@@ -1,0 +1,35 @@
+{
+  "$schema": "https://oxc.rs/schemas/oxlintrc.json",
+  "plugins": ["typescript", "react", "jsx-a11y", "nextjs"],
+  "settings": {},
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "node": true
+  },
+  "globals": {
+    "React": "readonly"
+  },
+  "rules": {
+    "typescript/no-unused-vars": "warn",
+    "typescript/no-explicit-any": "warn",
+    "react/jsx-key": "error",
+    "react/jsx-no-target-blank": "warn",
+    "react/no-unescaped-entities": "warn",
+    "jsx-a11y/alt-text": "warn",
+    "jsx-a11y/aria-props": "warn",
+    "jsx-a11y/aria-role": "warn",
+    "no-console": "off",
+    "no-debugger": "warn"
+  },
+  "ignorePatterns": [
+    "node_modules",
+    ".next",
+    "dist",
+    ".turbo",
+    "build",
+    "coverage",
+    "*.config.js",
+    "*.config.ts"
+  ]
+}

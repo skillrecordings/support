@@ -1,0 +1,94 @@
+# Support Platform PRD (Overview)
+
+> Agent-first customer support platform with human-in-the-loop for Skill Recordings products.
+
+## Purpose
+
+This is the overview and index. Start here. Detailed implementation instructions live in phase and reference docs.
+
+## Vision
+
+Every support interaction is an opportunity for an agent to help. The agent handles the high-volume, brain-dead stuff automatically. Humans approve edge cases via Slack or dashboard. Front remains the source of truth for conversations, but the agent is the brain.
+
+## Success Criteria
+
+1. Reduce human touches by 80%
+2. Sub-minute response time (draft within 60s)
+3. Full traceability (every decision/action/approval logged)
+4. Multi-app robustness (adding a new app is a `skill init` away)
+
+## Locked Decisions (Summary)
+
+- Inbox model: one inbox per product
+- Workflow engine: Inngest only
+- Vector search: Upstash defaults (hybrid, hosted embeddings)
+- Auth: BetterAuth
+- Database: PlanetScale
+- Webhook signing: HMAC-SHA256, Stripe-style, 5-minute replay, key rotation
+- Draft diff: token overlap with cleanup
+- Trust decay: exponential, 30-day half-life
+- Cache: Durable Objects per conversation, 7-day TTL
+- Context strategy: minimal live context, retrieval-first, structured data in DB, everything else behind search
+
+## System Boundary (High Level)
+
+```
+Support Platform (Turborepo)
+- apps/web: Dashboard
+- apps/slack: Slack approvals bot
+- apps/front: Front plugin
+- packages/core: agent, tools, workflows, registry
+- packages/sdk: integration contract + adapters
+- packages/cli: skill CLI
+
+External:
+- Front (source of truth for conversations)
+- Stripe Connect (refunds)
+- Slack (HITL approvals)
+- Upstash Vector (hybrid retrieval)
+- Axiom + Langfuse (observability)
+```
+
+## Implementation Index (PRD Format)
+
+Phases are PR-ready units. Use the phase docs to execute.
+
+- Phase 0: Ops Readiness (No-Code Setup)
+  - ./phases/01-ops.md
+- Phase 0.5: Bedrock Repo
+  - ./phases/02-bedrock.md
+- Phase 1: Registry + Ingestion
+  - ./phases/03-registry-ingestion.md
+- Phase 2: Agent Core + Actions
+  - ./phases/04-agent-actions.md
+- Phase 3: HITL Surfaces
+  - ./phases/05-hitl-surfaces.md
+- Phase 4: SDK + First App
+  - ./phases/06-sdk-first-app.md
+- Phase 5: Stripe Connect
+  - ./phases/07-stripe-connect.md
+- Phase 6: Vector + Trust + Auto-send
+  - ./phases/08-vector-trust.md
+- Phase 7: Polish + Ops
+  - ./phases/09-polish-ops.md
+
+## Reference Index
+
+Use these for detailed implementation and policies.
+
+- Architecture + Boundaries: ./reference/60-architecture.md
+- Tech Stack + Deploy Targets: ./reference/61-stack-runtime.md
+- Event Ingestion: ./reference/62-event-ingestion.md
+- Webhook Signing: ./reference/63-webhook-signing.md
+- Agent + Tools: ./reference/64-agent-tools.md
+- Workflows (Inngest): ./reference/65-workflows.md
+- HITL (Slack/Front/Dashboard): ./reference/66-hitl.md
+- SDK + Adapter: ./reference/67-sdk.md
+- CLI (skill): ./reference/68-cli.md
+- Data Model: ./reference/69-data-model.md
+- Observability: ./reference/70-observability.md
+- Vector Search: ./reference/71-vector-search.md
+- Agent Context Strategy: ./reference/72-context-strategy.md
+- Secrets + Encryption: ./reference/73-secrets.md
+- Defaults (Retention, SLAs, Policies): ./reference/74-defaults.md
+- Distributed Systems Patterns: ./reference/75-distributed-patterns.md
