@@ -76,19 +76,20 @@ Phases are PR-ready units. Use the phase docs to execute.
 
 Use these for detailed implementation and policies.
 
-- Architecture + Boundaries: ./reference/60-architecture.md
-- Tech Stack + Deploy Targets: ./reference/61-stack-runtime.md
-- Event Ingestion: ./reference/62-event-ingestion.md
-- Webhook Signing: ./reference/63-webhook-signing.md
-- Agent + Tools: ./reference/64-agent-tools.md
-- Workflows (Inngest): ./reference/65-workflows.md
-- HITL (Slack/Front/Dashboard): ./reference/66-hitl.md
-- SDK + Adapter: ./reference/67-sdk.md
-- CLI (skill): ./reference/68-cli.md
-- Data Model: ./reference/69-data-model.md
-- Observability: ./reference/70-observability.md
-- Vector Search: ./reference/71-vector-search.md
-- Agent Context Strategy: ./reference/72-context-strategy.md
-- Secrets + Encryption: ./reference/73-secrets.md
-- Defaults (Retention, SLAs, Policies): ./reference/74-defaults.md
-- Distributed Systems Patterns: ./reference/75-distributed-patterns.md
+- Architecture + Boundaries: ./60-architecture.md
+- Tech Stack + Deploy Targets: ./61-stack-runtime.md
+- Event Ingestion: ./62-event-ingestion.md
+- Webhook Signing: ./63-webhook-signing.md
+- Agent + Tools: ./64-agent-tools.md
+- Workflows (Inngest): ./65-workflows.md
+- HITL (Slack/Front/Dashboard): ./66-hitl.md
+- SDK + Adapter: ./67-sdk.md
+- CLI (skill): ./68-cli.md
+- Data Model: ./69-data-model.md
+- Observability: ./70-observability.md
+- Vector Search: ./71-vector-search.md
+- Agent Context Strategy: ./72-context-strategy.md
+- Secrets + Encryption: ./73-secrets.md
+- Defaults (Retention, SLAs, Policies): ./74-defaults.md
+- Distributed Systems Patterns: ./75-distributed-patterns.md
+- Front Integration + Webhooks: ./76-front-integration.md
