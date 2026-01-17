@@ -11,7 +11,10 @@
     "test": "turbo run test",
     "check-types": "turbo run check-types",
     "ci:version": "changeset version",
-    "ci:publish": "changeset publish"
+    "ci:publish": "changeset publish",
+    "db:generate": "drizzle-kit generate --config=packages/database/drizzle.config.ts",
+    "db:migrate": "drizzle-kit migrate --config=packages/database/drizzle.config.ts",
+    "db:studio": "drizzle-kit studio --config=packages/database/drizzle.config.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.0",
