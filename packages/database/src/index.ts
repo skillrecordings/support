@@ -9,6 +9,9 @@ export function getDb() {
 	if (!db) {
 		const connection = mysql.createPool({
 			uri: env.DATABASE_URL,
+			ssl: {
+				rejectUnauthorized: true,
+			},
 		})
 		db = drizzle(connection, { schema, mode: 'default' })
 	}
