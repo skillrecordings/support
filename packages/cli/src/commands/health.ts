@@ -137,15 +137,21 @@ async function listApps(): Promise<void> {
 /**
  * Health check command - tests integration endpoint connectivity and capabilities
  *
+ * Agent-friendly: all options are non-interactive.
+ * Use --json for machine-readable output.
+ *
  * Usage:
  *   skill health <slug>              - Look up app by slug from database
  *   skill health <url> --secret xxx  - Direct URL mode
  *   skill health --list              - List all registered apps
+ *   skill health <slug> --json       - Output as JSON
  */
 export async function health(
   slugOrUrl: string | undefined,
-  options: { secret?: string; list?: boolean }
+  options: { secret?: string; list?: boolean; json?: boolean }
 ): Promise<void> {
+  const { json = false } = options
+
   // Handle --list flag
   if (options.list) {
     await listApps()
@@ -153,9 +159,18 @@ export async function health(
   }
 
   if (!slugOrUrl) {
-    console.error('Error: App slug or URL required')
-    console.error('Usage: skill health <slug|url> [--secret <secret>]')
-    console.error('       skill health --list')
+    const error = {
+      success: false,
+      error:
+        'App slug or URL required. Usage: skill health <slug|url> [--secret <secret>]',
+    }
+    if (json) {
+      console.log(JSON.stringify(error, null, 2))
+    } else {
+      console.error('Error: App slug or URL required')
+      console.error('Usage: skill health <slug|url> [--secret <secret>]')
+      console.error('       skill health --list')
+    }
     process.exit(1)
   }
 
@@ -171,7 +186,9 @@ export async function health(
       ? appConfig.baseUrl
       : appConfig.baseUrl.replace(/\/$/, '') + '/api/support'
     secret = appConfig.secret
-    console.log(`\nUsing app configuration for: ${slugOrUrl}`)
+    if (!json) {
+      console.log(`\nUsing app configuration for: ${slugOrUrl}`)
+    }
   } else if (
     slugOrUrl.startsWith('http://') ||
     slugOrUrl.startsWith('https://')
@@ -179,9 +196,16 @@ export async function health(
     // Direct URL mode
     const secretValue = options.secret || process.env.SUPPORT_WEBHOOK_SECRET
     if (!secretValue) {
-      console.error(
-        'Error: Webhook secret required for direct URL mode. Use --secret or set SUPPORT_WEBHOOK_SECRET'
-      )
+      const error = {
+        success: false,
+        error:
+          'Webhook secret required for direct URL mode. Use --secret or set SUPPORT_WEBHOOK_SECRET',
+      }
+      if (json) {
+        console.log(JSON.stringify(error, null, 2))
+      } else {
+        console.error(`Error: ${error.error}`)
+      }
       process.exit(1)
     }
     baseUrl = slugOrUrl.endsWith('/api/support')
@@ -190,12 +214,22 @@ export async function health(
     secret = secretValue
   } else {
     // Slug not found in database
-    console.error(`Error: App "${slugOrUrl}" not found in database`)
-    console.error('Use --list to see registered apps, or provide a full URL')
+    const error = {
+      success: false,
+      error: `App "${slugOrUrl}" not found in database. Use --list to see registered apps, or provide a full URL.`,
+    }
+    if (json) {
+      console.log(JSON.stringify(error, null, 2))
+    } else {
+      console.error(`Error: App "${slugOrUrl}" not found in database`)
+      console.error('Use --list to see registered apps, or provide a full URL')
+    }
     process.exit(1)
   }
 
-  console.log(`\nHealth check: ${baseUrl}\n`)
+  if (!json) {
+    console.log(`\nHealth check: ${baseUrl}\n`)
+  }
 
   const start = Date.now()
   const results: HealthCheckResult = {
@@ -224,52 +258,60 @@ export async function health(
     },
   ]
 
-  console.log('Testing required actions...')
+  if (!json) {
+    console.log('Testing required actions...')
+  }
   for (const { name, params } of requiredActions) {
     const result = await testAction(baseUrl, secret, name, params)
     results.actions.push({ name, ...result })
 
-    const icon =
-      result.status === 'ok'
-        ? '✓'
-        : result.status === 'not_implemented'
-          ? '○'
-          : '✗'
-    const color =
-      result.status === 'ok'
-        ? '\x1b[32m'
-        : result.status === 'not_implemented'
-          ? '\x1b[33m'
-          : '\x1b[31m'
-    console.log(
-      `  ${color}${icon}\x1b[0m ${name}${result.error ? ` - ${result.error}` : ''}`
-    )
+    if (!json) {
+      const icon =
+        result.status === 'ok'
+          ? '✓'
+          : result.status === 'not_implemented'
+            ? '○'
+            : '✗'
+      const color =
+        result.status === 'ok'
+          ? '\x1b[32m'
+          : result.status === 'not_implemented'
+            ? '\x1b[33m'
+            : '\x1b[31m'
+      console.log(
+        `  ${color}${icon}\x1b[0m ${name}${result.error ? ` - ${result.error}` : ''}`
+      )
+    }
 
     if (result.status === 'error') {
       results.status = 'error'
     }
   }
 
-  console.log('\nTesting optional actions...')
+  if (!json) {
+    console.log('\nTesting optional actions...')
+  }
   for (const { name, params } of optionalActions) {
     const result = await testAction(baseUrl, secret, name, params)
     results.actions.push({ name, ...result })
 
-    const icon =
-      result.status === 'ok'
-        ? '✓'
-        : result.status === 'not_implemented'
-          ? '○'
-          : '✗'
-    const color =
-      result.status === 'ok'
-        ? '\x1b[32m'
-        : result.status === 'not_implemented'
-          ? '\x1b[33m'
-          : '\x1b[31m'
-    console.log(
-      `  ${color}${icon}\x1b[0m ${name}${result.error ? ` - ${result.error}` : ''}`
-    )
+    if (!json) {
+      const icon =
+        result.status === 'ok'
+          ? '✓'
+          : result.status === 'not_implemented'
+            ? '○'
+            : '✗'
+      const color =
+        result.status === 'ok'
+          ? '\x1b[32m'
+          : result.status === 'not_implemented'
+            ? '\x1b[33m'
+            : '\x1b[31m'
+      console.log(
+        `  ${color}${icon}\x1b[0m ${name}${result.error ? ` - ${result.error}` : ''}`
+      )
+    }
   }
 
   results.responseTime = Date.now() - start
@@ -281,16 +323,32 @@ export async function health(
     (a) => a.status === 'not_implemented'
   ).length
 
-  console.log(`\n─────────────────────────────`)
-  console.log(`Total time: ${results.responseTime}ms`)
-  console.log(
-    `Actions: \x1b[32m${okCount} ok\x1b[0m, \x1b[33m${notImplementedCount} not implemented\x1b[0m, \x1b[31m${errorCount} errors\x1b[0m`
-  )
-
-  if (results.status === 'error') {
-    console.log(`\n\x1b[31m✗ Health check failed\x1b[0m\n`)
-    process.exit(1)
-  } else {
-    console.log(`\n\x1b[32m✓ Health check passed\x1b[0m\n`)
+  // JSON output includes success flag
+  const jsonResult = {
+    success: results.status !== 'error',
+    ...results,
+    summary: {
+      ok: okCount,
+      notImplemented: notImplementedCount,
+      errors: errorCount,
+    },
   }
+
+  if (json) {
+    console.log(JSON.stringify(jsonResult, null, 2))
+  } else {
+    console.log(`\n─────────────────────────────`)
+    console.log(`Total time: ${results.responseTime}ms`)
+    console.log(
+      `Actions: \x1b[32m${okCount} ok\x1b[0m, \x1b[33m${notImplementedCount} not implemented\x1b[0m, \x1b[31m${errorCount} errors\x1b[0m`
+    )
+
+    if (results.status === 'error') {
+      console.log(`\n\x1b[31m✗ Health check failed\x1b[0m\n`)
+    } else {
+      console.log(`\n\x1b[32m✓ Health check passed\x1b[0m\n`)
+    }
+  }
+
+  process.exit(results.status === 'error' ? 1 : 0)
 }
