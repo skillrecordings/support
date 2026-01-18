@@ -9,6 +9,7 @@
     "format:check": "biome check .",
     "lint:oxlint": "oxlint .",
     "test": "turbo run test",
+    "test:all": "vitest --run",
     "check-types": "turbo run check-types",
     "ci:version": "changeset version",
     "ci:publish": "changeset publish",

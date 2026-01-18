@@ -47,3 +47,56 @@ See the authoritative list in:
 - TDD is mandatory: red → green → refactor. Add a failing test first, make it pass, then clean up.
 - Use the `.claude/skills/tdd-red-green-refactor` skill for all testable changes.
 - Keep docs current: update `docs/ARCHITECTURE.md`, `docs/CONVENTIONS.md`, `docs/DECISIONS.md`, `docs/ENV.md`, `docs/BOUNDARIES.md`, `docs/GLOSSARY.md`, `docs/TESTING.md`, and `docs/DEV-COMMANDS.md` when behavior or structure changes.
+
+## NO BARREL FILES - Use Package Exports
+
+**This is a hard mandate. No exceptions.**
+
+### What is a barrel file?
+An `index.ts` that just re-exports from other files:
+```typescript
+// BAD - barrel file
+export * from './foo'
+export * from './bar'
+export { thing } from './baz'
+```
+
+### Why we avoid them
+1. **Bundle size** - Tree-shaking fails, you get the whole module
+2. **Circular deps** - Barrels create hidden dependency cycles
+3. **Slower builds** - More files to parse on every import
+4. **IDE confusion** - Autocomplete shows the barrel, not the source
+5. **Test isolation** - Mocking through barrels is painful
+
+### What to do instead: Package exports
+
+Use `package.json` exports field to define public API:
+
+```json
+{
+  "name": "@skillrecordings/core",
+  "exports": {
+    "./agent": "./src/agent/config.ts",
+    "./tools": "./src/tools/create-tool.ts",
+    "./tools/*": "./src/tools/*.ts",
+    "./inngest": "./src/inngest/client.ts",
+    "./inngest/workflows": "./src/inngest/workflows/index.ts"
+  }
+}
+```
+
+Then import directly:
+```typescript
+// GOOD - direct import via package exports
+import { supportAgent } from '@skillrecordings/core/agent'
+import { createTool } from '@skillrecordings/core/tools'
+import { lookupUser } from '@skillrecordings/core/tools/lookup-user'
+```
+
+### When index.ts IS allowed
+1. **Workflow aggregation** - `inngest/workflows/index.ts` that collects functions for serve()
+2. **Internal module boundary** - Within a package, for logical grouping (not cross-package)
+3. **Framework requirements** - Next.js route handlers, etc.
+
+### Migration path
+Existing barrels should be migrated to package exports when touched. Don't bulk-refactor, but don't add new barrels.
