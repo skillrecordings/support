@@ -44,7 +44,7 @@ Support Platform (Turborepo)
 
 External:
 - Front (source of truth for conversations)
-- Stripe Connect (refunds)
+- Stripe Connect (query payment/subscription data - NOT mutations)
 - Slack (HITL approvals)
 - Upstash Vector (hybrid retrieval)
 - Axiom + Langfuse (observability)

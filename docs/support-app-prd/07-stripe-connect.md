@@ -2,77 +2,52 @@
 
 ## Goal
 
-Centralized refunds via Connect. The platform processes refunds on behalf of connected apps using Stripe's `Stripe-Account` header pattern.
+Connect to app Stripe accounts for **querying** payment and subscription data. The platform is the "queen" - it orchestrates and provides context, but does NOT execute financial actions.
 
-## Background
+## Critical Architecture: Query, Don't Execute
 
-Each Skill Recordings app (Total TypeScript, Pro Tailwind, etc.) has their own Stripe account. Rather than give the platform direct API keys, we use Stripe Connect OAuth to establish a secure connection. The platform can then issue refunds using its own API key + the connected account's `acct_xxx` ID.
-
-## Integration Philosophy: Query, Don't Warehouse
-
-**The platform is the "queen" - it orchestrates, it doesn't store everything.**
+**The platform provides intelligence. Apps execute actions.**
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    Support Platform                          │
 │                    ("Queen of Hive")                         │
 ├─────────────────────────────────────────────────────────────┤
-│  Queries on-demand            │  Apps notify us             │
-│  via Stripe Connect           │  via SDK                    │
-│  ─────────────────            │  ────────────               │
-│  • Payment history            │  • Refund processed         │
-│  • Subscription status        │  • Access revoked           │
-│  • Customer details           │  • License transferred      │
+│  We QUERY via Connect       │  Apps NOTIFY us via SDK       │
+│  ───────────────────        │  ─────────────────────        │
+│  • Payment history          │  • Refund processed           │
+│  • Subscription status      │  • Access revoked             │
+│  • Customer details         │  • License transferred        │
+│  • Charge/refund lookup     │  • Purchase created           │
 └─────────────────────────────────────────────────────────────┘
          │                              │
          ▼                              ▼
     Stripe API                    App Integration
-    (connected acct)              (SDK handler)
+    (connected acct)              (SDK webhook)
 ```
 
-**Why not ingest all Stripe events?**
-1. **No historical context** - Event ingestion starts "now", missing past data
-2. **Stripe is source of truth** - Query when needed, don't duplicate
-3. **Apps know their domain** - They tell us what matters via SDK
-4. **Simpler system** - Less state to manage, fewer failure modes
+**What we DO with Stripe Connect:**
+- Query payment history for a customer
+- Check subscription status
+- Look up charge details for agent context
+- Verify refund status (after app notifies us)
 
-**What we DO monitor via webhooks:**
-- `account.application.deauthorized` - Know when to clear connection
-- `charge.dispute.created` - Disputes need immediate attention (optional)
+**What we DON'T do:**
+- Process refunds (apps do this via their own Stripe integration)
+- Create charges
+- Modify subscriptions
+- Any financial mutations
 
-**Everything else: Query on-demand**
-- Agent tool calls Stripe API via connected account when it needs context
-- `getPaymentHistory(customerId)` → queries Stripe directly
-- `getSubscriptions(customerId)` → queries Stripe directly
+**Why this architecture?**
+1. **Apps own financial operations** - They have the business logic, policies, edge cases
+2. **Apps notify us via SDK** - When they refund, revoke access, transfer, etc.
+3. **We provide intelligence** - Context for support agents, decision support
+4. **Clear boundaries** - Platform can't accidentally charge/refund wrong account
+5. **Simpler system** - Query-only = fewer failure modes, no idempotency concerns
 
-## Architecture
+## Background
 
-```
-┌──────────────────────────────────────────────────────────────────────┐
-│                        Support Platform                               │
-├──────────────────────────────────────────────────────────────────────┤
-│                                                                      │
-│  processRefund Tool                                                  │
-│       │                                                              │
-│       ▼                                                              │
-│  ┌─────────────────────────────────────────────────────────────┐    │
-│  │ stripe.refunds.create(                                      │    │
-│  │   { charge: 'ch_xxx' },                                     │    │
-│  │   {                                                         │    │
-│  │     stripeAccount: 'acct_xxx',  // Connected account        │    │
-│  │     idempotencyKey: '...'       // Prevent duplicates       │    │
-│  │   }                                                         │    │
-│  │ )                                                           │    │
-│  └─────────────────────────────────────────────────────────────┘    │
-│                                                                      │
-└──────────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌──────────────────────────────────────────────────────────────────────┐
-│                    Connected Account (acct_xxx)                       │
-│                    e.g., Total TypeScript's Stripe                    │
-└──────────────────────────────────────────────────────────────────────┘
-```
+Each Skill Recordings app (Total TypeScript, Pro Tailwind, etc.) has their own Stripe account. We use Stripe Connect OAuth to establish a secure connection for **read access**. The platform can then query their Stripe data using its own API key + the connected account's `acct_xxx` ID.
 
 ## Deliverables
 
@@ -82,7 +57,7 @@ Each Skill Recordings app (Total TypeScript, Pro Tailwind, etc.) has their own S
 
 | Endpoint | Purpose |
 |----------|---------|
-| `GET /authorize` | Redirect to Stripe OAuth with state + prefill params |
+| `GET /authorize` | Redirect to Stripe OAuth with state + CSRF protection |
 | `GET /callback` | Exchange code for `stripe_user_id`, store in apps table |
 
 **OAuth URL Parameters:**
@@ -93,58 +68,35 @@ https://connect.stripe.com/oauth/authorize
   &scope=read_write
   &redirect_uri={CALLBACK_URL}
   &state={CSRF_TOKEN}
-  &stripe_user[email]={prefill}
-  &stripe_user[url]={prefill}
-  &stripe_user[business_name]={prefill}
 ```
 
-**Callback Response:**
-- `code` - Exchange for account ID (expires in 5 min, single use)
-- `state` - Verify matches session for CSRF protection
+**Callback stores:**
+- `stripe_account_id` (acct_xxx)
+- `stripe_connected` = true
 
-**Token Exchange:**
+### 2. Query Tools for Agent Context
+
+Agent tools that query Stripe Connect for context:
+
+| Tool | Purpose | Returns |
+|------|---------|---------|
+| `getPaymentHistory` | Fetch charges for a customer | List of charges with amounts, dates, refund status |
+| `getSubscriptionStatus` | Check subscription state | Status, period end, cancel status |
+| `lookupCharge` | Get charge details by ID | Full charge object |
+| `verifyRefund` | Verify refund after app notification | Refund status and amount |
+
+**Example usage in agent:**
 ```typescript
-const response = await stripe.oauth.token({
-  grant_type: 'authorization_code',
-  code: authCode,
+// Agent needs payment context for support conversation
+const history = await tools.getPaymentHistory({
+  stripeAccountId: app.stripe_account_id,
+  customerEmail: customer.email,
 })
-const stripeAccountId = response.stripe_user_id  // acct_xxx
+
+// Agent can now see: purchases, amounts, refund history
 ```
 
-### 2. Refund Processing with Connect
-
-**Update `packages/core/src/tools/process-refund.ts`:**
-
-Replace the Stripe stub with real Connect refund:
-
-```typescript
-const refund = await stripe.refunds.create(
-  {
-    charge: purchase.stripeChargeId,
-    reason: 'requested_by_customer',
-  },
-  {
-    stripeAccount: app.stripe_account_id,  // Critical
-    idempotencyKey: `refund:${purchaseId}:${context.approvalId}`,
-  }
-)
-```
-
-### 3. Idempotency Keys
-
-**MANDATORY** for all Stripe mutations. Pattern:
-
-```typescript
-// Deterministic key based on action + entity + approval
-const idempotencyKey = `${action}:${purchaseId}:${approvalId}`
-```
-
-This ensures:
-- Retry-safe: Same request = same result
-- Approval-scoped: New approval = new key = can retry
-- No duplicate refunds
-
-### 4. Webhook Monitoring (Minimal)
+### 3. Webhook Monitoring (Minimal)
 
 **Route: `apps/web/app/api/stripe/webhooks/route.ts`**
 
@@ -155,101 +107,91 @@ Per our "query, don't warehouse" philosophy, we only monitor events that require
 | `account.application.deauthorized` | App disconnected from Connect | Clear `stripe_account_id` from apps table |
 | `charge.dispute.created` | Dispute opened (optional) | Alert via Slack, flag conversation |
 
-**Note:** We do NOT ingest `charge.refunded` for general tracking. If we initiate a refund, our workflow knows the result. If the app refunds independently, they notify us via SDK.
+**We do NOT monitor:**
+- `charge.refunded` - Apps notify us via SDK when they refund
+- `customer.subscription.*` - Query on-demand when needed
+- `payment_intent.*` - Not our concern
 
-**Pattern: Inngest for durable processing**
+### 4. SDK Integration for App Notifications
+
+Apps notify us of actions via SDK (see Phase 4):
 
 ```typescript
-// Verify signature
-const event = stripe.webhooks.constructEvent(body, sig, webhookSecret)
-
-// Only process events we care about
-if (event.type === 'account.application.deauthorized') {
-  await inngest.send({
-    name: 'stripe/event.received',
-    data: { type: event.type, data: event.data.object, accountId: event.account }
-  })
-}
+// In app (e.g., Total TypeScript)
+await supportSDK.notify('refund.processed', {
+  purchaseId: 'pur_xxx',
+  refundId: 're_xxx',
+  amount: 9900,
+  reason: 'requested_by_customer',
+})
 ```
 
-### 5. On-Demand Stripe Queries (Future)
-
-Agent tools that query Stripe Connect directly:
-
-| Tool | Purpose |
-|------|---------|
-| `getPaymentHistory` | Fetch charges for a customer via connected account |
-| `getSubscriptionStatus` | Check subscription state via connected account |
-| `getDisputes` | List open disputes for a customer |
-
-These provide context without storing event history.
+Platform receives notification, can verify via Stripe if needed, updates conversation state.
 
 ## Environment Variables
 
 | Variable | Purpose |
 |----------|---------|
-| `STRIPE_SECRET_KEY` | Platform's secret key (sk_live_xxx) |
+| `STRIPE_SECRET_KEY` | Platform's secret key (sk_live_xxx) for Connect API |
 | `STRIPE_CONNECT_CLIENT_ID` | OAuth client ID (ca_xxx) from Connect settings |
-| `STRIPE_WEBHOOK_SECRET` | Webhook signing secret (whsec_xxx) |
+| `STRIPE_WEBHOOK_SECRET` | Webhook signing secret (for deauth only) |
 
-## Database Changes
+## Database
 
-The `apps` table already has `stripe_account_id` column. OAuth callback populates it:
+The `apps` table stores connection:
 
 ```sql
-UPDATE apps SET stripe_account_id = 'acct_xxx' WHERE slug = 'total-typescript';
+-- After OAuth callback
+UPDATE apps
+SET stripe_account_id = 'acct_xxx', stripe_connected = true
+WHERE slug = 'total-typescript';
 ```
+
+## Connected Apps
+
+| App | Account ID | Status |
+|-----|------------|--------|
+| Total TypeScript | `acct_1LFP5yAozSgJZBRP` | ✓ Connected |
 
 ## Error Handling
 
 | Error | Action |
 |-------|--------|
-| `charge_already_refunded` | Treat as success (idempotent) |
 | `invalid_grant` | Code expired/used - restart OAuth |
 | `access_denied` | User denied - show message |
 | Permission errors | Account not connected - re-auth |
 
 ## PR-Ready Checklist
 
-- [ ] OAuth flow: `/api/stripe/connect/authorize` redirects to Stripe
-- [ ] OAuth callback: `/api/stripe/connect/callback` stores `stripe_account_id`
-- [ ] State verification prevents CSRF
-- [ ] `processRefund` uses real Stripe API with `stripeAccount` header
-- [ ] Idempotency keys on all Stripe mutations
-- [ ] Webhook route verifies Stripe signature
-- [ ] Inngest workflow handles `charge.refunded` events
-- [ ] Audit log records refund with `stripeRefundId`
-- [ ] `revokeAccess` called after successful refund (already done in Phase 4)
+- [x] OAuth flow: `/api/stripe/connect/authorize` redirects to Stripe
+- [x] OAuth callback: `/api/stripe/connect/callback` stores `stripe_account_id`
+- [x] State verification prevents CSRF
+- [ ] Query tools: `getPaymentHistory`, `getSubscriptionStatus`
+- [ ] Deauth webhook handler clears connection
+- [ ] SDK notification handlers for refund/revoke events
 
 ## Validation / Tests
 
 ### Unit Tests
 - OAuth URL generation with correct params
-- Callback code exchange mocked
-- Idempotency key generation deterministic
-- Refund error handling (already refunded, permission denied)
+- Callback code exchange (mocked)
+- Query tool response mapping
 
 ### Integration Tests
 - Stripe webhook signature verification
-- Inngest workflow processes refund event
-
-### E2E Tests (Test Mode)
-- Full OAuth flow with test `client_id`
-- Create test charge → refund → verify refund created
-- Webhook received and processed
+- Connected account query works
 
 ## Files to Create/Modify
 
 | File | Action |
 |------|--------|
-| `apps/web/app/api/stripe/connect/authorize/route.ts` | Create |
-| `apps/web/app/api/stripe/connect/callback/route.ts` | Create |
-| `apps/web/app/api/stripe/webhooks/route.ts` | Create |
-| `packages/core/src/tools/process-refund.ts` | Modify (remove stub) |
-| `packages/core/src/inngest/workflows/stripe-refund.ts` | Create |
+| `apps/web/app/api/stripe/connect/authorize/route.ts` | Done |
+| `apps/web/app/api/stripe/connect/callback/route.ts` | Done |
+| `apps/web/app/api/stripe/webhooks/route.ts` | Create (deauth only) |
+| `packages/core/src/tools/lookup-stripe.ts` | Create (query tools) |
 
 ## Reference
 
 - Skill: `.claude/skills/stripe-connect/SKILL.md`
+- SDK: `.claude/skills/sdk-adapter/SKILL.md`
 - Stripe OAuth Docs: https://docs.stripe.com/connect/oauth-reference
-- Stripe Idempotency: https://docs.stripe.com/api/idempotent_requests
