@@ -1,5 +1,13 @@
 # @skillrecordings/sdk
 
+## 0.2.2
+
+### Patch Changes
+
+- 77b4f94: Add typesVersions for backwards compatibility with legacy moduleResolution
+
+  Projects using `moduleResolution: "node"` can now resolve subpath exports like `@skillrecordings/sdk/integration` without changing their tsconfig.
+
 ## 0.2.1
 
 ### Patch Changes
