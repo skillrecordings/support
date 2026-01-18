@@ -7,6 +7,41 @@ Primary product requirements live here:
 ## Product intent
 Agent-first support platform with human-in-the-loop approvals. Front is source of truth for conversations; the agent is the brain.
 
+## Critical Architecture: Platform as Orchestrator
+
+**The platform is the "queen of the hive" - it orchestrates, it doesn't execute financial actions.**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Support Platform                          │
+│                    ("Queen of Hive")                         │
+├─────────────────────────────────────────────────────────────┤
+│  We QUERY via Connect       │  Apps NOTIFY us via SDK       │
+│  ───────────────────        │  ─────────────────────        │
+│  • Payment history          │  • Refund processed           │
+│  • Subscription status      │  • Access revoked             │
+│  • Customer details         │  • License transferred        │
+│  • Charge/refund lookup     │  • Purchase created           │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Platform responsibilities:**
+- Provide context/intelligence to support agents
+- Draft responses based on customer data
+- Request HITL approval for actions
+- Route requests to apps via SDK
+
+**App responsibilities (via SDK):**
+- Execute refunds (their Stripe, their policies)
+- Revoke/grant access
+- Transfer licenses
+- Notify platform when actions complete
+
+**Why?**
+- Apps own their financial operations and business logic
+- Platform provides intelligence, not execution
+- Clear boundaries = safer, simpler system
+
 ## Success criteria
 - Reduce human touches by 80%
 - Draft response within 60 seconds
@@ -20,6 +55,7 @@ Agent-first support platform with human-in-the-loop approvals. Front is source o
 - Database: PlanetScale
 - Webhook signing: HMAC-SHA256, Stripe-style, 5-minute replay, key rotation
 - Cache: Durable Objects per conversation, 7-day TTL
+- **Stripe integration: Query on-demand, don't warehouse events. Platform queries via Connect, apps notify us of actions via SDK. Platform does NOT process refunds.**
 
 ## System boundary (high level)
 Inside repo:
@@ -32,7 +68,7 @@ Inside repo:
 
 External systems:
 - Front (source of truth for conversations)
-- Stripe Connect (refunds)
+- Stripe Connect (query payment/subscription data - NOT for mutations)
 - Slack (HITL approvals)
 - Upstash Vector (hybrid retrieval)
 - Axiom + Langfuse (observability)
