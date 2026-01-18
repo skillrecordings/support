@@ -26,3 +26,13 @@
 | Workflows | Inngest + Vercel |
 | Dashboard + CLI API + Front plugin | Next.js on Vercel |
 | Slack bot | Vercel |
+
+## UI Component Libraries
+
+| App | Library | Rationale |
+|-----|---------|-----------|
+| `apps/front` | [@frontapp/ui-kit](https://github.com/frontapp/front-ui-kit) | Native Front plugin look and feel |
+| `apps/web` | shadcn/ui + Tailwind | Dashboard flexibility, matches course-builder ecosystem |
+| `apps/slack` | None | Backend only, Slack handles UI |
+
+`packages/ui` holds shared primitives; app-specific components live in each app.
