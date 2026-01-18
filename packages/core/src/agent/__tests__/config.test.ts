@@ -15,7 +15,7 @@ const {
   mockShouldAutoSend: vi.fn(),
 }))
 
-vi.mock('@skillrecordings/sdk/client', () => ({
+vi.mock('@skillrecordings/sdk', () => ({
   IntegrationClient: vi.fn().mockImplementation(() => ({
     lookupUser: mockLookupUser,
     getPurchases: mockGetPurchases,
