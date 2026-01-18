@@ -1,6 +1,7 @@
 import { inngest } from '../client'
 import { SUPPORT_INBOUND_RECEIVED } from '../events'
 import type { SupportInboundReceivedEvent } from '../events'
+import { createFrontClient, type FrontMessage } from '../../front/index.js'
 
 /**
  * Handles inbound messages received from Front.
@@ -20,26 +21,47 @@ export const handleInboundMessage = inngest.createFunction(
   },
   { event: SUPPORT_INBOUND_RECEIVED },
   async ({ event, step }) => {
-    const { conversationId, appId, senderEmail, messageId, subject, body } =
-      event.data
+    const { conversationId, appId, messageId, subject, _links } = event.data
 
-    // Step 1: Get conversation context
+    // Step 1: Fetch full message and conversation from Front API
     const context = await step.run('get-conversation-context', async () => {
-      // TODO: Implement context retrieval
-      // - Fetch conversation history from Front API
-      // - Retrieve customer data (past purchases, licenses)
-      // - Get app-specific context (knowledge base, FAQs)
+      const frontToken = process.env.FRONT_API_TOKEN
+      if (!frontToken) {
+        console.error('[workflow] FRONT_API_TOKEN not configured')
+        return {
+          conversationId,
+          appId,
+          messageId,
+          subject: subject || '',
+          body: '',
+          senderEmail: '',
+          conversationHistory: [] as FrontMessage[],
+        }
+      }
+
+      const front = createFrontClient(frontToken)
+
+      // Fetch the triggering message (full data)
+      const message = await front.getMessage(
+        _links?.message || messageId
+      )
+
+      // Fetch conversation history
+      const conversationHistory = await front.getConversationMessages(conversationId)
+
+      // Extract sender email from message
+      const senderEmail = message.author?.email ||
+        message.recipients.find(r => r.role === 'from')?.handle ||
+        ''
+
       return {
         conversationId,
         appId,
-        senderEmail,
         messageId,
-        subject,
-        body,
-        // Placeholder for future implementation
-        conversationHistory: [],
-        customerData: {},
-        appContext: {},
+        subject: message.subject || subject || '',
+        body: message.body,
+        senderEmail,
+        conversationHistory,
       }
     })
 
