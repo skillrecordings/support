@@ -21,9 +21,9 @@ INNGEST_EVENT_KEY=       # Event key from Inngest dashboard
 ## Planned Variables (Future Phases)
 
 ### Slack (HITL approvals)
-- `SLACK_BOT_TOKEN`
-- `SLACK_SIGNING_SECRET`
-- `SLACK_CHANNEL_ID`
+- `SLACK_BOT_TOKEN` - Bot token from Slack app (xoxb-...)
+- `SLACK_SIGNING_SECRET` - Signing secret for verifying requests
+- `SLACK_APPROVAL_CHANNEL` - Channel ID for posting approvals (C...)
 
 ### Stripe (refunds)
 - `STRIPE_SECRET_KEY`
