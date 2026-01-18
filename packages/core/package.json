@@ -3,7 +3,6 @@
   "version": "0.0.0",
   "private": true,
   "exports": {
-    ".": "./src/index.ts",
     "./agent": "./src/agent/index.ts",
     "./tools": "./src/tools/index.ts",
     "./workflows": "./src/workflows/index.ts",
