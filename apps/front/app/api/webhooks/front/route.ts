@@ -8,7 +8,7 @@
  */
 
 import { type NextRequest, NextResponse } from 'next/server'
-import { verifyWebhook } from '@skillrecordings/core/webhooks'
+import { verifyFrontWebhook } from '@skillrecordings/core/webhooks'
 import { inngest, SUPPORT_INBOUND_RECEIVED } from '@skillrecordings/core/inngest'
 
 /**
@@ -17,6 +17,9 @@ import { inngest, SUPPORT_INBOUND_RECEIVED } from '@skillrecordings/core/inngest
  */
 interface FrontWebhookEvent {
   type: string
+  authorization?: {
+    id: string
+  }
   payload?: {
     conversation?: {
       id: string
@@ -40,7 +43,7 @@ interface FrontWebhookEvent {
 export async function POST(request: NextRequest) {
   const payload = await request.text()
 
-  // Get webhook secret from env
+  // Get Front app signing key from env
   const secret = process.env.FRONT_WEBHOOK_SECRET
   if (!secret) {
     return NextResponse.json(
@@ -55,14 +58,17 @@ export async function POST(request: NextRequest) {
     headers[key] = value
   })
 
-  // Verify HMAC signature
-  const result = verifyWebhook(payload, headers, {
-    secrets: [secret],
-    signatureHeader: 'x-front-signature',
-  })
+  // Verify HMAC signature (Front uses timestamp:body format, base64)
+  const result = verifyFrontWebhook(payload, headers, { secret })
 
   if (!result.valid) {
     return NextResponse.json({ error: result.error }, { status: 401 })
+  }
+
+  // Handle challenge during webhook setup
+  // Front sends x-front-challenge header and expects it echoed back
+  if (result.challenge) {
+    return NextResponse.json({ challenge: result.challenge })
   }
 
   // Parse event payload
@@ -73,7 +79,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400 })
   }
 
-  // Extract conversation ID
+  // Handle sync event (validation request)
+  if (event.type === 'sync') {
+    return NextResponse.json({ received: true })
+  }
+
+  // Extract conversation ID for regular events
   const conversationId =
     event.payload?.conversation?.id || event.conversation?.id
   if (!conversationId) {
@@ -84,7 +95,7 @@ export async function POST(request: NextRequest) {
   }
 
   // For inbound message events, dispatch to Inngest
-  if (event.type === 'inbound') {
+  if (event.type === 'inbound_received') {
     const messageData = event.payload?.target?.data
     if (!messageData) {
       return NextResponse.json(
