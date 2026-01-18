@@ -1,5 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
+  "bunVersion": "1.x",
+  "buildCommand": "cd ../.. && turbo run build --filter=slack",
+  "installCommand": "cd ../.. && bun install",
   "ignoreCommand": "npx turbo-ignore"
 }
