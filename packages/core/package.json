@@ -1,5 +1,5 @@
 {
-  "name": "@support/core",
+  "name": "@skillrecordings/core",
   "version": "0.0.0",
   "private": true,
   "exports": {
@@ -19,6 +19,6 @@
     "typescript": "5.9.2"
   },
   "dependencies": {
-    "@support/database": "*"
+    "@skillrecordings/database": "*"
   }
 }
