@@ -1,14 +1,6 @@
 import { serve } from 'inngest/next'
 import { inngest, allWorkflows } from '@skillrecordings/core/inngest'
 
-// Log Inngest config on cold start (env var presence, not values)
-console.log('[inngest] Config:', {
-  hasSigningKey: !!process.env.INNGEST_SIGNING_KEY,
-  signingKeyPrefix: process.env.INNGEST_SIGNING_KEY?.slice(0, 15),
-  hasEventKey: !!process.env.INNGEST_EVENT_KEY,
-  workflowCount: allWorkflows.length,
-})
-
 /**
  * Inngest serve handler for Next.js App Router.
  *

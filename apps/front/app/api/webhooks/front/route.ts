@@ -8,7 +8,7 @@
  */
 
 import { type NextRequest, NextResponse } from 'next/server'
-import { verifyFrontWebhook, computeFrontSignature } from '@skillrecordings/core/webhooks'
+import { verifyFrontWebhook } from '@skillrecordings/core/webhooks'
 import { inngest, SUPPORT_INBOUND_RECEIVED } from '@skillrecordings/core/inngest'
 
 /**
@@ -46,20 +46,11 @@ export async function POST(request: NextRequest) {
   // Get Front app signing key from env
   const secret = process.env.FRONT_WEBHOOK_SECRET
   if (!secret) {
-    console.error('[front-webhook] FRONT_WEBHOOK_SECRET not configured')
     return NextResponse.json(
       { error: 'Webhook secret not configured' },
       { status: 500 },
     )
   }
-
-  // Debug: log secret prefix and length to verify env var
-  console.log('[front-webhook] Secret check:', {
-    prefix: secret.slice(0, 8),
-    length: secret.length,
-    expectedPrefix: '3d63bcc2',
-    expectedLength: 32,
-  })
 
   // Build headers object for verification
   const headers: Record<string, string> = {}
@@ -67,30 +58,10 @@ export async function POST(request: NextRequest) {
     headers[key] = value
   })
 
-  console.log('[front-webhook] Headers:', {
-    signature: headers['x-front-signature']?.slice(0, 20) + '...',
-    timestamp: headers['x-front-request-timestamp'],
-    challenge: headers['x-front-challenge'] ? 'present' : 'absent',
-  })
-  console.log('[front-webhook] Payload preview:', payload.slice(0, 200))
-
-  // Debug: compute and compare signatures
-  const timestamp = headers['x-front-request-timestamp']
-  if (timestamp) {
-    const computed = computeFrontSignature(timestamp, payload, secret)
-    const received = headers['x-front-signature']
-    console.log('[front-webhook] Signature comparison:', {
-      computed: computed.slice(0, 20) + '...',
-      received: received?.slice(0, 20) + '...',
-      match: computed === received,
-    })
-  }
-
   // Verify HMAC signature (Front uses timestamp:body format, base64)
   const result = verifyFrontWebhook(payload, headers, { secret })
 
   if (!result.valid) {
-    console.error('[front-webhook] Verification failed:', result.error)
     return NextResponse.json({ error: result.error }, { status: 401 })
   }
 
