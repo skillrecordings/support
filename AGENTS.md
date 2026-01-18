@@ -100,3 +100,24 @@ import { lookupUser } from '@skillrecordings/core/tools/lookup-user'
 
 ### Migration path
 Existing barrels should be migrated to package exports when touched. Don't bulk-refactor, but don't add new barrels.
+
+## Stub Markers
+
+When adding temporary stubs or mocks for testing, mark them clearly:
+
+```typescript
+// TODO(REMOVE-STUB): Replace with real implementation
+// Description of what this stub does
+console.warn('[functionName] Using STUB - implement real thing')
+return { stubbed: true }
+```
+
+Find all stubs:
+```bash
+grep -r "TODO(REMOVE-STUB)" packages/
+```
+
+**Rules:**
+- Every stub gets `TODO(REMOVE-STUB)` comment
+- Add `console.warn` so it's visible in logs
+- Include brief description of what real implementation needs
