@@ -1,19 +1,5 @@
-import { createAnthropic } from '@ai-sdk/anthropic'
-import { generateText, tool, type CoreMessage } from 'ai'
+import { generateText, stepCountIs, tool, type ModelMessage } from 'ai'
 import { z } from 'zod'
-import { supportTools } from '../tools'
-
-/**
- * AI Gateway-backed Anthropic provider
- *
- * Uses AI_GATEWAY_API_KEY env var for authentication.
- * Model format: anthropic/claude-opus-4-5 (no version suffix needed)
- */
-const anthropic = createAnthropic({
-  apiKey: process.env.AI_GATEWAY_API_KEY,
-  // If using a custom gateway URL, set baseURL here:
-  // baseURL: process.env.AI_GATEWAY_BASE_URL,
-})
 
 /**
  * Support agent system prompt
@@ -64,11 +50,14 @@ Remember: You're here to make the customer's experience exceptional.`
 
 /**
  * AI SDK tools for the support agent
+ *
+ * Uses AI SDK v6 tool() pattern with inputSchema
  */
 export const agentTools = {
   lookupUser: tool({
-    description: 'Look up a user by email to get their account details and purchase history',
-    parameters: z.object({
+    description:
+      'Look up a user by email to get their account details and purchase history',
+    inputSchema: z.object({
       email: z.string().email().describe('Customer email address'),
       appId: z.string().describe('App identifier (e.g., total-typescript)'),
     }),
@@ -80,7 +69,7 @@ export const agentTools = {
 
   searchKnowledge: tool({
     description: 'Search the knowledge base for product documentation and FAQs',
-    parameters: z.object({
+    inputSchema: z.object({
       query: z.string().describe('Search query'),
       appId: z.string().describe('App to search within'),
     }),
@@ -92,7 +81,7 @@ export const agentTools = {
 
   draftResponse: tool({
     description: 'Draft a response to send to the customer',
-    parameters: z.object({
+    inputSchema: z.object({
       body: z.string().describe('Response body text'),
     }),
     execute: async ({ body }) => {
@@ -102,7 +91,7 @@ export const agentTools = {
 
   escalateToHuman: tool({
     description: 'Escalate this conversation to a human support agent',
-    parameters: z.object({
+    inputSchema: z.object({
       reason: z.string().describe('Why this needs human attention'),
       urgency: z.enum(['low', 'medium', 'high']).describe('How urgent is this'),
     }),
@@ -116,7 +105,7 @@ export interface AgentInput {
   /** Current message from customer */
   message: string
   /** Conversation history */
-  conversationHistory?: CoreMessage[]
+  conversationHistory?: ModelMessage[]
   /** Customer context (email, purchases, etc.) */
   customerContext?: {
     email?: string
@@ -131,7 +120,11 @@ export interface AgentOutput {
   /** Generated response text */
   response: string
   /** Tool calls made */
-  toolCalls: Array<{ name: string; args: Record<string, unknown>; result: unknown }>
+  toolCalls: Array<{
+    name: string
+    args: Record<string, unknown>
+    result: unknown
+  }>
   /** Whether action requires approval */
   requiresApproval: boolean
   /** Reasoning for the response */
@@ -142,12 +135,13 @@ export interface AgentOutput {
  * Run the support agent on a message
  *
  * Uses Claude Opus 4.5 via AI Gateway.
+ * Model string format: 'anthropic/claude-opus-4-5'
  */
 export async function runSupportAgent(input: AgentInput): Promise<AgentOutput> {
   const { message, conversationHistory = [], customerContext, appId } = input
 
   // Build messages array
-  const messages: CoreMessage[] = [
+  const messages: ModelMessage[] = [
     ...conversationHistory,
     { role: 'user', content: message },
   ]
@@ -156,40 +150,45 @@ export async function runSupportAgent(input: AgentInput): Promise<AgentOutput> {
   let systemPrompt = SUPPORT_AGENT_PROMPT
   if (customerContext) {
     systemPrompt += `\n\n## Current Customer Context\n`
-    if (customerContext.email) systemPrompt += `Email: ${customerContext.email}\n`
+    if (customerContext.email)
+      systemPrompt += `Email: ${customerContext.email}\n`
     if (customerContext.name) systemPrompt += `Name: ${customerContext.name}\n`
     if (customerContext.purchases?.length) {
-      systemPrompt += `Purchases:\n${customerContext.purchases.map(p => `- ${p.product} (${p.date})`).join('\n')}\n`
+      systemPrompt += `Purchases:\n${customerContext.purchases.map((p) => `- ${p.product} (${p.date})`).join('\n')}\n`
     }
   }
   systemPrompt += `\nApp: ${appId}`
 
+  // AI SDK v6: model as string for AI Gateway, stopWhen for multi-step
   const result = await generateText({
-    model: anthropic('claude-opus-4-5'),
+    model: 'anthropic/claude-opus-4-5',
     system: systemPrompt,
     messages,
     tools: agentTools,
-    maxSteps: 5, // Allow up to 5 tool calls
+    stopWhen: stepCountIs(5),
   })
 
-  // Extract tool calls
-  const toolCalls = result.steps
-    .flatMap(step => step.toolCalls || [])
-    .map(tc => ({
+  // AI SDK v6: toolCalls use 'input' not 'args', results are in toolResults
+  const toolCalls = result.steps.flatMap((step) => {
+    const resultsMap = new Map(
+      (step.toolResults || []).map((r) => [r.toolCallId, r.output])
+    )
+    return (step.toolCalls || []).map((tc) => ({
       name: tc.toolName,
-      args: tc.args as Record<string, unknown>,
-      result: tc.toolResult,
+      args: tc.input as Record<string, unknown>,
+      result: resultsMap.get(tc.toolCallId),
     }))
+  })
 
   // Check if any tool requires approval
-  const requiresApproval = toolCalls.some(tc =>
-    tc.name === 'processRefund' || tc.name === 'transferPurchase'
+  const requiresApproval = toolCalls.some(
+    (tc) => tc.name === 'processRefund' || tc.name === 'transferPurchase'
   )
 
   return {
     response: result.text,
     toolCalls,
     requiresApproval,
-    reasoning: result.reasoning?.text,
+    reasoning: undefined, // v6 reasoning access differs, will implement when needed
   }
 }
