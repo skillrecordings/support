@@ -111,6 +111,27 @@ echo -n 'secret-value' | vercel env add MY_VAR production
 vercel env add API_KEY --sensitive
 ```
 
+### Push from local .env to Vercel
+
+To push all vars from a local .env file:
+
+```bash
+# Parse .env and push each var (excludes comments and empty lines)
+while IFS='=' read -r key value; do
+  [[ -z "$key" || "$key" =~ ^# ]] && continue
+  echo -n "$value" | vercel env add "$key" production
+done < .env.local
+```
+
+Or push specific vars:
+
+```bash
+# Read from .env.local and push to production
+source .env.local
+echo -n "$FRONT_API_TOKEN" | vercel env add FRONT_API_TOKEN production
+echo -n "$INNGEST_SIGNING_KEY" | vercel env add INNGEST_SIGNING_KEY production
+```
+
 ### Pull env vars to local file
 
 ```bash
@@ -129,6 +150,14 @@ vercel env run -e production -- bun run build
 
 ```bash
 vercel env rm MY_VAR production
+```
+
+### Update existing env var
+
+```bash
+# Remove then add (no update command exists)
+vercel env rm MY_VAR production -y
+echo -n 'new-value' | vercel env add MY_VAR production
 ```
 
 ## Project Management
