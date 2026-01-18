@@ -1,4 +1,10 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
+const nextConfig = {
+  transpilePackages: [
+    '@skillrecordings/core',
+    '@skillrecordings/sdk',
+    '@skillrecordings/database',
+  ],
+}
 
-export default nextConfig;
+export default nextConfig
