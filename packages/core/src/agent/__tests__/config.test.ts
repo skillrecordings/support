@@ -1,9 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { agentTools } from '../config'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-// Mock IntegrationClient
-const mockLookupUser = vi.fn()
-const mockGetPurchases = vi.fn()
+// Hoist mocks to be available in mock factories
+const { mockLookupUser, mockGetPurchases, mockGetApp } = vi.hoisted(() => ({
+  mockLookupUser: vi.fn(),
+  mockGetPurchases: vi.fn(),
+  mockGetApp: vi.fn(),
+}))
 
 vi.mock('@skillrecordings/sdk/client', () => ({
   IntegrationClient: vi.fn().mockImplementation(() => ({
@@ -12,11 +14,18 @@ vi.mock('@skillrecordings/sdk/client', () => ({
   })),
 }))
 
-// Mock getApp
-const mockGetApp = vi.fn()
 vi.mock('../../services/app-registry', () => ({
   getApp: mockGetApp,
 }))
+
+import { agentTools } from '../config'
+
+// Helper to create mock ToolExecutionOptions
+const mockToolOptions = { toolCallId: 'test-call', messages: [] as any[] }
+
+// Get the tool's execute function with proper assertion
+const lookupUserExecute = agentTools.lookupUser?.execute
+if (!lookupUserExecute) throw new Error('lookupUser.execute not defined')
 
 describe('agentTools.lookupUser', () => {
   beforeEach(() => {
@@ -45,10 +54,13 @@ describe('agentTools.lookupUser', () => {
     mockLookupUser.mockResolvedValue(mockUser)
     mockGetPurchases.mockResolvedValue([])
 
-    const result = await agentTools.lookupUser.execute({
-      email: '[EMAIL]',
-      appId: 'total-typescript',
-    })
+    const result = await lookupUserExecute(
+      {
+        email: '[EMAIL]',
+        appId: 'total-typescript',
+      },
+      mockToolOptions
+    )
 
     // Verify getApp was called with appId
     expect(mockGetApp).toHaveBeenCalledWith('total-typescript')
@@ -67,10 +79,13 @@ describe('agentTools.lookupUser', () => {
   it('returns not found when app does not exist', async () => {
     mockGetApp.mockResolvedValue(null)
 
-    const result = await agentTools.lookupUser.execute({
-      email: '[EMAIL]',
-      appId: 'nonexistent-app',
-    })
+    const result = await lookupUserExecute(
+      {
+        email: '[EMAIL]',
+        appId: 'nonexistent-app',
+      },
+      mockToolOptions
+    )
 
     expect(result).toEqual({
       found: false,
@@ -88,10 +103,13 @@ describe('agentTools.lookupUser', () => {
     mockGetApp.mockResolvedValue(mockApp as any)
     mockLookupUser.mockResolvedValue(null)
 
-    const result = await agentTools.lookupUser.execute({
-      email: '[EMAIL]',
-      appId: 'total-typescript',
-    })
+    const result = await lookupUserExecute(
+      {
+        email: '[EMAIL]',
+        appId: 'total-typescript',
+      },
+      mockToolOptions
+    )
 
     expect(result).toEqual({
       found: false,
@@ -110,10 +128,13 @@ describe('agentTools.lookupUser', () => {
     mockGetApp.mockResolvedValue(mockApp as any)
     mockLookupUser.mockRejectedValue(new Error('Network timeout'))
 
-    const result = await agentTools.lookupUser.execute({
-      email: '[EMAIL]',
-      appId: 'total-typescript',
-    })
+    const result = await lookupUserExecute(
+      {
+        email: '[EMAIL]',
+        appId: 'total-typescript',
+      },
+      mockToolOptions
+    )
 
     expect(result).toEqual({
       found: false,
@@ -149,10 +170,13 @@ describe('agentTools.lookupUser', () => {
     mockLookupUser.mockResolvedValue(mockUser)
     mockGetPurchases.mockResolvedValue(mockPurchases)
 
-    const result = await agentTools.lookupUser.execute({
-      email: '[EMAIL]',
-      appId: 'total-typescript',
-    })
+    const result = await lookupUserExecute(
+      {
+        email: '[EMAIL]',
+        appId: 'total-typescript',
+      },
+      mockToolOptions
+    )
 
     expect(mockGetPurchases).toHaveBeenCalledWith('user-456')
     expect(result).toEqual({

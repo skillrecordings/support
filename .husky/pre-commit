@@ -1,0 +1,3 @@
+bunx lint-staged
+node scripts/check-types.mjs
+node scripts/check-barrels.mjs

@@ -2,452 +2,464 @@
 process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test'
 process.env.SLACK_APPROVAL_CHANNEL = 'C123456789'
 
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Mock the database module
 const mockDb = {
-	select: vi.fn().mockReturnThis(),
-	from: vi.fn().mockReturnThis(),
-	where: vi.fn().mockReturnThis(),
-	update: vi.fn().mockReturnThis(),
-	set: vi.fn().mockReturnThis(),
-	insert: vi.fn().mockReturnThis(),
-	values: vi.fn().mockReturnThis(),
+  select: vi.fn().mockReturnThis(),
+  from: vi.fn().mockReturnThis(),
+  where: vi.fn().mockReturnThis(),
+  update: vi.fn().mockReturnThis(),
+  set: vi.fn().mockReturnThis(),
+  insert: vi.fn().mockReturnThis(),
+  values: vi.fn().mockReturnThis(),
 }
 
 vi.mock('@skillrecordings/database', () => ({
-	getDb: vi.fn(() => mockDb),
-	ApprovalRequestsTable: {},
-	ActionsTable: {},
-	eq: vi.fn((field, value) => ({ field, value })),
+  getDb: vi.fn(() => mockDb),
+  ApprovalRequestsTable: {},
+  ActionsTable: {},
+  eq: vi.fn((field, value) => ({ field, value })),
 }))
 
 // Mock Slack client
 vi.mock('@skillrecordings/core/slack/client', () => ({
-	postApprovalMessage: vi
-		.fn()
-		.mockResolvedValue({ ts: '[PHONE].123456', channel: 'C123456789' }),
+  postApprovalMessage: vi
+    .fn()
+    .mockResolvedValue({ ts: '[PHONE].123456', channel: 'C123456789' }),
 }))
 
 // Mock approval blocks builder
 vi.mock('@skillrecordings/core/slack/approval-blocks', () => ({
-	buildApprovalBlocks: vi.fn((input) => [
-		{ type: 'header', text: { type: 'plain_text', text: 'Test Header' } },
-		{ type: 'section', text: { type: 'mrkdwn', text: input.agentReasoning } },
-	]),
+  buildApprovalBlocks: vi.fn((input) => [
+    { type: 'header', text: { type: 'plain_text', text: 'Test Header' } },
+    { type: 'section', text: { type: 'mrkdwn', text: input.agentReasoning } },
+  ]),
 }))
 
-import { requestApproval } from '../inngest/workflows/request-approval'
-import { SUPPORT_APPROVAL_REQUESTED } from '../inngest/events'
-import { postApprovalMessage } from '@skillrecordings/core/slack/client'
 import { buildApprovalBlocks } from '@skillrecordings/core/slack/approval-blocks'
+import { postApprovalMessage } from '@skillrecordings/core/slack/client'
+import { SUPPORT_APPROVAL_REQUESTED } from '../inngest/events'
+import { requestApproval } from '../inngest/workflows/request-approval'
 
 describe('requestApproval workflow', () => {
-	it('exports a function', () => {
-		expect(requestApproval).toBeDefined()
-		expect(typeof requestApproval).toBe('object')
-	})
+  it('exports a function', () => {
+    expect(requestApproval).toBeDefined()
+    expect(typeof requestApproval).toBe('object')
+  })
 
-	it('has correct id', () => {
-		expect(requestApproval.id()).toBe('request-approval')
-	})
+  it('has correct id', () => {
+    expect(requestApproval.id()).toBe('request-approval')
+  })
 
-	it('has correct name', () => {
-		expect(requestApproval.name).toBe('Request Human Approval')
-	})
+  it('has correct name', () => {
+    expect(requestApproval.name).toBe('Request Human Approval')
+  })
 
-	describe('workflow execution', () => {
-		let mockStep: any
-		let stepRunHandlers: Map<string, Function>
+  describe('workflow execution', () => {
+    let mockStep: any
+    let stepRunHandlers: Map<string, Function>
 
-		beforeEach(() => {
-			stepRunHandlers = new Map()
+    beforeEach(() => {
+      stepRunHandlers = new Map()
 
-			// Clear all mocks
-			vi.clearAllMocks()
+      // Clear all mocks
+      vi.clearAllMocks()
 
-			// Reset mock implementations
-			mockDb.select.mockReturnThis()
-			mockDb.from.mockReturnThis()
-			mockDb.where.mockReturnThis()
-			mockDb.update.mockReturnThis()
-			mockDb.set.mockReturnThis()
-			mockDb.insert.mockReturnThis()
-			mockDb.values.mockReturnThis()
+      // Reset mock implementations
+      mockDb.select.mockReturnThis()
+      mockDb.from.mockReturnThis()
+      mockDb.where.mockReturnThis()
+      mockDb.update.mockReturnThis()
+      mockDb.set.mockReturnThis()
+      mockDb.insert.mockReturnThis()
+      mockDb.values.mockReturnThis()
 
-			// Mock Inngest step with captured handlers
-			mockStep = {
-				run: vi.fn((stepName: string, handler: Function) => {
-					stepRunHandlers.set(stepName, handler)
-					return handler()
-				}),
-				waitForEvent: vi.fn(),
-			}
-		})
+      // Mock Inngest step with captured handlers
+      mockStep = {
+        run: vi.fn((stepName: string, handler: Function) => {
+          stepRunHandlers.set(stepName, handler)
+          return handler()
+        }),
+        waitForEvent: vi.fn(),
+      }
+    })
 
-		it('should create approval request in database', async () => {
-			const actionId = 'action-123'
-			const conversationId = 'conv-456'
-			const appId = 'app-tt'
-			const agentReasoning = 'Customer requested refund within policy window'
+    it('should create approval request in database', async () => {
+      const actionId = 'action-123'
+      const conversationId = 'conv-456'
+      const appId = 'app-tt'
+      const agentReasoning = 'Customer requested refund within policy window'
 
-			// Mock DB insert
-			mockDb.values.mockResolvedValueOnce(undefined)
+      // Mock DB insert
+      mockDb.values.mockResolvedValueOnce(undefined)
 
-			// Mock waitForEvent to return approval decision
-			mockStep.waitForEvent.mockResolvedValueOnce({
-				name: 'support/approval.decided',
-				data: {
-					approvalId: actionId,
-					decision: 'approved',
-					decidedBy: '[EMAIL]',
-					decidedAt: new Date().toISOString(),
-				},
-			})
+      // Mock waitForEvent to return approval decision
+      mockStep.waitForEvent.mockResolvedValueOnce({
+        name: 'support/approval.decided',
+        data: {
+          approvalId: actionId,
+          decision: 'approved',
+          decidedBy: '[EMAIL]',
+          decidedAt: new Date().toISOString(),
+        },
+      })
 
-			const event = {
-				name: SUPPORT_APPROVAL_REQUESTED,
-				data: {
-					actionId,
-					conversationId,
-					appId,
-					action: {
-						type: 'refund_order',
-						parameters: { orderId: 'order-789', amount: 100 },
-					},
-					agentReasoning,
-				},
-			}
+      const event = {
+        name: SUPPORT_APPROVAL_REQUESTED,
+        data: {
+          actionId,
+          conversationId,
+          appId,
+          action: {
+            type: 'refund_order',
+            parameters: { orderId: 'order-789', amount: 100 },
+          },
+          agentReasoning,
+        },
+      }
 
-			await requestApproval.fn({ event, step: mockStep } as any)
+      await (requestApproval as any).fn({ event, step: mockStep })
 
-			// Verify create-approval-request step was called
-			expect(mockStep.run).toHaveBeenCalledWith(
-				'create-approval-request',
-				expect.any(Function)
-			)
+      // Verify create-approval-request step was called
+      expect(mockStep.run).toHaveBeenCalledWith(
+        'create-approval-request',
+        expect.any(Function)
+      )
 
-			// Verify DB insert
-			expect(mockDb.insert).toHaveBeenCalled()
-			expect(mockDb.values).toHaveBeenCalled()
-		})
+      // Verify DB insert
+      expect(mockDb.insert).toHaveBeenCalled()
+      expect(mockDb.values).toHaveBeenCalled()
+    })
 
-		it('should send Slack notification with approval blocks', async () => {
-			const actionId = 'action-123'
-			const conversationId = 'conv-456'
-			const appId = 'app-tt'
-			const agentReasoning = 'Customer requested refund within policy window'
-			const action = {
-				type: 'refund_order',
-				parameters: { orderId: 'order-789', amount: 100 },
-			}
+    it('should send Slack notification with approval blocks', async () => {
+      const actionId = 'action-123'
+      const conversationId = 'conv-456'
+      const appId = 'app-tt'
+      const agentReasoning = 'Customer requested refund within policy window'
+      const action = {
+        type: 'refund_order',
+        parameters: { orderId: 'order-789', amount: 100 },
+      }
 
-			mockDb.values.mockResolvedValueOnce(undefined)
-			mockDb.where.mockResolvedValueOnce(undefined)
+      mockDb.values.mockResolvedValueOnce(undefined)
+      mockDb.where.mockResolvedValueOnce(undefined)
 
-			mockStep.waitForEvent.mockResolvedValueOnce({
-				name: 'support/approval.decided',
-				data: {
-					approvalId: actionId,
-					decision: 'approved',
-					decidedBy: '[EMAIL]',
-					decidedAt: new Date().toISOString(),
-				},
-			})
+      mockStep.waitForEvent.mockResolvedValueOnce({
+        name: 'support/approval.decided',
+        data: {
+          approvalId: actionId,
+          decision: 'approved',
+          decidedBy: '[EMAIL]',
+          decidedAt: new Date().toISOString(),
+        },
+      })
 
-			const event = {
-				name: SUPPORT_APPROVAL_REQUESTED,
-				data: {
-					actionId,
-					conversationId,
-					appId,
-					action,
-					agentReasoning,
-				},
-			}
+      const event = {
+        name: SUPPORT_APPROVAL_REQUESTED,
+        data: {
+          actionId,
+          conversationId,
+          appId,
+          action,
+          agentReasoning,
+        },
+      }
 
-			await requestApproval.fn({ event, step: mockStep } as any)
+      await (requestApproval as any).fn({ event, step: mockStep })
 
-			// Verify send-slack-notification step was called
-			expect(mockStep.run).toHaveBeenCalledWith(
-				'send-slack-notification',
-				expect.any(Function)
-			)
+      // Verify send-slack-notification step was called
+      expect(mockStep.run).toHaveBeenCalledWith(
+        'send-slack-notification',
+        expect.any(Function)
+      )
 
-			// Verify buildApprovalBlocks was called with correct input
-			expect(buildApprovalBlocks).toHaveBeenCalledWith({
-				actionId,
-				conversationId,
-				appId,
-				actionType: action.type,
-				parameters: action.parameters,
-				agentReasoning,
-			})
+      // Verify buildApprovalBlocks was called with correct input
+      expect(buildApprovalBlocks).toHaveBeenCalledWith({
+        actionId,
+        conversationId,
+        appId,
+        actionType: action.type,
+        parameters: action.parameters,
+        agentReasoning,
+      })
 
-			// Verify postApprovalMessage was called
-			expect(postApprovalMessage).toHaveBeenCalledWith(
-				'C123456789',
-				expect.any(Array),
-				expect.stringContaining('Refund Order')
-			)
-		})
+      // Verify postApprovalMessage was called
+      expect(postApprovalMessage).toHaveBeenCalledWith(
+        'C123456789',
+        expect.any(Array),
+        expect.stringContaining('Refund Order')
+      )
+    })
 
-		it('should update approval request with Slack message timestamp', async () => {
-			const actionId = 'action-123'
+    it('should update approval request with Slack message timestamp', async () => {
+      const actionId = 'action-123'
 
-			mockDb.values.mockResolvedValueOnce(undefined)
-			mockDb.where.mockResolvedValueOnce(undefined)
+      mockDb.values.mockResolvedValueOnce(undefined)
+      mockDb.where.mockResolvedValueOnce(undefined)
 
-			mockStep.waitForEvent.mockResolvedValueOnce({
-				name: 'support/approval.decided',
-				data: {
-					approvalId: actionId,
-					decision: 'approved',
-					decidedBy: '[EMAIL]',
-					decidedAt: new Date().toISOString(),
-				},
-			})
+      mockStep.waitForEvent.mockResolvedValueOnce({
+        name: 'support/approval.decided',
+        data: {
+          approvalId: actionId,
+          decision: 'approved',
+          decidedBy: '[EMAIL]',
+          decidedAt: new Date().toISOString(),
+        },
+      })
 
-			const event = {
-				name: SUPPORT_APPROVAL_REQUESTED,
-				data: {
-					actionId,
-					conversationId: 'conv-456',
-					appId: 'app-tt',
-					action: {
-						type: 'refund_order',
-						parameters: { orderId: 'order-789' },
-					},
-					agentReasoning: 'Test reasoning',
-				},
-			}
+      const event = {
+        name: SUPPORT_APPROVAL_REQUESTED,
+        data: {
+          actionId,
+          conversationId: 'conv-456',
+          appId: 'app-tt',
+          action: {
+            type: 'refund_order',
+            parameters: { orderId: 'order-789' },
+          },
+          agentReasoning: 'Test reasoning',
+        },
+      }
 
-			await requestApproval.fn({ event, step: mockStep } as any)
+      await (requestApproval as any).fn({ event, step: mockStep })
 
-			// Verify DB update with Slack message ts
-			expect(mockDb.update).toHaveBeenCalled()
-			expect(mockDb.set).toHaveBeenCalled()
-		})
+      // Verify DB update with Slack message ts
+      expect(mockDb.update).toHaveBeenCalled()
+      expect(mockDb.set).toHaveBeenCalled()
+    })
 
-		it('should wait for approval decision event', async () => {
-			const actionId = 'action-123'
+    it('should wait for approval decision event', async () => {
+      const actionId = 'action-123'
 
-			mockDb.values.mockResolvedValueOnce(undefined)
-			mockDb.where.mockResolvedValueOnce(undefined)
+      mockDb.values.mockResolvedValueOnce(undefined)
+      mockDb.where.mockResolvedValueOnce(undefined)
 
-			mockStep.waitForEvent.mockResolvedValueOnce({
-				name: 'support/approval.decided',
-				data: {
-					approvalId: actionId,
-					decision: 'approved',
-					decidedBy: '[EMAIL]',
-					decidedAt: new Date().toISOString(),
-				},
-			})
+      mockStep.waitForEvent.mockResolvedValueOnce({
+        name: 'support/approval.decided',
+        data: {
+          approvalId: actionId,
+          decision: 'approved',
+          decidedBy: '[EMAIL]',
+          decidedAt: new Date().toISOString(),
+        },
+      })
 
-			const event = {
-				name: SUPPORT_APPROVAL_REQUESTED,
-				data: {
-					actionId,
-					conversationId: 'conv-456',
-					appId: 'app-tt',
-					action: {
-						type: 'refund_order',
-						parameters: { orderId: 'order-789' },
-					},
-					agentReasoning: 'Test reasoning',
-				},
-			}
+      const event = {
+        name: SUPPORT_APPROVAL_REQUESTED,
+        data: {
+          actionId,
+          conversationId: 'conv-456',
+          appId: 'app-tt',
+          action: {
+            type: 'refund_order',
+            parameters: { orderId: 'order-789' },
+          },
+          agentReasoning: 'Test reasoning',
+        },
+      }
 
-			await requestApproval.fn({ event, step: mockStep } as any)
+      await (requestApproval as any).fn({ event, step: mockStep })
 
-			// Verify waitForEvent was called with correct config
-			expect(mockStep.waitForEvent).toHaveBeenCalledWith(
-				'wait-for-approval-decision',
-				{
-					event: 'support/approval.decided',
-					timeout: '24h',
-					match: 'data.approvalId',
-				}
-			)
-		})
+      // Verify waitForEvent was called with correct config
+      expect(mockStep.waitForEvent).toHaveBeenCalledWith(
+        'wait-for-approval-decision',
+        {
+          event: 'support/approval.decided',
+          timeout: '24h',
+          match: 'data.actionId',
+        }
+      )
+    })
 
-		it('should handle timeout by marking approval as expired', async () => {
-			const actionId = 'action-123'
+    it('should handle timeout by marking approval as expired', async () => {
+      const actionId = 'action-123'
 
-			mockDb.values.mockResolvedValueOnce(undefined)
-			mockDb.where.mockResolvedValueOnce(undefined)
-			mockDb.where.mockResolvedValueOnce(undefined) // handle-timeout update
+      mockDb.values.mockResolvedValueOnce(undefined)
+      mockDb.where.mockResolvedValueOnce(undefined)
+      mockDb.where.mockResolvedValueOnce(undefined) // handle-timeout update
 
-			// Mock waitForEvent to return null (timeout)
-			mockStep.waitForEvent.mockResolvedValueOnce(null)
+      // Mock waitForEvent to return null (timeout)
+      mockStep.waitForEvent.mockResolvedValueOnce(null)
 
-			const event = {
-				name: SUPPORT_APPROVAL_REQUESTED,
-				data: {
-					actionId,
-					conversationId: 'conv-456',
-					appId: 'app-tt',
-					action: {
-						type: 'refund_order',
-						parameters: { orderId: 'order-789' },
-					},
-					agentReasoning: 'Test reasoning',
-				},
-			}
+      const event = {
+        name: SUPPORT_APPROVAL_REQUESTED,
+        data: {
+          actionId,
+          conversationId: 'conv-456',
+          appId: 'app-tt',
+          action: {
+            type: 'refund_order',
+            parameters: { orderId: 'order-789' },
+          },
+          agentReasoning: 'Test reasoning',
+        },
+      }
 
-			const result = await requestApproval.fn({ event, step: mockStep } as any)
+      const result = await (requestApproval as any).fn({
+        event,
+        step: mockStep,
+      })
 
-			// Verify handle-timeout step was called
-			expect(mockStep.run).toHaveBeenCalledWith('handle-timeout', expect.any(Function))
+      // Verify handle-timeout step was called
+      expect(mockStep.run).toHaveBeenCalledWith(
+        'handle-timeout',
+        expect.any(Function)
+      )
 
-			// Verify DB update for expired status
-			expect(mockDb.update).toHaveBeenCalled()
+      // Verify DB update for expired status
+      expect(mockDb.update).toHaveBeenCalled()
 
-			// Verify result indicates timeout
-			expect(result).toMatchObject({
-				result: 'timeout',
-				actionId,
-			})
-		})
+      // Verify result indicates timeout
+      expect(result).toMatchObject({
+        result: 'timeout',
+        actionId,
+      })
+    })
 
-		it('should update approval status on approved decision', async () => {
-			const actionId = 'action-123'
-			const decidedBy = '[EMAIL]'
-			const decidedAt = new Date().toISOString()
+    it('should update approval status on approved decision', async () => {
+      const actionId = 'action-123'
+      const decidedBy = '[EMAIL]'
+      const decidedAt = new Date().toISOString()
 
-			mockDb.values.mockResolvedValueOnce(undefined)
-			mockDb.where.mockResolvedValueOnce(undefined) // send-slack-notification
-			mockDb.where.mockResolvedValueOnce(undefined) // update-approval-status
+      mockDb.values.mockResolvedValueOnce(undefined)
+      mockDb.where.mockResolvedValueOnce(undefined) // send-slack-notification
+      mockDb.where.mockResolvedValueOnce(undefined) // update-approval-status
 
-			mockStep.waitForEvent.mockResolvedValueOnce({
-				name: 'support/approval.decided',
-				data: {
-					approvalId: actionId,
-					decision: 'approved',
-					decidedBy,
-					decidedAt,
-				},
-			})
+      mockStep.waitForEvent.mockResolvedValueOnce({
+        name: 'support/approval.decided',
+        data: {
+          approvalId: actionId,
+          decision: 'approved',
+          decidedBy,
+          decidedAt,
+        },
+      })
 
-			const event = {
-				name: SUPPORT_APPROVAL_REQUESTED,
-				data: {
-					actionId,
-					conversationId: 'conv-456',
-					appId: 'app-tt',
-					action: {
-						type: 'refund_order',
-						parameters: { orderId: 'order-789' },
-					},
-					agentReasoning: 'Test reasoning',
-				},
-			}
+      const event = {
+        name: SUPPORT_APPROVAL_REQUESTED,
+        data: {
+          actionId,
+          conversationId: 'conv-456',
+          appId: 'app-tt',
+          action: {
+            type: 'refund_order',
+            parameters: { orderId: 'order-789' },
+          },
+          agentReasoning: 'Test reasoning',
+        },
+      }
 
-			await requestApproval.fn({ event, step: mockStep } as any)
+      await (requestApproval as any).fn({ event, step: mockStep })
 
-			// Verify update-approval-status step was called
-			expect(mockStep.run).toHaveBeenCalledWith(
-				'update-approval-status',
-				expect.any(Function)
-			)
+      // Verify update-approval-status step was called
+      expect(mockStep.run).toHaveBeenCalledWith(
+        'update-approval-status',
+        expect.any(Function)
+      )
 
-			// Verify DB update
-			expect(mockDb.update).toHaveBeenCalled()
-		})
+      // Verify DB update
+      expect(mockDb.update).toHaveBeenCalled()
+    })
 
-		it('should update approval status on rejected decision', async () => {
-			const actionId = 'action-123'
-			const decidedBy = '[EMAIL]'
-			const decidedAt = new Date().toISOString()
-			const reason = 'Not eligible for refund'
+    it('should update approval status on rejected decision', async () => {
+      const actionId = 'action-123'
+      const decidedBy = '[EMAIL]'
+      const decidedAt = new Date().toISOString()
+      const reason = 'Not eligible for refund'
 
-			mockDb.values.mockResolvedValueOnce(undefined)
-			mockDb.where.mockResolvedValueOnce(undefined) // send-slack-notification
-			mockDb.where.mockResolvedValueOnce(undefined) // update-approval-status
+      mockDb.values.mockResolvedValueOnce(undefined)
+      mockDb.where.mockResolvedValueOnce(undefined) // send-slack-notification
+      mockDb.where.mockResolvedValueOnce(undefined) // update-approval-status
 
-			mockStep.waitForEvent.mockResolvedValueOnce({
-				name: 'support/approval.decided',
-				data: {
-					approvalId: actionId,
-					decision: 'rejected',
-					decidedBy,
-					decidedAt,
-					reason,
-				},
-			})
+      mockStep.waitForEvent.mockResolvedValueOnce({
+        name: 'support/approval.decided',
+        data: {
+          approvalId: actionId,
+          decision: 'rejected',
+          decidedBy,
+          decidedAt,
+          reason,
+        },
+      })
 
-			const event = {
-				name: SUPPORT_APPROVAL_REQUESTED,
-				data: {
-					actionId,
-					conversationId: 'conv-456',
-					appId: 'app-tt',
-					action: {
-						type: 'refund_order',
-						parameters: { orderId: 'order-789' },
-					},
-					agentReasoning: 'Test reasoning',
-				},
-			}
+      const event = {
+        name: SUPPORT_APPROVAL_REQUESTED,
+        data: {
+          actionId,
+          conversationId: 'conv-456',
+          appId: 'app-tt',
+          action: {
+            type: 'refund_order',
+            parameters: { orderId: 'order-789' },
+          },
+          agentReasoning: 'Test reasoning',
+        },
+      }
 
-			const result = await requestApproval.fn({ event, step: mockStep } as any)
+      const result = await (requestApproval as any).fn({
+        event,
+        step: mockStep,
+      })
 
-			// Verify result indicates rejection
-			expect(result).toMatchObject({
-				result: 'rejected',
-				actionId,
-				decision: {
-					decision: 'rejected',
-					decidedBy,
-					decidedAt,
-					reason,
-				},
-			})
-		})
+      // Verify result indicates rejection
+      expect(result).toMatchObject({
+        result: 'rejected',
+        actionId,
+        decision: {
+          decision: 'rejected',
+          decidedBy,
+          decidedAt,
+          reason,
+        },
+      })
+    })
 
-		it('should return decision metadata on completion', async () => {
-			const actionId = 'action-123'
-			const decidedBy = '[EMAIL]'
-			const decidedAt = new Date().toISOString()
+    it('should return decision metadata on completion', async () => {
+      const actionId = 'action-123'
+      const decidedBy = '[EMAIL]'
+      const decidedAt = new Date().toISOString()
 
-			mockDb.values.mockResolvedValueOnce(undefined)
-			mockDb.where.mockResolvedValueOnce(undefined)
-			mockDb.where.mockResolvedValueOnce(undefined)
+      mockDb.values.mockResolvedValueOnce(undefined)
+      mockDb.where.mockResolvedValueOnce(undefined)
+      mockDb.where.mockResolvedValueOnce(undefined)
 
-			const decisionData = {
-				approvalId: actionId,
-				decision: 'approved',
-				decidedBy,
-				decidedAt,
-			}
+      const decisionData = {
+        approvalId: actionId,
+        decision: 'approved',
+        decidedBy,
+        decidedAt,
+      }
 
-			mockStep.waitForEvent.mockResolvedValueOnce({
-				name: 'support/approval.decided',
-				data: decisionData,
-			})
+      mockStep.waitForEvent.mockResolvedValueOnce({
+        name: 'support/approval.decided',
+        data: decisionData,
+      })
 
-			const event = {
-				name: SUPPORT_APPROVAL_REQUESTED,
-				data: {
-					actionId,
-					conversationId: 'conv-456',
-					appId: 'app-tt',
-					action: {
-						type: 'refund_order',
-						parameters: { orderId: 'order-789' },
-					},
-					agentReasoning: 'Test reasoning',
-				},
-			}
+      const event = {
+        name: SUPPORT_APPROVAL_REQUESTED,
+        data: {
+          actionId,
+          conversationId: 'conv-456',
+          appId: 'app-tt',
+          action: {
+            type: 'refund_order',
+            parameters: { orderId: 'order-789' },
+          },
+          agentReasoning: 'Test reasoning',
+        },
+      }
 
-			const result = await requestApproval.fn({ event, step: mockStep } as any)
+      const result = await (requestApproval as any).fn({
+        event,
+        step: mockStep,
+      })
 
-			expect(result).toMatchObject({
-				result: 'approved',
-				actionId,
-				decision: decisionData,
-			})
-		})
-	})
+      expect(result).toMatchObject({
+        result: 'approved',
+        actionId,
+        decision: decisionData,
+      })
+    })
+  })
 })

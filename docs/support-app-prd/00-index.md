@@ -71,6 +71,8 @@ Phases are PR-ready units. Use the phase docs to execute.
   - ./phases/08-vector-trust.md
 - Phase 7: Polish + Ops
   - ./phases/09-polish-ops.md
+- Phase 8: Routing + Caching + Canned Responses + Evals
+  - ./phases/10-routing-caching-evals.md
 
 ## Reference Index
 

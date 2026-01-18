@@ -45,12 +45,18 @@ See the authoritative list in:
 - Use official CLIs to generate/initialize standard config or scaffolds (tsconfig, turbo, tailwind, changesets, etc.).
 - Avoid hand-editing or hand-adding package/tool boilerplate unless there is no CLI or it fails.
 - TDD is mandatory: red → green → refactor. Add a failing test first, make it pass, then clean up.
-- Use the `.claude/skills/tdd-red-green-refactor` skill for all testable changes.
-- Keep docs current: update `docs/ARCHITECTURE.md`, `docs/CONVENTIONS.md`, `docs/DECISIONS.md`, `docs/ENV.md`, `docs/BOUNDARIES.md`, `docs/GLOSSARY.md`, `docs/TESTING.md`, and `docs/DEV-COMMANDS.md` when behavior or structure changes.
+- Use the @.claude/skills/tdd-red-green-refactor/SKILL.md skill for all testable changes.
+- Keep docs current: update @docs/ARCHITECTURE.md, @docs/CONVENTIONS.md, @docs/DECISIONS.md, @docs/ENV.md, @docs/BOUNDARIES.md, @docs/GLOSSARY.md, @docs/TESTING.md, and @docs/DEV-COMMANDS.md when behavior or structure changes.
+
+## WE USE VITEST NOT BUN:TEST
+
+See @docs/TESTING.md and @.claude/skills/tdd-red-green-refactor/SKILL.md.
 
 ## NO BARREL FILES - Use Package Exports
 
 **This is a hard mandate. No exceptions.**
+
+See @docs/CONVENTIONS.md and @docs/TESTING.md.
 
 ### What is a barrel file?
 An `index.ts` that just re-exports from other files:
