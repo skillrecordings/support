@@ -20,14 +20,18 @@ export {
 
 export { initializeToolAuditLogging } from './audit-integration'
 
+import { getConversationContext } from './get-conversation-context'
 // Import all tool implementations
 import { lookupUser } from './lookup-user'
-import { getConversationContext } from './get-conversation-context'
-import { searchKnowledge } from './search-knowledge'
 import { processRefund } from './process-refund'
+import { searchKnowledge } from './search-knowledge'
+import { getPaymentHistory } from './stripe-payment-history'
+import { getSubscriptionStatus } from './stripe-subscription-status'
 
 // Re-export individual tools for direct import
 export { processRefund } from './process-refund'
+export { getPaymentHistory } from './stripe-payment-history'
+export { getSubscriptionStatus } from './stripe-subscription-status'
 
 /**
  * Aggregated support tools object
@@ -38,4 +42,6 @@ export const supportTools = {
   getConversationContext,
   searchKnowledge,
   processRefund,
+  getPaymentHistory,
+  getSubscriptionStatus,
 }
