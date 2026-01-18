@@ -5,5 +5,5 @@
  * conversations, messages, and other data.
  */
 
-export { createFrontClient } from './client.js'
-export type { FrontClient, FrontMessage, FrontConversation } from './client.js'
+export { createFrontClient } from './client'
+export type { FrontClient, FrontMessage, FrontConversation } from './client'

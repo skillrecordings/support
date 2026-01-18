@@ -1,9 +1,14 @@
 /**
- * Agent module - Mastra-based agent logic for support system
+ * Agent module - AI SDK-based agent logic for support system
  */
 
-// Re-export the configured support agent
-export { supportAgent } from './config'
+export {
+  runSupportAgent,
+  agentTools,
+  SUPPORT_AGENT_PROMPT,
+  type AgentInput,
+  type AgentOutput,
+} from './config'
 
 // Re-export agent-relevant types for consumers
 export type {
