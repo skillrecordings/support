@@ -23,6 +23,7 @@
     "oxlint": "^0.15.0",
     "prettier": "^3.7.4",
     "turbo": "^2.7.5",
+    "turbo-ignore": "^2.7.5",
     "typescript": "5.9.2",
     "vitest": "^3.0.0"
   },

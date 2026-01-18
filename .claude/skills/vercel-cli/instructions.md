@@ -1,0 +1,257 @@
+# Vercel CLI Skill
+
+Deploy and manage Vercel projects via CLI. Org: `skillrecordings`.
+
+## Prerequisites
+
+```bash
+bun add -g vercel
+vercel login
+```
+
+## Project Setup (Monorepo)
+
+This is a Turborepo. Each app deploys as a separate Vercel project.
+
+### Link all projects at once (preferred)
+
+```bash
+vercel link --repo
+```
+
+This links all apps to their Vercel projects using Git integration.
+
+### Link individual app
+
+```bash
+cd apps/web
+vercel link --project support-web
+```
+
+### First-time project creation
+
+```bash
+cd apps/web
+vercel --yes
+# Creates project, prompts for settings
+```
+
+## Deployments
+
+### Preview deployment (PR/branch)
+
+```bash
+vercel
+# or from root:
+vercel --cwd apps/web
+```
+
+### Production deployment
+
+```bash
+vercel --prod
+# or from root:
+vercel --cwd apps/web --prod
+```
+
+### Deploy without waiting
+
+```bash
+vercel --no-wait
+```
+
+### Force rebuild (skip cache)
+
+```bash
+vercel --force
+```
+
+### Deploy with build logs
+
+```bash
+vercel --logs
+```
+
+## Environment Variables
+
+### List env vars
+
+```bash
+vercel env ls
+vercel env ls production
+vercel env ls preview feature-branch
+```
+
+### Add env var
+
+```bash
+# Interactive
+vercel env add MY_VAR
+
+# With value piped
+echo "secret-value" | vercel env add MY_VAR production
+
+# Sensitive (hidden in dashboard)
+vercel env add API_KEY --sensitive
+```
+
+### Pull env vars to local file
+
+```bash
+vercel env pull .env.local
+vercel env pull --environment=preview .env.preview
+```
+
+### Run command with env vars (no file)
+
+```bash
+vercel env run -- bun run dev
+vercel env run -e production -- bun run build
+```
+
+### Remove env var
+
+```bash
+vercel env rm MY_VAR production
+```
+
+## Project Management
+
+### List projects
+
+```bash
+vercel project ls
+vercel project ls --json
+```
+
+### Inspect project
+
+```bash
+vercel project inspect
+vercel project inspect support-web
+```
+
+### Remove project
+
+```bash
+vercel project rm support-web
+```
+
+## Domains
+
+### List domains
+
+```bash
+vercel domains ls
+```
+
+### Add domain
+
+```bash
+vercel domains add example.com
+```
+
+### Alias deployment to domain
+
+```bash
+vercel alias <deployment-url> my-custom-domain.com
+```
+
+## Logs
+
+### View deployment logs
+
+```bash
+vercel logs <deployment-url>
+vercel logs <deployment-url> --follow
+```
+
+## CI/CD Usage
+
+Use `VERCEL_TOKEN` env var or `--token` flag:
+
+```bash
+vercel --token $VERCEL_TOKEN --prod
+```
+
+## Monorepo vercel.json
+
+Each app should have its own `vercel.json`:
+
+```json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs"
+}
+```
+
+Root `vercel.json` for shared settings (optional):
+
+```json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "ignoreCommand": "npx turbo-ignore"
+}
+```
+
+## Common Patterns
+
+### Deploy only if app changed (turbo-ignore)
+
+```bash
+bun add -D turbo-ignore
+```
+
+In app's `vercel.json`:
+```json
+{
+  "ignoreCommand": "npx turbo-ignore"
+}
+```
+
+### Capture deployment URL in CI
+
+```bash
+DEPLOY_URL=$(vercel --prod 2>&1)
+echo "Deployed to: $DEPLOY_URL"
+```
+
+### Promote preview to production
+
+```bash
+vercel promote <deployment-url>
+```
+
+## Scope
+
+Always deploy to skillrecordings org:
+
+```bash
+vercel --scope skillrecordings
+```
+
+Or set globally:
+```bash
+vercel switch skillrecordings
+```
+
+## Troubleshooting
+
+### Clear local Vercel cache
+
+```bash
+rm -rf .vercel
+vercel link
+```
+
+### Check current link status
+
+```bash
+cat .vercel/project.json
+```
+
+### Redeploy with fresh build
+
+```bash
+vercel --force --logs
+```
