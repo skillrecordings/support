@@ -2,6 +2,7 @@ import { inngest } from '../client'
 import { SUPPORT_INBOUND_RECEIVED } from '../events'
 import type { SupportInboundReceivedEvent } from '../events'
 import { createFrontClient, type FrontMessage } from '../../front/index'
+import { runSupportAgent } from '../../agent/index'
 
 /**
  * Handles inbound messages received from Front.
@@ -67,59 +68,70 @@ export const handleInboundMessage = inngest.createFunction(
 
     // Step 2: Run agent
     const agentResult = await step.run('run-agent', async () => {
-      // TODO: Implement agent logic
-      // - Analyze message intent
-      // - Generate response draft
-      // - Determine if action is needed (refund, license transfer, etc)
-      // - Assess confidence level
+      // Convert Front messages to AI SDK message format
+      const conversationMessages = context.conversationHistory
+        .sort((a, b) => a.created_at - b.created_at)
+        .map(msg => ({
+          role: msg.is_inbound ? 'user' as const : 'assistant' as const,
+          content: msg.body,
+        }))
+
+      // Run the support agent
+      const result = await runSupportAgent({
+        message: context.body,
+        conversationHistory: conversationMessages.slice(0, -1), // Exclude current message
+        customerContext: {
+          email: context.senderEmail,
+        },
+        appId: context.appId,
+      })
+
+      // Check if escalation was requested
+      const escalationCall = result.toolCalls.find(tc => tc.name === 'escalateToHuman')
+      const draftCall = result.toolCalls.find(tc => tc.name === 'draftResponse')
+
       return {
-        response: 'Agent response placeholder',
-        action: null as
-          | null
-          | {
-              type: string
-              parameters: Record<string, unknown>
-              requiresApproval: boolean
-            },
-        agentReasoning: 'Placeholder reasoning',
-        confidence: 0.0,
+        response: draftCall?.args?.body as string || result.response,
+        toolCalls: result.toolCalls,
+        requiresApproval: result.requiresApproval,
+        escalated: !!escalationCall,
+        escalationReason: escalationCall?.args?.reason as string | undefined,
+        reasoning: result.reasoning,
       }
     })
 
-    // Step 3: Route based on approval requirement
+    // Step 3: Route based on agent result
     const routingResult = await step.run('route-action', async () => {
-      if (!agentResult.action) {
-        // No action needed, just respond
-        return { type: 'no-action' as const }
+      // If agent escalated, flag for human
+      if (agentResult.escalated) {
+        return {
+          type: 'escalated' as const,
+          reason: agentResult.escalationReason,
+        }
       }
 
-      if (agentResult.action.requiresApproval) {
-        // Action requires human approval
+      // If action requires approval, request it
+      if (agentResult.requiresApproval) {
         await step.sendEvent('request-approval', {
           name: 'support/approval.requested',
           data: {
             actionId: `action-${conversationId}-${Date.now()}`,
             conversationId,
-            appId,
+            appId: context.appId,
             action: {
-              type: agentResult.action.type,
-              parameters: agentResult.action.parameters,
+              type: 'pending-action',
+              parameters: { toolCalls: agentResult.toolCalls },
             },
-            agentReasoning: agentResult.agentReasoning,
+            agentReasoning: agentResult.reasoning || 'Agent proposed action requiring approval',
           },
         })
         return { type: 'approval-requested' as const }
-      } else {
-        // Auto-approve and execute
-        await step.sendEvent('auto-approve', {
-          name: 'support/action.approved',
-          data: {
-            actionId: `action-${conversationId}-${Date.now()}`,
-            approvedBy: 'system-auto-approval',
-            approvedAt: new Date().toISOString(),
-          },
-        })
-        return { type: 'auto-approved' as const }
+      }
+
+      // Otherwise, response is ready to send (or draft)
+      return {
+        type: 'response-ready' as const,
+        response: agentResult.response,
       }
     })
 
