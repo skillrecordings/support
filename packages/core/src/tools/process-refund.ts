@@ -1,5 +1,5 @@
 import { getApp } from '@skillrecordings/core/services/app-registry'
-import { IntegrationClient } from '@skillrecordings/sdk/client'
+import { IntegrationClient } from '@skillrecordings/sdk'
 import { z } from 'zod'
 import { createTool } from './create-tool'
 

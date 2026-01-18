@@ -6,12 +6,12 @@ vi.mock('@skillrecordings/core/services/app-registry', () => ({
   getApp: vi.fn(),
 }))
 
-vi.mock('@skillrecordings/sdk/client', () => ({
+vi.mock('@skillrecordings/sdk', () => ({
   IntegrationClient: vi.fn(),
 }))
 
 import { getApp } from '@skillrecordings/core/services/app-registry'
-import { IntegrationClient } from '@skillrecordings/sdk/client'
+import { IntegrationClient } from '@skillrecordings/sdk'
 import { processRefund } from './process-refund'
 
 /**
