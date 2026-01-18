@@ -125,11 +125,30 @@ Examples:
 - stripe/refund.completed
 ```
 
+## Database Access in Workflows
+
+**CRITICAL**: Use lazy initialization, not the singleton.
+
+```typescript
+// ❌ BAD - singleton creates pool at import time, fails in serverless
+import { database, ActionsTable } from '@skillrecordings/database'
+
+// ✅ GOOD - lazy init inside step function
+import { getDb, ActionsTable } from '@skillrecordings/database'
+
+await step.run('create-action', async () => {
+  const db = getDb()  // Pool created here, at runtime
+  await db.insert(ActionsTable).values({ ... })
+})
+```
+
+Why: The `database` singleton calls `mysql.createPool()` at import time. In serverless/Turbopack builds, this fails because DATABASE_URL isn't available during static analysis.
+
 ## File Locations
 
-- Inngest client: `packages/core/src/workflows/client.ts`
-- Workflow definitions: `packages/core/src/workflows/`
-- Event types: `packages/core/src/types/events.ts`
+- Inngest client: `packages/core/src/inngest/client.ts`
+- Workflow definitions: `packages/core/src/inngest/workflows/`
+- Event types: `packages/core/src/inngest/events.ts`
 
 ## Reference Docs
 

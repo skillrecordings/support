@@ -6,4 +6,6 @@ export const env = createEnv({
 		DATABASE_URL: z.string().url(),
 	},
 	runtimeEnv: process.env,
+	// Skip validation in test environment - tests mock the database
+	skipValidation: !!process.env.VITEST || process.env.NODE_ENV === 'test',
 })
