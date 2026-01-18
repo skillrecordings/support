@@ -3,7 +3,7 @@ import type {
   EvalDatapoint,
   EvalGates,
   EvalReport,
-} from '@skillrecordings/core'
+} from '@skillrecordings/core/evals/routing'
 
 export interface EvalOptions {
   json?: boolean
@@ -55,7 +55,7 @@ export async function runEval(
   }
 
   // Import evalRouting (only when needed to avoid circular deps)
-  const { evalRouting } = await import('@skillrecordings/core')
+  const { evalRouting } = await import('@skillrecordings/core/evals/routing')
 
   // Run eval with optional gates
   const report: EvalReport = await evalRouting(dataset, gates)

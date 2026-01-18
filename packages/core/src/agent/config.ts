@@ -1,5 +1,5 @@
 import { database } from '@skillrecordings/database'
-import { IntegrationClient } from '@skillrecordings/sdk'
+import { IntegrationClient } from '@skillrecordings/sdk/client'
 import { type ModelMessage, generateText, stepCountIs, tool } from 'ai'
 import { z } from 'zod'
 import { classifyMessage } from '../router/classifier'
