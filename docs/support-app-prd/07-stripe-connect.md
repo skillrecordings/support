@@ -8,6 +8,43 @@ Centralized refunds via Connect. The platform processes refunds on behalf of con
 
 Each Skill Recordings app (Total TypeScript, Pro Tailwind, etc.) has their own Stripe account. Rather than give the platform direct API keys, we use Stripe Connect OAuth to establish a secure connection. The platform can then issue refunds using its own API key + the connected account's `acct_xxx` ID.
 
+## Integration Philosophy: Query, Don't Warehouse
+
+**The platform is the "queen" - it orchestrates, it doesn't store everything.**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Support Platform                          │
+│                    ("Queen of Hive")                         │
+├─────────────────────────────────────────────────────────────┤
+│  Queries on-demand            │  Apps notify us             │
+│  via Stripe Connect           │  via SDK                    │
+│  ─────────────────            │  ────────────               │
+│  • Payment history            │  • Refund processed         │
+│  • Subscription status        │  • Access revoked           │
+│  • Customer details           │  • License transferred      │
+└─────────────────────────────────────────────────────────────┘
+         │                              │
+         ▼                              ▼
+    Stripe API                    App Integration
+    (connected acct)              (SDK handler)
+```
+
+**Why not ingest all Stripe events?**
+1. **No historical context** - Event ingestion starts "now", missing past data
+2. **Stripe is source of truth** - Query when needed, don't duplicate
+3. **Apps know their domain** - They tell us what matters via SDK
+4. **Simpler system** - Less state to manage, fewer failure modes
+
+**What we DO monitor via webhooks:**
+- `account.application.deauthorized` - Know when to clear connection
+- `charge.dispute.created` - Disputes need immediate attention (optional)
+
+**Everything else: Query on-demand**
+- Agent tool calls Stripe API via connected account when it needs context
+- `getPaymentHistory(customerId)` → queries Stripe directly
+- `getSubscriptions(customerId)` → queries Stripe directly
+
 ## Architecture
 
 ```
@@ -107,13 +144,18 @@ This ensures:
 - Approval-scoped: New approval = new key = can retry
 - No duplicate refunds
 
-### 4. Webhook Ingestion
+### 4. Webhook Monitoring (Minimal)
 
 **Route: `apps/web/app/api/stripe/webhooks/route.ts`**
 
-Events to handle:
-- `charge.refunded` - Reconciliation (backup to our initiated refunds)
-- `account.application.deauthorized` - App disconnected
+Per our "query, don't warehouse" philosophy, we only monitor events that require action:
+
+| Event | Purpose | Action |
+|-------|---------|--------|
+| `account.application.deauthorized` | App disconnected from Connect | Clear `stripe_account_id` from apps table |
+| `charge.dispute.created` | Dispute opened (optional) | Alert via Slack, flag conversation |
+
+**Note:** We do NOT ingest `charge.refunded` for general tracking. If we initiate a refund, our workflow knows the result. If the app refunds independently, they notify us via SDK.
 
 **Pattern: Inngest for durable processing**
 
@@ -121,12 +163,26 @@ Events to handle:
 // Verify signature
 const event = stripe.webhooks.constructEvent(body, sig, webhookSecret)
 
-// Send to Inngest
-await inngest.send({
-  name: 'stripe/event.received',
-  data: { type: event.type, data: event.data.object, accountId: event.account }
-})
+// Only process events we care about
+if (event.type === 'account.application.deauthorized') {
+  await inngest.send({
+    name: 'stripe/event.received',
+    data: { type: event.type, data: event.data.object, accountId: event.account }
+  })
+}
 ```
+
+### 5. On-Demand Stripe Queries (Future)
+
+Agent tools that query Stripe Connect directly:
+
+| Tool | Purpose |
+|------|---------|
+| `getPaymentHistory` | Fetch charges for a customer via connected account |
+| `getSubscriptionStatus` | Check subscription state via connected account |
+| `getDisputes` | List open disputes for a customer |
+
+These provide context without storing event history.
 
 ## Environment Variables
 
