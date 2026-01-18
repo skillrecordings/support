@@ -222,6 +222,16 @@ export const agentTools = {
   }),
 }
 
+/** Available models via AI Gateway */
+export type SupportAgentModel =
+  | 'anthropic/claude-haiku-4-5'
+  | 'anthropic/claude-sonnet-4-5'
+  | 'anthropic/claude-opus-4-5'
+
+/** Default model for cost efficiency */
+export const DEFAULT_AGENT_MODEL: SupportAgentModel =
+  'anthropic/claude-haiku-4-5'
+
 export interface AgentInput {
   /** Current message from customer */
   message: string
@@ -235,6 +245,8 @@ export interface AgentInput {
   }
   /** App identifier */
   appId: string
+  /** Model to use (defaults to Haiku for cost efficiency) */
+  model?: SupportAgentModel
 }
 
 export interface AgentOutput {
@@ -257,11 +269,17 @@ export interface AgentOutput {
 /**
  * Run the support agent on a message
  *
- * Uses Claude Opus 4.5 via AI Gateway.
- * Model string format: 'anthropic/claude-opus-4-5'
+ * Uses AI Gateway with configurable model.
+ * Defaults to Haiku for cost efficiency (~60x cheaper than Opus).
  */
 export async function runSupportAgent(input: AgentInput): Promise<AgentOutput> {
-  const { message, conversationHistory = [], customerContext, appId } = input
+  const {
+    message,
+    conversationHistory = [],
+    customerContext,
+    appId,
+    model = DEFAULT_AGENT_MODEL,
+  } = input
 
   // Retrieve context from vector store
   const retrievedContext = await buildAgentContext({
@@ -303,7 +321,7 @@ export async function runSupportAgent(input: AgentInput): Promise<AgentOutput> {
 
   // AI SDK v6: model as string for AI Gateway, stopWhen for multi-step
   const result = await generateText({
-    model: 'anthropic/claude-opus-4-5',
+    model,
     system: systemPrompt,
     messages,
     tools: agentTools,
