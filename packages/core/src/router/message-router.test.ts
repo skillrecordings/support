@@ -3,11 +3,26 @@ import { routeMessage } from './message-router'
 import type { RouterDecision, RoutingContext } from './message-router'
 import type { Rule } from './types'
 
+// Mock the classifier to avoid hitting real AI Gateway in tests
+const mockClassifyMessage = vi.hoisted(() => vi.fn())
+vi.mock('./classifier', () => ({
+  classifyMessage: mockClassifyMessage,
+}))
+
 describe('routeMessage', () => {
   let mockCache: any
   let context: RoutingContext
 
   beforeEach(() => {
+    vi.clearAllMocks()
+
+    // Default classifier mock - high confidence classification
+    mockClassifyMessage.mockResolvedValue({
+      category: 'general',
+      confidence: 0.85,
+      reasoning: 'Mock classification for testing',
+    })
+
     mockCache = {
       getDecision: vi.fn().mockReturnValue(null),
       setDecision: vi.fn(),
@@ -146,11 +161,16 @@ describe('routeMessage', () => {
 
   describe('agent fallback', () => {
     it('routes to agent when classifier confidence is low', async () => {
-      // Edge case: completely ambiguous message
+      // Mock low confidence from classifier
+      mockClassifyMessage.mockResolvedValue({
+        category: 'general',
+        confidence: 0.5,
+        reasoning: 'Ambiguous message, low confidence',
+      })
+
       const result = await routeMessage('...', context)
 
-      // Classifier should return low confidence
-      // Router should upgrade to agent route
+      // Router should upgrade to agent route when confidence is low
       expect(result.route).toBe('agent')
       expect(result.confidence).toBeLessThan(0.7)
     })
