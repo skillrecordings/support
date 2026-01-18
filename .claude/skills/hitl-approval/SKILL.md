@@ -36,9 +36,11 @@ Core differentiator: **agent proposes, human approves**. Every sensitive action 
 | Event | Trigger | Data |
 |-------|---------|------|
 | `support/approval.requested` | Agent proposes action | actionId, conversationId, appId, action, agentReasoning |
-| `support/approval.decided` | Human clicks button | approvalId, decision, decidedBy, decidedAt |
+| `support/approval.decided` | Human clicks button | **actionId**, decision, decidedBy, decidedAt |
 | `support/action.approved` | Human approves | actionId, approvedBy, approvedAt |
 | `support/action.rejected` | Human rejects | actionId, rejectedBy, rejectedAt, reason? |
+
+**IMPORTANT**: The `waitForEvent` match uses `data.actionId` - ensure all events use `actionId` consistently (not `approvalId`).
 
 ## Slack Block Kit Builder
 

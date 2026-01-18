@@ -144,11 +144,61 @@ await step.run('create-action', async () => {
 
 Why: The `database` singleton calls `mysql.createPool()` at import time. In serverless/Turbopack builds, this fails because DATABASE_URL isn't available during static analysis.
 
+## Vercel Cron for Inngest Registration
+
+Keep Inngest functions registered on Vercel serverless:
+
+```typescript
+// app/api/cron/route.ts
+import { headers } from 'next/headers'
+
+export const dynamic = 'force-dynamic'
+
+export async function GET() {
+  await headers()
+  const baseUrl = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : 'http://localhost:3000'
+
+  await fetch(`${baseUrl}/api/inngest`, { method: 'PUT' })
+  return new Response(null, { status: 200 })
+}
+```
+
+```json
+// vercel.json
+{
+  "crons": [{ "path": "/api/cron", "schedule": "*/5 * * * *" }]
+}
+```
+
+## External API Fallback Pattern
+
+When fetching from external APIs (Front, Stripe), always provide fallback:
+
+```typescript
+const context = await step.run('get-context', async () => {
+  const fallback = {
+    body: event.data.messageBody || '',
+    senderEmail: event.data.customerEmail || '',
+  }
+
+  try {
+    const data = await externalApi.fetch(id)
+    return data
+  } catch (error) {
+    console.warn('[workflow] API error, using fallback:', error)
+    return fallback
+  }
+})
+```
+
 ## File Locations
 
 - Inngest client: `packages/core/src/inngest/client.ts`
 - Workflow definitions: `packages/core/src/inngest/workflows/`
 - Event types: `packages/core/src/inngest/events.ts`
+- Cron endpoint: `apps/front/app/api/cron/route.ts`
 
 ## Reference Docs
 
