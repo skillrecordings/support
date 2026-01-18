@@ -8,6 +8,6 @@ export * as webhooks from './webhooks/index.js'
 export * as front from './front/index'
 
 // Also export key items directly for convenience
-export { supportAgent } from './agent/index.js'
+export { runSupportAgent } from './agent/index.js'
 export { supportTools, createTool } from './tools/index.js'
 export { inngest as inngestClient, createServeHandler, allWorkflows } from './inngest/index.js'
