@@ -148,6 +148,39 @@ export type StripeRefundCompletedEvent = {
   }
 }
 
+/** Event emitted when a conversation is resolved and ready for indexing */
+export const SUPPORT_CONVERSATION_RESOLVED =
+  'support/conversation.resolved' as const
+
+export type SupportConversationResolvedEvent = {
+  name: typeof SUPPORT_CONVERSATION_RESOLVED
+  data: {
+    /** Front conversation ID */
+    conversationId: string
+    /** Skill Recordings app identifier */
+    appId: string
+    /** Customer email address */
+    customerEmail: string
+    /** Conversation messages */
+    messages: Array<{
+      role: 'customer' | 'agent'
+      content: string
+      timestamp: string
+    }>
+    /** Resolution metadata */
+    resolution: {
+      /** Resolution category */
+      category: string
+      /** Whether response was auto-sent */
+      wasAutoSent: boolean
+      /** Whether agent draft was used */
+      agentDraftUsed: boolean
+      /** Optional trust score */
+      trustScore?: number
+    }
+  }
+}
+
 /**
  * Union of all support platform events.
  * Used to type the Inngest client.
@@ -160,4 +193,5 @@ export type Events = {
   [SUPPORT_APPROVAL_DECIDED]: SupportApprovalDecidedEvent
   [STRIPE_EVENT_RECEIVED]: StripeEventReceivedEvent
   [STRIPE_REFUND_COMPLETED]: StripeRefundCompletedEvent
+  [SUPPORT_CONVERSATION_RESOLVED]: SupportConversationResolvedEvent
 }

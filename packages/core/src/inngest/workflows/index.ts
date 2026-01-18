@@ -8,10 +8,12 @@ export { handleInboundMessage } from './handle-inbound-message'
 export { requestApproval } from './request-approval'
 export { executeApprovedAction } from './execute-approved-action'
 export { handleStripeEvent } from './stripe-refund'
+export { indexConversation } from './index-conversation'
 
-import { handleInboundMessage } from './handle-inbound-message'
-import { requestApproval } from './request-approval'
 import { executeApprovedAction } from './execute-approved-action'
+import { handleInboundMessage } from './handle-inbound-message'
+import { indexConversation } from './index-conversation'
+import { requestApproval } from './request-approval'
 import { handleStripeEvent } from './stripe-refund'
 
 /**
@@ -27,4 +29,5 @@ export const allWorkflows = [
   requestApproval,
   executeApprovedAction,
   handleStripeEvent,
+  indexConversation,
 ]

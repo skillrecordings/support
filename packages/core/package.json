@@ -14,7 +14,14 @@
     "./slack": "./src/slack/index.ts",
     "./slack/client": "./src/slack/client.ts",
     "./slack/approval-blocks": "./src/slack/approval-blocks.ts",
-    "./services/app-registry": "./src/services/app-registry.ts"
+    "./services/app-registry": "./src/services/app-registry.ts",
+    "./vector": "./src/vector/client.ts",
+    "./vector/client": "./src/vector/client.ts",
+    "./vector/types": "./src/vector/types.ts",
+    "./vector/redact": "./src/vector/redact.ts",
+    "./vector/retrieval": "./src/vector/retrieval.ts",
+    "./trust/score": "./src/trust/score.ts",
+    "./trust/types": "./src/trust/types.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit",
@@ -31,7 +38,7 @@
     "@skillrecordings/database": "*",
     "@skillrecordings/sdk": "*",
     "@slack/web-api": "^7.11.0",
-    "@upstash/vector": "^1.2.0",
+    "@upstash/vector": "^1.2.2",
     "ai": "^6.0.39",
     "drizzle-orm": "^0.45.1",
     "inngest": "^3.49.0",

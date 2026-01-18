@@ -24,13 +24,26 @@ You are guiding the user through setting up the support platform. Your job is to
 - Copy API keys from dashboards
 - Approve OAuth permissions
 
+## Monorepo Environment Pattern
+
+**Apps do NOT share a root .env file.**
+
+Each app has its own `.env.local`:
+- `apps/web/.env.local` - Dashboard
+- `apps/slack/.env.local` - Slack bot
+- `apps/front/.env.local` - Front plugin
+
+Packages get env vars from the consuming app's runtime.
+
 ## Setup State Tracking
 
-Track progress in `.env.local`. Check which vars are set:
+Track progress in each app's `.env.local`. Check which vars are set:
 
 ```bash
-# Check setup progress
-cat .env.local 2>/dev/null | grep -v "^#" | grep -v "^$" | cut -d= -f1
+# Check setup progress for each app
+cat apps/web/.env.local 2>/dev/null | grep -v "^#" | grep -v "^$" | cut -d= -f1
+cat apps/slack/.env.local 2>/dev/null | grep -v "^#" | grep -v "^$" | cut -d= -f1
+cat apps/front/.env.local 2>/dev/null | grep -v "^#" | grep -v "^$" | cut -d= -f1
 ```
 
 ## Interactive Flow
@@ -178,6 +191,23 @@ Set up services in this order (dependencies matter):
 7. **Axiom + Langfuse** (observability)
 8. **Vercel** (hosting - do last, then update webhook URLs)
 9. **BetterAuth** (just needs secret generation)
+
+## Vercel Environment Variables - NO NEWLINES
+
+**CRITICAL: When adding env vars to Vercel via CLI, use `echo -n` to avoid trailing newlines.**
+
+```bash
+# ✅ CORRECT - no trailing newline
+echo -n 'sk_live_xxx' | vercel env add STRIPE_SECRET_KEY production
+
+# ❌ WRONG - heredoc adds newline
+vercel env add STRIPE_SECRET_KEY production <<< 'sk_live_xxx'
+
+# ❌ WRONG - echo without -n adds newline
+echo 'sk_live_xxx' | vercel env add STRIPE_SECRET_KEY production
+```
+
+Trailing newlines in secrets cause cryptic auth failures.
 
 ## Quick Commands
 

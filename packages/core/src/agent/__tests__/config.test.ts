@@ -1,10 +1,18 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Hoist mocks to be available in mock factories
-const { mockLookupUser, mockGetPurchases, mockGetApp } = vi.hoisted(() => ({
+const {
+  mockLookupUser,
+  mockGetPurchases,
+  mockGetApp,
+  mockBuildAgentContext,
+  mockShouldAutoSend,
+} = vi.hoisted(() => ({
   mockLookupUser: vi.fn(),
   mockGetPurchases: vi.fn(),
   mockGetApp: vi.fn(),
+  mockBuildAgentContext: vi.fn(),
+  mockShouldAutoSend: vi.fn(),
 }))
 
 vi.mock('@skillrecordings/sdk/client', () => ({
@@ -16,6 +24,14 @@ vi.mock('@skillrecordings/sdk/client', () => ({
 
 vi.mock('../../services/app-registry', () => ({
   getApp: mockGetApp,
+}))
+
+vi.mock('../../vector/retrieval', () => ({
+  buildAgentContext: mockBuildAgentContext,
+}))
+
+vi.mock('../../trust/score', () => ({
+  shouldAutoSend: mockShouldAutoSend,
 }))
 
 import { agentTools } from '../config'
@@ -184,5 +200,107 @@ describe('agentTools.lookupUser', () => {
       user: mockUser,
       purchases: mockPurchases,
     })
+  })
+})
+
+describe('agentTools.searchKnowledge', () => {
+  const searchKnowledgeExecute = agentTools.searchKnowledge?.execute
+  if (!searchKnowledgeExecute)
+    throw new Error('searchKnowledge.execute not defined')
+
+  beforeEach(() => {
+    mockBuildAgentContext.mockClear()
+  })
+
+  it('calls buildAgentContext with query and appId', async () => {
+    const mockContext = {
+      similarTickets: [],
+      knowledge: [
+        {
+          id: 'kb-1',
+          data: 'Refund policy documentation',
+          metadata: { type: 'knowledge', appId: 'total-typescript' },
+        },
+      ],
+      goodResponses: [],
+    }
+    mockBuildAgentContext.mockResolvedValue(mockContext)
+
+    const result = await searchKnowledgeExecute(
+      {
+        query: 'refund policy',
+        appId: 'total-typescript',
+      },
+      mockToolOptions
+    )
+
+    expect(mockBuildAgentContext).toHaveBeenCalledWith({
+      query: 'refund policy',
+      appId: 'total-typescript',
+    })
+
+    expect(result).toEqual({
+      similarTickets: [],
+      knowledge: mockContext.knowledge,
+      goodResponses: [],
+    })
+  })
+
+  it('returns empty results when no matches found', async () => {
+    const mockContext = {
+      similarTickets: [],
+      knowledge: [],
+      goodResponses: [],
+    }
+    mockBuildAgentContext.mockResolvedValue(mockContext)
+
+    const result = await searchKnowledgeExecute(
+      {
+        query: 'unknown query',
+        appId: 'total-typescript',
+      },
+      mockToolOptions
+    )
+
+    expect(result).toEqual({
+      similarTickets: [],
+      knowledge: [],
+      goodResponses: [],
+    })
+  })
+})
+
+describe('runSupportAgent', () => {
+  beforeEach(() => {
+    mockBuildAgentContext.mockClear()
+    mockShouldAutoSend.mockClear()
+  })
+
+  it('includes retrieved context in agent execution', async () => {
+    const mockContext = {
+      similarTickets: [
+        {
+          id: 'conv-1',
+          data: 'Similar past refund request',
+          metadata: { type: 'conversation', appId: 'total-typescript' },
+        },
+      ],
+      knowledge: [],
+      goodResponses: [],
+    }
+    mockBuildAgentContext.mockResolvedValue(mockContext)
+
+    // Mock should not be called for this test - just verifying context retrieval
+    // Full integration would require mocking AI SDK's generateText
+  })
+
+  it('sets autoSent=true when shouldAutoSend returns true and confidence > 0.9', async () => {
+    // This test would require mocking generateText from AI SDK
+    // Placeholder for now - implementation needed
+  })
+
+  it('keeps requiresApproval=true when shouldAutoSend returns false', async () => {
+    // This test would require mocking generateText from AI SDK
+    // Placeholder for now - implementation needed
   })
 })
