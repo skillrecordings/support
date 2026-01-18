@@ -1,6 +1,17 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
   "ui": "tui",
+  "globalEnv": [
+    "DATABASE_URL",
+    "FRONT_WEBHOOK_SECRET",
+    "FRONT_API_TOKEN",
+    "INNGEST_SIGNING_KEY",
+    "INNGEST_EVENT_KEY",
+    "AI_GATEWAY_API_KEY",
+    "SLACK_BOT_TOKEN",
+    "SLACK_SIGNING_SECRET",
+    "SLACK_APPROVAL_CHANNEL"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
