@@ -20,6 +20,14 @@ export {
   SUPPORT_ACTION_APPROVED,
   SUPPORT_ACTION_REJECTED,
 } from './events'
+export {
+  withDeadLetter,
+  alertOnFailure,
+  calculateBackoff,
+  recordFailedEvent,
+  DEFAULT_DLQ_OPTIONS,
+} from './dead-letter'
+export type { DeadLetterOptions, FailureEvent } from './dead-letter'
 
 /**
  * All workflow functions for the support platform.

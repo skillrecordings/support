@@ -5,6 +5,22 @@ description: Comprehensive guide to AI SDK v6 for agent development, tool defini
 
 # Vercel AI SDK v6 Patterns
 
+## ⚠️ CRITICAL: Zod v4 Import Required
+
+```typescript
+// ❌ WRONG - causes TS2589 "Type instantiation is excessively deep"
+import { z } from 'zod'
+
+// ✅ CORRECT - always use zod/v4 with AI SDK v6
+import { z } from 'zod/v4'
+```
+
+**This is non-negotiable.** AI SDK v6 uses complex recursive generics that exceed TypeScript's default recursion limit with Zod v3 types. The `zod/v4` subpath exports optimized types.
+
+Affected APIs: `generateObject`, `streamObject`, `tool()`, `Output.object()`, ANY schema usage.
+
+---
+
 Comprehensive guide for Vercel AI SDK v6 (6.0+) patterns used in agent-first applications. Contains rules for provider setup, tool definitions, multi-step workflows, and result extraction.
 
 ## When to Apply
@@ -34,12 +50,28 @@ Reference these guidelines when:
 
 ```typescript
 // ❌ v5 patterns that FAIL in v6:
+import { z } from 'zod'                   // → import { z } from 'zod/v4'
 import { type CoreMessage } from 'ai'     // → ModelMessage
 parameters: z.object({...})               // → inputSchema
 maxSteps: 5                               // → stopWhen: stepCountIs(5)
 call.args                                 // → call.input
 call.toolResult                           // → step.toolResults[].output
 ```
+
+### Zod v4 Import (CRITICAL)
+
+**AI SDK v6 requires Zod v4.** Using the default `zod` import causes TS2589 "Type instantiation is excessively deep" errors.
+
+```typescript
+// ❌ WRONG - causes TS2589 errors
+import { z } from 'zod'
+
+// ✅ CORRECT - use Zod v4 subpath
+import { z } from 'zod/v4'
+```
+
+This applies to ALL AI SDK schema usage: `generateObject`, `streamObject`, `tool()`, `Output.object()`.
+The `zod/v4` subpath exports optimized types that work with AI SDK's complex generics.
 
 ### 1. Provider Setup (CRITICAL)
 
@@ -67,7 +99,7 @@ const result = await generateText({
 
 ```typescript
 import { tool } from 'ai'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 const myTool = tool({
   description: 'What this does',
@@ -149,13 +181,15 @@ Each rule file contains:
 ```typescript
 import {
   generateText,
+  generateObject,
   streamText,
+  streamObject,
   tool,
   stepCountIs,
   hasToolCall,
   type ModelMessage,
 } from 'ai'
-import { z } from 'zod'
+import { z } from 'zod/v4'  // ✅ Always use zod/v4 with AI SDK
 ```
 
 ## Model Strings (AI Gateway)

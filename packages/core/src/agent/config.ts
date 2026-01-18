@@ -1,8 +1,11 @@
+import { database } from '@skillrecordings/database'
 import { IntegrationClient } from '@skillrecordings/sdk/client'
 import { type ModelMessage, generateText, stepCountIs, tool } from 'ai'
 import { z } from 'zod'
+import { classifyMessage } from '../router/classifier'
 import { getApp } from '../services/app-registry'
-import { shouldAutoSend } from '../trust/score'
+import { getTrustScore } from '../trust/repository'
+import { calculateTrustScore, shouldAutoSend } from '../trust/score'
 import { buildAgentContext } from '../vector/retrieval'
 
 /**
@@ -413,24 +416,25 @@ export async function runSupportAgent(input: AgentInput): Promise<AgentOutput> {
     (tc) => tc.name === 'processRefund' || tc.name === 'transferPurchase'
   )
 
-  // Auto-send gating: check if response should bypass approval
-  // TODO(INTEGRATION): Wire up real trust scoring and confidence extraction
-  // - Extract category from classifier (not yet implemented)
-  // - Get trust score from database for (appId, category) pair
-  // - Extract confidence from AI SDK v6 response (API unclear)
-  // - Calculate decayed trust score using calculateTrustScore()
-  //
-  // For now, we use conservative placeholders:
-  // - Only non-risky actions get high confidence (0.95)
-  // - Risky actions (refund, transfer) get 0.8 to block auto-send
-  // - Sample count and trust score are placeholder values
-  console.warn('[runSupportAgent] Auto-send using placeholder values')
-  const hasRiskyAction = requiresApproval
-  const confidence = hasRiskyAction ? 0.8 : 0.95
-  const category = 'general' // Placeholder until classifier implemented
-  const trustScore = 0.9 // Placeholder until trust DB lookup implemented
-  const sampleCount = 100 // Placeholder
+  // Auto-send gating: classify message and check trust score
+  const classifierResult = await classifyMessage(message, {
+    recentMessages: conversationHistory.map((m) => m.content as string),
+  })
 
+  // Lookup trust score from database
+  const trustScoreRecord = await getTrustScore(
+    database,
+    appId,
+    classifierResult.category
+  )
+
+  // Extract values with safe fallbacks
+  const category = classifierResult.category
+  const confidence = classifierResult.confidence
+  const trustScore = trustScoreRecord?.trustScore ?? 0
+  const sampleCount = trustScoreRecord?.sampleCount ?? 0
+
+  // Determine if auto-send is allowed
   const canAutoSend = shouldAutoSend(
     category,
     trustScore,
@@ -439,7 +443,7 @@ export async function runSupportAgent(input: AgentInput): Promise<AgentOutput> {
   )
 
   let autoSent = false
-  if (canAutoSend && confidence > 0.9 && !hasRiskyAction) {
+  if (canAutoSend && !requiresApproval) {
     requiresApproval = false
     autoSent = true
   }

@@ -21,7 +21,24 @@
     "./vector/redact": "./src/vector/redact.ts",
     "./vector/retrieval": "./src/vector/retrieval.ts",
     "./trust/score": "./src/trust/score.ts",
-    "./trust/types": "./src/trust/types.ts"
+    "./trust/types": "./src/trust/types.ts",
+    "./observability/axiom": "./src/observability/axiom.ts",
+    "./observability/langfuse": "./src/observability/langfuse.ts",
+    "./observability/types": "./src/observability/types.ts",
+    "./evals/routing": "./src/evals/routing.ts",
+    "./router": "./src/router/message-router.ts",
+    "./router/message-router": "./src/router/message-router.ts",
+    "./router/classifier": "./src/router/classifier.ts",
+    "./router/canned": "./src/router/canned.ts",
+    "./router/rules": "./src/router/rules.ts",
+    "./router/cache": "./src/router/cache.ts",
+    "./router/types": "./src/router/types.ts",
+    "./trust": "./src/trust/score.ts",
+    "./trust/feedback": "./src/trust/feedback.ts",
+    "./trust/repository": "./src/trust/repository.ts",
+    "./middleware/rate-limit": "./src/middleware/rate-limit.ts",
+    "./services/retention": "./src/services/retention.ts",
+    "./inngest/dead-letter": "./src/inngest/dead-letter.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit",
@@ -35,6 +52,7 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.15",
+    "@axiomhq/js": "^1.3.0",
     "@skillrecordings/database": "*",
     "@skillrecordings/sdk": "*",
     "@slack/web-api": "^7.11.0",
@@ -42,6 +60,7 @@
     "ai": "^6.0.39",
     "drizzle-orm": "^0.45.1",
     "inngest": "^3.49.0",
+    "langfuse": "^3.38.6",
     "stripe": "^17.5.0",
     "zod": "^3.24.0"
   },
