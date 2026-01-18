@@ -17,6 +17,8 @@
     "typescript": "5.9.2"
   },
   "dependencies": {
-    "commander": "^12.1.0"
+    "@skillrecordings/database": "workspace:*",
+    "commander": "^12.1.0",
+    "dotenv-flow": "^4.1.0"
   }
 }
