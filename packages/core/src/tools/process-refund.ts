@@ -1,44 +1,52 @@
-import { z } from 'zod'
-import Stripe from 'stripe'
-import { createTool } from './create-tool'
-import { IntegrationClient } from '@skillrecordings/sdk/client'
 import { getApp } from '@skillrecordings/core/services/app-registry'
+import { IntegrationClient } from '@skillrecordings/sdk/client'
+import { z } from 'zod'
+import { createTool } from './create-tool'
 
 /**
- * Refund processing result.
+ * Refund request result.
  */
-export interface RefundResult {
+export interface RefundRequestResult {
   /**
-   * Stripe refund ID
+   * Whether the refund request was accepted by the app
    */
-  refundId: string
+  accepted: boolean
   /**
-   * Amount refunded in cents
+   * Message from the app (e.g., "Refund processing", "Already refunded", error message)
    */
-  amountRefunded: number
+  message: string
+  /**
+   * Refund ID if available (app may return this immediately or via notification later)
+   */
+  refundId?: string
 }
 
 /**
- * Process a refund for a customer purchase.
+ * Request a refund for a customer purchase.
  *
- * This tool processes refunds through Stripe Connect and revokes product access.
- * It has a built-in approval gate:
- * - Purchases within 30 days: auto-approve
+ * IMPORTANT: This tool does NOT process refunds directly. It requests the app
+ * to process the refund via SDK. The app owns the Stripe integration and
+ * executes the actual refund, then notifies us when complete.
+ *
+ * Architecture: Platform requests → App executes → App notifies platform
+ *
+ * Approval gate:
+ * - Purchases within 30 days: auto-approve request
  * - Purchases 30-45 days: requires human approval
  * - Purchases over 45 days: should be escalated (agent discretion)
  *
  * @example
  * ```typescript
- * const result = await processRefund.execute(
+ * const result = await requestRefund.execute(
  *   { purchaseId: 'pur_123', appId: 'total-typescript', reason: 'Customer request' },
  *   context
  * )
  * ```
  */
 export const processRefund = createTool({
-  name: 'process_refund',
+  name: 'request_refund',
   description:
-    'Process a refund for a customer purchase. Use only for eligible refund requests within policy.',
+    'Request a refund for a customer purchase. This sends the request to the app which processes the actual refund. Use only for eligible refund requests within policy.',
   parameters: z.object({
     /**
      * Purchase ID to refund
@@ -79,93 +87,40 @@ export const processRefund = createTool({
       throw new Error(`App not found: ${appId}`)
     }
 
-    // Validate app has Stripe Connect account
-    if (!app.stripe_account_id) {
-      throw new Error(`App ${appId} is not connected to Stripe`)
-    }
-
-    // Find the purchase to get Stripe charge ID
-    const purchase = context.purchases.find((p) => p.id === purchaseId)
-    if (!purchase) {
-      throw new Error(`Purchase not found: ${purchaseId}`)
-    }
-    if (!purchase.stripeChargeId) {
-      throw new Error(`Purchase ${purchaseId} has no Stripe charge ID`)
-    }
-
-    // Initialize Stripe client
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-      apiVersion: '2025-02-24.acacia',
+    // Create SDK client to communicate with app
+    const client = new IntegrationClient({
+      baseUrl: app.integration_base_url,
+      webhookSecret: app.webhook_secret,
     })
 
-    // Generate deterministic idempotency key
-    const idempotencyKey = `refund:${purchaseId}:${context.approvalId}`
-
-    // Execute Stripe refund via Connect
-    let refund: Stripe.Refund
+    // Request refund from the app
+    // The app will:
+    // 1. Validate the request
+    // 2. Process the Stripe refund (they own the Stripe integration)
+    // 3. Revoke access
+    // 4. Notify us via SDK callback when complete
     try {
-      refund = await stripe.refunds.create(
-        {
-          charge: purchase.stripeChargeId,
-          reason: 'requested_by_customer',
-        },
-        {
-          stripeAccount: app.stripe_account_id,
-          idempotencyKey,
-        }
-      )
-    } catch (err) {
-      // Handle Stripe errors
-      if (err && typeof err === 'object' && 'type' in err) {
-        const stripeError = err as { type: string; code?: string; message?: string }
-
-        if (stripeError.type === 'StripeInvalidRequestError') {
-          if (stripeError.code === 'charge_already_refunded') {
-            // Idempotent: charge already refunded
-            // Fetch the existing refund to get the amount
-            const charge = await stripe.charges.retrieve(purchase.stripeChargeId, {
-              stripeAccount: app.stripe_account_id,
-            })
-            refund = {
-              id: `re_already_${purchaseId}`,
-              amount: charge.amount_refunded,
-            } as Stripe.Refund
-          } else {
-            throw new Error(`Stripe refund failed: ${stripeError.message}`)
-          }
-        } else if (stripeError.type === 'StripePermissionError') {
-          throw new Error(`Not authorized to refund for app ${appId}`)
-        } else {
-          throw err
-        }
-      } else {
-        throw err
-      }
-    }
-
-    // Revoke access via IntegrationClient
-    try {
-      const client = new IntegrationClient({
-        baseUrl: app.integration_base_url,
-        webhookSecret: app.webhook_secret,
-      })
-
-      const revokeResult = await client.revokeAccess({
+      const result = await client.revokeAccess({
         purchaseId,
         reason,
-        refundId: refund.id,
+        refundId: `pending_${context.approvalId}`, // Placeholder until app confirms
       })
 
-      if (!revokeResult.success) {
-        throw new Error(revokeResult.error || 'Failed to revoke access')
+      if (!result.success) {
+        return {
+          accepted: false,
+          message: result.error || 'App declined the refund request',
+        }
       }
 
       return {
-        refundId: refund.id,
-        amountRefunded: refund.amount,
+        accepted: true,
+        message:
+          'Refund request accepted. App will process and notify when complete.',
       }
     } catch (error) {
-      throw error instanceof Error ? error : new Error('Failed to revoke access')
+      const message = error instanceof Error ? error.message : 'Unknown error'
+      throw new Error(`Failed to request refund from app: ${message}`)
     }
   },
 })
