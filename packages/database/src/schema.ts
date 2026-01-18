@@ -123,6 +123,35 @@ export const ApprovalRequestsTable = mysqlTable('SUPPORT_approval_requests', {
 	created_at: datetime('created_at').default(sql`CURRENT_TIMESTAMP`),
 })
 
+/**
+ * Comprehensive audit log for all agent actions and executions
+ * Separate from ActionsTable (approval workflow) - this is for observability/debugging
+ */
+export const AuditLogTable = mysqlTable('SUPPORT_audit_log', {
+	id: varchar('id', { length: 255 }).primaryKey(),
+	conversation_id: varchar('conversation_id', { length: 255 }).references(
+		() => ConversationsTable.id,
+	),
+	app_id: varchar('app_id', { length: 255 }).references(() => AppsTable.id),
+
+	action_type: varchar('action_type', {
+		length: 50,
+		enum: ['tool_execution', 'agent_run', 'approval_request', 'approval_response'],
+	}).notNull(),
+
+	tool_name: varchar('tool_name', { length: 255 }),
+	parameters: json('parameters').$type<Record<string, unknown>>().notNull(),
+	result: json('result').$type<Record<string, unknown>>(),
+	error: text('error'),
+
+	duration_ms: int('duration_ms'),
+	token_usage: json('token_usage').$type<{ input: number; output: number }>(),
+
+	trace_id: varchar('trace_id', { length: 255 }),
+
+	created_at: datetime('created_at').default(sql`CURRENT_TIMESTAMP`),
+})
+
 // Type exports for type-safe database operations
 export type App = typeof AppsTable.$inferSelect
 export type NewApp = typeof AppsTable.$inferInsert
@@ -135,3 +164,6 @@ export type NewAction = typeof ActionsTable.$inferInsert
 
 export type ApprovalRequest = typeof ApprovalRequestsTable.$inferSelect
 export type NewApprovalRequest = typeof ApprovalRequestsTable.$inferInsert
+
+export type AuditLog = typeof AuditLogTable.$inferSelect
+export type NewAuditLog = typeof AuditLogTable.$inferInsert

@@ -10,7 +10,10 @@
     "./registry": "./src/registry/index.ts",
     "./webhooks": "./src/webhooks/index.ts",
     "./inngest": "./src/inngest/index.ts",
-    "./front": "./src/front/index.ts"
+    "./front": "./src/front/index.ts",
+    "./slack": "./src/slack/index.ts",
+    "./slack/client": "./src/slack/client.ts",
+    "./slack/approval-blocks": "./src/slack/approval-blocks.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit",
@@ -18,14 +21,17 @@
   },
   "devDependencies": {
     "@repo/typescript-config": "*",
+    "@slack/types": "^2.19.0",
     "@types/bun": "^1.3.5",
     "typescript": "5.9.2"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.15",
     "@skillrecordings/database": "*",
+    "@slack/web-api": "^7.11.0",
     "@upstash/vector": "^1.2.0",
     "ai": "^6.0.39",
+    "drizzle-orm": "^0.45.1",
     "inngest": "^3.49.0",
     "zod": "^3.24.0"
   },
