@@ -12,21 +12,61 @@ import { verifyFrontWebhook } from '@skillrecordings/core/webhooks'
 import { inngest, SUPPORT_INBOUND_RECEIVED } from '@skillrecordings/core/inngest'
 
 /**
- * Front webhook event structure
- * See: https://dev.frontapp.com/docs/webhooks-1
+ * Front webhook event structure (application webhooks)
+ *
+ * Application webhooks wrap the event in a payload envelope:
+ * - type: Event type (inbound_received, outbound_sent, etc.)
+ * - authorization: Company info
+ * - payload: The actual event object (PREVIEW only - IDs and links, not full data)
+ *
+ * Event types from webhook config:
+ * - inbound_received: Incoming message
+ * - outbound_sent: Outbound message
+ * - conversation_archived, conversation_reopened, etc.
+ *
+ * IMPORTANT: Webhooks send PREVIEWS, not full data.
+ * Must fetch full message/conversation data via Front API.
+ *
+ * See: https://dev.frontapp.com/docs/application-webhooks
+ * See: https://dev.frontapp.com/docs/events
  */
 interface FrontWebhookEvent {
+  /** Event type: inbound_received, outbound_sent, sync, etc. */
   type: string
+  /** Company/workspace authorization */
   authorization?: {
     id: string
   }
+  /** The event payload (preview - contains IDs and _links, not full data) */
   payload?: {
+    /** Event ID */
+    id?: string
+    /** Event type from the Events API (inbound, outbound, assign, etc.) */
+    type?: string
+    /** Timestamp when event was emitted */
+    emitted_at?: number
+    /** Conversation preview */
     conversation?: {
       id: string
+      subject?: string
+      _links?: {
+        self?: string
+        related?: {
+          messages?: string
+        }
+      }
     }
+    /** Target preview (message for inbound/outbound events) */
     target?: {
+      _meta?: {
+        type: string // "message" for inbound
+      }
       data?: {
         id: string
+        _links?: {
+          self?: string
+        }
+        // These may not be present in preview
         subject?: string
         body?: string
         author?: {
@@ -34,9 +74,15 @@ interface FrontWebhookEvent {
         }
       }
     }
-  }
-  conversation?: {
-    id: string
+    /** Source preview */
+    source?: {
+      _meta?: {
+        type: string // "inboxes" for inbound
+      }
+      data?: {
+        id: string
+      }
+    }
   }
 }
 
@@ -79,11 +125,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400 })
   }
 
-  // Log event type and structure for debugging
-  console.log('[front-webhook] Event:', {
+  // Log event for debugging
+  console.log('[front-webhook] Event received:', {
     type: event.type,
-    hasPayload: !!event.payload,
-    hasConversation: !!event.payload?.conversation || !!event.conversation,
+    payloadType: event.payload?.type,
+    conversationId: event.payload?.conversation?.id,
+    targetType: event.payload?.target?._meta?.type,
+    targetId: event.payload?.target?.data?.id,
   })
 
   // Handle sync event (validation request)
@@ -91,55 +139,49 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true })
   }
 
-  // Extract conversation ID for regular events
-  const conversationId =
-    event.payload?.conversation?.id || event.conversation?.id
+  // Extract conversation ID
+  const conversationId = event.payload?.conversation?.id
   if (!conversationId) {
-    console.log('[front-webhook] Missing conversation ID, payload:', JSON.stringify(event).slice(0, 500))
-    return NextResponse.json(
-      { error: 'Missing conversation ID' },
-      { status: 400 },
-    )
+    console.log('[front-webhook] No conversation ID in payload:', JSON.stringify(event).slice(0, 1000))
+    // Some events may not have a conversation - acknowledge anyway
+    return NextResponse.json({ received: true })
   }
 
   // For inbound message events, dispatch to Inngest
+  // Webhook sends PREVIEW only - Inngest workflow will fetch full data via Front API
   if (event.type === 'inbound_received') {
-    const messageData = event.payload?.target?.data
-    if (!messageData) {
-      console.log('[front-webhook] Missing message data, payload:', JSON.stringify(event.payload).slice(0, 500))
-      return NextResponse.json(
-        { error: 'Missing message data in inbound event' },
-        { status: 400 },
-      )
+    const messageId = event.payload?.target?.data?.id
+    if (!messageId) {
+      console.log('[front-webhook] Missing message ID in inbound event')
+      return NextResponse.json({ received: true }) // Ack anyway, don't fail
     }
 
-    // Extract required fields for support/inbound.received event
-    const senderEmail = messageData.author?.email
-    if (!senderEmail) {
-      console.log('[front-webhook] Missing sender email, messageData:', JSON.stringify(messageData).slice(0, 500))
-      return NextResponse.json(
-        { error: 'Missing sender email' },
-        { status: 400 },
-      )
-    }
-
-    // appId will be determined by Front conversation tag/inbox routing
-    // For now, default to 'unknown' - this will be enhanced in Phase 2
-    const appId = 'unknown'
+    // Extract what we can from the preview
+    // Full data (body, author email) must be fetched via Front API in the workflow
+    const subject = event.payload?.conversation?.subject
+    const inboxId = event.payload?.source?.data?.id
 
     await inngest.send({
       name: SUPPORT_INBOUND_RECEIVED,
       data: {
         conversationId,
-        appId,
-        senderEmail,
-        messageId: messageData.id,
-        subject: messageData.subject,
-        body: messageData.body || '',
+        messageId,
+        // Preview may not have these - workflow fetches full data
+        subject: subject || '',
+        body: '', // Must fetch via Front API
+        senderEmail: '', // Must fetch via Front API
+        appId: inboxId || 'unknown', // Use inbox ID for now
+        // Include links for API fetching
+        _links: {
+          conversation: event.payload?.conversation?._links?.self,
+          message: event.payload?.target?.data?._links?.self,
+        },
       },
     })
+
+    console.log('[front-webhook] Dispatched to Inngest:', { conversationId, messageId })
   }
 
-  // For other event types, just acknowledge (we may add handlers later)
+  // Acknowledge all events
   return NextResponse.json({ received: true })
 }
