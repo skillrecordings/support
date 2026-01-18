@@ -38,3 +38,69 @@ External:
 - DB: PlanetScale
 - Webhook signing: HMAC-SHA256, 5-minute replay, key rotation
 - Cache: Durable Objects per conversation, 7-day TTL
+
+## SDK Integration Flow
+
+The SDK enables secure communication between the support platform and app integrations (Total TypeScript, Pro Tailwind, etc.).
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        Support Platform (core)                          │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  ┌──────────────┐     ┌──────────────┐     ┌──────────────────────┐    │
+│  │ Agent Tool   │────►│ App Registry │────►│ IntegrationClient    │    │
+│  │ (lookupUser) │     │ (getApp)     │     │ (signed requests)    │    │
+│  └──────────────┘     └──────────────┘     └──────────┬───────────┘    │
+│                                                       │                 │
+└───────────────────────────────────────────────────────│─────────────────┘
+                                                        │
+                                              HTTPS + HMAC-SHA256
+                                              timestamp=...,v1=...
+                                                        │
+                                                        ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        App Integration (e.g., Total TypeScript)         │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  ┌──────────────────────┐     ┌──────────────────────────────────┐     │
+│  │ createSupportHandler │────►│ SupportIntegration implementation │     │
+│  │ (signature verify)   │     │ (lookupUser, revokeAccess, etc.) │     │
+│  └──────────────────────┘     └──────────────────────────────────┘     │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### SDK Components
+
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| `SupportIntegration` | `@skillrecordings/sdk/integration` | Interface that apps implement |
+| `IntegrationClient` | `@skillrecordings/sdk/client` | HTTP client with HMAC signing |
+| `createSupportHandler` | `@skillrecordings/sdk/handler` | Request handler with signature verification |
+| App Registry | `@skillrecordings/core/services/app-registry` | App config lookup with 5-min TTL cache |
+
+### HMAC Signature Format
+
+Requests are signed using HMAC-SHA256 with the app's `webhook_secret`:
+
+```
+x-signature: timestamp=1737163200,v1=<hex_signature>
+```
+
+Payload to sign: `${timestamp}.${JSON.stringify(body)}`
+
+### SupportIntegration Methods
+
+**Required:**
+- `lookupUser(email)` - Look up user by email
+- `getPurchases(userId)` - Get user's purchases
+- `revokeAccess({purchaseId, reason, refundId})` - Revoke access after refund
+- `transferPurchase({purchaseId, fromUserId, toEmail})` - Transfer purchase
+- `generateMagicLink({email, expiresIn})` - Generate login link
+
+**Optional:**
+- `getSubscriptions(userId)` - Get recurring subscriptions
+- `updateEmail({userId, newEmail})` - Change email
+- `updateName({userId, newName})` - Change name
+- `getClaimedSeats(bulkCouponId)` - Team seat management

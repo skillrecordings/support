@@ -1,5 +1,7 @@
 import { generateText, stepCountIs, tool, type ModelMessage } from 'ai'
 import { z } from 'zod'
+import { IntegrationClient } from '@skillrecordings/sdk/client'
+import { getApp } from '../services/app-registry'
 
 /**
  * Support agent system prompt
@@ -62,25 +64,45 @@ export const agentTools = {
       appId: z.string().describe('App identifier (e.g., total-typescript)'),
     }),
     execute: async ({ email, appId }) => {
-      // TODO(REMOVE-STUB): Replace with real app registry lookup
-      // This stub returns fake data for HITL flow testing
-      // Real implementation: call appId's SDK adapter to fetch user + purchases
-      console.warn('[lookupUser] Using STUB data - implement real lookup')
-      return {
-        found: true,
-        user: {
-          email,
-          name: 'Test Customer',
-        },
-        purchases: [
-          {
-            id: 'pur_abc123',
-            product: 'Pro Essentials Bundle',
-            amount: 9900,
-            purchasedAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(), // 45 days ago
-            status: 'active',
-          },
-        ],
+      try {
+        // Look up app configuration from registry
+        const app = await getApp(appId)
+        if (!app) {
+          return {
+            found: false,
+            error: `App not found: ${appId}`,
+          }
+        }
+
+        // Create IntegrationClient with app's webhook config
+        const client = new IntegrationClient({
+          baseUrl: app.integration_base_url,
+          webhookSecret: app.webhook_secret,
+        })
+
+        // Look up user via app's integration endpoint
+        const user = await client.lookupUser(email)
+        if (!user) {
+          return {
+            found: false,
+            user: null,
+            purchases: [],
+          }
+        }
+
+        // Fetch user's purchases
+        const purchases = await client.getPurchases(user.id)
+
+        return {
+          found: true,
+          user,
+          purchases,
+        }
+      } catch (error) {
+        return {
+          found: false,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        }
       }
     },
   }),

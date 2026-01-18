@@ -97,6 +97,7 @@
       "dependencies": {
         "@ai-sdk/anthropic": "^3.0.15",
         "@skillrecordings/database": "*",
+        "@skillrecordings/sdk": "*",
         "@slack/web-api": "^7.11.0",
         "@upstash/vector": "^1.2.0",
         "ai": "^6.0.39",
