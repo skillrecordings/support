@@ -1,7 +1,7 @@
 import { drizzle } from 'drizzle-orm/mysql2'
 import mysql from 'mysql2/promise'
-import { env } from './env.js'
-import * as schema from './schema.js'
+import { env } from './env'
+import * as schema from './schema'
 
 let db: any = null
 
@@ -21,7 +21,7 @@ export function getDb() {
 export const database = getDb()
 
 // Re-export schema and types for convenience
-export * from './schema.js'
+export * from './schema'
 export { env }
 
 // Re-export drizzle operators for queries

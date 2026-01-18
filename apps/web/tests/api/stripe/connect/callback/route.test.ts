@@ -28,7 +28,7 @@ vi.mock('@skillrecordings/database', () => ({
 
 vi.mock('stripe', () => {
   class MockStripeInvalidGrantError extends Error {
-    name = 'StripeInvalidGrantError'
+    override name = 'StripeInvalidGrantError'
   }
 
   const StripeMock = vi.fn(() => ({

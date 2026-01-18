@@ -5,5 +5,8 @@
   "license": "MIT",
   "publishConfig": {
     "access": "public"
+  },
+  "dependencies": {
+    "@total-typescript/tsconfig": "^1.0.4"
   }
 }

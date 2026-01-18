@@ -16,10 +16,7 @@ const run = (args) => {
 let exitCode = 0
 
 if (biomeFiles.length > 0) {
-  exitCode = run(['format', '--write', ...biomeFiles])
-  if (exitCode === 0) {
-    exitCode = run(['check', '--files-ignore-unknown=true', ...biomeFiles])
-  }
+  exitCode = run(['check', '--write', '--files-ignore-unknown=true', ...biomeFiles])
 }
 
 if (exitCode !== 0) {
