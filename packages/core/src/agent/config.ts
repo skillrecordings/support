@@ -1,6 +1,6 @@
-import { generateText, stepCountIs, tool, type ModelMessage } from 'ai'
-import { z } from 'zod'
 import { IntegrationClient } from '@skillrecordings/sdk/client'
+import { type ModelMessage, generateText, stepCountIs, tool } from 'ai'
+import { z } from 'zod'
 import { getApp } from '../services/app-registry'
 
 /**
@@ -143,7 +143,7 @@ export const agentTools = {
 
   processRefund: tool({
     description:
-      'Process a refund for a customer purchase. Use only for eligible refund requests within policy. Refunds within 30 days are auto-approved, 30-45 days require human approval.',
+      'Request a refund for a customer purchase via the app. Use only for eligible refund requests within policy. Refunds within 30 days are auto-approved, 30-45 days require human approval. The app processes the actual Stripe refund.',
     inputSchema: z.object({
       purchaseId: z.string().describe('Purchase ID to refund'),
       appId: z.string().describe('App identifier'),
@@ -152,6 +152,7 @@ export const agentTools = {
     execute: async ({ purchaseId, appId, reason }) => {
       // Tool execution is deferred to approval flow
       // This just captures the intent for HITL processing
+      // The app will process the actual Stripe refund via SDK
       return {
         status: 'pending_approval',
         purchaseId,
@@ -159,6 +160,59 @@ export const agentTools = {
         reason,
         message: 'Refund request submitted for approval',
       }
+    },
+  }),
+
+  getPaymentHistory: tool({
+    description:
+      'Fetch payment/charge history for a customer via Stripe Connect. Returns a list of recent charges with amounts, status, and dates. Use this to verify payment status before processing refunds.',
+    inputSchema: z.object({
+      customerEmail: z.string().email().describe('Customer email address'),
+      limit: z
+        .number()
+        .optional()
+        .default(10)
+        .describe('Number of charges to return (default 10)'),
+    }),
+    execute: async ({ customerEmail, limit }, context) => {
+      // Import dynamically to avoid circular dependencies
+      const { getPaymentHistory } = await import(
+        '../tools/stripe-payment-history'
+      )
+      // Note: Tool expects stripeAccountId in context.appConfig
+      const result = await getPaymentHistory.execute(
+        { customerEmail, limit },
+        context as any // Context should have appConfig.stripeAccountId
+      )
+      if (result.success) {
+        return result.data
+      }
+      return { error: result.error.message, charges: [] }
+    },
+  }),
+
+  getSubscriptionStatus: tool({
+    description:
+      'Check subscription status for a customer via Stripe Connect. Returns subscription details including status, plan, and billing period. Use this to verify active subscriptions.',
+    inputSchema: z.object({
+      customerId: z.string().describe('Stripe customer ID'),
+      stripeAccountId: z
+        .string()
+        .describe('Connected Stripe account ID (e.g., acct_1LFP5yAozSgJZBRP)'),
+    }),
+    execute: async ({ customerId, stripeAccountId }) => {
+      // Import dynamically to avoid circular dependencies
+      const { getSubscriptionStatus } = await import(
+        '../tools/stripe-subscription-status'
+      )
+      const result = await getSubscriptionStatus.execute(
+        { customerId, stripeAccountId },
+        {} as any // Minimal context - Stripe tools don't need full context
+      )
+      if (result.success) {
+        return result.data
+      }
+      return { error: result.error.message, subscription: null }
     },
   }),
 }
