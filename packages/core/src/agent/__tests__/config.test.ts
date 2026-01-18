@@ -1,0 +1,164 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { agentTools } from '../config'
+
+// Mock IntegrationClient
+const mockLookupUser = vi.fn()
+const mockGetPurchases = vi.fn()
+
+vi.mock('@skillrecordings/sdk/client', () => ({
+  IntegrationClient: vi.fn().mockImplementation(() => ({
+    lookupUser: mockLookupUser,
+    getPurchases: mockGetPurchases,
+  })),
+}))
+
+// Mock getApp
+const mockGetApp = vi.fn()
+vi.mock('../../services/app-registry', () => ({
+  getApp: mockGetApp,
+}))
+
+describe('agentTools.lookupUser', () => {
+  beforeEach(() => {
+    mockLookupUser.mockClear()
+    mockGetPurchases.mockClear()
+    mockGetApp.mockClear()
+  })
+
+  it('looks up user via IntegrationClient when app is found', async () => {
+    // Mock app registry returning app config
+    const mockApp = {
+      id: 'app-123',
+      slug: 'total-typescript',
+      name: 'Total TypeScript',
+      integration_base_url: 'https://totaltypescript.com',
+      webhook_secret: 'whsec_test123',
+    }
+    mockGetApp.mockResolvedValue(mockApp as any)
+
+    // Mock IntegrationClient.lookupUser returning user data
+    const mockUser = {
+      id: 'user-456',
+      email: 'test@example.com',
+      name: 'Test User',
+    }
+    mockLookupUser.mockResolvedValue(mockUser)
+    mockGetPurchases.mockResolvedValue([])
+
+    const result = await agentTools.lookupUser.execute({
+      email: 'test@example.com',
+      appId: 'total-typescript',
+    })
+
+    // Verify getApp was called with appId
+    expect(mockGetApp).toHaveBeenCalledWith('total-typescript')
+
+    // Verify lookupUser was called on the client
+    expect(mockLookupUser).toHaveBeenCalledWith('test@example.com')
+
+    // Verify result contains user data
+    expect(result).toEqual({
+      found: true,
+      user: mockUser,
+      purchases: [],
+    })
+  })
+
+  it('returns not found when app does not exist', async () => {
+    mockGetApp.mockResolvedValue(null)
+
+    const result = await agentTools.lookupUser.execute({
+      email: 'test@example.com',
+      appId: 'nonexistent-app',
+    })
+
+    expect(result).toEqual({
+      found: false,
+      error: 'App not found: nonexistent-app',
+    })
+  })
+
+  it('returns not found when IntegrationClient returns null', async () => {
+    const mockApp = {
+      id: 'app-123',
+      slug: 'total-typescript',
+      integration_base_url: 'https://totaltypescript.com',
+      webhook_secret: 'whsec_test123',
+    }
+    mockGetApp.mockResolvedValue(mockApp as any)
+    mockLookupUser.mockResolvedValue(null)
+
+    const result = await agentTools.lookupUser.execute({
+      email: 'notfound@example.com',
+      appId: 'total-typescript',
+    })
+
+    expect(result).toEqual({
+      found: false,
+      user: null,
+      purchases: [],
+    })
+  })
+
+  it('handles IntegrationClient errors gracefully', async () => {
+    const mockApp = {
+      id: 'app-123',
+      slug: 'total-typescript',
+      integration_base_url: 'https://totaltypescript.com',
+      webhook_secret: 'whsec_test123',
+    }
+    mockGetApp.mockResolvedValue(mockApp as any)
+    mockLookupUser.mockRejectedValue(new Error('Network timeout'))
+
+    const result = await agentTools.lookupUser.execute({
+      email: 'test@example.com',
+      appId: 'total-typescript',
+    })
+
+    expect(result).toEqual({
+      found: false,
+      error: 'Network timeout',
+    })
+  })
+
+  it('fetches purchases when user is found', async () => {
+    const mockApp = {
+      id: 'app-123',
+      slug: 'total-typescript',
+      integration_base_url: 'https://totaltypescript.com',
+      webhook_secret: 'whsec_test123',
+    }
+    mockGetApp.mockResolvedValue(mockApp as any)
+
+    const mockUser = {
+      id: 'user-456',
+      email: 'test@example.com',
+      name: 'Test User',
+    }
+    const mockPurchases = [
+      {
+        id: 'pur_123',
+        userId: 'user-456',
+        productId: 'prod-123',
+        amount: 9900,
+        purchasedAt: new Date('2025-01-01'),
+        status: 'active' as const,
+      },
+    ]
+
+    mockLookupUser.mockResolvedValue(mockUser)
+    mockGetPurchases.mockResolvedValue(mockPurchases)
+
+    const result = await agentTools.lookupUser.execute({
+      email: 'test@example.com',
+      appId: 'total-typescript',
+    })
+
+    expect(mockGetPurchases).toHaveBeenCalledWith('user-456')
+    expect(result).toEqual({
+      found: true,
+      user: mockUser,
+      purchases: mockPurchases,
+    })
+  })
+})
