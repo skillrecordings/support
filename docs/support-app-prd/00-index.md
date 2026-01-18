@@ -76,6 +76,15 @@ Phases are PR-ready units. Use the phase docs to execute.
 
 Use these for detailed implementation and policies.
 
+- Docs Index: ../README.md
+- Repo Architecture (agent-friendly): ../ARCHITECTURE.md
+- Repo Conventions: ../CONVENTIONS.md
+- Decisions Log: ../DECISIONS.md
+- Environment Setup Notes: ../ENV.md
+- Boundaries: ../BOUNDARIES.md
+- Glossary: ../GLOSSARY.md
+- Testing: ../TESTING.md
+- Dev Commands: ../DEV-COMMANDS.md
 - Architecture + Boundaries: ./60-architecture.md
 - Tech Stack + Deploy Targets: ./61-stack-runtime.md
 - Event Ingestion: ./62-event-ingestion.md
