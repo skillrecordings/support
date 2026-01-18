@@ -62,8 +62,24 @@ export const agentTools = {
       appId: z.string().describe('App identifier (e.g., total-typescript)'),
     }),
     execute: async ({ email, appId }) => {
+      // STUB: Return test data for now
       // TODO: Implement via app registry
-      return { found: false, message: 'User lookup not yet implemented' }
+      return {
+        found: true,
+        user: {
+          email,
+          name: 'Test Customer',
+        },
+        purchases: [
+          {
+            id: 'pur_abc123',
+            product: 'Pro Essentials Bundle',
+            amount: 9900,
+            purchasedAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(), // 45 days ago
+            status: 'active',
+          },
+        ],
+      }
     },
   }),
 
