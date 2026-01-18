@@ -2,6 +2,22 @@
 
 Deploy and manage Vercel projects via CLI. Org: `skillrecordings`.
 
+## ⚠️ CRITICAL: Environment Variable Newlines
+
+**NEVER use heredocs (`<<<`) or plain `echo` to pipe values to `vercel env add`.**
+
+These add trailing newlines that WILL break secrets silently:
+```bash
+# ❌ BAD - adds newline
+echo "secret" | vercel env add MY_VAR production
+vercel env add MY_VAR production <<< "secret"
+
+# ✅ GOOD - no newline
+echo -n 'secret' | vercel env add MY_VAR production
+```
+
+Always use `echo -n` (no newline flag) when piping values.
+
 ## Prerequisites
 
 ```bash
@@ -85,11 +101,11 @@ vercel env ls preview feature-branch
 ### Add env var
 
 ```bash
-# Interactive
+# Interactive (prompts for value)
 vercel env add MY_VAR
 
-# With value piped
-echo "secret-value" | vercel env add MY_VAR production
+# With value piped (MUST use echo -n to avoid newline!)
+echo -n 'secret-value' | vercel env add MY_VAR production
 
 # Sensitive (hidden in dashboard)
 vercel env add API_KEY --sensitive
