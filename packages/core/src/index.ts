@@ -4,6 +4,7 @@ export * as tools from './tools/index.js'
 export * as workflows from './workflows/index.js'
 export * as registry from './registry/index.js'
 export * as inngest from './inngest/index.js'
+export * as webhooks from './webhooks/index.js'
 
 // Also export key items directly for convenience
 export { supportAgent } from './agent/index.js'
