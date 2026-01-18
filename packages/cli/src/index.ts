@@ -15,7 +15,11 @@ program
 program
   .command('init')
   .description('Initialize a new app integration')
-  .argument('[name]', 'Name of the integration')
+  .argument(
+    '[name]',
+    'Name of the integration (required in non-interactive mode)'
+  )
+  .option('--json', 'Output result as JSON (machine-readable)')
   .action(init)
 
 program
@@ -30,6 +34,7 @@ program
     'Webhook secret (required for direct URL mode)'
   )
   .option('-l, --list', 'List all registered apps')
+  .option('--json', 'Output result as JSON (machine-readable)')
   .action(health)
 
 program.parse()
