@@ -1,26 +1,20 @@
 import { z } from 'zod'
 import { createTool } from './create-tool'
+import { IntegrationClient } from '@skillrecordings/sdk/client'
+import { getApp } from '@skillrecordings/core/services/app-registry'
 
 /**
  * Refund processing result.
  */
 export interface RefundResult {
   /**
-   * Whether the refund was processed successfully
+   * Stripe refund ID
    */
-  success: boolean
-  /**
-   * Stripe refund ID if processed
-   */
-  refundId?: string
+  refundId: string
   /**
    * Amount refunded in cents
    */
-  amountRefunded?: number
-  /**
-   * Error message if failed
-   */
-  error?: string
+  amountRefunded: number
 }
 
 /**
@@ -78,31 +72,15 @@ export const processRefund = createTool({
   },
 
   execute: async ({ purchaseId, appId, reason }, context) => {
-    // TODO: Integrate with Stripe Connect
-    // const app = await appRegistry.get(appId)
-    // const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
-    //
-    // const purchase = context.purchases.find(p => p.id === purchaseId)
-    // if (!purchase?.stripeChargeId) {
-    //   return { success: false, error: 'No Stripe charge found for purchase' }
-    // }
-    //
-    // const refund = await stripe.refunds.create({
-    //   charge: purchase.stripeChargeId,
-    // }, {
-    //   stripeAccount: app.stripeAccountId,
-    //   idempotencyKey: `refund-${context.approvalId || purchaseId}`,
-    // })
-    //
-    // await app.integration.revokeAccess({
-    //   purchaseId,
-    //   reason,
-    //   refundId: refund.id,
-    // })
+    // Look up app configuration
+    const app = await getApp(appId)
+    if (!app) {
+      throw new Error(`App not found: ${appId}`)
+    }
 
     // TODO(REMOVE-STUB): Replace with real Stripe Connect refund API call
-    // Stub implementation for testing HITL flow
-    console.warn('[processRefund] Using STUB - implement Stripe Connect')
+    // Stub Stripe refund for testing HITL flow
+    console.warn('[processRefund] Using STUB for Stripe Connect - implement real refund')
     console.log('[processRefund] Executing refund:', {
       purchaseId,
       appId,
@@ -111,12 +89,31 @@ export const processRefund = createTool({
       traceId: context.traceId,
     })
 
-    const result: RefundResult = {
-      success: true,
-      refundId: `re_stub_${Date.now()}`,
-      amountRefunded: 9900, // $99.00 stub
-    }
+    const stubRefundId = `re_stub_${Date.now()}`
 
-    return result
+    // Real implementation: Call revokeAccess via IntegrationClient
+    try {
+      const client = new IntegrationClient({
+        baseUrl: app.integration_base_url,
+        webhookSecret: app.webhook_secret,
+      })
+
+      const revokeResult = await client.revokeAccess({
+        purchaseId,
+        reason,
+        refundId: stubRefundId,
+      })
+
+      if (!revokeResult.success) {
+        throw new Error(revokeResult.message || 'Failed to revoke access')
+      }
+
+      return {
+        refundId: stubRefundId,
+        amountRefunded: 9900, // $99.00 stub
+      }
+    } catch (error) {
+      throw error instanceof Error ? error : new Error('Failed to revoke access')
+    }
   },
 })
