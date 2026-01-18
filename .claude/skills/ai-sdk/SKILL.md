@@ -54,6 +54,8 @@ const result = await generateText({
 })
 ```
 
+**No provider wrapper is required** when using AI Gateway model strings.
+
 ### 2. Text Generation (HIGH)
 
 - `generate-basic` - Core generateText pattern

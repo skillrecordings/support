@@ -95,6 +95,17 @@ export async function POST(request: NextRequest) {
 }
 ```
 
+## Local Dev (ngrok)
+
+For local testing, use a tunnel (ngrok) and point the Front webhook to the **exact** tunnel URL:
+
+```bash
+ngrok http 3000
+# Use the https URL printed by ngrok as the webhook target
+```
+
+Do not use wildcard domains for webhook URLs.
+
 ## Front Event Types (Application Webhooks)
 
 | Webhook Event | API Event | Description |
