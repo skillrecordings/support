@@ -17,7 +17,16 @@ async function seed() {
       front_inbox_id: 'inb_3srbb',
       integration_base_url: 'https://www.totaltypescript.com/api/support',
       webhook_secret: `whsec_${crypto.randomUUID().replace(/-/g, '')}`,
-      capabilities: ['refund', 'lookup_user', 'get_purchases', 'revoke_access'],
+      capabilities: [
+        'lookup_user',
+        'get_purchases',
+        'revoke_access',
+        'transfer_purchase',
+        'generate_magic_link',
+        'update_email',
+        'update_name',
+        'get_claimed_seats',
+      ],
     })
     .onDuplicateKeyUpdate({
       set: {
