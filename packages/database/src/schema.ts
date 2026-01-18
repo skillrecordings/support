@@ -46,7 +46,7 @@ export const ConversationsTable = mysqlTable('SUPPORT_conversations', {
 	front_conversation_id: varchar('front_conversation_id', { length: 255 })
 		.notNull()
 		.unique(),
-	app_id: varchar('app_id', { length: 255 }).references(() => AppsTable.id),
+	app_id: varchar('app_id', { length: 255 }), // FK to AppsTable.id (enforced at app level)
 
 	customer_email: varchar('customer_email', { length: 255 }).notNull(),
 	customer_name: varchar('customer_name', { length: 255 }),
@@ -73,10 +73,8 @@ export const ConversationsTable = mysqlTable('SUPPORT_conversations', {
  */
 export const ActionsTable = mysqlTable('SUPPORT_actions', {
 	id: varchar('id', { length: 255 }).primaryKey(),
-	conversation_id: varchar('conversation_id', { length: 255 }).references(
-		() => ConversationsTable.id,
-	),
-	app_id: varchar('app_id', { length: 255 }).references(() => AppsTable.id),
+	conversation_id: varchar('conversation_id', { length: 255 }), // FK to ConversationsTable.id (enforced at app level)
+	app_id: varchar('app_id', { length: 255 }), // FK to AppsTable.id (enforced at app level)
 
 	type: varchar('type', { length: 255 }).notNull(),
 	parameters: json('parameters').$type<Record<string, unknown>>().notNull(),
@@ -103,9 +101,7 @@ export const ActionsTable = mysqlTable('SUPPORT_actions', {
  */
 export const ApprovalRequestsTable = mysqlTable('SUPPORT_approval_requests', {
 	id: varchar('id', { length: 255 }).primaryKey(),
-	action_id: varchar('action_id', { length: 255 }).references(
-		() => ActionsTable.id,
-	),
+	action_id: varchar('action_id', { length: 255 }), // FK to ActionsTable.id (enforced at app level)
 
 	slack_message_ts: varchar('slack_message_ts', { length: 255 }),
 	slack_channel: varchar('slack_channel', { length: 255 }),
@@ -129,10 +125,8 @@ export const ApprovalRequestsTable = mysqlTable('SUPPORT_approval_requests', {
  */
 export const AuditLogTable = mysqlTable('SUPPORT_audit_log', {
 	id: varchar('id', { length: 255 }).primaryKey(),
-	conversation_id: varchar('conversation_id', { length: 255 }).references(
-		() => ConversationsTable.id,
-	),
-	app_id: varchar('app_id', { length: 255 }).references(() => AppsTable.id),
+	conversation_id: varchar('conversation_id', { length: 255 }), // FK to ConversationsTable.id (enforced at app level)
+	app_id: varchar('app_id', { length: 255 }), // FK to AppsTable.id (enforced at app level)
 
 	action_type: varchar('action_type', {
 		length: 50,
