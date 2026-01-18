@@ -50,6 +50,10 @@ export interface ExecutionContext extends ToolContext {
    * Conversation ID from Front
    */
   conversationId: string
+  /**
+   * Database instance for audit logging and data access
+   */
+  db?: any
 }
 
 /**

@@ -120,23 +120,31 @@ export function createTool<TParams, TResult>(
         // Validate parameters
         const validatedParams = config.parameters.parse(params)
 
-        // Pre-execution hook
-        await globalAuditHooks.onPreExecute?.({
-          toolName: config.name,
-          params: validatedParams,
-          context,
-        })
+        // Pre-execution hook (swallow errors to prevent audit failures from blocking execution)
+        try {
+          await globalAuditHooks.onPreExecute?.({
+            toolName: config.name,
+            params: validatedParams,
+            context,
+          })
+        } catch (hookError) {
+          console.error('[create-tool] Pre-execution audit hook failed:', hookError)
+        }
 
         // Execute tool
         const result = await config.execute(validatedParams, context)
 
-        // Post-execution hook
-        await globalAuditHooks.onPostExecute?.({
-          toolName: config.name,
-          params: validatedParams,
-          result,
-          context,
-        })
+        // Post-execution hook (swallow errors to prevent audit failures from blocking execution)
+        try {
+          await globalAuditHooks.onPostExecute?.({
+            toolName: config.name,
+            params: validatedParams,
+            result,
+            context,
+          })
+        } catch (hookError) {
+          console.error('[create-tool] Post-execution audit hook failed:', hookError)
+        }
 
         return {
           success: true,
@@ -145,13 +153,17 @@ export function createTool<TParams, TResult>(
       } catch (error) {
         const err = error instanceof Error ? error : new Error(String(error))
 
-        // Error hook
-        await globalAuditHooks.onError?.({
-          toolName: config.name,
-          params,
-          error: err,
-          context,
-        })
+        // Error hook (swallow errors to prevent audit failures from blocking execution)
+        try {
+          await globalAuditHooks.onError?.({
+            toolName: config.name,
+            params,
+            error: err,
+            context,
+          })
+        } catch (hookError) {
+          console.error('[create-tool] Error audit hook failed:', hookError)
+        }
 
         // Handle Zod validation errors specifically
         if (error instanceof z.ZodError) {

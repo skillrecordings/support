@@ -99,6 +99,27 @@ export const agentTools = {
       return { escalated: true, reason, urgency }
     },
   }),
+
+  processRefund: tool({
+    description:
+      'Process a refund for a customer purchase. Use only for eligible refund requests within policy. Refunds within 30 days are auto-approved, 30-45 days require human approval.',
+    inputSchema: z.object({
+      purchaseId: z.string().describe('Purchase ID to refund'),
+      appId: z.string().describe('App identifier'),
+      reason: z.string().describe('Reason for the refund'),
+    }),
+    execute: async ({ purchaseId, appId, reason }) => {
+      // Tool execution is deferred to approval flow
+      // This just captures the intent for HITL processing
+      return {
+        status: 'pending_approval',
+        purchaseId,
+        appId,
+        reason,
+        message: 'Refund request submitted for approval',
+      }
+    },
+  }),
 }
 
 export interface AgentInput {

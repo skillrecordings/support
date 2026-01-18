@@ -3,6 +3,8 @@ import { SUPPORT_INBOUND_RECEIVED } from '../events'
 import type { SupportInboundReceivedEvent } from '../events'
 import { createFrontClient, type FrontMessage } from '../../front/index'
 import { runSupportAgent } from '../../agent/index'
+import { getDb, ActionsTable } from '@skillrecordings/database'
+import { randomUUID } from 'crypto'
 
 /**
  * Handles inbound messages received from Front.
@@ -112,10 +114,24 @@ export const handleInboundMessage = inngest.createFunction(
 
       // If action requires approval, request it
       if (agentResult.requiresApproval) {
+        // Create action record in database
+        const actionId = randomUUID()
+        const db = getDb()
+
+        await db.insert(ActionsTable).values({
+          id: actionId,
+          conversation_id: conversationId,
+          app_id: context.appId,
+          type: 'pending-action',
+          parameters: { toolCalls: agentResult.toolCalls },
+          requires_approval: true,
+          created_at: new Date(),
+        })
+
         await step.sendEvent('request-approval', {
           name: 'support/approval.requested',
           data: {
-            actionId: `action-${conversationId}-${Date.now()}`,
+            actionId,
             conversationId,
             appId: context.appId,
             action: {
@@ -125,7 +141,7 @@ export const handleInboundMessage = inngest.createFunction(
             agentReasoning: agentResult.reasoning || 'Agent proposed action requiring approval',
           },
         })
-        return { type: 'approval-requested' as const }
+        return { type: 'approval-requested' as const, actionId }
       }
 
       // Otherwise, response is ready to send (or draft)
