@@ -7,6 +7,7 @@ import {
   json,
   mysqlTable,
   text,
+  unique,
   varchar,
 } from 'drizzle-orm/mysql-core'
 
@@ -172,21 +173,57 @@ export type NewAuditLog = typeof AuditLogTable.$inferInsert
  * Trust scores for auto-send decision making
  * Tracks success rate of agent responses by app and category with exponential decay
  */
-export const TrustScoresTable = mysqlTable('SUPPORT_trust_scores', {
-  id: varchar('id', { length: 255 }).primaryKey(),
-  app_id: varchar('app_id', { length: 255 }).notNull(), // FK to AppsTable.id (enforced at app level)
-  category: varchar('category', { length: 100 }).notNull(),
+export const TrustScoresTable = mysqlTable(
+  'SUPPORT_trust_scores',
+  {
+    id: varchar('id', { length: 255 }).primaryKey(),
+    app_id: varchar('app_id', { length: 255 }).notNull(), // FK to AppsTable.id (enforced at app level)
+    category: varchar('category', { length: 100 }).notNull(),
 
-  trust_score: double('trust_score').notNull().default(0.5),
-  sample_count: int('sample_count').notNull().default(0),
+    trust_score: double('trust_score').notNull().default(0.5),
+    sample_count: int('sample_count').notNull().default(0),
 
-  decay_half_life_days: int('decay_half_life_days').notNull().default(30),
+    decay_half_life_days: int('decay_half_life_days').notNull().default(30),
 
-  last_updated_at: datetime('last_updated_at')
-    .default(sql`CURRENT_TIMESTAMP`)
-    .$onUpdateFn(() => new Date()),
-  created_at: datetime('created_at').default(sql`CURRENT_TIMESTAMP`),
-})
+    last_updated_at: datetime('last_updated_at')
+      .default(sql`CURRENT_TIMESTAMP`)
+      .$onUpdateFn(() => new Date()),
+    created_at: datetime('created_at').default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => ({
+    // Composite unique constraint ensures one trust score per app/category pair
+    appCategoryUnique: unique().on(table.app_id, table.category),
+  })
+)
 
 export type TrustScore = typeof TrustScoresTable.$inferSelect
 export type NewTrustScore = typeof TrustScoresTable.$inferInsert
+
+/**
+ * Dead letter queue for failed event processing
+ * Stores failed Inngest events after max retries for debugging and replay
+ */
+export const DeadLetterQueueTable = mysqlTable('SUPPORT_dead_letter_queue', {
+  id: varchar('id', { length: 255 }).primaryKey(),
+  event_name: varchar('event_name', { length: 255 }).notNull(),
+  event_data: json('event_data').$type<Record<string, unknown>>().notNull(),
+
+  error_message: text('error_message').notNull(),
+  error_stack: text('error_stack'),
+
+  retry_count: int('retry_count').notNull().default(0),
+  consecutive_failures: int('consecutive_failures').notNull().default(1),
+
+  first_failed_at: datetime('first_failed_at').notNull(),
+  last_failed_at: datetime('last_failed_at')
+    .default(sql`CURRENT_TIMESTAMP`)
+    .$onUpdateFn(() => new Date()),
+
+  alerted_at: datetime('alerted_at'),
+  resolved_at: datetime('resolved_at'),
+
+  created_at: datetime('created_at').default(sql`CURRENT_TIMESTAMP`),
+})
+
+export type DeadLetterQueueEntry = typeof DeadLetterQueueTable.$inferSelect
+export type NewDeadLetterQueueEntry = typeof DeadLetterQueueTable.$inferInsert
