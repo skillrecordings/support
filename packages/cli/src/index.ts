@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
 
+import 'dotenv-flow/config'
 import { Command } from 'commander'
 import { health } from './commands/health'
 import { init } from './commands/init'
@@ -20,11 +21,15 @@ program
 program
   .command('health')
   .description('Test integration endpoint health')
-  .argument('<url>', 'Base URL of the app (e.g., https://totaltypescript.com)')
+  .argument(
+    '[slug|url]',
+    'App slug (from database) or URL (e.g., https://totaltypescript.com)'
+  )
   .option(
     '-s, --secret <secret>',
-    'Webhook secret (or set SUPPORT_WEBHOOK_SECRET)'
+    'Webhook secret (required for direct URL mode)'
   )
+  .option('-l, --list', 'List all registered apps')
   .action(health)
 
 program.parse()

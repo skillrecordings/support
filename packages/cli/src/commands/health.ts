@@ -1,4 +1,5 @@
 import { createHmac } from 'node:crypto'
+import { AppsTable, eq, getDb } from '@skillrecordings/database'
 
 interface HealthCheckResult {
   endpoint: string
@@ -34,7 +35,6 @@ async function testAction(
   const signature = signRequest(body, secret)
 
   try {
-    const start = Date.now()
     const response = await fetch(baseUrl, {
       method: 'POST',
       headers: {
@@ -43,7 +43,6 @@ async function testAction(
       },
       body,
     })
-    const elapsed = Date.now() - start
 
     if (response.status === 501) {
       return { status: 'not_implemented' }
@@ -69,25 +68,132 @@ async function testAction(
 }
 
 /**
+ * Look up an app by slug from the database
+ */
+async function lookupApp(
+  slugOrUrl: string
+): Promise<{ baseUrl: string; secret: string } | null> {
+  // If it looks like a URL, return null (use direct mode)
+  if (slugOrUrl.startsWith('http://') || slugOrUrl.startsWith('https://')) {
+    return null
+  }
+
+  try {
+    const db = getDb()
+    const app = await db
+      .select({
+        integration_base_url: AppsTable.integration_base_url,
+        webhook_secret: AppsTable.webhook_secret,
+      })
+      .from(AppsTable)
+      .where(eq(AppsTable.slug, slugOrUrl))
+      .limit(1)
+
+    if (!app.length) {
+      return null
+    }
+
+    return {
+      baseUrl: app[0].integration_base_url,
+      secret: app[0].webhook_secret,
+    }
+  } catch (err) {
+    console.error('Database lookup failed:', err)
+    return null
+  }
+}
+
+/**
+ * List all registered apps
+ */
+async function listApps(): Promise<void> {
+  try {
+    const db = getDb()
+    const apps = await db
+      .select({
+        slug: AppsTable.slug,
+        name: AppsTable.name,
+        integration_base_url: AppsTable.integration_base_url,
+      })
+      .from(AppsTable)
+
+    if (!apps.length) {
+      console.log('No apps registered.')
+      return
+    }
+
+    console.log('\nRegistered apps:\n')
+    for (const app of apps) {
+      console.log(`  ${app.slug}`)
+      console.log(`    Name: ${app.name}`)
+      console.log(`    URL:  ${app.integration_base_url}\n`)
+    }
+  } catch (err) {
+    console.error('Failed to list apps:', err)
+    process.exit(1)
+  }
+}
+
+/**
  * Health check command - tests integration endpoint connectivity and capabilities
+ *
+ * Usage:
+ *   skill health <slug>              - Look up app by slug from database
+ *   skill health <url> --secret xxx  - Direct URL mode
+ *   skill health --list              - List all registered apps
  */
 export async function health(
-  url: string,
-  options: { secret?: string }
+  slugOrUrl: string | undefined,
+  options: { secret?: string; list?: boolean }
 ): Promise<void> {
-  const secret = options.secret || process.env.SUPPORT_WEBHOOK_SECRET
+  // Handle --list flag
+  if (options.list) {
+    await listApps()
+    return
+  }
 
-  if (!secret) {
-    console.error(
-      'Error: Webhook secret required. Use --secret or set SUPPORT_WEBHOOK_SECRET'
-    )
+  if (!slugOrUrl) {
+    console.error('Error: App slug or URL required')
+    console.error('Usage: skill health <slug|url> [--secret <secret>]')
+    console.error('       skill health --list')
     process.exit(1)
   }
 
-  // Normalize URL
-  const baseUrl = url.endsWith('/api/support')
-    ? url
-    : url.replace(/\/$/, '') + '/api/support'
+  let baseUrl: string
+  let secret: string
+
+  // Try database lookup first
+  const appConfig = await lookupApp(slugOrUrl)
+
+  if (appConfig) {
+    // Found in database
+    baseUrl = appConfig.baseUrl.endsWith('/api/support')
+      ? appConfig.baseUrl
+      : appConfig.baseUrl.replace(/\/$/, '') + '/api/support'
+    secret = appConfig.secret
+    console.log(`\nUsing app configuration for: ${slugOrUrl}`)
+  } else if (
+    slugOrUrl.startsWith('http://') ||
+    slugOrUrl.startsWith('https://')
+  ) {
+    // Direct URL mode
+    const secretValue = options.secret || process.env.SUPPORT_WEBHOOK_SECRET
+    if (!secretValue) {
+      console.error(
+        'Error: Webhook secret required for direct URL mode. Use --secret or set SUPPORT_WEBHOOK_SECRET'
+      )
+      process.exit(1)
+    }
+    baseUrl = slugOrUrl.endsWith('/api/support')
+      ? slugOrUrl
+      : slugOrUrl.replace(/\/$/, '') + '/api/support'
+    secret = secretValue
+  } else {
+    // Slug not found in database
+    console.error(`Error: App "${slugOrUrl}" not found in database`)
+    console.error('Use --list to see registered apps, or provide a full URL')
+    process.exit(1)
+  }
 
   console.log(`\nHealth check: ${baseUrl}\n`)
 
