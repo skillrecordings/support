@@ -46,6 +46,7 @@ export async function POST(request: NextRequest) {
   // Get Front app signing key from env
   const secret = process.env.FRONT_WEBHOOK_SECRET
   if (!secret) {
+    console.error('[front-webhook] FRONT_WEBHOOK_SECRET not configured')
     return NextResponse.json(
       { error: 'Webhook secret not configured' },
       { status: 500 },
@@ -58,10 +59,18 @@ export async function POST(request: NextRequest) {
     headers[key] = value
   })
 
+  console.log('[front-webhook] Headers:', {
+    signature: headers['x-front-signature']?.slice(0, 20) + '...',
+    timestamp: headers['x-front-request-timestamp'],
+    challenge: headers['x-front-challenge'] ? 'present' : 'absent',
+  })
+  console.log('[front-webhook] Payload preview:', payload.slice(0, 200))
+
   // Verify HMAC signature (Front uses timestamp:body format, base64)
   const result = verifyFrontWebhook(payload, headers, { secret })
 
   if (!result.valid) {
+    console.error('[front-webhook] Verification failed:', result.error)
     return NextResponse.json({ error: result.error }, { status: 401 })
   }
 
