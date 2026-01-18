@@ -1,7 +1,7 @@
 import { inngest } from '../client'
 import { SUPPORT_INBOUND_RECEIVED } from '../events'
 import type { SupportInboundReceivedEvent } from '../events'
-import { createFrontClient, type FrontMessage } from '../../front/index.js'
+import { createFrontClient, type FrontMessage } from '../../front/index'
 
 /**
  * Handles inbound messages received from Front.
