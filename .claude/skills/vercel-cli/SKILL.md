@@ -190,6 +190,18 @@ vercel project rm support-web
 vercel domains ls
 ```
 
+### Webhook URLs (no wildcards)
+
+Use the **exact** Vercel app domain for webhooks. Wildcards are not supported by most providers.
+
+```bash
+# Find the exact production domain for the current project
+vercel project inspect | rg -n "Domains|domain"
+
+# Or list deployments and pick the latest
+vercel ls
+```
+
 ### Add domain
 
 ```bash

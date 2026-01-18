@@ -2,6 +2,8 @@ import { IntegrationClient } from '@skillrecordings/sdk/client'
 import { type ModelMessage, generateText, stepCountIs, tool } from 'ai'
 import { z } from 'zod'
 import { getApp } from '../services/app-registry'
+import { shouldAutoSend } from '../trust/score'
+import { buildAgentContext } from '../vector/retrieval'
 
 /**
  * Support agent system prompt
@@ -114,9 +116,12 @@ export const agentTools = {
       appId: z.string().describe('App to search within'),
     }),
     execute: async ({ query, appId }) => {
-      // TODO(REMOVE-STUB): Implement via Upstash Vector hybrid search
-      console.warn('[searchKnowledge] Using STUB - implement Upstash Vector')
-      return { results: [], message: 'Knowledge search not yet implemented' }
+      const context = await buildAgentContext({ query, appId })
+      return {
+        similarTickets: context.similarTickets,
+        knowledge: context.knowledge,
+        goodResponses: context.goodResponses,
+      }
     },
   }),
 
@@ -245,6 +250,8 @@ export interface AgentOutput {
   requiresApproval: boolean
   /** Reasoning for the response */
   reasoning?: string
+  /** Whether response was auto-sent (bypassed approval) */
+  autoSent?: boolean
 }
 
 /**
@@ -255,6 +262,13 @@ export interface AgentOutput {
  */
 export async function runSupportAgent(input: AgentInput): Promise<AgentOutput> {
   const { message, conversationHistory = [], customerContext, appId } = input
+
+  // Retrieve context from vector store
+  const retrievedContext = await buildAgentContext({
+    appId,
+    query: message,
+    customerEmail: customerContext?.email,
+  })
 
   // Build messages array
   const messages: ModelMessage[] = [
@@ -273,6 +287,18 @@ export async function runSupportAgent(input: AgentInput): Promise<AgentOutput> {
       systemPrompt += `Purchases:\n${customerContext.purchases.map((p) => `- ${p.product} (${p.date})`).join('\n')}\n`
     }
   }
+
+  // Add retrieved context to system prompt
+  if (retrievedContext.similarTickets.length > 0) {
+    systemPrompt += `\n\n## Similar Past Tickets\n${retrievedContext.similarTickets.map((t) => `- ${t.data}`).join('\n')}\n`
+  }
+  if (retrievedContext.knowledge.length > 0) {
+    systemPrompt += `\n\n## Relevant Knowledge Base\n${retrievedContext.knowledge.map((k) => `- ${k.data}`).join('\n')}\n`
+  }
+  if (retrievedContext.goodResponses.length > 0) {
+    systemPrompt += `\n\n## Good Response Examples\n${retrievedContext.goodResponses.map((r) => `- ${r.data}`).join('\n')}\n`
+  }
+
   systemPrompt += `\nApp: ${appId}`
 
   // AI SDK v6: model as string for AI Gateway, stopWhen for multi-step
@@ -297,14 +323,46 @@ export async function runSupportAgent(input: AgentInput): Promise<AgentOutput> {
   })
 
   // Check if any tool requires approval
-  const requiresApproval = toolCalls.some(
+  let requiresApproval = toolCalls.some(
     (tc) => tc.name === 'processRefund' || tc.name === 'transferPurchase'
   )
+
+  // Auto-send gating: check if response should bypass approval
+  // TODO(INTEGRATION): Wire up real trust scoring and confidence extraction
+  // - Extract category from classifier (not yet implemented)
+  // - Get trust score from database for (appId, category) pair
+  // - Extract confidence from AI SDK v6 response (API unclear)
+  // - Calculate decayed trust score using calculateTrustScore()
+  //
+  // For now, we use conservative placeholders:
+  // - Only non-risky actions get high confidence (0.95)
+  // - Risky actions (refund, transfer) get 0.8 to block auto-send
+  // - Sample count and trust score are placeholder values
+  console.warn('[runSupportAgent] Auto-send using placeholder values')
+  const hasRiskyAction = requiresApproval
+  const confidence = hasRiskyAction ? 0.8 : 0.95
+  const category = 'general' // Placeholder until classifier implemented
+  const trustScore = 0.9 // Placeholder until trust DB lookup implemented
+  const sampleCount = 100 // Placeholder
+
+  const canAutoSend = shouldAutoSend(
+    category,
+    trustScore,
+    confidence,
+    sampleCount
+  )
+
+  let autoSent = false
+  if (canAutoSend && confidence > 0.9 && !hasRiskyAction) {
+    requiresApproval = false
+    autoSent = true
+  }
 
   return {
     response: result.text,
     toolCalls,
     requiresApproval,
     reasoning: undefined, // v6 reasoning access differs, will implement when needed
+    autoSent,
   }
 }
