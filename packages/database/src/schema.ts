@@ -1,17 +1,137 @@
-import { datetime, mysqlTable, varchar } from 'drizzle-orm/mysql-core'
+import {
+	boolean,
+	datetime,
+	int,
+	json,
+	mysqlTable,
+	text,
+	varchar,
+} from 'drizzle-orm/mysql-core'
 import { sql } from 'drizzle-orm'
 
-export const ConversationsTable = mysqlTable('SUPPORT_conversations', {
+/**
+ * Multi-product registry tracking integrated apps and their capabilities
+ */
+export const AppsTable = mysqlTable('SUPPORT_apps', {
 	id: varchar('id', { length: 255 }).primaryKey(),
-	external_id: varchar('external_id', { length: 255 }).notNull().unique(),
-	status: varchar('status', {
-		length: 50,
-		enum: ['active', 'archived', 'resolved'],
-	})
-		.notNull()
-		.default('active'),
+	slug: varchar('slug', { length: 255 }).notNull().unique(),
+	name: varchar('name', { length: 255 }).notNull(),
+
+	front_inbox_id: varchar('front_inbox_id', { length: 255 }).notNull(),
+
+	stripe_account_id: varchar('stripe_account_id', { length: 255 }),
+	stripe_connected: boolean('stripe_connected').default(false),
+
+	integration_base_url: text('integration_base_url').notNull(),
+	webhook_secret: varchar('webhook_secret', { length: 255 }).notNull(),
+	capabilities: json('capabilities').$type<string[]>().notNull(),
+
+	auto_approve_refund_days: int('auto_approve_refund_days').default(30),
+	auto_approve_transfer_days: int('auto_approve_transfer_days').default(14),
+	escalation_slack_channel: varchar('escalation_slack_channel', {
+		length: 255,
+	}),
+
 	created_at: datetime('created_at').default(sql`CURRENT_TIMESTAMP`),
 	updated_at: datetime('updated_at')
 		.default(sql`CURRENT_TIMESTAMP`)
 		.$onUpdateFn(() => new Date()),
 })
+
+/**
+ * Front conversation tracking with app association and agent state
+ */
+export const ConversationsTable = mysqlTable('SUPPORT_conversations', {
+	id: varchar('id', { length: 255 }).primaryKey(),
+	front_conversation_id: varchar('front_conversation_id', { length: 255 })
+		.notNull()
+		.unique(),
+	app_id: varchar('app_id', { length: 255 }).references(() => AppsTable.id),
+
+	customer_email: varchar('customer_email', { length: 255 }).notNull(),
+	customer_name: varchar('customer_name', { length: 255 }),
+
+	status: varchar('status', {
+		length: 50,
+		enum: ['open', 'active', 'archived', 'resolved'],
+	})
+		.notNull()
+		.default('open'),
+	assigned_to: varchar('assigned_to', { length: 255 }),
+
+	last_agent_run_id: varchar('last_agent_run_id', { length: 255 }),
+	last_agent_action: text('last_agent_action'),
+
+	created_at: datetime('created_at').default(sql`CURRENT_TIMESTAMP`),
+	updated_at: datetime('updated_at')
+		.default(sql`CURRENT_TIMESTAMP`)
+		.$onUpdateFn(() => new Date()),
+})
+
+/**
+ * Agent tool executions with approval workflow and observability tracking
+ */
+export const ActionsTable = mysqlTable('SUPPORT_actions', {
+	id: varchar('id', { length: 255 }).primaryKey(),
+	conversation_id: varchar('conversation_id', { length: 255 }).references(
+		() => ConversationsTable.id,
+	),
+	app_id: varchar('app_id', { length: 255 }).references(() => AppsTable.id),
+
+	type: varchar('type', { length: 255 }).notNull(),
+	parameters: json('parameters').$type<Record<string, unknown>>().notNull(),
+
+	requires_approval: boolean('requires_approval').default(false),
+	approved_by: varchar('approved_by', { length: 255 }),
+	approved_at: datetime('approved_at'),
+	rejected_by: varchar('rejected_by', { length: 255 }),
+	rejected_at: datetime('rejected_at'),
+	rejection_reason: text('rejection_reason'),
+
+	executed_at: datetime('executed_at'),
+	result: json('result').$type<Record<string, unknown>>(),
+	error: text('error'),
+
+	trace_id: varchar('trace_id', { length: 255 }),
+	langfuse_trace_id: varchar('langfuse_trace_id', { length: 255 }),
+
+	created_at: datetime('created_at').default(sql`CURRENT_TIMESTAMP`),
+})
+
+/**
+ * Human-in-the-loop approval requests with Slack integration
+ */
+export const ApprovalRequestsTable = mysqlTable('SUPPORT_approval_requests', {
+	id: varchar('id', { length: 255 }).primaryKey(),
+	action_id: varchar('action_id', { length: 255 }).references(
+		() => ActionsTable.id,
+	),
+
+	slack_message_ts: varchar('slack_message_ts', { length: 255 }),
+	slack_channel: varchar('slack_channel', { length: 255 }),
+
+	status: varchar('status', {
+		length: 50,
+		enum: ['pending', 'approved', 'rejected', 'expired'],
+	})
+		.notNull()
+		.default('pending'),
+
+	agent_reasoning: text('agent_reasoning'),
+
+	expires_at: datetime('expires_at'),
+	created_at: datetime('created_at').default(sql`CURRENT_TIMESTAMP`),
+})
+
+// Type exports for type-safe database operations
+export type App = typeof AppsTable.$inferSelect
+export type NewApp = typeof AppsTable.$inferInsert
+
+export type Conversation = typeof ConversationsTable.$inferSelect
+export type NewConversation = typeof ConversationsTable.$inferInsert
+
+export type Action = typeof ActionsTable.$inferSelect
+export type NewAction = typeof ActionsTable.$inferInsert
+
+export type ApprovalRequest = typeof ApprovalRequestsTable.$inferSelect
+export type NewApprovalRequest = typeof ApprovalRequestsTable.$inferInsert

@@ -1,4 +1,4 @@
 /**
  * Workflows module - Inngest-based workflow orchestration
  */
-export const workflows = {};
+export { executeApprovedAction } from '../inngest/workflows/execute-approved-action'
