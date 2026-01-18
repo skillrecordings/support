@@ -21,6 +21,8 @@
  */
 
 export type {
+  FrontVerificationOptions,
+  FrontVerificationResult,
   ParsedSignature,
   VerificationOptions,
   VerificationResult,
@@ -29,8 +31,11 @@ export type {
 } from './types'
 
 export {
+  computeFrontSignature,
   computeSignature,
   parseSignatureHeader,
+  verifyFrontSignature,
+  verifyFrontWebhook,
   verifySignature,
   verifyTimestamp,
   verifyWebhook,

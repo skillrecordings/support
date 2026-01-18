@@ -57,3 +57,25 @@ export interface VerificationOptions {
   /** Signature header name to use (default: x-support-signature) */
   signatureHeader?: 'x-support-signature' | 'x-front-signature'
 }
+
+/**
+ * Front-specific webhook verification options
+ */
+export interface FrontVerificationOptions {
+  /** Front app signing key */
+  secret: string
+  /** Maximum age of webhook in milliseconds (default: 300000 = 5 minutes) */
+  maxAgeMs?: number
+}
+
+/**
+ * Front-specific verification result
+ */
+export interface FrontVerificationResult {
+  /** Whether the webhook passed all verification checks */
+  valid: boolean
+  /** Reason for verification failure (if any) */
+  error?: string
+  /** Challenge string to echo back (only present during webhook setup) */
+  challenge?: string
+}

@@ -9,6 +9,8 @@
 
 import { createHmac, timingSafeEqual } from 'node:crypto'
 import type {
+  FrontVerificationOptions,
+  FrontVerificationResult,
   ParsedSignature,
   VerificationOptions,
   VerificationResult,
@@ -194,4 +196,115 @@ export function verifyWebhook(
   }
 
   return { valid: true }
+}
+
+/**
+ * Compute HMAC-SHA256 signature for Front webhook
+ *
+ * Front's format: HMAC-SHA256(timestamp + ":" + body, secret), base64 encoded
+ *
+ * @param timestamp - Timestamp in milliseconds from x-front-request-timestamp
+ * @param body - Raw request body
+ * @param secret - Front app signing key
+ * @returns Base64-encoded signature
+ */
+export function computeFrontSignature(
+  timestamp: string,
+  body: string,
+  secret: string,
+): string {
+  const baseString = Buffer.concat([
+    Buffer.from(`${timestamp}:`, 'utf8'),
+    Buffer.from(body, 'utf8'),
+  ]).toString()
+  return createHmac('sha256', secret).update(baseString).digest('base64')
+}
+
+/**
+ * Verify Front webhook signature using timing-safe comparison
+ *
+ * @param timestamp - Timestamp from x-front-request-timestamp header
+ * @param body - Raw request body
+ * @param signature - Signature from x-front-signature header
+ * @param secret - Front app signing key
+ * @returns True if signature is valid
+ */
+export function verifyFrontSignature(
+  timestamp: string,
+  body: string,
+  signature: string,
+  secret: string,
+): boolean {
+  const expected = computeFrontSignature(timestamp, body, secret)
+  const expectedBuf = Buffer.from(expected, 'utf8')
+  const signatureBuf = Buffer.from(signature, 'utf8')
+
+  if (expectedBuf.length !== signatureBuf.length) {
+    return false
+  }
+
+  return timingSafeEqual(expectedBuf, signatureBuf)
+}
+
+/**
+ * Verify Front webhook with signature and optional challenge handling
+ *
+ * Front webhooks have a special validation flow:
+ * - During setup, Front sends x-front-challenge header
+ * - Must respond with {"challenge": "<value>"} within 10s
+ * - Signature is HMAC-SHA256(timestamp:body) in base64
+ *
+ * @param body - Raw request body
+ * @param headers - Request headers
+ * @param options - Front verification options
+ * @returns Verification result with optional challenge to echo back
+ */
+export function verifyFrontWebhook(
+  body: string,
+  headers: WebhookHeaders,
+  options: FrontVerificationOptions,
+): FrontVerificationResult {
+  const { secret, maxAgeMs = DEFAULT_MAX_AGE_MS } = options
+
+  const signature = headers['x-front-signature']
+  const timestamp = headers['x-front-request-timestamp']
+  const challenge = headers['x-front-challenge']
+
+  if (!signature) {
+    return { valid: false, error: 'Missing x-front-signature header' }
+  }
+
+  if (!timestamp) {
+    return { valid: false, error: 'Missing x-front-request-timestamp header' }
+  }
+
+  // Verify timestamp (Front uses milliseconds)
+  const timestampMs = Number.parseInt(timestamp, 10)
+  if (Number.isNaN(timestampMs)) {
+    return { valid: false, error: 'Invalid timestamp format' }
+  }
+
+  const nowMs = Date.now()
+  const ageMs = nowMs - timestampMs
+
+  // Reject if timestamp is in the future (allow 5 second clock skew)
+  if (ageMs < -5000) {
+    return { valid: false, error: 'Timestamp is in the future' }
+  }
+
+  // Reject if timestamp is too old
+  if (ageMs > maxAgeMs) {
+    return {
+      valid: false,
+      error: 'Webhook timestamp outside acceptable window (replay protection)',
+    }
+  }
+
+  // Verify signature
+  if (!verifyFrontSignature(timestamp, body, signature, secret)) {
+    return { valid: false, error: 'Invalid signature' }
+  }
+
+  // If challenge present, include it in result for response
+  return { valid: true, challenge: challenge ?? undefined }
 }
