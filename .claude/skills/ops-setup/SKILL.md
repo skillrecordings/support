@@ -49,10 +49,16 @@ const res = await fetch('https://slack.com/api/auth.test', {
   headers: { Authorization: `Bearer ${token}` }
 })
 
-// Stripe
+// Stripe Secret Key
 const res = await fetch('https://api.stripe.com/v1/balance', {
   headers: { Authorization: `Basic ${btoa(key + ':')}` }
 })
+
+// Stripe Connect Client ID (validate by checking settings exist)
+// Client ID format: ca_xxx (development) or ca_xxx (production)
+if (!clientId.startsWith('ca_')) {
+  throw new Error('Invalid Connect client ID format')
+}
 
 // Upstash
 const res = await fetch(`${url}/info`, {
@@ -112,14 +118,38 @@ await fetch('https://slack.com/api/apps.manifest.update', {
 })
 ```
 
-### Stripe (via API)
+### Stripe Webhooks (via API)
 ```typescript
 const stripe = new Stripe(secretKey)
 await stripe.webhookEndpoints.create({
-  url: `${vercelUrl}/api/stripe/webhook`,
-  enabled_events: ['charge.refunded', 'refund.created']
+  url: `${vercelUrl}/api/stripe/webhooks`,
+  enabled_events: ['charge.refunded', 'account.application.deauthorized']
 })
 ```
+
+### Stripe Connect OAuth (manual steps)
+
+1. **Enable Connect in Stripe Dashboard**
+   - Go to: https://dashboard.stripe.com/settings/connect
+   - Enable Standard accounts
+
+2. **Configure OAuth settings**
+   - Go to: https://dashboard.stripe.com/settings/connect/onboarding-options/oauth
+   - Add redirect URI: `{VERCEL_URL}/api/stripe/connect/callback`
+   - Copy the **Client ID** (ca_xxx)
+
+3. **Environment variables needed:**
+   ```bash
+   STRIPE_SECRET_KEY=sk_live_xxx         # Platform secret key
+   STRIPE_CONNECT_CLIENT_ID=ca_xxx       # From OAuth settings
+   STRIPE_WEBHOOK_SECRET=whsec_xxx       # From webhook endpoint
+   ```
+
+4. **Test OAuth flow:**
+   ```bash
+   # Visit to start OAuth
+   open "${VERCEL_URL}/api/stripe/connect/authorize?app=total-typescript"
+   ```
 
 ## Conversation Patterns
 
