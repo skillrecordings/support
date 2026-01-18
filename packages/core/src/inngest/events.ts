@@ -13,16 +13,21 @@ export type SupportInboundReceivedEvent = {
   data: {
     /** Front conversation ID */
     conversationId: string
-    /** Skill Recordings app identifier (e.g., 'total-typescript') */
+    /** Skill Recordings app identifier or inbox ID */
     appId: string
-    /** Sender's email address */
-    senderEmail: string
     /** Front message ID */
     messageId: string
-    /** Optional subject line */
+    /** Optional subject line (may be empty from webhook preview) */
     subject?: string
-    /** Message body text */
+    /** Message body text (empty from webhook - must fetch via Front API) */
     body: string
+    /** Sender's email address (empty from webhook - must fetch via Front API) */
+    senderEmail: string
+    /** Front API links for fetching full data */
+    _links?: {
+      conversation?: string
+      message?: string
+    }
   }
 }
 
