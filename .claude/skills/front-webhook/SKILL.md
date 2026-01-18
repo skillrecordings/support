@@ -127,6 +127,44 @@ const history = await front.getConversationMessages(conversationId)
 - Signature verification: `packages/core/src/webhooks/verify.ts`
 - Event types reference: `docs/FRONT-EVENTS.md`
 
+## Inbox ID Conversion
+
+Front UI URLs use decimal IDs, but the API uses base-36 with a prefix.
+
+**Formula:** `inb_` + base36(decimal_id)
+
+**Example:**
+- UI URL: `https://app.frontapp.com/settings/tim:571743/inboxes/edit/[PHONE]/settings`
+- Decimal ID: `[PHONE]`
+- Base-36: `3srbb`
+- API ID: `inb_3srbb`
+
+**JavaScript conversion:**
+```typescript
+function frontInboxId(decimalId: number): string {
+  return `inb_${decimalId.toString(36)}`
+}
+// frontInboxId([PHONE]) → "inb_3srbb"
+```
+
+**List all inboxes via API:**
+```bash
+curl -H "Authorization: Bearer $FRONT_API_TOKEN" "https://api2.frontapp.com/inboxes" | jq '._results[] | {id, name}'
+```
+
+**Known Skill Recordings inboxes:**
+| Product | Inbox ID | Email |
+|---------|----------|-------|
+| Total TypeScript | `inb_3srbb` | [EMAIL] |
+| Pro Tailwind | `inb_3pqh3` | [EMAIL] |
+| Epic Web | `inb_jqs2t` | [EMAIL] |
+| Testing Accessibility | `inb_3bkef` | [EMAIL] |
+| Just JavaScript | `inb_2odqf` | [EMAIL] |
+| Pro NextJS | `inb_43olj` | [EMAIL] |
+| AI Hero | `inb_4bj7r` | [EMAIL] |
+| ScriptKit | `inb_41c3r` | [EMAIL] |
+| Badass Courses | `inb_3mn7r` | [EMAIL] |
+
 ## Environment Variables
 
 ```bash
