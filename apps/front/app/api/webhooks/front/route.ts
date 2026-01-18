@@ -7,9 +7,13 @@
  * Front webhook docs: https://dev.frontapp.com/docs/webhooks-1
  */
 
-import { type NextRequest, NextResponse } from 'next/server'
+import {
+  SUPPORT_INBOUND_RECEIVED,
+  inngest,
+} from '@skillrecordings/core/inngest'
+import { getAppByInboxId } from '@skillrecordings/core/services/app-registry'
 import { verifyFrontWebhook } from '@skillrecordings/core/webhooks'
-import { inngest, SUPPORT_INBOUND_RECEIVED } from '@skillrecordings/core/inngest'
+import { type NextRequest, NextResponse } from 'next/server'
 
 /**
  * Front webhook event structure (application webhooks)
@@ -94,7 +98,7 @@ export async function POST(request: NextRequest) {
   if (!secret) {
     return NextResponse.json(
       { error: 'Webhook secret not configured' },
-      { status: 500 },
+      { status: 500 }
     )
   }
 
@@ -142,7 +146,10 @@ export async function POST(request: NextRequest) {
   // Extract conversation ID
   const conversationId = event.payload?.conversation?.id
   if (!conversationId) {
-    console.log('[front-webhook] No conversation ID in payload:', JSON.stringify(event).slice(0, 1000))
+    console.log(
+      '[front-webhook] No conversation ID in payload:',
+      JSON.stringify(event).slice(0, 1000)
+    )
     // Some events may not have a conversation - acknowledge anyway
     return NextResponse.json({ received: true })
   }
@@ -161,6 +168,17 @@ export async function POST(request: NextRequest) {
     const subject = event.payload?.conversation?.subject
     const inboxId = event.payload?.source?.data?.id
 
+    // Map inbox ID to app slug via database lookup
+    let appSlug = 'unknown'
+    if (inboxId) {
+      const app = await getAppByInboxId(inboxId)
+      if (app) {
+        appSlug = app.slug
+      } else {
+        console.warn(`[front-webhook] No app found for inbox ID: ${inboxId}`)
+      }
+    }
+
     await inngest.send({
       name: SUPPORT_INBOUND_RECEIVED,
       data: {
@@ -170,7 +188,7 @@ export async function POST(request: NextRequest) {
         subject: subject || '',
         body: '', // Must fetch via Front API
         senderEmail: '', // Must fetch via Front API
-        appId: inboxId || 'unknown', // Use inbox ID for now
+        appId: appSlug,
         // Include links for API fetching
         _links: {
           conversation: event.payload?.conversation?._links?.self,
@@ -179,7 +197,10 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    console.log('[front-webhook] Dispatched to Inngest:', { conversationId, messageId })
+    console.log('[front-webhook] Dispatched to Inngest:', {
+      conversationId,
+      messageId,
+    })
   }
 
   // Acknowledge all events

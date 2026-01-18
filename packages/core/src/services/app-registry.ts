@@ -53,6 +53,29 @@ export async function getAppById(id: string): Promise<App | null> {
 }
 
 /**
+ * Retrieve an app by Front inbox ID, with 5-minute in-memory cache.
+ * Returns null if app doesn't exist.
+ */
+export async function getAppByInboxId(inboxId: string): Promise<App | null> {
+  // Check cache by inbox ID (scan values)
+  for (const entry of cache.values()) {
+    if (entry.app.front_inbox_id === inboxId && entry.expiresAt > Date.now()) {
+      return entry.app
+    }
+  }
+
+  const app = await database.query.AppsTable.findFirst({
+    where: eq(AppsTable.front_inbox_id, inboxId),
+  })
+
+  if (app) {
+    cache.set(app.slug, { app, expiresAt: Date.now() + TTL_MS })
+  }
+
+  return app ?? null
+}
+
+/**
  * Clear all cached app entries.
  * Useful for testing or manual cache invalidation.
  */
