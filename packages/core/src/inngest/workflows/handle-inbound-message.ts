@@ -29,42 +29,52 @@ export const handleInboundMessage = inngest.createFunction(
     // Step 1: Fetch full message and conversation from Front API
     const context = await step.run('get-conversation-context', async () => {
       const frontToken = process.env.FRONT_API_TOKEN
+
+      // Fallback context from event data (used when Front API unavailable or for testing)
+      const fallbackContext = {
+        conversationId,
+        appId,
+        messageId,
+        subject: subject || '',
+        body: event.data.messageBody || '',
+        senderEmail: event.data.customerEmail || '',
+        conversationHistory: [] as FrontMessage[],
+      }
+
       if (!frontToken) {
         console.error('[workflow] FRONT_API_TOKEN not configured')
+        return fallbackContext
+      }
+
+      try {
+        const front = createFrontClient(frontToken)
+
+        // Fetch the triggering message (full data)
+        const message = await front.getMessage(
+          _links?.message || messageId
+        )
+
+        // Fetch conversation history
+        const conversationHistory = await front.getConversationMessages(conversationId)
+
+        // Extract sender email from message
+        const senderEmail = message.author?.email ||
+          message.recipients.find(r => r.role === 'from')?.handle ||
+          ''
+
         return {
           conversationId,
           appId,
           messageId,
-          subject: subject || '',
-          body: '',
-          senderEmail: '',
-          conversationHistory: [] as FrontMessage[],
+          subject: message.subject || subject || '',
+          body: message.body,
+          senderEmail,
+          conversationHistory,
         }
-      }
-
-      const front = createFrontClient(frontToken)
-
-      // Fetch the triggering message (full data)
-      const message = await front.getMessage(
-        _links?.message || messageId
-      )
-
-      // Fetch conversation history
-      const conversationHistory = await front.getConversationMessages(conversationId)
-
-      // Extract sender email from message
-      const senderEmail = message.author?.email ||
-        message.recipients.find(r => r.role === 'from')?.handle ||
-        ''
-
-      return {
-        conversationId,
-        appId,
-        messageId,
-        subject: message.subject || subject || '',
-        body: message.body,
-        senderEmail,
-        conversationHistory,
+      } catch (error) {
+        // Fallback to event data if Front API fails (e.g., 404 for test data)
+        console.warn('[workflow] Front API error, using fallback context:', error)
+        return fallbackContext
       }
     })
 
