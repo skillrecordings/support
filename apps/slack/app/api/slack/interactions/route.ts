@@ -55,7 +55,7 @@ export async function POST(request: Request) {
           {
             name: SUPPORT_APPROVAL_DECIDED,
             data: {
-              approvalId: metadata.actionId,
+              actionId: metadata.actionId,
               decision: 'approved',
               decidedBy: username,
               decidedAt,
@@ -76,7 +76,7 @@ export async function POST(request: Request) {
           {
             name: SUPPORT_APPROVAL_DECIDED,
             data: {
-              approvalId: metadata.actionId,
+              actionId: metadata.actionId,
               decision: 'rejected',
               decidedBy: username,
               decidedAt,

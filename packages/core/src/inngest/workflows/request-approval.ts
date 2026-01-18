@@ -85,7 +85,7 @@ export const requestApproval = inngest.createFunction(
     const decision = await step.waitForEvent('wait-for-approval-decision', {
       event: SUPPORT_APPROVAL_DECIDED,
       timeout: '24h',
-      match: 'data.approvalId',
+      match: 'data.actionId',
     })
 
     // Step 4: Handle timeout or decision
