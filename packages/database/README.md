@@ -1,4 +1,4 @@
-# @support/database
+# @skillrecordings/database
 
 Drizzle ORM database package for the Support platform. Handles schema definitions, migrations, and database client initialization.
 
@@ -26,16 +26,16 @@ The `@t3-oss/env-core` package validates this at runtime.
 ### Import the Database Client
 
 ```typescript
-import { database } from '@support/database'
+import { database } from '@skillrecordings/database'
 // or for lazy initialization:
-import { getDb } from '@support/database'
+import { getDb } from '@skillrecordings/database'
 const db = getDb()
 ```
 
 ### Query the Database
 
 ```typescript
-import { database, ConversationsTable } from '@support/database'
+import { database, ConversationsTable } from '@skillrecordings/database'
 import { eq } from 'drizzle-orm'
 
 // Select
