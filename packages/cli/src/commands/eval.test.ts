@@ -11,7 +11,7 @@ const mockExit = vi.spyOn(process, 'exit').mockImplementation((code) => {
 vi.mock('node:fs/promises')
 
 // Mock core evals module
-vi.mock('@skillrecordings/core', () => ({
+vi.mock('@skillrecordings/core/evals/routing', () => ({
   evalRouting: vi.fn(),
 }))
 
@@ -105,7 +105,7 @@ describe('eval command', () => {
     vi.mocked(fs.access).mockResolvedValue(undefined)
     vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify(mockDataset))
 
-    const { evalRouting } = await import('@skillrecordings/core')
+    const { evalRouting } = await import('@skillrecordings/core/evals/routing')
     vi.mocked(evalRouting).mockResolvedValue(mockReport)
 
     await expect(runEval('routing', '/path/to/dataset.json')).rejects.toThrow(
@@ -151,7 +151,7 @@ describe('eval command', () => {
     vi.mocked(fs.access).mockResolvedValue(undefined)
     vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify(mockDataset))
 
-    const { evalRouting } = await import('@skillrecordings/core')
+    const { evalRouting } = await import('@skillrecordings/core/evals/routing')
     vi.mocked(evalRouting).mockResolvedValue(mockReport)
 
     await expect(
@@ -195,7 +195,7 @@ describe('eval command', () => {
     vi.mocked(fs.access).mockResolvedValue(undefined)
     vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify(mockDataset))
 
-    const { evalRouting } = await import('@skillrecordings/core')
+    const { evalRouting } = await import('@skillrecordings/core/evals/routing')
     vi.mocked(evalRouting).mockResolvedValue(mockReport)
 
     await expect(
@@ -234,7 +234,7 @@ describe('eval command', () => {
     vi.mocked(fs.access).mockResolvedValue(undefined)
     vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify(mockDataset))
 
-    const { evalRouting } = await import('@skillrecordings/core')
+    const { evalRouting } = await import('@skillrecordings/core/evals/routing')
     vi.mocked(evalRouting).mockResolvedValue(mockReport)
 
     // Test with custom gates

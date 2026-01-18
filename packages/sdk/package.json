@@ -4,10 +4,6 @@
   "private": false,
   "type": "module",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    },
     "./types": {
       "types": "./dist/types.d.ts",
       "import": "./dist/types.js"
@@ -31,7 +27,6 @@
   },
   "typesVersions": {
     "*": {
-      ".": ["./dist/index.d.ts"],
       "types": ["./dist/types.d.ts"],
       "integration": ["./dist/integration.d.ts"],
       "adapter": ["./dist/adapter.d.ts"],
