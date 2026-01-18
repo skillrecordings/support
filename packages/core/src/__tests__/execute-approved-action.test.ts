@@ -1,255 +1,302 @@
 // Set environment variables BEFORE any imports
 process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test'
 
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Mock the database module
 const mockDb = {
-	select: vi.fn().mockReturnThis(),
-	from: vi.fn().mockReturnThis(),
-	where: vi.fn().mockReturnThis(),
-	update: vi.fn().mockReturnThis(),
-	set: vi.fn().mockReturnThis(),
+  select: vi.fn().mockReturnThis(),
+  from: vi.fn().mockReturnThis(),
+  where: vi.fn().mockReturnThis(),
+  update: vi.fn().mockReturnThis(),
+  set: vi.fn().mockReturnThis(),
 }
 
 vi.mock('@skillrecordings/database', () => ({
-	getDb: vi.fn(() => mockDb),
-	ActionsTable: {},
-	ApprovalRequestsTable: {},
-	eq: vi.fn((field, value) => ({ field, value })),
+  getDb: vi.fn(() => mockDb),
+  ActionsTable: {},
+  ApprovalRequestsTable: {},
+  eq: vi.fn((field, value) => ({ field, value })),
 }))
 
-import { executeApprovedAction } from '../inngest/workflows/execute-approved-action'
+// Mock supportTools - use vi.hoisted to ensure mock fn is available
+const { mockProcessRefund } = vi.hoisted(() => ({
+  mockProcessRefund: vi.fn(),
+}))
+vi.mock('../tools', () => ({
+  supportTools: {
+    processRefund: {
+      execute: mockProcessRefund,
+    },
+  },
+}))
+
 import { SUPPORT_ACTION_APPROVED } from '../inngest/events'
+import { executeApprovedAction } from '../inngest/workflows/execute-approved-action'
 
 describe('executeApprovedAction workflow', () => {
-	it('exports a function', () => {
-		expect(executeApprovedAction).toBeDefined()
-		expect(typeof executeApprovedAction).toBe('object')
-	})
+  it('exports a function', () => {
+    expect(executeApprovedAction).toBeDefined()
+    expect(typeof executeApprovedAction).toBe('object')
+  })
 
-	it('has correct id', () => {
-		expect(executeApprovedAction.id()).toBe('execute-approved-action')
-	})
+  it('has correct id', () => {
+    expect(executeApprovedAction.id()).toBe('execute-approved-action')
+  })
 
-	it('has correct name', () => {
-		expect(executeApprovedAction.name).toBe('Execute Approved Action')
-	})
+  it('has correct name', () => {
+    expect(executeApprovedAction.name).toBe('Execute Approved Action')
+  })
 
-	describe('workflow execution', () => {
-		let mockStep: any
-		let stepRunHandlers: Map<string, Function>
+  describe('workflow execution', () => {
+    let mockStep: any
+    let stepRunHandlers: Map<string, Function>
 
-		beforeEach(() => {
-			stepRunHandlers = new Map()
+    beforeEach(() => {
+      stepRunHandlers = new Map()
 
-			// Clear all mocks
-			vi.clearAllMocks()
+      // Clear all mocks
+      vi.clearAllMocks()
 
-			// Reset mock implementations
-			mockDb.select.mockReturnThis()
-			mockDb.from.mockReturnThis()
-			mockDb.where.mockReturnThis()
-			mockDb.update.mockReturnThis()
-			mockDb.set.mockReturnThis()
+      // Reset mock implementations
+      mockDb.select.mockReturnThis()
+      mockDb.from.mockReturnThis()
+      mockDb.where.mockReturnThis()
+      mockDb.update.mockReturnThis()
+      mockDb.set.mockReturnThis()
 
-			// Mock Inngest step with captured handlers
-			mockStep = {
-				run: vi.fn((stepName: string, handler: Function) => {
-					stepRunHandlers.set(stepName, handler)
-					return handler()
-				}),
-			}
-		})
+      // Default mock for processRefund - success
+      mockProcessRefund.mockResolvedValue({
+        success: true,
+        refundId: 'refund-123',
+      })
 
-		it('should lookup action from database', async () => {
-			const actionId = 'action-123'
-			const mockAction = {
-				id: actionId,
-				type: 'refund_order',
-				parameters: { orderId: 'order-456', amount: 100 },
-				conversation_id: 'conv-789',
-				app_id: 'app-tt',
-			}
+      // Mock Inngest step with captured handlers
+      mockStep = {
+        run: vi.fn((stepName: string, handler: Function) => {
+          stepRunHandlers.set(stepName, handler)
+          return handler()
+        }),
+      }
+    })
 
-			// Setup DB mock to return action
-			mockDb.where.mockResolvedValueOnce([mockAction])
+    it('should lookup action from database', async () => {
+      const actionId = 'action-123'
+      const mockAction = {
+        id: actionId,
+        type: 'refund_order',
+        parameters: { orderId: 'order-456', amount: 100 },
+        conversation_id: 'conv-789',
+        app_id: 'app-tt',
+      }
 
-			const event = {
-				name: SUPPORT_ACTION_APPROVED,
-				data: {
-					actionId,
-					approvedBy: 'admin@example.com',
-					approvedAt: new Date().toISOString(),
-				},
-			}
+      // Setup DB mock to return action
+      mockDb.where.mockResolvedValueOnce([mockAction])
 
-			// Execute workflow
-			await executeApprovedAction.fn({ event, step: mockStep } as any)
+      const event = {
+        name: SUPPORT_ACTION_APPROVED,
+        data: {
+          actionId,
+          approvedBy: 'admin@example.com',
+          approvedAt: new Date().toISOString(),
+        },
+      }
 
-			// Verify lookup-action step was called
-			expect(mockStep.run).toHaveBeenCalledWith('lookup-action', expect.any(Function))
+      // Execute workflow
+      await (executeApprovedAction as any).fn({ event, step: mockStep })
 
-			// Verify DB query
-			expect(mockDb.select).toHaveBeenCalled()
-			expect(mockDb.from).toHaveBeenCalled()
-			expect(mockDb.where).toHaveBeenCalled()
-		})
+      // Verify lookup-action step was called
+      expect(mockStep.run).toHaveBeenCalledWith(
+        'lookup-action',
+        expect.any(Function)
+      )
 
-		it('should throw error if action not found', async () => {
-			const actionId = 'nonexistent-action'
+      // Verify DB query
+      expect(mockDb.select).toHaveBeenCalled()
+      expect(mockDb.from).toHaveBeenCalled()
+      expect(mockDb.where).toHaveBeenCalled()
+    })
 
-			// Setup DB mock to return empty array
-			mockDb.where.mockResolvedValueOnce([])
+    it('should throw error if action not found', async () => {
+      const actionId = 'nonexistent-action'
 
-			const event = {
-				name: SUPPORT_ACTION_APPROVED,
-				data: {
-					actionId,
-					approvedBy: 'admin@example.com',
-					approvedAt: new Date().toISOString(),
-				},
-			}
+      // Setup DB mock to return empty array
+      mockDb.where.mockResolvedValueOnce([])
 
-			// Execute workflow and expect error
-			await expect(
-				executeApprovedAction.fn({ event, step: mockStep } as any)
-			).rejects.toThrow(`Action ${actionId} not found`)
-		})
+      const event = {
+        name: SUPPORT_ACTION_APPROVED,
+        data: {
+          actionId,
+          approvedBy: 'admin@example.com',
+          approvedAt: new Date().toISOString(),
+        },
+      }
 
-		it('should execute tool with action parameters (stub)', async () => {
-			const actionId = 'action-123'
-			const mockAction = {
-				id: actionId,
-				type: 'pending-action',
-				parameters: {
-					toolCalls: [
-						{ name: 'processRefund', args: { purchaseId: 'order-456', appId: 'app-tt', reason: 'Customer request' } },
-					],
-				},
-				conversation_id: 'conv-789',
-				app_id: 'app-tt',
-			}
+      // Execute workflow and expect error
+      await expect(
+        (executeApprovedAction as any).fn({ event, step: mockStep })
+      ).rejects.toThrow(`Action ${actionId} not found`)
+    })
 
-			mockDb.where.mockResolvedValueOnce([mockAction])
-			mockDb.where.mockResolvedValueOnce(undefined) // update-action-status
-			mockDb.where.mockResolvedValueOnce(undefined) // update approval request
+    it('should execute tool with action parameters (stub)', async () => {
+      const actionId = 'action-123'
+      const mockAction = {
+        id: actionId,
+        type: 'pending-action',
+        parameters: {
+          toolCalls: [
+            {
+              name: 'processRefund',
+              args: {
+                purchaseId: 'order-456',
+                appId: 'app-tt',
+                reason: 'Customer request',
+              },
+            },
+          ],
+        },
+        conversation_id: 'conv-789',
+        app_id: 'app-tt',
+      }
 
-			const event = {
-				name: SUPPORT_ACTION_APPROVED,
-				data: {
-					actionId,
-					approvedBy: 'admin@example.com',
-					approvedAt: new Date().toISOString(),
-				},
-			}
+      mockDb.where.mockResolvedValueOnce([mockAction])
+      mockDb.where.mockResolvedValueOnce(undefined) // update-action-status
+      mockDb.where.mockResolvedValueOnce(undefined) // update approval request
 
-			const result = await executeApprovedAction.fn({ event, step: mockStep } as any)
+      const event = {
+        name: SUPPORT_ACTION_APPROVED,
+        data: {
+          actionId,
+          approvedBy: 'admin@example.com',
+          approvedAt: new Date().toISOString(),
+        },
+      }
 
-			// Verify execute-tool step was called
-			expect(mockStep.run).toHaveBeenCalledWith('execute-tool', expect.any(Function))
+      const result = await (executeApprovedAction as any).fn({
+        event,
+        step: mockStep,
+      })
 
-			// Verify stub returns success
-			expect(result.executed).toBe(true)
-		})
+      // Verify execute-tool step was called
+      expect(mockStep.run).toHaveBeenCalledWith(
+        'execute-tool',
+        expect.any(Function)
+      )
 
-		it('should update action status on success', async () => {
-			const actionId = 'action-123'
-			const mockAction = {
-				id: actionId,
-				type: 'refund_order',
-				parameters: { orderId: 'order-456' },
-				conversation_id: 'conv-789',
-				app_id: 'app-tt',
-			}
+      // Verify stub returns success
+      expect(result.executed).toBe(true)
+    })
 
-			mockDb.where.mockResolvedValueOnce([mockAction])
-			mockDb.where.mockResolvedValueOnce(undefined) // update-action-status
-			mockDb.where.mockResolvedValueOnce(undefined) // update approval request
+    it('should update action status on success', async () => {
+      const actionId = 'action-123'
+      const mockAction = {
+        id: actionId,
+        type: 'refund_order',
+        parameters: { orderId: 'order-456' },
+        conversation_id: 'conv-789',
+        app_id: 'app-tt',
+      }
 
-			const event = {
-				name: SUPPORT_ACTION_APPROVED,
-				data: {
-					actionId,
-					approvedBy: 'admin@example.com',
-					approvedAt: new Date().toISOString(),
-				},
-			}
+      mockDb.where.mockResolvedValueOnce([mockAction])
+      mockDb.where.mockResolvedValueOnce(undefined) // update-action-status
+      mockDb.where.mockResolvedValueOnce(undefined) // update approval request
 
-			await executeApprovedAction.fn({ event, step: mockStep } as any)
+      const event = {
+        name: SUPPORT_ACTION_APPROVED,
+        data: {
+          actionId,
+          approvedBy: 'admin@example.com',
+          approvedAt: new Date().toISOString(),
+        },
+      }
 
-			// Verify update-action-status step was called
-			expect(mockStep.run).toHaveBeenCalledWith('update-action-status', expect.any(Function))
+      await (executeApprovedAction as any).fn({ event, step: mockStep })
 
-			// Verify DB update was called
-			expect(mockDb.update).toHaveBeenCalled()
-			expect(mockDb.set).toHaveBeenCalled()
-		})
+      // Verify update-action-status step was called
+      expect(mockStep.run).toHaveBeenCalledWith(
+        'update-action-status',
+        expect.any(Function)
+      )
 
-		it('should update approval request status on success', async () => {
-			const actionId = 'action-123'
-			const mockAction = {
-				id: actionId,
-				type: 'refund_order',
-				parameters: { orderId: 'order-456' },
-				conversation_id: 'conv-789',
-				app_id: 'app-tt',
-			}
+      // Verify DB update was called
+      expect(mockDb.update).toHaveBeenCalled()
+      expect(mockDb.set).toHaveBeenCalled()
+    })
 
-			mockDb.where.mockResolvedValueOnce([mockAction])
-			mockDb.where.mockResolvedValueOnce(undefined) // update-action-status
-			mockDb.where.mockResolvedValueOnce(undefined) // update approval request
+    it('should update approval request status on success', async () => {
+      const actionId = 'action-123'
+      const mockAction = {
+        id: actionId,
+        type: 'refund_order',
+        parameters: { orderId: 'order-456' },
+        conversation_id: 'conv-789',
+        app_id: 'app-tt',
+      }
 
-			const event = {
-				name: SUPPORT_ACTION_APPROVED,
-				data: {
-					actionId,
-					approvedBy: 'admin@example.com',
-					approvedAt: new Date().toISOString(),
-				},
-			}
+      mockDb.where.mockResolvedValueOnce([mockAction])
+      mockDb.where.mockResolvedValueOnce(undefined) // update-action-status
+      mockDb.where.mockResolvedValueOnce(undefined) // update approval request
 
-			await executeApprovedAction.fn({ event, step: mockStep } as any)
+      const event = {
+        name: SUPPORT_ACTION_APPROVED,
+        data: {
+          actionId,
+          approvedBy: 'admin@example.com',
+          approvedAt: new Date().toISOString(),
+        },
+      }
 
-			// Verify both updates were called
-			expect(mockDb.update).toHaveBeenCalledTimes(2)
-		})
+      await (executeApprovedAction as any).fn({ event, step: mockStep })
 
-		it('should return execution result with metadata', async () => {
-			const actionId = 'action-123'
-			const approvedBy = 'admin@example.com'
-			const mockAction = {
-				id: actionId,
-				type: 'pending-action',
-				parameters: {
-					toolCalls: [
-						{ name: 'processRefund', args: { purchaseId: 'order-456', appId: 'app-tt', reason: 'Test' } },
-					],
-				},
-				conversation_id: 'conv-789',
-				app_id: 'app-tt',
-			}
+      // Verify both updates were called
+      expect(mockDb.update).toHaveBeenCalledTimes(2)
+    })
 
-			mockDb.where.mockResolvedValueOnce([mockAction])
-			mockDb.where.mockResolvedValueOnce(undefined)
-			mockDb.where.mockResolvedValueOnce(undefined)
+    it('should return execution result with metadata', async () => {
+      const actionId = 'action-123'
+      const approvedBy = 'admin@example.com'
+      const mockAction = {
+        id: actionId,
+        type: 'pending-action',
+        parameters: {
+          toolCalls: [
+            {
+              name: 'processRefund',
+              args: {
+                purchaseId: 'order-456',
+                appId: 'app-tt',
+                reason: 'Test',
+              },
+            },
+          ],
+        },
+        conversation_id: 'conv-789',
+        app_id: 'app-tt',
+      }
 
-			const event = {
-				name: SUPPORT_ACTION_APPROVED,
-				data: {
-					actionId,
-					approvedBy,
-					approvedAt: new Date().toISOString(),
-				},
-			}
+      mockDb.where.mockResolvedValueOnce([mockAction])
+      mockDb.where.mockResolvedValueOnce(undefined)
+      mockDb.where.mockResolvedValueOnce(undefined)
 
-			const result = await executeApprovedAction.fn({ event, step: mockStep } as any)
+      const event = {
+        name: SUPPORT_ACTION_APPROVED,
+        data: {
+          actionId,
+          approvedBy,
+          approvedAt: new Date().toISOString(),
+        },
+      }
 
-			expect(result).toMatchObject({
-				actionId,
-				executed: true,
-				approvedBy,
-			})
-		})
-	})
+      const result = await (executeApprovedAction as any).fn({
+        event,
+        step: mockStep,
+      })
+
+      expect(result).toMatchObject({
+        actionId,
+        executed: true,
+        approvedBy,
+      })
+    })
+  })
 })
