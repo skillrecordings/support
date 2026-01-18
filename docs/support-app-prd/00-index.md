@@ -29,6 +29,7 @@ Every support interaction is an opportunity for an agent to help. The agent hand
 - Trust decay: exponential, 30-day half-life
 - Cache: Durable Objects per conversation, 7-day TTL
 - Context strategy: minimal live context, retrieval-first, structured data in DB, everything else behind search
+- **Stripe integration: Query on-demand, don't warehouse events.** Platform is the "queen" - orchestrates via Stripe Connect API queries. Apps notify us of actions via SDK. Minimal webhook monitoring (deauth, disputes only).
 
 ## System Boundary (High Level)
 

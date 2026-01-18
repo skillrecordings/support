@@ -17,3 +17,11 @@ Record non-trivial decisions here. Keep entries short and dated.
 - t3-env `skipValidation` enabled for test environments (VITEST, NODE_ENV=test).
 - AI SDK v6: Use `inputSchema` not `parameters`, `stopWhen: stepCountIs(n)` not `maxSteps`, `ModelMessage` not `CoreMessage`. Skill at `.claude/skills/ai-sdk/`.
 - Added Phase 8 for routing + caching + canned responses + evals to reduce inference costs and enforce quality gates.
+- tsconfig: Migrated to `@total-typescript/tsconfig` with bundler module resolution. No `.js` extensions needed.
+- **Stripe integration philosophy: Query on-demand, don't warehouse events.**
+  - Platform is the "queen" (orchestrator), not a data warehouse.
+  - Query Stripe Connect API on-demand when agent needs payment history.
+  - Apps notify us of their actions via SDK integration (refunds, transfers, etc.).
+  - Minimal webhook monitoring: only `account.application.deauthorized` (cleanup) and optionally `charge.dispute.created` (urgent).
+  - No bulk event ingestion - we'd miss historical data anyway, and Stripe is the source of truth.
+  - Agent tools query connected accounts directly for context (e.g., `getPaymentHistory`).
