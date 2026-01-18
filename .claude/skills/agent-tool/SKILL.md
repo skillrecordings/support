@@ -55,8 +55,10 @@ export const supportAgent = new Agent({
 ## Tool Definition Pattern
 
 ```typescript
-import { createTool } from '@mastra/core'
+import { createTool } from './create-tool'
 import { z } from 'zod'
+import { getApp } from '@skillrecordings/core/services/app-registry'
+import { IntegrationClient } from '@skillrecordings/sdk/client'
 
 export const processRefund = createTool({
   name: 'process_refund',
@@ -76,37 +78,68 @@ export const processRefund = createTool({
     return daysSincePurchase > 30  // Auto-approve within 30 days
   },
 
-  // Execution logic
-  execute: async ({ purchaseId, appId, reason }, { approvalId }) => {
-    const app = await appRegistry.get(appId)
-    const purchase = await app.integration.getPurchase(purchaseId)
+  // Execution logic - THROW errors, don't return {success: false}
+  execute: async ({ purchaseId, appId, reason }, context) => {
+    // Get app config from registry (5-min TTL cache)
+    const app = await getApp(appId)
+    if (!app) {
+      throw new Error(`App not found: ${appId}`)  // ← THROW, don't return error
+    }
 
     // Process via Stripe Connect
     const stripeRefund = await stripe.refunds.create({
       charge: purchase.stripeChargeId,
     }, {
-      stripeAccount: app.stripeAccountId,
+      stripeAccount: app.stripe_account_id,
     })
 
-    // Revoke access in the app
-    await app.integration.revokeAccess({
+    // Revoke access via IntegrationClient (signed request)
+    const client = new IntegrationClient({
+      baseUrl: app.integration_base_url,
+      webhookSecret: app.webhook_secret,
+    })
+
+    const revokeResult = await client.revokeAccess({
       purchaseId,
       reason,
       refundId: stripeRefund.id,
     })
 
-    // Audit log
-    await auditLog.record({
-      action: 'refund',
-      purchaseId,
-      appId,
-      approvalId,
-      stripeRefundId: stripeRefund.id,
-    })
+    if (!revokeResult.success) {
+      throw new Error(revokeResult.message || 'Failed to revoke access')
+    }
 
-    return { success: true, refundId: stripeRefund.id }
+    // Return data only - wrapper adds {success: true, data: ...}
+    return { refundId: stripeRefund.id, amountRefunded: stripeRefund.amount }
   },
 })
+```
+
+## Error Handling Pattern
+
+**CRITICAL**: The `createTool` wrapper handles success/error wrapping automatically.
+
+```typescript
+// ❌ WRONG - Don't return success/error objects
+execute: async (params) => {
+  if (!app) {
+    return { success: false, error: 'App not found' }  // BAD
+  }
+  return { success: true, data: result }  // BAD
+}
+
+// ✅ CORRECT - Throw errors, return plain data
+execute: async (params) => {
+  if (!app) {
+    throw new Error('App not found')  // GOOD - wrapper catches this
+  }
+  return { refundId, amount }  // GOOD - wrapper wraps as {success: true, data: ...}
+}
+```
+
+The wrapper produces:
+- Success: `{ success: true, data: <your return value> }`
+- Error: `{ success: false, error: { code: 'EXECUTION_ERROR', message: '...' } }`
 ```
 
 ## Standard Tools
@@ -124,6 +157,9 @@ export const processRefund = createTool({
 
 ### Lookup User (No Approval)
 ```typescript
+import { getApp } from '@skillrecordings/core/services/app-registry'
+import { IntegrationClient } from '@skillrecordings/sdk/client'
+
 export const lookupUser = createTool({
   name: 'lookup_user',
   description: 'Look up a user by email to get their account details and purchase history',
@@ -132,8 +168,23 @@ export const lookupUser = createTool({
     appId: z.string(),
   }),
   execute: async ({ email, appId }) => {
-    const app = await appRegistry.get(appId)
-    return app.integration.lookupUser(email)
+    const app = await getApp(appId)
+    if (!app) {
+      return { found: false, error: `App not found: ${appId}` }
+    }
+
+    const client = new IntegrationClient({
+      baseUrl: app.integration_base_url,
+      webhookSecret: app.webhook_secret,
+    })
+
+    const user = await client.lookupUser(email)
+    if (!user) {
+      return { found: false, user: null, purchases: [] }
+    }
+
+    const purchases = await client.getPurchases(user.id)
+    return { found: true, user, purchases }
   },
 })
 ```
@@ -175,9 +226,13 @@ export const escalateToHuman = createTool({
 
 ## File Locations
 
-- Agent definition: `packages/core/src/agent/index.ts`
-- Tool definitions: `packages/core/src/tools/`
-- Tool types: `packages/core/src/types/tools.ts`
+| File | Purpose |
+|------|---------|
+| `packages/core/src/agent/config.ts` | Agent definition with tool bindings |
+| `packages/core/src/tools/` | Individual tool implementations |
+| `packages/core/src/tools/create-tool.ts` | Tool factory with success/error wrapping |
+| `packages/core/src/services/app-registry.ts` | App config lookup (5-min TTL cache) |
+| `packages/sdk/src/client.ts` | IntegrationClient for SDK calls |
 
 ## Reference Docs
 
