@@ -220,6 +220,32 @@ export const agentTools = {
       return { error: result.error.message, subscription: null }
     },
   }),
+
+  transferPurchase: tool({
+    description:
+      'Transfer a purchase from one user to another. Use for license transfers when a customer needs to move their purchase to a different email. Transfers within 14 days are auto-approved, older transfers require human approval.',
+    inputSchema: z.object({
+      purchaseId: z.string().describe('Purchase ID to transfer'),
+      appId: z.string().describe('App identifier'),
+      fromUserId: z.string().describe('Current owner user ID'),
+      toEmail: z.string().email().describe('Email of the new owner'),
+      reason: z.string().describe('Reason for the transfer'),
+    }),
+    execute: async ({ purchaseId, appId, fromUserId, toEmail, reason }) => {
+      // Tool execution is deferred to approval flow
+      // This just captures the intent for HITL processing
+      // The app will process the actual transfer via SDK
+      return {
+        status: 'pending_approval',
+        purchaseId,
+        appId,
+        fromUserId,
+        toEmail,
+        reason,
+        message: 'Transfer request submitted for approval',
+      }
+    },
+  }),
 }
 
 /** Available models via AI Gateway */
