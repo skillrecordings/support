@@ -28,6 +28,12 @@ export type SupportInboundReceivedEvent = {
       conversation?: string
       message?: string
     }
+    /** Optional: message body for testing/fallback (alias for body) */
+    messageBody?: string
+    /** Optional: customer email for testing/fallback (alias for senderEmail) */
+    customerEmail?: string
+    /** Optional: inbox ID from webhook */
+    inboxId?: string
   }
 }
 
@@ -91,8 +97,8 @@ export const SUPPORT_APPROVAL_DECIDED = 'support/approval.decided' as const
 export type SupportApprovalDecidedEvent = {
   name: typeof SUPPORT_APPROVAL_DECIDED
   data: {
-    /** Approval ID (same as actionId) */
-    approvalId: string
+    /** Action ID being decided on */
+    actionId: string
     /** Decision: approved or rejected */
     decision: 'approved' | 'rejected'
     /** User who made the decision */
