@@ -8,9 +8,30 @@ allowed-tools: Read, Grep, Glob, Edit, Write, Bash
 
 Adding a new app should be **"a `skill init` away"**. Each app implements the `SupportIntegration` interface.
 
+## Architecture Overview
+
+```
+Support Platform                          App Integration
+┌─────────────────┐                      ┌─────────────────┐
+│ Agent Tool      │  HTTPS + HMAC-SHA256 │ createSupport-  │
+│ (lookupUser,    │─────────────────────►│ Handler         │
+│  processRefund) │  x-signature header  │ (verifies sig)  │
+└────────┬────────┘                      └────────┬────────┘
+         │                                        │
+         ▼                                        ▼
+┌─────────────────┐                      ┌─────────────────┐
+│ IntegrationClient│                     │ SupportIntegration
+│ (signs requests) │                     │ (your impl)     │
+└─────────────────┘                      └─────────────────┘
+```
+
 ## SupportIntegration Interface
 
+Import from `@skillrecordings/sdk/integration`:
+
 ```typescript
+import type { SupportIntegration } from '@skillrecordings/sdk/integration'
+
 export interface SupportIntegration {
   // Required: User lookup
   lookupUser(email: string): Promise<User | null>
@@ -39,15 +60,8 @@ export interface SupportIntegration {
   }): Promise<{ url: string }>
 
   // Optional: Profile updates
-  updateEmail?(params: {
-    userId: string
-    newEmail: string
-  }): Promise<ActionResult>
-
-  updateName?(params: {
-    userId: string
-    newName: string
-  }): Promise<ActionResult>
+  updateEmail?(params: { userId: string; newEmail: string }): Promise<ActionResult>
+  updateName?(params: { userId: string; newName: string }): Promise<ActionResult>
 
   // Optional: Team features
   getClaimedSeats?(bulkCouponId: string): Promise<ClaimedSeat[]>
@@ -56,45 +70,64 @@ export interface SupportIntegration {
 
 ## Type Definitions
 
+Import from `@skillrecordings/sdk/types`:
+
 ```typescript
 export interface User {
   id: string
   email: string
   name?: string
-  createdAt: Date
+  createdAt?: Date
 }
 
 export interface Purchase {
   id: string
+  userId: string
   productId: string
-  productName: string
+  productName?: string
   purchasedAt: Date
   amount: number
-  currency: string
+  currency?: string
   stripeChargeId?: string
   status: 'active' | 'refunded' | 'transferred'
 }
 
-export interface RefundRequest {
-  purchaseId: string
-  reason: string
-  amount?: number  // Partial refund
+export interface Subscription {
+  id: string
+  userId: string
+  productId: string
+  status: 'active' | 'canceled' | 'past_due' | 'trialing'
+  currentPeriodEnd: Date
+  cancelAtPeriodEnd: boolean
 }
 
-export interface RefundResult {
+export interface ActionResult {
   success: boolean
-  refundId?: string
-  error?: string
+  message?: string
 }
 ```
 
-## Next.js Route Adapter
+## HMAC Signature Verification
+
+Requests from the support platform include an `x-signature` header:
+
+```
+x-signature: timestamp=1737163200,v1=<hex_signature>
+```
+
+**Payload to sign:** `${timestamp}.${JSON.stringify(body)}`
+
+The handler verifies:
+1. Signature matches HMAC-SHA256(payload, webhook_secret)
+2. Timestamp is within 5 minutes (replay protection)
+
+## Next.js Route Handler
 
 ```typescript
-import { createSupportHandler } from '@support/sdk'
-import type { SupportIntegration } from '@support/sdk'
+// app/api/support/route.ts
+import { createSupportHandler } from '@skillrecordings/sdk/handler'
+import type { SupportIntegration } from '@skillrecordings/sdk/integration'
 
-// Implement integration for your app
 const integration: SupportIntegration = {
   async lookupUser(email) {
     return db.user.findUnique({ where: { email } })
@@ -113,7 +146,7 @@ const integration: SupportIntegration = {
     const toUser = await db.user.findUnique({ where: { email: toEmail } })
     await db.purchase.update({
       where: { id: purchaseId },
-      data: { userId: toUser.id }
+      data: { userId: toUser.id, status: 'transferred' }
     })
     return { success: true }
   },
@@ -123,10 +156,14 @@ const integration: SupportIntegration = {
   },
 }
 
-// Create route handlers
-export const { GET, POST } = createSupportRoutes(integration, {
+// Create handler - handles signature verification automatically
+const handler = createSupportHandler(integration, {
   webhookSecret: process.env.SUPPORT_WEBHOOK_SECRET!,
 })
+
+export async function POST(request: Request) {
+  return handler(request)
+}
 ```
 
 ## App Registration
@@ -140,7 +177,7 @@ Each app needs an entry in the `apps` table:
   front_inbox_id: 'inb_xxx',
   stripe_account_id: 'acct_xxx',
   integration_base_url: 'https://totaltypescript.com/api/support',
-  webhook_secret: 'whsec_xxx',
+  webhook_secret: 'whsec_xxx',  // Shared secret for HMAC signing
   capabilities: ['refund', 'transfer', 'magic_link'],
   auto_approve_refund_days: 30,
   auto_approve_transfer_days: 14,
@@ -150,11 +187,32 @@ Each app needs an entry in the `apps` table:
 
 ## File Locations
 
-- SDK types: `packages/sdk/src/types.ts`
-- Adapter interface: `packages/sdk/src/adapter.ts`
-- CLI scaffolding: `packages/cli/src/commands/init.ts`
+| File | Purpose |
+|------|---------|
+| `packages/sdk/src/types.ts` | User, Purchase, Subscription, ActionResult types |
+| `packages/sdk/src/integration.ts` | SupportIntegration interface |
+| `packages/sdk/src/handler.ts` | createSupportHandler factory |
+| `packages/sdk/src/client.ts` | IntegrationClient (used by core) |
+| `packages/core/src/services/app-registry.ts` | App config lookup with 5-min TTL cache |
+
+## Package Exports
+
+```typescript
+// Types
+import type { User, Purchase, ActionResult } from '@skillrecordings/sdk/types'
+
+// Interface
+import type { SupportIntegration } from '@skillrecordings/sdk/integration'
+
+// Handler (for app implementations)
+import { createSupportHandler } from '@skillrecordings/sdk/handler'
+
+// Client (used internally by core)
+import { IntegrationClient } from '@skillrecordings/sdk/client'
+```
 
 ## Reference Docs
 
 For full details, see:
 - `docs/support-app-prd/67-sdk.md`
+- `docs/ARCHITECTURE.md` (SDK Integration Flow section)
