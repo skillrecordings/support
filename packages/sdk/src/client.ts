@@ -1,12 +1,12 @@
-import { createHmac } from 'node:crypto';
+import { createHmac } from 'node:crypto'
 import type {
-  SupportIntegration,
-  User,
-  Purchase,
-  Subscription,
   ActionResult,
   ClaimedSeat,
-} from './integration';
+  Purchase,
+  Subscription,
+  SupportIntegration,
+  User,
+} from './integration'
 
 /**
  * Client for calling app integration endpoints with HMAC-signed requests.
@@ -27,13 +27,13 @@ import type {
  * ```
  */
 export class IntegrationClient implements SupportIntegration {
-  private readonly baseUrl: string;
-  private readonly webhookSecret: string;
+  private readonly baseUrl: string
+  private readonly webhookSecret: string
 
   constructor(config: { baseUrl: string; webhookSecret: string }) {
     // Strip trailing slash for consistent URL construction
-    this.baseUrl = config.baseUrl.replace(/\/$/, '');
-    this.webhookSecret = config.webhookSecret;
+    this.baseUrl = config.baseUrl.replace(/\/$/, '')
+    this.webhookSecret = config.webhookSecret
   }
 
   /**
@@ -43,21 +43,21 @@ export class IntegrationClient implements SupportIntegration {
    * Signature is computed as: HMAC-SHA256(timestamp + "." + body, secret)
    */
   private generateSignature(body: string): string {
-    const timestamp = Math.floor(Date.now() / 1000);
-    const signedPayload = `${timestamp}.${body}`;
+    const timestamp = Math.floor(Date.now() / 1000)
+    const signedPayload = `${timestamp}.${body}`
     const signature = createHmac('sha256', this.webhookSecret)
       .update(signedPayload)
-      .digest('hex');
+      .digest('hex')
 
-    return `t=${timestamp},v1=${signature}`;
+    return `t=${timestamp},v1=${signature}`
   }
 
   /**
    * Make signed POST request to app integration endpoint.
    */
   private async request<T>(endpoint: string, payload: unknown): Promise<T> {
-    const body = JSON.stringify(payload);
-    const signature = this.generateSignature(body);
+    const body = JSON.stringify(payload)
+    const signature = this.generateSignature(body)
 
     const response = await fetch(`${this.baseUrl}${endpoint}`, {
       method: 'POST',
@@ -66,79 +66,81 @@ export class IntegrationClient implements SupportIntegration {
         'X-Support-Signature': signature,
       },
       body,
-    });
+    })
 
     if (!response.ok) {
       // Try to extract error message from response body
-      let errorMessage: string | undefined;
+      let errorMessage: string | undefined
       try {
-        const errorBody = await response.json();
+        const errorBody = (await response.json()) as { error?: string }
         if (errorBody?.error) {
-          errorMessage = errorBody.error;
+          errorMessage = errorBody.error
         }
       } catch {
         // If JSON parsing fails, ignore and use status text
       }
 
       if (errorMessage) {
-        throw new Error(errorMessage);
+        throw new Error(errorMessage)
       }
-      throw new Error(`Integration request failed: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `Integration request failed: ${response.status} ${response.statusText}`
+      )
     }
 
-    return response.json();
+    return (await response.json()) as T
   }
 
   async lookupUser(email: string): Promise<User | null> {
-    return this.request('/api/support/lookup-user', { email });
+    return this.request('/api/support/lookup-user', { email })
   }
 
   async getPurchases(userId: string): Promise<Purchase[]> {
-    return this.request('/api/support/get-purchases', { userId });
+    return this.request('/api/support/get-purchases', { userId })
   }
 
   async getSubscriptions(userId: string): Promise<Subscription[]> {
-    return this.request('/api/support/get-subscriptions', { userId });
+    return this.request('/api/support/get-subscriptions', { userId })
   }
 
   async revokeAccess(params: {
-    purchaseId: string;
-    reason: string;
-    refundId: string;
+    purchaseId: string
+    reason: string
+    refundId: string
   }): Promise<ActionResult> {
-    return this.request('/api/support/revoke-access', params);
+    return this.request('/api/support/revoke-access', params)
   }
 
   async transferPurchase(params: {
-    purchaseId: string;
-    fromUserId: string;
-    toEmail: string;
+    purchaseId: string
+    fromUserId: string
+    toEmail: string
   }): Promise<ActionResult> {
-    return this.request('/api/support/transfer-purchase', params);
+    return this.request('/api/support/transfer-purchase', params)
   }
 
   async generateMagicLink(params: {
-    email: string;
-    expiresIn: number;
+    email: string
+    expiresIn: number
   }): Promise<{ url: string }> {
-    return this.request('/api/support/generate-magic-link', params);
+    return this.request('/api/support/generate-magic-link', params)
   }
 
   async updateEmail(params: {
-    userId: string;
-    newEmail: string;
+    userId: string
+    newEmail: string
   }): Promise<ActionResult> {
-    return this.request('/api/support/update-email', params);
+    return this.request('/api/support/update-email', params)
   }
 
   async updateName(params: {
-    userId: string;
-    newName: string;
+    userId: string
+    newName: string
   }): Promise<ActionResult> {
-    return this.request('/api/support/update-name', params);
+    return this.request('/api/support/update-name', params)
   }
 
   async getClaimedSeats(bulkCouponId: string): Promise<ClaimedSeat[]> {
-    return this.request('/api/support/get-claimed-seats', { bulkCouponId });
+    return this.request('/api/support/get-claimed-seats', { bulkCouponId })
   }
 }
