@@ -25,13 +25,17 @@ import { getConversationContext } from './get-conversation-context'
 import { lookupUser } from './lookup-user'
 import { processRefund } from './process-refund'
 import { searchKnowledge } from './search-knowledge'
+import { lookupCharge } from './stripe-lookup-charge'
 import { getPaymentHistory } from './stripe-payment-history'
 import { getSubscriptionStatus } from './stripe-subscription-status'
+import { verifyRefund } from './stripe-verify-refund'
 
 // Re-export individual tools for direct import
 export { processRefund } from './process-refund'
 export { getPaymentHistory } from './stripe-payment-history'
+export { lookupCharge } from './stripe-lookup-charge'
 export { getSubscriptionStatus } from './stripe-subscription-status'
+export { verifyRefund } from './stripe-verify-refund'
 
 /**
  * Aggregated support tools object
@@ -43,5 +47,7 @@ export const supportTools = {
   searchKnowledge,
   processRefund,
   getPaymentHistory,
+  lookupCharge,
   getSubscriptionStatus,
+  verifyRefund,
 }

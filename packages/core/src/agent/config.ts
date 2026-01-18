@@ -221,6 +221,48 @@ export const agentTools = {
     },
   }),
 
+  lookupCharge: tool({
+    description:
+      'Lookup a specific charge by ID via Stripe Connect. Returns charge details including amount, status, refund status, and customer. Use when you have a specific charge ID to investigate.',
+    inputSchema: z.object({
+      chargeId: z.string().describe('Stripe charge ID (starts with ch_)'),
+    }),
+    execute: async ({ chargeId }, context) => {
+      // Import dynamically to avoid circular dependencies
+      const { lookupCharge } = await import('../tools/stripe-lookup-charge')
+      // Note: Tool expects stripeAccountId in context.appConfig
+      const result = await lookupCharge.execute(
+        { chargeId },
+        context as any // Context should have appConfig.stripeAccountId
+      )
+      if (result.success) {
+        return result.data
+      }
+      return { error: result.error.message, charge: null }
+    },
+  }),
+
+  verifyRefund: tool({
+    description:
+      'Verify refund status via Stripe Connect. Returns refund details including status, amount, charge ID, and reason. Use to confirm a refund was processed after an app notifies us.',
+    inputSchema: z.object({
+      refundId: z.string().describe('Stripe refund ID (starts with re_)'),
+    }),
+    execute: async ({ refundId }, context) => {
+      // Import dynamically to avoid circular dependencies
+      const { verifyRefund } = await import('../tools/stripe-verify-refund')
+      // Note: Tool expects stripeAccountId in context.appConfig
+      const result = await verifyRefund.execute(
+        { refundId },
+        context as any // Context should have appConfig.stripeAccountId
+      )
+      if (result.success) {
+        return result.data
+      }
+      return { error: result.error.message, refund: null }
+    },
+  }),
+
   transferPurchase: tool({
     description:
       'Transfer a purchase from one user to another. Use for license transfers when a customer needs to move their purchase to a different email. Transfers within 14 days are auto-approved, older transfers require human approval.',
