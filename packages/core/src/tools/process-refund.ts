@@ -100,7 +100,9 @@ export const processRefund = createTool({
     //   refundId: refund.id,
     // })
 
+    // TODO(REMOVE-STUB): Replace with real Stripe Connect refund API call
     // Stub implementation for testing HITL flow
+    console.warn('[processRefund] Using STUB - implement Stripe Connect')
     console.log('[processRefund] Executing refund:', {
       purchaseId,
       appId,
