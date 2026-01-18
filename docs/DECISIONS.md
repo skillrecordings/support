@@ -16,3 +16,4 @@ Record non-trivial decisions here. Keep entries short and dated.
 - Drizzle operators re-exported from `@skillrecordings/database` to avoid version conflicts between packages.
 - t3-env `skipValidation` enabled for test environments (VITEST, NODE_ENV=test).
 - AI SDK v6: Use `inputSchema` not `parameters`, `stopWhen: stepCountIs(n)` not `maxSteps`, `ModelMessage` not `CoreMessage`. Skill at `.claude/skills/ai-sdk/`.
+- Added Phase 8 for routing + caching + canned responses + evals to reduce inference costs and enforce quality gates.

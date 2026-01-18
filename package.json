@@ -15,17 +15,25 @@
     "ci:publish": "changeset publish",
     "db:generate": "drizzle-kit generate --config=packages/database/drizzle.config.ts",
     "db:migrate": "drizzle-kit migrate --config=packages/database/drizzle.config.ts",
-    "db:studio": "drizzle-kit studio --config=packages/database/drizzle.config.ts"
+    "db:studio": "drizzle-kit studio --config=packages/database/drizzle.config.ts",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.0",
     "@changesets/cli": "^2.29.8",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "oxlint": "^0.15.0",
     "prettier": "^3.7.4",
     "turbo": "^2.7.5",
     "turbo-ignore": "^2.7.5",
     "typescript": "5.9.2",
     "vitest": "^3.0.0"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json,md,mdx,css,scss,yml,yaml}": [
+      "node scripts/lint-staged-biome.mjs"
+    ]
   },
   "engines": {
     "node": ">=18"

@@ -13,6 +13,7 @@
 - TDD required: red → green → refactor
 - Prefer targeted tests over repo-wide
 - Add tests alongside the change that requires them
+- Typecheck policy: types always pass; fix or revert, no “pre-existing errors”
 
 ## Tooling
 - Prefer official CLIs for config/scaffolding
