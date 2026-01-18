@@ -9,6 +9,8 @@
  */
 
 import { inngest } from './client'
+import { allWorkflows } from './workflows'
+
 export { inngest }
 export type { Events } from './events'
 export {
@@ -22,7 +24,7 @@ export {
  * All workflow functions for the support platform.
  * Populated by ./workflows/index.ts when workflows are implemented.
  */
-export const allWorkflows: Array<unknown> = []
+export { allWorkflows }
 
 /**
  * Create serve handler for Inngest workflows.
@@ -42,6 +44,7 @@ export const allWorkflows: Array<unknown> = []
 export function createServeHandler() {
   // Dynamic import to avoid loading serve at module level
   // serve() is framework-specific (Next.js, Express, etc.)
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { serve } = require('inngest/next')
 
   return serve({

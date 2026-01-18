@@ -17,4 +17,8 @@ describe('packages/core', () => {
   it('exports registry module', () => {
     expect(core).toHaveProperty('registry')
   })
+
+  it('exports webhooks module', () => {
+    expect(core).toHaveProperty('webhooks')
+  })
 })

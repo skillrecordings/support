@@ -1,16 +1,37 @@
+import { randomBytes } from 'node:crypto'
+import { createInterface } from 'node:readline'
+
 /**
- * Initialize command for creating new app integrations
- * @param name - Optional name for the integration
+ * Prompt user for app name interactively
+ */
+async function promptForName(): Promise<string> {
+	const rl = createInterface({
+		input: process.stdin,
+		output: process.stdout,
+	})
+
+	return new Promise((resolve) => {
+		rl.question('App name: ', (answer) => {
+			rl.close()
+			resolve(answer.trim() || 'my-app')
+		})
+	})
+}
+
+/**
+ * Initialize command for registering new app with webhook secret
+ * @param name - Optional name for the app
  */
 export async function init(name?: string): Promise<void> {
-  const integrationName = name || 'my-app';
+	const appName = name || (await promptForName())
+	const webhookSecret = randomBytes(32).toString('hex')
 
-  console.log(`🚀 Initializing new app integration: ${integrationName}`);
-  console.log('📦 This is a placeholder - scaffolding functionality coming soon!');
+	// TODO: Save to DB when database connection is configured
+	// For now, output the values for manual configuration
 
-  // TODO: Implement actual scaffolding logic
-  // - Create integration directory structure
-  // - Generate config files
-  // - Set up package.json
-  // - Create initial templates
+	console.log(`\n✓ App "${appName}" initialized\n`)
+	console.log(`Webhook URL: https://your-domain.com/api/webhooks/front`)
+	console.log(`Webhook Secret: ${webhookSecret}`)
+	console.log(`\nAdd to your .env:`)
+	console.log(`FRONT_WEBHOOK_SECRET=${webhookSecret}`)
 }
