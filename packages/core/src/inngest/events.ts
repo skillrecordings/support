@@ -5,6 +5,8 @@
  * Event names are exported as const for type safety.
  */
 
+import type Stripe from 'stripe'
+
 /** Event emitted when an inbound support message is received from Front */
 export const SUPPORT_INBOUND_RECEIVED = 'support/inbound.received' as const
 
@@ -110,6 +112,42 @@ export type SupportApprovalDecidedEvent = {
   }
 }
 
+/** Event emitted when a Stripe webhook event is received */
+export const STRIPE_EVENT_RECEIVED = 'stripe/event.received' as const
+
+export type StripeEventReceivedEvent = {
+  name: typeof STRIPE_EVENT_RECEIVED
+  data: {
+    /** Stripe event type (e.g., charge.refunded) */
+    type: string
+    /** Stripe event data object */
+    data: Stripe.Event['data']['object']
+    /** Stripe Connect account ID if from connected account */
+    accountId?: string
+  }
+}
+
+/** Event emitted when a Stripe refund is successfully completed */
+export const STRIPE_REFUND_COMPLETED = 'stripe/refund.completed' as const
+
+export type StripeRefundCompletedEvent = {
+  name: typeof STRIPE_REFUND_COMPLETED
+  data: {
+    /** Refund ID */
+    refundId: string
+    /** Charge ID that was refunded */
+    chargeId: string
+    /** Amount refunded in cents */
+    amount: number
+    /** Currency code */
+    currency: string
+    /** Stripe Connect account ID if applicable */
+    accountId?: string
+    /** Associated conversation ID if known */
+    conversationId?: string
+  }
+}
+
 /**
  * Union of all support platform events.
  * Used to type the Inngest client.
@@ -120,4 +158,6 @@ export type Events = {
   [SUPPORT_ACTION_APPROVED]: SupportActionApprovedEvent
   [SUPPORT_ACTION_REJECTED]: SupportActionRejectedEvent
   [SUPPORT_APPROVAL_DECIDED]: SupportApprovalDecidedEvent
+  [STRIPE_EVENT_RECEIVED]: StripeEventReceivedEvent
+  [STRIPE_REFUND_COMPLETED]: StripeRefundCompletedEvent
 }

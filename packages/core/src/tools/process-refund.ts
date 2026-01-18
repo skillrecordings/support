@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import Stripe from 'stripe'
 import { createTool } from './create-tool'
 import { IntegrationClient } from '@skillrecordings/sdk/client'
 import { getApp } from '@skillrecordings/core/services/app-registry'
@@ -78,20 +79,71 @@ export const processRefund = createTool({
       throw new Error(`App not found: ${appId}`)
     }
 
-    // TODO(REMOVE-STUB): Replace with real Stripe Connect refund API call
-    // Stub Stripe refund for testing HITL flow
-    console.warn('[processRefund] Using STUB for Stripe Connect - implement real refund')
-    console.log('[processRefund] Executing refund:', {
-      purchaseId,
-      appId,
-      reason,
-      approvalId: context.approvalId,
-      traceId: context.traceId,
+    // Validate app has Stripe Connect account
+    if (!app.stripe_account_id) {
+      throw new Error(`App ${appId} is not connected to Stripe`)
+    }
+
+    // Find the purchase to get Stripe charge ID
+    const purchase = context.purchases.find((p) => p.id === purchaseId)
+    if (!purchase) {
+      throw new Error(`Purchase not found: ${purchaseId}`)
+    }
+    if (!purchase.stripeChargeId) {
+      throw new Error(`Purchase ${purchaseId} has no Stripe charge ID`)
+    }
+
+    // Initialize Stripe client
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+      apiVersion: '2025-02-24.acacia',
     })
 
-    const stubRefundId = `re_stub_${Date.now()}`
+    // Generate deterministic idempotency key
+    const idempotencyKey = `refund:${purchaseId}:${context.approvalId}`
 
-    // Real implementation: Call revokeAccess via IntegrationClient
+    // Execute Stripe refund via Connect
+    let refund: Stripe.Refund
+    try {
+      refund = await stripe.refunds.create(
+        {
+          charge: purchase.stripeChargeId,
+          reason: 'requested_by_customer',
+        },
+        {
+          stripeAccount: app.stripe_account_id,
+          idempotencyKey,
+        }
+      )
+    } catch (err) {
+      // Handle Stripe errors
+      if (err && typeof err === 'object' && 'type' in err) {
+        const stripeError = err as { type: string; code?: string; message?: string }
+
+        if (stripeError.type === 'StripeInvalidRequestError') {
+          if (stripeError.code === 'charge_already_refunded') {
+            // Idempotent: charge already refunded
+            // Fetch the existing refund to get the amount
+            const charge = await stripe.charges.retrieve(purchase.stripeChargeId, {
+              stripeAccount: app.stripe_account_id,
+            })
+            refund = {
+              id: `re_already_${purchaseId}`,
+              amount: charge.amount_refunded,
+            } as Stripe.Refund
+          } else {
+            throw new Error(`Stripe refund failed: ${stripeError.message}`)
+          }
+        } else if (stripeError.type === 'StripePermissionError') {
+          throw new Error(`Not authorized to refund for app ${appId}`)
+        } else {
+          throw err
+        }
+      } else {
+        throw err
+      }
+    }
+
+    // Revoke access via IntegrationClient
     try {
       const client = new IntegrationClient({
         baseUrl: app.integration_base_url,
@@ -101,16 +153,16 @@ export const processRefund = createTool({
       const revokeResult = await client.revokeAccess({
         purchaseId,
         reason,
-        refundId: stubRefundId,
+        refundId: refund.id,
       })
 
       if (!revokeResult.success) {
-        throw new Error(revokeResult.message || 'Failed to revoke access')
+        throw new Error(revokeResult.error || 'Failed to revoke access')
       }
 
       return {
-        refundId: stubRefundId,
-        amountRefunded: 9900, // $99.00 stub
+        refundId: refund.id,
+        amountRefunded: refund.amount,
       }
     } catch (error) {
       throw error instanceof Error ? error : new Error('Failed to revoke access')
