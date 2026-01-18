@@ -1,6 +1,6 @@
 {
   "name": "@skillrecordings/sdk",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "private": false,
   "type": "module",
   "exports": {
@@ -27,6 +27,16 @@
     "./handler": {
       "types": "./dist/handler.d.ts",
       "import": "./dist/handler.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      ".": ["./dist/index.d.ts"],
+      "types": ["./dist/types.d.ts"],
+      "integration": ["./dist/integration.d.ts"],
+      "adapter": ["./dist/adapter.d.ts"],
+      "client": ["./dist/client.d.ts"],
+      "handler": ["./dist/handler.d.ts"]
     }
   },
   "files": ["dist"],
