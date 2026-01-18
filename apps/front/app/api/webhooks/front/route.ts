@@ -79,6 +79,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400 })
   }
 
+  // Log event type and structure for debugging
+  console.log('[front-webhook] Event:', {
+    type: event.type,
+    hasPayload: !!event.payload,
+    hasConversation: !!event.payload?.conversation || !!event.conversation,
+  })
+
   // Handle sync event (validation request)
   if (event.type === 'sync') {
     return NextResponse.json({ received: true })
@@ -88,6 +95,7 @@ export async function POST(request: NextRequest) {
   const conversationId =
     event.payload?.conversation?.id || event.conversation?.id
   if (!conversationId) {
+    console.log('[front-webhook] Missing conversation ID, payload:', JSON.stringify(event).slice(0, 500))
     return NextResponse.json(
       { error: 'Missing conversation ID' },
       { status: 400 },
@@ -98,6 +106,7 @@ export async function POST(request: NextRequest) {
   if (event.type === 'inbound_received') {
     const messageData = event.payload?.target?.data
     if (!messageData) {
+      console.log('[front-webhook] Missing message data, payload:', JSON.stringify(event.payload).slice(0, 500))
       return NextResponse.json(
         { error: 'Missing message data in inbound event' },
         { status: 400 },
@@ -107,6 +116,7 @@ export async function POST(request: NextRequest) {
     // Extract required fields for support/inbound.received event
     const senderEmail = messageData.author?.email
     if (!senderEmail) {
+      console.log('[front-webhook] Missing sender email, messageData:', JSON.stringify(messageData).slice(0, 500))
       return NextResponse.json(
         { error: 'Missing sender email' },
         { status: 400 },
