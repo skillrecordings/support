@@ -62,8 +62,10 @@ export const agentTools = {
       appId: z.string().describe('App identifier (e.g., total-typescript)'),
     }),
     execute: async ({ email, appId }) => {
-      // STUB: Return test data for now
-      // TODO: Implement via app registry
+      // TODO(REMOVE-STUB): Replace with real app registry lookup
+      // This stub returns fake data for HITL flow testing
+      // Real implementation: call appId's SDK adapter to fetch user + purchases
+      console.warn('[lookupUser] Using STUB data - implement real lookup')
       return {
         found: true,
         user: {
@@ -90,7 +92,8 @@ export const agentTools = {
       appId: z.string().describe('App to search within'),
     }),
     execute: async ({ query, appId }) => {
-      // TODO: Implement via Upstash Vector
+      // TODO(REMOVE-STUB): Implement via Upstash Vector hybrid search
+      console.warn('[searchKnowledge] Using STUB - implement Upstash Vector')
       return { results: [], message: 'Knowledge search not yet implemented' }
     },
   }),
