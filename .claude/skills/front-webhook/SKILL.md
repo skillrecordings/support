@@ -8,70 +8,133 @@ allowed-tools: Read, Grep, Glob, Edit, Write, Bash
 
 Front is the **source of truth for all conversations**. Every support interaction starts with a Front webhook.
 
-## Webhook Signature Verification
+## Key Insight: Webhooks Send PREVIEWS
 
-Use HMAC-SHA256 with Stripe-style format and replay protection:
+Front webhooks send **event previews**, NOT full data. You get:
+- IDs and `_links` for resources
+- Basic metadata
+
+You do NOT get:
+- Full message body
+- Author email address
+- Conversation history
+
+**Must fetch full data via Front API** using the `_links` in the preview.
+
+## Front Signature Verification
+
+Front uses a **different format** than Stripe-style:
 
 ```typescript
-// Header format: x-support-signature: t=[PHONE],v1=5257a869...,v1=oldkeysig...
+// Headers from Front:
+// x-front-signature: base64-encoded HMAC
+// x-front-request-timestamp: milliseconds
+// x-front-challenge: present during setup only
 
-function verifySignature(payload: string, header: string, secrets: string[]): boolean {
-  const { timestamp, signatures } = parseHeader(header)
+function verifyFrontSignature(timestamp: string, body: string, secret: string): string {
+  // Format: HMAC-SHA256(timestamp:body), base64 encoded
+  const baseString = Buffer.concat([
+    Buffer.from(`${timestamp}:`, 'utf8'),
+    Buffer.from(body, 'utf8'),
+  ]).toString()
+  return crypto.createHmac('sha256', secret).update(baseString).digest('base64')
+}
+```
 
-  // 5-minute replay protection
-  if (Date.now() - timestamp > 5 * 60 * 1000) return false
+## Challenge-Response for Setup
 
-  const signedPayload = `${timestamp}.${payload}`
+When creating/updating a webhook, Front sends a validation request:
+- Header: `x-front-challenge: <random-string>`
+- Must respond with: `{"challenge": "<value>"}`
 
-  // Support multiple signatures for key rotation
-  return secrets.some(secret =>
-    signatures.some(sig =>
-      timingSafeEqual(hmacSha256(signedPayload, secret), Buffer.from(sig, 'hex'))
-    )
-  )
+```typescript
+if (result.challenge) {
+  return NextResponse.json({ challenge: result.challenge })
 }
 ```
 
 ## Webhook Handler Pattern
 
 ```typescript
-export async function handleFrontWebhook(req: Request) {
-  // 1. Verify signature
-  const verified = await verifySupportSignature(req)
-  if (!verified) return new Response('Unauthorized', { status: 401 })
+export async function POST(request: NextRequest) {
+  const payload = await request.text()
+  const secret = process.env.FRONT_WEBHOOK_SECRET
 
-  // 2. Parse event and find app
-  const event = await parseFrontEvent(req)
-  const app = await appRegistry.findByFrontInbox(event.inboxId)
-  if (!app) return new Response('Unknown inbox', { status: 404 })
+  // Build headers object
+  const headers: Record<string, string> = {}
+  request.headers.forEach((value, key) => { headers[key] = value })
 
-  // 3. Dispatch to Inngest for durable processing
-  await inngest.send({
-    name: 'front/event.received',
-    data: { event, appId: app.id }
-  })
+  // Verify signature
+  const result = verifyFrontWebhook(payload, headers, { secret })
+  if (!result.valid) {
+    return NextResponse.json({ error: result.error }, { status: 401 })
+  }
 
-  return new Response('OK', { status: 200 })
+  // Handle challenge during setup
+  if (result.challenge) {
+    return NextResponse.json({ challenge: result.challenge })
+  }
+
+  // Parse and dispatch to Inngest
+  const event = JSON.parse(payload)
+  if (event.type === 'inbound_received') {
+    await inngest.send({
+      name: SUPPORT_INBOUND_RECEIVED,
+      data: {
+        conversationId: event.payload.conversation.id,
+        messageId: event.payload.target.data.id,
+        _links: {
+          message: event.payload.target.data._links?.self,
+          conversation: event.payload.conversation._links?.self,
+        },
+      },
+    })
+  }
+
+  return NextResponse.json({ received: true })
 }
 ```
 
-## Front Event Types
+## Front Event Types (Application Webhooks)
 
-| Event | Trigger | Action |
-|-------|---------|--------|
-| `inbound_received` | New customer message | Classify, extract intent, propose response/action |
-| `outbound_sent` | Agent sends message | Log, update state, detect promises made |
-| `assignee_changed` | Conversation reassigned | Handoff context to new agent |
-| `tag_added` | Tag applied | Trigger workflows (e.g., "urgent" → Slack escalation) |
+| Webhook Event | API Event | Description |
+|--------------|-----------|-------------|
+| `inbound_received` | `inbound` | Incoming message |
+| `outbound_sent` | `outbound` | Outbound message sent |
+| `conversation_archived` | `archive` | Conversation archived |
+| `conversation_reopened` | `reopen` | Conversation reopened |
+| `assignee_changed` | `assign`/`unassign` | Assignee changed |
+| `tag_added` | `tag` | Tag added |
+| `tag_removed` | `untag` | Tag removed |
+
+## Fetching Full Data
+
+```typescript
+const front = createFrontClient(process.env.FRONT_API_TOKEN)
+
+// Fetch full message
+const message = await front.getMessage(messageId)
+// message.body, message.author.email now available
+
+// Fetch conversation history
+const history = await front.getConversationMessages(conversationId)
+```
 
 ## File Locations
 
-- Webhook handler: `apps/front/app/api/front/webhook/route.ts`
-- Event types: `packages/core/src/types/front.ts`
+- Webhook handler: `apps/front/app/api/webhooks/front/route.ts`
+- Front API client: `packages/core/src/front/client.ts`
 - Signature verification: `packages/core/src/webhooks/verify.ts`
+- Event types reference: `docs/FRONT-EVENTS.md`
+
+## Environment Variables
+
+```bash
+FRONT_WEBHOOK_SECRET=  # App signing key (32-char hex)
+FRONT_API_TOKEN=       # API token for fetching data
+```
 
 ## Reference Docs
 
-For full details, see:
-- `docs/support-app-prd/62-event-ingestion.md`
-- `docs/support-app-prd/63-webhook-signing.md`
+- `docs/FRONT-EVENTS.md` - Event types and payload structure
+- `docs/support-app-prd/76-front-integration.md` - Full integration spec
