@@ -200,6 +200,25 @@ runtimeEnv: {
 },
 ```
 
+### 5.6 Add to turbo.json (Turborepo monorepos)
+
+For Turborepo monorepos, add the env var to the build task's `env` array:
+
+```json
+{
+  "tasks": {
+    "build": {
+      "env": [
+        "...existing vars...",
+        "SUPPORT_WEBHOOK_SECRET"
+      ]
+    }
+  }
+}
+```
+
+Without this, Turbo won't pass the env var to the build and you'll get warnings.
+
 ## Step 6: Verify Integration
 
 Test the endpoint is reachable:
