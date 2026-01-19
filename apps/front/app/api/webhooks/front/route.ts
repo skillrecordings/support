@@ -189,6 +189,8 @@ export async function POST(request: NextRequest) {
         body: '', // Must fetch via Front API
         senderEmail: '', // Must fetch via Front API
         appId: appSlug,
+        // Include inbox ID for draft creation (required by Front API)
+        inboxId: inboxId || '',
         // Include links for API fetching
         _links: {
           conversation: event.payload?.conversation?._links?.self,

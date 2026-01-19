@@ -139,14 +139,21 @@ export function createFrontClient(apiToken: string) {
     /**
      * Create a draft reply in a conversation
      * Docs: https://dev.frontapp.com/reference/create-draft
+     *
+     * @param conversationId - Front conversation ID
+     * @param body - Draft message body
+     * @param channelId - Front channel/inbox ID (required by Front API)
+     * @param options - Optional author_id
      */
     async createDraft(
       conversationId: string,
       body: string,
+      channelId: string,
       options?: { authorId?: string }
     ): Promise<{ id: string; conversation_id: string }> {
       return postJson(`/conversations/${conversationId}/drafts`, {
         body,
+        channel_id: channelId,
         author_id: options?.authorId,
       })
     },
