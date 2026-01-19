@@ -9,7 +9,6 @@ import { init } from './commands/init'
 import { registerEventsCommands } from './commands/inngest/events'
 import { registerRunsCommands } from './commands/inngest/runs'
 import { registerSignalCommand } from './commands/inngest/signal'
-import { registerSkillCommands } from './commands/skill/index'
 import { wizard } from './commands/wizard'
 
 const program = new Command()
@@ -98,8 +97,5 @@ registerSignalCommand(program)
 
 // Register Front commands
 registerFrontCommands(program)
-
-// Register skill management commands
-registerSkillCommands(program)
 
 program.parse()
