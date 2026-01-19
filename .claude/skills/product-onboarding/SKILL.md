@@ -339,25 +339,32 @@ function mapPurchaseStatus(status: string): 'active' | 'refunded' | 'transferred
 }
 ```
 
-### Route Handler with Runtime Check
+### Route Handler (Request-Time Check)
 
-The `SUPPORT_WEBHOOK_SECRET` env var is optional (app builds without it), but required at runtime:
+**IMPORTANT**: Check the env var at request time, not module load time. Top-level throws break the build.
 
 ```typescript
+import { NextRequest, NextResponse } from 'next/server'
 import { env } from '@/env.mjs'
 import { createSupportHandler } from '@skillrecordings/sdk/handler'
 import { integration } from '../integration'
 
-if (!env.SUPPORT_WEBHOOK_SECRET) {
-  throw new Error('SUPPORT_WEBHOOK_SECRET is required')
+export async function POST(request: NextRequest) {
+  // Check at request time, not build time
+  if (!env.SUPPORT_WEBHOOK_SECRET) {
+    return NextResponse.json(
+      { error: 'Support integration not configured' },
+      { status: 503 },
+    )
+  }
+
+  const handler = createSupportHandler({
+    integration,
+    webhookSecret: env.SUPPORT_WEBHOOK_SECRET,
+  })
+
+  return handler(request)
 }
-
-const handler = createSupportHandler({
-  integration,
-  webhookSecret: env.SUPPORT_WEBHOOK_SECRET,
-})
-
-export { handler as POST }
 ```
 
 ## Checklist
