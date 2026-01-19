@@ -328,6 +328,7 @@ export function createFrontClient(apiToken: string) {
           body,
           channel_id: channelId,
           author_id: options?.authorId,
+          mode: 'shared', // Make draft visible to all teammates, not just API user
         },
         FrontDraftResponseSchema
       )
