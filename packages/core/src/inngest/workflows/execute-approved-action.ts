@@ -5,6 +5,7 @@ import {
   eq,
   getDb,
 } from '@skillrecordings/database'
+import { createFrontClient } from '../../front'
 import { supportTools } from '../../tools'
 import type { ExecutionContext } from '../../tools/types'
 import { inngest } from '../client'
@@ -45,9 +46,49 @@ export const executeApprovedAction = inngest.createFunction(
       return actionRecord
     })
 
-    // Step 2: Execute the tool with stored parameters
-    const result = await step.run('execute-tool', async () => {
-      // Extract tool calls from action parameters
+    // Step 2: Execute based on action type
+    const result = await step.run('execute-action', async () => {
+      // Handle draft-response: create draft in Front
+      if (action.type === 'draft-response') {
+        const params = action.parameters as { response?: string }
+        const response = params?.response
+
+        if (!response) {
+          return {
+            success: false,
+            output: null,
+            error: 'No response text in draft-response action',
+          }
+        }
+
+        const frontToken = process.env.FRONT_API_TOKEN
+        if (!frontToken) {
+          return {
+            success: false,
+            output: null,
+            error: 'FRONT_API_TOKEN not configured',
+          }
+        }
+
+        const front = createFrontClient(frontToken)
+        const conversationId = action.conversation_id
+        if (!conversationId) {
+          return {
+            success: false,
+            output: null,
+            error: 'No conversation_id in action',
+          }
+        }
+
+        const draft = await front.createDraft(conversationId, response)
+        return {
+          success: true,
+          output: { draftId: draft.id, conversationId },
+          error: undefined,
+        }
+      }
+
+      // Handle tool execution (processRefund, etc.)
       const params = action.parameters as {
         toolCalls?: Array<{ name: string; args: Record<string, unknown> }>
       }
@@ -123,7 +164,11 @@ export const executeApprovedAction = inngest.createFunction(
         .set({
           executed_at: new Date(),
           result: result.output ? { results: result.output } : null,
-          error: result.success ? null : result.error,
+          error: result.success
+            ? null
+            : 'error' in result
+              ? result.error
+              : 'Unknown error',
         })
         .where(eq(ActionsTable.id, actionId))
 

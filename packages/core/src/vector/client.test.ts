@@ -26,8 +26,8 @@ const originalEnv = process.env
 beforeEach(() => {
   process.env = {
     ...originalEnv,
-    UPSTASH_VECTOR_URL: 'https://test-vector.upstash.io',
-    UPSTASH_VECTOR_TOKEN: 'test-token',
+    UPSTASH_VECTOR_REST_URL: 'https://test-vector.upstash.io',
+    UPSTASH_VECTOR_REST_TOKEN: 'test-token',
   }
   // Reset mocks between tests
   mockUpsert.mockClear()
@@ -56,25 +56,25 @@ describe('Vector Client', () => {
       expect(index1).toBe(index2)
     })
 
-    it('should throw if UPSTASH_VECTOR_URL is missing', async () => {
-      delete process.env.UPSTASH_VECTOR_URL
+    it('should throw if UPSTASH_VECTOR_REST_URL is missing', async () => {
+      delete process.env.UPSTASH_VECTOR_REST_URL
       vi.resetModules()
 
       const { getVectorIndex } = await import('./client')
 
       expect(() => getVectorIndex()).toThrow(
-        'UPSTASH_VECTOR_URL environment variable is required'
+        'UPSTASH_VECTOR_REST_URL environment variable is required'
       )
     })
 
-    it('should throw if UPSTASH_VECTOR_TOKEN is missing', async () => {
-      delete process.env.UPSTASH_VECTOR_TOKEN
+    it('should throw if UPSTASH_VECTOR_REST_TOKEN is missing', async () => {
+      delete process.env.UPSTASH_VECTOR_REST_TOKEN
       vi.resetModules()
 
       const { getVectorIndex } = await import('./client')
 
       expect(() => getVectorIndex()).toThrow(
-        'UPSTASH_VECTOR_TOKEN environment variable is required'
+        'UPSTASH_VECTOR_REST_TOKEN environment variable is required'
       )
     })
   })

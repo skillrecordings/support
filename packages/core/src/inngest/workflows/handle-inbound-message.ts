@@ -170,9 +170,31 @@ export const handleInboundMessage = inngest.createFunction(
       }
     })
 
-    // Step 4: Create draft in Front if response is ready
+    // Step 4: Create draft in Front and notify via Slack with rating buttons
     if (routingResult.type === 'response-ready' && routingResult.response) {
-      await step.run('create-draft', async () => {
+      // Create action record for tracking feedback
+      const actionId = randomUUID()
+      const db = getDb()
+
+      await step.run('create-draft-action', async () => {
+        await db.insert(ActionsTable).values({
+          id: actionId,
+          conversation_id: conversationId,
+          app_id: context.appId,
+          type: 'draft-response',
+          parameters: {
+            response: routingResult.response,
+            category:
+              agentResult.toolCalls.length > 0
+                ? 'tool-assisted'
+                : 'direct-response',
+          },
+          requires_approval: false, // Draft doesn't need approval, just feedback
+          created_at: new Date(),
+        })
+      })
+
+      const draftResult = await step.run('create-draft', async () => {
         const frontToken = process.env.FRONT_API_TOKEN
         if (!frontToken) {
           console.warn(
@@ -189,6 +211,78 @@ export const handleInboundMessage = inngest.createFunction(
         console.log('[workflow] Draft created:', draft.id)
         return { drafted: true, draftId: draft.id }
       })
+
+      // Notify Slack about the draft with rating buttons
+      if (draftResult.drafted) {
+        await step.run('notify-slack-draft', async () => {
+          const { postMessage } = await import('../../slack/client')
+          const channel = process.env.SLACK_APPROVAL_CHANNEL
+          if (!channel) {
+            console.warn('[workflow] SLACK_APPROVAL_CHANNEL not configured')
+            return { notified: false }
+          }
+
+          // Front conversation URL format
+          const frontUrl = `https://app.frontapp.com/open/${conversationId}`
+
+          // Block Kit blocks - cast needed due to @slack/web-api type restrictions
+          const blocks = [
+            {
+              type: 'section',
+              text: {
+                type: 'mrkdwn',
+                text: `*Draft Response Created*\n\nApp: *${context.appId}*\nCustomer: ${context.senderEmail || 'Unknown'}`,
+              },
+            },
+            {
+              type: 'section',
+              text: {
+                type: 'mrkdwn',
+                text: `*Draft preview:*\n>${routingResult.response.slice(0, 300).replace(/\n/g, '\n>')}${routingResult.response.length > 300 ? '...' : ''}`,
+              },
+            },
+            {
+              type: 'actions',
+              block_id: `draft_rating_${actionId}`,
+              elements: [
+                {
+                  type: 'button',
+                  text: { type: 'plain_text', text: 'Open in Front' },
+                  url: frontUrl,
+                  style: 'primary',
+                },
+                {
+                  type: 'button',
+                  action_id: `rate_good_${actionId}`,
+                  text: { type: 'plain_text', text: '👍 Good' },
+                  value: JSON.stringify({
+                    actionId,
+                    rating: 'good',
+                    appId: context.appId,
+                  }),
+                },
+                {
+                  type: 'button',
+                  action_id: `rate_bad_${actionId}`,
+                  text: { type: 'plain_text', text: '👎 Bad' },
+                  value: JSON.stringify({
+                    actionId,
+                    rating: 'bad',
+                    appId: context.appId,
+                  }),
+                },
+              ],
+            },
+          ] as const
+
+          await postMessage(channel, {
+            text: `Draft response created for ${context.appId}`,
+            blocks: blocks as unknown as import('@slack/web-api').Block[],
+          })
+
+          return { notified: true, channel, actionId }
+        })
+      }
     }
 
     return {
