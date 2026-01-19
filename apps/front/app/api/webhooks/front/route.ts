@@ -129,15 +129,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400 })
   }
 
-  // Log event for debugging
+  // Log event for debugging - include full source/target structure to understand shape
   console.log('[front-webhook] Event received:', {
     type: event.type,
     payloadType: event.payload?.type,
     conversationId: event.payload?.conversation?.id,
-    targetType: event.payload?.target?._meta?.type,
-    targetId: event.payload?.target?.data?.id,
-    sourceType: event.payload?.source?._meta?.type,
-    sourceId: event.payload?.source?.data?.id,
+    // Log full source to see actual structure
+    source: JSON.stringify(event.payload?.source),
+    // Log full target to see actual structure
+    target: JSON.stringify(event.payload?.target),
   })
 
   // Handle sync event (validation request)
