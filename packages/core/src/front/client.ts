@@ -126,7 +126,7 @@ const FrontConversationMessagesSchema = z.object({
 
 const FrontDraftResponseSchema = z.object({
   id: z.string(),
-  conversation_id: z.string(),
+  conversation_id: z.string().optional(),
 })
 
 // ============================================================================
