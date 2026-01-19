@@ -7,6 +7,7 @@ import {
 import { updateApprovalMessage } from '@skillrecordings/core/slack/client'
 import { recordOutcome } from '@skillrecordings/core/trust/feedback'
 import { ActionsTable, eq, getDb } from '@skillrecordings/database'
+import { VotingService } from '@skillrecordings/memory/voting'
 import type { SectionBlock } from '@slack/types'
 import { verifySlackSignature } from '../../../../lib/verify-signature'
 
