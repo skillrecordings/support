@@ -104,3 +104,4 @@ Payload to sign: `${timestamp}.${JSON.stringify(body)}`
 - `updateEmail({userId, newEmail})` - Change email
 - `updateName({userId, newName})` - Change name
 - `getClaimedSeats(bulkCouponId)` - Team seat management
+- `searchContent(request)` - Search product content for agent recommendations (SDK 0.3.0+)

@@ -188,7 +188,7 @@ export const POST = withSupportHandler(async (req) => {
       type: 'social',
       title: 'Matt on Twitter',
       description: 'Follow Matt for TypeScript tips',
-      url: 'https://twitter.com/maaborland',
+      url: 'https://x.com/mattpocockuk',
     },
   ]
 
@@ -501,7 +501,7 @@ export const POST = withSupportHandler(async (req) => {
     })),
     quickLinks: [
       { id: 'discord', type: 'social', title: 'Total TypeScript Discord', url: 'https://totaltypescript.com/discord' },
-      { id: 'twitter', type: 'social', title: 'Matt on Twitter', url: 'https://twitter.com/maattybot' },
+      { id: 'twitter', type: 'social', title: 'Matt on Twitter', url: 'https://x.com/mattpocockuk' },
     ],
   })
 })

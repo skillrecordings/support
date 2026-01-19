@@ -13,10 +13,13 @@ apps/
 packages/
   core/      Agent, router, tools, workflows, trust scoring, vector search
   database/  Drizzle ORM + PlanetScale schema
-  sdk/       Integration contract for product apps
+  sdk/       Integration contract for product apps (npm: @skillrecordings/sdk)
+  front-sdk/ Front API client
   cli/       Skill scaffolding CLI
+  memory/    Semantic memory (Hivemind)
   ui/        Shared React components
-  eslint-config/  Shared lint rules
+  eslint-config/     Shared lint rules
+  typescript-config/ Shared TS config
 ```
 
 ## Tech Stack
@@ -28,7 +31,7 @@ packages/
 - **Vector**: Upstash Vector (hybrid search)
 - **Cache/KV**: Upstash Redis
 - **LLM**: Claude via AI SDK (Haiku for classification, Sonnet for responses)
-- **Auth**: TBD (BetterAuth planned)
+- **Auth**: BetterAuth (planned, not yet implemented)
 - **Observability**: Axiom (traces), Langfuse (LLM)
 
 ## Commands

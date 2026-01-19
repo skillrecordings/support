@@ -6,7 +6,7 @@ SDK + Next adapter + first app integration.
 
 ## Deliverables
 
-- @skillrecordings/support-sdk
+- @skillrecordings/sdk
 - createSupportRoutes adapter
 - skill doctor/test commands
 - First app integration (TT)
