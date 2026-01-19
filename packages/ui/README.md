@@ -1,14 +1,19 @@
-# @skillrecordings/ui
+# packages/ui
 
-Shared UI primitives used across apps.
+Shared React components and primitives.
 
-## Purpose
-- Shared UI primitives only
-- App-specific components live in each app
+## Components
 
-## Key paths
-- `packages/ui/src/`
+Based on shadcn/ui patterns. Primitives only - app-specific components live in their respective apps.
 
-## Do / Don’t
-- Do keep primitives generic
-- Don’t couple to app-specific data models
+## Usage
+
+```typescript
+import { Button, Card, Input } from '@skillrecordings/ui'
+```
+
+## Stack
+
+- React 19
+- Tailwind CSS
+- Radix UI primitives
