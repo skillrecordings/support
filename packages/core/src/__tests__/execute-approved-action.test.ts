@@ -177,9 +177,9 @@ describe('executeApprovedAction workflow', () => {
         step: mockStep,
       })
 
-      // Verify execute-tool step was called
+      // Verify execute-action step was called
       expect(mockStep.run).toHaveBeenCalledWith(
-        'execute-tool',
+        'execute-action',
         expect.any(Function)
       )
 
