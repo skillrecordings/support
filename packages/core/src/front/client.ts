@@ -5,99 +5,143 @@
  * Docs: https://dev.frontapp.com/reference
  */
 
+import { z } from 'zod'
+
 const FRONT_API_BASE = 'https://api2.frontapp.com'
 
-export interface FrontMessage {
-  id: string
-  type: string
-  is_inbound: boolean
-  created_at: number
-  subject?: string
-  blurb: string
-  body: string
-  author?: {
-    id: string
-    email: string
-    name?: string
-  }
-  recipients: Array<{
-    handle: string
-    role: 'from' | 'to' | 'cc' | 'bcc'
-  }>
-  _links: {
-    self: string
-    related: {
-      conversation: string
-    }
-  }
-}
+// ============================================================================
+// Zod Schemas - validate API responses at runtime
+// ============================================================================
 
-export interface FrontConversation {
-  id: string
-  subject: string
-  status: 'archived' | 'unassigned' | 'assigned' | 'deleted' | 'snoozed'
-  created_at: number
-  recipient: {
-    handle: string
-    role: string
-  }
-  tags: Array<{
-    id: string
-    name: string
-  }>
-  _links: {
-    self: string
-    related: {
-      messages: string
-      inboxes: string
-    }
-  }
-}
+const FrontRecipientSchema = z.object({
+  handle: z.string(),
+  role: z.enum(['from', 'to', 'cc', 'bcc']),
+  name: z.string().optional(),
+  _links: z
+    .object({
+      related: z
+        .object({
+          contact: z.string().optional(),
+        })
+        .optional(),
+    })
+    .optional(),
+})
 
-export interface FrontInbox {
-  id: string
-  name: string
-  address: string
-  type: string
-  _links: {
-    self: string
-  }
-}
+const FrontAuthorSchema = z.object({
+  id: z.string(),
+  email: z.string(),
+  name: z.string().optional(),
+})
 
-export interface FrontInboxes {
-  _links: {
-    self: string
-  }
-  _results: FrontInbox[]
-}
+const FrontMessageSchema = z.object({
+  id: z.string(),
+  type: z.string(),
+  is_inbound: z.boolean(),
+  created_at: z.number(),
+  subject: z.string().optional().nullable(),
+  blurb: z.string(),
+  body: z.string(),
+  author: FrontAuthorSchema.nullable().optional(),
+  recipients: z.array(FrontRecipientSchema),
+  _links: z.object({
+    self: z.string(),
+    related: z.object({
+      conversation: z.string(),
+    }),
+  }),
+})
 
-export interface FrontChannel {
-  id: string
-  name: string
-  address: string
-  type: string
-  send_as: string
-  _links: {
-    self: string
-    related: {
-      inbox: string
-    }
-  }
-}
+const FrontConversationSchema = z.object({
+  id: z.string(),
+  subject: z.string(),
+  status: z.enum([
+    'archived',
+    'unassigned',
+    'assigned',
+    'deleted',
+    'snoozed',
+    'invisible',
+  ]),
+  created_at: z.number(),
+  recipient: z.object({
+    handle: z.string(),
+    role: z.string(),
+  }),
+  tags: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+    })
+  ),
+  _links: z.object({
+    self: z.string(),
+    related: z.object({
+      messages: z.string(),
+      inboxes: z.string(),
+    }),
+  }),
+})
 
-export interface FrontChannels {
-  _links: {
-    self: string
-  }
-  _results: FrontChannel[]
-}
+const FrontInboxSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  address: z.string().optional(),
+  type: z.string(),
+  _links: z.object({
+    self: z.string(),
+  }),
+})
 
-export interface FrontConversationMessages {
-  _links: {
-    self: string
-  }
-  _results: FrontMessage[]
-}
+const FrontInboxesSchema = z.object({
+  _links: z.object({ self: z.string() }),
+  _results: z.array(FrontInboxSchema),
+})
+
+const FrontChannelSchema = z.object({
+  id: z.string(),
+  name: z.string().optional(),
+  address: z.string().optional(),
+  type: z.string(),
+  send_as: z.string().optional(),
+  _links: z.object({
+    self: z.string(),
+    related: z
+      .object({
+        inbox: z.string(),
+      })
+      .optional(),
+  }),
+})
+
+const FrontChannelsSchema = z.object({
+  _links: z.object({ self: z.string() }),
+  _results: z.array(FrontChannelSchema),
+})
+
+const FrontConversationMessagesSchema = z.object({
+  _links: z.object({ self: z.string() }),
+  _results: z.array(FrontMessageSchema),
+})
+
+const FrontDraftResponseSchema = z.object({
+  id: z.string(),
+  conversation_id: z.string(),
+})
+
+// ============================================================================
+// Exported Types (inferred from schemas)
+// ============================================================================
+
+export type FrontMessage = z.infer<typeof FrontMessageSchema>
+export type FrontConversation = z.infer<typeof FrontConversationSchema>
+export type FrontInbox = z.infer<typeof FrontInboxSchema>
+export type FrontInboxes = z.infer<typeof FrontInboxesSchema>
+export type FrontChannel = z.infer<typeof FrontChannelSchema>
+export type FrontChannels = z.infer<typeof FrontChannelsSchema>
+export type FrontConversationMessages = z.infer<
+  typeof FrontConversationMessagesSchema
+>
 
 /**
  * Create a Front API client with the given token.
@@ -108,7 +152,7 @@ export function createFrontClient(apiToken: string) {
     'Content-Type': 'application/json',
   }
 
-  async function fetchJson<T>(url: string): Promise<T> {
+  async function fetchJson<T>(url: string, schema?: z.ZodType<T>): Promise<T> {
     const fullUrl = url.startsWith('http') ? url : `${FRONT_API_BASE}${url}`
     console.log('[front-api] GET', fullUrl)
     const startTime = Date.now()
@@ -129,10 +173,29 @@ export function createFrontClient(apiToken: string) {
 
     const data = await response.json()
     console.log(`[front-api] GET OK (${Date.now() - startTime}ms)`)
-    return data
+
+    if (schema) {
+      const parsed = schema.safeParse(data)
+      if (!parsed.success) {
+        console.error(
+          '[front-api] Schema validation failed:',
+          parsed.error.format()
+        )
+        console.error('[front-api] Raw data:', JSON.stringify(data, null, 2))
+        throw new Error(
+          `Front API schema validation failed: ${parsed.error.message}`
+        )
+      }
+      return parsed.data
+    }
+    return data as T
   }
 
-  async function postJson<T>(url: string, body: unknown): Promise<T> {
+  async function postJson<T>(
+    url: string,
+    body: unknown,
+    schema?: z.ZodType<T>
+  ): Promise<T> {
     const fullUrl = url.startsWith('http') ? url : `${FRONT_API_BASE}${url}`
     console.log('[front-api] POST', fullUrl)
     console.log('[front-api] POST body:', JSON.stringify(body, null, 2))
@@ -159,7 +222,22 @@ export function createFrontClient(apiToken: string) {
     const data = await response.json()
     console.log(`[front-api] POST OK (${Date.now() - startTime}ms)`)
     console.log('[front-api] POST response:', JSON.stringify(data, null, 2))
-    return data
+
+    if (schema) {
+      const parsed = schema.safeParse(data)
+      if (!parsed.success) {
+        console.error(
+          '[front-api] Schema validation failed:',
+          parsed.error.format()
+        )
+        console.error('[front-api] Raw data:', JSON.stringify(data, null, 2))
+        throw new Error(
+          `Front API schema validation failed: ${parsed.error.message}`
+        )
+      }
+      return parsed.data
+    }
+    return data as T
   }
 
   return {
@@ -170,7 +248,7 @@ export function createFrontClient(apiToken: string) {
       const url = messageIdOrUrl.startsWith('http')
         ? messageIdOrUrl
         : `/messages/${messageIdOrUrl}`
-      return fetchJson<FrontMessage>(url)
+      return fetchJson(url, FrontMessageSchema)
     },
 
     /**
@@ -182,7 +260,7 @@ export function createFrontClient(apiToken: string) {
       const url = conversationIdOrUrl.startsWith('http')
         ? conversationIdOrUrl
         : `/conversations/${conversationIdOrUrl}`
-      return fetchJson<FrontConversation>(url)
+      return fetchJson(url, FrontConversationSchema)
     },
 
     /**
@@ -191,8 +269,9 @@ export function createFrontClient(apiToken: string) {
     async getConversationMessages(
       conversationId: string
     ): Promise<FrontMessage[]> {
-      const data = await fetchJson<FrontConversationMessages>(
-        `/conversations/${conversationId}/messages`
+      const data = await fetchJson(
+        `/conversations/${conversationId}/messages`,
+        FrontConversationMessagesSchema
       )
       return data._results
     },
@@ -202,8 +281,9 @@ export function createFrontClient(apiToken: string) {
      * Returns the first inbox ID (conversations typically have one inbox)
      */
     async getConversationInbox(conversationId: string): Promise<string | null> {
-      const data = await fetchJson<FrontInboxes>(
-        `/conversations/${conversationId}/inboxes`
+      const data = await fetchJson(
+        `/conversations/${conversationId}/inboxes`,
+        FrontInboxesSchema
       )
       return data._results[0]?.id ?? null
     },
@@ -214,8 +294,9 @@ export function createFrontClient(apiToken: string) {
      */
     async getInboxChannel(inboxId: string): Promise<string | null> {
       console.log('[front-api] Getting channels for inbox:', inboxId)
-      const data = await fetchJson<FrontChannels>(
-        `/inboxes/${inboxId}/channels`
+      const data = await fetchJson(
+        `/inboxes/${inboxId}/channels`,
+        FrontChannelsSchema
       )
       console.log(
         '[front-api] Channels found:',
@@ -230,7 +311,7 @@ export function createFrontClient(apiToken: string) {
      *
      * @param conversationId - Front conversation ID
      * @param body - Draft message body
-     * @param channelId - Front channel/inbox ID (required by Front API)
+     * @param channelId - Front channel ID (cha_xxx, NOT inbox ID)
      * @param options - Optional author_id
      */
     async createDraft(
@@ -238,12 +319,16 @@ export function createFrontClient(apiToken: string) {
       body: string,
       channelId: string,
       options?: { authorId?: string }
-    ): Promise<{ id: string; conversation_id: string }> {
-      return postJson(`/conversations/${conversationId}/drafts`, {
-        body,
-        channel_id: channelId,
-        author_id: options?.authorId,
-      })
+    ): Promise<z.infer<typeof FrontDraftResponseSchema>> {
+      return postJson(
+        `/conversations/${conversationId}/drafts`,
+        {
+          body,
+          channel_id: channelId,
+          author_id: options?.authorId,
+        },
+        FrontDraftResponseSchema
+      )
     },
 
     /**
