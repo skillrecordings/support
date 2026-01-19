@@ -1,0 +1,377 @@
+# Phase 8.2: Content Search API
+
+> Agent queries product sites for relevant resources to share with customers.
+
+## Problem
+
+The support agent needs to recommend content (courses, tutorials, articles, exercises) but:
+- Content changes frequently (new modules, updated resources)
+- Each product has different content types and metadata
+- Agent shouldn't maintain stale content indexes
+- Products know their content structure best
+
+Currently the agent either:
+1. Guesses at URLs (risky)
+2. Uses hardcoded knowledge (stale)
+3. Searches vector store (may miss new content)
+
+## Solution
+
+Add `contentSearch` to the SDK contract. Products implement an endpoint that returns relevant resources in a standardized format. Agent queries on-demand, products return fresh results.
+
+## SDK Contract
+
+### New Integration Method
+
+```typescript
+// packages/sdk/src/integration.ts
+
+export interface ContentSearchResult {
+  /** Unique identifier for deduplication */
+  id: string
+
+  /** Resource type for filtering/display */
+  type: 'course' | 'module' | 'lesson' | 'article' | 'exercise' | 'resource' | 'social'
+
+  /** Human-readable title */
+  title: string
+
+  /** Brief description (1-2 sentences) */
+  description?: string
+
+  /** Canonical URL to share with customer */
+  url: string
+
+  /** Relevance score 0-1 (optional, for ranking) */
+  score?: number
+
+  /** Product-specific metadata (agent can reference but doesn't parse) */
+  metadata?: {
+    /** Duration in minutes (for courses/lessons) */
+    duration?: number
+    /** Difficulty level */
+    difficulty?: 'beginner' | 'intermediate' | 'advanced'
+    /** Tags/topics */
+    tags?: string[]
+    /** Author/instructor name */
+    author?: string
+    /** Last updated date */
+    updatedAt?: string
+    /** Free vs paid */
+    accessLevel?: 'free' | 'paid' | 'preview'
+    /** Arbitrary product-specific data */
+    [key: string]: unknown
+  }
+}
+
+export interface ContentSearchRequest {
+  /** Natural language query */
+  query: string
+
+  /** Filter by content type */
+  types?: ContentSearchResult['type'][]
+
+  /** Max results to return */
+  limit?: number
+
+  /** Customer context (for personalization) */
+  customer?: {
+    email?: string
+    hasPurchased?: boolean
+    purchasedProducts?: string[]
+  }
+}
+
+export interface ContentSearchResponse {
+  results: ContentSearchResult[]
+
+  /** Quick links always returned (social, support, etc.) */
+  quickLinks?: ContentSearchResult[]
+
+  /** Search metadata */
+  meta?: {
+    totalResults?: number
+    searchTimeMs?: number
+  }
+}
+
+export interface SupportIntegration {
+  // ... existing methods ...
+
+  /**
+   * Search product content for relevant resources.
+   * Agent calls this to find content to recommend to customers.
+   */
+  searchContent(request: ContentSearchRequest): Promise<ContentSearchResponse>
+}
+```
+
+### Handler Addition
+
+```typescript
+// packages/sdk/src/handler.ts
+
+export function createSupportHandler(integration: SupportIntegration) {
+  return {
+    // ... existing handlers ...
+
+    async handleContentSearch(request: ContentSearchRequest): Promise<ContentSearchResponse> {
+      return integration.searchContent(request)
+    }
+  }
+}
+```
+
+## Agent Tool
+
+```typescript
+// packages/core/src/agent/config.ts
+
+searchProductContent: tool({
+  description: 'Search product content to find relevant resources to share with customers. Use when customer asks about topics, needs learning resources, or when you want to point them to specific content.',
+  inputSchema: z.object({
+    query: z.string().describe('What the customer is looking for'),
+    types: z.array(z.enum(['course', 'module', 'lesson', 'article', 'exercise', 'resource', 'social'])).optional(),
+    limit: z.number().optional().default(5),
+  }),
+  execute: async ({ query, types, limit }, context) => {
+    const app = (context as any)?.appConfig
+    if (!app) return { results: [], error: 'No app context' }
+
+    const client = new IntegrationClient({
+      baseUrl: app.integration_base_url,
+      webhookSecret: app.webhook_secret,
+    })
+
+    const response = await client.searchContent({ query, types, limit })
+    return response
+  },
+}),
+```
+
+## Product Implementation Example
+
+### Total TypeScript
+
+```typescript
+// total-typescript/app/api/support/content-search/route.ts
+
+import { withSupportHandler } from '@skillrecordings/sdk/handler'
+import { searchContent } from '@/lib/content-search'
+
+export const POST = withSupportHandler(async (req) => {
+  const { query, types, limit = 5, customer } = await req.json()
+
+  // Search internal content index
+  const results = await searchContent(query, { types, limit })
+
+  // Always include quick links
+  const quickLinks = [
+    {
+      id: 'discord',
+      type: 'social',
+      title: 'Total TypeScript Discord',
+      description: 'Join the community for discussions and help',
+      url: 'https://totaltypescript.com/discord',
+    },
+    {
+      id: 'twitter',
+      type: 'social',
+      title: 'Matt on Twitter',
+      description: 'Follow Matt for TypeScript tips',
+      url: 'https://twitter.com/maaborland',
+    },
+  ]
+
+  return Response.json({
+    results: results.map(r => ({
+      id: r.slug,
+      type: r.type,
+      title: r.title,
+      description: r.summary,
+      url: `https://totaltypescript.com/${r.path}`,
+      score: r.score,
+      metadata: {
+        duration: r.durationMinutes,
+        difficulty: r.difficulty,
+        tags: r.tags,
+        author: 'Matt Pocock',
+        accessLevel: r.isFree ? 'free' : 'paid',
+      },
+    })),
+    quickLinks,
+    meta: {
+      totalResults: results.length,
+    },
+  })
+})
+```
+
+## Use Cases
+
+### 1. Customer asks about a topic
+
+```
+Customer: "How do I use generics in TypeScript?"
+
+Agent calls: searchContent({ query: "generics typescript" })
+
+Response includes:
+- Lesson: "Generic Functions" (beginner)
+- Lesson: "Generic Constraints" (intermediate)
+- Exercise: "Build a Generic Utility Type"
+- Article: "When to Use Generics"
+
+Agent: "Here are some resources on generics:
+- Start with Generic Functions if you're new to them
+- Generic Constraints covers more advanced patterns
+- There's also a hands-on exercise..."
+```
+
+### 2. Customer wants community resources
+
+```
+Customer: "Is there a Discord or community?"
+
+Agent calls: searchContent({ query: "community discord", types: ['social'] })
+
+Response includes quickLinks:
+- Discord link
+- Twitter
+- GitHub discussions
+
+Agent: "Join the Total TypeScript Discord: [link]
+Matt's also active on Twitter if you want TypeScript tips."
+```
+
+### 3. Customer asks about specific content
+
+```
+Customer: "Do you have anything on React Server Components?"
+
+Agent calls: searchContent({ query: "react server components RSC" })
+
+Response: (empty or limited results)
+
+Agent: "I don't see specific RSC content in the Total TypeScript curriculum right now.
+The focus is on TypeScript fundamentals. For RSC, I'd check the React docs or
+Matt's Twitter where he shares thoughts on it."
+```
+
+## Caching Strategy
+
+### Agent-side caching (optional)
+
+```typescript
+// packages/core/src/cache/content-cache.ts
+
+const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
+
+interface CacheEntry {
+  response: ContentSearchResponse
+  timestamp: number
+}
+
+const cache = new Map<string, CacheEntry>()
+
+function getCacheKey(appId: string, request: ContentSearchRequest): string {
+  return `${appId}:${request.query}:${request.types?.join(',')}:${request.limit}`
+}
+
+export async function cachedContentSearch(
+  appId: string,
+  request: ContentSearchRequest,
+  fetcher: () => Promise<ContentSearchResponse>
+): Promise<ContentSearchResponse> {
+  const key = getCacheKey(appId, request)
+  const cached = cache.get(key)
+
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.response
+  }
+
+  const response = await fetcher()
+  cache.set(key, { response, timestamp: Date.now() })
+  return response
+}
+```
+
+### Quick links caching
+
+Quick links (social, support pages) are semi-static. Cache longer:
+
+```typescript
+// Cache quick links for 24h, refresh on first content search of the day
+const quickLinksCache = new Map<string, { links: ContentSearchResult[], timestamp: number }>()
+const QUICK_LINKS_TTL = 24 * 60 * 60 * 1000
+```
+
+## Response Format Guidelines
+
+### Required fields (agent depends on these)
+- `id`: Deduplication
+- `type`: Display/filtering
+- `title`: Show to customer
+- `url`: Share with customer
+
+### Recommended fields
+- `description`: Agent uses for context
+- `metadata.difficulty`: Helps agent recommend appropriately
+- `metadata.accessLevel`: Agent knows if customer can access
+
+### Product-specific metadata
+Products can add arbitrary metadata. Agent includes it in context but doesn't parse it:
+
+```typescript
+metadata: {
+  // Standard fields agent understands
+  difficulty: 'intermediate',
+  accessLevel: 'paid',
+
+  // Product-specific (ignored by agent, useful for debugging)
+  moduleId: 'mod_abc123',
+  sectionIndex: 3,
+  hasExercises: true,
+}
+```
+
+## Implementation Plan
+
+### Phase 1: SDK Contract
+1. Add types to `packages/sdk/src/types.ts`
+2. Add `searchContent` to `SupportIntegration` interface
+3. Add handler method
+4. Add agent tool
+
+### Phase 2: Total TypeScript Implementation
+1. Create content index (if not exists)
+2. Implement search endpoint
+3. Add quick links
+4. Test with agent
+
+### Phase 3: Caching & Optimization
+1. Add agent-side caching
+2. Add quick links caching
+3. Monitor latency/cache hit rates
+
+## Non-Goals
+
+- **Full-text search on agent side**: Products own their search
+- **Content ingestion**: Agent doesn't store product content
+- **Personalized recommendations**: Products can personalize, agent just passes customer context
+- **Content editing**: Read-only API
+
+## Open Questions
+
+1. **Should agent store search results in vector DB for future reference?**
+   - Pro: Build up knowledge of what content exists
+   - Con: Staleness, complexity
+   - Recommendation: No, keep it simple. Fresh queries are fine.
+
+2. **Rate limiting?**
+   - Products should implement their own rate limiting
+   - Agent shouldn't hammer the endpoint (use caching)
+
+3. **Fallback when endpoint unavailable?**
+   - Return empty results
+   - Agent should gracefully handle: "I can't search content right now, but here's the main site..."
