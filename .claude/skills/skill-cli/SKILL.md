@@ -1,10 +1,12 @@
 ---
 name: skill-cli
-description: CLI tool for managing app integrations, debugging workflows, and inspecting Front/Inngest data. Use when investigating support issues, checking event history, or managing skills.
+description: CLI for Skill Recordings Support Agent platform. Use when investigating support issues, debugging workflows, inspecting Front/Inngest data, or managing app integrations.
 allowed-tools: Bash(skill:*)
 ---
 
-# Support CLI (skill)
+# Skill Recordings Support Agent CLI
+
+CLI tool for the Skill Recordings support platform. Named `skill` after Skill Recordings (the company), not Claude skills.
 
 ## Quick start
 
@@ -81,18 +83,20 @@ skill front conversation <id> --json      # JSON output
 # - Message history (with -m flag)
 ```
 
-## Skills Commands
+## Claude Skills Commands
+
+Manage Claude Code skill files (SKILL.md with YAML frontmatter).
 
 ### List skills
 ```bash
-skill skills list                         # List available skills
+skill skills list                         # List available Claude skills
 skill skills list --json                  # JSON output
 skill skills list -p /path/to/project    # Custom path
 ```
 
 ### Create skill
 ```bash
-skill skills create my-tool               # Create skill scaffold
+skill skills create my-tool               # Scaffold new Claude skill
 skill skills create my-tool -d "Description here"
 skill skills create my-tool -t "Read,Edit,Bash"  # Specify allowed tools
 skill skills create my-tool -p /path/to/project  # Custom path
