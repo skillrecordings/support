@@ -74,8 +74,8 @@ export async function recordFailedEvent(
     .limit(1)
 
   const consecutiveFailures =
-    existingFailures.length > 0
-      ? existingFailures[0].consecutive_failures + 1
+    existingFailures.length > 0 && existingFailures[0]
+      ? (existingFailures[0].consecutive_failures ?? 0) + 1
       : 1
 
   const id = randomUUID()
@@ -151,10 +151,11 @@ export async function alertOnFailure(
     .orderBy(desc(DeadLetterQueueTable.last_failed_at))
     .limit(1)
 
-  if (recentFailures.length > 0 && !recentFailures[0].alerted_at) {
+  const recent = recentFailures[0]
+  if (recent && !recent.alerted_at) {
     await db
       .update(DeadLetterQueueTable)
       .set({ alerted_at: new Date() })
-      .where(eq(DeadLetterQueueTable.id, recentFailures[0].id))
+      .where(eq(DeadLetterQueueTable.id, recent.id))
   }
 }
