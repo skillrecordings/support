@@ -1,10 +1,14 @@
-import { verifySlackSignature } from '../../../../lib/verify-signature'
 import {
-  inngest,
-  SUPPORT_APPROVAL_DECIDED,
   SUPPORT_ACTION_APPROVED,
   SUPPORT_ACTION_REJECTED,
+  SUPPORT_APPROVAL_DECIDED,
+  inngest,
 } from '@skillrecordings/core/inngest'
+import { updateApprovalMessage } from '@skillrecordings/core/slack/client'
+import { recordOutcome } from '@skillrecordings/core/trust/feedback'
+import { ActionsTable, eq, getDb } from '@skillrecordings/database'
+import type { SectionBlock } from '@slack/types'
+import { verifySlackSignature } from '../../../../lib/verify-signature'
 
 /**
  * Slack Interactions API endpoint
@@ -91,6 +95,52 @@ export async function POST(request: Request) {
             },
           },
         ])
+      } else if (
+        actionId.startsWith('rate_good_') ||
+        actionId.startsWith('rate_bad_')
+      ) {
+        // Handle draft rating buttons
+        const isGood = actionId.startsWith('rate_good_')
+        const { actionId: recordId, appId } = metadata
+
+        // Get the action record to find the category
+        const db = getDb()
+        const [actionRecord] = await db
+          .select()
+          .from(ActionsTable)
+          .where(eq(ActionsTable.id, recordId))
+
+        const params = actionRecord?.parameters as { category?: string } | null
+        const category = params?.category ?? 'unknown'
+
+        // Record the outcome for trust scoring
+        await recordOutcome(db, appId, category, isGood)
+
+        // Update the Slack message to show the rating was recorded
+        const channel = payload.channel?.id
+        const ts = payload.message?.ts
+        if (channel && ts) {
+          const ratingEmoji = isGood ? '👍' : '👎'
+          const blocks: SectionBlock[] = [
+            {
+              type: 'section',
+              text: {
+                type: 'mrkdwn',
+                text: `*Draft Response Created*\n\nApp: *${appId}*\n\n_Rated ${ratingEmoji} by @${username}_`,
+              },
+            },
+          ]
+          await updateApprovalMessage(
+            channel,
+            ts,
+            blocks,
+            `Draft rated ${ratingEmoji} by ${username}`
+          )
+        }
+
+        console.log(
+          `[slack] Recorded ${isGood ? 'good' : 'bad'} rating for action ${recordId} (${appId}/${category})`
+        )
       }
     } catch (error) {
       // Log but don't fail - unknown actions are ignored
