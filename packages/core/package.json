@@ -55,6 +55,7 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.15",
+    "@skillrecordings/front-sdk": "*",
     "@axiomhq/js": "^1.3.0",
     "@skillrecordings/database": "*",
     "@skillrecordings/sdk": "*",
