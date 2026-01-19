@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto'
 import { ActionsTable, getDb } from '@skillrecordings/database'
+import { MemoryService } from '@skillrecordings/memory/memory'
 import { runSupportAgent } from '../../agent/index'
 import { type FrontMessage, createFrontClient } from '../../front/index'
 import { classifyMessage } from '../../router/classifier'
@@ -268,6 +269,45 @@ export const handleInboundMessage = inngest.createFunction(
       }
     }
 
+    // Step 2.7: Retrieve relevant memories for context
+    const memories = await step.run('retrieve-memories', async () => {
+      console.log('[workflow:memory] Retrieving relevant memories...')
+
+      const messageBody = context.body?.trim() || ''
+      const query = `${context.subject} ${messageBody}`.trim()
+
+      if (!query) {
+        console.log('[workflow:memory] Empty query, skipping memory retrieval')
+        return { memories: [], citedMemoryIds: [] }
+      }
+
+      try {
+        const results = await MemoryService.find(query, {
+          collection: 'support',
+          limit: 5,
+          threshold: 0.4,
+          app_slug: context.appId,
+        })
+
+        console.log('[workflow:memory] Retrieved memories:', {
+          count: results.length,
+          memoryIds: results.map((r) => r.memory.id),
+          scores: results.map((r) => r.score),
+        })
+
+        // Track cited memory IDs for later voting
+        const citedMemoryIds = results.map((r) => r.memory.id)
+
+        return {
+          memories: results,
+          citedMemoryIds,
+        }
+      } catch (error) {
+        console.error('[workflow:memory] Error retrieving memories:', error)
+        return { memories: [], citedMemoryIds: [] }
+      }
+    })
+
     // Step 3: Classify message with Haiku (fast, cheap)
     const classification = await step.run('classify-message', async () => {
       console.log(
@@ -283,10 +323,19 @@ export const handleInboundMessage = inngest.createFunction(
         }
       }
 
+      // Format memories for classifier context
+      const priorKnowledge = memories.memories
+        .map((r) => {
+          const recency = r.decay_factor > 0.5 ? 'recent' : 'older'
+          return `[${recency}] ${r.memory.content}`
+        })
+        .join('\n')
+
       const result = await classifyMessage(messageBody, {
         recentMessages: context.conversationHistory
           .slice(-3)
           .map((m) => m.body),
+        priorKnowledge: priorKnowledge || undefined,
       })
 
       console.log('[workflow:classify] Result:', {
@@ -361,11 +410,24 @@ export const handleInboundMessage = inngest.createFunction(
         }
       }
 
+      // Format memories for agent context
+      const priorKnowledge = memories.memories
+        .map((r) => {
+          const recency = r.decay_factor > 0.5 ? 'recent' : 'older'
+          return `[${recency}] ${r.memory.content}`
+        })
+        .join('\n')
+
       // Run the support agent with model based on complexity
       console.log(
         '[workflow:agent] Calling runSupportAgent with model:',
         modelToUse
       )
+      console.log(
+        '[workflow:agent] Prior knowledge memories:',
+        memories.memories.length
+      )
+
       const result = await runSupportAgent({
         message: messageBody,
         conversationHistory: conversationMessages.slice(0, -1), // Exclude current message
@@ -374,6 +436,7 @@ export const handleInboundMessage = inngest.createFunction(
         },
         appId: context.appId,
         model: modelToUse,
+        priorKnowledge: priorKnowledge || undefined,
       })
 
       console.log('[workflow:agent] Agent result:', {
@@ -679,6 +742,7 @@ export const handleInboundMessage = inngest.createFunction(
       routingType: routingResult.type,
       agentEscalated: agentResult.escalated,
       agentRequiresApproval: agentResult.requiresApproval,
+      memoriesCited: memories.citedMemoryIds.length,
     })
 
     return {
@@ -686,6 +750,7 @@ export const handleInboundMessage = inngest.createFunction(
       messageId,
       routingResult,
       agentResult,
+      memoriesCited: memories.citedMemoryIds,
     }
   }
 )

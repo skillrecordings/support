@@ -35,6 +35,22 @@ export const SUPPORT_AGENT_PROMPT = `You are a support agent for a technical edu
 
 If a message is clearly not from a customer seeking support, simply do not draft a response.
 
+## Instructor Correspondence
+
+Some messages are personal correspondence meant for the instructor/creator, not support requests. Recognize and route these appropriately:
+
+ROUTE TO INSTRUCTOR (use assignToInstructor tool):
+- Fan mail or appreciation messages ("Your work has changed my career")
+- Personal feedback about teaching style
+- Messages directly addressing the instructor by name with personal content
+- Requests for personal advice unrelated to the product
+- Community engagement that's meant for the creator
+
+When routing to instructor:
+1. Use assignToInstructor with the conversation ID
+2. Optionally draft a brief acknowledgment: "Thanks for the kind words! I'm passing this along to [instructor name]."
+3. Do NOT dismiss these as "not support" - they're valuable community engagement
+
 ## Authority Levels
 
 AUTO-APPROVE (do immediately):
@@ -343,6 +359,46 @@ export const agentTools = {
       }
     },
   }),
+
+  assignToInstructor: tool({
+    description:
+      'Assign conversation to the instructor/creator for personal correspondence. Use when the message is fan mail, personal feedback, or directed at the instructor personally rather than being a support request.',
+    inputSchema: z.object({
+      conversationId: z.string().describe('Front conversation ID'),
+      reason: z.string().describe('Why this is being routed to the instructor'),
+    }),
+    execute: async ({ conversationId, reason }, context) => {
+      // Get instructor teammate ID from app config
+      const appConfig = (context as any)?.appConfig
+      const instructorTeammateId = appConfig?.instructor_teammate_id
+
+      if (!instructorTeammateId) {
+        return {
+          assigned: false,
+          error: 'No instructor configured for this app',
+        }
+      }
+
+      // Import Front SDK and assign
+      const { createFrontClient } = await import('@skillrecordings/front-sdk')
+      const apiToken = process.env.FRONT_API_TOKEN
+      if (!apiToken) {
+        return { assigned: false, error: 'Front API token not configured' }
+      }
+
+      const front = createFrontClient({ apiToken })
+      await front.conversations.updateAssignee(
+        conversationId,
+        instructorTeammateId
+      )
+
+      return {
+        assigned: true,
+        instructorTeammateId,
+        reason,
+      }
+    },
+  }),
 }
 
 /** Available models via AI Gateway */
@@ -370,6 +426,8 @@ export interface AgentInput {
   appId: string
   /** Model to use (defaults to Haiku for cost efficiency) */
   model?: SupportAgentModel
+  /** Prior knowledge from semantic memory */
+  priorKnowledge?: string
 }
 
 export interface AgentOutput {
@@ -405,6 +463,7 @@ export async function runSupportAgent(input: AgentInput): Promise<AgentOutput> {
     customerContext,
     appId,
     model = DEFAULT_AGENT_MODEL,
+    priorKnowledge,
   } = input
 
   console.log('[agent] Input:', {
@@ -414,6 +473,7 @@ export async function runSupportAgent(input: AgentInput): Promise<AgentOutput> {
     customerEmail: customerContext?.email,
     appId,
     model,
+    hasPriorKnowledge: !!priorKnowledge,
   })
 
   // Retrieve context from vector store
@@ -445,6 +505,11 @@ export async function runSupportAgent(input: AgentInput): Promise<AgentOutput> {
     if (customerContext.purchases?.length) {
       systemPrompt += `Purchases:\n${customerContext.purchases.map((p) => `- ${p.product} (${p.date})`).join('\n')}\n`
     }
+  }
+
+  // Add prior knowledge from semantic memory
+  if (priorKnowledge && priorKnowledge.trim().length > 0) {
+    systemPrompt += `\n\n## Prior Knowledge (from memory)\n${priorKnowledge}\n`
   }
 
   // Add retrieved context to system prompt

@@ -13,6 +13,7 @@ export const CLASSIFIER_CATEGORIES = [
   'billing',
   'technical',
   'general',
+  'instructor_correspondence',
 ] as const
 
 export type ClassifierCategory = (typeof CLASSIFIER_CATEGORIES)[number]
@@ -58,7 +59,7 @@ function validateComplexity(raw: string): ComplexityTier {
 
 export async function classifyMessage(
   message: string,
-  context?: { recentMessages?: string[] }
+  context?: { recentMessages?: string[]; priorKnowledge?: string }
 ): Promise<ClassifierResult> {
   // Build prompt with category guidance and optional conversation context
   let prompt = `Classify this customer support message.
@@ -74,10 +75,11 @@ export async function classifyMessage(
 - billing: Invoice or charge inquiries
 - technical: Product functionality issues
 - general: Other inquiries
+- instructor_correspondence: Personal messages to the instructor/creator (fan mail, compliments, appreciation, feedback about teaching style, personal questions directed at them, conversational messages starting with "Hi [instructor name]")
 
 ## Complexity (for model selection)
 - skip: Don't respond (spam, acks, bounces, auto-replies)
-- simple: Easy to answer (FAQ, magic link, basic info) - fast model OK
+- simple: Easy to answer (FAQ, magic link, basic info), instructor correspondence - fast model OK
 - complex: Nuanced issue, frustrated customer, needs reasoning - use powerful model
 
 Message: ${message}`
@@ -85,6 +87,10 @@ Message: ${message}`
   if (context?.recentMessages && context.recentMessages.length > 0) {
     const conversationContext = context.recentMessages.join('\n')
     prompt += `\n\nRecent conversation context:\n${conversationContext}`
+  }
+
+  if (context?.priorKnowledge && context.priorKnowledge.trim().length > 0) {
+    prompt += `\n\nPrior knowledge from memory:\n${context.priorKnowledge}`
   }
 
   prompt += `\n\nProvide:
