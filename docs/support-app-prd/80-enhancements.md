@@ -177,6 +177,36 @@
 
 ---
 
+## Phase: Slack Thread Feedback
+
+**Goal:** Reply to Slack draft notifications to steer the AI or suggest edits.
+
+**User Flow:**
+1. AI posts draft notification to Slack with Good/Bad buttons
+2. User replies in thread: "make it shorter" or "add info about team licenses"
+3. AI regenerates response with that guidance
+4. New draft posted to thread and updated in Front
+
+**Implementation:**
+```
+1. Track Slack message ts when posting draft notifications
+2. Subscribe to Slack Events API for `message` events
+3. Filter for thread replies to our messages (thread_ts matches our ts)
+4. Extract feedback text from reply
+5. Re-run agent with original context + feedback as additional instruction
+6. Update/replace draft in Front
+7. Post regenerated draft to Slack thread
+```
+
+**Slash Commands (future):**
+- `/regenerate` - try again with same context
+- `/shorter` - regenerate with brevity constraint
+- `/escalate` - cancel draft and flag for human
+
+**Effort:** Medium (2-3 days)
+
+---
+
 ## Quick Wins (< 1 day each)
 
 1. **Greeting detection** - Skip drafting for "Thanks!" / "Got it!" messages
