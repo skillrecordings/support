@@ -320,7 +320,7 @@ export function createFrontClient(apiToken: string) {
       conversationId: string,
       body: string,
       channelId: string,
-      options?: { authorId?: string }
+      options?: { authorId?: string; signatureId?: string }
     ): Promise<z.infer<typeof FrontDraftResponseSchema>> {
       return postJson(
         `/conversations/${conversationId}/drafts`,
@@ -328,6 +328,7 @@ export function createFrontClient(apiToken: string) {
           body,
           channel_id: channelId,
           author_id: options?.authorId,
+          signature_id: options?.signatureId,
           mode: 'shared', // Make draft visible to all teammates, not just API user
         },
         FrontDraftResponseSchema
