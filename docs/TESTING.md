@@ -1,7 +1,25 @@
 # Testing
 
+## ⚠️ Vitest Only - No bun:test
+
+This repo uses **Vitest** exclusively. Do NOT use Bun's built-in test runner.
+
+```bash
+# ✅ CORRECT - runs Vitest via Turborepo
+bun run test
+
+# ❌ WRONG - runs Bun's test runner (different API, different behavior)
+bun test
+```
+
+**Why this matters:**
+- `bun:test` has different APIs (`expect.toHaveBeenCalled()` vs Vitest matchers)
+- Vitest workspace config won't apply
+- CI runs Vitest, so bun:test passes would be false positives
+- Existing tests are written for Vitest
+
 ## Default
-Use Turborepo from the repo root. Do not use `bun test` (Bun's built-in test runner) in this repo.
+Use Turborepo from the repo root.
 
 ```bash
 bun run test

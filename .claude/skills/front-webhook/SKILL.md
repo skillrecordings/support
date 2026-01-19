@@ -8,6 +8,10 @@ allowed-tools: Read, Grep, Glob, Edit, Write, Bash
 
 Front is the **source of truth for all conversations**. Every support interaction starts with a Front webhook.
 
+## ⚠️ CRITICAL: Webhooks Send PREVIEWS, Not Full Data
+
+**This is the #1 gotcha with Front integration.** Webhooks do NOT contain the full message body or sender email. You MUST fetch via API.
+
 ## Key Insight: Webhooks Send PREVIEWS
 
 Front webhooks send **event previews**, NOT full data. You get:
