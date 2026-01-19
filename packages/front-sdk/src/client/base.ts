@@ -1,4 +1,4 @@
-import { z } from 'zod/v4'
+import { z } from 'zod'
 import { ErrorResponseSchema } from '../schemas/common'
 
 export const FRONT_API_BASE = 'https://api2.frontapp.com'
