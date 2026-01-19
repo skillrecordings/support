@@ -87,6 +87,40 @@ throttle: {
 ```
 
 ### Wait for Event (Approval Flow)
+
+**⚠️ CRITICAL: Match Field Alignment**
+
+The `match` field MUST align with the field name in BOTH the triggering event AND the awaited event:
+
+```typescript
+// Triggering workflow sends:
+await inngest.send({
+  name: 'support/approval.requested',
+  data: { actionId: 'abc123', ... }  // ← Field is "actionId"
+})
+
+// waitForEvent MUST use the same field:
+const approval = await step.waitForEvent('approval-received', {
+  event: 'support/approval.decided',
+  match: 'data.actionId',  // ✅ Matches triggering event's field name
+  timeout: '24h',
+})
+
+// Decision event MUST also use the same field:
+await inngest.send({
+  name: 'support/approval.decided',
+  data: { actionId: 'abc123', approved: true }  // ✅ Same field name
+})
+```
+
+**Common mistake:**
+```typescript
+// ❌ WRONG - field name mismatch
+// Trigger has: data.actionId
+// waitForEvent uses: match: 'data.approvalId'  ← Never matches!
+// Decision has: data.approvalId
+```
+
 ```typescript
 const approval = await step.waitForEvent('approval-received', {
   event: 'action/approved',

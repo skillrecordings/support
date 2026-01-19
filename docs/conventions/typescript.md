@@ -22,6 +22,29 @@ import { z } from 'zod/v4'
 
 This applies to ALL AI SDK schema usage: `generateObject`, `streamObject`, `tool()`, `Output.object()`.
 
+## Handling Type Errors
+
+**Don't reach for `@ts-ignore` or `@ts-expect-error` as first resort.**
+
+When hitting complex type errors (especially TS2589 with generics):
+
+1. **Simplify the generic chain** - Use intermediate type variables
+2. **Use type assertions** - `as Type` when you know the shape
+3. **Narrow the type** - Type guards and conditional checks
+4. **Simplify Zod schemas** - `z.string().transform()` over `z.enum()` with many values
+5. **Only then** - If truly unavoidable, use `@ts-expect-error` with a comment explaining why
+
+```typescript
+// ❌ Lazy
+// @ts-ignore
+const result = complexGenericCall()
+
+// ✅ Better - explain and use proper directive
+// @ts-expect-error - AI SDK v6 recursive generic exceeds TS depth limit
+// See: https://github.com/vercel/ai/issues/XXX
+const result = complexGenericCall()
+```
+
 ## Typecheck policy
 
 Types always pass. Do not blame pre-existing errors. Fix or revert.

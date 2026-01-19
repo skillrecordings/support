@@ -1,56 +1,51 @@
 /**
- * Trust score repository tests
+ * Trust score repository tests (Redis-backed)
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { getTrustScore, upsertTrustScore } from './repository'
 
-describe('Trust Score Repository', () => {
+// Mock Redis client
+const mockRedis = {
+  get: vi.fn(),
+  set: vi.fn(),
+  del: vi.fn(),
+  scan: vi.fn(),
+  mget: vi.fn(),
+}
+
+vi.mock('../redis/client', () => ({
+  getRedis: () => mockRedis,
+}))
+
+import { deleteTrustScore, getTrustScore, upsertTrustScore } from './repository'
+
+describe('Trust Score Repository (Redis)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
   describe('getTrustScore', () => {
     it('should return null when no trust score exists', async () => {
-      const mockDb = {
-        select: vi.fn().mockReturnValue({
-          from: vi.fn().mockReturnValue({
-            where: vi.fn().mockResolvedValue([]),
-          }),
-        }),
-      }
+      mockRedis.get.mockResolvedValue(null)
 
-      const result = await getTrustScore(
-        mockDb as any,
-        'app-1',
-        'refund-simple'
-      )
+      const result = await getTrustScore('app-1', 'refund-simple')
 
       expect(result).toBeNull()
+      expect(mockRedis.get).toHaveBeenCalledWith('trust:app-1:refund-simple')
     })
 
     it('should return trust score with decay applied', async () => {
       const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-      const mockDb = {
-        select: vi.fn().mockReturnValue({
-          from: vi.fn().mockReturnValue({
-            where: vi.fn().mockResolvedValue([
-              {
-                id: 'ts-1',
-                app_id: 'app-1',
-                category: 'refund-simple',
-                trust_score: 0.9,
-                sample_count: 100,
-                decay_half_life_days: 30,
-                last_updated_at: thirtyDaysAgo,
-                created_at: new Date(),
-              },
-            ]),
-          }),
-        }),
-      }
+      mockRedis.get.mockResolvedValue({
+        appId: 'app-1',
+        category: 'refund-simple',
+        trustScore: 0.9,
+        sampleCount: 100,
+        lastUpdatedAt: thirtyDaysAgo.toISOString(),
+        decayHalfLifeDays: 30,
+      })
 
-      const result = await getTrustScore(
-        mockDb as any,
-        'app-1',
-        'refund-simple'
-      )
+      const result = await getTrustScore('app-1', 'refund-simple')
 
       expect(result).not.toBeNull()
       expect(result?.appId).toBe('app-1')
@@ -60,99 +55,73 @@ describe('Trust Score Repository', () => {
       expect(result?.trustScore).toBeCloseTo(0.45, 2)
     })
 
-    it('should use default half-life when not set in database', async () => {
-      const mockDb = {
-        select: vi.fn().mockReturnValue({
-          from: vi.fn().mockReturnValue({
-            where: vi.fn().mockResolvedValue([
-              {
-                id: 'ts-1',
-                app_id: 'app-1',
-                category: 'refund-simple',
-                trust_score: 0.8,
-                sample_count: 50,
-                decay_half_life_days: null,
-                last_updated_at: new Date(),
-                created_at: new Date(),
-              },
-            ]),
-          }),
-        }),
-      }
+    it('should handle deprecated 3-arg signature for backwards compatibility', async () => {
+      mockRedis.get.mockResolvedValue({
+        appId: 'app-1',
+        category: 'refund-simple',
+        trustScore: 0.8,
+        sampleCount: 50,
+        lastUpdatedAt: new Date().toISOString(),
+        decayHalfLifeDays: 30,
+      })
 
-      const result = await getTrustScore(
-        mockDb as any,
-        'app-1',
-        'refund-simple'
-      )
+      // Old signature: (db, appId, category)
+      const result = await getTrustScore({} as any, 'app-1', 'refund-simple')
 
       expect(result).not.toBeNull()
-      // No decay applied since just updated, should be same as base score
       expect(result?.trustScore).toBeCloseTo(0.8, 2)
+      expect(mockRedis.get).toHaveBeenCalledWith('trust:app-1:refund-simple')
     })
   })
 
   describe('upsertTrustScore', () => {
-    it('should insert new trust score when none exists', async () => {
-      const mockDb = {
-        insert: vi.fn().mockReturnValue({
-          values: vi.fn().mockReturnValue({
-            onDuplicateKeyUpdate: vi.fn().mockResolvedValue(undefined),
-          }),
-        }),
-      }
+    it('should set trust score in Redis', async () => {
+      mockRedis.set.mockResolvedValue('OK')
 
-      await upsertTrustScore(mockDb as any, 'app-1', 'refund-simple', {
+      await upsertTrustScore('app-1', 'refund-simple', {
         trustScore: 0.85,
         sampleCount: 1,
       })
 
-      expect(mockDb.insert).toHaveBeenCalled()
+      expect(mockRedis.set).toHaveBeenCalledWith(
+        'trust:app-1:refund-simple',
+        expect.objectContaining({
+          appId: 'app-1',
+          category: 'refund-simple',
+          trustScore: 0.85,
+          sampleCount: 1,
+        })
+      )
     })
 
-    it('should update existing trust score on conflict', async () => {
-      const mockDb = {
-        insert: vi.fn().mockReturnValue({
-          values: vi.fn().mockReturnValue({
-            onDuplicateKeyUpdate: vi.fn().mockResolvedValue(undefined),
-          }),
-        }),
-      }
+    it('should handle deprecated 4-arg signature for backwards compatibility', async () => {
+      mockRedis.set.mockResolvedValue('OK')
 
-      await upsertTrustScore(mockDb as any, 'app-2', 'transfer', {
+      // Old signature: (db, appId, category, update)
+      await upsertTrustScore({} as any, 'app-2', 'transfer', {
         trustScore: 0.92,
         sampleCount: 150,
       })
 
-      const insertCall = mockDb.insert().values
-      const values = insertCall.mock.calls[0][0]
-
-      expect(values).toMatchObject({
-        app_id: 'app-2',
-        category: 'transfer',
-        trust_score: 0.92,
-        sample_count: 150,
-      })
+      expect(mockRedis.set).toHaveBeenCalledWith(
+        'trust:app-2:transfer',
+        expect.objectContaining({
+          appId: 'app-2',
+          category: 'transfer',
+          trustScore: 0.92,
+          sampleCount: 150,
+        })
+      )
     })
+  })
 
-    it('should generate unique ID for new records', async () => {
-      const mockDb = {
-        insert: vi.fn().mockReturnValue({
-          values: vi.fn().mockReturnValue({
-            onDuplicateKeyUpdate: vi.fn().mockResolvedValue(undefined),
-          }),
-        }),
-      }
+  describe('deleteTrustScore', () => {
+    it('should delete trust score from Redis', async () => {
+      mockRedis.del.mockResolvedValue(1)
 
-      await upsertTrustScore(mockDb as any, 'app-1', 'refund-simple', {
-        trustScore: 0.75,
-        sampleCount: 25,
-      })
+      await deleteTrustScore('app-1', 'refund-simple')
 
-      const insertCall = mockDb.insert().values
-      const values = insertCall.mock.calls[0][0]
-
-      expect(values.id).toMatch(/^ts-/)
+      expect(mockRedis.del).toHaveBeenCalledWith('trust:app-1:refund-simple')
     })
   })
 })
