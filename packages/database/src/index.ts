@@ -40,4 +40,4 @@ export * from './schema'
 export { env }
 
 // Re-export drizzle operators for queries
-export { eq, and, or, desc, asc, sql } from 'drizzle-orm'
+export { eq, and, or, desc, asc, sql, gte, lte, gt, lt } from 'drizzle-orm'
