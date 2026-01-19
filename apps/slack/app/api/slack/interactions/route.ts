@@ -142,6 +142,70 @@ export async function POST(request: Request) {
         console.log(
           `[slack] Recorded ${isGood ? 'good' : 'bad'} rating for action ${recordId} (${appId}/${category})`
         )
+      } else if (actionId === 'memory_store') {
+        // Handle memory store action (acknowledge only for now)
+        const { actionId: recordId, conversationId, appId } = metadata
+
+        // Update the Slack message to confirm
+        const channel = payload.channel?.id
+        const ts = payload.message?.ts
+        if (channel && ts) {
+          const blocks: SectionBlock[] = [
+            {
+              type: 'section',
+              text: {
+                type: 'mrkdwn',
+                text: `*Memory Store Request*\n\nConversation: *${conversationId}*\nApp: *${appId}*\n\n_Acknowledged by @${username}_`,
+              },
+            },
+          ]
+          await updateApprovalMessage(
+            channel,
+            ts,
+            blocks,
+            `Memory store acknowledged by ${username}`
+          )
+        }
+
+        console.log(
+          `[slack] Memory store acknowledged for conversation ${conversationId} by ${username}`
+        )
+      } else if (
+        actionId === 'memory_upvote' ||
+        actionId === 'memory_downvote'
+      ) {
+        // Handle memory voting
+        const voteType = actionId === 'memory_upvote' ? 'upvote' : 'downvote'
+        const { memory_id, collection } = metadata
+
+        // Record the vote
+        await VotingService.vote(memory_id, collection, voteType)
+
+        // Update the Slack message to show the vote was recorded
+        const channel = payload.channel?.id
+        const ts = payload.message?.ts
+        if (channel && ts) {
+          const voteEmoji = voteType === 'upvote' ? '👍' : '👎'
+          const blocks: SectionBlock[] = [
+            {
+              type: 'section',
+              text: {
+                type: 'mrkdwn',
+                text: `*Memory Vote*\n\nMemory: \`${memory_id}\`\nCollection: *${collection}*\n\n_Voted ${voteEmoji} by @${username}_`,
+              },
+            },
+          ]
+          await updateApprovalMessage(
+            channel,
+            ts,
+            blocks,
+            `Memory voted ${voteEmoji} by ${username}`
+          )
+        }
+
+        console.log(
+          `[slack] Recorded ${voteType} for memory ${memory_id} (${collection}) by ${username}`
+        )
       }
     } catch (error) {
       // Log but don't fail - unknown actions are ignored

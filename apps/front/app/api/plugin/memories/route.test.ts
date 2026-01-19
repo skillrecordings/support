@@ -55,15 +55,18 @@ describe('GET /api/plugin/memories', () => {
           id: 'mem-1',
           content: 'Test memory',
           metadata: {
+            collection: 'learnings',
+            source: 'human' as const,
             confidence: 0.95,
             tags: ['test'],
             created_at: '2025-01-19T00:00:00Z',
-            votes: { upvotes: 5, downvotes: 0 },
+            votes: { upvotes: 5, downvotes: 0, citations: 0, success_rate: 0 },
           },
         },
         score: 0.92,
         raw_score: 0.92,
         age_days: 1,
+        decay_factor: 0.98,
       },
     ]
 
@@ -85,7 +88,7 @@ describe('GET /api/plugin/memories', () => {
       confidence: 0.95,
       tags: ['test'],
       created_at: '2025-01-19T00:00:00Z',
-      votes: { upvotes: 5, downvotes: 0 },
+      votes: { upvotes: 5, downvotes: 0, citations: 0, success_rate: 0 },
     })
     expect(MemoryService.find).toHaveBeenCalledWith('test query', {
       collection: 'learnings',
@@ -135,30 +138,36 @@ describe('GET /api/plugin/memories', () => {
           id: 'mem-1',
           content: 'First memory',
           metadata: {
+            collection: 'learnings',
+            source: 'human' as const,
             confidence: 0.95,
             tags: ['tag1'],
             created_at: '2025-01-19T00:00:00Z',
-            votes: { upvotes: 10, downvotes: 1 },
+            votes: { upvotes: 10, downvotes: 1, citations: 0, success_rate: 0 },
           },
         },
         score: 0.95,
         raw_score: 0.95,
         age_days: 1,
+        decay_factor: 0.98,
       },
       {
         memory: {
           id: 'mem-2',
           content: 'Second memory',
           metadata: {
+            collection: 'learnings',
+            source: 'human' as const,
             confidence: 0.85,
             tags: ['tag1', 'tag2'],
             created_at: '2025-01-18T00:00:00Z',
-            votes: { upvotes: 3, downvotes: 0 },
+            votes: { upvotes: 3, downvotes: 0, citations: 0, success_rate: 0 },
           },
         },
         score: 0.88,
         raw_score: 0.88,
         age_days: 2,
+        decay_factor: 0.96,
       },
     ]
 
@@ -186,8 +195,12 @@ describe('POST /api/plugin/memories', () => {
         id: 'mem-123',
         content: 'Learned something important',
         metadata: {
+          collection: 'learnings',
+          source: 'human' as const,
+          confidence: 1,
           tags: ['learning'],
           created_at: '2025-01-19T00:00:00Z',
+          votes: { upvotes: 0, downvotes: 0, citations: 0, success_rate: 0 },
         },
       }
 
@@ -224,8 +237,12 @@ describe('POST /api/plugin/memories', () => {
         id: 'mem-456',
         content: 'Another memory',
         metadata: {
+          collection: 'learnings',
+          source: 'human' as const,
+          confidence: 1,
           tags: [],
           created_at: '2025-01-19T00:00:00Z',
+          votes: { upvotes: 0, downvotes: 0, citations: 0, success_rate: 0 },
         },
       }
 
