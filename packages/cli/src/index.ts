@@ -9,6 +9,7 @@ import { init } from './commands/init'
 import { registerEventsCommands } from './commands/inngest/events'
 import { registerRunsCommands } from './commands/inngest/runs'
 import { registerSignalCommand } from './commands/inngest/signal'
+import { registerMemoryCommands } from './commands/memory/index'
 import { wizard } from './commands/wizard'
 
 const program = new Command()
@@ -97,5 +98,8 @@ registerSignalCommand(program)
 
 // Register Front commands
 registerFrontCommands(program)
+
+// Register Memory commands
+registerMemoryCommands(program)
 
 program.parse()

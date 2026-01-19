@@ -13,9 +13,10 @@ export type Links = z.infer<typeof LinksSchema>
 /**
  * Pagination schema for Front API responses
  * Contains optional next page URL for cursor-based pagination
+ * Note: Front returns null (not undefined) when there's no next page
  */
 export const PaginationSchema = z.object({
-  next: z.string().url().optional(),
+  next: z.string().url().nullish(),
 })
 
 export type Pagination = z.infer<typeof PaginationSchema>

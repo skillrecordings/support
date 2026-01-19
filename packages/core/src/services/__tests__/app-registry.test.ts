@@ -37,6 +37,7 @@ const mockApp: App = {
   slug: 'test-app',
   name: 'Test App',
   front_inbox_id: 'inbox-123',
+  instructor_teammate_id: null,
   stripe_account_id: null,
   stripe_connected: false,
   integration_base_url: 'https://test.example.com',

@@ -181,6 +181,31 @@ export type SupportConversationResolvedEvent = {
   }
 }
 
+/** Event emitted when memory voting is requested after a resolution */
+export const MEMORY_VOTE_REQUESTED = 'memory/vote.requested' as const
+
+export type MemoryVoteRequestedEvent = {
+  name: typeof MEMORY_VOTE_REQUESTED
+  data: {
+    /** Inngest run ID for traceability */
+    run_id: string
+    /** Outcome of the resolution */
+    outcome: 'success' | 'failure' | 'rejection'
+    /** Memory IDs that were cited in this resolution */
+    cited_memories: string[]
+    /** Collection the memories belong to */
+    collection: string
+    /** Optional: app slug for filtering */
+    app_slug?: string
+    /** Optional: additional context about the outcome */
+    context?: {
+      resolution_summary?: string
+      customer_satisfied?: boolean
+      rejection_reason?: string
+    }
+  }
+}
+
 /**
  * Union of all support platform events.
  * Used to type the Inngest client.
@@ -194,4 +219,5 @@ export type Events = {
   [STRIPE_EVENT_RECEIVED]: StripeEventReceivedEvent
   [STRIPE_REFUND_COMPLETED]: StripeRefundCompletedEvent
   [SUPPORT_CONVERSATION_RESOLVED]: SupportConversationResolvedEvent
+  [MEMORY_VOTE_REQUESTED]: MemoryVoteRequestedEvent
 }

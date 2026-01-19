@@ -4,6 +4,7 @@
  * Provides direct access to Front API for:
  * - Fetching messages (body, author, recipients)
  * - Fetching conversations with message history
+ * - Listing and looking up teammates
  * - Comparing webhook data vs API data
  */
 
@@ -11,12 +12,13 @@ import {
   type FrontMessage,
   createFrontClient,
 } from '@skillrecordings/core/front'
+import { createFrontClient as createSdkClient } from '@skillrecordings/front-sdk'
 import type { Command } from 'commander'
 
 type Message = FrontMessage
 
 /**
- * Get Front API client from environment
+ * Get Front API client from environment (legacy wrapper)
  */
 function getFrontClient() {
   const apiToken = process.env.FRONT_API_TOKEN
@@ -24,6 +26,17 @@ function getFrontClient() {
     throw new Error('FRONT_API_TOKEN environment variable is required')
   }
   return createFrontClient(apiToken)
+}
+
+/**
+ * Get Front SDK client from environment (full typed client)
+ */
+function getFrontSdkClient() {
+  const apiToken = process.env.FRONT_API_TOKEN
+  if (!apiToken) {
+    throw new Error('FRONT_API_TOKEN environment variable is required')
+  }
+  return createSdkClient({ apiToken })
 }
 
 /**
@@ -200,6 +213,85 @@ async function getConversation(
 }
 
 /**
+ * Command: skill front teammates
+ * List all teammates in the workspace
+ */
+async function listTeammates(options: { json?: boolean }): Promise<void> {
+  try {
+    const front = getFrontSdkClient()
+    const result = await front.teammates.list()
+
+    if (options.json) {
+      console.log(JSON.stringify(result._results, null, 2))
+      return
+    }
+
+    console.log('\n👥 Teammates:')
+    console.log('-'.repeat(60))
+
+    for (const teammate of result._results) {
+      const available = teammate.is_available ? '✓' : '✗'
+      console.log(`   ${available} ${teammate.id}`)
+      console.log(`      Email: ${teammate.email}`)
+      if (teammate.first_name || teammate.last_name) {
+        console.log(
+          `      Name:  ${teammate.first_name || ''} ${teammate.last_name || ''}`.trim()
+        )
+      }
+      if (teammate.username) {
+        console.log(`      Username: ${teammate.username}`)
+      }
+      console.log('')
+    }
+  } catch (error) {
+    console.error(
+      'Error:',
+      error instanceof Error ? error.message : 'Unknown error'
+    )
+    process.exit(1)
+  }
+}
+
+/**
+ * Command: skill front teammate <id>
+ * Get a specific teammate by ID
+ */
+async function getTeammate(
+  id: string,
+  options: { json?: boolean }
+): Promise<void> {
+  try {
+    const front = getFrontSdkClient()
+    const teammate = await front.teammates.get(id)
+
+    if (options.json) {
+      console.log(JSON.stringify(teammate, null, 2))
+      return
+    }
+
+    console.log('\n👤 Teammate Details:')
+    console.log(`   ID:        ${teammate.id}`)
+    console.log(`   Email:     ${teammate.email}`)
+    if (teammate.first_name || teammate.last_name) {
+      console.log(
+        `   Name:      ${teammate.first_name || ''} ${teammate.last_name || ''}`.trim()
+      )
+    }
+    if (teammate.username) {
+      console.log(`   Username:  ${teammate.username}`)
+    }
+    console.log(`   Available: ${teammate.is_available ? 'Yes' : 'No'}`)
+    console.log('')
+  } catch (error) {
+    console.error(
+      'Error:',
+      error instanceof Error ? error.message : 'Unknown error'
+    )
+    process.exit(1)
+  }
+}
+
+/**
  * Register Front commands with Commander
  */
 export function registerFrontCommands(program: Command): void {
@@ -221,4 +313,17 @@ export function registerFrontCommands(program: Command): void {
     .option('--json', 'Output as JSON')
     .option('-m, --messages', 'Include message history')
     .action(getConversation)
+
+  front
+    .command('teammates')
+    .description('List all teammates in the workspace')
+    .option('--json', 'Output as JSON')
+    .action(listTeammates)
+
+  front
+    .command('teammate')
+    .description('Get teammate details by ID')
+    .argument('<id>', 'Teammate ID (e.g., tea_xxx or username)')
+    .option('--json', 'Output as JSON')
+    .action(getTeammate)
 }

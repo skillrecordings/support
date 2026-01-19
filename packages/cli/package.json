@@ -21,6 +21,7 @@
     "@skillrecordings/core": "workspace:*",
     "@skillrecordings/database": "workspace:*",
     "@skillrecordings/front-sdk": "workspace:*",
+    "@skillrecordings/memory": "workspace:*",
     "commander": "^12.1.0",
     "dotenv-flow": "^4.1.0",
     "zod": "^4.3.5"
