@@ -5,11 +5,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: [
-    '@skillrecordings/core',
-    '@skillrecordings/database',
-    '@skillrecordings/sdk',
-  ],
+  transpilePackages: ['@skillrecordings/core', '@skillrecordings/database'],
   turbopack: {
     root: path.join(__dirname, '../..'),
   },
