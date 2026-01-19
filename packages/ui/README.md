@@ -2,18 +2,10 @@
 
 Shared React components and primitives.
 
-## Components
+## Status
 
-Based on shadcn/ui patterns. Primitives only - app-specific components live in their respective apps.
-
-## Usage
-
-```typescript
-import { Button, Card, Input } from '@skillrecordings/ui'
-```
+Placeholder package. Components TBD.
 
 ## Stack
 
 - React 19
-- Tailwind CSS
-- Radix UI primitives
