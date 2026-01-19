@@ -8,6 +8,7 @@ Skills are model-invoked: Claude automatically uses them based on description ma
 |-------|-------------|
 | `agent-tool` | tool, agent tool, define tool, refund, license transfer |
 | `ai-sdk` | ai sdk, generateText, streamText, tool(), v6, multi-step |
+| `front-plugin` | front plugin, sidebar plugin, composer plugin, @frontapp/plugin-sdk, UI |
 | `front-webhook` | front, webhook, inbound, conversation, message handler |
 | `hitl-approval` | hitl, approval, slack approval, human-in-the-loop, review queue |
 | `inngest-workflow` | inngest, workflow, step.run, createFunction, async, durable |
