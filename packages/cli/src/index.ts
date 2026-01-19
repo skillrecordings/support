@@ -3,8 +3,12 @@
 import 'dotenv-flow/config'
 import { Command } from 'commander'
 import { runEval } from './commands/eval'
+import { registerFrontCommands } from './commands/front/index'
 import { health } from './commands/health'
 import { init } from './commands/init'
+import { registerEventsCommands } from './commands/inngest/events'
+import { registerRunsCommands } from './commands/inngest/runs'
+import { registerSignalCommand } from './commands/inngest/signal'
 import { wizard } from './commands/wizard'
 
 const program = new Command()
@@ -85,5 +89,13 @@ program
       gates: Object.keys(gates).length > 0 ? gates : undefined,
     })
   })
+
+// Register Inngest commands
+registerEventsCommands(program)
+registerRunsCommands(program)
+registerSignalCommand(program)
+
+// Register Front commands
+registerFrontCommands(program)
 
 program.parse()

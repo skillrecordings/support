@@ -10,13 +10,13 @@ export const RecipientSchema = z.object({
     .object({
       related: z
         .object({
-          contact: z.string().optional(),
+          contact: z.string().nullable(),
         })
         .optional(),
     })
     .optional(),
   handle: z.string(),
-  role: z.enum(['from', 'to', 'cc', 'bcc']),
+  role: z.enum(['from', 'to', 'cc', 'bcc', 'reply-to']),
   name: z.string().nullable().optional(),
 })
 
