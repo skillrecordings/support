@@ -18,6 +18,7 @@ describe('classifyMessage', () => {
       category: 'refund',
       confidence: 0.95,
       reasoning: 'Customer explicitly requests refund',
+      complexity: 'simple',
     }
 
     vi.mocked(generateObject).mockResolvedValue({
@@ -43,6 +44,7 @@ describe('classifyMessage', () => {
       category: 'technical',
       confidence: 0.78,
       reasoning: 'User reports technical issue with product access',
+      complexity: 'simple',
     }
 
     vi.mocked(generateObject).mockResolvedValue({
@@ -63,6 +65,7 @@ describe('classifyMessage', () => {
       category: 'no_response',
       confidence: 0.92,
       reasoning: 'Automated bounce notification, no action required',
+      complexity: 'skip',
     }
 
     vi.mocked(generateObject).mockResolvedValue({
@@ -83,6 +86,7 @@ describe('classifyMessage', () => {
       confidence: 0.88,
       reasoning:
         'Multiple issues mentioned requiring human judgment and empathy',
+      complexity: 'complex',
     }
 
     vi.mocked(generateObject).mockResolvedValue({
@@ -102,6 +106,7 @@ describe('classifyMessage', () => {
       category: 'billing',
       confidence: 0.85,
       reasoning: 'Follow-up on previous billing inquiry',
+      complexity: 'simple',
     }
 
     vi.mocked(generateObject).mockResolvedValue({
@@ -125,6 +130,7 @@ describe('classifyMessage', () => {
       category: 'general',
       confidence: 0.72,
       reasoning: 'General inquiry about product features',
+      complexity: 'simple',
     }
 
     vi.mocked(generateObject).mockResolvedValue({
@@ -144,6 +150,7 @@ describe('classifyMessage', () => {
       category: 'technical',
       confidence: 0.5,
       reasoning: 'Uncertain classification',
+      complexity: 'complex',
     }
 
     vi.mocked(generateObject).mockResolvedValue({
@@ -174,6 +181,7 @@ describe('classifyMessage', () => {
       category: 'account_issue',
       confidence: 0.82,
       reasoning: 'User cannot access account',
+      complexity: 'simple',
     }
 
     vi.mocked(generateObject).mockResolvedValue({
@@ -183,5 +191,24 @@ describe('classifyMessage', () => {
     const result = await classifyMessage('I cannot log in to my account')
 
     expect(validCategories).toContain(result.category)
+  })
+
+  it('returns complexity tier for model selection', async () => {
+    const mockResult: ClassifierResult = {
+      category: 'human_required',
+      confidence: 0.9,
+      reasoning: 'Frustrated customer needs careful handling',
+      complexity: 'complex',
+    }
+
+    vi.mocked(generateObject).mockResolvedValue({
+      object: mockResult,
+    } as any)
+
+    const result = await classifyMessage(
+      'This is ridiculous! Nothing works and nobody is helping me!'
+    )
+
+    expect(result.complexity).toBe('complex')
   })
 })

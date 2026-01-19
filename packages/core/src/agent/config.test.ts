@@ -51,6 +51,7 @@ describe('runSupportAgent - auto-send integration', () => {
       category: 'billing' as const,
       confidence: 0.92,
       reasoning: 'Clear billing inquiry',
+      complexity: 'simple' as const,
     }
 
     const mockTrustScore = {
@@ -103,6 +104,7 @@ describe('runSupportAgent - auto-send integration', () => {
       category: 'refund' as const,
       confidence: 0.85,
       reasoning: 'Refund request',
+      complexity: 'simple' as const,
     }
 
     const mockTrustScore = {
@@ -135,6 +137,7 @@ describe('runSupportAgent - auto-send integration', () => {
       category: 'general' as const,
       confidence: 0.88,
       reasoning: 'General inquiry',
+      complexity: 'simple' as const,
     }
 
     vi.mocked(classifyMessage).mockResolvedValue(mockClassifierResult)
