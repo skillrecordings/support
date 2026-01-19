@@ -11,9 +11,18 @@ The support agent needs to recommend content (courses, tutorials, articles, exer
 - Products know their content structure best
 
 Currently the agent either:
-1. Guesses at URLs (risky)
-2. Uses hardcoded knowledge (stale)
-3. Searches vector store (may miss new content)
+1. **Hallucinates content** - invents "fundamentals section" or "modules" that don't exist
+2. Guesses at URLs (risky - may 404)
+3. Uses hardcoded knowledge (stale)
+4. Searches vector store (may miss new content)
+
+### The Hallucination Problem
+
+Without a content API, when a customer asks "how do I get started?", the agent has no ground truth about what the product contains. It fills the void with plausible-sounding bullshit:
+
+> "Start with the fundamentals section in AI Hero. It covers core concepts like how AI models work, prompt engineering basics, and common use cases."
+
+This is fabricated. The agent has no idea what AI Hero actually teaches. We've added guardrails to prevent this (`packages/core/src/agent/config.ts` - "NEVER FABRICATE PRODUCT CONTENT"), but the real fix is giving the agent actual content to reference.
 
 ## Solution
 
@@ -335,6 +344,196 @@ metadata: {
 }
 ```
 
+## Reference Implementations
+
+Current products have completely different search architectures. The SDK adapter pattern normalizes them to our interface - we don't care HOW you search, just that you return `ContentSearchResponse`.
+
+### AI Hero: Typesense (Dedicated Search Engine)
+
+**Source**: `/Users/joel/Code/badass-courses/course-builder/apps/ai-hero/src/app/(search)/q/_components/search.tsx`
+**Adapter**: `/Users/joel/Code/badass-courses/course-builder/apps/ai-hero/src/utils/typesense-instantsearch-adapter.ts`
+
+AI Hero uses **Typesense**, a dedicated search engine with:
+- InstantSearch adapter for client-side faceted search
+- Searches: `title, description, summary`
+- Filters: `visibility:public && state:published`
+- Faceted refinements: type, tags
+- Sorting by relevance (`_text_match:desc`) or recency
+
+```typescript
+// Current implementation (client-side InstantSearch)
+const config = createDefaultConfig({
+  apiKey: process.env.NEXT_PUBLIC_TYPESENSE_API_KEY,
+  host: process.env.NEXT_PUBLIC_TYPESENSE_HOST,
+  queryBy: 'title,description,summary',
+  sortBy: '_text_match:desc',
+})
+
+export const typesenseInstantsearchAdapter = new TypesenseInstantSearchAdapter(config)
+```
+
+**Adapter strategy**: Create server-side Typesense client, query directly, transform to `ContentSearchResult[]`:
+
+```typescript
+// ai-hero/app/api/support/content-search/route.ts
+
+import Typesense from 'typesense'
+import { withSupportHandler } from '@skillrecordings/sdk/handler'
+
+const client = new Typesense.Client({
+  apiKey: process.env.TYPESENSE_API_KEY,
+  nodes: [{ host: process.env.TYPESENSE_HOST, port: 443, protocol: 'https' }],
+})
+
+export const POST = withSupportHandler(async (req) => {
+  const { query, types, limit = 5 } = await req.json()
+
+  const searchParams = {
+    q: query,
+    query_by: 'title,description,summary',
+    filter_by: 'visibility:public && state:published',
+    per_page: limit,
+  }
+
+  if (types?.length) {
+    searchParams.filter_by += ` && type:[${types.join(',')}]`
+  }
+
+  const results = await client
+    .collections('content_production')
+    .documents()
+    .search(searchParams)
+
+  return Response.json({
+    results: results.hits.map(hit => ({
+      id: hit.document.id,
+      type: hit.document.type,
+      title: hit.document.title,
+      description: hit.document.description,
+      url: `https://aihero.dev/${hit.document.slug}`,
+      score: hit.text_match / 100, // Normalize to 0-1
+      metadata: {
+        tags: hit.document.tags?.map(t => t.fields?.label),
+        author: hit.document.instructor_name,
+        updatedAt: hit.document.updated_at,
+      },
+    })),
+    quickLinks: [
+      { id: 'discord', type: 'social', title: 'AI Hero Discord', url: 'https://aihero.dev/discord' },
+    ],
+  })
+})
+```
+
+### Total TypeScript: Sanity GROQ (CMS Query Language)
+
+**Source**: `/Users/joel/Code/skillrecordings/products/apps/total-typescript/src/trpc/routers/search.ts`
+
+Total TypeScript uses **Sanity CMS** with GROQ full-text search:
+- Server-side tRPC router
+- Searches: `title, description, body, transcript`
+- Boost scoring for relevance weighting
+- Returns hierarchical content structure (module → section → chapter → book)
+
+```typescript
+// Current implementation (tRPC + GROQ)
+const results = await sanityClient.fetch(
+  groq`*[_type in ["article", "tip", "module", "exercise", "explainer"]
+       && state == "published"]
+  | score(
+    title match $searchQuery
+    || description match $searchQuery
+    || pt::text(body) match $searchQuery
+    || boost(pt::text(transcript) match $searchQuery, 0.5)
+  )
+  | order(_score desc)
+  {
+    _score, _id, title, slug, _type, description,
+    "section": *[_type == 'section' && references(^._id)][0]{...},
+    "module": *[_type == 'module' && references(^.section._id)][0]{...}
+  }
+  [_score > 0][0..${limit}]`,
+  { searchQuery: query }
+)
+```
+
+**Adapter strategy**: Wrap existing GROQ query, transform to `ContentSearchResult[]`:
+
+```typescript
+// total-typescript/app/api/support/content-search/route.ts
+
+import { sanityClient } from '@skillrecordings/skill-lesson/utils/sanity-client'
+import { withSupportHandler } from '@skillrecordings/sdk/handler'
+import groq from 'groq'
+
+export const POST = withSupportHandler(async (req) => {
+  const { query, types, limit = 5 } = await req.json()
+
+  const typeFilter = types?.length
+    ? `_type in [${types.map(t => `"${mapType(t)}"`).join(',')}]`
+    : `_type in ["article", "tip", "module", "exercise", "explainer"]`
+
+  const results = await sanityClient.fetch(
+    groq`*[${typeFilter} && state == "published"]
+    | score(
+      title match $searchQuery
+      || description match $searchQuery
+      || pt::text(body) match $searchQuery
+    )
+    | order(_score desc)
+    { _score, _id, title, slug, _type, description, moduleType }
+    [_score > 0][0..${limit}]`,
+    { searchQuery: query }
+  )
+
+  return Response.json({
+    results: results.map(r => ({
+      id: r._id,
+      type: mapSanityType(r._type, r.moduleType),
+      title: r.title,
+      description: r.description,
+      url: buildUrl(r),
+      score: r._score / 100,
+      metadata: {
+        author: 'Matt Pocock',
+        sanityType: r._type,
+      },
+    })),
+    quickLinks: [
+      { id: 'discord', type: 'social', title: 'Total TypeScript Discord', url: 'https://totaltypescript.com/discord' },
+      { id: 'twitter', type: 'social', title: 'Matt on Twitter', url: 'https://twitter.com/maattybot' },
+    ],
+  })
+})
+
+function mapSanityType(type: string, moduleType?: string): ContentSearchResult['type'] {
+  if (type === 'module') return moduleType === 'tutorial' ? 'course' : 'module'
+  if (type === 'exercise') return 'exercise'
+  if (type === 'article' || type === 'tip') return 'article'
+  return 'lesson'
+}
+
+function buildUrl(r: any): string {
+  const base = 'https://totaltypescript.com'
+  if (r._type === 'module') return `${base}/tutorials/${r.slug.current}`
+  if (r._type === 'article') return `${base}/articles/${r.slug.current}`
+  if (r._type === 'tip') return `${base}/tips/${r.slug.current}`
+  return `${base}/${r.slug.current}`
+}
+```
+
+### Why This Pattern Works
+
+| Aspect | AI Hero | Total TypeScript | SDK Interface |
+|--------|---------|------------------|---------------|
+| **Search engine** | Typesense | Sanity GROQ | Doesn't care |
+| **Query language** | Typesense DSL | GROQ | Natural language |
+| **Scoring** | `_text_match` | `score()` | Normalized 0-1 |
+| **Content types** | Flat | Hierarchical | Enum mapped |
+| **Response** | Typesense hits | Sanity documents | `ContentSearchResult[]` |
+
+The adapter lives in each product's codebase - they transform their search results to our interface. Support platform sees consistent `ContentSearchResponse` regardless of underlying implementation.
+
 ## Implementation Plan
 
 ### Phase 1: SDK Contract
@@ -343,13 +542,19 @@ metadata: {
 3. Add handler method
 4. Add agent tool
 
-### Phase 2: Total TypeScript Implementation
-1. Create content index (if not exists)
-2. Implement search endpoint
-3. Add quick links
-4. Test with agent
+### Phase 2: AI Hero Implementation
+1. Create server-side Typesense client (reuse existing config)
+2. Implement `/api/support/content-search` route
+3. Map Typesense hits → `ContentSearchResult[]`
+4. Add quick links (Discord, etc.)
 
-### Phase 3: Caching & Optimization
+### Phase 3: Total TypeScript Implementation
+1. Wrap existing GROQ query in new endpoint
+2. Implement `/api/support/content-search` route
+3. Map Sanity documents → `ContentSearchResult[]`
+4. Handle hierarchical content (module → lesson paths)
+
+### Phase 4: Caching & Optimization
 1. Add agent-side caching
 2. Add quick links caching
 3. Monitor latency/cache hit rates
