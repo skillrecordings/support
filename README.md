@@ -9,7 +9,6 @@ apps/
   front/     Front plugin - receives webhooks, triggers workflows (port 4101)
   slack/     HITL approvals bot - Slack interactions (port 4102)
   web/       Dashboard - approval queue, trust scores, audit logs (port 4100)
-  docs/      Documentation site (port 4103)
 
 packages/
   core/      Agent, router, tools, workflows, trust scoring, vector search
@@ -29,7 +28,7 @@ packages/
 - **Vector**: Upstash Vector (hybrid search)
 - **Cache/KV**: Upstash Redis
 - **LLM**: Claude via AI SDK (Haiku for classification, Sonnet for responses)
-- **Auth**: BetterAuth
+- **Auth**: TBD (BetterAuth planned)
 - **Observability**: Axiom (traces), Langfuse (LLM)
 
 ## Commands

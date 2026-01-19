@@ -4,48 +4,28 @@ Integration contract for Skill Recordings products.
 
 ## Purpose
 
-Apps (Total TypeScript, Pro Tailwind, etc.) implement this interface to integrate with the support platform.
+Apps (Total TypeScript, Pro Tailwind, etc.) implement `SupportIntegration` interface. The support platform calls these methods via HTTP with HMAC auth.
 
 ## Interface
 
 ```typescript
 interface SupportIntegration {
-  appId: string
-  name: string
-  frontInboxId: string
-  stripeConnectedAccountId?: string
-
-  // Callbacks
   lookupUser(email: string): Promise<User | null>
-  getKnowledgeBase(): Promise<KnowledgeEntry[]>
+  getPurchases(userId: string): Promise<Purchase[]>
+  getSubscriptions?(userId: string): Promise<Subscription[]>
+  revokeAccess(params: { purchaseId, reason, refundId }): Promise<ActionResult>
+  transferPurchase(params: { purchaseId, fromUserId, toEmail }): Promise<ActionResult>
+  generateMagicLink(params: { email, expiresIn }): Promise<{ url: string }>
+  updateEmail?(params: { userId, newEmail }): Promise<ActionResult>
+  updateName?(params: { userId, newName }): Promise<ActionResult>
+  getClaimedSeats?(bulkCouponId: string): Promise<ClaimedSeat[]>
 }
 ```
 
-## Usage
+## Exports
 
-```typescript
-import { createSupportAdapter } from '@skillrecordings/sdk'
-
-export const adapter = createSupportAdapter({
-  appId: 'total-typescript',
-  name: 'Total TypeScript',
-  frontInboxId: 'inb_xxx',
-  stripeConnectedAccountId: 'acct_xxx',
-
-  async lookupUser(email) {
-    return db.query.users.findFirst({ where: eq(users.email, email) })
-  },
-
-  async getKnowledgeBase() {
-    return [...faqEntries, ...docEntries]
-  }
-})
-```
-
-## Webhook Handler
-
-```typescript
-import { createWebhookHandler } from '@skillrecordings/sdk'
-
-export const POST = createWebhookHandler(adapter)
-```
+- `integration.ts` - SupportIntegration interface + types
+- `handler.ts` - Webhook handler factory
+- `client.ts` - IntegrationClient for calling apps
+- `adapter.ts` - Adapter utilities
+- `types.ts` - Shared types (User, Purchase, etc.)

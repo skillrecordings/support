@@ -18,7 +18,7 @@ Slack bot for HITL approvals. Receives Slack interactions (button clicks), route
 ## Stack
 
 - Next.js 16 (App Router)
-- Slack Web API (`@slack/web-api`)
+- Slack client via `packages/core`
 
 ## Dev
 

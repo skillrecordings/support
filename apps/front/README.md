@@ -14,8 +14,8 @@ Front plugin app. Receives webhooks from Front, triggers Inngest workflows.
 ## Stack
 
 - Next.js 16 (App Router)
-- Front UI Kit (`@frontapp/ui-kit`)
 - Inngest client
+- Core package for Front API client
 
 ## Dev
 
