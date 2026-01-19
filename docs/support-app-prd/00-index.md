@@ -55,25 +55,25 @@ External:
 Phases are PR-ready units. Use the phase docs to execute.
 
 - Phase 0: Ops Readiness (No-Code Setup)
-  - ./phases/01-ops.md
+  - ./01-ops.md
 - Phase 0.5: Bedrock Repo
-  - ./phases/02-bedrock.md
+  - ./02-bedrock.md
 - Phase 1: Registry + Ingestion
-  - ./phases/03-registry-ingestion.md
+  - ./03-registry-ingestion.md
 - Phase 2: Agent Core + Actions
-  - ./phases/04-agent-actions.md
+  - ./04-agent-actions.md
 - Phase 3: HITL Surfaces
-  - ./phases/05-hitl-surfaces.md
+  - ./05-hitl-surfaces.md
 - Phase 4: SDK + First App
-  - ./phases/06-sdk-first-app.md
+  - ./06-sdk-first-app.md
 - Phase 5: Stripe Connect
-  - ./phases/07-stripe-connect.md
+  - ./07-stripe-connect.md
 - Phase 6: Vector + Trust + Auto-send
-  - ./phases/08-vector-trust.md
+  - ./08-vector-trust.md
 - Phase 7: Polish + Ops
-  - ./phases/09-polish-ops.md
+  - ./09-polish-ops.md
 - Phase 8: Routing + Caching + Canned Responses + Evals
-  - ./phases/10-routing-caching-evals.md
+  - ./10-routing-caching-evals.md
 
 ## Reference Index
 

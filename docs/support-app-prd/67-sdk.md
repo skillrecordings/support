@@ -36,6 +36,9 @@ export interface SupportIntegration {
   }): Promise<ActionResult>
 
   getClaimedSeats?(bulkCouponId: string): Promise<ClaimedSeat[]>
+
+  /** Search product content (SDK 0.3.0+) */
+  searchContent?(request: ContentSearchRequest): Promise<ContentSearchResponse>
 }
 ```
 

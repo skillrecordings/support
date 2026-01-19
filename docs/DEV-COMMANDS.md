@@ -29,4 +29,3 @@ bun run db:studio
 - `apps/web`: 4100
 - `apps/front`: 4101
 - `apps/slack`: 4102
-- `apps/docs`: 4103
