@@ -89,19 +89,33 @@ export function createFrontClient(apiToken: string) {
 
   async function fetchJson<T>(url: string): Promise<T> {
     const fullUrl = url.startsWith('http') ? url : `${FRONT_API_BASE}${url}`
+    console.log('[front-api] GET', fullUrl)
+    const startTime = Date.now()
     const response = await fetch(fullUrl, { headers })
 
     if (!response.ok) {
+      const text = await response.text()
+      console.error(
+        '[front-api] GET FAILED:',
+        response.status,
+        response.statusText,
+        text
+      )
       throw new Error(
-        `Front API error: ${response.status} ${response.statusText}`
+        `Front API error: ${response.status} ${response.statusText} - ${text}`
       )
     }
 
-    return response.json()
+    const data = await response.json()
+    console.log(`[front-api] GET OK (${Date.now() - startTime}ms)`)
+    return data
   }
 
   async function postJson<T>(url: string, body: unknown): Promise<T> {
     const fullUrl = url.startsWith('http') ? url : `${FRONT_API_BASE}${url}`
+    console.log('[front-api] POST', fullUrl)
+    console.log('[front-api] POST body:', JSON.stringify(body, null, 2))
+    const startTime = Date.now()
     const response = await fetch(fullUrl, {
       method: 'POST',
       headers,
@@ -110,12 +124,21 @@ export function createFrontClient(apiToken: string) {
 
     if (!response.ok) {
       const text = await response.text()
+      console.error(
+        '[front-api] POST FAILED:',
+        response.status,
+        response.statusText,
+        text
+      )
       throw new Error(
         `Front API error: ${response.status} ${response.statusText} - ${text}`
       )
     }
 
-    return response.json()
+    const data = await response.json()
+    console.log(`[front-api] POST OK (${Date.now() - startTime}ms)`)
+    console.log('[front-api] POST response:', JSON.stringify(data, null, 2))
+    return data
   }
 
   return {
