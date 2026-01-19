@@ -1,5 +1,15 @@
 # @skillrecordings/sdk
 
+## 0.3.0
+
+### Minor Changes
+
+- 92706d4: Add Content Search API for agent product recommendations
+  - Export `ContentSearchResult`, `ContentSearchRequest`, `ContentSearchResponse` types
+  - Add optional `searchContent` method to `SupportIntegration` interface
+  - Add `searchContent()` to `IntegrationClient` for platform-to-product calls
+  - Add `searchContent` action routing in `createSupportHandler`
+
 ## 0.2.3
 
 ### Patch Changes
