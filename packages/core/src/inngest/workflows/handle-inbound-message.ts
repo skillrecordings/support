@@ -1,10 +1,10 @@
+import { randomUUID } from 'crypto'
+import { ActionsTable, getDb } from '@skillrecordings/database'
+import { runSupportAgent } from '../../agent/index'
+import { type FrontMessage, createFrontClient } from '../../front/index'
 import { inngest } from '../client'
 import { SUPPORT_INBOUND_RECEIVED } from '../events'
 import type { SupportInboundReceivedEvent } from '../events'
-import { createFrontClient, type FrontMessage } from '../../front/index'
-import { runSupportAgent } from '../../agent/index'
-import { getDb, ActionsTable } from '@skillrecordings/database'
-import { randomUUID } from 'crypto'
 
 /**
  * Handles inbound messages received from Front.
@@ -50,16 +50,16 @@ export const handleInboundMessage = inngest.createFunction(
         const front = createFrontClient(frontToken)
 
         // Fetch the triggering message (full data)
-        const message = await front.getMessage(
-          _links?.message || messageId
-        )
+        const message = await front.getMessage(_links?.message || messageId)
 
         // Fetch conversation history
-        const conversationHistory = await front.getConversationMessages(conversationId)
+        const conversationHistory =
+          await front.getConversationMessages(conversationId)
 
         // Extract sender email from message
-        const senderEmail = message.author?.email ||
-          message.recipients.find(r => r.role === 'from')?.handle ||
+        const senderEmail =
+          message.author?.email ||
+          message.recipients.find((r) => r.role === 'from')?.handle ||
           ''
 
         return {
@@ -73,7 +73,10 @@ export const handleInboundMessage = inngest.createFunction(
         }
       } catch (error) {
         // Fallback to event data if Front API fails (e.g., 404 for test data)
-        console.warn('[workflow] Front API error, using fallback context:', error)
+        console.warn(
+          '[workflow] Front API error, using fallback context:',
+          error
+        )
         return fallbackContext
       }
     })
@@ -83,8 +86,8 @@ export const handleInboundMessage = inngest.createFunction(
       // Convert Front messages to AI SDK message format
       const conversationMessages = context.conversationHistory
         .sort((a, b) => a.created_at - b.created_at)
-        .map(msg => ({
-          role: msg.is_inbound ? 'user' as const : 'assistant' as const,
+        .map((msg) => ({
+          role: msg.is_inbound ? ('user' as const) : ('assistant' as const),
           content: msg.body,
         }))
 
@@ -99,11 +102,15 @@ export const handleInboundMessage = inngest.createFunction(
       })
 
       // Check if escalation was requested
-      const escalationCall = result.toolCalls.find(tc => tc.name === 'escalateToHuman')
-      const draftCall = result.toolCalls.find(tc => tc.name === 'draftResponse')
+      const escalationCall = result.toolCalls.find(
+        (tc) => tc.name === 'escalateToHuman'
+      )
+      const draftCall = result.toolCalls.find(
+        (tc) => tc.name === 'draftResponse'
+      )
 
       return {
-        response: draftCall?.args?.body as string || result.response,
+        response: (draftCall?.args?.body as string) || result.response,
         toolCalls: result.toolCalls,
         requiresApproval: result.requiresApproval,
         escalated: !!escalationCall,
@@ -148,7 +155,9 @@ export const handleInboundMessage = inngest.createFunction(
               type: 'pending-action',
               parameters: { toolCalls: agentResult.toolCalls },
             },
-            agentReasoning: agentResult.reasoning || 'Agent proposed action requiring approval',
+            agentReasoning:
+              agentResult.reasoning ||
+              'Agent proposed action requiring approval',
           },
         })
         return { type: 'approval-requested' as const, actionId }
@@ -160,6 +169,27 @@ export const handleInboundMessage = inngest.createFunction(
         response: agentResult.response,
       }
     })
+
+    // Step 4: Create draft in Front if response is ready
+    if (routingResult.type === 'response-ready' && routingResult.response) {
+      await step.run('create-draft', async () => {
+        const frontToken = process.env.FRONT_API_TOKEN
+        if (!frontToken) {
+          console.warn(
+            '[workflow] FRONT_API_TOKEN not configured, skipping draft creation'
+          )
+          return { drafted: false, reason: 'no_token' }
+        }
+
+        const front = createFrontClient(frontToken)
+        const draft = await front.createDraft(
+          conversationId,
+          routingResult.response
+        )
+        console.log('[workflow] Draft created:', draft.id)
+        return { drafted: true, draftId: draft.id }
+      })
+    }
 
     return {
       conversationId,
