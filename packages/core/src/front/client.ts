@@ -71,6 +71,27 @@ export interface FrontInboxes {
   _results: FrontInbox[]
 }
 
+export interface FrontChannel {
+  id: string
+  name: string
+  address: string
+  type: string
+  send_as: string
+  _links: {
+    self: string
+    related: {
+      inbox: string
+    }
+  }
+}
+
+export interface FrontChannels {
+  _links: {
+    self: string
+  }
+  _results: FrontChannel[]
+}
+
 export interface FrontConversationMessages {
   _links: {
     self: string
@@ -183,6 +204,22 @@ export function createFrontClient(apiToken: string) {
     async getConversationInbox(conversationId: string): Promise<string | null> {
       const data = await fetchJson<FrontInboxes>(
         `/conversations/${conversationId}/inboxes`
+      )
+      return data._results[0]?.id ?? null
+    },
+
+    /**
+     * Get channels for an inbox
+     * Returns the first channel ID (used for creating drafts)
+     */
+    async getInboxChannel(inboxId: string): Promise<string | null> {
+      console.log('[front-api] Getting channels for inbox:', inboxId)
+      const data = await fetchJson<FrontChannels>(
+        `/inboxes/${inboxId}/channels`
+      )
+      console.log(
+        '[front-api] Channels found:',
+        data._results.map((c) => ({ id: c.id, address: c.address }))
       )
       return data._results[0]?.id ?? null
     },
