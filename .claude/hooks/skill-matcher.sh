@@ -26,4 +26,6 @@ if [[ -n "$matches" ]]; then
   done
   echo ""
   echo "Use Read tool on matched skills NOW, then proceed with task."
+else
+  echo "No skill matches for this prompt"
 fi
