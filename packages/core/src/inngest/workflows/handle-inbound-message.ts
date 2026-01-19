@@ -1,5 +1,12 @@
 import { randomUUID } from 'crypto'
-import { ActionsTable, getDb } from '@skillrecordings/database'
+import {
+  ActionsTable,
+  and,
+  desc,
+  eq,
+  getDb,
+  gte,
+} from '@skillrecordings/database'
 import { runSupportAgent } from '../../agent/index'
 import { type FrontMessage, createFrontClient } from '../../front/index'
 import { matchRules } from '../../router/rules'
@@ -160,6 +167,77 @@ export const handleInboundMessage = inngest.createFunction(
         ruleId: filterResult.ruleId,
         agentResult: null,
         routingResult: { type: 'filtered' as const },
+      }
+    }
+
+    // Step 2.5: Loop prevention - limit AI responses per conversation
+    const loopCheck = await step.run('check-reply-loop', async () => {
+      console.log('[workflow:loop] Checking for reply loop...')
+      const db = getDb()
+
+      // Check for simple acknowledgment messages that don't need responses
+      const ackPatterns = [
+        /^(thanks|thank you|thx|ty)[\s!.]*$/i,
+        /^(got it|okay|ok|k)[\s!.]*$/i,
+        /^(perfect|great|awesome|cool)[\s!.]*$/i,
+        /^(will do|sounds good|noted)[\s!.]*$/i,
+      ]
+      const messageText = context.body?.trim() || ''
+      const isAck = ackPatterns.some((p) => p.test(messageText))
+      if (isAck) {
+        console.log(
+          '[workflow:loop] Message is simple acknowledgment:',
+          messageText
+        )
+        return { isLoop: true, reason: 'acknowledgment' }
+      }
+
+      // Count AI responses to this conversation in the last 24 hours
+      // Allow up to 2 AI responses, then back off and let humans take over
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
+      const recentActions = await db
+        .select()
+        .from(ActionsTable)
+        .where(
+          and(
+            eq(ActionsTable.conversation_id, conversationId),
+            eq(ActionsTable.type, 'draft-response'),
+            gte(ActionsTable.created_at, oneDayAgo)
+          )
+        )
+        .orderBy(desc(ActionsTable.created_at))
+
+      const aiResponseCount = recentActions.length
+      console.log('[workflow:loop] AI responses in last 24h:', aiResponseCount)
+
+      // Max 2 AI responses per conversation per day
+      // After that, humans need to take over (customer might be frustrated)
+      const MAX_AI_RESPONSES = 2
+      if (aiResponseCount >= MAX_AI_RESPONSES) {
+        console.log(
+          `[workflow:loop] Exceeded ${MAX_AI_RESPONSES} AI responses, backing off`
+        )
+        return {
+          isLoop: true,
+          reason: 'max_ai_responses',
+          count: aiResponseCount,
+        }
+      }
+
+      console.log('[workflow:loop] No loop detected, proceeding')
+      return { isLoop: false, aiResponseCount }
+    })
+
+    // Early exit if reply loop detected
+    if (loopCheck.isLoop) {
+      console.log('[workflow] ========== LOOP DETECTED - SKIPPING ==========')
+      return {
+        conversationId,
+        messageId,
+        filtered: false,
+        loopDetected: true,
+        agentResult: null,
+        routingResult: { type: 'loop-prevented' as const },
       }
     }
 
