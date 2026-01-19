@@ -29,7 +29,7 @@ Skills live under @.claude/skills/*/SKILL.md. If a task matches a skill, read it
 - Never convert tests to `bun:test` - different API, CI uses Vitest
 
 ### TypeScript
-- **Use `zod/v4`** not `zod` with AI SDK v6 (prevents TS2589)
+- **Zod 4.x** - repo uses Zod 4.3.5+ directly (`import { z } from 'zod'`)
 - Don't reach for `@ts-ignore` first - find proper type solutions
 
 ### Package Structure

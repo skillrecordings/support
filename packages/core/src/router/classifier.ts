@@ -1,5 +1,5 @@
 import { generateObject } from 'ai'
-import { z } from 'zod/v4'
+import { z } from 'zod'
 
 // Valid categories for classification
 export const CLASSIFIER_CATEGORIES = [

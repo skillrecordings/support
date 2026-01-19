@@ -1,15 +1,19 @@
 import { z } from 'zod'
 import type {
+  ExecutionContext,
   SupportTool,
   ToolContext,
-  ExecutionContext,
   ToolResult,
 } from './types'
 
 /**
  * Configuration for creating a support tool.
+ *
+ * @typeParam TInput - Input type (what callers pass in)
+ * @typeParam TOutput - Output type (after Zod parsing, with defaults applied)
+ * @typeParam TResult - Tool result type
  */
-export interface CreateToolConfig<TParams, TResult> {
+export interface CreateToolConfig<TInput, TOutput, TResult> {
   /**
    * Unique tool identifier (snake_case)
    */
@@ -23,17 +27,17 @@ export interface CreateToolConfig<TParams, TResult> {
   /**
    * Zod schema for parameter validation
    */
-  parameters: z.ZodSchema<TParams>
+  parameters: z.ZodType<TOutput, TInput>
 
   /**
-   * Optional approval gate
+   * Optional approval gate (receives parsed/validated params)
    */
-  requiresApproval?: (params: TParams, context: ToolContext) => boolean
+  requiresApproval?: (params: TOutput, context: ToolContext) => boolean
 
   /**
-   * Tool execution function
+   * Tool execution function (receives parsed/validated params)
    */
-  execute: (params: TParams, context: ExecutionContext) => Promise<TResult>
+  execute: (params: TOutput, context: ExecutionContext) => Promise<TResult>
 }
 
 /**
@@ -106,16 +110,19 @@ export function setAuditHooks(hooks: AuditHooks): void {
  * })
  * ```
  */
-export function createTool<TParams, TResult>(
-  config: CreateToolConfig<TParams, TResult>,
-): SupportTool<TParams, TResult> {
+export function createTool<TInput, TOutput, TResult>(
+  config: CreateToolConfig<TInput, TOutput, TResult>
+): SupportTool<TInput, TOutput, TResult> {
   return {
     name: config.name,
     description: config.description,
     parameters: config.parameters,
     requiresApproval: config.requiresApproval,
 
-    execute: async (params: TParams, context: ExecutionContext): Promise<ToolResult<TResult>> => {
+    execute: async (
+      params: TInput,
+      context: ExecutionContext
+    ): Promise<ToolResult<TResult>> => {
       try {
         // Validate parameters
         const validatedParams = config.parameters.parse(params)
@@ -128,7 +135,10 @@ export function createTool<TParams, TResult>(
             context,
           })
         } catch (hookError) {
-          console.error('[create-tool] Pre-execution audit hook failed:', hookError)
+          console.error(
+            '[create-tool] Pre-execution audit hook failed:',
+            hookError
+          )
         }
 
         // Execute tool
@@ -143,7 +153,10 @@ export function createTool<TParams, TResult>(
             context,
           })
         } catch (hookError) {
-          console.error('[create-tool] Post-execution audit hook failed:', hookError)
+          console.error(
+            '[create-tool] Post-execution audit hook failed:',
+            hookError
+          )
         }
 
         return {

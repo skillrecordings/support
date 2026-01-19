@@ -1,4 +1,4 @@
-import { z } from 'zod/v4'
+import { z } from 'zod'
 import { PaginatedResponseSchema } from './common'
 import { AttachmentSchema, AuthorSchema, RecipientSchema } from './message'
 
