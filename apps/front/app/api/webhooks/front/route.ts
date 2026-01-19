@@ -168,7 +168,11 @@ export async function POST(request: NextRequest) {
     // Extract what we can from the preview
     // Full data (body, author email) must be fetched via Front API in the workflow
     const subject = event.payload?.conversation?.subject
-    const inboxId = event.payload?.source?.data?.id
+    // Try multiple paths for inbox ID - Front structure varies
+    const inboxId =
+      event.payload?.source?.data?.id || // nested structure
+      (event.payload?.source as { id?: string })?.id || // flat structure
+      undefined
 
     // Map inbox ID to app slug via database lookup
     let appSlug = 'unknown'
@@ -204,6 +208,8 @@ export async function POST(request: NextRequest) {
     console.log('[front-webhook] Dispatched to Inngest:', {
       conversationId,
       messageId,
+      inboxId: inboxId || '(empty - will fetch from API)',
+      appSlug,
     })
   }
 
