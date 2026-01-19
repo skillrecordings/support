@@ -10,10 +10,12 @@ export { executeApprovedAction } from './execute-approved-action'
 export { handleStripeEvent } from './stripe-refund'
 export { indexConversation } from './index-conversation'
 export { retentionCleanup } from './retention-cleanup'
+export { handleMemoryVote } from './memory-vote'
 
 import { executeApprovedAction } from './execute-approved-action'
 import { handleInboundMessage } from './handle-inbound-message'
 import { indexConversation } from './index-conversation'
+import { handleMemoryVote } from './memory-vote'
 import { requestApproval } from './request-approval'
 import { retentionCleanup } from './retention-cleanup'
 import { handleStripeEvent } from './stripe-refund'
@@ -33,4 +35,5 @@ export const allWorkflows = [
   handleStripeEvent,
   indexConversation,
   retentionCleanup,
+  handleMemoryVote,
 ]

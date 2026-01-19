@@ -20,6 +20,7 @@ export const AppsTable = mysqlTable('SUPPORT_apps', {
   name: varchar('name', { length: 255 }).notNull(),
 
   front_inbox_id: varchar('front_inbox_id', { length: 255 }).notNull(),
+  instructor_teammate_id: varchar('instructor_teammate_id', { length: 255 }),
 
   stripe_account_id: varchar('stripe_account_id', { length: 255 }),
   stripe_connected: boolean('stripe_connected').default(false),
