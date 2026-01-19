@@ -16,7 +16,7 @@ const FRONT_API_BASE = 'https://api2.frontapp.com'
 const FrontRecipientSchema = z.object({
   handle: z.string(),
   role: z.enum(['from', 'to', 'cc', 'bcc']),
-  name: z.string().optional(),
+  name: z.string().nullable().optional(),
   _links: z
     .object({
       related: z
