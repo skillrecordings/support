@@ -66,6 +66,14 @@ export const handleInboundMessage = inngest.createFunction(
           message.recipients.find((r) => r.role === 'from')?.handle ||
           ''
 
+        // Get inbox ID - from event or fetch from conversation
+        let resolvedInboxId = inboxId || ''
+        if (!resolvedInboxId) {
+          const fetchedInboxId =
+            await front.getConversationInbox(conversationId)
+          resolvedInboxId = fetchedInboxId || ''
+        }
+
         return {
           conversationId,
           appId,
@@ -73,7 +81,7 @@ export const handleInboundMessage = inngest.createFunction(
           subject: message.subject || subject || '',
           body: message.body,
           senderEmail,
-          inboxId: inboxId || '',
+          inboxId: resolvedInboxId,
           conversationHistory,
         }
       } catch (error) {
