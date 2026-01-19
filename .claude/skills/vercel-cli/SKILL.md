@@ -1,3 +1,9 @@
+---
+name: vercel-cli
+description: Deploy and manage Vercel projects via CLI. Use when deploying apps, managing environment variables, configuring domains, or pushing secrets to Vercel. Triggers on deploy, vercel, env vars, production.
+allowed-tools: Read, Bash, Glob, Grep
+---
+
 # Vercel CLI Skill
 
 Deploy and manage Vercel projects via CLI. Org: `skillrecordings`.
