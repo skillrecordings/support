@@ -1,0 +1,186 @@
+---
+name: skill-cli
+description: CLI tool for managing app integrations, debugging workflows, and inspecting Front/Inngest data. Use when investigating support issues, checking event history, or managing skills.
+allowed-tools: Bash(skill:*)
+---
+
+# Support CLI (skill)
+
+## Quick start
+
+```bash
+skill inngest events --after 1h     # Recent events
+skill inngest event <id>            # Event details + runs
+skill front message <id>            # Full message with body
+skill front conversation <id> -m    # Conversation with history
+skill skills list                   # Available skills
+```
+
+## Inngest Commands
+
+### List events
+```bash
+skill inngest events                      # List recent events (default 20)
+skill inngest events --after 2h           # Events from last 2 hours
+skill inngest events --after 1d           # Events from last day
+skill inngest events --name "support/inbound.received"  # Filter by name
+skill inngest events --limit 50           # Limit results
+skill inngest events --json               # JSON output
+skill inngest events --dev                # Use dev server (localhost:8288)
+```
+
+### Get event details
+```bash
+skill inngest event <id>                  # Event details + triggered runs
+skill inngest event <id> --json           # JSON output
+```
+
+### Get run details
+```bash
+skill inngest run <id>                    # Run status, output, timing
+skill inngest run <id> --json             # JSON output
+```
+
+### Cancel run
+```bash
+skill inngest cancel <id>                 # Cancel running function
+```
+
+### Send signal
+```bash
+skill inngest signal <name>               # Resume waiting function
+skill inngest signal approval:draft_123   # Example: approval signal
+skill inngest signal <name> --data '{"approved":true}'  # With payload
+```
+
+## Front Commands
+
+### Get message
+```bash
+skill front message <id>                  # Full message details
+skill front message msg_xxx --json        # JSON output
+
+# Output includes:
+# - ID, type, subject, created timestamp
+# - Author email
+# - Recipients (from, to, cc, bcc)
+# - Body (HTML length, text length, preview)
+# - Attachments
+```
+
+### Get conversation
+```bash
+skill front conversation <id>             # Conversation details
+skill front conversation cnv_xxx -m       # Include message history
+skill front conversation <id> --json      # JSON output
+
+# Output includes:
+# - ID, subject, status, created timestamp
+# - Recipient, assignee
+# - Tags
+# - Message history (with -m flag)
+```
+
+## Skills Commands
+
+### List skills
+```bash
+skill skills list                         # List available skills
+skill skills list --json                  # JSON output
+skill skills list -p /path/to/project    # Custom path
+```
+
+### Create skill
+```bash
+skill skills create my-tool               # Create skill scaffold
+skill skills create my-tool -d "Description here"
+skill skills create my-tool -t "Read,Edit,Bash"  # Specify allowed tools
+skill skills create my-tool -p /path/to/project  # Custom path
+```
+
+## Other Commands
+
+### Initialize integration
+```bash
+skill init                                # Interactive mode
+skill init my-app                         # Quick mode with name
+skill init --json                         # JSON output
+```
+
+### Setup wizard
+```bash
+skill wizard                              # Interactive property setup
+skill wizard --json                       # JSON output
+```
+
+### Health check
+```bash
+skill health                              # Check default integration
+skill health total-typescript             # Check by slug
+skill health https://example.com -s secret  # Check by URL
+skill health -l                           # List all registered apps
+skill health --json                       # JSON output
+```
+
+### Run evals
+```bash
+skill eval routing dataset.json           # Run routing eval
+skill eval routing dataset.json --json    # JSON output
+skill eval routing dataset.json --min-precision 0.95
+skill eval routing dataset.json --min-recall 0.98
+skill eval routing dataset.json --max-fp-rate 0.02
+skill eval routing dataset.json --max-fn-rate 0.01
+```
+
+## Common Workflows
+
+### Debug empty message body
+```bash
+# 1. Find recent inbound events
+skill inngest events --after 1h --name "support/inbound.received"
+
+# 2. Get event details
+skill inngest event 01KFxxx
+
+# 3. Check if message has body via Front API
+skill front message msg_xxx
+
+# 4. Compare webhook data vs API data
+```
+
+### Investigate failed workflow
+```bash
+# 1. Find function.finished events
+skill inngest events --after 2h | grep function.finished
+
+# 2. Get run details
+skill inngest run 01KFxxx
+
+# 3. Check event that triggered it
+skill inngest event <event_id>
+```
+
+### Check conversation context
+```bash
+# Get full conversation with message history
+skill front conversation cnv_xxx -m
+
+# Or just the conversation metadata
+skill front conversation cnv_xxx
+```
+
+## Environment Variables
+
+Required in `.env.local`:
+```bash
+FRONT_API_TOKEN=           # For Front API commands
+INNGEST_SIGNING_KEY=       # For Inngest API commands
+```
+
+## JSON Output
+
+All commands support `--json` for machine-readable output:
+```bash
+skill inngest events --json | jq '.[0].data'
+skill front message msg_xxx --json | jq '.body'
+```
