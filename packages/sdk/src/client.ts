@@ -2,6 +2,8 @@ import { createHmac } from 'node:crypto'
 import type {
   ActionResult,
   ClaimedSeat,
+  ContentSearchRequest,
+  ContentSearchResponse,
   Purchase,
   Subscription,
   SupportIntegration,
@@ -142,5 +144,11 @@ export class IntegrationClient implements SupportIntegration {
 
   async getClaimedSeats(bulkCouponId: string): Promise<ClaimedSeat[]> {
     return this.request('/api/support/get-claimed-seats', { bulkCouponId })
+  }
+
+  async searchContent(
+    request: ContentSearchRequest
+  ): Promise<ContentSearchResponse> {
+    return this.request('/api/support/search-content', request)
   }
 }

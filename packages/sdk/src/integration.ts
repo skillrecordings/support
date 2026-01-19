@@ -1,10 +1,13 @@
 import type {
-  User,
-  Purchase,
-  Subscription,
   ActionResult,
   ClaimedSeat,
-} from './types';
+  ContentSearchRequest,
+  ContentSearchResponse,
+  ContentSearchResult,
+  Purchase,
+  Subscription,
+  User,
+} from './types'
 
 // Re-export types for convenience
 export type {
@@ -13,7 +16,10 @@ export type {
   Subscription,
   ActionResult,
   ClaimedSeat,
-};
+  ContentSearchResult,
+  ContentSearchRequest,
+  ContentSearchResponse,
+}
 
 /**
  * SupportIntegration interface that apps must implement.
@@ -64,7 +70,7 @@ export interface SupportIntegration {
    * @param email - User's email address
    * @returns User if found, null otherwise
    */
-  lookupUser(email: string): Promise<User | null>;
+  lookupUser(email: string): Promise<User | null>
 
   /**
    * Fetch all purchases for a given user.
@@ -73,7 +79,7 @@ export interface SupportIntegration {
    * @param userId - User's unique identifier
    * @returns Array of purchases, empty if none found
    */
-  getPurchases(userId: string): Promise<Purchase[]>;
+  getPurchases(userId: string): Promise<Purchase[]>
 
   /**
    * Fetch active subscriptions for a user.
@@ -82,7 +88,7 @@ export interface SupportIntegration {
    * @param userId - User's unique identifier
    * @returns Array of subscriptions, empty if none found
    */
-  getSubscriptions?(userId: string): Promise<Subscription[]>;
+  getSubscriptions?(userId: string): Promise<Subscription[]>
 
   /**
    * Revoke access to a product after refund.
@@ -94,10 +100,10 @@ export interface SupportIntegration {
    * @returns ActionResult indicating success/failure
    */
   revokeAccess(params: {
-    purchaseId: string;
-    reason: string;
-    refundId: string;
-  }): Promise<ActionResult>;
+    purchaseId: string
+    reason: string
+    refundId: string
+  }): Promise<ActionResult>
 
   /**
    * Transfer purchase to a different user.
@@ -109,10 +115,10 @@ export interface SupportIntegration {
    * @returns ActionResult indicating success/failure
    */
   transferPurchase(params: {
-    purchaseId: string;
-    fromUserId: string;
-    toEmail: string;
-  }): Promise<ActionResult>;
+    purchaseId: string
+    fromUserId: string
+    toEmail: string
+  }): Promise<ActionResult>
 
   /**
    * Generate a magic link for passwordless login.
@@ -123,9 +129,9 @@ export interface SupportIntegration {
    * @returns Object with magic link URL
    */
   generateMagicLink(params: {
-    email: string;
-    expiresIn: number;
-  }): Promise<{ url: string }>;
+    email: string
+    expiresIn: number
+  }): Promise<{ url: string }>
 
   /**
    * Update user's email address.
@@ -136,9 +142,9 @@ export interface SupportIntegration {
    * @returns ActionResult indicating success/failure
    */
   updateEmail?(params: {
-    userId: string;
-    newEmail: string;
-  }): Promise<ActionResult>;
+    userId: string
+    newEmail: string
+  }): Promise<ActionResult>
 
   /**
    * Update user's display name.
@@ -149,9 +155,9 @@ export interface SupportIntegration {
    * @returns ActionResult indicating success/failure
    */
   updateName?(params: {
-    userId: string;
-    newName: string;
-  }): Promise<ActionResult>;
+    userId: string
+    newName: string
+  }): Promise<ActionResult>
 
   /**
    * Get all claimed seats for a team/bulk purchase.
@@ -160,5 +166,32 @@ export interface SupportIntegration {
    * @param bulkCouponId - Bulk coupon/license identifier
    * @returns Array of claimed seats with user info
    */
-  getClaimedSeats?(bulkCouponId: string): Promise<ClaimedSeat[]>;
+  getClaimedSeats?(bulkCouponId: string): Promise<ClaimedSeat[]>
+
+  /**
+   * Search product content (courses, lessons, articles, etc.) for agent recommendations.
+   * Optional method - implement if app wants agent to recommend specific resources.
+   *
+   * The agent will call this when customers ask about topics, features, or how to do something.
+   * Return relevant content the agent can share via links.
+   *
+   * @param request - Search query with optional filters and customer context
+   * @returns Search results with content items and optional quick links
+   *
+   * @example
+   * ```typescript
+   * // Customer asks: "How do I use generics in TypeScript?"
+   * const results = await integration.searchContent({
+   *   query: "TypeScript generics tutorial",
+   *   types: ["lesson", "article"],
+   *   limit: 5
+   * })
+   *
+   * // Agent shares results:
+   * // "Here are some resources on TypeScript generics:"
+   * // - [Understanding Generics](https://totalts.com/lessons/generics)
+   * // - [Generic Constraints](https://totalts.com/lessons/constraints)
+   * ```
+   */
+  searchContent?(request: ContentSearchRequest): Promise<ContentSearchResponse>
 }

@@ -1,7 +1,12 @@
 import { database } from '@skillrecordings/database'
 import { IntegrationClient } from '@skillrecordings/sdk/client'
+import type {
+  ContentSearchRequest,
+  ContentSearchResponse,
+} from '@skillrecordings/sdk/types'
 import { type ModelMessage, generateText, stepCountIs, tool } from 'ai'
 import { z } from 'zod'
+import { cachedContentSearch } from '../cache/content-cache'
 import { classifyMessage } from '../router/classifier'
 import { getApp } from '../services/app-registry'
 import { getTrustScore } from '../trust/repository'
@@ -20,6 +25,21 @@ export const SUPPORT_AGENT_PROMPT = `You are a support agent for a technical edu
 - NEVER mention "Skill Recordings" - only use the specific product name
 - Refer to the product by name, not as "Skill Recordings products"
 - When relevant, reference the creator/instructor by name
+
+## NEVER FABRICATE PRODUCT CONTENT
+This is critical. If you don't have knowledge base results about the product:
+- DO NOT invent course modules, sections, lessons, or features
+- DO NOT claim to know what the product contains or teaches
+- DO NOT suggest "start with the fundamentals section" or similar made-up advice
+- DO NOT describe product structure you haven't been told about
+
+If asked about product content without knowledge base context, either:
+1. Ask what specific topic they want help with
+2. Acknowledge you don't have that information and offer to escalate
+3. Suggest they check the product's website directly
+
+WRONG: "Start with the fundamentals section. It covers core concepts like X, Y, Z."
+RIGHT: "What specific topic are you trying to learn about? I can point you to the right resources once I know what you're working on."
 
 ## Your Role
 - Help customers resolve issues quickly and accurately
@@ -419,6 +439,51 @@ export const agentTools = {
       }
     },
   }),
+
+  searchProductContent: tool({
+    description:
+      'Search product content (courses, lessons, articles) to find resources relevant to customer questions. Use when customer asks about topics, features, or how to do something.',
+    inputSchema: z.object({
+      query: z.string().describe('Natural language search query'),
+      types: z
+        .array(
+          z.enum([
+            'course',
+            'module',
+            'lesson',
+            'article',
+            'exercise',
+            'resource',
+            'social',
+          ])
+        )
+        .optional()
+        .describe('Filter by content type'),
+      limit: z
+        .number()
+        .optional()
+        .default(5)
+        .describe('Maximum results to return'),
+    }),
+    execute: async ({ query, types, limit }, context) => {
+      const appId = (context as any)?.appId
+      const integrationClient = (context as any)?.integrationClient
+
+      if (!appId || !integrationClient) {
+        return {
+          error: 'Missing appId or integrationClient in context',
+          results: [],
+        }
+      }
+
+      const request: ContentSearchRequest = { query, types, limit }
+      const response = await cachedContentSearch(appId, request, () =>
+        integrationClient.searchContent(request)
+      )
+
+      return response
+    },
+  }),
 }
 
 /** Available models via AI Gateway */
@@ -541,6 +606,27 @@ export async function runSupportAgent(input: AgentInput): Promise<AgentOutput> {
   }
   if (retrievedContext.goodResponses.length > 0) {
     systemPrompt += `\n\n## Good Response Examples\n${retrievedContext.goodResponses.map((r) => `- ${r.data}`).join('\n')}\n`
+  }
+
+  // Explicit warning when knowledge base is empty - prevents hallucination
+  const hasKnowledge =
+    retrievedContext.similarTickets.length > 0 ||
+    retrievedContext.knowledge.length > 0 ||
+    retrievedContext.goodResponses.length > 0
+  if (!hasKnowledge) {
+    systemPrompt += `\n\n## WARNING: No Knowledge Base Results
+The knowledge base returned no results for this query. You do not have verified information about this product's content, structure, modules, or features.
+
+DO NOT:
+- Invent or guess product content
+- Describe courses, modules, or lessons you haven't been told about
+- Make claims about what the product teaches or includes
+
+INSTEAD:
+- Ask clarifying questions about what specifically the customer needs help with
+- Acknowledge limitations: "I don't have specific information about that course content"
+- Offer to escalate to someone who can help with curriculum questions
+`
   }
 
   systemPrompt += `\nApp: ${appId}`
