@@ -13,7 +13,7 @@ Dashboard for support operations. Approval queue, trust scores, audit logs.
 
 ## Stack
 
-- Next.js 15 (App Router)
+- Next.js 16 (App Router)
 - BetterAuth
 - Shared UI from `packages/ui`
 
