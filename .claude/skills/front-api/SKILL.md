@@ -1,3 +1,9 @@
+---
+name: front-api
+description: Reference for Front REST API integration. Use when working with Front API schemas, nullable fields, webhooks, or debugging Front SDK issues.
+allowed-tools: Read, Grep
+---
+
 # Front API Skill
 
 Reference for Front REST API integration.
