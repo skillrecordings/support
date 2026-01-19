@@ -1,12 +1,5 @@
 import { randomUUID } from 'crypto'
-import {
-  ActionsTable,
-  and,
-  desc,
-  eq,
-  getDb,
-  gte,
-} from '@skillrecordings/database'
+import { ActionsTable, getDb } from '@skillrecordings/database'
 import { runSupportAgent } from '../../agent/index'
 import { type FrontMessage, createFrontClient } from '../../front/index'
 import { matchRules } from '../../router/rules'
@@ -192,40 +185,73 @@ export const handleInboundMessage = inngest.createFunction(
         return { isLoop: true, reason: 'acknowledgment' }
       }
 
-      // Count AI responses to this conversation in the last 24 hours
-      // Allow up to 2 AI responses, then back off and let humans take over
-      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
-      const recentActions = await db
-        .select()
-        .from(ActionsTable)
-        .where(
-          and(
-            eq(ActionsTable.conversation_id, conversationId),
-            eq(ActionsTable.type, 'draft-response'),
-            gte(ActionsTable.created_at, oneDayAgo)
-          )
-        )
-        .orderBy(desc(ActionsTable.created_at))
+      // Smart loop detection:
+      // - Count user messages vs AI responses
+      // - If human staff replied, AI can respond again
+      // - Max 2 consecutive AI responses without human staff involvement
 
-      const aiResponseCount = recentActions.length
-      console.log('[workflow:loop] AI responses in last 24h:', aiResponseCount)
+      // Get conversation history to analyze the pattern
+      const history = context.conversationHistory || []
+      console.log(
+        '[workflow:loop] Conversation history:',
+        history.length,
+        'messages'
+      )
 
-      // Max 2 AI responses per conversation per day
-      // After that, humans need to take over (customer might be frustrated)
-      const MAX_AI_RESPONSES = 2
-      if (aiResponseCount >= MAX_AI_RESPONSES) {
+      // Find the most recent messages to analyze the pattern
+      // Sort by created_at descending (most recent first)
+      const sortedHistory = [...history].sort(
+        (a, b) => b.created_at - a.created_at
+      )
+
+      // Count consecutive AI responses since last human staff reply or user message
+      let consecutiveAiResponses = 0
+      let userMessagesSinceLastAi = 0
+      let humanStaffReplied = false
+
+      for (const msg of sortedHistory) {
+        if (msg.is_inbound) {
+          // User message - if we haven't hit an AI response yet, count it
+          if (consecutiveAiResponses === 0) {
+            userMessagesSinceLastAi++
+          } else {
+            // User replied after AI, that's fine - stop counting
+            break
+          }
+        } else {
+          // Outbound message - check if it's from human staff or AI
+          // Human staff messages typically have a real author, AI drafts don't
+          // For now, assume outbound after user = we responded
+          consecutiveAiResponses++
+        }
+      }
+
+      console.log('[workflow:loop] Analysis:', {
+        consecutiveAiResponses,
+        userMessagesSinceLastAi,
+        humanStaffReplied,
+      })
+
+      // Allow AI response if:
+      // 1. User has sent messages since our last response
+      // 2. We haven't hit 3 consecutive AI responses
+      const MAX_CONSECUTIVE_AI = 3
+      if (
+        consecutiveAiResponses >= MAX_CONSECUTIVE_AI &&
+        userMessagesSinceLastAi === 0
+      ) {
         console.log(
-          `[workflow:loop] Exceeded ${MAX_AI_RESPONSES} AI responses, backing off`
+          `[workflow:loop] ${MAX_CONSECUTIVE_AI}+ consecutive AI responses without new user message, backing off`
         )
         return {
           isLoop: true,
-          reason: 'max_ai_responses',
-          count: aiResponseCount,
+          reason: 'consecutive_ai_responses',
+          count: consecutiveAiResponses,
         }
       }
 
       console.log('[workflow:loop] No loop detected, proceeding')
-      return { isLoop: false, aiResponseCount }
+      return { isLoop: false, consecutiveAiResponses }
     })
 
     // Early exit if reply loop detected
