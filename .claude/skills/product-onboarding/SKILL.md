@@ -214,19 +214,150 @@ bun packages/cli/src/index.ts health --app product-slug
 
 ## Course-Builder Apps
 
-For apps built on course-builder (like AI Hero), the schema is standardized:
+For apps built on course-builder (like AI Hero), **always use `courseBuilderAdapter`** instead of direct database queries. The adapter handles organization setup, proper relations, and maintains consistency.
 
-- **Users**: `users` table with `id`, `email`, `name`, `createdAt`
-- **Purchases**: `purchases` table with `userId`, `productId`, `totalAmount`, `status`, `merchantChargeId`
-- **Products**: `products` table with `id`, `name`
-- **Charges**: `merchantCharge` table with `identifier` (Stripe charge ID)
-- **Transfers**: `purchaseUserTransfer` table for license transfers
-- **Auth**: `courseBuilderAdapter.createVerificationToken()` for magic links
+### Import Pattern
 
-Import from:
 ```typescript
-import { db, courseBuilderAdapter } from '@/db'
-import { users, purchases, products, merchantCharge, purchaseUserTransfer } from '@/db/schema'
+import { courseBuilderAdapter } from '@/db'
+import { env } from '@/env.mjs'
+```
+
+**Do NOT import `db` or schema tables directly** - use adapter methods.
+
+### Adapter Methods Reference
+
+| Operation | Adapter Method |
+|-----------|----------------|
+| Find user by email | `courseBuilderAdapter.getUserByEmail(email)` |
+| Find user by ID | `courseBuilderAdapter.getUserById(userId)` |
+| Find or create user | `courseBuilderAdapter.findOrCreateUser(email)` |
+| Get user's purchases | `courseBuilderAdapter.getPurchasesForUser(userId)` |
+| Get single purchase | `courseBuilderAdapter.getPurchase(purchaseId)` |
+| Update purchase status | `courseBuilderAdapter.updatePurchaseStatusForCharge(chargeId, status)` |
+| Transfer purchase | `courseBuilderAdapter.transferPurchaseToUser({ purchaseId, sourceUserId, targetUserId })` |
+| Update user | `courseBuilderAdapter.updateUser({ id, ...fields })` |
+| Create verification token | `courseBuilderAdapter.createVerificationToken({ identifier, token, expires })` |
+
+### Full Integration Example (Course-Builder)
+
+```typescript
+import { courseBuilderAdapter } from '@/db'
+import { env } from '@/env.mjs'
+import type {
+  ActionResult,
+  Purchase,
+  SupportIntegration,
+  User,
+} from '@skillrecordings/sdk/integration'
+import { v4 as uuidv4 } from 'uuid'
+
+export const integration: SupportIntegration = {
+  async lookupUser(email: string): Promise<User | null> {
+    const user = await courseBuilderAdapter.getUserByEmail?.(email)
+    if (!user) return null
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name ?? undefined,
+      createdAt: new Date(),
+    }
+  },
+
+  async getPurchases(userId: string): Promise<Purchase[]> {
+    const purchases = await courseBuilderAdapter.getPurchasesForUser(userId)
+    return purchases.map((p) => ({
+      id: p.id,
+      productId: p.productId,
+      productName: p.product?.name ?? 'Unknown Product',
+      purchasedAt: p.createdAt,
+      amount: Math.round(Number(p.totalAmount) * 100),
+      currency: 'USD',
+      stripeChargeId: p.merchantChargeId ?? undefined,
+      status: mapPurchaseStatus(p.status ?? 'Valid'),
+    }))
+  },
+
+  async revokeAccess({ purchaseId }): Promise<ActionResult> {
+    const purchase = await courseBuilderAdapter.getPurchase(purchaseId)
+    if (!purchase?.merchantChargeId) {
+      return { success: false, error: 'No charge ID' }
+    }
+    await courseBuilderAdapter.updatePurchaseStatusForCharge(
+      purchase.merchantChargeId,
+      'Refunded',
+    )
+    return { success: true }
+  },
+
+  async transferPurchase({ purchaseId, fromUserId, toEmail }): Promise<ActionResult> {
+    const { user: toUser } = await courseBuilderAdapter.findOrCreateUser(toEmail)
+    if (!toUser) return { success: false, error: 'User creation failed' }
+
+    await courseBuilderAdapter.transferPurchaseToUser({
+      purchaseId,
+      sourceUserId: fromUserId,
+      targetUserId: toUser.id,
+    })
+    return { success: true }
+  },
+
+  async generateMagicLink({ email, expiresIn }): Promise<{ url: string }> {
+    const token = uuidv4()
+    await courseBuilderAdapter.createVerificationToken?.({
+      identifier: email,
+      token,
+      expires: new Date(Date.now() + expiresIn * 1000),
+    })
+    const baseUrl = env.NEXT_PUBLIC_URL
+    return {
+      url: `${baseUrl}/api/auth/callback/email?callbackUrl=${encodeURIComponent(baseUrl)}&token=${token}&email=${encodeURIComponent(email)}`,
+    }
+  },
+
+  async updateEmail({ userId, newEmail }): Promise<ActionResult> {
+    const existing = await courseBuilderAdapter.getUserByEmail?.(newEmail)
+    if (existing && existing.id !== userId) {
+      return { success: false, error: 'Email in use' }
+    }
+    await courseBuilderAdapter.updateUser?.({ id: userId, email: newEmail })
+    return { success: true }
+  },
+
+  async updateName({ userId, newName }): Promise<ActionResult> {
+    await courseBuilderAdapter.updateUser?.({ id: userId, name: newName })
+    return { success: true }
+  },
+}
+
+function mapPurchaseStatus(status: string): 'active' | 'refunded' | 'transferred' {
+  switch (status) {
+    case 'Refunded': return 'refunded'
+    case 'Transferred': return 'transferred'
+    default: return 'active'
+  }
+}
+```
+
+### Route Handler with Runtime Check
+
+The `SUPPORT_WEBHOOK_SECRET` env var is optional (app builds without it), but required at runtime:
+
+```typescript
+import { env } from '@/env.mjs'
+import { createSupportHandler } from '@skillrecordings/sdk/handler'
+import { integration } from '../integration'
+
+if (!env.SUPPORT_WEBHOOK_SECRET) {
+  throw new Error('SUPPORT_WEBHOOK_SECRET is required')
+}
+
+const handler = createSupportHandler({
+  integration,
+  webhookSecret: env.SUPPORT_WEBHOOK_SECRET,
+})
+
+export { handler as POST }
 ```
 
 ## Checklist
