@@ -10,17 +10,16 @@
 - No `.js` extensions in TS/TSX imports
 - Use package exports; no barrel files
 
-## AI SDK + Zod (CRITICAL)
+## AI SDK + Zod
+
+This repo uses **Zod 4.x** (4.3.5+) directly:
 
 ```typescript
-// ❌ WRONG - causes TS2589 "Type instantiation is excessively deep"
+// ✅ Standard Zod 4 import
 import { z } from 'zod'
-
-// ✅ CORRECT - always use zod/v4 with AI SDK v6
-import { z } from 'zod/v4'
 ```
 
-This applies to ALL AI SDK schema usage: `generateObject`, `streamObject`, `tool()`, `Output.object()`.
+Zod 4's optimized types work well with AI SDK v6's recursive generics. No special import path needed.
 
 ## Handling Type Errors
 

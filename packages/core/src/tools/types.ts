@@ -76,10 +76,15 @@ export type ToolResult<T> =
 /**
  * Core tool interface for support actions.
  *
- * @typeParam TParams - Zod-validated parameter schema
+ * @typeParam TInput - Input type (what callers pass in)
+ * @typeParam TOutput - Output type (after Zod parsing, with defaults applied)
  * @typeParam TResult - Expected result type on success
  */
-export interface SupportTool<TParams = unknown, TResult = unknown> {
+export interface SupportTool<
+  TInput = unknown,
+  TOutput = unknown,
+  TResult = unknown,
+> {
   /**
    * Unique tool identifier (snake_case)
    */
@@ -94,33 +99,60 @@ export interface SupportTool<TParams = unknown, TResult = unknown> {
   /**
    * Zod schema for parameter validation
    */
-  parameters: z.ZodSchema<TParams>
+  parameters: z.ZodType<TOutput, TInput>
 
   /**
    * Optional approval gate. Return true to require human approval before execution.
    *
-   * @param params - Validated parameters
+   * @param params - Validated/parsed parameters
    * @param context - Tool context with user and purchase info
    * @returns true if approval required, false if auto-approve
    */
-  requiresApproval?: (params: TParams, context: ToolContext) => boolean
+  requiresApproval?: (params: TOutput, context: ToolContext) => boolean
 
   /**
    * Execute the tool action.
    *
-   * @param params - Validated parameters
+   * @param params - Input parameters (will be validated and defaults applied)
    * @param context - Execution context including approval and trace IDs
    * @returns Tool result with success/error discrimination
    */
-  execute: (params: TParams, context: ExecutionContext) => Promise<ToolResult<TResult>>
+  execute: (
+    params: TInput,
+    context: ExecutionContext
+  ) => Promise<ToolResult<TResult>>
 }
 
 /**
- * Type-safe tool parameter extraction
+ * Type-safe tool input parameter extraction
  */
-export type InferToolParams<T> = T extends SupportTool<infer P, unknown> ? P : never
+export type InferToolInput<T> = T extends SupportTool<infer I, unknown, unknown>
+  ? I
+  : never
+
+/**
+ * Type-safe tool output parameter extraction (after parsing with defaults)
+ */
+export type InferToolOutput<T> = T extends SupportTool<
+  unknown,
+  infer O,
+  unknown
+>
+  ? O
+  : never
+
+/**
+ * Type-safe tool parameter extraction (alias for InferToolInput for backwards compat)
+ */
+export type InferToolParams<T> = InferToolInput<T>
 
 /**
  * Type-safe tool result extraction
  */
-export type InferToolResult<T> = T extends SupportTool<unknown, infer R> ? R : never
+export type InferToolResult<T> = T extends SupportTool<
+  unknown,
+  unknown,
+  infer R
+>
+  ? R
+  : never
