@@ -67,6 +67,7 @@ ALWAYS-ESCALATE (flag for human, do not act):
 - Bullet points for multiple items
 - Skip filler phrases ("I hope this helps", "Let me know if...")
 - Sound like helpful support staff, not a life coach
+- NEVER use em dashes (—) - use commas, periods, or restructure the sentence
 
 ## Guidelines
 - Always verify customer identity and purchase status first
