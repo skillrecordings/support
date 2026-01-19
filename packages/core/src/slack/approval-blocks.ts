@@ -10,6 +10,7 @@
  * @see https://api.slack.com/block-kit
  */
 
+import type { SearchResult } from '@skillrecordings/memory/schemas'
 import type { Block, KnownBlock } from '@slack/types'
 
 /**
@@ -17,18 +18,20 @@ import type { Block, KnownBlock } from '@slack/types'
  * Contains all data needed for approval request message.
  */
 export type ApprovalBlocksInput = {
-	/** Action ID for tracking */
-	actionId: string
-	/** Conversation ID */
-	conversationId: string
-	/** App ID */
-	appId: string
-	/** Action type (refund, license_transfer, etc) */
-	actionType: string
-	/** Action parameters */
-	parameters: Record<string, unknown>
-	/** Agent's reasoning for proposing this action */
-	agentReasoning: string
+  /** Action ID for tracking */
+  actionId: string
+  /** Conversation ID */
+  conversationId: string
+  /** App ID */
+  appId: string
+  /** Action type (refund, license_transfer, etc) */
+  actionType: string
+  /** Action parameters */
+  parameters: Record<string, unknown>
+  /** Agent's reasoning for proposing this action */
+  agentReasoning: string
+  /** Cited memories (optional) */
+  citedMemories?: SearchResult[]
 }
 
 /**
@@ -36,9 +39,9 @@ export type ApprovalBlocksInput = {
  * Passed back in interaction payload when user clicks approve/reject.
  */
 export type ApprovalMetadata = {
-	actionId: string
-	conversationId: string
-	appId: string
+  actionId: string
+  conversationId: string
+  appId: string
 }
 
 /**
@@ -51,13 +54,13 @@ export type ApprovalMetadata = {
  * capitalizeActionType('issue_refund') -> 'Issue Refund'
  */
 function capitalizeActionType(actionType: string): string {
-	return actionType
-		.replace(/_/g, ' ')
-		.replace(/([A-Z])/g, ' $1')
-		.trim()
-		.split(' ')
-		.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-		.join(' ')
+  return actionType
+    .replace(/_/g, ' ')
+    .replace(/([A-Z])/g, ' $1')
+    .trim()
+    .split(' ')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
 }
 
 /**
@@ -65,12 +68,106 @@ function capitalizeActionType(actionType: string): string {
  * Each parameter becomes a mrkdwn field: "*key*: value"
  */
 function formatParameters(
-	parameters: Record<string, unknown>,
+  parameters: Record<string, unknown>
 ): Array<{ type: 'mrkdwn'; text: string }> {
-	return Object.entries(parameters).map(([key, value]) => ({
-		type: 'mrkdwn' as const,
-		text: `*${key}*: ${String(value)}`,
-	}))
+  return Object.entries(parameters).map(([key, value]) => ({
+    type: 'mrkdwn' as const,
+    text: `*${key}*: ${String(value)}`,
+  }))
+}
+
+/**
+ * Builds memory section showing cited memories with confidence scores.
+ * Truncates long content to fit Slack's limits.
+ */
+function buildMemorySection(memories: SearchResult[]): KnownBlock[] {
+  if (memories.length === 0) return []
+
+  const memoryItems = memories
+    .map((result) => {
+      const confidencePercent = Math.round(
+        result.memory.metadata.confidence * 100
+      )
+      const content =
+        result.memory.content.length > 100
+          ? result.memory.content.slice(0, 100) + '...'
+          : result.memory.content
+      return `[${confidencePercent}%] ${content}`
+    })
+    .join('\n\n')
+
+  return [
+    {
+      type: 'divider',
+    },
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: `*Relevant Memories:*\n${memoryItems}`,
+      },
+    },
+  ]
+}
+
+/**
+ * Builds memory action buttons for post-approval interactions.
+ * Includes: Store as Memory, Upvote/Downvote for each cited memory.
+ */
+function buildMemoryActionButtons(
+  metadata: ApprovalMetadata,
+  memories: SearchResult[]
+): KnownBlock {
+  const elements = [
+    // Store as Memory button
+    {
+      type: 'button' as const,
+      text: {
+        type: 'plain_text' as const,
+        text: 'Store as Memory',
+        emoji: true,
+      },
+      action_id: 'memory_store',
+      value: JSON.stringify({
+        actionId: metadata.actionId,
+        conversationId: metadata.conversationId,
+        appId: metadata.appId,
+      }),
+    },
+  ]
+
+  // Upvote/Downvote buttons for each cited memory
+  for (const result of memories) {
+    const memoryId = result.memory.id
+    const collection = result.memory.metadata.collection
+
+    elements.push({
+      type: 'button' as const,
+      text: {
+        type: 'plain_text' as const,
+        text: '👍 Upvote',
+        emoji: true,
+      },
+      action_id: 'memory_upvote',
+      value: JSON.stringify({ memory_id: memoryId, collection }),
+    })
+
+    elements.push({
+      type: 'button' as const,
+      text: {
+        type: 'plain_text' as const,
+        text: '👎 Downvote',
+        emoji: true,
+      },
+      action_id: 'memory_downvote',
+      value: JSON.stringify({ memory_id: memoryId, collection }),
+    })
+  }
+
+  return {
+    type: 'actions',
+    elements,
+  }
 }
 
 /**
@@ -87,75 +184,83 @@ function formatParameters(
  * @see https://api.slack.com/block-kit
  */
 export function buildApprovalBlocks(input: ApprovalBlocksInput): KnownBlock[] {
-	const {
-		actionId,
-		conversationId,
-		appId,
-		actionType,
-		parameters,
-		agentReasoning,
-	} = input
+  const {
+    actionId,
+    conversationId,
+    appId,
+    actionType,
+    parameters,
+    agentReasoning,
+    citedMemories = [],
+  } = input
 
-	// Metadata for button values
-	const metadata: ApprovalMetadata = {
-		actionId,
-		conversationId,
-		appId,
-	}
-	const metadataValue = JSON.stringify(metadata)
+  // Metadata for button values
+  const metadata: ApprovalMetadata = {
+    actionId,
+    conversationId,
+    appId,
+  }
+  const metadataValue = JSON.stringify(metadata)
 
-	const blocks: KnownBlock[] = [
-		// Header
-		{
-			type: 'header',
-			text: {
-				type: 'plain_text',
-				text: `${capitalizeActionType(actionType)} Approval Request`,
-				emoji: true,
-			},
-		},
-		// Agent reasoning
-		{
-			type: 'section',
-			text: {
-				type: 'mrkdwn',
-				text: `*Agent Reasoning:*\n${agentReasoning}`,
-			},
-		},
-		// Parameters
-		{
-			type: 'section',
-			fields: formatParameters(parameters),
-		},
-		// Approve/Reject buttons
-		{
-			type: 'actions',
-			elements: [
-				{
-					type: 'button',
-					text: {
-						type: 'plain_text',
-						text: 'Approve',
-						emoji: true,
-					},
-					style: 'primary',
-					action_id: 'approve_action',
-					value: metadataValue,
-				},
-				{
-					type: 'button',
-					text: {
-						type: 'plain_text',
-						text: 'Reject',
-						emoji: true,
-					},
-					style: 'danger',
-					action_id: 'reject_action',
-					value: metadataValue,
-				},
-			],
-		},
-	]
+  const blocks: KnownBlock[] = [
+    // Header
+    {
+      type: 'header',
+      text: {
+        type: 'plain_text',
+        text: `${capitalizeActionType(actionType)} Approval Request`,
+        emoji: true,
+      },
+    },
+    // Agent reasoning
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: `*Agent Reasoning:*\n${agentReasoning}`,
+      },
+    },
+    // Parameters
+    {
+      type: 'section',
+      fields: formatParameters(parameters),
+    },
+    // Memory section (if memories provided)
+    ...buildMemorySection(citedMemories),
+    // Approve/Reject buttons
+    {
+      type: 'actions',
+      elements: [
+        {
+          type: 'button',
+          text: {
+            type: 'plain_text',
+            text: 'Approve',
+            emoji: true,
+          },
+          style: 'primary',
+          action_id: 'approve_action',
+          value: metadataValue,
+        },
+        {
+          type: 'button',
+          text: {
+            type: 'plain_text',
+            text: 'Reject',
+            emoji: true,
+          },
+          style: 'danger',
+          action_id: 'reject_action',
+          value: metadataValue,
+        },
+      ],
+    },
+  ]
 
-	return blocks
+  // Add memory action buttons if memories exist
+  if (citedMemories.length > 0) {
+    blocks.push(buildMemoryActionButtons(metadata, citedMemories))
+  }
+
+  return blocks
 }
