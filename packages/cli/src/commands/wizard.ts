@@ -295,7 +295,10 @@ export async function wizard(options: WizardOptions = {}): Promise<void> {
 
       if (!stripeAccountId && useStripe) {
         console.log('4. Connect Stripe account:')
-        console.log('   Visit /api/stripe/connect/authorize?app=' + slug)
+        console.log(
+          '   Visit https://skill-support-agent-web.vercel.app/api/stripe/connect/authorize?appSlug=' +
+            slug
+        )
         console.log('')
       }
 
