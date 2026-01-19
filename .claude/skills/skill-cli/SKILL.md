@@ -43,6 +43,51 @@ skill inngest run <id>                    # Run status, output, timing
 skill inngest run <id> --json             # JSON output
 ```
 
+### Investigation Commands (Agent-Optimized)
+
+These commands output JSON by default, optimized for agent consumption with aggregate stats and anomaly detection.
+
+```bash
+skill inngest inspect <event-id>          # Deep dive: event + runs + results
+skill inngest failures --after 2h         # Aggregate failure analysis
+skill inngest stats --after 1d            # Stats with anomaly detection
+skill inngest trace <run-id>              # Full workflow trace
+skill inngest search "email@example"      # Search event data for patterns
+skill inngest search "refund" --field result  # Search specific field
+```
+
+#### Inspect (Deep Dive)
+```bash
+skill inngest inspect 01KFxxx
+# Returns: event details, all triggered runs with results/errors, durations
+```
+
+#### Failures (Aggregate Analysis)
+```bash
+skill inngest failures --after 2h --limit 20
+# Returns: total failures, grouped by error message, failure details
+```
+
+#### Stats (Pattern Detection)
+```bash
+skill inngest stats --after 1d
+# Returns: event counts by type, workflow outcomes, skip reasons, anomalies
+# Anomalies detected: high failure rate, more skipped than completed, etc.
+```
+
+#### Trace (Workflow Debug)
+```bash
+skill inngest trace 01KFxxx
+# Returns: run details, input, result, error, duration
+```
+
+#### Search (Pattern Matching)
+```bash
+skill inngest search "purchase_id" --after 1h
+skill inngest search "error" --field result --limit 100
+# Returns: matching events with data
+```
+
 ### Cancel run
 ```bash
 skill inngest cancel <id>                 # Cancel running function

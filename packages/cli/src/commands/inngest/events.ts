@@ -1,5 +1,6 @@
 import type { Command } from 'commander'
 import { type Event, InngestClient, type Run, parseTimeArg } from './client.js'
+import { registerInvestigateCommands } from './investigate.js'
 
 /**
  * Format a timestamp to human-readable format
@@ -225,4 +226,7 @@ export function registerEventsCommands(program: Command): void {
     .option('--json', 'Output as JSON')
     .option('--dev', 'Use dev server (localhost:8288)')
     .action(getEvent)
+
+  // Register investigation/spelunking commands
+  registerInvestigateCommands(inngest)
 }
