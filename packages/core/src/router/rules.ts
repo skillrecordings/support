@@ -72,6 +72,8 @@ function matchRule(rule: Rule, message: string, sender: string): boolean {
       return matchKeyword(rule.pattern, message)
     case 'sender_domain':
       return matchSenderDomain(rule.pattern, sender)
+    case 'sender_pattern':
+      return matchSenderPattern(rule.pattern, sender)
     default:
       return false
   }
@@ -129,4 +131,27 @@ function matchSenderDomain(pattern: string, sender: string): boolean {
 
   // Exact domain matching
   return senderDomain === lowerPattern
+}
+
+/**
+ * Match sender email against a pattern (case insensitive).
+ * Supports wildcards: * matches any characters.
+ * Example: "mailer-daemon@*" matches "[EMAIL]"
+ */
+function matchSenderPattern(pattern: string, sender: string): boolean {
+  const lowerSender = sender.toLowerCase()
+  const lowerPattern = pattern.toLowerCase()
+
+  // Convert wildcard pattern to regex
+  // Escape regex special chars except *, then replace * with .*
+  const regexPattern = lowerPattern
+    .replace(/[.+?^${}()|[\]\\]/g, '\\$&')
+    .replace(/\*/g, '.*')
+
+  try {
+    const regex = new RegExp(`^${regexPattern}$`, 'i')
+    return regex.test(lowerSender)
+  } catch {
+    return false
+  }
 }

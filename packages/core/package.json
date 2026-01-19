@@ -32,6 +32,7 @@
     "./router/rules": "./src/router/rules.ts",
     "./router/cache": "./src/router/cache.ts",
     "./router/types": "./src/router/types.ts",
+    "./router/system-rules": "./src/router/system-rules.ts",
     "./trust": "./src/trust/score.ts",
     "./trust/feedback": "./src/trust/feedback.ts",
     "./trust/repository": "./src/trust/repository.ts",
