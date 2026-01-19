@@ -1,3 +1,9 @@
+---
+name: front-id-converter
+description: Convert between Front URL IDs (base-10) and API IDs (base-36 with prefix). Use when working with Front inbox, conversation, or message IDs.
+allowed-tools: Bash
+---
+
 # Front ID Converter Skill
 
 Convert between Front URL IDs (base-10) and API IDs (base-36 with prefix).
