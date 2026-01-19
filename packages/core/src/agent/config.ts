@@ -360,6 +360,9 @@ export interface AgentOutput {
  * Defaults to Haiku for cost efficiency (~60x cheaper than Opus).
  */
 export async function runSupportAgent(input: AgentInput): Promise<AgentOutput> {
+  console.log('[agent] ========== RUN SUPPORT AGENT ==========')
+  const startTime = Date.now()
+
   const {
     message,
     conversationHistory = [],
@@ -368,11 +371,26 @@ export async function runSupportAgent(input: AgentInput): Promise<AgentOutput> {
     model = DEFAULT_AGENT_MODEL,
   } = input
 
+  console.log('[agent] Input:', {
+    messageLength: message?.length,
+    messagePreview: message?.slice(0, 200),
+    conversationHistoryLength: conversationHistory.length,
+    customerEmail: customerContext?.email,
+    appId,
+    model,
+  })
+
   // Retrieve context from vector store
+  console.log('[agent] Retrieving context from vector store...')
   const retrievedContext = await buildAgentContext({
     appId,
     query: message,
     customerEmail: customerContext?.email,
+  })
+  console.log('[agent] Retrieved context:', {
+    similarTickets: retrievedContext.similarTickets.length,
+    knowledge: retrievedContext.knowledge.length,
+    goodResponses: retrievedContext.goodResponses.length,
   })
 
   // Build messages array
@@ -406,13 +424,24 @@ export async function runSupportAgent(input: AgentInput): Promise<AgentOutput> {
 
   systemPrompt += `\nApp: ${appId}`
 
+  console.log('[agent] System prompt length:', systemPrompt.length)
+  console.log('[agent] Messages count:', messages.length)
+  console.log('[agent] Calling AI SDK generateText...')
+
   // AI SDK v6: model as string for AI Gateway, stopWhen for multi-step
+  const aiStartTime = Date.now()
   const result = await generateText({
     model,
     system: systemPrompt,
     messages,
     tools: agentTools,
     stopWhen: stepCountIs(5),
+  })
+  console.log(`[agent] AI SDK call completed (${Date.now() - aiStartTime}ms)`)
+  console.log('[agent] AI result:', {
+    textLength: result.text?.length,
+    textPreview: result.text?.slice(0, 300),
+    stepsCount: result.steps?.length,
   })
 
   // AI SDK v6: toolCalls use 'input' not 'args', results are in toolResults
@@ -427,22 +456,36 @@ export async function runSupportAgent(input: AgentInput): Promise<AgentOutput> {
     }))
   })
 
+  console.log(
+    '[agent] Tool calls:',
+    toolCalls.map((tc) => ({
+      name: tc.name,
+      args: tc.args,
+      hasResult: !!tc.result,
+    }))
+  )
+
   // Check if any tool requires approval
   let requiresApproval = toolCalls.some(
     (tc) => tc.name === 'processRefund' || tc.name === 'transferPurchase'
   )
+  console.log('[agent] Requires approval (from tool calls):', requiresApproval)
 
   // Auto-send gating: classify message and check trust score
+  console.log('[agent] Classifying message...')
   const classifierResult = await classifyMessage(message, {
     recentMessages: conversationHistory.map((m) => m.content as string),
   })
+  console.log('[agent] Classifier result:', classifierResult)
 
   // Lookup trust score from database
+  console.log('[agent] Looking up trust score...')
   const trustScoreRecord = await getTrustScore(
     database,
     appId,
     classifierResult.category
   )
+  console.log('[agent] Trust score record:', trustScoreRecord)
 
   // Extract values with safe fallbacks
   const category = classifierResult.category
@@ -457,12 +500,28 @@ export async function runSupportAgent(input: AgentInput): Promise<AgentOutput> {
     confidence,
     sampleCount
   )
+  console.log('[agent] Auto-send check:', {
+    category,
+    confidence,
+    trustScore,
+    sampleCount,
+    canAutoSend,
+  })
 
   let autoSent = false
   if (canAutoSend && !requiresApproval) {
     requiresApproval = false
     autoSent = true
   }
+
+  const totalTime = Date.now() - startTime
+  console.log(`[agent] ========== AGENT COMPLETE (${totalTime}ms) ==========`)
+  console.log('[agent] Final output:', {
+    responseLength: result.text?.length,
+    toolCallsCount: toolCalls.length,
+    requiresApproval,
+    autoSent,
+  })
 
   return {
     response: result.text,
