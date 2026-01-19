@@ -169,28 +169,39 @@ export async function POST(request: NextRequest) {
     // Full data (body, author email) must be fetched via Front API in the workflow
     const subject = event.payload?.conversation?.subject
 
-    // source.data is an ARRAY of inboxes - get the first one
+    // source.data is an ARRAY of inboxes - find one that matches a registered app
     const sourceData = event.payload?.source?.data
-    const firstInbox =
-      Array.isArray(sourceData) && sourceData.length > 0 ? sourceData[0] : null
-    const inboxId = firstInbox?.id ?? (sourceData as { id?: string })?.id
+    const inboxes = Array.isArray(sourceData) ? sourceData : []
 
     console.log('[front-webhook] Extracted:', {
       subject,
-      inboxId,
-      sourceDataType: Array.isArray(sourceData) ? 'array' : typeof sourceData,
-      sourceDataLength: Array.isArray(sourceData) ? sourceData.length : 'n/a',
+      inboxCount: inboxes.length,
+      inboxIds: inboxes.map((i: { id?: string }) => i?.id).filter(Boolean),
     })
 
-    // Map inbox ID to app slug via database lookup
+    // Find the first inbox that matches a registered app
     let appSlug = 'unknown'
-    if (inboxId) {
-      const app = await getAppByInboxId(inboxId)
-      if (app) {
-        appSlug = app.slug
-      } else {
-        console.warn(`[front-webhook] No app found for inbox ID: ${inboxId}`)
+    let inboxId: string | undefined
+    for (const inbox of inboxes) {
+      if (inbox?.id) {
+        const app = await getAppByInboxId(inbox.id)
+        if (app) {
+          appSlug = app.slug
+          inboxId = inbox.id
+          console.log(
+            `[front-webhook] Matched inbox ${inbox.id} to app ${app.slug}`
+          )
+          break
+        }
       }
+    }
+
+    // Fallback to first inbox if no app match
+    if (!inboxId && inboxes.length > 0) {
+      inboxId = inboxes[0]?.id
+      console.warn(
+        `[front-webhook] No app match, using first inbox: ${inboxId}`
+      )
     }
 
     await inngest.send({
