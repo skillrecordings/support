@@ -1,9 +1,14 @@
-import { inngest } from '../client'
-import { SUPPORT_ACTION_APPROVED } from '../events'
-import { getDb, ActionsTable, ApprovalRequestsTable, eq } from '@skillrecordings/database'
+import { randomUUID } from 'crypto'
+import {
+  ActionsTable,
+  ApprovalRequestsTable,
+  eq,
+  getDb,
+} from '@skillrecordings/database'
 import { supportTools } from '../../tools'
 import type { ExecutionContext } from '../../tools/types'
-import { randomUUID } from 'crypto'
+import { inngest } from '../client'
+import { SUPPORT_ACTION_APPROVED } from '../events'
 
 /**
  * Execute Approved Action Workflow
@@ -43,7 +48,9 @@ export const executeApprovedAction = inngest.createFunction(
     // Step 2: Execute the tool with stored parameters
     const result = await step.run('execute-tool', async () => {
       // Extract tool calls from action parameters
-      const params = action.parameters as { toolCalls?: Array<{ name: string; args: Record<string, unknown> }> }
+      const params = action.parameters as {
+        toolCalls?: Array<{ name: string; args: Record<string, unknown> }>
+      }
       const toolCalls = params?.toolCalls || []
 
       if (toolCalls.length === 0) {
@@ -58,10 +65,13 @@ export const executeApprovedAction = inngest.createFunction(
       const executionContext: ExecutionContext = {
         approvalId: actionId,
         traceId: randomUUID(),
-        conversationId: action.conversation_id,
+        conversationId: action.conversation_id ?? 'unknown',
         user: { id: 'unknown', email: 'unknown' }, // TODO: fetch from conversation context
         purchases: [],
-        appConfig: { id: action.app_id, name: action.app_id },
+        appConfig: {
+          id: action.app_id ?? 'unknown',
+          name: action.app_id ?? 'unknown',
+        },
       }
 
       // Execute each tool call
@@ -71,7 +81,11 @@ export const executeApprovedAction = inngest.createFunction(
 
         if (toolName === 'processRefund' && supportTools.processRefund) {
           const toolResult = await supportTools.processRefund.execute(
-            toolCall.args as { purchaseId: string; appId: string; reason: string },
+            toolCall.args as {
+              purchaseId: string
+              appId: string
+              reason: string
+            },
             executionContext
           )
           results.push({ tool: toolName, result: toolResult })
@@ -79,7 +93,13 @@ export const executeApprovedAction = inngest.createFunction(
           // Unknown or unsupported tool
           results.push({
             tool: toolName,
-            result: { success: false, error: { code: 'UNSUPPORTED_TOOL', message: `Tool ${toolName} not supported for post-approval execution` } },
+            result: {
+              success: false,
+              error: {
+                code: 'UNSUPPORTED_TOOL',
+                message: `Tool ${toolName} not supported for post-approval execution`,
+              },
+            },
           })
         }
       }
@@ -102,7 +122,7 @@ export const executeApprovedAction = inngest.createFunction(
         .update(ActionsTable)
         .set({
           executed_at: new Date(),
-          result: result.output,
+          result: result.output ? { results: result.output } : null,
           error: result.success ? null : result.error,
         })
         .where(eq(ActionsTable.id, actionId))
