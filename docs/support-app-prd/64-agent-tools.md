@@ -1,14 +1,25 @@
 # Agent + Tools
 
-## Agent Core (Mastra)
+## Agent Core (AI SDK v6)
 
 ```typescript
-import { Agent } from '@mastra/core'
-import { supportTools } from './tools'
+import { generateText, tool, stepCountIs, type ModelMessage } from 'ai'
+import { z } from 'zod'
 
-export const supportAgent = new Agent({
-  name: 'support-agent',
-  instructions: `
+// Agent is invoked via generateText with tools
+export async function runSupportAgent(context: AgentContext): Promise<AgentResult> {
+  const result = await generateText({
+    model: anthropic('claude-sonnet-4-[PHONE]'),
+    messages: context.messages,
+    system: SUPPORT_AGENT_PROMPT, // See packages/core/src/agent/config.ts
+    tools: supportTools,
+    stopWhen: stepCountIs(10),
+  })
+  return result
+}
+
+// System prompt (excerpt):
+const SUPPORT_AGENT_PROMPT = `
     You are a support agent for Skill Recordings products.
 
     Your goal is to resolve customer issues quickly and empathetically.
@@ -39,19 +50,19 @@ export const supportAgent = new Agent({
     - Be concise, not verbose
     - Don't apologize excessively
     - Focus on resolution, not explanation
-  `,
-  model: { provider: 'anthropic', name: 'claude-sonnet-4-[PHONE]' },
-  tools: supportTools,
-})
+`
 ```
 
 ## Tools (Actions)
 
+Tools use AI SDK v6's `tool()` helper with Zod schemas:
+
 ```typescript
-import { createTool } from '@mastra/core'
+import { tool } from 'ai'
+import { z } from 'zod'
 
 export const supportTools = {
-  lookupUser: createTool({
+  lookupUser: tool({
     name: 'lookup_user',
     description: 'Look up a user by email to get their account details and purchase history',
     parameters: z.object({
@@ -64,7 +75,7 @@ export const supportTools = {
     },
   }),
 
-  processRefund: createTool({
+  processRefund: tool({
     name: 'process_refund',
     description: 'Process a refund for a purchase. Use only within policy.',
     parameters: z.object({
@@ -102,7 +113,7 @@ export const supportTools = {
     },
   }),
 
-  generateMagicLink: createTool({
+  generateMagicLink: tool({
     name: 'generate_magic_link',
     description: 'Generate a magic login link for a user',
     parameters: z.object({
@@ -115,7 +126,7 @@ export const supportTools = {
     },
   }),
 
-  transferPurchase: createTool({
+  transferPurchase: tool({
     name: 'transfer_purchase',
     description: 'Transfer a purchase from one user to another',
     parameters: z.object({
@@ -139,7 +150,7 @@ export const supportTools = {
     },
   }),
 
-  draftResponse: createTool({
+  draftResponse: tool({
     name: 'draft_response',
     description: 'Draft a response to send to the customer via Front',
     parameters: z.object({
@@ -156,7 +167,7 @@ export const supportTools = {
     },
   }),
 
-  escalateToHuman: createTool({
+  escalateToHuman: tool({
     name: 'escalate_to_human',
     description: 'Escalate this conversation to a human support agent',
     parameters: z.object({
@@ -185,6 +196,26 @@ export const supportTools = {
       })
 
       return { escalated: true }
+    },
+  }),
+
+  // SDK 0.3.0+ - Search product content
+  searchProductContent: tool({
+    description: 'Search product content to find relevant resources to share with customers',
+    inputSchema: z.object({
+      query: z.string().describe('What the customer is looking for'),
+      types: z.array(z.enum(['course', 'lesson', 'article', 'resource', 'social'])).optional(),
+      limit: z.number().optional().default(5),
+    }),
+    execute: async ({ query, types, limit }, context) => {
+      const app = await getApp(context.appId)
+      const client = new IntegrationClient({
+        baseUrl: app.integration_base_url,
+        webhookSecret: app.webhook_secret,
+      })
+      return cachedContentSearch(app.id, { query, types, limit }, () =>
+        client.searchContent({ query, types, limit })
+      )
     },
   }),
 }

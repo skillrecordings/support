@@ -11,6 +11,9 @@ Record non-trivial decisions here. Keep entries short and dated.
 - Cache: Durable Objects per conversation, 7-day TTL.
 - UI libraries: `apps/front` uses `@frontapp/ui-kit`, `apps/web` uses shadcn/ui + Tailwind, `apps/slack` has no UI.
 
+## 2026-01-19
+- **SDK 0.3.0: Content Search API.** Added `searchContent()` optional method to `SupportIntegration` interface. Agent can now query products for relevant content (courses, articles, tutorials) to recommend to customers. Prevents hallucination of non-existent content. Caching: 5-min TTL for search results, 24h for quickLinks.
+
 ## 2026-01-18
 - Lazy database init: `getDb()` over `database` singleton in Inngest workflows. Singleton triggers MySQL pool creation at import time, fails in serverless builds.
 - Drizzle operators re-exported from `@skillrecordings/database` to avoid version conflicts between packages.

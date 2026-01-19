@@ -36,6 +36,7 @@ src/
 - `stripe-subscription-status` - Check subscription
 - `lookup-user` - Look up user by email
 - `search-knowledge` - Vector search
+- `searchProductContent` - Search product content for recommendations (SDK 0.3.0+)
 
 ## Dev
 

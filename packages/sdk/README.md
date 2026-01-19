@@ -19,6 +19,7 @@ interface SupportIntegration {
   updateEmail?(params: { userId, newEmail }): Promise<ActionResult>
   updateName?(params: { userId, newName }): Promise<ActionResult>
   getClaimedSeats?(bulkCouponId: string): Promise<ClaimedSeat[]>
+  searchContent?(request: ContentSearchRequest): Promise<ContentSearchResponse>  // v0.3.0+
 }
 ```
 
