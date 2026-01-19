@@ -285,6 +285,387 @@ if (!memoryEngagement.searched_before_draft) {
 
 ## Integration Points
 
+### CLI (`packages/cli`)
+
+#### Memory Commands
+
+```bash
+# Core operations
+skill memory store "Refund window is 30 days for all products" --tags "refunds,policy"
+skill memory find "refund policy" --limit 5
+skill memory find "license transfer" --app total-typescript
+skill memory get mem_abc123
+skill memory validate mem_abc123    # Reset decay, mark as still-relevant
+skill memory delete mem_abc123
+
+# Voting
+skill memory upvote mem_abc123 --reason "Helped resolve ticket"
+skill memory downvote mem_abc123 --reason "Outdated information"
+
+# Analytics
+skill memory stats                  # Overall memory health
+skill memory stats --app total-typescript
+skill memory stale                  # List memories needing validation
+skill memory leaderboard            # Most-cited, highest-confidence memories
+```
+
+#### HATEOAS-Style Memory Hints
+
+Every CLI command output includes contextual memory suggestions. The CLI acts as a teacher, prompting agents to engage with the memory system.
+
+**After `skill inngest inspect` (viewing a resolved issue):**
+```json
+{
+  "event_id": "01KFxxx",
+  "event_name": "support/inbound.received",
+  "runs": [{ "status": "Completed", "result": { "classification": "refund_request" } }],
+
+  "_memory_hints": {
+    "suggest_store": {
+      "prompt": "This resolution may help future agents. Consider storing:",
+      "command": "skill memory store 'Refund request for [product]: [resolution summary]' --tags 'refund,[product]'",
+      "when": "Resolution was successful and pattern is reusable"
+    },
+    "suggest_search": {
+      "prompt": "Before handling similar issues, search for prior knowledge:",
+      "command": "skill memory find 'refund [product]' --limit 3"
+    }
+  }
+}
+```
+
+**After `skill inngest failures` (viewing failure patterns):**
+```json
+{
+  "total_failures": 5,
+  "by_error": { "Stripe API timeout": 3, "Invalid license key": 2 },
+
+  "_memory_hints": {
+    "suggest_store": {
+      "prompt": "Recurring errors may warrant a memory. Consider:",
+      "command": "skill memory store 'Stripe API timeout: [root cause and fix]' --tags 'stripe,error,timeout'",
+      "when": "You've identified the root cause"
+    },
+    "check_existing": {
+      "prompt": "Check if this error pattern is already documented:",
+      "command": "skill memory find 'Stripe API timeout'"
+    }
+  }
+}
+```
+
+**After `skill front conversation` (viewing customer history):**
+```json
+{
+  "conversation_id": "cnv_xxx",
+  "customer_email": "[EMAIL]",
+  "messages": [...],
+
+  "_memory_hints": {
+    "suggest_search": {
+      "prompt": "Check for prior interactions with this customer:",
+      "command": "skill memory find '[EMAIL]' --collection customers"
+    },
+    "suggest_store": {
+      "prompt": "After resolution, store customer context:",
+      "command": "skill memory store 'Customer [email]: [relevant context]' --collection customers --tags 'customer'"
+    }
+  }
+}
+```
+
+**After `skill memory find` (search results returned):**
+```json
+{
+  "results": [
+    { "id": "mem_abc", "content": "Refund window is 30 days", "confidence": 0.85 },
+    { "id": "mem_def", "content": "License transfers require approval", "confidence": 0.62 }
+  ],
+
+  "_memory_hints": {
+    "vote_guidance": {
+      "prompt": "After using these memories, vote on their helpfulness:",
+      "upvote": "skill memory upvote mem_abc --reason 'Accurate, helped draft response'",
+      "downvote": "skill memory downvote mem_def --reason 'Outdated, policy changed'"
+    },
+    "validate_stale": {
+      "prompt": "Memory mem_def has low confidence (62%). If still accurate:",
+      "command": "skill memory validate mem_def"
+    }
+  }
+}
+```
+
+#### CLI Memory Skill (`.claude/skills/skill-cli/SKILL.md`)
+
+The skill documentation teaches agents the memory workflow:
+
+```markdown
+## Memory Workflow
+
+### Before drafting a response:
+1. Search for relevant memories:
+   skill memory find "[issue keywords]" --limit 5
+
+2. Cite memories you use (tracked automatically via search)
+
+### After successful resolution:
+1. Store new learnings:
+   skill memory store "[what you learned]" --tags "[relevant,tags]"
+
+2. Vote on memories you used:
+   skill memory upvote mem_xxx --reason "[why it helped]"
+   skill memory downvote mem_xxx --reason "[why it was wrong]"
+
+### Maintaining memory quality:
+- Check stale memories: skill memory stale
+- Validate still-accurate memories: skill memory validate mem_xxx
+- Review your contributions: skill memory stats --mine
+```
+
+### Apps Integration (Front & Slack)
+
+Both `apps/front` and `apps/slack` integrate via Inngest events that provide full context for agent memory decisions.
+
+#### Inngest Events for Memory Operations
+
+**`memory/context.available`** - Fired when an agent has context to potentially store/retrieve:
+
+```typescript
+// Fired at key decision points in support workflow
+inngest.send({
+  name: "memory/context.available",
+  data: {
+    trigger: "pre_draft" | "post_resolution" | "post_approval" | "post_rejection",
+    context: {
+      conversation_id: "cnv_xxx",
+      message_id: "msg_xxx",
+      app_slug: "total-typescript",
+      classification: { category: "refund_request", confidence: 0.92 },
+      customer: { email: "[EMAIL]", prior_interactions: 3 },
+      message_preview: "I'd like a refund for...",
+    },
+    // Memories already retrieved for this interaction
+    cited_memories: ["mem_abc", "mem_def"],
+    // Suggested actions based on context
+    suggested_actions: [
+      { action: "search", query: "refund total-typescript", reason: "Pre-draft context" },
+      { action: "store", content: "...", reason: "Novel resolution pattern" },
+      { action: "upvote", memory_id: "mem_abc", reason: "Led to successful draft" },
+    ]
+  }
+})
+```
+
+**`memory/vote.requested`** - Fired when outcome is known, prompting vote:
+
+```typescript
+// After resolution outcome is determined
+inngest.send({
+  name: "memory/vote.requested",
+  data: {
+    run_id: "01KFxxx",
+    outcome: "success" | "failure" | "rejection",
+    cited_memories: ["mem_abc", "mem_def"],
+    context: {
+      // Full context for agent to decide how to vote
+      resolution_summary: "Processed refund via Stripe",
+      customer_satisfied: true,
+      rejection_reason: null,
+    },
+    vote_guidance: {
+      if_success: "Upvote memories that contributed to this outcome",
+      if_failure: "Downvote memories that may have misled the response",
+      if_rejection: "Review memories for accuracy, downvote if outdated"
+    }
+  }
+})
+```
+
+#### Front Plugin (`apps/front`)
+
+The Front sidebar plugin shows memory context and prompts action:
+
+```typescript
+// apps/front/app/api/plugin/sidebar/route.ts
+
+// When conversation loads, fetch relevant memories
+const memories = await memory.find(conversation.subject, {
+  limit: 5,
+  app_slug: conversation.app_slug,
+})
+
+// Render sidebar with memory section
+return {
+  sections: [
+    {
+      title: "Relevant Memories",
+      items: memories.map(m => ({
+        id: m.id,
+        content: m.content,
+        confidence: `${(m.confidence * 100).toFixed(0)}%`,
+        actions: [
+          { label: "Upvote", action: "memory.upvote", memory_id: m.id },
+          { label: "Downvote", action: "memory.downvote", memory_id: m.id },
+          { label: "Validate", action: "memory.validate", memory_id: m.id },
+        ]
+      })),
+      footer: {
+        action: "memory.search",
+        label: "Search memories...",
+        placeholder: "Enter search query"
+      }
+    },
+    {
+      title: "Store New Memory",
+      input: {
+        action: "memory.store",
+        placeholder: "What did you learn from this interaction?",
+        tags_placeholder: "refund, policy, total-typescript"
+      }
+    }
+  ]
+}
+```
+
+#### Slack Bot (`apps/slack`)
+
+Approval messages include memory context and post-approval actions:
+
+```typescript
+// apps/slack/lib/approval.ts
+
+// When posting approval request, include memory context
+const approvalMessage = {
+  blocks: [
+    // ... existing approval content ...
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: "*Relevant Memories:*\n" + memories.map(m =>
+          `• [${(m.confidence * 100).toFixed(0)}%] ${m.content.slice(0, 100)}...`
+        ).join("\n")
+      }
+    },
+    {
+      type: "actions",
+      elements: [
+        { type: "button", text: "Approve", action_id: "approve" },
+        { type: "button", text: "Reject", action_id: "reject" },
+        { type: "button", text: "Search Memories", action_id: "memory_search" },
+      ]
+    }
+  ]
+}
+
+// After approval/rejection, prompt memory actions
+const postApprovalMessage = {
+  blocks: [
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: outcome === "approved"
+          ? "✅ *Approved* - Consider storing this pattern for future reference"
+          : "❌ *Rejected* - Review cited memories for accuracy"
+      }
+    },
+    {
+      type: "actions",
+      elements: [
+        {
+          type: "button",
+          text: "Store as Memory",
+          action_id: "memory_store",
+          value: JSON.stringify({ draft_summary, tags: [classification] })
+        },
+        ...citedMemories.map(m => ({
+          type: "button",
+          text: outcome === "approved" ? `Upvote ${m.id.slice(-6)}` : `Downvote ${m.id.slice(-6)}`,
+          action_id: outcome === "approved" ? "memory_upvote" : "memory_downvote",
+          value: m.id
+        }))
+      ]
+    }
+  ]
+}
+```
+
+#### Memory-Aware Workflow Steps
+
+The support workflow includes explicit memory checkpoints:
+
+```typescript
+// packages/core/src/workflows/support.ts
+
+export const supportWorkflow = inngest.createFunction(
+  { id: "support/inbound" },
+  { event: "support/inbound.received" },
+  async ({ event, step }) => {
+    // Step 1: Retrieve relevant memories BEFORE classification
+    const memories = await step.run("memory-retrieve", async () => {
+      return memory.find(event.data.message.subject + " " + event.data.message.body, {
+        limit: 5,
+        app_slug: event.data.app_slug,
+        min_confidence: 0.4,
+      })
+    })
+
+    // Step 2: Classify with memory context
+    const classification = await step.run("classify", async () => {
+      return classifier.classify({
+        message: event.data.message,
+        memories: memories.map(m => m.content), // Inject as context
+      })
+    })
+
+    // ... draft, approve, send ...
+
+    // Step N: After resolution, fire memory event for agent to act
+    await step.run("memory-prompt", async () => {
+      await inngest.send({
+        name: "memory/context.available",
+        data: {
+          trigger: "post_resolution",
+          context: { /* full context */ },
+          cited_memories: memories.map(m => m.id),
+          suggested_actions: determineSuggestedActions(classification, outcome),
+        }
+      })
+    })
+  }
+)
+
+function determineSuggestedActions(classification, outcome) {
+  const actions = []
+
+  if (outcome.success && classification.confidence > 0.9) {
+    actions.push({
+      action: "store",
+      content: `${classification.category}: ${outcome.summary}`,
+      reason: "High-confidence successful resolution"
+    })
+  }
+
+  if (outcome.success) {
+    actions.push({
+      action: "upvote",
+      reason: "Resolution successful, cited memories likely helped"
+    })
+  }
+
+  if (outcome.rejection) {
+    actions.push({
+      action: "downvote",
+      reason: "Draft rejected, review cited memories for accuracy"
+    })
+  }
+
+  return actions
+}
+```
+
 ### CLI (`skill memory`)
 
 ```bash
