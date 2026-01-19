@@ -3,11 +3,26 @@
   "version": "0.0.1",
   "private": true,
   "exports": {
-    "./schemas": "./src/schemas.ts",
-    "./client": "./src/client.ts",
-    "./memory": "./src/memory.ts",
-    "./decay": "./src/decay.ts",
-    "./voting": "./src/voting.ts"
+    "./schemas": {
+      "types": "./src/schemas.ts",
+      "default": "./src/schemas.ts"
+    },
+    "./client": {
+      "types": "./src/client.ts",
+      "default": "./src/client.ts"
+    },
+    "./memory": {
+      "types": "./src/memory.ts",
+      "default": "./src/memory.ts"
+    },
+    "./decay": {
+      "types": "./src/decay.ts",
+      "default": "./src/decay.ts"
+    },
+    "./voting": {
+      "types": "./src/voting.ts",
+      "default": "./src/voting.ts"
+    }
   },
   "scripts": {
     "check-types": "tsc --noEmit",
