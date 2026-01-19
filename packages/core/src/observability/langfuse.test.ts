@@ -130,6 +130,7 @@ describe('Langfuse LLM Observability', () => {
         category: 'refund',
         confidence: 0.95,
         reasoning: 'Customer explicitly requested refund',
+        complexity: 'simple',
       }
       const usage = { promptTokens: 50, completionTokens: 20, totalTokens: 70 }
 
@@ -152,6 +153,7 @@ describe('Langfuse LLM Observability', () => {
         category: 'no_response',
         confidence: 0.88,
         reasoning: 'Polite closing message',
+        complexity: 'skip',
       }
       const usage = { promptTokens: 30, completionTokens: 15, totalTokens: 45 }
 
@@ -183,6 +185,7 @@ describe('Langfuse LLM Observability', () => {
         category: 'general',
         confidence: 0.75,
         reasoning: 'Generic inquiry',
+        complexity: 'simple',
       }
       const usage = { promptTokens: 40, completionTokens: 10, totalTokens: 50 }
 

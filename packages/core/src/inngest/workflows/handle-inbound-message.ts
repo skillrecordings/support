@@ -2,6 +2,7 @@ import { randomUUID } from 'crypto'
 import { ActionsTable, getDb } from '@skillrecordings/database'
 import { runSupportAgent } from '../../agent/index'
 import { type FrontMessage, createFrontClient } from '../../front/index'
+import { classifyMessage } from '../../router/classifier'
 import { matchRules } from '../../router/rules'
 import { systemRules } from '../../router/system-rules'
 import { inngest } from '../client'
@@ -267,7 +268,59 @@ export const handleInboundMessage = inngest.createFunction(
       }
     }
 
-    // Step 3: Run agent
+    // Step 3: Classify message with Haiku (fast, cheap)
+    const classification = await step.run('classify-message', async () => {
+      console.log(
+        '[workflow:classify] ========== CLASSIFYING MESSAGE =========='
+      )
+      const messageBody = context.body?.trim() || ''
+      if (!messageBody) {
+        return {
+          category: 'no_response' as const,
+          complexity: 'skip' as const,
+          confidence: 1,
+          reasoning: 'Empty message body',
+        }
+      }
+
+      const result = await classifyMessage(messageBody, {
+        recentMessages: context.conversationHistory
+          .slice(-3)
+          .map((m) => m.body),
+      })
+
+      console.log('[workflow:classify] Result:', {
+        category: result.category,
+        complexity: result.complexity,
+        confidence: result.confidence,
+        reasoning: result.reasoning,
+      })
+
+      return result
+    })
+
+    // Early exit if classifier says skip
+    if (classification.complexity === 'skip') {
+      console.log('[workflow] ========== SKIP - NO RESPONSE NEEDED ==========')
+      return {
+        conversationId,
+        messageId,
+        filtered: false,
+        skipped: true,
+        classification,
+        agentResult: null,
+        routingResult: { type: 'skipped' as const },
+      }
+    }
+
+    // Select model based on complexity
+    const modelToUse =
+      classification.complexity === 'complex'
+        ? 'anthropic/claude-sonnet-4-5'
+        : 'anthropic/claude-haiku-4-5'
+    console.log('[workflow] Model selected:', modelToUse)
+
+    // Step 4: Run agent
     const agentResult = await step.run('run-agent', async () => {
       console.log('[workflow:agent] ========== RUNNING AGENT ==========')
       console.log('[workflow:agent] Message:', context.body?.slice(0, 500))
@@ -308,8 +361,11 @@ export const handleInboundMessage = inngest.createFunction(
         }
       }
 
-      // Run the support agent
-      console.log('[workflow:agent] Calling runSupportAgent...')
+      // Run the support agent with model based on complexity
+      console.log(
+        '[workflow:agent] Calling runSupportAgent with model:',
+        modelToUse
+      )
       const result = await runSupportAgent({
         message: messageBody,
         conversationHistory: conversationMessages.slice(0, -1), // Exclude current message
@@ -317,6 +373,7 @@ export const handleInboundMessage = inngest.createFunction(
           email: context.senderEmail,
         },
         appId: context.appId,
+        model: modelToUse,
       })
 
       console.log('[workflow:agent] Agent result:', {
