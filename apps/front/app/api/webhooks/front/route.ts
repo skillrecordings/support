@@ -91,11 +91,17 @@ interface FrontWebhookEvent {
 }
 
 export async function POST(request: NextRequest) {
+  const startTime = Date.now()
   const payload = await request.text()
+
+  console.log('[front-webhook] ========== WEBHOOK RECEIVED ==========')
+  console.log('[front-webhook] Timestamp:', new Date().toISOString())
+  console.log('[front-webhook] Payload length:', payload.length)
 
   // Get Front app signing key from env
   const secret = process.env.FRONT_WEBHOOK_SECRET
   if (!secret) {
+    console.error('[front-webhook] FATAL: FRONT_WEBHOOK_SECRET not configured')
     return NextResponse.json(
       { error: 'Webhook secret not configured' },
       { status: 500 }
@@ -107,17 +113,27 @@ export async function POST(request: NextRequest) {
   request.headers.forEach((value, key) => {
     headers[key] = value
   })
+  console.log('[front-webhook] Headers:', JSON.stringify(headers, null, 2))
 
   // Verify HMAC signature (Front uses timestamp:body format, base64)
   const result = verifyFrontWebhook(payload, headers, { secret })
+  console.log(
+    '[front-webhook] Signature verification:',
+    result.valid ? 'VALID' : 'INVALID'
+  )
 
   if (!result.valid) {
+    console.error(
+      '[front-webhook] Signature verification failed:',
+      result.error
+    )
     return NextResponse.json({ error: result.error }, { status: 401 })
   }
 
   // Handle challenge during webhook setup
   // Front sends x-front-challenge header and expects it echoed back
   if (result.challenge) {
+    console.log('[front-webhook] Challenge received, echoing back')
     return NextResponse.json({ challenge: result.challenge })
   }
 
@@ -126,19 +142,15 @@ export async function POST(request: NextRequest) {
   try {
     event = JSON.parse(payload)
   } catch {
+    console.error('[front-webhook] Failed to parse JSON payload')
     return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400 })
   }
 
-  // Log event for debugging - include full source/target structure to understand shape
-  console.log('[front-webhook] Event received:', {
-    type: event.type,
-    payloadType: event.payload?.type,
-    conversationId: event.payload?.conversation?.id,
-    // Log full source to see actual structure
-    source: JSON.stringify(event.payload?.source),
-    // Log full target to see actual structure
-    target: JSON.stringify(event.payload?.target),
-  })
+  // Log FULL event for debugging
+  console.log(
+    '[front-webhook] FULL EVENT PAYLOAD:',
+    JSON.stringify(event, null, 2)
+  )
 
   // Handle sync event (validation request)
   if (event.type === 'sync') {
@@ -204,33 +216,42 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ received: true })
     }
 
-    await inngest.send({
-      name: SUPPORT_INBOUND_RECEIVED,
-      data: {
-        conversationId,
-        messageId,
-        // Preview may not have these - workflow fetches full data
-        subject: subject || '',
-        body: '', // Must fetch via Front API
-        senderEmail: '', // Must fetch via Front API
-        appId: appSlug,
-        inboxId,
-        // Include links for API fetching
-        _links: {
-          conversation: event.payload?.conversation?._links?.self,
-          message: event.payload?.target?.data?._links?.self,
-        },
-      },
-    })
-
-    console.log('[front-webhook] Dispatched to Inngest:', {
+    const inngestPayload = {
       conversationId,
       messageId,
+      // Preview may not have these - workflow fetches full data
+      subject: subject || '',
+      body: '', // Must fetch via Front API
+      senderEmail: '', // Must fetch via Front API
+      appId: appSlug,
       inboxId,
-      appSlug,
+      // Include links for API fetching
+      _links: {
+        conversation: event.payload?.conversation?._links?.self,
+        message: event.payload?.target?.data?._links?.self,
+      },
+    }
+
+    console.log(
+      '[front-webhook] Sending to Inngest:',
+      JSON.stringify(inngestPayload, null, 2)
+    )
+
+    await inngest.send({
+      name: SUPPORT_INBOUND_RECEIVED,
+      data: inngestPayload,
     })
+
+    const elapsed = Date.now() - startTime
+    console.log(
+      `[front-webhook] ========== DISPATCHED TO INNGEST (${elapsed}ms) ==========`
+    )
   }
 
   // Acknowledge all events
+  const elapsed = Date.now() - startTime
+  console.log(
+    `[front-webhook] ========== WEBHOOK COMPLETE (${elapsed}ms) ==========`
+  )
   return NextResponse.json({ received: true })
 }
