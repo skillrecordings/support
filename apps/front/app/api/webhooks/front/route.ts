@@ -168,11 +168,19 @@ export async function POST(request: NextRequest) {
     // Extract what we can from the preview
     // Full data (body, author email) must be fetched via Front API in the workflow
     const subject = event.payload?.conversation?.subject
-    // Try multiple paths for inbox ID - Front structure varies
-    const inboxId =
-      event.payload?.source?.data?.id || // nested structure
-      (event.payload?.source as { id?: string })?.id || // flat structure
-      undefined
+
+    // source.data is an ARRAY of inboxes - get the first one
+    const sourceData = event.payload?.source?.data
+    const inboxId = Array.isArray(sourceData)
+      ? sourceData[0]?.id
+      : (sourceData as { id?: string })?.id
+
+    console.log('[front-webhook] Extracted:', {
+      subject,
+      inboxId,
+      sourceDataType: Array.isArray(sourceData) ? 'array' : typeof sourceData,
+      sourceDataLength: Array.isArray(sourceData) ? sourceData.length : 'n/a',
+    })
 
     // Map inbox ID to app slug via database lookup
     let appSlug = 'unknown'
