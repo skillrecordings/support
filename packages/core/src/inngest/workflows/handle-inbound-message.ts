@@ -355,16 +355,49 @@ export const handleInboundMessage = inngest.createFunction(
           '[workflow:draft] body length:',
           routingResult.response.length
         )
-
-        const front = createFrontClient(frontToken)
-        const draft = await front.createDraft(
-          conversationId,
-          routingResult.response,
-          context.inboxId
+        console.log(
+          '[workflow:draft] body preview:',
+          routingResult.response.slice(0, 200)
         )
-        console.log('[workflow:draft] Draft created successfully!')
-        console.log('[workflow:draft] Draft ID:', draft.id)
-        return { drafted: true, draftId: draft.id }
+
+        try {
+          const front = createFrontClient(frontToken)
+
+          // Front requires channel_id (cha_xxx), not inbox_id (inb_xxx)
+          // Fetch the channel from the inbox
+          console.log('[workflow:draft] Fetching channel for inbox...')
+          const channelId = await front.getInboxChannel(context.inboxId)
+          if (!channelId) {
+            console.error(
+              '[workflow:draft] No channel found for inbox:',
+              context.inboxId
+            )
+            return { drafted: false, reason: 'no_channel_id' }
+          }
+          console.log('[workflow:draft] Channel ID:', channelId)
+
+          console.log(
+            '[workflow:draft] Front client created, calling createDraft...'
+          )
+          const draft = await front.createDraft(
+            conversationId,
+            routingResult.response,
+            channelId
+          )
+          console.log('[workflow:draft] Draft created successfully!')
+          console.log('[workflow:draft] Draft ID:', draft.id)
+          return { drafted: true, draftId: draft.id }
+        } catch (error) {
+          console.error('[workflow:draft] FRONT API ERROR:', error)
+          console.error('[workflow:draft] Error details:', {
+            conversationId,
+            inboxId: context.inboxId,
+            bodyLength: routingResult.response.length,
+            errorMessage:
+              error instanceof Error ? error.message : String(error),
+          })
+          throw error // Re-throw to let Inngest retry
+        }
       })
 
       // Notify Slack about the draft with rating buttons
