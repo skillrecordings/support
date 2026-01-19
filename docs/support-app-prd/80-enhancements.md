@@ -68,35 +68,91 @@
 
 ---
 
-## Phase: Canned Responses
+## Phase: Front Message Templates (Canned Responses)
 
-**Goal:** Common questions get instant, pre-approved responses.
+**Goal:** Common questions get instant, pre-approved responses using Front's native template system.
 
-**Examples:**
-- "How do I access my course?" → Magic link + instructions
-- "Can I get a refund?" → Policy + process refund (if eligible)
-- "Is there a team license?" → Team pricing info
+**Why Front Templates:**
+- No custom DB/storage needed
+- Support team edits templates directly in Front UI
+- Templates visible during manual replies
+- Folders = organization by product/inbox
+- API for programmatic access and creation
+
+**Front API:**
+- `GET /message_template_folders` - List folders
+- `GET /inboxes/:inbox_id/message_templates` - List templates per inbox
+- `POST /inboxes/:inbox_id/message_templates` - Create template
+
+**Folder Structure:**
+```
+inb_total-typescript/
+  refund/
+    - within-30-days
+    - after-30-days
+  billing/
+    - invoice-request
+    - payment-failed
+  access/
+    - login-link
+    - course-access
+```
+
+**Template Selection Options:**
+
+1. **Classifier outputs template name** - Train classifier on template names
+2. **Semantic search** - Index template content in vector store, find best match
+3. **Folder = category** - Classifier picks category, we pick from that folder
 
 **Implementation:**
 ```
-1. Canned response registry
-   - YAML/JSON definitions with:
-     - trigger patterns (intent classification)
-     - response template
-     - required variables (e.g., {{customerName}})
-     - auto-send eligibility
+1. Add to Front client
+   - listMessageTemplates(inboxId)
+   - listFolders()
+   - createMessageTemplate(inboxId, template)
 
-2. Classifier integration
-   - Before running full agent, classify message
-   - If high-confidence canned match, use template
-   - Fallback to full agent for low confidence
+2. Cache templates per inbox
+   - Refresh on schedule or webhook
+   - Index in vector store for semantic matching
 
-3. Template engine
-   - Simple variable interpolation
-   - Conditional sections based on customer state
+3. Wire to classifier
+   - Classifier says "canned_response"
+   - Match to template via name, folder, or embedding
+   - Send via draft API
 ```
 
 **Effort:** Medium (1-2 days)
+
+---
+
+## Phase: "Save as Template" HITL Flow
+
+**Goal:** Template library grows organically from actual good responses.
+
+**User Flow:**
+1. Agent drafts response
+2. Slack shows: `[Approve & Send]` `[Save as Template]` `[Edit]` `[Reject]`
+3. "Save as Template" → prompts for name, auto-selects folder based on category
+4. `POST /inboxes/:inbox_id/message_templates` creates it in Front
+5. Response is also sent to customer
+6. Future similar messages match that template
+
+**Template Opportunity Detection:**
+- Track response embeddings
+- Notice clusters: "5 similar responses this week"
+- Surface to reviewer: "This pattern could be a template"
+- One-click templatize from Slack
+
+**Implementation:**
+```
+1. Add "Save as Template" button to Slack approval blocks
+2. Modal or thread reply for template name
+3. Auto-suggest folder based on classifier category
+4. Create template via Front API
+5. Optionally index in vector store immediately
+```
+
+**Effort:** Low-Medium (1 day)
 
 ---
 
@@ -158,6 +214,62 @@
 - Use for prompt tuning and eval dataset
 
 **Effort:** Medium-High
+
+---
+
+## Phase: Outbound Message Analysis
+
+**Goal:** Learn from human responses captured via Front webhooks.
+
+**Key Insight:** Front webhooks capture outbound messages too. Human responses = ground truth.
+
+**What We Get:**
+- What humans actually write (not just what agent proposed)
+- Diff between agent draft vs. what human sent = learning signal
+- Clusters of similar human responses = template candidates
+- Topics humans handle that agent doesn't = capability gaps
+
+**Data Flow:**
+```
+inbound → agent drafts → human edits → outbound captured
+                              ↓
+                    compare draft vs sent
+                              ↓
+              ┌───────────────┼───────────────┐
+              ↓               ↓               ↓
+        high similarity  low similarity  repeated pattern
+        (agent was right) (learn from human) (templatize)
+```
+
+**Implementation:**
+```
+1. Index outbound messages
+   - Store in vector DB with metadata (appId, category, conversationId)
+   - Link to original inbound and agent draft if available
+
+2. Draft vs. Sent comparison
+   - On outbound webhook, check if we drafted for this conversation
+   - Compute similarity (embedding distance or token overlap)
+   - Log as training signal
+
+3. Pattern detection
+   - Periodic job to cluster similar outbound messages
+   - Surface clusters with 3+ similar responses
+   - Suggest as template candidates via Slack notification
+
+4. Trust scoring integration
+   - High edit rate for category = lower trust
+   - Consistent approval = higher trust
+   - Feed into auto-send thresholds
+```
+
+**Use Cases:**
+- "Find human responses similar to this inbound" → few-shot examples for agent
+- "What do humans say about refunds?" → tune prompts
+- "5 similar responses this week" → templatize
+- "Humans always rewrite billing responses" → agent needs work there
+
+**Effort:** Medium (2-3 days)
 
 ---
 
@@ -230,7 +342,9 @@
 ## Priority Order (Suggested)
 
 1. Properties/Purchase Context (low effort, high value)
-2. Canned Responses (medium effort, high volume reduction)
-3. Product Content RAG (medium effort, quality improvement)
-4. Per-Product Personas (low effort, brand consistency)
-5. Feedback Loop (medium effort, continuous improvement)
+2. Front Message Templates (medium effort, high volume reduction, no custom storage)
+3. "Save as Template" HITL (low effort, grows template library organically)
+4. Product Content RAG (medium effort, quality improvement)
+5. Outbound Message Analysis (medium effort, self-improving system)
+6. Per-Product Personas (low effort, brand consistency)
+7. Feedback Loop (medium effort, continuous improvement)
