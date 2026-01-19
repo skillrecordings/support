@@ -50,14 +50,26 @@ export const executeApprovedAction = inngest.createFunction(
     const result = await step.run('execute-action', async () => {
       // Handle draft-response: create draft in Front
       if (action.type === 'draft-response') {
-        const params = action.parameters as { response?: string }
+        const params = action.parameters as {
+          response?: string
+          inboxId?: string
+        }
         const response = params?.response
+        const inboxId = params?.inboxId
 
         if (!response) {
           return {
             success: false,
             output: null,
             error: 'No response text in draft-response action',
+          }
+        }
+
+        if (!inboxId) {
+          return {
+            success: false,
+            output: null,
+            error: 'No inboxId in draft-response action',
           }
         }
 
@@ -80,7 +92,7 @@ export const executeApprovedAction = inngest.createFunction(
           }
         }
 
-        const draft = await front.createDraft(conversationId, response)
+        const draft = await front.createDraft(conversationId, response, inboxId)
         return {
           success: true,
           output: { draftId: draft.id, conversationId },

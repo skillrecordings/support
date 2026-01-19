@@ -26,7 +26,8 @@ export const handleInboundMessage = inngest.createFunction(
   },
   { event: SUPPORT_INBOUND_RECEIVED },
   async ({ event, step }) => {
-    const { conversationId, appId, messageId, subject, _links } = event.data
+    const { conversationId, appId, messageId, subject, _links, inboxId } =
+      event.data
 
     // Step 1: Fetch full message and conversation from Front API
     const context = await step.run('get-conversation-context', async () => {
@@ -40,6 +41,7 @@ export const handleInboundMessage = inngest.createFunction(
         subject: subject || '',
         body: event.data.messageBody || '',
         senderEmail: event.data.customerEmail || '',
+        inboxId: inboxId || '',
         conversationHistory: [] as FrontMessage[],
       }
 
@@ -71,6 +73,7 @@ export const handleInboundMessage = inngest.createFunction(
           subject: message.subject || subject || '',
           body: message.body,
           senderEmail,
+          inboxId: inboxId || '',
           conversationHistory,
         }
       } catch (error) {
@@ -217,6 +220,7 @@ export const handleInboundMessage = inngest.createFunction(
           type: 'draft-response',
           parameters: {
             response: routingResult.response,
+            inboxId: context.inboxId,
             category:
               agentResult.toolCalls.length > 0
                 ? 'tool-assisted'
@@ -236,10 +240,18 @@ export const handleInboundMessage = inngest.createFunction(
           return { drafted: false, reason: 'no_token' }
         }
 
+        if (!context.inboxId) {
+          console.warn(
+            '[workflow] No inbox ID available, skipping draft creation'
+          )
+          return { drafted: false, reason: 'no_inbox_id' }
+        }
+
         const front = createFrontClient(frontToken)
         const draft = await front.createDraft(
           conversationId,
-          routingResult.response
+          routingResult.response,
+          context.inboxId
         )
         console.log('[workflow] Draft created:', draft.id)
         return { drafted: true, draftId: draft.id }
