@@ -75,7 +75,27 @@ export function createFrontClient(apiToken: string) {
     const response = await fetch(fullUrl, { headers })
 
     if (!response.ok) {
-      throw new Error(`Front API error: ${response.status} ${response.statusText}`)
+      throw new Error(
+        `Front API error: ${response.status} ${response.statusText}`
+      )
+    }
+
+    return response.json()
+  }
+
+  async function postJson<T>(url: string, body: unknown): Promise<T> {
+    const fullUrl = url.startsWith('http') ? url : `${FRONT_API_BASE}${url}`
+    const response = await fetch(fullUrl, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body),
+    })
+
+    if (!response.ok) {
+      const text = await response.text()
+      throw new Error(
+        `Front API error: ${response.status} ${response.statusText} - ${text}`
+      )
     }
 
     return response.json()
@@ -95,7 +115,9 @@ export function createFrontClient(apiToken: string) {
     /**
      * Get a conversation by ID or URL
      */
-    async getConversation(conversationIdOrUrl: string): Promise<FrontConversation> {
+    async getConversation(
+      conversationIdOrUrl: string
+    ): Promise<FrontConversation> {
       const url = conversationIdOrUrl.startsWith('http')
         ? conversationIdOrUrl
         : `/conversations/${conversationIdOrUrl}`
@@ -105,11 +127,43 @@ export function createFrontClient(apiToken: string) {
     /**
      * Get all messages in a conversation
      */
-    async getConversationMessages(conversationId: string): Promise<FrontMessage[]> {
+    async getConversationMessages(
+      conversationId: string
+    ): Promise<FrontMessage[]> {
       const data = await fetchJson<FrontConversationMessages>(
         `/conversations/${conversationId}/messages`
       )
       return data._results
+    },
+
+    /**
+     * Create a draft reply in a conversation
+     * Docs: https://dev.frontapp.com/reference/create-draft
+     */
+    async createDraft(
+      conversationId: string,
+      body: string,
+      options?: { authorId?: string }
+    ): Promise<{ id: string; conversation_id: string }> {
+      return postJson(`/conversations/${conversationId}/drafts`, {
+        body,
+        author_id: options?.authorId,
+      })
+    },
+
+    /**
+     * Send a reply to a conversation (immediately, no draft)
+     * Docs: https://dev.frontapp.com/reference/reply-to-conversation
+     */
+    async sendReply(
+      conversationId: string,
+      body: string,
+      options?: { authorId?: string }
+    ): Promise<{ id: string }> {
+      return postJson(`/conversations/${conversationId}/messages`, {
+        body,
+        author_id: options?.authorId,
+      })
     },
   }
 }
