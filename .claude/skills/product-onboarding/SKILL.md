@@ -1,6 +1,12 @@
+---
+name: product-onboarding
+description: Add a new Skill Recordings product to the support platform. Use when user says "add product", "new app", "onboard [product name]", or similar.
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebFetch
+---
+
 # Product Onboarding Skill
 
-Add a new Skill Recordings product to the support platform. Use when user says "add product", "new app", "onboard [product name]", or similar.
+Add a new Skill Recordings product to the support platform.
 
 ## Prerequisites
 
