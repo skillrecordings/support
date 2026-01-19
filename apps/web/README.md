@@ -1,13 +1,24 @@
-# support-web
+# apps/web
 
-Dashboard app for support operations.
+Dashboard for support operations. Approval queue, trust scores, audit logs.
 
-## Local dev
+**Port**: 4100
+
+## Routes
+
+- `/` - Dashboard home
+- `/api/stripe/connect/authorize` - Start Stripe Connect OAuth
+- `/api/stripe/connect/callback` - OAuth callback
+- `/api/stripe/webhooks` - Stripe webhook receiver
+
+## Stack
+
+- Next.js 15 (App Router)
+- BetterAuth
+- Shared UI from `packages/ui`
+
+## Dev
+
 ```bash
-bun dev
+bun run dev --filter=web
 ```
-Runs on port 4100 per `package.json`.
-
-## Notes
-- Auth via BetterAuth
-- Uses shared UI primitives from `packages/ui`
