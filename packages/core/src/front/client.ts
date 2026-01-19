@@ -5,6 +5,7 @@
  * Docs: https://dev.frontapp.com/reference
  */
 
+import { marked } from 'marked'
 import { z } from 'zod'
 
 const FRONT_API_BASE = 'https://api2.frontapp.com'
@@ -130,6 +131,24 @@ const FrontDraftResponseSchema = z
     id: z.string(),
   })
   .passthrough()
+
+// ============================================================================
+// Markdown to HTML conversion using marked
+// ============================================================================
+
+// Configure marked for email-safe output
+marked.setOptions({
+  gfm: true, // GitHub Flavored Markdown
+  breaks: true, // Convert \n to <br>
+})
+
+/**
+ * Convert markdown to HTML for Front email drafts.
+ * Uses marked for robust parsing.
+ */
+function markdownToHtml(text: string): string {
+  return marked.parse(text) as string
+}
 
 // ============================================================================
 // Exported Types (inferred from schemas)
@@ -322,11 +341,8 @@ export function createFrontClient(apiToken: string) {
       channelId: string,
       options?: { authorId?: string; signatureId?: string }
     ): Promise<z.infer<typeof FrontDraftResponseSchema>> {
-      // Convert plain text newlines to HTML for proper formatting in Front
-      const htmlBody = body
-        .split('\n\n')
-        .map((p) => `<p>${p.replace(/\n/g, '<br>')}</p>`)
-        .join('')
+      // Convert markdown to HTML for proper formatting in Front
+      const htmlBody = markdownToHtml(body)
 
       return postJson(
         `/conversations/${conversationId}/drafts`,
