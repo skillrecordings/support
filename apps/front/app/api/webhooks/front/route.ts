@@ -171,9 +171,9 @@ export async function POST(request: NextRequest) {
 
     // source.data is an ARRAY of inboxes - get the first one
     const sourceData = event.payload?.source?.data
-    const inboxId = Array.isArray(sourceData)
-      ? sourceData[0]?.id
-      : (sourceData as { id?: string })?.id
+    const firstInbox =
+      Array.isArray(sourceData) && sourceData.length > 0 ? sourceData[0] : null
+    const inboxId = firstInbox?.id ?? (sourceData as { id?: string })?.id
 
     console.log('[front-webhook] Extracted:', {
       subject,
