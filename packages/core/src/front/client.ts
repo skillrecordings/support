@@ -124,10 +124,12 @@ const FrontConversationMessagesSchema = z.object({
   _results: z.array(FrontMessageSchema),
 })
 
-const FrontDraftResponseSchema = z.object({
-  id: z.string(),
-  conversation_id: z.string().optional(),
-})
+// Draft creation returns a full Message object, but we only need the ID
+const FrontDraftResponseSchema = z
+  .object({
+    id: z.string(),
+  })
+  .passthrough()
 
 // ============================================================================
 // Exported Types (inferred from schemas)
