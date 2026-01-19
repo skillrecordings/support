@@ -5,6 +5,7 @@ import { Command } from 'commander'
 import { runEval } from './commands/eval'
 import { health } from './commands/health'
 import { init } from './commands/init'
+import { wizard } from './commands/wizard'
 
 const program = new Command()
 
@@ -15,13 +16,19 @@ program
 
 program
   .command('init')
-  .description('Initialize a new app integration')
+  .description('Initialize a new app integration (quick mode)')
   .argument(
     '[name]',
     'Name of the integration (required in non-interactive mode)'
   )
   .option('--json', 'Output result as JSON (machine-readable)')
   .action(init)
+
+program
+  .command('wizard')
+  .description('Interactive wizard for setting up a new property')
+  .option('--json', 'Output result as JSON (machine-readable)')
+  .action(wizard)
 
 program
   .command('health')
