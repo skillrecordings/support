@@ -54,6 +54,23 @@ export interface FrontConversation {
   }
 }
 
+export interface FrontInbox {
+  id: string
+  name: string
+  address: string
+  type: string
+  _links: {
+    self: string
+  }
+}
+
+export interface FrontInboxes {
+  _links: {
+    self: string
+  }
+  _results: FrontInbox[]
+}
+
 export interface FrontConversationMessages {
   _links: {
     self: string
@@ -134,6 +151,17 @@ export function createFrontClient(apiToken: string) {
         `/conversations/${conversationId}/messages`
       )
       return data._results
+    },
+
+    /**
+     * Get the inboxes associated with a conversation
+     * Returns the first inbox ID (conversations typically have one inbox)
+     */
+    async getConversationInbox(conversationId: string): Promise<string | null> {
+      const data = await fetchJson<FrontInboxes>(
+        `/conversations/${conversationId}/inboxes`
+      )
+      return data._results[0]?.id ?? null
     },
 
     /**

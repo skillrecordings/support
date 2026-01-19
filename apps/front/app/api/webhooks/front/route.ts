@@ -136,6 +136,8 @@ export async function POST(request: NextRequest) {
     conversationId: event.payload?.conversation?.id,
     targetType: event.payload?.target?._meta?.type,
     targetId: event.payload?.target?.data?.id,
+    sourceType: event.payload?.source?._meta?.type,
+    sourceId: event.payload?.source?.data?.id,
   })
 
   // Handle sync event (validation request)
