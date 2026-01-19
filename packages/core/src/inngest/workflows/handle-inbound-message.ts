@@ -171,22 +171,43 @@ export const handleInboundMessage = inngest.createFunction(
       console.log('[workflow:agent] App ID:', context.appId)
 
       // Convert Front messages to AI SDK message format
+      // Filter out messages with empty content - AI SDK will reject them
       const conversationMessages = context.conversationHistory
         .sort((a, b) => a.created_at - b.created_at)
         .map((msg) => ({
           role: msg.is_inbound ? ('user' as const) : ('assistant' as const),
-          content: msg.body,
+          content: msg.body || '',
         }))
+        .filter((msg) => msg.content.trim().length > 0)
+
       console.log(
         '[workflow:agent] Conversation history:',
         conversationMessages.length,
         'messages'
       )
+      console.log(
+        '[workflow:agent] Message content lengths:',
+        conversationMessages.map((m) => m.content.length)
+      )
+
+      // Ensure message body isn't empty
+      const messageBody = context.body?.trim() || ''
+      if (!messageBody) {
+        console.error('[workflow:agent] Empty message body, cannot run agent')
+        return {
+          response: '',
+          toolCalls: [],
+          requiresApproval: false,
+          escalated: true,
+          escalationReason: 'Empty message body',
+          reasoning: 'Message body was empty',
+        }
+      }
 
       // Run the support agent
       console.log('[workflow:agent] Calling runSupportAgent...')
       const result = await runSupportAgent({
-        message: context.body,
+        message: messageBody,
         conversationHistory: conversationMessages.slice(0, -1), // Exclude current message
         customerContext: {
           email: context.senderEmail,
