@@ -17,6 +17,7 @@
     "typescript": "5.9.2"
   },
   "dependencies": {
+    "@inquirer/prompts": "^8.2.0",
     "@skillrecordings/core": "workspace:*",
     "@skillrecordings/database": "workspace:*",
     "commander": "^12.1.0",
