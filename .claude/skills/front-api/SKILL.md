@@ -1,124 +1,60 @@
----
-name: front-api
-description: Front REST API reference for server-side operations. Use when working with Front API client, fetching conversations, creating drafts, managing templates, or any backend Front integration.
----
+# Front API Skill
 
-# Front REST API
+Reference for Front REST API integration.
 
-Server-side REST API for Front integrations. Base URL: `https://api2.frontapp.com`
+## OpenAPI Spec
 
-## When to Use This Skill
+The full OpenAPI spec is in `core-api.json` (13k+ lines). Use it as the source of truth for:
+- Request/response schemas
+- Nullable fields
+- Enum values
+- Endpoint paths
 
-- Implementing Front API client methods
-- Creating/updating drafts via API
-- Fetching conversation/message data
-- Managing message templates
-- Working with tags, contacts, inboxes
+## Key Schemas
 
-## Authentication
+### Message
+- `recipients[].name` - nullable
+- `recipients[]._links.related.contact` - nullable
+- `recipients[].role` - enum: `from`, `to`, `cc`, `bcc`, `reply-to`
+- `author` - nullable (null for inbound from external)
+- `text` - nullable (plain text version of body)
 
-Bearer token in Authorization header:
+### Conversation
+- `assignee` - nullable
+- `recipient` - nullable for some conversation types
+- `tags` - can be empty array
+- `last_message` - nullable
+- `scheduled_reminders` - nullable
 
-```ts
-const headers = {
-  Authorization: `Bearer ${FRONT_API_TOKEN}`,
-  'Content-Type': 'application/json'
+### Recipient
+```json
+{
+  "name": "string | null",
+  "handle": "string (required)",
+  "role": "from | to | cc | bcc | reply-to",
+  "_links": {
+    "related": {
+      "contact": "string | null"
+    }
+  }
 }
 ```
 
-## Our Client
+## Common Gotchas
 
-We have a typed Front client at `packages/core/src/front/client.ts`:
+1. **Webhooks send previews only** - must fetch full data via API
+2. **Many fields nullable** - don't assume presence, use `.nullable()` in Zod
+3. **`_links.related.contact`** - null when recipient has no contact record
+4. **`role` includes `reply-to`** - often forgotten in enums
 
-```ts
-import { createFrontClient } from '@skillrecordings/core/front'
+## SDK Location
 
-const front = createFrontClient(process.env.FRONT_API_TOKEN)
+`@skillrecordings/front-sdk` - Zod schemas should match this spec exactly.
 
-// Get conversation
-const conv = await front.getConversation('cnv_xxx')
+## Useful Endpoints
 
-// Get messages
-const messages = await front.getConversationMessages('cnv_xxx')
-
-// Create draft
-await front.createDraft(conversationId, body, channelId, { authorId, signatureId })
-```
-
-## Key Endpoints We Use
-
-### Conversations
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/conversations/{id}` | Fetch conversation |
-| GET | `/conversations/{id}/messages` | List messages |
-| GET | `/conversations/{id}/inboxes` | Get inboxes |
-| POST | `/conversations/{id}/drafts` | Create draft reply |
-| POST | `/conversations/{id}/messages` | Send reply (immediate) |
-| POST | `/conversations/{id}/tags` | Add tags |
-
-### Messages
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/messages/{id}` | Fetch message |
-
-### Drafts
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/conversations/{id}/drafts` | Create draft in conversation |
-| POST | `/channels/{id}/drafts` | Create new draft (not reply) |
-| PATCH | `/drafts/{id}` | Update draft |
-| DELETE | `/drafts/{id}` | Delete draft |
-
-### Message Templates
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/message_templates` | List all templates |
-| GET | `/message_template_folders` | List folders |
-| GET | `/message_templates/{id}` | Get template |
-| POST | `/message_templates` | Create template |
-| POST | `/inboxes/{id}/message_templates` | Create inbox template |
-| PATCH | `/message_templates/{id}` | Update template |
-| DELETE | `/message_templates/{id}` | Delete template |
-
-### Inboxes & Channels
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/inboxes` | List inboxes |
-| GET | `/inboxes/{id}` | Get inbox |
-| GET | `/inboxes/{id}/channels` | List channels |
-| GET | `/channels/{id}` | Get channel |
-
-### Tags
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/tags` | List tags |
-| POST | `/tags` | Create tag |
-| GET | `/tags/{id}` | Get tag |
-
-### Contacts
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/contacts` | List contacts |
-| GET | `/contacts/{id}` | Get contact |
-| POST | `/contacts` | Create contact |
-
-## Related Skills
-
-- `front-webhook` - Handling incoming webhooks from Front
-- `front-plugin` - Building UI plugins with Plugin SDK
-
-## Detailed Reference
-
-See `rules/` for:
-- Request/response schemas
-- Pagination patterns
-- Error handling
-- Template management
+- `GET /messages/{id}` - Full message with body
+- `GET /conversations/{id}` - Conversation details
+- `GET /conversations/{id}/messages` - Message history
+- `POST /conversations/{id}/drafts` - Create draft reply
+- `GET /inboxes/{id}` - Inbox details
