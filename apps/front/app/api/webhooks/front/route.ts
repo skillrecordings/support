@@ -196,12 +196,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Fallback to first inbox if no app match
-    if (!inboxId && inboxes.length > 0) {
-      inboxId = inboxes[0]?.id
+    // Bail if no registered app found - don't waste resources on unknown inboxes
+    if (!inboxId || appSlug === 'unknown') {
       console.warn(
-        `[front-webhook] No app match, using first inbox: ${inboxId}`
+        `[front-webhook] No registered app for inboxes: ${inboxes.map((i: { id?: string }) => i?.id).join(', ')}`
       )
+      return NextResponse.json({ received: true })
     }
 
     await inngest.send({
@@ -214,8 +214,7 @@ export async function POST(request: NextRequest) {
         body: '', // Must fetch via Front API
         senderEmail: '', // Must fetch via Front API
         appId: appSlug,
-        // Include inbox ID for draft creation (required by Front API)
-        inboxId: inboxId || '',
+        inboxId,
         // Include links for API fetching
         _links: {
           conversation: event.payload?.conversation?._links?.self,
@@ -227,7 +226,7 @@ export async function POST(request: NextRequest) {
     console.log('[front-webhook] Dispatched to Inngest:', {
       conversationId,
       messageId,
-      inboxId: inboxId || '(empty - will fetch from API)',
+      inboxId,
       appSlug,
     })
   }
