@@ -322,10 +322,16 @@ export function createFrontClient(apiToken: string) {
       channelId: string,
       options?: { authorId?: string; signatureId?: string }
     ): Promise<z.infer<typeof FrontDraftResponseSchema>> {
+      // Convert plain text newlines to HTML for proper formatting in Front
+      const htmlBody = body
+        .split('\n\n')
+        .map((p) => `<p>${p.replace(/\n/g, '<br>')}</p>`)
+        .join('')
+
       return postJson(
         `/conversations/${conversationId}/drafts`,
         {
-          body,
+          body: htmlBody,
           channel_id: channelId,
           author_id: options?.authorId,
           signature_id: options?.signatureId,
