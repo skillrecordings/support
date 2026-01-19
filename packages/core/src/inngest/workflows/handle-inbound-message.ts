@@ -400,10 +400,13 @@ export const handleInboundMessage = inngest.createFunction(
           console.log(
             '[workflow:draft] Front client created, calling createDraft...'
           )
+          // TODO: Make signature_id configurable per-app in app-registry
+          const FRONT_SIGNATURE_ID = '[PHONE]'
           const draft = await front.createDraft(
             conversationId,
             routingResult.response,
-            channelId
+            channelId,
+            { signatureId: FRONT_SIGNATURE_ID }
           )
           console.log('[workflow:draft] Draft created successfully!')
           console.log('[workflow:draft] Draft ID:', draft.id)
