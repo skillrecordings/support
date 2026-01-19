@@ -15,18 +15,22 @@ let _index: Index | null = null
  * Get or create the Upstash Vector index instance.
  * Uses lazy initialization to defer connection until first use.
  *
- * @throws {Error} If UPSTASH_VECTOR_URL or UPSTASH_VECTOR_TOKEN env vars are missing
+ * @throws {Error} If UPSTASH_VECTOR_REST_URL or UPSTASH_VECTOR_REST_TOKEN env vars are missing
  */
 export function getVectorIndex(): Index {
   if (!_index) {
-    const url = process.env.UPSTASH_VECTOR_URL
-    const token = process.env.UPSTASH_VECTOR_TOKEN
+    const url = process.env.UPSTASH_VECTOR_REST_URL
+    const token = process.env.UPSTASH_VECTOR_REST_TOKEN
 
     if (!url) {
-      throw new Error('UPSTASH_VECTOR_URL environment variable is required')
+      throw new Error(
+        'UPSTASH_VECTOR_REST_URL environment variable is required'
+      )
     }
     if (!token) {
-      throw new Error('UPSTASH_VECTOR_TOKEN environment variable is required')
+      throw new Error(
+        'UPSTASH_VECTOR_REST_TOKEN environment variable is required'
+      )
     }
 
     _index = new Index({
