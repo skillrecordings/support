@@ -2,6 +2,8 @@ import { randomUUID } from 'crypto'
 import { ActionsTable, getDb } from '@skillrecordings/database'
 import { runSupportAgent } from '../../agent/index'
 import { type FrontMessage, createFrontClient } from '../../front/index'
+import { matchRules } from '../../router/rules'
+import { systemRules } from '../../router/system-rules'
 import { inngest } from '../client'
 import { SUPPORT_INBOUND_RECEIVED } from '../events'
 import type { SupportInboundReceivedEvent } from '../events'
@@ -81,7 +83,38 @@ export const handleInboundMessage = inngest.createFunction(
       }
     })
 
-    // Step 2: Run agent
+    // Step 2: Check system rules for spam/bounce filtering
+    const filterResult = await step.run('check-system-rules', async () => {
+      // Run message and sender through system rules
+      const ruleMatch = matchRules(
+        `${context.subject} ${context.body}`,
+        context.senderEmail,
+        systemRules
+      )
+
+      if (ruleMatch && ruleMatch.action === 'no_respond') {
+        console.log(
+          `[workflow] Message filtered by rule ${ruleMatch.ruleId}: ${context.senderEmail}`
+        )
+        return { filtered: true as const, ruleId: ruleMatch.ruleId }
+      }
+
+      return { filtered: false as const }
+    })
+
+    // Early exit if message was filtered
+    if (filterResult.filtered === true) {
+      return {
+        conversationId,
+        messageId,
+        filtered: true,
+        ruleId: filterResult.ruleId,
+        agentResult: null,
+        routingResult: { type: 'filtered' as const },
+      }
+    }
+
+    // Step 3: Run agent
     const agentResult = await step.run('run-agent', async () => {
       // Convert Front messages to AI SDK message format
       const conversationMessages = context.conversationHistory

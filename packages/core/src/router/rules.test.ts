@@ -305,6 +305,92 @@ describe('matchRules', () => {
     })
   })
 
+  describe('sender_pattern rules', () => {
+    it('should match mailer-daemon wildcard', () => {
+      const rules: Rule[] = [
+        {
+          id: 'mailer-daemon',
+          priority: 0,
+          type: 'sender_pattern',
+          pattern: 'mailer-daemon@*',
+          action: 'no_respond',
+        },
+      ]
+
+      const result = matchRules(
+        'Delivery Status Notification',
+        'mailer-daemon@googlemail.com',
+        rules
+      )
+
+      expect(result?.ruleId).toBe('mailer-daemon')
+    })
+
+    it('should match noreply wildcard', () => {
+      const rules: Rule[] = [
+        {
+          id: 'noreply',
+          priority: 0,
+          type: 'sender_pattern',
+          pattern: 'noreply@*',
+          action: 'no_respond',
+        },
+      ]
+
+      const result = matchRules('Notification', 'noreply@company.com', rules)
+      expect(result?.ruleId).toBe('noreply')
+    })
+
+    it('should match complex patterns with wildcards', () => {
+      const rules: Rule[] = [
+        {
+          id: 'aws-health',
+          priority: 0,
+          type: 'sender_pattern',
+          pattern: '*@health.aws',
+          action: 'no_respond',
+        },
+      ]
+
+      const result = matchRules('AWS Health', 'notifications@health.aws', rules)
+      expect(result?.ruleId).toBe('aws-health')
+    })
+
+    it('should be case insensitive', () => {
+      const rules: Rule[] = [
+        {
+          id: 'postmaster',
+          priority: 0,
+          type: 'sender_pattern',
+          pattern: 'postmaster@*',
+          action: 'no_respond',
+        },
+      ]
+
+      const result = matchRules('Bounce', 'POSTMASTER@example.com', rules)
+      expect(result?.ruleId).toBe('postmaster')
+    })
+
+    it('should not match when pattern does not apply', () => {
+      const rules: Rule[] = [
+        {
+          id: 'mailer-daemon',
+          priority: 0,
+          type: 'sender_pattern',
+          pattern: 'mailer-daemon@*',
+          action: 'no_respond',
+        },
+      ]
+
+      const result = matchRules(
+        'Real customer message',
+        'customer@example.com',
+        rules
+      )
+      expect(result).toBeNull()
+    })
+  })
+
   describe('edge cases', () => {
     it('should return null when no rules match', () => {
       const rules: Rule[] = [

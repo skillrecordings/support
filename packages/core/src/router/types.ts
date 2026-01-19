@@ -12,7 +12,7 @@ export interface RouterDecision {
 export interface Rule {
   id: string
   priority: number
-  type: 'regex' | 'keyword' | 'sender_domain'
+  type: 'regex' | 'keyword' | 'sender_domain' | 'sender_pattern'
   pattern: string
   action: 'auto_respond' | 'no_respond' | 'escalate' | 'route_to_canned'
   response?: string
