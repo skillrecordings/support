@@ -113,6 +113,14 @@ bun scripts/setup/validate-stripe.ts
 bun scripts/setup/validate-all.ts
 ```
 
+## Production URLs
+
+| App | URL |
+|-----|-----|
+| Web (dashboard, Stripe) | https://skill-support-agent-web.vercel.app |
+| Front Plugin | https://skill-support-agent-front.vercel.app |
+| Slack Bot | https://skill-support-agent-slack.vercel.app |
+
 ## Webhook Auto-Configuration
 
 Once Vercel URLs are known, auto-configure webhooks:
@@ -160,8 +168,8 @@ await stripe.webhookEndpoints.create({
 
 4. **Test OAuth flow:**
    ```bash
-   # Visit to start OAuth
-   open "${VERCEL_URL}/api/stripe/connect/authorize?app=total-typescript"
+   # Visit to start OAuth (use appSlug parameter)
+   open "https://skill-support-agent-web.vercel.app/api/stripe/connect/authorize?appSlug=total-typescript"
    ```
 
 ## Conversation Patterns
@@ -208,6 +216,16 @@ echo 'sk_live_xxx' | vercel env add STRIPE_SECRET_KEY production
 ```
 
 Trailing newlines in secrets cause cryptic auth failures.
+
+## Adding a New Product (App)
+
+When user wants to add a new product to the support platform:
+
+1. **Get Front inbox ID** - Use `@.claude/skills/front-id-converter/SKILL.md` to convert URL ID to API ID
+2. **Run wizard** - `bun packages/cli/src/index.ts wizard`
+3. **Insert into DB** - Use generated SQL or `bun run db:studio`
+4. **Connect Stripe** - `https://skill-support-agent-web.vercel.app/api/stripe/connect/authorize?appSlug=<slug>`
+5. **Implement SDK** - Product implements handler (see `@docs/support-app-prd/67-sdk.md`)
 
 ## Quick Commands
 

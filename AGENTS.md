@@ -19,6 +19,22 @@ Support platform monorepo (agent-first, Front is source of truth, HITL approvals
 - Dev commands: @docs/DEV-COMMANDS.md
 - Env/setup: @docs/ENV.md and @.claude/skills/ops-setup/SKILL.md
 
+## Production URLs
+
+| App | URL |
+|-----|-----|
+| Web (dashboard, Stripe) | https://skill-support-agent-web.vercel.app |
+| Front Plugin | https://skill-support-agent-front.vercel.app |
+| Slack Bot | https://skill-support-agent-slack.vercel.app |
+
+## Adding a New Product (App)
+
+1. **Get Front inbox ID** - Convert URL ID to API ID (see `@.claude/skills/front-id-converter/SKILL.md`)
+2. **Run wizard** - `bun packages/cli/src/index.ts wizard`
+3. **Insert into DB** - Use generated SQL or `bun run db:studio`
+4. **Connect Stripe** - Visit `https://skill-support-agent-web.vercel.app/api/stripe/connect/authorize?appSlug=<slug>`
+5. **Implement SDK** - Add handler in the product's codebase (see `@docs/support-app-prd/67-sdk.md`)
+
 ## Skills
 Skills live under @.claude/skills/*/SKILL.md. If a task matches a skill, read it before acting. Use the skills.
 
