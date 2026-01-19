@@ -1,5 +1,5 @@
 import { createHmac } from 'node:crypto'
-import { AppsTable, eq, getDb } from '@skillrecordings/database'
+import { AppsTable, closeDb, eq, getDb } from '@skillrecordings/database'
 
 interface HealthCheckResult {
   endpoint: string
@@ -89,13 +89,14 @@ async function lookupApp(
       .where(eq(AppsTable.slug, slugOrUrl))
       .limit(1)
 
-    if (!app.length) {
+    const record = app[0]
+    if (!record) {
       return null
     }
 
     return {
-      baseUrl: app[0].integration_base_url,
-      secret: app[0].webhook_secret,
+      baseUrl: record.integration_base_url,
+      secret: record.webhook_secret,
     }
   } catch (err) {
     console.error('Database lookup failed:', err)
@@ -119,6 +120,7 @@ async function listApps(): Promise<void> {
 
     if (!apps.length) {
       console.log('No apps registered.')
+      await closeDb()
       return
     }
 
@@ -128,8 +130,10 @@ async function listApps(): Promise<void> {
       console.log(`    Name: ${app.name}`)
       console.log(`    URL:  ${app.integration_base_url}\n`)
     }
+    await closeDb()
   } catch (err) {
     console.error('Failed to list apps:', err)
+    await closeDb()
     process.exit(1)
   }
 }
@@ -171,6 +175,7 @@ export async function health(
       console.error('Usage: skill health <slug|url> [--secret <secret>]')
       console.error('       skill health --list')
     }
+    await closeDb()
     process.exit(1)
   }
 
@@ -206,6 +211,7 @@ export async function health(
       } else {
         console.error(`Error: ${error.error}`)
       }
+      await closeDb()
       process.exit(1)
     }
     baseUrl = slugOrUrl.endsWith('/api/support')
@@ -224,6 +230,7 @@ export async function health(
       console.error(`Error: App "${slugOrUrl}" not found in database`)
       console.error('Use --list to see registered apps, or provide a full URL')
     }
+    await closeDb()
     process.exit(1)
   }
 
@@ -350,5 +357,6 @@ export async function health(
     }
   }
 
+  await closeDb()
   process.exit(results.status === 'error' ? 1 : 0)
 }
