@@ -23,7 +23,7 @@ packages/
 ## Tech Stack
 
 - **Runtime**: Bun workspaces, Turborepo
-- **Framework**: Next.js 15 (App Router)
+- **Framework**: Next.js 16 (App Router)
 - **Database**: PlanetScale (MySQL) via Drizzle
 - **Workflows**: Inngest (durable execution)
 - **Vector**: Upstash Vector (hybrid search)
