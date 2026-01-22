@@ -330,7 +330,7 @@ LANGFUSE_HOST=https://cloud.langfuse.com  # or your self-hosted URL
 
 **Capture these values:**
 ```
-DATABASE_URL=mysql://xxxxx:xxxxx@xxxxx.us-east.psdb.cloud/support?sslaccept=strict
+DATABASE_URL=mysql://xxxxx:xxxxx@xxxxx.us-east.psdb.cloud/support
 ```
 
 **Validation:** Connection will be validated when running migrations.
