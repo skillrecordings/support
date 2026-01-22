@@ -4,6 +4,7 @@ import type {
   ClaimedSeat,
   ContentSearchRequest,
   ContentSearchResponse,
+  ProductStatus,
   Purchase,
   Subscription,
   SupportIntegration,
@@ -158,5 +159,9 @@ export class IntegrationClient implements SupportIntegration {
       'searchContent',
       request as unknown as Record<string, unknown>
     )
+  }
+
+  async getProductStatus(productId: string): Promise<ProductStatus | null> {
+    return this.request('getProductStatus', { productId })
   }
 }
