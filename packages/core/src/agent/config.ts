@@ -318,15 +318,15 @@ export const agentTools = {
         .default(10)
         .describe('Number of charges to return (default 10)'),
     }),
-    execute: async ({ customerEmail, limit }, context) => {
+    execute: async ({ customerEmail, limit }, { experimental_context }) => {
       // Import dynamically to avoid circular dependencies
       const { getPaymentHistory } = await import(
         '../tools/stripe-payment-history'
       )
-      // Note: Tool expects stripeAccountId in context.appConfig
+      // AI SDK v6 wraps context in experimental_context
       const result = await getPaymentHistory.execute(
         { customerEmail, limit },
-        context as any // Context should have appConfig.stripeAccountId
+        experimental_context as any // Context should have appConfig.stripeAccountId
       )
       if (result.success) {
         return result.data
@@ -366,13 +366,13 @@ export const agentTools = {
     inputSchema: z.object({
       chargeId: z.string().describe('Stripe charge ID (starts with ch_)'),
     }),
-    execute: async ({ chargeId }, context) => {
+    execute: async ({ chargeId }, { experimental_context }) => {
       // Import dynamically to avoid circular dependencies
       const { lookupCharge } = await import('../tools/stripe-lookup-charge')
-      // Note: Tool expects stripeAccountId in context.appConfig
+      // AI SDK v6 wraps context in experimental_context
       const result = await lookupCharge.execute(
         { chargeId },
-        context as any // Context should have appConfig.stripeAccountId
+        experimental_context as any // Context should have appConfig.stripeAccountId
       )
       if (result.success) {
         return result.data
@@ -387,13 +387,13 @@ export const agentTools = {
     inputSchema: z.object({
       refundId: z.string().describe('Stripe refund ID (starts with re_)'),
     }),
-    execute: async ({ refundId }, context) => {
+    execute: async ({ refundId }, { experimental_context }) => {
       // Import dynamically to avoid circular dependencies
       const { verifyRefund } = await import('../tools/stripe-verify-refund')
-      // Note: Tool expects stripeAccountId in context.appConfig
+      // AI SDK v6 wraps context in experimental_context
       const result = await verifyRefund.execute(
         { refundId },
-        context as any // Context should have appConfig.stripeAccountId
+        experimental_context as any // Context should have appConfig.stripeAccountId
       )
       if (result.success) {
         return result.data
@@ -435,10 +435,12 @@ export const agentTools = {
       conversationId: z.string().describe('Front conversation ID'),
       reason: z.string().describe('Why this is being routed to the instructor'),
     }),
-    execute: async ({ conversationId, reason }, context) => {
-      // Get instructor teammate ID from app config
-      const appConfig = (context as any)?.appConfig
-      const instructorTeammateId = appConfig?.instructor_teammate_id
+    execute: async ({ conversationId, reason }, { experimental_context }) => {
+      // Get instructor teammate ID from app config (AI SDK v6 wraps context in experimental_context)
+      const ctx = experimental_context as {
+        appConfig?: { instructor_teammate_id?: string }
+      }
+      const instructorTeammateId = ctx?.appConfig?.instructor_teammate_id
 
       if (!instructorTeammateId) {
         return {
@@ -493,9 +495,18 @@ export const agentTools = {
         .default(5)
         .describe('Maximum results to return'),
     }),
-    execute: async ({ query, types, limit }, context) => {
-      const appId = (context as any)?.appId
-      const integrationClient = (context as any)?.integrationClient
+    execute: async ({ query, types, limit }, { experimental_context }) => {
+      // AI SDK v6 wraps context in experimental_context
+      const ctx = experimental_context as {
+        appId?: string
+        integrationClient?: {
+          searchContent: (
+            r: ContentSearchRequest
+          ) => Promise<ContentSearchResponse>
+        }
+      }
+      const appId = ctx?.appId
+      const integrationClient = ctx?.integrationClient
 
       if (!appId || !integrationClient) {
         return {
