@@ -40,7 +40,7 @@ export class IntegrationClient implements SupportIntegration {
 
   /**
    * Generate HMAC-SHA256 signature for request body.
-   * Format: `t=<timestamp>,v1=<signature>`
+   * Format: `timestamp=<timestamp>,v1=<signature>`
    *
    * Signature is computed as: HMAC-SHA256(timestamp + "." + body, secret)
    */
@@ -51,17 +51,22 @@ export class IntegrationClient implements SupportIntegration {
       .update(signedPayload)
       .digest('hex')
 
-    return `t=${timestamp},v1=${signature}`
+    return `timestamp=${timestamp},v1=${signature}`
   }
 
   /**
    * Make signed POST request to app integration endpoint.
+   * Uses action-based routing: all requests go to /api/support with action in body.
    */
-  private async request<T>(endpoint: string, payload: unknown): Promise<T> {
-    const body = JSON.stringify(payload)
+  private async request<T>(
+    action: string,
+    payload: Record<string, unknown>
+  ): Promise<T> {
+    const body = JSON.stringify({ action, ...payload })
     const signature = this.generateSignature(body)
 
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+    // baseUrl should be the complete endpoint URL (e.g., https://example.com/api/support)
+    const response = await fetch(this.baseUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -94,15 +99,15 @@ export class IntegrationClient implements SupportIntegration {
   }
 
   async lookupUser(email: string): Promise<User | null> {
-    return this.request('/api/support/lookup-user', { email })
+    return this.request('lookupUser', { email })
   }
 
   async getPurchases(userId: string): Promise<Purchase[]> {
-    return this.request('/api/support/get-purchases', { userId })
+    return this.request('getPurchases', { userId })
   }
 
   async getSubscriptions(userId: string): Promise<Subscription[]> {
-    return this.request('/api/support/get-subscriptions', { userId })
+    return this.request('getSubscriptions', { userId })
   }
 
   async revokeAccess(params: {
@@ -110,7 +115,7 @@ export class IntegrationClient implements SupportIntegration {
     reason: string
     refundId: string
   }): Promise<ActionResult> {
-    return this.request('/api/support/revoke-access', params)
+    return this.request('revokeAccess', params)
   }
 
   async transferPurchase(params: {
@@ -118,37 +123,40 @@ export class IntegrationClient implements SupportIntegration {
     fromUserId: string
     toEmail: string
   }): Promise<ActionResult> {
-    return this.request('/api/support/transfer-purchase', params)
+    return this.request('transferPurchase', params)
   }
 
   async generateMagicLink(params: {
     email: string
     expiresIn: number
   }): Promise<{ url: string }> {
-    return this.request('/api/support/generate-magic-link', params)
+    return this.request('generateMagicLink', params)
   }
 
   async updateEmail(params: {
     userId: string
     newEmail: string
   }): Promise<ActionResult> {
-    return this.request('/api/support/update-email', params)
+    return this.request('updateEmail', params)
   }
 
   async updateName(params: {
     userId: string
     newName: string
   }): Promise<ActionResult> {
-    return this.request('/api/support/update-name', params)
+    return this.request('updateName', params)
   }
 
   async getClaimedSeats(bulkCouponId: string): Promise<ClaimedSeat[]> {
-    return this.request('/api/support/get-claimed-seats', { bulkCouponId })
+    return this.request('getClaimedSeats', { bulkCouponId })
   }
 
   async searchContent(
     request: ContentSearchRequest
   ): Promise<ContentSearchResponse> {
-    return this.request('/api/support/search-content', request)
+    return this.request(
+      'searchContent',
+      request as unknown as Record<string, unknown>
+    )
   }
 }

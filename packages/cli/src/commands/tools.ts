@@ -27,17 +27,12 @@ async function getAppConfig(slug: string) {
     return null
   }
 
-  // Fix: DB has `/api/support` suffix but SDK client adds it too
-  // Strip suffix so we get the root domain for the client
-  let baseUrl = app.integration_base_url
-  if (baseUrl?.endsWith('/api/support')) {
-    baseUrl = baseUrl.replace(/\/api\/support$/, '')
-  }
-
+  // baseUrl should be the complete endpoint URL
+  // SDK client will POST directly to this URL with action in body
   return {
     slug: app.slug,
     name: app.name,
-    baseUrl,
+    baseUrl: app.integration_base_url,
     webhookSecret: app.webhook_secret,
     stripeAccountId: app.stripe_account_id,
     instructorTeammateId: app.instructor_teammate_id,
@@ -97,7 +92,7 @@ async function searchContent(
   })
 
   console.log(`\nSearching ${app.name} for: "${query}"`)
-  console.log(`Endpoint: ${app.baseUrl}/api/support/search-content`)
+  console.log(`Endpoint: ${app.baseUrl}`)
   console.log()
 
   try {
@@ -164,7 +159,7 @@ async function lookupUser(
   })
 
   console.log(`\nLooking up user: ${email}`)
-  console.log(`Endpoint: ${app.baseUrl}/api/support/lookup-user`)
+  console.log(`Endpoint: ${app.baseUrl}`)
   console.log()
 
   try {
@@ -219,7 +214,7 @@ async function getPurchases(
   })
 
   console.log(`\nFetching purchases for user: ${userId}`)
-  console.log(`Endpoint: ${app.baseUrl}/api/support/get-purchases`)
+  console.log(`Endpoint: ${app.baseUrl}`)
   console.log()
 
   try {
