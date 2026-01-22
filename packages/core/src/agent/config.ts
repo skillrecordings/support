@@ -11,6 +11,12 @@ import { traceWorkflowStep } from '../observability/axiom'
 import { telemetryConfig } from '../observability/otel'
 import { classifyMessage } from '../router/classifier'
 import { getApp } from '../services/app-registry'
+import {
+  memoryCite,
+  memorySearch,
+  memoryStore,
+  memoryVote,
+} from '../tools/memory'
 import { getTrustScore } from '../trust/repository'
 import { shouldAutoSend } from '../trust/score'
 import { buildAgentContext } from '../vector/retrieval'
@@ -22,6 +28,35 @@ import { buildAgentContext } from '../vector/retrieval'
  * product name (Total TypeScript, Pro Tailwind, etc.) and creator.
  */
 export const SUPPORT_AGENT_PROMPT = `You are a support agent for a technical education product.
+
+## Memory System
+
+You have access to a collective memory shared across all support agents.
+
+### Before responding:
+1. **Search memories** for relevant prior knowledge about this customer, product, or issue type
+2. **Cite** any memories you use (they'll be tracked for effectiveness)
+
+### After successful resolution:
+1. **Store** new learnings that would help future agents
+2. **Upvote** memories that helped you
+3. **Downvote** memories that were misleading or outdated
+
+### Memory quality guidelines:
+- Store facts, not opinions: "Refund window is 30 days" not "I think we should refund"
+- Include context: "For Total TypeScript, license transfers require manual approval"
+- Be specific: "Error 4001 means the purchase was on a different email" not "Check the email"
+
+### What to store:
+- Product-specific policies you discovered
+- Customer patterns ("this user has been patient despite multiple issues")
+- Resolution patterns ("for this error, the fix is always X")
+- Edge cases that aren't in docs
+
+### What NOT to store:
+- PII (customer emails, payment details)
+- Temporary issues ("site is down right now")
+- Opinions or guesses
 
 ## Critical Rules
 1. NEVER mention "Skill Recordings" - only use the specific product name
@@ -523,6 +558,54 @@ export const agentTools = {
       return response
     },
   }),
+
+  memory_search: tool({
+    description: memorySearch.description,
+    inputSchema: memorySearch.parameters,
+    execute: async (params, { experimental_context }) => {
+      const result = await memorySearch.execute(
+        params,
+        experimental_context as any
+      )
+      return result.success ? result.data : { error: result.error.message }
+    },
+  }),
+
+  memory_store: tool({
+    description: memoryStore.description,
+    inputSchema: memoryStore.parameters,
+    execute: async (params, { experimental_context }) => {
+      const result = await memoryStore.execute(
+        params,
+        experimental_context as any
+      )
+      return result.success ? result.data : { error: result.error.message }
+    },
+  }),
+
+  memory_vote: tool({
+    description: memoryVote.description,
+    inputSchema: memoryVote.parameters,
+    execute: async (params, { experimental_context }) => {
+      const result = await memoryVote.execute(
+        params,
+        experimental_context as any
+      )
+      return result.success ? result.data : { error: result.error.message }
+    },
+  }),
+
+  memory_cite: tool({
+    description: memoryCite.description,
+    inputSchema: memoryCite.parameters,
+    execute: async (params, { experimental_context }) => {
+      const result = await memoryCite.execute(
+        params,
+        experimental_context as any
+      )
+      return result.success ? result.data : { error: result.error.message }
+    },
+  }),
 }
 
 /** Available models via AI Gateway */
@@ -639,6 +722,19 @@ export async function runSupportAgent(input: AgentInput): Promise<AgentOutput> {
   // Add prior knowledge from semantic memory
   if (priorKnowledge && priorKnowledge.trim().length > 0) {
     systemPrompt += `\n\n## Prior Knowledge (from memory)\n${priorKnowledge}\n`
+
+    // Trace memory context injection
+    await traceWorkflowStep({
+      appId,
+      workflowName: 'agent',
+      stepName: 'inject-memory-context',
+      durationMs: 0, // Immediate operation
+      success: true,
+      metadata: {
+        priorKnowledgeLength: priorKnowledge.length,
+        hasPriorKnowledge: true,
+      },
+    })
   }
 
   // Add retrieved context to system prompt

@@ -23,6 +23,7 @@ export { initializeToolAuditLogging } from './audit-integration'
 import { getConversationContext } from './get-conversation-context'
 // Import all tool implementations
 import { lookupUser } from './lookup-user'
+import { memoryCite, memorySearch, memoryStore, memoryVote } from './memory'
 import { processRefund } from './process-refund'
 import { searchKnowledge } from './search-knowledge'
 import { lookupCharge } from './stripe-lookup-charge'
@@ -31,6 +32,7 @@ import { getSubscriptionStatus } from './stripe-subscription-status'
 import { verifyRefund } from './stripe-verify-refund'
 
 // Re-export individual tools for direct import
+export { memoryCite, memorySearch, memoryStore, memoryVote } from './memory'
 export { processRefund } from './process-refund'
 export { getPaymentHistory } from './stripe-payment-history'
 export { lookupCharge } from './stripe-lookup-charge'
@@ -50,4 +52,8 @@ export const supportTools = {
   lookupCharge,
   getSubscriptionStatus,
   verifyRefund,
+  memorySearch,
+  memoryStore,
+  memoryVote,
+  memoryCite,
 }

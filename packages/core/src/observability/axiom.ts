@@ -372,3 +372,125 @@ export async function traceWorkflowComplete(data: {
     ...data,
   })
 }
+
+// ============================================================================
+// Memory operations tracing
+// ============================================================================
+
+/**
+ * Trace memory store operation
+ */
+export async function traceMemoryStore(data: {
+  memoryId: string
+  collection: string
+  appSlug?: string
+  source: 'agent' | 'human' | 'system'
+  contentLength: number
+  tags: string[]
+  confidence: number
+  durationMs: number
+  success: boolean
+  error?: string
+}): Promise<void> {
+  await sendTrace({
+    name: 'memory.store',
+    type: 'memory-operation',
+    operation: 'store',
+    ...data,
+  })
+}
+
+/**
+ * Trace memory find operation
+ */
+export async function traceMemoryFind(data: {
+  collection: string
+  appSlug?: string
+  queryLength: number
+  limit: number
+  threshold: number
+  tags?: string[]
+  resultsFound: number
+  topScore?: number
+  avgScore?: number
+  durationMs: number
+  success: boolean
+  error?: string
+}): Promise<void> {
+  await sendTrace({
+    name: 'memory.find',
+    type: 'memory-operation',
+    operation: 'find',
+    ...data,
+  })
+}
+
+/**
+ * Trace memory vote operation
+ */
+export async function traceMemoryVote(data: {
+  memoryId: string
+  collection: string
+  voteType: 'upvote' | 'downvote'
+  voterId?: string
+  previousUpvotes: number
+  previousDownvotes: number
+  newUpvotes: number
+  newDownvotes: number
+  durationMs: number
+  success: boolean
+  error?: string
+}): Promise<void> {
+  await sendTrace({
+    name: 'memory.vote',
+    type: 'memory-operation',
+    operation: 'vote',
+    ...data,
+  })
+}
+
+/**
+ * Trace memory citation operation
+ */
+export async function traceMemoryCite(data: {
+  memoryId: string
+  collection: string
+  conversationId?: string
+  appId?: string
+  previousCitations: number
+  newCitations: number
+  durationMs: number
+  success: boolean
+  error?: string
+}): Promise<void> {
+  await sendTrace({
+    name: 'memory.cite',
+    type: 'memory-operation',
+    operation: 'cite',
+    ...data,
+  })
+}
+
+/**
+ * Trace memory outcome recording
+ */
+export async function traceMemoryOutcome(data: {
+  memoryId: string
+  collection: string
+  outcome: 'success' | 'failure'
+  conversationId?: string
+  appId?: string
+  previousSuccessRate: number
+  newSuccessRate: number
+  totalOutcomes: number
+  durationMs: number
+  success: boolean
+  error?: string
+}): Promise<void> {
+  await sendTrace({
+    name: 'memory.outcome',
+    type: 'memory-operation',
+    operation: 'outcome',
+    ...data,
+  })
+}
