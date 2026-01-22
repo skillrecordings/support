@@ -1,5 +1,6 @@
 import { generateObject } from 'ai'
 import { z } from 'zod'
+import { telemetryConfig } from '../observability/otel'
 
 // Valid categories for classification
 export const CLASSIFIER_CATEGORIES = [
@@ -108,6 +109,7 @@ Message: ${message}`
     model: 'anthropic/claude-haiku-4-5',
     prompt,
     schema: ClassifierResultSchema,
+    experimental_telemetry: telemetryConfig,
   })
 
   // AI SDK v6 usage type - extract token counts safely

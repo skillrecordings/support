@@ -4,12 +4,22 @@ import { MemoryService } from '@skillrecordings/memory/memory'
 import { IntegrationClient } from '@skillrecordings/sdk/client'
 import { runSupportAgent } from '../../agent/index'
 import { type FrontMessage, createFrontClient } from '../../front/index'
-import { withTracing } from '../../observability/axiom'
+import {
+  initializeAxiom,
+  traceAgentRun as traceAgentRunAxiom,
+  traceClassification as traceClassificationAxiom,
+  traceDraftCreation,
+  traceMemoryRetrieval,
+  traceRouting,
+  traceWorkflowComplete,
+  withTracing,
+} from '../../observability/axiom'
 import {
   initializeLangfuse,
   traceAgentRun,
   traceClassification,
 } from '../../observability/langfuse'
+import { initializeOtel } from '../../observability/otel'
 import { classifyMessage } from '../../router/classifier'
 import { matchRules } from '../../router/rules'
 import { systemRules } from '../../router/system-rules'
@@ -39,11 +49,17 @@ export const handleInboundMessage = inngest.createFunction(
     const { conversationId, appId, messageId, subject, _links, inboxId } =
       event.data
 
+    const workflowStartTime = Date.now()
+    let classificationDurationMs: number | undefined
+    let agentDurationMs: number | undefined
+
     console.log('[workflow] ========== HANDLE INBOUND MESSAGE ==========')
     console.log('[workflow] Event data:', JSON.stringify(event.data, null, 2))
 
-    // Initialize Langfuse for LLM observability
+    // Initialize observability (Axiom + Langfuse + OTel)
+    initializeAxiom()
     initializeLangfuse()
+    initializeOtel()
 
     // Step 1: Fetch full message and conversation from Front API
     const context = await step.run('get-conversation-context', async () => {
@@ -166,6 +182,13 @@ export const handleInboundMessage = inngest.createFunction(
     // Early exit if message was filtered
     if (filterResult.filtered === true) {
       console.log('[workflow] ========== FILTERED - EXITING ==========')
+      await traceRouting({
+        conversationId,
+        appId: context.appId,
+        messageId,
+        routingType: 'filtered',
+        filterRuleId: filterResult.ruleId,
+      })
       return {
         conversationId,
         messageId,
@@ -270,6 +293,13 @@ export const handleInboundMessage = inngest.createFunction(
     // Early exit if reply loop detected
     if (loopCheck.isLoop) {
       console.log('[workflow] ========== LOOP DETECTED - SKIPPING ==========')
+      await traceRouting({
+        conversationId,
+        appId: context.appId,
+        messageId,
+        routingType: 'loop-prevented',
+        loopReason: 'reason' in loopCheck ? loopCheck.reason : 'unknown',
+      })
       return {
         conversationId,
         messageId,
@@ -283,13 +313,14 @@ export const handleInboundMessage = inngest.createFunction(
     // Step 2.7: Retrieve relevant memories for context
     const memories = await step.run('retrieve-memories', async () => {
       console.log('[workflow:memory] Retrieving relevant memories...')
+      const memoryStartTime = Date.now()
 
       const messageBody = context.body?.trim() || ''
       const query = `${context.subject} ${messageBody}`.trim()
 
       if (!query) {
         console.log('[workflow:memory] Empty query, skipping memory retrieval')
-        return { memories: [], citedMemoryIds: [] }
+        return { memories: [], citedMemoryIds: [], durationMs: 0 }
       }
 
       try {
@@ -300,22 +331,35 @@ export const handleInboundMessage = inngest.createFunction(
           app_slug: context.appId,
         })
 
+        const durationMs = Date.now() - memoryStartTime
         console.log('[workflow:memory] Retrieved memories:', {
           count: results.length,
           memoryIds: results.map((r) => r.memory.id),
           scores: results.map((r) => r.score),
+          durationMs,
         })
 
         // Track cited memory IDs for later voting
         const citedMemoryIds = results.map((r) => r.memory.id)
 
+        // Trace to Axiom
+        await traceMemoryRetrieval({
+          conversationId,
+          appId: context.appId,
+          queryLength: query.length,
+          memoriesFound: results.length,
+          topScore: results[0]?.score ?? 0,
+          durationMs,
+        })
+
         return {
           memories: results,
           citedMemoryIds,
+          durationMs,
         }
       } catch (error) {
         console.error('[workflow:memory] Error retrieving memories:', error)
-        return { memories: [], citedMemoryIds: [] }
+        return { memories: [], citedMemoryIds: [], durationMs: 0 }
       }
     })
 
@@ -324,6 +368,7 @@ export const handleInboundMessage = inngest.createFunction(
       console.log(
         '[workflow:classify] ========== CLASSIFYING MESSAGE =========='
       )
+      const classifyStartTime = Date.now()
       const messageBody = context.body?.trim() || ''
       if (!messageBody) {
         return {
@@ -331,6 +376,7 @@ export const handleInboundMessage = inngest.createFunction(
           complexity: 'skip' as const,
           confidence: 1,
           reasoning: 'Empty message body',
+          durationMs: 0,
         }
       }
 
@@ -349,25 +395,49 @@ export const handleInboundMessage = inngest.createFunction(
         priorKnowledge: priorKnowledge || undefined,
       })
 
+      const durationMs = Date.now() - classifyStartTime
+      classificationDurationMs = durationMs
+
       console.log('[workflow:classify] Result:', {
         category: result.category,
         complexity: result.complexity,
         confidence: result.confidence,
         reasoning: result.reasoning,
         usage: result.usage,
+        durationMs,
       })
 
-      // Trace classification to Langfuse for o11y
+      // Trace classification to Langfuse for LLM o11y
       if (result.usage) {
         await traceClassification(messageBody, result, result.usage)
       }
 
-      return result
+      // Trace classification to Axiom for high-cardinality analytics
+      await traceClassificationAxiom({
+        conversationId,
+        appId: context.appId,
+        messageId,
+        category: result.category,
+        complexity: result.complexity,
+        confidence: result.confidence,
+        reasoning: result.reasoning,
+        messageLength: messageBody.length,
+        durationMs,
+        usage: result.usage,
+      })
+
+      return { ...result, durationMs }
     })
 
     // Early exit if classifier says skip
     if (classification.complexity === 'skip') {
       console.log('[workflow] ========== SKIP - NO RESPONSE NEEDED ==========')
+      await traceRouting({
+        conversationId,
+        appId: context.appId,
+        messageId,
+        routingType: 'skipped',
+      })
       return {
         conversationId,
         messageId,
@@ -393,6 +463,12 @@ export const handleInboundMessage = inngest.createFunction(
         console.log(
           '[workflow] No instructor configured, skipping instructor routing'
         )
+        await traceRouting({
+          conversationId,
+          appId: context.appId,
+          messageId,
+          routingType: 'no-instructor-configured',
+        })
         return {
           conversationId,
           messageId,
@@ -448,6 +524,13 @@ export const handleInboundMessage = inngest.createFunction(
       })
 
       console.log('[workflow] Instructor assignment approval requested')
+      await traceRouting({
+        conversationId,
+        appId: context.appId,
+        messageId,
+        routingType: 'instructor-approval-requested',
+        actionId,
+      })
       return {
         conversationId,
         messageId,
@@ -594,6 +677,29 @@ export const handleInboundMessage = inngest.createFunction(
             }
           )
 
+          // Store duration for workflow trace
+          agentDurationMs = agentDuration
+
+          // Trace agent run to Axiom for high-cardinality analytics
+          await traceAgentRunAxiom({
+            conversationId,
+            appId: context.appId,
+            messageId,
+            model: modelToUse,
+            responseLength: result.response?.length ?? 0,
+            toolCallsCount: result.toolCalls.length,
+            toolNames: result.toolCalls.map((tc) => tc.name),
+            requiresApproval: result.requiresApproval,
+            autoSent: result.autoSent ?? false,
+            escalated: !!result.toolCalls.find(
+              (tc) => tc.name === 'escalateToHuman'
+            ),
+            durationMs: agentDuration,
+            memoriesRetrieved: memories.memories.length,
+            knowledgeResults: 0, // TODO: track vector search results
+            customerEmail: context.senderEmail,
+          })
+
           console.log('[workflow:agent] Agent result:', {
             responseLength: result.response?.length,
             responsePreview: result.response?.slice(0, 300),
@@ -650,6 +756,13 @@ export const handleInboundMessage = inngest.createFunction(
       // If agent escalated, flag for human
       if (agentResult.escalated) {
         console.log('[workflow:routing] DECISION: Escalated to human')
+        await traceRouting({
+          conversationId,
+          appId: context.appId,
+          messageId,
+          routingType: 'escalated',
+          escalationReason: agentResult.escalationReason,
+        })
         return {
           type: 'escalated' as const,
           reason: agentResult.escalationReason,
@@ -692,11 +805,24 @@ export const handleInboundMessage = inngest.createFunction(
           },
         })
         console.log('[workflow:routing] Approval event sent')
+        await traceRouting({
+          conversationId,
+          appId: context.appId,
+          messageId,
+          routingType: 'approval-requested',
+          actionId,
+        })
         return { type: 'approval-requested' as const, actionId }
       }
 
       // Otherwise, response is ready to send (or draft)
       console.log('[workflow:routing] DECISION: Response ready')
+      await traceRouting({
+        conversationId,
+        appId: context.appId,
+        messageId,
+        routingType: 'response-ready',
+      })
       return {
         type: 'response-ready' as const,
         response: agentResult.response,
@@ -743,6 +869,7 @@ export const handleInboundMessage = inngest.createFunction(
 
       const draftResult = await step.run('create-draft', async () => {
         console.log('[workflow:draft] ========== CALLING FRONT API ==========')
+        const draftStartTime = Date.now()
         const frontToken = process.env.FRONT_API_TOKEN
         if (!frontToken) {
           console.error(
@@ -796,10 +923,25 @@ export const handleInboundMessage = inngest.createFunction(
             channelId,
             { signatureId: FRONT_SIGNATURE_ID }
           )
+          const durationMs = Date.now() - draftStartTime
           console.log('[workflow:draft] Draft created successfully!')
           console.log('[workflow:draft] Draft ID:', draft.id)
+
+          // Trace draft creation to Axiom
+          await traceDraftCreation({
+            conversationId,
+            appId: context.appId,
+            messageId,
+            draftLength: routingResult.response.length,
+            inboxId: context.inboxId,
+            channelId,
+            success: true,
+            durationMs,
+          })
+
           return { drafted: true, draftId: draft.id }
         } catch (error) {
+          const durationMs = Date.now() - draftStartTime
           console.error('[workflow:draft] FRONT API ERROR:', error)
           console.error('[workflow:draft] Error details:', {
             conversationId,
@@ -808,6 +950,19 @@ export const handleInboundMessage = inngest.createFunction(
             errorMessage:
               error instanceof Error ? error.message : String(error),
           })
+
+          // Trace failed draft creation
+          await traceDraftCreation({
+            conversationId,
+            appId: context.appId,
+            messageId,
+            draftLength: routingResult.response.length,
+            inboxId: context.inboxId,
+            success: false,
+            durationMs,
+            error: error instanceof Error ? error.message : String(error),
+          })
+
           throw error // Re-throw to let Inngest retry
         }
       })
@@ -907,6 +1062,21 @@ export const handleInboundMessage = inngest.createFunction(
       agentEscalated: agentResult.escalated,
       agentRequiresApproval: agentResult.requiresApproval,
       memoriesCited: memories.citedMemoryIds.length,
+    })
+
+    // Trace complete workflow to Axiom
+    await traceWorkflowComplete({
+      conversationId,
+      appId: context.appId,
+      messageId,
+      routingType: routingResult.type,
+      totalDurationMs: Date.now() - workflowStartTime,
+      classificationDurationMs,
+      agentDurationMs,
+      memoriesCited: memories.citedMemoryIds.length,
+      filtered: false,
+      skipped: false,
+      loopDetected: false,
     })
 
     return {

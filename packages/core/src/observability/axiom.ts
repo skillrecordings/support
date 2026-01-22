@@ -139,3 +139,168 @@ async function sendTrace(trace: Record<string, any>): Promise<void> {
     console.error('[Axiom] Failed to send trace:', error)
   }
 }
+
+// ============================================================================
+// Rich trace functions with high cardinality
+// ============================================================================
+
+/**
+ * Trace a classification result
+ */
+export async function traceClassification(data: {
+  conversationId: string
+  appId: string
+  messageId: string
+  category: string
+  complexity: string
+  confidence: number
+  reasoning: string
+  messageLength: number
+  durationMs: number
+  usage?: {
+    promptTokens: number
+    completionTokens: number
+    totalTokens: number
+  }
+}): Promise<void> {
+  await sendTrace({
+    name: 'classifier.run',
+    type: 'classification',
+    ...data,
+  })
+}
+
+/**
+ * Trace an agent run
+ */
+export async function traceAgentRun(data: {
+  conversationId: string
+  appId: string
+  messageId: string
+  model: string
+  responseLength: number
+  toolCallsCount: number
+  toolNames: string[]
+  requiresApproval: boolean
+  autoSent: boolean
+  escalated: boolean
+  durationMs: number
+  memoriesRetrieved: number
+  knowledgeResults: number
+  customerEmail?: string
+}): Promise<void> {
+  await sendTrace({
+    name: 'agent.run',
+    type: 'agent',
+    ...data,
+  })
+}
+
+/**
+ * Trace a routing decision
+ */
+export async function traceRouting(data: {
+  conversationId: string
+  appId: string
+  messageId: string
+  routingType:
+    | 'filtered'
+    | 'skipped'
+    | 'loop-prevented'
+    | 'escalated'
+    | 'approval-requested'
+    | 'response-ready'
+    | 'instructor-approval-requested'
+    | 'no-instructor-configured'
+  filterRuleId?: string
+  loopReason?: string
+  escalationReason?: string
+  actionId?: string
+}): Promise<void> {
+  await sendTrace({
+    name: 'router.decision',
+    type: 'routing',
+    ...data,
+  })
+}
+
+/**
+ * Trace memory retrieval
+ */
+export async function traceMemoryRetrieval(data: {
+  conversationId: string
+  appId: string
+  queryLength: number
+  memoriesFound: number
+  topScore: number
+  durationMs: number
+}): Promise<void> {
+  await sendTrace({
+    name: 'memory.retrieve',
+    type: 'memory',
+    ...data,
+  })
+}
+
+/**
+ * Trace a tool execution
+ */
+export async function traceToolExecution(data: {
+  conversationId: string
+  appId: string
+  toolName: string
+  success: boolean
+  durationMs: number
+  error?: string
+  resultSize?: number
+}): Promise<void> {
+  await sendTrace({
+    name: `tool.${data.toolName}`,
+    type: 'tool',
+    ...data,
+  })
+}
+
+/**
+ * Trace draft creation
+ */
+export async function traceDraftCreation(data: {
+  conversationId: string
+  appId: string
+  messageId: string
+  draftLength: number
+  inboxId: string
+  channelId?: string
+  success: boolean
+  durationMs: number
+  error?: string
+}): Promise<void> {
+  await sendTrace({
+    name: 'draft.create',
+    type: 'draft',
+    ...data,
+  })
+}
+
+/**
+ * Trace workflow completion
+ */
+export async function traceWorkflowComplete(data: {
+  conversationId: string
+  appId: string
+  messageId: string
+  routingType: string
+  totalDurationMs: number
+  classificationDurationMs?: number
+  agentDurationMs?: number
+  memoriesCited: number
+  filtered: boolean
+  skipped: boolean
+  loopDetected: boolean
+}): Promise<void> {
+  await sendTrace({
+    name: 'workflow.complete',
+    type: 'workflow',
+    ...data,
+  })
+}
