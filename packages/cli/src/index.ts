@@ -10,6 +10,7 @@ import { registerEventsCommands } from './commands/inngest/events'
 import { registerRunsCommands } from './commands/inngest/runs'
 import { registerSignalCommand } from './commands/inngest/signal'
 import { registerMemoryCommands } from './commands/memory/index'
+import { registerResponseCommands } from './commands/responses'
 import { wizard } from './commands/wizard'
 
 const program = new Command()
@@ -101,5 +102,8 @@ registerFrontCommands(program)
 
 // Register Memory commands
 registerMemoryCommands(program)
+
+// Register Response commands (for analysis)
+registerResponseCommands(program)
 
 program.parse()

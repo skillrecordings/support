@@ -162,6 +162,34 @@ skill eval routing dataset.json --max-fp-rate 0.02
 skill eval routing dataset.json --max-fn-rate 0.01
 ```
 
+## Response Analysis Commands
+
+### List recent responses
+```bash
+skill responses list                          # List recent responses (default 20)
+skill responses list --app total-typescript   # Filter by app
+skill responses list --limit 50               # More results
+skill responses list --rating bad             # Only bad-rated responses
+skill responses list --rating unrated         # Only unrated responses
+skill responses list --since 2024-01-01       # Since date
+skill responses list --json                   # JSON output
+```
+
+### Get response details
+```bash
+skill responses get <actionId>                # Response details
+skill responses get <actionId> --context      # Include conversation history
+skill responses get <actionId> --json         # JSON output
+```
+
+### Export for analysis
+```bash
+skill responses export                        # Export all with context
+skill responses export --app total-typescript # Filter by app
+skill responses export --rating bad           # Only bad responses
+skill responses export -o bad-responses.json  # Output to file
+```
+
 ## Common Workflows
 
 ### Debug empty message body
