@@ -58,9 +58,6 @@ export const handleInboundMessage = inngest.createFunction(
     let classificationDurationMs: number | undefined
     let agentDurationMs: number | undefined
 
-    console.log('[workflow] ========== HANDLE INBOUND MESSAGE ==========')
-    console.log('[workflow] Event data:', JSON.stringify(event.data, null, 2))
-
     // Initialize observability (Axiom + Langfuse + OTel)
     initializeAxiom()
     initializeLangfuse()
@@ -68,12 +65,6 @@ export const handleInboundMessage = inngest.createFunction(
 
     // Step 1: Fetch full message and conversation from Front API
     const context = await step.run('get-conversation-context', async () => {
-      console.log('[workflow:context] Starting context fetch...')
-      console.log('[workflow:context] conversationId:', conversationId)
-      console.log('[workflow:context] messageId:', messageId)
-      console.log('[workflow:context] inboxId from event:', inboxId)
-      console.log('[workflow:context] _links:', JSON.stringify(_links))
-
       const frontToken = process.env.FRONT_API_TOKEN
 
       // Fallback context from event data (used when Front API unavailable or for testing)
@@ -89,54 +80,26 @@ export const handleInboundMessage = inngest.createFunction(
       }
 
       if (!frontToken) {
-        console.error(
-          '[workflow:context] FATAL: FRONT_API_TOKEN not configured'
-        )
         return fallbackContext
       }
 
       try {
         const front = createFrontClient(frontToken)
-
-        // Fetch the triggering message (full data)
-        console.log('[workflow:context] Fetching message from Front API...')
         const message = await front.getMessage(_links?.message || messageId)
-        console.log('[workflow:context] Message fetched:', {
-          id: message.id,
-          subject: message.subject,
-          bodyLength: message.body?.length,
-          author: message.author,
-          recipients: message.recipients,
-        })
-
-        // Fetch conversation history
-        console.log('[workflow:context] Fetching conversation history...')
         const conversationHistory =
           await front.getConversationMessages(conversationId)
-        console.log(
-          '[workflow:context] History fetched:',
-          conversationHistory.length,
-          'messages'
-        )
-
-        // Extract sender email from message
         const senderEmail =
           extractCustomerEmail(message) || message.author?.email || ''
-        console.log('[workflow:context] Sender email:', senderEmail)
 
         // Get inbox ID - from event or fetch from conversation
         let resolvedInboxId = inboxId || ''
         if (!resolvedInboxId) {
-          console.log(
-            '[workflow:context] No inboxId in event, fetching from conversation...'
-          )
           const fetchedInboxId =
             await front.getConversationInbox(conversationId)
           resolvedInboxId = fetchedInboxId || ''
-          console.log('[workflow:context] Fetched inboxId:', resolvedInboxId)
         }
 
-        const result = {
+        return {
           conversationId,
           appId,
           messageId,
@@ -146,16 +109,8 @@ export const handleInboundMessage = inngest.createFunction(
           inboxId: resolvedInboxId,
           conversationHistory,
         }
-        console.log('[workflow:context] Context built:', {
-          ...result,
-          body: result.body?.slice(0, 200) + '...',
-          conversationHistory: `${result.conversationHistory.length} messages`,
-        })
-        return result
       } catch (error) {
-        // Fallback to event data if Front API fails (e.g., 404 for test data)
-        console.error('[workflow:context] Front API error:', error)
-        console.log('[workflow:context] Using fallback context')
+        // Fallback to event data if Front API fails
         return fallbackContext
       }
     })
@@ -728,6 +683,9 @@ export const handleInboundMessage = inngest.createFunction(
           agentDurationMs = agentDuration
 
           // Trace agent run to Axiom for high-cardinality analytics
+          const escalationCall = result.toolCalls.find(
+            (tc) => tc.name === 'escalateToHuman'
+          )
           await traceAgentRunAxiom({
             conversationId,
             appId: context.appId,
@@ -738,31 +696,24 @@ export const handleInboundMessage = inngest.createFunction(
             toolNames: result.toolCalls.map((tc) => tc.name),
             requiresApproval: result.requiresApproval,
             autoSent: result.autoSent ?? false,
-            escalated: !!result.toolCalls.find(
-              (tc) => tc.name === 'escalateToHuman'
-            ),
+            escalated: !!escalationCall,
             durationMs: agentDuration,
             memoriesRetrieved: memories.memories.length,
-            knowledgeResults: 0, // TODO: track vector search results
+            knowledgeResults: 0,
             customerEmail: context.senderEmail,
+            // High cardinality fields
+            category: classification.category,
+            confidence: classification.confidence,
+            complexity: classification.complexity,
+            inputLength: context.body?.length ?? 0,
+            conversationLength: context.conversationHistory?.length ?? 0,
+            knowledgeEmpty: memories.memories.length === 0,
+            escalationReason: escalationCall?.args?.reason as
+              | string
+              | undefined,
+            inboxId: context.inboxId,
           })
 
-          console.log('[workflow:agent] Agent result:', {
-            responseLength: result.response?.length,
-            responsePreview: result.response?.slice(0, 300),
-            toolCalls: result.toolCalls.map((tc) => ({
-              name: tc.name,
-              args: tc.args,
-            })),
-            requiresApproval: result.requiresApproval,
-            autoSent: result.autoSent,
-            duration: agentDuration,
-          })
-
-          // Check if escalation was requested
-          const escalationCall = result.toolCalls.find(
-            (tc) => tc.name === 'escalateToHuman'
-          )
           const draftCall = result.toolCalls.find(
             (tc) => tc.name === 'draftResponse'
           )
@@ -777,11 +728,6 @@ export const handleInboundMessage = inngest.createFunction(
               | undefined,
             reasoning: result.reasoning,
           }
-          console.log('[workflow:agent] Final agent output:', {
-            responseLength: agentOutput.response?.length,
-            escalated: agentOutput.escalated,
-            requiresApproval: agentOutput.requiresApproval,
-          })
           return agentOutput
         },
         {
