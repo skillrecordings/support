@@ -7,11 +7,16 @@ import type {
 import { type ModelMessage, generateText, stepCountIs, tool } from 'ai'
 import { z } from 'zod'
 import { cachedContentSearch } from '../cache/content-cache'
+import {
+  traceAgentRun,
+  traceToolExecution,
+  traceWorkflowStep,
+} from '../observability/axiom'
 import { telemetryConfig } from '../observability/otel'
 import { classifyMessage } from '../router/classifier'
 import { getApp } from '../services/app-registry'
 import { getTrustScore } from '../trust/repository'
-import { calculateTrustScore, shouldAutoSend } from '../trust/score'
+import { shouldAutoSend } from '../trust/score'
 import { buildAgentContext } from '../vector/retrieval'
 
 /**
@@ -530,9 +535,9 @@ export type SupportAgentModel =
   | 'anthropic/claude-sonnet-4-5'
   | 'anthropic/claude-opus-4-5'
 
-/** Default model for cost efficiency */
+/** Default model - Opus for quality */
 export const DEFAULT_AGENT_MODEL: SupportAgentModel =
-  'anthropic/claude-haiku-4-5'
+  'anthropic/claude-opus-4-5'
 
 export interface AgentInput {
   /** Current message from customer */
@@ -581,10 +586,8 @@ export interface AgentOutput {
  * Run the support agent on a message
  *
  * Uses AI Gateway with configurable model.
- * Defaults to Haiku for cost efficiency (~60x cheaper than Opus).
  */
 export async function runSupportAgent(input: AgentInput): Promise<AgentOutput> {
-  console.log('[agent] ========== RUN SUPPORT AGENT ==========')
   const startTime = Date.now()
 
   const {
@@ -598,27 +601,25 @@ export async function runSupportAgent(input: AgentInput): Promise<AgentOutput> {
     appConfig,
   } = input
 
-  console.log('[agent] Input:', {
-    messageLength: message?.length,
-    messagePreview: message?.slice(0, 200),
-    conversationHistoryLength: conversationHistory.length,
-    customerEmail: customerContext?.email,
-    appId,
-    model,
-    hasPriorKnowledge: !!priorKnowledge,
-  })
-
   // Retrieve context from vector store
-  console.log('[agent] Retrieving context from vector store...')
+  const retrievalStart = Date.now()
   const retrievedContext = await buildAgentContext({
     appId,
     query: message,
     customerEmail: customerContext?.email,
   })
-  console.log('[agent] Retrieved context:', {
-    similarTickets: retrievedContext.similarTickets.length,
-    knowledge: retrievedContext.knowledge.length,
-    goodResponses: retrievedContext.goodResponses.length,
+
+  await traceWorkflowStep({
+    appId,
+    workflowName: 'agent',
+    stepName: 'retrieve-context',
+    durationMs: Date.now() - retrievalStart,
+    success: true,
+    metadata: {
+      similarTickets: retrievedContext.similarTickets.length,
+      knowledge: retrievedContext.knowledge.length,
+      goodResponses: retrievedContext.goodResponses.length,
+    },
   })
 
   // Build messages array
@@ -678,10 +679,6 @@ INSTEAD:
 
   systemPrompt += `\nApp: ${appId}`
 
-  console.log('[agent] System prompt length:', systemPrompt.length)
-  console.log('[agent] Messages count:', messages.length)
-  console.log('[agent] Calling AI SDK generateText...')
-
   // AI SDK v6: model as string for AI Gateway, stopWhen for multi-step
   const aiStartTime = Date.now()
   const result = await generateText({
@@ -689,7 +686,7 @@ INSTEAD:
     system: systemPrompt,
     messages,
     tools: agentTools,
-    stopWhen: stepCountIs(5),
+    stopWhen: stepCountIs(15),
     experimental_context: {
       appId,
       integrationClient,
@@ -697,12 +694,7 @@ INSTEAD:
     },
     experimental_telemetry: telemetryConfig,
   })
-  console.log(`[agent] AI SDK call completed (${Date.now() - aiStartTime}ms)`)
-  console.log('[agent] AI result:', {
-    textLength: result.text?.length,
-    textPreview: result.text?.slice(0, 300),
-    stepsCount: result.steps?.length,
-  })
+  const aiDurationMs = Date.now() - aiStartTime
 
   // AI SDK v6: toolCalls use 'input' not 'args', results are in toolResults
   const toolCalls = result.steps.flatMap((step) => {
@@ -716,14 +708,19 @@ INSTEAD:
     }))
   })
 
-  console.log(
-    '[agent] Tool calls:',
-    toolCalls.map((tc) => ({
-      name: tc.name,
-      args: tc.args,
-      hasResult: !!tc.result,
-    }))
-  )
+  // Trace each tool execution
+  for (const tc of toolCalls) {
+    const resultObj = tc.result as Record<string, unknown> | undefined
+    const hasError = resultObj?.error !== undefined
+    await traceToolExecution({
+      appId,
+      conversationId: '', // Not available at this level
+      toolName: tc.name,
+      success: !hasError,
+      durationMs: 0, // Individual timing not available
+      error: hasError ? String(resultObj.error) : undefined,
+    })
+  }
 
   // Check if any tool requires approval
   let requiresApproval = toolCalls.some(
@@ -732,23 +729,18 @@ INSTEAD:
       tc.name === 'transferPurchase' ||
       tc.name === 'assignToInstructor'
   )
-  console.log('[agent] Requires approval (from tool calls):', requiresApproval)
 
   // Auto-send gating: classify message and check trust score
-  console.log('[agent] Classifying message...')
   const classifierResult = await classifyMessage(message, {
     recentMessages: conversationHistory.map((m) => m.content as string),
   })
-  console.log('[agent] Classifier result:', classifierResult)
 
   // Lookup trust score from database
-  console.log('[agent] Looking up trust score...')
   const trustScoreRecord = await getTrustScore(
     database,
     appId,
     classifierResult.category
   )
-  console.log('[agent] Trust score record:', trustScoreRecord)
 
   // Extract values with safe fallbacks
   const category = classifierResult.category
@@ -763,13 +755,6 @@ INSTEAD:
     confidence,
     sampleCount
   )
-  console.log('[agent] Auto-send check:', {
-    category,
-    confidence,
-    trustScore,
-    sampleCount,
-    canAutoSend,
-  })
 
   let autoSent = false
   if (canAutoSend && !requiresApproval) {
@@ -777,13 +762,27 @@ INSTEAD:
     autoSent = true
   }
 
-  const totalTime = Date.now() - startTime
-  console.log(`[agent] ========== AGENT COMPLETE (${totalTime}ms) ==========`)
-  console.log('[agent] Final output:', {
-    responseLength: result.text?.length,
+  const totalDurationMs = Date.now() - startTime
+
+  // Trace complete agent run to Axiom
+  await traceAgentRun({
+    conversationId: '', // Not available at this level - caller should trace
+    appId,
+    messageId: '', // Not available at this level
+    model,
+    responseLength: result.text?.length ?? 0,
     toolCallsCount: toolCalls.length,
+    toolNames: toolCalls.map((tc) => tc.name),
     requiresApproval,
     autoSent,
+    escalated: toolCalls.some((tc) => tc.name === 'escalateToHuman'),
+    durationMs: totalDurationMs,
+    memoriesRetrieved:
+      retrievedContext.similarTickets.length +
+      retrievedContext.knowledge.length +
+      retrievedContext.goodResponses.length,
+    knowledgeResults: retrievedContext.knowledge.length,
+    customerEmail: customerContext?.email,
   })
 
   return {
