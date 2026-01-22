@@ -13,6 +13,8 @@ import {
   traceAgentRun as traceAgentRunAxiom,
   traceClassification as traceClassificationAxiom,
   traceDraftCreation,
+  traceMemoryCite,
+  traceMemoryOutcome,
   traceMemoryRetrieval,
   traceRouting,
   traceWorkflowComplete,
@@ -320,6 +322,48 @@ export const handleInboundMessage = inngest.createFunction(
         return { memories: [], citedMemoryIds: [], durationMs: 0 }
       }
     })
+
+    // Step 2.8: Emit memory citation event if memories were retrieved
+    if (memories.citedMemoryIds.length > 0) {
+      await step.run('emit-memory-citations', async () => {
+        const traceStartTime = Date.now()
+        console.log('[workflow:memory] Emitting memory/cited event...')
+
+        // Generate run ID for tracking
+        const runId = `${conversationId}-${messageId}-${Date.now()}`
+
+        await step.sendEvent('memory-cited', {
+          name: 'memory/cited',
+          data: {
+            memoryIds: memories.citedMemoryIds,
+            runId,
+            conversationId,
+            appId,
+            collection: 'support',
+          },
+        })
+
+        // Trace each citation to Axiom
+        for (const memoryId of memories.citedMemoryIds) {
+          await traceMemoryCite({
+            memoryId,
+            collection: 'support',
+            conversationId,
+            appId,
+            previousCitations: 0, // Will be updated by the event handler
+            newCitations: 1,
+            durationMs: Date.now() - traceStartTime,
+            success: true,
+          })
+        }
+
+        console.log(
+          '[workflow:memory] Cited',
+          memories.citedMemoryIds.length,
+          'memories'
+        )
+      })
+    }
 
     // Step 3: Classify message with Haiku (fast, cheap)
     const classification = await step.run('classify-message', async () => {
@@ -1005,6 +1049,52 @@ export const handleInboundMessage = inngest.createFunction(
           throw error // Re-throw to let Inngest retry
         }
       })
+
+      // Step 5.1: Record successful outcome for cited memories
+      if (draftResult.drafted && memories.citedMemoryIds.length > 0) {
+        await step.run('emit-memory-outcome-success', async () => {
+          const traceStartTime = Date.now()
+          console.log(
+            '[workflow:memory] Emitting memory/outcome.recorded event...'
+          )
+
+          // Generate run ID for tracking
+          const runId = `${conversationId}-${messageId}-${Date.now()}`
+
+          await step.sendEvent('memory-outcome-recorded', {
+            name: 'memory/outcome.recorded',
+            data: {
+              memoryIds: memories.citedMemoryIds,
+              runId,
+              conversationId,
+              outcome: 'success',
+              collection: 'support',
+            },
+          })
+
+          // Trace each outcome to Axiom
+          for (const memoryId of memories.citedMemoryIds) {
+            await traceMemoryOutcome({
+              memoryId,
+              collection: 'support',
+              outcome: 'success',
+              conversationId,
+              appId,
+              previousSuccessRate: 0, // Will be updated by the event handler
+              newSuccessRate: 0,
+              totalOutcomes: 1,
+              durationMs: Date.now() - traceStartTime,
+              success: true,
+            })
+          }
+
+          console.log(
+            '[workflow:memory] Recorded success outcome for',
+            memories.citedMemoryIds.length,
+            'memories'
+          )
+        })
+      }
 
       // Notify Slack about the draft with rating buttons
       if (draftResult.drafted) {

@@ -14,9 +14,21 @@ vi.mock('@skillrecordings/memory/memory', () => ({
 vi.mock('@skillrecordings/memory/voting', () => ({
   VotingService: {
     vote: vi.fn(),
+    cite: vi.fn(),
+    recordOutcome: vi.fn(),
+    stats: vi.fn(),
   },
 }))
 
+vi.mock('@skillrecordings/core/observability/axiom', () => ({
+  traceMemoryCite: vi.fn(),
+  traceMemoryOutcome: vi.fn(),
+}))
+
+import {
+  traceMemoryCite,
+  traceMemoryOutcome,
+} from '@skillrecordings/core/observability/axiom'
 import { MemoryService } from '@skillrecordings/memory/memory'
 import { VotingService } from '@skillrecordings/memory/voting'
 
@@ -527,6 +539,315 @@ describe('POST /api/plugin/memories', () => {
 
       expect(response.status).toBe(500)
       expect(data.error).toBe('Validation failed')
+    })
+  })
+
+  describe('cite action', () => {
+    it('should cite memories successfully', async () => {
+      vi.mocked(VotingService.cite).mockResolvedValue(undefined)
+      vi.mocked(traceMemoryCite).mockResolvedValue(undefined)
+
+      const request = createPostRequest({
+        action: 'cite',
+        memory_ids: ['mem-1', 'mem-2'],
+        run_id: 'run-123',
+      })
+      const response = await POST(request)
+      const data = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(data.success).toBe(true)
+      expect(data.message).toBe('2 memories cited successfully')
+      expect(VotingService.cite).toHaveBeenCalledWith(
+        ['mem-1', 'mem-2'],
+        'run-123',
+        'learnings'
+      )
+      expect(traceMemoryCite).toHaveBeenCalledTimes(2)
+    })
+
+    it('should cite memories with custom collection', async () => {
+      vi.mocked(VotingService.cite).mockResolvedValue(undefined)
+      vi.mocked(traceMemoryCite).mockResolvedValue(undefined)
+
+      const request = createPostRequest({
+        action: 'cite',
+        memory_ids: ['mem-1'],
+        run_id: 'run-456',
+        collection: 'sessions',
+      })
+      const response = await POST(request)
+      const data = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(VotingService.cite).toHaveBeenCalledWith(
+        ['mem-1'],
+        'run-456',
+        'sessions'
+      )
+    })
+
+    it('should return 400 when memory_ids is missing', async () => {
+      const request = createPostRequest({
+        action: 'cite',
+        run_id: 'run-123',
+      })
+      const response = await POST(request)
+      const data = await response.json()
+
+      expect(response.status).toBe(400)
+      expect(data.error).toBe(
+        'memory_ids is required and must be a non-empty array'
+      )
+      expect(VotingService.cite).not.toHaveBeenCalled()
+    })
+
+    it('should return 400 when memory_ids is empty', async () => {
+      const request = createPostRequest({
+        action: 'cite',
+        memory_ids: [],
+        run_id: 'run-123',
+      })
+      const response = await POST(request)
+      const data = await response.json()
+
+      expect(response.status).toBe(400)
+      expect(data.error).toBe(
+        'memory_ids is required and must be a non-empty array'
+      )
+      expect(VotingService.cite).not.toHaveBeenCalled()
+    })
+
+    it('should return 400 when run_id is missing', async () => {
+      const request = createPostRequest({
+        action: 'cite',
+        memory_ids: ['mem-1'],
+      })
+      const response = await POST(request)
+      const data = await response.json()
+
+      expect(response.status).toBe(400)
+      expect(data.error).toBe('run_id is required and must be a string')
+      expect(VotingService.cite).not.toHaveBeenCalled()
+    })
+
+    it('should handle cite errors and trace them', async () => {
+      const error = new Error('Citation failed')
+      vi.mocked(VotingService.cite).mockRejectedValue(error)
+      vi.mocked(traceMemoryCite).mockResolvedValue(undefined)
+
+      const request = createPostRequest({
+        action: 'cite',
+        memory_ids: ['mem-1', 'mem-2'],
+        run_id: 'run-123',
+      })
+      const response = await POST(request)
+      const data = await response.json()
+
+      expect(response.status).toBe(500)
+      expect(data.error).toBe('Citation failed')
+      expect(traceMemoryCite).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: false,
+          error: 'Citation failed',
+        })
+      )
+    })
+  })
+
+  describe('recordOutcome action', () => {
+    it('should record outcome successfully', async () => {
+      vi.mocked(VotingService.recordOutcome).mockResolvedValue(undefined)
+      vi.mocked(traceMemoryOutcome).mockResolvedValue(undefined)
+
+      const request = createPostRequest({
+        action: 'recordOutcome',
+        memory_ids: ['mem-1', 'mem-2'],
+        run_id: 'run-123',
+        outcome: 'success',
+      })
+      const response = await POST(request)
+      const data = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(data.success).toBe(true)
+      expect(data.message).toBe('Outcome recorded for 2 memories')
+      expect(VotingService.recordOutcome).toHaveBeenCalledWith(
+        ['mem-1', 'mem-2'],
+        'run-123',
+        'success',
+        'learnings'
+      )
+      expect(traceMemoryOutcome).toHaveBeenCalledTimes(2)
+    })
+
+    it('should record failure outcome', async () => {
+      vi.mocked(VotingService.recordOutcome).mockResolvedValue(undefined)
+      vi.mocked(traceMemoryOutcome).mockResolvedValue(undefined)
+
+      const request = createPostRequest({
+        action: 'recordOutcome',
+        memory_ids: ['mem-1'],
+        run_id: 'run-456',
+        outcome: 'failure',
+        collection: 'sessions',
+      })
+      const response = await POST(request)
+      const data = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(VotingService.recordOutcome).toHaveBeenCalledWith(
+        ['mem-1'],
+        'run-456',
+        'failure',
+        'sessions'
+      )
+    })
+
+    it('should return 400 when memory_ids is missing', async () => {
+      const request = createPostRequest({
+        action: 'recordOutcome',
+        run_id: 'run-123',
+        outcome: 'success',
+      })
+      const response = await POST(request)
+      const data = await response.json()
+
+      expect(response.status).toBe(400)
+      expect(data.error).toBe(
+        'memory_ids is required and must be a non-empty array'
+      )
+      expect(VotingService.recordOutcome).not.toHaveBeenCalled()
+    })
+
+    it('should return 400 when run_id is missing', async () => {
+      const request = createPostRequest({
+        action: 'recordOutcome',
+        memory_ids: ['mem-1'],
+        outcome: 'success',
+      })
+      const response = await POST(request)
+      const data = await response.json()
+
+      expect(response.status).toBe(400)
+      expect(data.error).toBe('run_id is required and must be a string')
+      expect(VotingService.recordOutcome).not.toHaveBeenCalled()
+    })
+
+    it('should return 400 when outcome is invalid', async () => {
+      const request = createPostRequest({
+        action: 'recordOutcome',
+        memory_ids: ['mem-1'],
+        run_id: 'run-123',
+        outcome: 'invalid',
+      })
+      const response = await POST(request)
+      const data = await response.json()
+
+      expect(response.status).toBe(400)
+      expect(data.error).toBe('outcome must be "success" or "failure"')
+      expect(VotingService.recordOutcome).not.toHaveBeenCalled()
+    })
+
+    it('should handle recordOutcome errors and trace them', async () => {
+      const error = new Error('Outcome recording failed')
+      vi.mocked(VotingService.recordOutcome).mockRejectedValue(error)
+      vi.mocked(traceMemoryOutcome).mockResolvedValue(undefined)
+
+      const request = createPostRequest({
+        action: 'recordOutcome',
+        memory_ids: ['mem-1'],
+        run_id: 'run-123',
+        outcome: 'success',
+      })
+      const response = await POST(request)
+      const data = await response.json()
+
+      expect(response.status).toBe(500)
+      expect(data.error).toBe('Outcome recording failed')
+      expect(traceMemoryOutcome).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: false,
+          error: 'Outcome recording failed',
+        })
+      )
+    })
+  })
+
+  describe('stats action', () => {
+    it('should return stats for all collections', async () => {
+      const mockStats = {
+        learnings: {
+          count: 10,
+          avg_confidence: 0.85,
+          total_upvotes: 25,
+          total_downvotes: 3,
+          total_citations: 15,
+          avg_success_rate: 0.75,
+        },
+        sessions: {
+          count: 5,
+          avg_confidence: 0.9,
+          total_upvotes: 10,
+          total_downvotes: 1,
+          total_citations: 8,
+          avg_success_rate: 0.8,
+        },
+      }
+
+      vi.mocked(VotingService.stats).mockResolvedValue(mockStats)
+
+      const request = createPostRequest({
+        action: 'stats',
+      })
+      const response = await POST(request)
+      const data = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(data.success).toBe(true)
+      expect(data.stats).toEqual(mockStats)
+      expect(VotingService.stats).toHaveBeenCalledWith(undefined)
+    })
+
+    it('should return stats for specific collection', async () => {
+      const mockStats = {
+        learnings: {
+          count: 10,
+          avg_confidence: 0.85,
+          total_upvotes: 25,
+          total_downvotes: 3,
+          total_citations: 15,
+          avg_success_rate: 0.75,
+        },
+      }
+
+      vi.mocked(VotingService.stats).mockResolvedValue(mockStats)
+
+      const request = createPostRequest({
+        action: 'stats',
+        collection: 'learnings',
+      })
+      const response = await POST(request)
+      const data = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(data.success).toBe(true)
+      expect(data.stats).toEqual(mockStats)
+      expect(VotingService.stats).toHaveBeenCalledWith('learnings')
+    })
+
+    it('should handle stats errors and return 500', async () => {
+      const error = new Error('Stats retrieval failed')
+      vi.mocked(VotingService.stats).mockRejectedValue(error)
+
+      const request = createPostRequest({
+        action: 'stats',
+      })
+      const response = await POST(request)
+      const data = await response.json()
+
+      expect(response.status).toBe(500)
+      expect(data.error).toBe('Stats retrieval failed')
     })
   })
 

@@ -108,24 +108,35 @@ export const VotingService = {
   },
 
   /**
-   * Record a citation (memory was retrieved and used)
+   * Record a citation (memories were retrieved and used)
    *
-   * @param id - Memory ID
-   * @param collection - Collection the memory belongs to
-   * @throws {Error} If memory not found
+   * @param memoryIds - Array of memory IDs
+   * @param runId - Run ID for tracking citation context
+   * @param collection - Collection the memories belong to
+   * @throws {Error} If any memory not found or memoryIds is empty
    */
-  async cite(id: string, collection: string): Promise<void> {
-    const memory = await fetchMemory(id, collection)
-    if (!memory) {
-      throw new Error('Memory not found')
+  async cite(
+    memoryIds: string[],
+    runId: string,
+    collection: string
+  ): Promise<void> {
+    if (memoryIds.length === 0) {
+      throw new Error('memoryIds cannot be empty')
     }
 
-    memory.metadata.votes.citations++
-    await upsertMemory(memory)
+    for (const id of memoryIds) {
+      const memory = await fetchMemory(id, collection)
+      if (!memory) {
+        throw new Error('Memory not found')
+      }
+
+      memory.metadata.votes.citations++
+      await upsertMemory(memory)
+    }
   },
 
   /**
-   * Record outcome for a citation (success or failure)
+   * Record outcome for citations (success or failure)
    *
    * Updates the success_rate based on accumulated outcomes.
    * Formula: success_rate = success_count / total_outcomes
@@ -133,44 +144,52 @@ export const VotingService = {
    * We store outcome counts in metadata (not in schema yet, but will add).
    * For now, we store them as custom fields in metadata.
    *
-   * @param id - Memory ID
-   * @param collection - Collection the memory belongs to
+   * @param memoryIds - Array of memory IDs
+   * @param runId - Run ID for tracking outcome context
    * @param outcome - Outcome type ('success' or 'failure')
-   * @throws {Error} If memory not found
+   * @param collection - Collection the memories belong to
+   * @throws {Error} If any memory not found or memoryIds is empty
    */
   async recordOutcome(
-    id: string,
-    collection: string,
-    outcome: OutcomeType
+    memoryIds: string[],
+    runId: string,
+    outcome: OutcomeType,
+    collection: string
   ): Promise<void> {
-    const memory = await fetchMemory(id, collection)
-    if (!memory) {
-      throw new Error('Memory not found')
+    if (memoryIds.length === 0) {
+      throw new Error('memoryIds cannot be empty')
     }
 
-    // Store outcome counts in metadata (extend the type at runtime)
-    const metadata = memory.metadata as any
-    const outcomeTracking = metadata._outcome_tracking || {
-      success: 0,
-      failure: 0,
+    for (const id of memoryIds) {
+      const memory = await fetchMemory(id, collection)
+      if (!memory) {
+        throw new Error('Memory not found')
+      }
+
+      // Store outcome counts in metadata (extend the type at runtime)
+      const metadata = memory.metadata as any
+      const outcomeTracking = metadata._outcome_tracking || {
+        success: 0,
+        failure: 0,
+      }
+
+      // Update counts based on new outcome
+      if (outcome === 'success') {
+        outcomeTracking.success++
+      } else {
+        outcomeTracking.failure++
+      }
+
+      // Calculate new success rate
+      const totalOutcomes = outcomeTracking.success + outcomeTracking.failure
+      memory.metadata.votes.success_rate =
+        totalOutcomes > 0 ? outcomeTracking.success / totalOutcomes : 0
+
+      // Store updated tracking
+      metadata._outcome_tracking = outcomeTracking
+
+      await upsertMemory(memory)
     }
-
-    // Update counts based on new outcome
-    if (outcome === 'success') {
-      outcomeTracking.success++
-    } else {
-      outcomeTracking.failure++
-    }
-
-    // Calculate new success rate
-    const totalOutcomes = outcomeTracking.success + outcomeTracking.failure
-    memory.metadata.votes.success_rate =
-      totalOutcomes > 0 ? outcomeTracking.success / totalOutcomes : 0
-
-    // Store updated tracking
-    metadata._outcome_tracking = outcomeTracking
-
-    await upsertMemory(memory)
   },
 
   /**
