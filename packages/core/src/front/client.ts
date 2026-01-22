@@ -42,6 +42,34 @@ function markdownToHtml(text: string): string {
   return marked.parse(text) as string
 }
 
+/**
+ * Extract the best customer email from a Front message.
+ *
+ * For inbound messages (e.g., feedback forms), the actual customer email is
+ * often in the `reply-to` role, not `from`. This function prioritizes `reply-to`
+ * and falls back to `from` if not present.
+ *
+ * @param message - The Front message to extract email from
+ * @returns The customer's email address, or null if not found
+ *
+ * @example
+ * ```ts
+ * const email = extractCustomerEmail(message)
+ * // Returns "customer@example.com" from reply-to or from recipient
+ * ```
+ */
+export function extractCustomerEmail(message: FrontMessage): string | null {
+  const recipients = message.recipients || []
+
+  // 1. Prefer reply-to (actual customer for feedback forms)
+  const replyTo = recipients.find((r) => r.role === 'reply-to')
+  if (replyTo?.handle) return replyTo.handle
+
+  // 2. Fall back to from
+  const from = recipients.find((r) => r.role === 'from')
+  return from?.handle || null
+}
+
 // ============================================================================
 // Backward-compatible types (re-export from SDK)
 // ============================================================================
