@@ -35,6 +35,23 @@ Support platform monorepo (agent-first, Front is source of truth, HITL approvals
 4. **Connect Stripe** - Visit `https://skill-support-agent-web.vercel.app/api/stripe/connect/authorize?appSlug=<slug>`
 5. **Implement SDK** - Add handler in the product's codebase (see `@docs/support-app-prd/67-sdk.md`)
 
+## CLI (`skill` command)
+
+Run from `packages/cli` to pick up env vars:
+
+```bash
+cd packages/cli
+bun src/index.ts <command>
+```
+
+Key commands:
+- `skill tools list` - list registered apps
+- `skill tools search <app> <query>` - test content search
+- `skill tools lookup <app> <email>` - test user lookup
+- `skill dataset build --output data.json` - build eval dataset from Front
+- `skill front conversation <id>` - inspect Front conversation
+- `skill responses list` - list recent agent responses
+
 ## Skills
 Skills live under @.claude/skills/*/SKILL.md. If a task matches a skill, read it before acting. Use the skills.
 
