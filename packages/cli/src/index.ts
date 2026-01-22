@@ -11,6 +11,7 @@ import { registerRunsCommands } from './commands/inngest/runs'
 import { registerSignalCommand } from './commands/inngest/signal'
 import { registerMemoryCommands } from './commands/memory/index'
 import { registerResponseCommands } from './commands/responses'
+import { registerToolsCommands } from './commands/tools'
 import { wizard } from './commands/wizard'
 
 const program = new Command()
@@ -105,5 +106,8 @@ registerMemoryCommands(program)
 
 // Register Response commands (for analysis)
 registerResponseCommands(program)
+
+// Register Tools commands (test agent tools)
+registerToolsCommands(program)
 
 program.parse()
