@@ -54,9 +54,10 @@ export function createConversationsClient(client: BaseClient) {
      * Update conversation assignee
      * @param id - Conversation ID (cnv_xxx)
      * @param assigneeId - Teammate ID (tea_xxx)
+     * @see https://dev.frontapp.com/reference/update-conversation-assignee
      */
     updateAssignee: (id: string, assigneeId: string) =>
-      client.patch<void>(`/conversations/${id}/assignee`, {
+      client.put<void>(`/conversations/${id}/assignee`, {
         assignee_id: assigneeId,
       }),
 

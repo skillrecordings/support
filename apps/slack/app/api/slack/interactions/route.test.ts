@@ -1,7 +1,15 @@
-import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest'
-import { POST } from './route'
-import { verifySlackSignature } from '../../../../lib/verify-signature'
 import { inngest } from '@skillrecordings/core/inngest'
+import {
+  type Mock,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest'
+import { verifySlackSignature } from '../../../../lib/verify-signature'
+import { POST } from './route'
 
 // Mock dependencies
 vi.mock('../../../../lib/verify-signature', () => ({
@@ -12,6 +20,13 @@ vi.mock('@skillrecordings/core/inngest', () => ({
   inngest: {
     send: vi.fn(),
   },
+  SUPPORT_APPROVAL_DECIDED: 'support/approval.decided',
+  SUPPORT_ACTION_APPROVED: 'support/action.approved',
+  SUPPORT_ACTION_REJECTED: 'support/action.rejected',
+}))
+
+vi.mock('@skillrecordings/core/slack/client', () => ({
+  updateApprovalMessage: vi.fn().mockResolvedValue(undefined),
 }))
 
 // Type the mocked functions
@@ -73,15 +88,20 @@ describe('POST /api/slack/interactions', () => {
         payload: JSON.stringify(mockApprovePayload),
       }).toString()
 
-      const request = new Request('http://localhost:3000/api/slack/interactions', {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/x-www-form-urlencoded',
-          'x-slack-signature': 'v0=invalid',
-          'x-slack-request-timestamp': Math.floor(Date.now() / 1000).toString(),
-        },
-        body,
-      })
+      const request = new Request(
+        'http://localhost:3000/api/slack/interactions',
+        {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/x-www-form-urlencoded',
+            'x-slack-signature': 'v0=invalid',
+            'x-slack-request-timestamp': Math.floor(
+              Date.now() / 1000
+            ).toString(),
+          },
+          body,
+        }
+      )
 
       mockVerifySlackSignature.mockReturnValue(false)
 
@@ -98,15 +118,18 @@ describe('POST /api/slack/interactions', () => {
         payload: JSON.stringify(mockApprovePayload),
       }).toString()
 
-      const request = new Request('http://localhost:3000/api/slack/interactions', {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/x-www-form-urlencoded',
-          'x-slack-signature': 'v0=abc123',
-          'x-slack-request-timestamp': timestamp,
-        },
-        body,
-      })
+      const request = new Request(
+        'http://localhost:3000/api/slack/interactions',
+        {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/x-www-form-urlencoded',
+            'x-slack-signature': 'v0=abc123',
+            'x-slack-request-timestamp': timestamp,
+          },
+          body,
+        }
+      )
 
       mockVerifySlackSignature.mockReturnValue(true)
       mockInngestSend.mockResolvedValue(undefined as any)
@@ -128,15 +151,18 @@ describe('POST /api/slack/interactions', () => {
         payload: JSON.stringify(mockApprovePayload),
       }).toString()
 
-      const request = new Request('http://localhost:3000/api/slack/interactions', {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/x-www-form-urlencoded',
-          'x-slack-signature': 'v0=valid',
-          'x-slack-request-timestamp': timestamp,
-        },
-        body,
-      })
+      const request = new Request(
+        'http://localhost:3000/api/slack/interactions',
+        {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/x-www-form-urlencoded',
+            'x-slack-signature': 'v0=valid',
+            'x-slack-request-timestamp': timestamp,
+          },
+          body,
+        }
+      )
 
       mockVerifySlackSignature.mockReturnValue(true)
       mockInngestSend.mockResolvedValue(undefined as any)
@@ -151,7 +177,7 @@ describe('POST /api/slack/interactions', () => {
         {
           name: 'support/approval.decided',
           data: {
-            approvalId: 'action-123',
+            actionId: 'action-123',
             decision: 'approved',
             decidedBy: 'test.user',
             decidedAt: expect.any(String),
@@ -176,15 +202,18 @@ describe('POST /api/slack/interactions', () => {
         payload: JSON.stringify(mockRejectPayload),
       }).toString()
 
-      const request = new Request('http://localhost:3000/api/slack/interactions', {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/x-www-form-urlencoded',
-          'x-slack-signature': 'v0=valid',
-          'x-slack-request-timestamp': timestamp,
-        },
-        body,
-      })
+      const request = new Request(
+        'http://localhost:3000/api/slack/interactions',
+        {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/x-www-form-urlencoded',
+            'x-slack-signature': 'v0=valid',
+            'x-slack-request-timestamp': timestamp,
+          },
+          body,
+        }
+      )
 
       mockVerifySlackSignature.mockReturnValue(true)
       mockInngestSend.mockResolvedValue(undefined as any)
@@ -199,7 +228,7 @@ describe('POST /api/slack/interactions', () => {
         {
           name: 'support/approval.decided',
           data: {
-            approvalId: 'action-123',
+            actionId: 'action-123',
             decision: 'rejected',
             decidedBy: 'test.user',
             decidedAt: expect.any(String),
@@ -236,15 +265,18 @@ describe('POST /api/slack/interactions', () => {
         payload: JSON.stringify(unknownPayload),
       }).toString()
 
-      const request = new Request('http://localhost:3000/api/slack/interactions', {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/x-www-form-urlencoded',
-          'x-slack-signature': 'v0=valid',
-          'x-slack-request-timestamp': timestamp,
-        },
-        body,
-      })
+      const request = new Request(
+        'http://localhost:3000/api/slack/interactions',
+        {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/x-www-form-urlencoded',
+            'x-slack-signature': 'v0=valid',
+            'x-slack-request-timestamp': timestamp,
+          },
+          body,
+        }
+      )
 
       mockVerifySlackSignature.mockReturnValue(true)
       mockInngestSend.mockResolvedValue(undefined as any)
@@ -262,14 +294,19 @@ describe('POST /api/slack/interactions', () => {
         payload: JSON.stringify(mockApprovePayload),
       }).toString()
 
-      const request = new Request('http://localhost:3000/api/slack/interactions', {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/x-www-form-urlencoded',
-          'x-slack-request-timestamp': Math.floor(Date.now() / 1000).toString(),
-        },
-        body,
-      })
+      const request = new Request(
+        'http://localhost:3000/api/slack/interactions',
+        {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/x-www-form-urlencoded',
+            'x-slack-request-timestamp': Math.floor(
+              Date.now() / 1000
+            ).toString(),
+          },
+          body,
+        }
+      )
 
       mockVerifySlackSignature.mockReturnValue(false)
 
@@ -288,14 +325,17 @@ describe('POST /api/slack/interactions', () => {
         payload: JSON.stringify(mockApprovePayload),
       }).toString()
 
-      const request = new Request('http://localhost:3000/api/slack/interactions', {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/x-www-form-urlencoded',
-          'x-slack-signature': 'v0=valid',
-        },
-        body,
-      })
+      const request = new Request(
+        'http://localhost:3000/api/slack/interactions',
+        {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/x-www-form-urlencoded',
+            'x-slack-signature': 'v0=valid',
+          },
+          body,
+        }
+      )
 
       mockVerifySlackSignature.mockReturnValue(false)
 
@@ -317,15 +357,18 @@ describe('POST /api/slack/interactions', () => {
         payload: 'not-valid-json',
       }).toString()
 
-      const request = new Request('http://localhost:3000/api/slack/interactions', {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/x-www-form-urlencoded',
-          'x-slack-signature': 'v0=valid',
-          'x-slack-request-timestamp': timestamp,
-        },
-        body,
-      })
+      const request = new Request(
+        'http://localhost:3000/api/slack/interactions',
+        {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/x-www-form-urlencoded',
+            'x-slack-signature': 'v0=valid',
+            'x-slack-request-timestamp': timestamp,
+          },
+          body,
+        }
+      )
 
       mockVerifySlackSignature.mockReturnValue(true)
 
