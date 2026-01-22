@@ -2,6 +2,7 @@
 
 import 'dotenv-flow/config'
 import { Command } from 'commander'
+import { registerAxiomCommands } from './commands/axiom/index'
 import { registerDatasetCommands } from './commands/build-dataset'
 import { runEval } from './commands/eval'
 import { registerFrontCommands } from './commands/front/index'
@@ -113,5 +114,8 @@ registerToolsCommands(program)
 
 // Register Dataset commands (eval dataset building)
 registerDatasetCommands(program)
+
+// Register Axiom commands (log querying)
+registerAxiomCommands(program)
 
 program.parse()

@@ -17,6 +17,7 @@
     "typescript": "5.9.2"
   },
   "dependencies": {
+    "@axiomhq/js": "^1.3.1",
     "@inquirer/prompts": "^8.2.0",
     "@skillrecordings/core": "workspace:*",
     "@skillrecordings/database": "workspace:*",
