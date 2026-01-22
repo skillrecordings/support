@@ -58,6 +58,10 @@ export type SupportApprovalRequestedEvent = {
     }
     /** Agent's reasoning for proposing this action */
     agentReasoning: string
+    /** Customer email (for Slack context) */
+    customerEmail?: string
+    /** Inbox ID (for Slack context) */
+    inboxId?: string
   }
 }
 

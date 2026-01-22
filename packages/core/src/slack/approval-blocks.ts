@@ -32,6 +32,10 @@ export type ApprovalBlocksInput = {
   agentReasoning: string
   /** Cited memories (optional) */
   citedMemories?: SearchResult[]
+  /** Customer email (optional) */
+  customerEmail?: string
+  /** Inbox ID (optional) */
+  inboxId?: string
 }
 
 /**
@@ -64,16 +68,58 @@ function capitalizeActionType(actionType: string): string {
 }
 
 /**
+ * Keys to hide from parameters display (internal/redundant data)
+ */
+const HIDDEN_PARAMETER_KEYS = new Set([
+  'toolCalls',
+  'instructorTeammateId',
+  'reason', // Already shown in agent reasoning
+  'conversationId', // Already in context
+  'appId', // Already in context
+])
+
+/**
  * Formats parameters as Block Kit fields array.
  * Each parameter becomes a mrkdwn field: "*key*: value"
+ * Filters out internal/redundant keys.
  */
 function formatParameters(
   parameters: Record<string, unknown>
 ): Array<{ type: 'mrkdwn'; text: string }> {
-  return Object.entries(parameters).map(([key, value]) => ({
+  const entries = Object.entries(parameters).filter(
+    ([key]) => !HIDDEN_PARAMETER_KEYS.has(key)
+  )
+
+  // If all params are hidden, return empty
+  if (entries.length === 0) return []
+
+  return entries.map(([key, value]) => ({
     type: 'mrkdwn' as const,
-    text: `*${key}*: ${String(value)}`,
+    text: `*${formatKeyName(key)}:* ${formatValue(value)}`,
   }))
+}
+
+/**
+ * Formats a camelCase or snake_case key as readable text
+ */
+function formatKeyName(key: string): string {
+  return key
+    .replace(/_/g, ' ')
+    .replace(/([A-Z])/g, ' $1')
+    .trim()
+    .split(' ')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ')
+}
+
+/**
+ * Formats a value for display, truncating long strings
+ */
+function formatValue(value: unknown): string {
+  if (value === null || value === undefined) return 'N/A'
+  const str = String(value)
+  if (str.length > 100) return str.slice(0, 100) + '...'
+  return str
 }
 
 /**
@@ -192,6 +238,8 @@ export function buildApprovalBlocks(input: ApprovalBlocksInput): KnownBlock[] {
     parameters,
     agentReasoning,
     citedMemories = [],
+    customerEmail,
+    inboxId,
   } = input
 
   // Metadata for button values
@@ -201,6 +249,18 @@ export function buildApprovalBlocks(input: ApprovalBlocksInput): KnownBlock[] {
     appId,
   }
   const metadataValue = JSON.stringify(metadata)
+
+  // Front conversation URL
+  const frontUrl = `https://app.frontapp.com/open/${conversationId}`
+
+  // Build context line with app, customer, inbox
+  const contextParts: string[] = [`*App:* ${appId}`]
+  if (customerEmail) {
+    contextParts.push(`*Customer:* ${customerEmail}`)
+  }
+  if (inboxId) {
+    contextParts.push(`*Inbox:* ${inboxId}`)
+  }
 
   const blocks: KnownBlock[] = [
     // Header
@@ -212,25 +272,51 @@ export function buildApprovalBlocks(input: ApprovalBlocksInput): KnownBlock[] {
         emoji: true,
       },
     },
-    // Agent reasoning
+    // Context: App, Customer, Inbox
+    {
+      type: 'context',
+      elements: [
+        {
+          type: 'mrkdwn',
+          text: contextParts.join('  |  '),
+        },
+      ],
+    },
+    // Agent reasoning (truncated for readability)
     {
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: `*Agent Reasoning:*\n${agentReasoning}`,
+        text:
+          agentReasoning.length > 300
+            ? agentReasoning.slice(0, 300) + '...'
+            : agentReasoning,
       },
     },
-    // Parameters
-    {
-      type: 'section',
-      fields: formatParameters(parameters),
-    },
+    // Parameters (only if there are visible ones)
+    ...(formatParameters(parameters).length > 0
+      ? [
+          {
+            type: 'section' as const,
+            fields: formatParameters(parameters),
+          },
+        ]
+      : []),
     // Memory section (if memories provided)
     ...buildMemorySection(citedMemories),
-    // Approve/Reject buttons
+    // Approve/Reject/Open in Front buttons
     {
       type: 'actions',
       elements: [
+        {
+          type: 'button',
+          text: {
+            type: 'plain_text',
+            text: 'Open in Front',
+            emoji: true,
+          },
+          url: frontUrl,
+        },
         {
           type: 'button',
           text: {

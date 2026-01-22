@@ -516,10 +516,11 @@ export const handleInboundMessage = inngest.createFunction(
             type: 'assign-to-instructor',
             parameters: {
               instructorTeammateId,
-              reason: classification.reasoning,
             },
           },
-          agentReasoning: `Classified as instructor correspondence: ${classification.reasoning}`,
+          agentReasoning: classification.reasoning,
+          customerEmail: context.senderEmail,
+          inboxId: context.inboxId,
         },
       })
 
@@ -802,6 +803,8 @@ export const handleInboundMessage = inngest.createFunction(
             agentReasoning:
               agentResult.reasoning ||
               'Agent proposed action requiring approval',
+            customerEmail: context.senderEmail,
+            inboxId: context.inboxId,
           },
         })
         console.log('[workflow:routing] Approval event sent')

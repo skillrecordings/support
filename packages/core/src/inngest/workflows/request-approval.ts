@@ -1,12 +1,12 @@
-import { inngest } from '../client'
-import {
-  SUPPORT_APPROVAL_REQUESTED,
-  SUPPORT_APPROVAL_DECIDED,
-  type SupportApprovalRequestedEvent,
-} from '../events'
-import { getDb, ApprovalRequestsTable, eq } from '@skillrecordings/database'
 import { buildApprovalBlocks } from '@skillrecordings/core/slack/approval-blocks'
 import { postApprovalMessage } from '@skillrecordings/core/slack/client'
+import { ApprovalRequestsTable, eq, getDb } from '@skillrecordings/database'
+import { inngest } from '../client'
+import {
+  SUPPORT_APPROVAL_DECIDED,
+  SUPPORT_APPROVAL_REQUESTED,
+  type SupportApprovalRequestedEvent,
+} from '../events'
 
 /**
  * Workflow: Request human approval for agent actions
@@ -22,7 +22,15 @@ export const requestApproval = inngest.createFunction(
   },
   { event: SUPPORT_APPROVAL_REQUESTED },
   async ({ event, step }) => {
-    const { actionId, conversationId, appId, action, agentReasoning } = event.data
+    const {
+      actionId,
+      conversationId,
+      appId,
+      action,
+      agentReasoning,
+      customerEmail,
+      inboxId,
+    } = event.data
 
     // Step 1: Create approval request record in DB
     await step.run('create-approval-request', async () => {
@@ -48,6 +56,8 @@ export const requestApproval = inngest.createFunction(
         actionType: action.type,
         parameters: action.parameters,
         agentReasoning,
+        customerEmail,
+        inboxId,
       })
 
       const channel = process.env.SLACK_APPROVAL_CHANNEL
@@ -59,7 +69,7 @@ export const requestApproval = inngest.createFunction(
       const actionTypeDisplay = action.type
         .replace(/_/g, ' ')
         .split(' ')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ')
 
       const { ts, channel: slackChannel } = await postApprovalMessage(
@@ -121,5 +131,5 @@ export const requestApproval = inngest.createFunction(
       actionId,
       decision: decision.data,
     }
-  },
+  }
 )
