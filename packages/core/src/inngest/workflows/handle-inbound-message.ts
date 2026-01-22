@@ -3,7 +3,11 @@ import { ActionsTable, getDb } from '@skillrecordings/database'
 import { MemoryService } from '@skillrecordings/memory/memory'
 import { IntegrationClient } from '@skillrecordings/sdk/client'
 import { runSupportAgent } from '../../agent/index'
-import { type FrontMessage, createFrontClient } from '../../front/index'
+import {
+  type FrontMessage,
+  createFrontClient,
+  extractCustomerEmail,
+} from '../../front/client'
 import {
   initializeAxiom,
   traceAgentRun as traceAgentRunAxiom,
@@ -116,9 +120,7 @@ export const handleInboundMessage = inngest.createFunction(
 
         // Extract sender email from message
         const senderEmail =
-          message.author?.email ||
-          message.recipients.find((r) => r.role === 'from')?.handle ||
-          ''
+          extractCustomerEmail(message) || message.author?.email || ''
         console.log('[workflow:context] Sender email:', senderEmail)
 
         // Get inbox ID - from event or fetch from conversation
@@ -392,12 +394,11 @@ export const handleInboundMessage = inngest.createFunction(
       const threadMessages = context.conversationHistory
         .slice(-5) // Last 5 messages for more context
         .map((m) => {
-          // For inbound messages, get sender from recipients with role 'from'
+          // For inbound messages, use extractCustomerEmail to get actual sender
           // For outbound, use author email (teammate)
           let sender = 'unknown'
           if (m.is_inbound) {
-            const fromRecipient = m.recipients.find((r) => r.role === 'from')
-            sender = fromRecipient?.handle || 'customer'
+            sender = extractCustomerEmail(m) || m.author?.email || 'customer'
           } else {
             sender = m.author?.email || 'support'
           }
