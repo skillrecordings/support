@@ -15,7 +15,17 @@ export const CLASSIFIER_CATEGORIES = [
   'technical',
   'general',
   'instructor_correspondence',
+  'team_correspondence',
 ] as const
+
+/**
+ * Structured thread message for classifier context
+ */
+export type ThreadMessage = {
+  sender: string // email address
+  isInbound: boolean
+  body: string
+}
 
 export type ClassifierCategory = (typeof CLASSIFIER_CATEGORIES)[number]
 
@@ -65,7 +75,12 @@ function validateComplexity(raw: string): ComplexityTier {
 
 export async function classifyMessage(
   message: string,
-  context?: { recentMessages?: string[]; priorKnowledge?: string }
+  context?: {
+    recentMessages?: string[] // deprecated: use threadMessages instead
+    threadMessages?: ThreadMessage[]
+    senderEmail?: string
+    priorKnowledge?: string
+  }
 ): Promise<ClassifierResult> {
   // Build prompt with category guidance and optional conversation context
   let prompt = `Classify this customer support message.
@@ -81,17 +96,33 @@ export async function classifyMessage(
 - billing: Invoice or charge inquiries
 - technical: Product functionality issues
 - general: Other inquiries
-- instructor_correspondence: Personal messages to the instructor/creator (fan mail, compliments, appreciation, feedback about teaching style, personal questions directed at them, conversational messages starting with "Hi [instructor name]")
+- instructor_correspondence: Personal fan mail from CUSTOMERS to the instructor (compliments, appreciation, feedback about teaching style, personal questions). NOT business discussions.
+- team_correspondence: Business discussions between team members, partners, or internal stakeholders about product strategy, operations, launches, cohorts, scheduling. NOT customer support. Route to human without AI response.
 
 ## Complexity (for model selection)
-- skip: Don't respond (spam, acks, bounces, auto-replies)
+- skip: Don't respond (spam, acks, bounces, auto-replies, team correspondence)
 - simple: Easy to answer (FAQ, magic link, basic info), instructor correspondence - fast model OK
 - complex: Nuanced issue, frustrated customer, needs reasoning - use powerful model
 
+## Sender context
+${context?.senderEmail ? `Current message from: ${context.senderEmail}` : 'Sender unknown'}
+
 Message: ${message}`
 
-  if (context?.recentMessages && context.recentMessages.length > 0) {
-    const conversationContext = context.recentMessages.join('\n')
+  // Prefer structured thread messages over legacy string array
+  if (context?.threadMessages && context.threadMessages.length > 0) {
+    const threadContext = context.threadMessages
+      .map((m) => {
+        const direction = m.isInbound ? '→' : '←'
+        const preview =
+          m.body.length > 300 ? m.body.slice(0, 300) + '...' : m.body
+        return `[${m.sender}] ${direction}\n${preview}`
+      })
+      .join('\n\n')
+    prompt += `\n\n## Thread history (oldest first)\n${threadContext}`
+  } else if (context?.recentMessages && context.recentMessages.length > 0) {
+    // Legacy fallback
+    const conversationContext = context.recentMessages.join('\n---\n')
     prompt += `\n\nRecent conversation context:\n${conversationContext}`
   }
 

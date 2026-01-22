@@ -388,10 +388,29 @@ export const handleInboundMessage = inngest.createFunction(
         })
         .join('\n')
 
+      // Build structured thread context with sender info
+      const threadMessages = context.conversationHistory
+        .slice(-5) // Last 5 messages for more context
+        .map((m) => {
+          // For inbound messages, get sender from recipients with role 'from'
+          // For outbound, use author email (teammate)
+          let sender = 'unknown'
+          if (m.is_inbound) {
+            const fromRecipient = m.recipients.find((r) => r.role === 'from')
+            sender = fromRecipient?.handle || 'customer'
+          } else {
+            sender = m.author?.email || 'support'
+          }
+          return {
+            sender,
+            isInbound: m.is_inbound,
+            body: m.body || '',
+          }
+        })
+
       const result = await classifyMessage(messageBody, {
-        recentMessages: context.conversationHistory
-          .slice(-3)
-          .map((m) => m.body),
+        threadMessages,
+        senderEmail: context.senderEmail,
         priorKnowledge: priorKnowledge || undefined,
       })
 
@@ -446,6 +465,32 @@ export const handleInboundMessage = inngest.createFunction(
         classification,
         agentResult: null,
         routingResult: { type: 'skipped' as const },
+      }
+    }
+
+    // Handle team correspondence - internal business discussions, skip AI entirely
+    if (classification.category === 'team_correspondence') {
+      console.log(
+        '[workflow] ========== TEAM CORRESPONDENCE - SKIPPING AI =========='
+      )
+      console.log('[workflow] Sender:', context.senderEmail)
+      console.log('[workflow] Reasoning:', classification.reasoning)
+
+      await traceRouting({
+        conversationId,
+        appId: context.appId,
+        messageId,
+        routingType: 'team-correspondence',
+      })
+
+      return {
+        conversationId,
+        messageId,
+        filtered: false,
+        skipped: true,
+        classification,
+        agentResult: null,
+        routingResult: { type: 'team-correspondence' as const },
       }
     }
 

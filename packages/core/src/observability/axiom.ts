@@ -212,6 +212,7 @@ export async function traceRouting(data: {
     | 'response-ready'
     | 'instructor-approval-requested'
     | 'no-instructor-configured'
+    | 'team-correspondence'
   filterRuleId?: string
   loopReason?: string
   escalationReason?: string
