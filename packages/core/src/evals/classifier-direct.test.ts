@@ -48,7 +48,7 @@ Appreciate you taking the time to share this.`
       // This is actually agent output, not customer input - skip
     })
 
-    it('should classify internal team message as instructor_correspondence', async () => {
+    it('should classify internal team message as team_correspondence', async () => {
       const message = `This quote encapsulates how I feel about software atm:
 
 https://x.com/cramforce/status/2013992385638986138
@@ -59,7 +59,8 @@ Our job should be to help the mid-career engineers adapt. LOTS of useful content
 
       const result = await classifyMessage(message)
       console.log('Result:', result)
-      expect(result.category).toBe('instructor_correspondence')
+      // This is a business/strategy discussion between team members, not personal fan mail
+      expect(result.category).toBe('team_correspondence')
     })
 
     it('should classify business outreach as no_response or instructor_correspondence', async () => {
