@@ -54,7 +54,7 @@ async function listApps(options: { json?: boolean }) {
 
   if (options.json) {
     console.log(JSON.stringify(apps, null, 2))
-    return
+    process.exit(0)
   }
 
   console.log('\nRegistered Apps:')
@@ -64,6 +64,7 @@ async function listApps(options: { json?: boolean }) {
     console.log(`    URL: ${app.baseUrl}`)
     console.log()
   }
+  process.exit(0)
 }
 
 /**
@@ -104,12 +105,12 @@ async function searchContent(
 
     if (options.json) {
       console.log(JSON.stringify(result, null, 2))
-      return
+      process.exit(0)
     }
 
     if (!result.results || result.results.length === 0) {
       console.log('No results found.')
-      return
+      process.exit(0)
     }
 
     console.log(`Found ${result.results.length} results:\n`)
@@ -125,6 +126,7 @@ async function searchContent(
       }
       console.log()
     }
+    process.exit(0)
   } catch (error) {
     console.error(
       'Search failed:',
@@ -167,12 +169,12 @@ async function lookupUser(
 
     if (options.json) {
       console.log(JSON.stringify(user, null, 2))
-      return
+      process.exit(0)
     }
 
     if (!user) {
       console.log('User not found.')
-      return
+      process.exit(0)
     }
 
     console.log('User found:')
@@ -180,6 +182,7 @@ async function lookupUser(
     console.log(`  Email: ${user.email}`)
     if (user.name) console.log(`  Name: ${user.name}`)
     console.log()
+    process.exit(0)
   } catch (error) {
     console.error(
       'Lookup failed:',
@@ -222,12 +225,12 @@ async function getPurchases(
 
     if (options.json) {
       console.log(JSON.stringify(purchases, null, 2))
-      return
+      process.exit(0)
     }
 
     if (!purchases || purchases.length === 0) {
       console.log('No purchases found.')
-      return
+      process.exit(0)
     }
 
     console.log(`Found ${purchases.length} purchases:\n`)
@@ -238,6 +241,7 @@ async function getPurchases(
       console.log(`    Date: ${new Date(p.purchasedAt).toLocaleDateString()}`)
       console.log()
     }
+    process.exit(0)
   } catch (error) {
     console.error(
       'Fetch failed:',
