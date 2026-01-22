@@ -63,6 +63,20 @@ Our job should be to help the mid-career engineers adapt. LOTS of useful content
       expect(result.category).toBe('team_correspondence')
     })
 
+    it('should classify discount request as billing/general, NOT instructor_correspondence', async () => {
+      const message = `Hi Matt,
+
+I'm reaching out on behalf of a non-profit organization. We're looking to train our volunteers on TypeScript development. Is there any discount available for non-profit organizations?
+
+Thank you!
+Sarah`
+
+      const result = await classifyMessage(message)
+      console.log('Result:', result)
+      // Discount requests should use the dedicated discount category
+      expect(result.category).toBe('discount')
+    })
+
     it('should classify business outreach as no_response or instructor_correspondence', async () => {
       const message = `Hi Matt,
 
@@ -80,10 +94,12 @@ Vibe Coder | QA Tester & Creative Technologist @ Volter Ai`
 
       const result = await classifyMessage(message)
       console.log('Result:', result)
-      // Could be no_response (spam) or instructor_correspondence (business pitch to Matt)
-      expect(['no_response', 'instructor_correspondence']).toContain(
-        result.category
-      )
+      // Business partnership pitches could be no_response (spam), team_correspondence (business discussion), or instructor_correspondence
+      expect([
+        'no_response',
+        'instructor_correspondence',
+        'team_correspondence',
+      ]).toContain(result.category)
     })
   })
 

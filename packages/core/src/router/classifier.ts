@@ -12,6 +12,7 @@ export const CLASSIFIER_CATEGORIES = [
   'transfer',
   'account_issue',
   'billing',
+  'discount',
   'technical',
   'general',
   'instructor_correspondence',
@@ -94,9 +95,10 @@ export async function classifyMessage(
 - transfer: License transfer request
 - account_issue: Login or access problems
 - billing: Invoice or charge inquiries
+- discount: Discount requests (student, non-profit, team, special pricing, coupon codes). NOT refunds.
 - technical: Product functionality issues
 - general: Other inquiries
-- instructor_correspondence: Personal fan mail from CUSTOMERS to the instructor (compliments, appreciation, feedback about teaching style, personal questions). NOT business discussions.
+- instructor_correspondence: ONLY use for genuine personal fan mail - compliments about teaching style, heartfelt appreciation, personal life questions to the instructor. NOT discount requests, pricing questions, partnership pitches, or any message asking for something. If they want a discount, student rate, non-profit pricing, or special deal - that's billing/general, NOT instructor_correspondence.
 - team_correspondence: Business discussions between team members, partners, or internal stakeholders about product strategy, operations, launches, cohorts, scheduling. NOT customer support. Route to human without AI response.
 
 ## Complexity (for model selection)
