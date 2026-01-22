@@ -26,11 +26,11 @@ async function executeSearchTool(
   if (!tool.execute) throw new Error('Tool execute not defined')
   // Add default limit if not provided
   const paramsWithLimit = { ...params, limit: params.limit ?? 5 }
-  // Cast context to satisfy ToolExecutionOptions - we only care about appId and integrationClient
+  // AI SDK v6: context must be wrapped in experimental_context
   const fullContext = {
-    ...context,
     toolCallId: 'test-tool-call-id',
     messages: [],
+    experimental_context: context,
   }
   return (await tool.execute(paramsWithLimit, fullContext as any)) as
     | ContentSearchResponse
