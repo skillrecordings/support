@@ -5,6 +5,7 @@ import {
   eq,
   getDb,
 } from '@skillrecordings/database'
+import { createFrontClient as createFrontSdkClient } from '@skillrecordings/front-sdk'
 import { createFrontClient } from '../../front'
 import { supportTools } from '../../tools'
 import type { ExecutionContext } from '../../tools/types'
@@ -130,7 +131,7 @@ export const executeApprovedAction = inngest.createFunction(
       // Execute each tool call
       const results = []
       for (const toolCall of toolCalls) {
-        const toolName = toolCall.name as keyof typeof supportTools
+        const toolName = toolCall.name
 
         if (toolName === 'processRefund' && supportTools.processRefund) {
           const toolResult = await supportTools.processRefund.execute(
@@ -142,6 +143,61 @@ export const executeApprovedAction = inngest.createFunction(
             executionContext
           )
           results.push({ tool: toolName, result: toolResult })
+        } else if (toolName === 'assignToInstructor') {
+          // Execute instructor assignment via Front SDK
+          const args = toolCall.args as {
+            conversationId: string
+            instructorTeammateId: string
+            reason: string
+          }
+
+          const frontToken = process.env.FRONT_API_TOKEN
+          if (!frontToken) {
+            results.push({
+              tool: toolName,
+              result: {
+                success: false,
+                error: {
+                  code: 'MISSING_CONFIG',
+                  message: 'FRONT_API_TOKEN not configured',
+                },
+              },
+            })
+            continue
+          }
+
+          try {
+            // Use SDK directly for updateAssignee (not the deprecated wrapper)
+            const front = createFrontSdkClient({ apiToken: frontToken })
+            await front.conversations.updateAssignee(
+              args.conversationId,
+              args.instructorTeammateId
+            )
+            results.push({
+              tool: toolName,
+              result: {
+                success: true,
+                data: {
+                  assigned: true,
+                  conversationId: args.conversationId,
+                  instructorTeammateId: args.instructorTeammateId,
+                  reason: args.reason,
+                },
+              },
+            })
+          } catch (error) {
+            results.push({
+              tool: toolName,
+              result: {
+                success: false,
+                error: {
+                  code: 'FRONT_API_ERROR',
+                  message:
+                    error instanceof Error ? error.message : 'Unknown error',
+                },
+              },
+            })
+          }
         } else {
           // Unknown or unsupported tool
           results.push({

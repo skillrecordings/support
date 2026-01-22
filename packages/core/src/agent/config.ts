@@ -430,7 +430,7 @@ export const agentTools = {
 
   assignToInstructor: tool({
     description:
-      'Assign conversation to the instructor/creator for personal correspondence. Use when the message is fan mail, personal feedback, or directed at the instructor personally rather than being a support request.',
+      'Assign conversation to the instructor/creator for personal correspondence. Use when the message is fan mail, personal feedback, or directed at the instructor personally rather than being a support request. Requires human approval before execution.',
     inputSchema: z.object({
       conversationId: z.string().describe('Front conversation ID'),
       reason: z.string().describe('Why this is being routed to the instructor'),
@@ -439,33 +439,27 @@ export const agentTools = {
       // Get instructor teammate ID from app config (AI SDK v6 wraps context in experimental_context)
       const ctx = experimental_context as {
         appConfig?: { instructor_teammate_id?: string }
+        appId?: string
       }
       const instructorTeammateId = ctx?.appConfig?.instructor_teammate_id
+      const appId = ctx?.appId
 
       if (!instructorTeammateId) {
         return {
-          assigned: false,
+          status: 'error',
           error: 'No instructor configured for this app',
         }
       }
 
-      // Import Front SDK and assign
-      const { createFrontClient } = await import('@skillrecordings/front-sdk')
-      const apiToken = process.env.FRONT_API_TOKEN
-      if (!apiToken) {
-        return { assigned: false, error: 'Front API token not configured' }
-      }
-
-      const front = createFrontClient({ apiToken })
-      await front.conversations.updateAssignee(
-        conversationId,
-        instructorTeammateId
-      )
-
+      // HITL: Don't execute immediately - return pending_approval for human review
+      // Actual Front API assignment happens in approval workflow
       return {
-        assigned: true,
+        status: 'pending_approval',
+        conversationId,
+        appId,
         instructorTeammateId,
         reason,
+        message: 'Instructor assignment submitted for approval',
       }
     },
   }),
@@ -727,7 +721,10 @@ INSTEAD:
 
   // Check if any tool requires approval
   let requiresApproval = toolCalls.some(
-    (tc) => tc.name === 'processRefund' || tc.name === 'transferPurchase'
+    (tc) =>
+      tc.name === 'processRefund' ||
+      tc.name === 'transferPurchase' ||
+      tc.name === 'assignToInstructor'
   )
   console.log('[agent] Requires approval (from tool calls):', requiresApproval)
 
