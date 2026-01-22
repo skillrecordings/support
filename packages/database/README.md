@@ -16,7 +16,7 @@ Database uses PlanetScale (MySQL) with the following configuration:
 Each app (`web`, `front`, `slack`) has DATABASE_URL configured in `.env.local`:
 
 ```env
-DATABASE_URL=mysql://[EMAIL]/skill-support?sslaccept=strict
+DATABASE_URL=mysql://[EMAIL]/skill-support
 ```
 
 The `@t3-oss/env-core` package validates this at runtime.
