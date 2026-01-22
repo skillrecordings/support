@@ -463,6 +463,164 @@ async function getClassificationStats(options: {
 }
 
 /**
+ * List workflow step traces (for debugging timeout issues)
+ */
+async function listWorkflowSteps(options: {
+  workflow?: string
+  conversation?: string
+  since?: string
+  limit?: number
+  json?: boolean
+}): Promise<void> {
+  const client = getAxiomClient()
+  const limit = options.limit ?? 50
+  const { startTime, endTime } = parseTimeRange(options.since ?? '24h')
+
+  let apl = `['${getDataset()}']
+| where type == 'workflow-step'`
+
+  if (options.workflow) {
+    apl += `
+| where workflowName == '${options.workflow}'`
+  }
+
+  if (options.conversation) {
+    apl += `
+| where conversationId == '${options.conversation}'`
+  }
+
+  apl += `
+| sort by _time desc
+| limit ${limit}`
+
+  try {
+    const result = await client.query(apl, {
+      startTime: startTime.toISOString(),
+      endTime: endTime.toISOString(),
+    })
+
+    const matches = result.matches ?? []
+
+    if (options.json) {
+      console.log(
+        JSON.stringify(
+          matches.map((m) => m.data),
+          null,
+          2
+        )
+      )
+      return
+    }
+
+    if (matches.length === 0) {
+      console.log('No workflow steps found')
+      return
+    }
+
+    console.log('\nWorkflow Steps')
+    console.log('='.repeat(100))
+
+    for (const match of matches) {
+      const d = match.data as Record<string, unknown>
+      const time = formatTime(match._time)
+      const workflow = d.workflowName ?? 'unknown'
+      const step = d.stepName ?? 'unknown'
+      const duration = formatDuration(Number(d.durationMs) || 0)
+      const success = d.success ? '✓' : '✗'
+
+      console.log(`\n[${time}] ${workflow} > ${step} ${success} (${duration})`)
+      if (d.conversationId) console.log(`  Conv: ${d.conversationId}`)
+      if (d.error) console.log(`  Error: ${d.error}`)
+      if (d.metadata) console.log(`  Meta: ${JSON.stringify(d.metadata)}`)
+    }
+
+    console.log('\n' + '-'.repeat(100))
+    console.log(`Total: ${matches.length}`)
+  } catch (error) {
+    console.error(
+      'Query failed:',
+      error instanceof Error ? error.message : error
+    )
+    process.exit(1)
+  }
+}
+
+/**
+ * List approval-related traces (for debugging HITL flow)
+ */
+async function listApprovals(options: {
+  since?: string
+  limit?: number
+  json?: boolean
+}): Promise<void> {
+  const client = getAxiomClient()
+  const limit = options.limit ?? 30
+  const { startTime, endTime } = parseTimeRange(options.since ?? '24h')
+
+  const apl = `['${getDataset()}']
+| where type in ('approval', 'slack')
+| sort by _time desc
+| limit ${limit}`
+
+  try {
+    const result = await client.query(apl, {
+      startTime: startTime.toISOString(),
+      endTime: endTime.toISOString(),
+    })
+
+    const matches = result.matches ?? []
+
+    if (options.json) {
+      console.log(
+        JSON.stringify(
+          matches.map((m) => m.data),
+          null,
+          2
+        )
+      )
+      return
+    }
+
+    if (matches.length === 0) {
+      console.log('No approval traces found')
+      return
+    }
+
+    console.log('\nApproval Flow Traces')
+    console.log('='.repeat(100))
+
+    for (const match of matches) {
+      const d = match.data as Record<string, unknown>
+      const time = formatTime(match._time)
+      const name = d.name ?? 'unknown'
+      const actionId = d.actionId ?? ''
+      const success = d.success !== undefined ? (d.success ? '✓' : '✗') : ''
+      const duration = d.durationMs
+        ? ` (${formatDuration(Number(d.durationMs))})`
+        : ''
+
+      console.log(`\n[${time}] ${name} ${success}${duration}`)
+      if (actionId) console.log(`  Action: ${actionId}`)
+      if (d.actionType) console.log(`  Type: ${d.actionType}`)
+      if (d.conversationId) console.log(`  Conv: ${d.conversationId}`)
+      if (d.channel) console.log(`  Channel: ${d.channel}`)
+      if (d.messageTs) console.log(`  Slack TS: ${d.messageTs}`)
+      if (d.error) console.log(`  Error: ${d.error}`)
+      if (d.customerEmail) console.log(`  Customer: ${d.customerEmail}`)
+    }
+
+    console.log('\n' + '-'.repeat(100))
+    console.log(`Total: ${matches.length}`)
+  } catch (error) {
+    console.error(
+      'Query failed:',
+      error instanceof Error ? error.message : error
+    )
+    process.exit(1)
+  }
+}
+
+/**
  * Register Axiom commands with Commander
  */
 export function registerAxiomCommands(program: Command): void {
@@ -510,4 +668,22 @@ export function registerAxiomCommands(program: Command): void {
     .option('-s, --since <time>', 'Time range (e.g., 1h, 24h, 7d)', '24h')
     .option('--json', 'Output as JSON')
     .action(getClassificationStats)
+
+  axiom
+    .command('workflow-steps')
+    .description('List workflow step traces (for debugging timeouts)')
+    .option('-w, --workflow <name>', 'Filter by workflow name')
+    .option('-c, --conversation <id>', 'Filter by conversation ID')
+    .option('-l, --limit <n>', 'Number of results', parseInt)
+    .option('-s, --since <time>', 'Time range (e.g., 1h, 24h, 7d)', '24h')
+    .option('--json', 'Output as JSON')
+    .action(listWorkflowSteps)
+
+  axiom
+    .command('approvals')
+    .description('List approval flow traces (HITL debugging)')
+    .option('-l, --limit <n>', 'Number of results', parseInt)
+    .option('-s, --since <time>', 'Time range (e.g., 1h, 24h, 7d)', '24h')
+    .option('--json', 'Output as JSON')
+    .action(listApprovals)
 }
