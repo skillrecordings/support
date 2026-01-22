@@ -2,6 +2,7 @@
 
 import 'dotenv-flow/config'
 import { Command } from 'commander'
+import { registerDatasetCommands } from './commands/build-dataset'
 import { runEval } from './commands/eval'
 import { registerFrontCommands } from './commands/front/index'
 import { health } from './commands/health'
@@ -109,5 +110,8 @@ registerResponseCommands(program)
 
 // Register Tools commands (test agent tools)
 registerToolsCommands(program)
+
+// Register Dataset commands (eval dataset building)
+registerDatasetCommands(program)
 
 program.parse()
