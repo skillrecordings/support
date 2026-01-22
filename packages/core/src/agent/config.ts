@@ -11,6 +11,7 @@ import { traceWorkflowStep } from '../observability/axiom'
 import { telemetryConfig } from '../observability/otel'
 import { classifyMessage } from '../router/classifier'
 import { getApp } from '../services/app-registry'
+import { checkProductAvailability } from '../tools/check-product-availability'
 import {
   memoryCite,
   memorySearch,
@@ -98,6 +99,25 @@ If asked about product content without knowledge base context, either:
 
 WRONG: "Start with the fundamentals section. It covers core concepts like X, Y, Z."
 RIGHT: "What specific topic are you trying to learn about? I can point you to the right resources once I know what you're working on."
+
+## Product Availability - ALWAYS CHECK FIRST
+
+NEVER claim a product is sold out, available, or has limited seats without checking:
+- Use check_product_availability BEFORE making any availability claims
+- Don't guess or assume based on product type
+
+WRONG: "The workshop is sold out" (without checking)
+WRONG: "There are still seats available" (without checking)
+
+RIGHT: [Call check_product_availability first] "The February workshop is sold out - all 50 seats have been claimed."
+RIGHT: [Call check_product_availability first] "There are 12 seats remaining for the workshop starting February 1st."
+
+The tool returns:
+- soldOut: true/false
+- quantityRemaining: number of seats left (-1 means unlimited)
+- quantityAvailable: total capacity
+- startsAt/endsAt: event dates
+- enrollmentOpen/enrollmentClose: enrollment window for cohorts
 
 ## Helpfulness Guardrails
 
@@ -600,6 +620,18 @@ export const agentTools = {
     inputSchema: memoryCite.parameters,
     execute: async (params, { experimental_context }) => {
       const result = await memoryCite.execute(
+        params,
+        experimental_context as any
+      )
+      return result.success ? result.data : { error: result.error.message }
+    },
+  }),
+
+  check_product_availability: tool({
+    description: checkProductAvailability.description,
+    inputSchema: checkProductAvailability.parameters,
+    execute: async (params, { experimental_context }) => {
+      const result = await checkProductAvailability.execute(
         params,
         experimental_context as any
       )

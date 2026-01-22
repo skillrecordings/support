@@ -4,6 +4,7 @@ import type {
   ContentSearchRequest,
   ContentSearchResponse,
   ContentSearchResult,
+  ProductStatus,
   Purchase,
   Subscription,
   User,
@@ -19,6 +20,7 @@ export type {
   ContentSearchResult,
   ContentSearchRequest,
   ContentSearchResponse,
+  ProductStatus,
 }
 
 /**
@@ -194,4 +196,28 @@ export interface SupportIntegration {
    * ```
    */
   searchContent?(request: ContentSearchRequest): Promise<ContentSearchResponse>
+
+  /**
+   * Get product availability/inventory status.
+   * Optional method - implement to let the agent accurately report availability.
+   *
+   * IMPORTANT: The agent should call this BEFORE claiming a product is sold out
+   * or unavailable. Without this, the agent may give incorrect availability info.
+   *
+   * @param productId - Product identifier (slug or ID)
+   * @returns ProductStatus with availability, inventory, and enrollment info
+   *
+   * @example
+   * ```typescript
+   * // Customer asks: "Can I still sign up for the TypeScript workshop?"
+   * const status = await integration.getProductStatus('ts-workshop-feb-2026')
+   *
+   * if (status?.soldOut) {
+   *   // Agent: "Sorry, this workshop is sold out (0 of 50 seats remaining)"
+   * } else if (status?.available && status.quantityRemaining > 0) {
+   *   // Agent: "Yes! There are still 12 seats available."
+   * }
+   * ```
+   */
+  getProductStatus?(productId: string): Promise<ProductStatus | null>
 }

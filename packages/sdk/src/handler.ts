@@ -257,6 +257,18 @@ async function routeAction(
         return { data: result, status: 200 }
       }
 
+      case 'getProductStatus': {
+        if (!integration.getProductStatus) {
+          return {
+            data: { error: 'Method not implemented: getProductStatus' },
+            status: 501,
+          }
+        }
+        const productId = (body as unknown as { productId: string }).productId
+        const result = await integration.getProductStatus(productId)
+        return { data: result, status: 200 }
+      }
+
       default:
         return {
           data: { error: `Unknown action: ${action}` },

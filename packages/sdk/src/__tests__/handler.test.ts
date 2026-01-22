@@ -385,6 +385,89 @@ describe('createSupportHandler', () => {
       const data = (await response.json()) as Record<string, unknown>
       expect(data.error).toBe('Method not implemented: getSubscriptions')
     })
+
+    it('routes getProductStatus when implemented', async () => {
+      const integrationWithProductStatus: SupportIntegration = {
+        ...mockIntegration,
+        getProductStatus: vi.fn(async (productId: string) => ({
+          productId,
+          productType: 'live' as const,
+          available: true,
+          soldOut: false,
+          quantityAvailable: 50,
+          quantityRemaining: 12,
+          state: 'active' as const,
+          startsAt: '2026-02-01T10:00:00Z',
+        })),
+      }
+
+      const handler = createSupportHandler({
+        integration: integrationWithProductStatus,
+        webhookSecret,
+      })
+
+      const request = createRequest({
+        action: 'getProductStatus',
+        productId: 'ts-workshop-feb-2026',
+      })
+
+      const response = await handler(request)
+      expect(response.status).toBe(200)
+
+      expect(
+        integrationWithProductStatus.getProductStatus
+      ).toHaveBeenCalledWith('ts-workshop-feb-2026')
+
+      const data = (await response.json()) as Record<string, unknown>
+      expect(data).toMatchObject({
+        productId: 'ts-workshop-feb-2026',
+        productType: 'live',
+        available: true,
+        soldOut: false,
+        quantityRemaining: 12,
+      })
+    })
+
+    it('returns 501 for getProductStatus when not implemented', async () => {
+      const handler = createSupportHandler({
+        integration: mockIntegration,
+        webhookSecret,
+      })
+
+      const request = createRequest({
+        action: 'getProductStatus',
+        productId: 'some-product',
+      })
+
+      const response = await handler(request)
+      expect(response.status).toBe(501)
+
+      const data = (await response.json()) as Record<string, unknown>
+      expect(data.error).toBe('Method not implemented: getProductStatus')
+    })
+
+    it('returns null for non-existent product', async () => {
+      const integrationWithProductStatus: SupportIntegration = {
+        ...mockIntegration,
+        getProductStatus: vi.fn(async (productId: string) => null),
+      }
+
+      const handler = createSupportHandler({
+        integration: integrationWithProductStatus,
+        webhookSecret,
+      })
+
+      const request = createRequest({
+        action: 'getProductStatus',
+        productId: 'non-existent-product',
+      })
+
+      const response = await handler(request)
+      expect(response.status).toBe(200)
+
+      const data = await response.json()
+      expect(data).toBeNull()
+    })
   })
 
   describe('error handling', () => {

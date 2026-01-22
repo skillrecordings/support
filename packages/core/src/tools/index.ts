@@ -20,6 +20,7 @@ export {
 
 export { initializeToolAuditLogging } from './audit-integration'
 
+import { checkProductAvailability } from './check-product-availability'
 import { getConversationContext } from './get-conversation-context'
 // Import all tool implementations
 import { lookupUser } from './lookup-user'
@@ -38,6 +39,7 @@ export { getPaymentHistory } from './stripe-payment-history'
 export { lookupCharge } from './stripe-lookup-charge'
 export { getSubscriptionStatus } from './stripe-subscription-status'
 export { verifyRefund } from './stripe-verify-refund'
+export { checkProductAvailability } from './check-product-availability'
 
 /**
  * Aggregated support tools object
@@ -56,4 +58,5 @@ export const supportTools = {
   memoryStore,
   memoryVote,
   memoryCite,
+  checkProductAvailability,
 }
