@@ -1,0 +1,582 @@
+/**
+ * CLI commands for pulling agent responses for analysis
+ *
+ * Usage:
+ *   skill responses list --app total-typescript --limit 50
+ *   skill responses list --since 2024-01-01 --json
+ *   skill responses get <actionId> --context
+ */
+
+import { writeFileSync } from 'fs'
+import { createFrontClient } from '@skillrecordings/core/front'
+import {
+  ActionsTable,
+  AppsTable,
+  ConversationsTable,
+  and,
+  desc,
+  eq,
+  getDb,
+  gte,
+} from '@skillrecordings/database'
+import type { Command } from 'commander'
+
+interface ResponseRecord {
+  actionId: string
+  appSlug: string
+  appName: string
+  conversationId: string
+  customerEmail: string
+  response: string
+  category: string
+  createdAt: Date
+  rating?: 'good' | 'bad'
+  ratedBy?: string
+  ratedAt?: Date
+}
+
+interface ResponseWithContext extends ResponseRecord {
+  conversationHistory?: Array<{
+    id: string
+    isInbound: boolean
+    body: string
+    createdAt: number
+    author?: string
+  }>
+  triggerMessage?: {
+    subject: string
+    body: string
+  }
+}
+
+/**
+ * Format timestamp for display
+ */
+function formatDate(date: Date): string {
+  return date.toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+/**
+ * Truncate string with ellipsis
+ */
+function truncate(str: string, len: number): string {
+  if (!str) return ''
+  if (str.length <= len) return str
+  return str.slice(0, len - 3) + '...'
+}
+
+/**
+ * List recent agent responses
+ */
+async function listResponses(options: {
+  app?: string
+  limit?: number
+  since?: string
+  rating?: 'good' | 'bad' | 'unrated'
+  json?: boolean
+}): Promise<void> {
+  const db = getDb()
+  const limit = options.limit || 20
+
+  try {
+    // Build query conditions
+    const conditions = [eq(ActionsTable.type, 'draft-response')]
+
+    if (options.app) {
+      // Lookup app by slug
+      const appResults = await db
+        .select()
+        .from(AppsTable)
+        .where(eq(AppsTable.slug, options.app))
+        .limit(1)
+
+      const foundApp = appResults[0]
+      if (!foundApp) {
+        console.error(`App not found: ${options.app}`)
+        process.exit(1)
+      }
+      conditions.push(eq(ActionsTable.app_id, foundApp.id))
+    }
+
+    if (options.since) {
+      const sinceDate = new Date(options.since)
+      conditions.push(gte(ActionsTable.created_at, sinceDate))
+    }
+
+    // Query actions with app and conversation info
+    const results = await db
+      .select({
+        action: ActionsTable,
+        app: AppsTable,
+        conversation: ConversationsTable,
+      })
+      .from(ActionsTable)
+      .leftJoin(AppsTable, eq(ActionsTable.app_id, AppsTable.id))
+      .leftJoin(
+        ConversationsTable,
+        eq(
+          ActionsTable.conversation_id,
+          ConversationsTable.front_conversation_id
+        )
+      )
+      .where(and(...conditions))
+      .orderBy(desc(ActionsTable.created_at))
+      .limit(limit)
+
+    // Transform to response records
+    const responses: ResponseRecord[] = results.map((r) => {
+      const params = r.action.parameters as {
+        response?: string
+        category?: string
+      }
+
+      // Determine rating from approved_by/rejected_by
+      let rating: 'good' | 'bad' | undefined
+      let ratedBy: string | undefined
+      let ratedAt: Date | undefined
+
+      if (r.action.approved_by) {
+        rating = 'good'
+        ratedBy = r.action.approved_by
+        ratedAt = r.action.approved_at ?? undefined
+      } else if (r.action.rejected_by) {
+        rating = 'bad'
+        ratedBy = r.action.rejected_by
+        ratedAt = r.action.rejected_at ?? undefined
+      }
+
+      return {
+        actionId: r.action.id,
+        appSlug: r.app?.slug ?? 'unknown',
+        appName: r.app?.name ?? 'Unknown App',
+        conversationId: r.action.conversation_id ?? '',
+        customerEmail: r.conversation?.customer_email ?? 'unknown',
+        response: params.response ?? '',
+        category: params.category ?? 'unknown',
+        createdAt: r.action.created_at ?? new Date(),
+        rating,
+        ratedBy,
+        ratedAt,
+      }
+    })
+
+    // Filter by rating if specified
+    let filteredResponses = responses
+    if (options.rating === 'good') {
+      filteredResponses = responses.filter((r) => r.rating === 'good')
+    } else if (options.rating === 'bad') {
+      filteredResponses = responses.filter((r) => r.rating === 'bad')
+    } else if (options.rating === 'unrated') {
+      filteredResponses = responses.filter((r) => !r.rating)
+    }
+
+    if (options.json) {
+      console.log(JSON.stringify(filteredResponses, null, 2))
+      return
+    }
+
+    // Display table
+    console.log('\n📝 Agent Responses')
+    console.log('='.repeat(80))
+
+    for (const r of filteredResponses) {
+      const ratingIcon =
+        r.rating === 'good' ? '👍' : r.rating === 'bad' ? '👎' : '⏳'
+      console.log(`\n${ratingIcon} [${formatDate(r.createdAt)}] ${r.appSlug}`)
+      console.log(`   Customer: ${r.customerEmail}`)
+      console.log(`   Category: ${r.category}`)
+      console.log(
+        `   Response: ${truncate(r.response.replace(/\n/g, ' '), 200)}`
+      )
+      console.log(`   ID: ${r.actionId}`)
+      if (r.rating) {
+        console.log(`   Rated: ${r.rating} by ${r.ratedBy}`)
+      }
+    }
+
+    console.log('\n' + '-'.repeat(80))
+    console.log(`Total: ${filteredResponses.length} responses`)
+    console.log(
+      `  👍 Good: ${filteredResponses.filter((r) => r.rating === 'good').length}`
+    )
+    console.log(
+      `  👎 Bad: ${filteredResponses.filter((r) => r.rating === 'bad').length}`
+    )
+    console.log(
+      `  ⏳ Unrated: ${filteredResponses.filter((r) => !r.rating).length}`
+    )
+    console.log('')
+  } catch (error) {
+    console.error(
+      'Error:',
+      error instanceof Error ? error.message : 'Unknown error'
+    )
+    process.exit(1)
+  }
+}
+
+/**
+ * Get a specific response with full context
+ */
+async function getResponse(
+  actionId: string,
+  options: { context?: boolean; json?: boolean }
+): Promise<void> {
+  const db = getDb()
+
+  try {
+    // Fetch the action with related data
+    const results = await db
+      .select({
+        action: ActionsTable,
+        app: AppsTable,
+        conversation: ConversationsTable,
+      })
+      .from(ActionsTable)
+      .leftJoin(AppsTable, eq(ActionsTable.app_id, AppsTable.id))
+      .leftJoin(
+        ConversationsTable,
+        eq(
+          ActionsTable.conversation_id,
+          ConversationsTable.front_conversation_id
+        )
+      )
+      .where(eq(ActionsTable.id, actionId))
+      .limit(1)
+
+    const r = results[0]
+    if (!r) {
+      console.error(`Response not found: ${actionId}`)
+      process.exit(1)
+    }
+
+    const params = r.action.parameters as {
+      response?: string
+      category?: string
+    }
+
+    let rating: 'good' | 'bad' | undefined
+    let ratedBy: string | undefined
+    let ratedAt: Date | undefined
+
+    if (r.action.approved_by) {
+      rating = 'good'
+      ratedBy = r.action.approved_by
+      ratedAt = r.action.approved_at ?? undefined
+    } else if (r.action.rejected_by) {
+      rating = 'bad'
+      ratedBy = r.action.rejected_by
+      ratedAt = r.action.rejected_at ?? undefined
+    }
+
+    const response: ResponseWithContext = {
+      actionId: r.action.id,
+      appSlug: r.app?.slug ?? 'unknown',
+      appName: r.app?.name ?? 'Unknown App',
+      conversationId: r.action.conversation_id ?? '',
+      customerEmail: r.conversation?.customer_email ?? 'unknown',
+      response: params.response ?? '',
+      category: params.category ?? 'unknown',
+      createdAt: r.action.created_at ?? new Date(),
+      rating,
+      ratedBy,
+      ratedAt,
+    }
+
+    // Fetch conversation context from Front if requested
+    if (options.context && r.action.conversation_id) {
+      const frontToken = process.env.FRONT_API_TOKEN
+      if (frontToken) {
+        try {
+          const front = createFrontClient(frontToken)
+          const messages = await front.getConversationMessages(
+            r.action.conversation_id
+          )
+
+          response.conversationHistory = messages.map((m) => ({
+            id: m.id,
+            isInbound: m.is_inbound,
+            body:
+              m.text ||
+              m.body
+                .replace(/<[^>]*>/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim(),
+            createdAt: m.created_at,
+            author: m.author?.email,
+          }))
+
+          // Find the trigger message (most recent inbound before draft creation)
+          const draftTime = r.action.created_at?.getTime() ?? Date.now()
+          const inboundBefore = messages
+            .filter((m) => m.is_inbound && m.created_at * 1000 < draftTime)
+            .sort((a, b) => b.created_at - a.created_at)
+
+          const trigger = inboundBefore[0]
+          if (trigger) {
+            response.triggerMessage = {
+              subject: trigger.subject ?? '',
+              body:
+                trigger.text ??
+                trigger.body
+                  .replace(/<[^>]*>/g, ' ')
+                  .replace(/\s+/g, ' ')
+                  .trim(),
+            }
+          }
+        } catch (err) {
+          console.error('[warn] Failed to fetch Front context:', err)
+        }
+      } else {
+        console.error('[warn] FRONT_API_TOKEN not set, skipping context fetch')
+      }
+    }
+
+    if (options.json) {
+      console.log(JSON.stringify(response, null, 2))
+      return
+    }
+
+    // Display detailed view
+    const ratingIcon =
+      response.rating === 'good'
+        ? '👍'
+        : response.rating === 'bad'
+          ? '👎'
+          : '⏳'
+
+    console.log('\n📝 Agent Response Details')
+    console.log('='.repeat(80))
+    console.log(`ID:         ${response.actionId}`)
+    console.log(`App:        ${response.appName} (${response.appSlug})`)
+    console.log(`Customer:   ${response.customerEmail}`)
+    console.log(`Category:   ${response.category}`)
+    console.log(`Created:    ${formatDate(response.createdAt)}`)
+    console.log(`Rating:     ${ratingIcon} ${response.rating ?? 'unrated'}`)
+    if (response.ratedBy) {
+      console.log(`Rated by:   ${response.ratedBy}`)
+    }
+
+    if (response.triggerMessage) {
+      console.log('\n--- Trigger Message ---')
+      if (response.triggerMessage.subject) {
+        console.log(`Subject: ${response.triggerMessage.subject}`)
+      }
+      console.log(response.triggerMessage.body)
+    }
+
+    console.log('\n--- Agent Response ---')
+    console.log(response.response)
+
+    if (response.conversationHistory?.length) {
+      console.log('\n--- Conversation History ---')
+      for (const msg of response.conversationHistory) {
+        const dir = msg.isInbound ? '← IN' : '→ OUT'
+        const time = new Date(msg.createdAt * 1000).toLocaleString()
+        console.log(`\n[${dir}] ${time} - ${msg.author ?? 'unknown'}`)
+        console.log(truncate(msg.body, 500))
+      }
+    }
+
+    console.log('')
+  } catch (error) {
+    console.error(
+      'Error:',
+      error instanceof Error ? error.message : 'Unknown error'
+    )
+    process.exit(1)
+  }
+}
+
+/**
+ * Export responses to a file for eval/analysis
+ */
+async function exportResponses(options: {
+  app?: string
+  since?: string
+  output?: string
+  rating?: 'good' | 'bad' | 'all'
+}): Promise<void> {
+  const db = getDb()
+
+  try {
+    // Build query conditions
+    const conditions = [eq(ActionsTable.type, 'draft-response')]
+
+    if (options.app) {
+      const appResults = await db
+        .select()
+        .from(AppsTable)
+        .where(eq(AppsTable.slug, options.app))
+        .limit(1)
+
+      const foundApp = appResults[0]
+      if (!foundApp) {
+        console.error(`App not found: ${options.app}`)
+        process.exit(1)
+      }
+      conditions.push(eq(ActionsTable.app_id, foundApp.id))
+    }
+
+    if (options.since) {
+      const sinceDate = new Date(options.since)
+      conditions.push(gte(ActionsTable.created_at, sinceDate))
+    }
+
+    // Query all matching actions
+    const results = await db
+      .select({
+        action: ActionsTable,
+        app: AppsTable,
+        conversation: ConversationsTable,
+      })
+      .from(ActionsTable)
+      .leftJoin(AppsTable, eq(ActionsTable.app_id, AppsTable.id))
+      .leftJoin(
+        ConversationsTable,
+        eq(
+          ActionsTable.conversation_id,
+          ConversationsTable.front_conversation_id
+        )
+      )
+      .where(and(...conditions))
+      .orderBy(desc(ActionsTable.created_at))
+
+    // Fetch Front context for each
+    const frontToken = process.env.FRONT_API_TOKEN
+    const front = frontToken ? createFrontClient(frontToken) : null
+
+    const exportData: ResponseWithContext[] = []
+
+    for (const r of results) {
+      const params = r.action.parameters as {
+        response?: string
+        category?: string
+      }
+
+      let rating: 'good' | 'bad' | undefined
+      if (r.action.approved_by) rating = 'good'
+      else if (r.action.rejected_by) rating = 'bad'
+
+      // Filter by rating
+      if (options.rating === 'good' && rating !== 'good') continue
+      if (options.rating === 'bad' && rating !== 'bad') continue
+
+      const record: ResponseWithContext = {
+        actionId: r.action.id,
+        appSlug: r.app?.slug ?? 'unknown',
+        appName: r.app?.name ?? 'Unknown App',
+        conversationId: r.action.conversation_id ?? '',
+        customerEmail: r.conversation?.customer_email ?? 'unknown',
+        response: params.response ?? '',
+        category: params.category ?? 'unknown',
+        createdAt: r.action.created_at ?? new Date(),
+        rating,
+        ratedBy: r.action.approved_by ?? r.action.rejected_by ?? undefined,
+        ratedAt: r.action.approved_at ?? r.action.rejected_at ?? undefined,
+      }
+
+      // Fetch context
+      if (front && r.action.conversation_id) {
+        try {
+          const messages = await front.getConversationMessages(
+            r.action.conversation_id
+          )
+
+          record.conversationHistory = messages.map((m) => ({
+            id: m.id,
+            isInbound: m.is_inbound,
+            body:
+              m.text ??
+              m.body
+                .replace(/<[^>]*>/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim(),
+            createdAt: m.created_at,
+            author: m.author?.email,
+          }))
+
+          const draftTime = r.action.created_at?.getTime() ?? Date.now()
+          const inboundBefore = messages
+            .filter((m) => m.is_inbound && m.created_at * 1000 < draftTime)
+            .sort((a, b) => b.created_at - a.created_at)
+
+          const trigger = inboundBefore[0]
+          if (trigger) {
+            record.triggerMessage = {
+              subject: trigger.subject ?? '',
+              body:
+                trigger.text ??
+                trigger.body
+                  .replace(/<[^>]*>/g, ' ')
+                  .replace(/\s+/g, ' ')
+                  .trim(),
+            }
+          }
+        } catch {
+          // Skip context fetch failures
+        }
+      }
+
+      exportData.push(record)
+    }
+
+    const outputJson = JSON.stringify(exportData, null, 2)
+
+    if (options.output) {
+      writeFileSync(options.output, outputJson, 'utf-8')
+      console.log(
+        `Exported ${exportData.length} responses to ${options.output}`
+      )
+    } else {
+      console.log(outputJson)
+    }
+  } catch (error) {
+    console.error(
+      'Error:',
+      error instanceof Error ? error.message : 'Unknown error'
+    )
+    process.exit(1)
+  }
+}
+
+/**
+ * Register response commands with Commander
+ */
+export function registerResponseCommands(program: Command): void {
+  const responses = program
+    .command('responses')
+    .description('Pull agent responses for analysis')
+
+  responses
+    .command('list')
+    .description('List recent agent responses')
+    .option('-a, --app <slug>', 'Filter by app slug')
+    .option('-l, --limit <n>', 'Number of responses (default: 20)', parseInt)
+    .option('-s, --since <date>', 'Filter responses since date (YYYY-MM-DD)')
+    .option('-r, --rating <type>', 'Filter by rating (good, bad, unrated)')
+    .option('--json', 'Output as JSON')
+    .action(listResponses)
+
+  responses
+    .command('get')
+    .description('Get a specific response with details')
+    .argument('<actionId>', 'Action ID of the response')
+    .option('-c, --context', 'Include conversation context from Front')
+    .option('--json', 'Output as JSON')
+    .action(getResponse)
+
+  responses
+    .command('export')
+    .description('Export responses with context for analysis')
+    .option('-a, --app <slug>', 'Filter by app slug')
+    .option('-s, --since <date>', 'Filter responses since date (YYYY-MM-DD)')
+    .option('-r, --rating <type>', 'Filter by rating (good, bad, all)')
+    .option('-o, --output <file>', 'Output file path')
+    .action(exportResponses)
+}
