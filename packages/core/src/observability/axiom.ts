@@ -284,6 +284,63 @@ export async function traceDraftCreation(data: {
 }
 
 /**
+ * Trace approval request sent
+ */
+export async function traceApprovalRequested(data: {
+  conversationId: string
+  appId: string
+  actionId: string
+  actionType: string
+  customerEmail?: string
+}): Promise<void> {
+  await sendTrace({
+    name: 'approval.requested',
+    type: 'approval',
+    ...data,
+  })
+}
+
+/**
+ * Trace Slack notification
+ */
+export async function traceSlackNotification(data: {
+  conversationId?: string
+  appId?: string
+  actionId: string
+  success: boolean
+  channel?: string
+  messageTs?: string
+  durationMs: number
+  error?: string
+}): Promise<void> {
+  await sendTrace({
+    name: 'slack.notification',
+    type: 'slack',
+    ...data,
+  })
+}
+
+/**
+ * Trace workflow step (generic step timing)
+ */
+export async function traceWorkflowStep(data: {
+  conversationId?: string
+  appId?: string
+  workflowName: string
+  stepName: string
+  durationMs: number
+  success: boolean
+  error?: string
+  metadata?: Record<string, unknown>
+}): Promise<void> {
+  await sendTrace({
+    name: `workflow.step.${data.stepName}`,
+    type: 'workflow-step',
+    ...data,
+  })
+}
+
+/**
  * Trace workflow completion
  */
 export async function traceWorkflowComplete(data: {
