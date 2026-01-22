@@ -1,11 +1,15 @@
 import { randomUUID } from 'crypto'
 import { ActionsTable, getDb } from '@skillrecordings/database'
 import { MemoryService } from '@skillrecordings/memory/memory'
+import { IntegrationClient } from '@skillrecordings/sdk/client'
 import { runSupportAgent } from '../../agent/index'
 import { type FrontMessage, createFrontClient } from '../../front/index'
+import { withTracing } from '../../observability/axiom'
+import { initializeLangfuse, traceAgentRun } from '../../observability/langfuse'
 import { classifyMessage } from '../../router/classifier'
 import { matchRules } from '../../router/rules'
 import { systemRules } from '../../router/system-rules'
+import { getApp } from '../../services/app-registry'
 import { inngest } from '../client'
 import { SUPPORT_INBOUND_RECEIVED } from '../events'
 import type { SupportInboundReceivedEvent } from '../events'
@@ -33,6 +37,9 @@ export const handleInboundMessage = inngest.createFunction(
 
     console.log('[workflow] ========== HANDLE INBOUND MESSAGE ==========')
     console.log('[workflow] Event data:', JSON.stringify(event.data, null, 2))
+
+    // Initialize Langfuse for LLM observability
+    initializeLangfuse()
 
     // Step 1: Fetch full message and conversation from Front API
     const context = await step.run('get-conversation-context', async () => {
@@ -371,107 +378,172 @@ export const handleInboundMessage = inngest.createFunction(
 
     // Step 4: Run agent
     const agentResult = await step.run('run-agent', async () => {
-      console.log('[workflow:agent] ========== RUNNING AGENT ==========')
-      console.log('[workflow:agent] Message:', context.body?.slice(0, 500))
-      console.log('[workflow:agent] Customer email:', context.senderEmail)
-      console.log('[workflow:agent] App ID:', context.appId)
+      return withTracing(
+        'agent.run',
+        async () => {
+          console.log('[workflow:agent] ========== RUNNING AGENT ==========')
+          console.log('[workflow:agent] Message:', context.body?.slice(0, 500))
+          console.log('[workflow:agent] Customer email:', context.senderEmail)
+          console.log('[workflow:agent] App ID:', context.appId)
 
-      // Convert Front messages to AI SDK message format
-      // Filter out messages with empty content - AI SDK will reject them
-      const conversationMessages = context.conversationHistory
-        .sort((a, b) => a.created_at - b.created_at)
-        .map((msg) => ({
-          role: msg.is_inbound ? ('user' as const) : ('assistant' as const),
-          content: msg.body || '',
-        }))
-        .filter((msg) => msg.content.trim().length > 0)
+          const agentStartTime = Date.now()
 
-      console.log(
-        '[workflow:agent] Conversation history:',
-        conversationMessages.length,
-        'messages'
-      )
-      console.log(
-        '[workflow:agent] Message content lengths:',
-        conversationMessages.map((m) => m.content.length)
-      )
+          // Convert Front messages to AI SDK message format
+          // Filter out messages with empty content - AI SDK will reject them
+          const conversationMessages = context.conversationHistory
+            .sort((a, b) => a.created_at - b.created_at)
+            .map((msg) => ({
+              role: msg.is_inbound ? ('user' as const) : ('assistant' as const),
+              content: msg.body || '',
+            }))
+            .filter((msg) => msg.content.trim().length > 0)
 
-      // Ensure message body isn't empty
-      const messageBody = context.body?.trim() || ''
-      if (!messageBody) {
-        console.error('[workflow:agent] Empty message body, cannot run agent')
-        return {
-          response: '',
-          toolCalls: [],
-          requiresApproval: false,
-          escalated: true,
-          escalationReason: 'Empty message body',
-          reasoning: 'Message body was empty',
-        }
-      }
+          console.log(
+            '[workflow:agent] Conversation history:',
+            conversationMessages.length,
+            'messages'
+          )
+          console.log(
+            '[workflow:agent] Message content lengths:',
+            conversationMessages.map((m) => m.content.length)
+          )
 
-      // Format memories for agent context
-      const priorKnowledge = memories.memories
-        .map((r) => {
-          const recency = r.decay_factor > 0.5 ? 'recent' : 'older'
-          return `[${recency}] ${r.memory.content}`
-        })
-        .join('\n')
+          // Ensure message body isn't empty
+          const messageBody = context.body?.trim() || ''
+          if (!messageBody) {
+            console.error(
+              '[workflow:agent] Empty message body, cannot run agent'
+            )
+            return {
+              response: '',
+              toolCalls: [],
+              requiresApproval: false,
+              escalated: true,
+              escalationReason: 'Empty message body',
+              reasoning: 'Message body was empty',
+            }
+          }
 
-      // Run the support agent with model based on complexity
-      console.log(
-        '[workflow:agent] Calling runSupportAgent with model:',
-        modelToUse
-      )
-      console.log(
-        '[workflow:agent] Prior knowledge memories:',
-        memories.memories.length
-      )
+          // Format memories for agent context
+          const priorKnowledge = memories.memories
+            .map((r) => {
+              const recency = r.decay_factor > 0.5 ? 'recent' : 'older'
+              return `[${recency}] ${r.memory.content}`
+            })
+            .join('\n')
 
-      const result = await runSupportAgent({
-        message: messageBody,
-        conversationHistory: conversationMessages.slice(0, -1), // Exclude current message
-        customerContext: {
-          email: context.senderEmail,
+          // Get app config for tool context
+          const app = await getApp(context.appId)
+          if (!app) {
+            console.error(
+              '[workflow:agent] App not found in registry:',
+              context.appId
+            )
+            return {
+              response: '',
+              toolCalls: [],
+              requiresApproval: false,
+              escalated: true,
+              escalationReason: 'App not found in registry',
+              reasoning: 'App configuration not found',
+            }
+          }
+
+          // Create IntegrationClient for tool context
+          const integrationClient = new IntegrationClient({
+            baseUrl: app.integration_base_url,
+            webhookSecret: app.webhook_secret,
+          })
+
+          // Run the support agent with model based on complexity
+          console.log(
+            '[workflow:agent] Calling runSupportAgent with model:',
+            modelToUse
+          )
+          console.log(
+            '[workflow:agent] Prior knowledge memories:',
+            memories.memories.length
+          )
+
+          const result = await runSupportAgent({
+            message: messageBody,
+            conversationHistory: conversationMessages.slice(0, -1), // Exclude current message
+            customerContext: {
+              email: context.senderEmail,
+            },
+            appId: context.appId,
+            model: modelToUse,
+            priorKnowledge: priorKnowledge || undefined,
+            integrationClient,
+            appConfig: {
+              instructor_teammate_id: app.instructor_teammate_id || undefined,
+              stripeAccountId: app.stripe_account_id || undefined,
+            },
+          })
+
+          const agentDuration = Date.now() - agentStartTime
+
+          // Trace agent run with Langfuse
+          await traceAgentRun(
+            {
+              text: result.response,
+              usage: {
+                promptTokens: 0,
+                completionTokens: 0,
+                totalTokens: 0,
+              },
+              finishReason: 'stop',
+            },
+            {
+              conversationId,
+              appId: context.appId,
+              userEmail: context.senderEmail,
+              messages: conversationMessages,
+            }
+          )
+
+          console.log('[workflow:agent] Agent result:', {
+            responseLength: result.response?.length,
+            responsePreview: result.response?.slice(0, 300),
+            toolCalls: result.toolCalls.map((tc) => ({
+              name: tc.name,
+              args: tc.args,
+            })),
+            requiresApproval: result.requiresApproval,
+            autoSent: result.autoSent,
+            duration: agentDuration,
+          })
+
+          // Check if escalation was requested
+          const escalationCall = result.toolCalls.find(
+            (tc) => tc.name === 'escalateToHuman'
+          )
+          const draftCall = result.toolCalls.find(
+            (tc) => tc.name === 'draftResponse'
+          )
+
+          const agentOutput = {
+            response: (draftCall?.args?.body as string) || result.response,
+            toolCalls: result.toolCalls,
+            requiresApproval: result.requiresApproval,
+            escalated: !!escalationCall,
+            escalationReason: escalationCall?.args?.reason as
+              | string
+              | undefined,
+            reasoning: result.reasoning,
+          }
+          console.log('[workflow:agent] Final agent output:', {
+            responseLength: agentOutput.response?.length,
+            escalated: agentOutput.escalated,
+            requiresApproval: agentOutput.requiresApproval,
+          })
+          return agentOutput
         },
-        appId: context.appId,
-        model: modelToUse,
-        priorKnowledge: priorKnowledge || undefined,
-      })
-
-      console.log('[workflow:agent] Agent result:', {
-        responseLength: result.response?.length,
-        responsePreview: result.response?.slice(0, 300),
-        toolCalls: result.toolCalls.map((tc) => ({
-          name: tc.name,
-          args: tc.args,
-        })),
-        requiresApproval: result.requiresApproval,
-        autoSent: result.autoSent,
-      })
-
-      // Check if escalation was requested
-      const escalationCall = result.toolCalls.find(
-        (tc) => tc.name === 'escalateToHuman'
+        {
+          conversationId,
+          appId: context.appId,
+        }
       )
-      const draftCall = result.toolCalls.find(
-        (tc) => tc.name === 'draftResponse'
-      )
-
-      const agentOutput = {
-        response: (draftCall?.args?.body as string) || result.response,
-        toolCalls: result.toolCalls,
-        requiresApproval: result.requiresApproval,
-        escalated: !!escalationCall,
-        escalationReason: escalationCall?.args?.reason as string | undefined,
-        reasoning: result.reasoning,
-      }
-      console.log('[workflow:agent] Final agent output:', {
-        responseLength: agentOutput.response?.length,
-        escalated: agentOutput.escalated,
-        requiresApproval: agentOutput.requiresApproval,
-      })
-      return agentOutput
     })
 
     // Step 4: Route based on agent result
