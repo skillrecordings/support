@@ -16,6 +16,7 @@ import {
   traceMemoryRetrieval,
   traceRouting,
   traceWorkflowComplete,
+  traceWorkflowStep,
   withTracing,
 } from '../../observability/axiom'
 import {
@@ -793,12 +794,28 @@ export const handleInboundMessage = inngest.createFunction(
 
     // Step 4: Route based on agent result
     const routingResult = await step.run('route-action', async () => {
+      const routingStartTime = Date.now()
       console.log('[workflow:routing] ========== ROUTING DECISION ==========')
+      console.log('[workflow:routing] Start time:', new Date().toISOString())
       console.log('[workflow:routing] Escalated:', agentResult.escalated)
       console.log(
         '[workflow:routing] Requires approval:',
         agentResult.requiresApproval
       )
+
+      // Trace that we entered the routing step
+      await traceWorkflowStep({
+        conversationId,
+        appId: context.appId,
+        workflowName: 'handle-inbound-message',
+        stepName: 'route-action-start',
+        durationMs: 0,
+        success: true,
+        metadata: {
+          escalated: agentResult.escalated,
+          requiresApproval: agentResult.requiresApproval,
+        },
+      })
 
       // If agent escalated, flag for human
       if (agentResult.escalated) {
@@ -821,9 +838,11 @@ export const handleInboundMessage = inngest.createFunction(
         console.log(
           '[workflow:routing] DECISION: Requires approval, creating action record'
         )
+
         // Create action record in database
         const actionId = randomUUID()
         const db = getDb()
+        const dbStartTime = Date.now()
 
         await db.insert(ActionsTable).values({
           id: actionId,
@@ -835,6 +854,20 @@ export const handleInboundMessage = inngest.createFunction(
           created_at: new Date(),
         })
         console.log('[workflow:routing] Action record created:', actionId)
+
+        // Trace that DB insert completed (diagnostic: if we see this but not sendEvent, timeout happened between)
+        await traceWorkflowStep({
+          conversationId,
+          appId: context.appId,
+          workflowName: 'handle-inbound-message',
+          stepName: 'create-action-record',
+          durationMs: Date.now() - dbStartTime,
+          success: true,
+          metadata: { actionId, requiresApproval: true },
+        })
+
+        const sendEventStartTime = Date.now()
+        console.log('[workflow:routing] Sending approval event...')
 
         await step.sendEvent('request-approval', {
           name: 'support/approval.requested',
@@ -854,6 +887,18 @@ export const handleInboundMessage = inngest.createFunction(
           },
         })
         console.log('[workflow:routing] Approval event sent')
+
+        // Trace that sendEvent completed
+        await traceWorkflowStep({
+          conversationId,
+          appId: context.appId,
+          workflowName: 'handle-inbound-message',
+          stepName: 'send-approval-event',
+          durationMs: Date.now() - sendEventStartTime,
+          success: true,
+          metadata: { actionId },
+        })
+
         await traceRouting({
           conversationId,
           appId: context.appId,
