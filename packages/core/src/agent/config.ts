@@ -7,6 +7,7 @@ import type {
 import { type ModelMessage, generateText, stepCountIs, tool } from 'ai'
 import { z } from 'zod'
 import { cachedContentSearch } from '../cache/content-cache'
+import { telemetryConfig } from '../observability/otel'
 import { classifyMessage } from '../router/classifier'
 import { getApp } from '../services/app-registry'
 import { getTrustScore } from '../trust/repository'
@@ -694,6 +695,7 @@ INSTEAD:
       integrationClient,
       appConfig,
     },
+    experimental_telemetry: telemetryConfig,
   })
   console.log(`[agent] AI SDK call completed (${Date.now() - aiStartTime}ms)`)
   console.log('[agent] AI result:', {

@@ -55,9 +55,11 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.15",
-    "@skillrecordings/front-sdk": "*",
     "@axiomhq/js": "^1.3.0",
+    "@langfuse/otel": "^4.5.1",
+    "@opentelemetry/sdk-node": "^0.211.0",
     "@skillrecordings/database": "*",
+    "@skillrecordings/front-sdk": "*",
     "@skillrecordings/memory": "*",
     "@skillrecordings/sdk": "*",
     "@slack/web-api": "^7.11.0",
