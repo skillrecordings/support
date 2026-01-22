@@ -133,6 +133,12 @@ export function createBaseClient(config: FrontClientConfig) {
       request<T>('PATCH', path, schema, body),
 
     /**
+     * Send a PUT request
+     */
+    put: <T>(path: string, body: unknown, schema?: z.ZodType<T>) =>
+      request<T>('PUT', path, schema, body),
+
+    /**
      * Send a DELETE request
      */
     delete: <T>(path: string, schema?: z.ZodType<T>) =>
