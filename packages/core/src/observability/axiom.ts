@@ -171,7 +171,7 @@ export async function traceClassification(data: {
 }
 
 /**
- * Trace an agent run
+ * Trace an agent run - high cardinality for analytics
  */
 export async function traceAgentRun(data: {
   conversationId: string
@@ -188,6 +188,16 @@ export async function traceAgentRun(data: {
   memoriesRetrieved: number
   knowledgeResults: number
   customerEmail?: string
+  // High cardinality fields for analytics
+  category?: string
+  confidence?: number
+  complexity?: string
+  trustScore?: number
+  inputLength?: number
+  conversationLength?: number
+  knowledgeEmpty?: boolean
+  escalationReason?: string
+  inboxId?: string
 }): Promise<void> {
   await sendTrace({
     name: 'agent.run',

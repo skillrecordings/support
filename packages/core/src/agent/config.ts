@@ -7,11 +7,7 @@ import type {
 import { type ModelMessage, generateText, stepCountIs, tool } from 'ai'
 import { z } from 'zod'
 import { cachedContentSearch } from '../cache/content-cache'
-import {
-  traceAgentRun,
-  traceToolExecution,
-  traceWorkflowStep,
-} from '../observability/axiom'
+import { traceWorkflowStep } from '../observability/axiom'
 import { telemetryConfig } from '../observability/otel'
 import { classifyMessage } from '../router/classifier'
 import { getApp } from '../services/app-registry'
@@ -708,20 +704,6 @@ INSTEAD:
     }))
   })
 
-  // Trace each tool execution
-  for (const tc of toolCalls) {
-    const resultObj = tc.result as Record<string, unknown> | undefined
-    const hasError = resultObj?.error !== undefined
-    await traceToolExecution({
-      appId,
-      conversationId: '', // Not available at this level
-      toolName: tc.name,
-      success: !hasError,
-      durationMs: 0, // Individual timing not available
-      error: hasError ? String(resultObj.error) : undefined,
-    })
-  }
-
   // Check if any tool requires approval
   let requiresApproval = toolCalls.some(
     (tc) =>
@@ -761,29 +743,6 @@ INSTEAD:
     requiresApproval = false
     autoSent = true
   }
-
-  const totalDurationMs = Date.now() - startTime
-
-  // Trace complete agent run to Axiom
-  await traceAgentRun({
-    conversationId: '', // Not available at this level - caller should trace
-    appId,
-    messageId: '', // Not available at this level
-    model,
-    responseLength: result.text?.length ?? 0,
-    toolCallsCount: toolCalls.length,
-    toolNames: toolCalls.map((tc) => tc.name),
-    requiresApproval,
-    autoSent,
-    escalated: toolCalls.some((tc) => tc.name === 'escalateToHuman'),
-    durationMs: totalDurationMs,
-    memoriesRetrieved:
-      retrievedContext.similarTickets.length +
-      retrievedContext.knowledge.length +
-      retrievedContext.goodResponses.length,
-    knowledgeResults: retrievedContext.knowledge.length,
-    customerEmail: customerContext?.email,
-  })
 
   return {
     response: result.text,
