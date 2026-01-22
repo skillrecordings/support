@@ -3,6 +3,10 @@
   "version": "0.0.1",
   "private": true,
   "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
     "./schemas": {
       "types": "./src/schemas.ts",
       "default": "./src/schemas.ts"

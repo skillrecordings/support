@@ -210,6 +210,44 @@ export type MemoryVoteRequestedEvent = {
   }
 }
 
+/** Event emitted when memories are cited during agent execution */
+export const MEMORY_CITED = 'memory/cited' as const
+
+export type MemoryCitedEvent = {
+  name: typeof MEMORY_CITED
+  data: {
+    /** Memory IDs that were cited */
+    memoryIds: string[]
+    /** Inngest run ID for traceability */
+    runId: string
+    /** Associated conversation ID */
+    conversationId: string
+    /** App identifier */
+    appId: string
+    /** Collection the memories belong to */
+    collection: string
+  }
+}
+
+/** Event emitted when a memory outcome is recorded */
+export const MEMORY_OUTCOME_RECORDED = 'memory/outcome.recorded' as const
+
+export type MemoryOutcomeRecordedEvent = {
+  name: typeof MEMORY_OUTCOME_RECORDED
+  data: {
+    /** Memory IDs associated with the outcome */
+    memoryIds: string[]
+    /** Inngest run ID for traceability */
+    runId: string
+    /** Associated conversation ID */
+    conversationId: string
+    /** Outcome of the interaction */
+    outcome: 'success' | 'failure'
+    /** Collection the memories belong to */
+    collection: string
+  }
+}
+
 /**
  * Union of all support platform events.
  * Used to type the Inngest client.
@@ -224,4 +262,6 @@ export type Events = {
   [STRIPE_REFUND_COMPLETED]: StripeRefundCompletedEvent
   [SUPPORT_CONVERSATION_RESOLVED]: SupportConversationResolvedEvent
   [MEMORY_VOTE_REQUESTED]: MemoryVoteRequestedEvent
+  [MEMORY_CITED]: MemoryCitedEvent
+  [MEMORY_OUTCOME_RECORDED]: MemoryOutcomeRecordedEvent
 }

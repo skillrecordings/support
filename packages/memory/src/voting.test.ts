@@ -100,24 +100,57 @@ describe('VotingService', () => {
 
   describe('cite', () => {
     it('should increment citations when memory is cited', async () => {
-      await VotingService.cite(testMemory.id, 'test')
+      await VotingService.cite([testMemory.id], 'run-123', 'test')
 
       const updated = await MemoryService.get(testMemory.id, 'test')
       expect(updated?.metadata.votes.citations).toBe(1)
     })
 
     it('should allow multiple citations', async () => {
-      await VotingService.cite(testMemory.id, 'test')
-      await VotingService.cite(testMemory.id, 'test')
-      await VotingService.cite(testMemory.id, 'test')
+      await VotingService.cite([testMemory.id], 'run-123', 'test')
+      await VotingService.cite([testMemory.id], 'run-124', 'test')
+      await VotingService.cite([testMemory.id], 'run-125', 'test')
 
       const updated = await MemoryService.get(testMemory.id, 'test')
       expect(updated?.metadata.votes.citations).toBe(3)
     })
 
-    it('should throw error if memory not found', async () => {
-      await expect(VotingService.cite(randomUUID(), 'test')).rejects.toThrow(
-        'Memory not found'
+    it('should handle batch citations for multiple memories', async () => {
+      const memory2 = await MemoryService.store('Test memory 2', {
+        collection: 'test',
+        source: 'agent',
+        tags: ['test'],
+      })
+      const memory3 = await MemoryService.store('Test memory 3', {
+        collection: 'test',
+        source: 'agent',
+        tags: ['test'],
+      })
+
+      await VotingService.cite(
+        [testMemory.id, memory2.id, memory3.id],
+        'run-123',
+        'test'
+      )
+
+      const updated1 = await MemoryService.get(testMemory.id, 'test')
+      const updated2 = await MemoryService.get(memory2.id, 'test')
+      const updated3 = await MemoryService.get(memory3.id, 'test')
+
+      expect(updated1?.metadata.votes.citations).toBe(1)
+      expect(updated2?.metadata.votes.citations).toBe(1)
+      expect(updated3?.metadata.votes.citations).toBe(1)
+    })
+
+    it('should throw error if any memory not found', async () => {
+      await expect(
+        VotingService.cite([randomUUID()], 'run-123', 'test')
+      ).rejects.toThrow('Memory not found')
+    })
+
+    it('should throw error if memoryIds is empty', async () => {
+      await expect(VotingService.cite([], 'run-123', 'test')).rejects.toThrow(
+        'memoryIds cannot be empty'
       )
     })
   })
@@ -125,18 +158,28 @@ describe('VotingService', () => {
   describe('recordOutcome', () => {
     beforeEach(async () => {
       // Add some citations first
-      await VotingService.cite(testMemory.id, 'test')
+      await VotingService.cite([testMemory.id], 'run-123', 'test')
     })
 
     it('should update success_rate to 1.0 after first success', async () => {
-      await VotingService.recordOutcome(testMemory.id, 'test', 'success')
+      await VotingService.recordOutcome(
+        [testMemory.id],
+        'run-123',
+        'success',
+        'test'
+      )
 
       const updated = await MemoryService.get(testMemory.id, 'test')
       expect(updated?.metadata.votes.success_rate).toBe(1.0)
     })
 
     it('should update success_rate to 0.0 after first failure', async () => {
-      await VotingService.recordOutcome(testMemory.id, 'test', 'failure')
+      await VotingService.recordOutcome(
+        [testMemory.id],
+        'run-123',
+        'failure',
+        'test'
+      )
 
       const updated = await MemoryService.get(testMemory.id, 'test')
       expect(updated?.metadata.votes.success_rate).toBe(0.0)
@@ -144,11 +187,21 @@ describe('VotingService', () => {
 
     it('should calculate success_rate correctly for mixed outcomes', async () => {
       // 2 citations total
-      await VotingService.cite(testMemory.id, 'test')
+      await VotingService.cite([testMemory.id], 'run-124', 'test')
 
       // 1 success, 1 failure = 50%
-      await VotingService.recordOutcome(testMemory.id, 'test', 'success')
-      await VotingService.recordOutcome(testMemory.id, 'test', 'failure')
+      await VotingService.recordOutcome(
+        [testMemory.id],
+        'run-123',
+        'success',
+        'test'
+      )
+      await VotingService.recordOutcome(
+        [testMemory.id],
+        'run-124',
+        'failure',
+        'test'
+      )
 
       const updated = await MemoryService.get(testMemory.id, 'test')
       expect(updated?.metadata.votes.success_rate).toBe(0.5)
@@ -156,24 +209,80 @@ describe('VotingService', () => {
 
     it('should handle multiple outcomes correctly', async () => {
       // 4 citations total
-      await VotingService.cite(testMemory.id, 'test')
-      await VotingService.cite(testMemory.id, 'test')
-      await VotingService.cite(testMemory.id, 'test')
+      await VotingService.cite([testMemory.id], 'run-124', 'test')
+      await VotingService.cite([testMemory.id], 'run-125', 'test')
+      await VotingService.cite([testMemory.id], 'run-126', 'test')
 
       // 3 successes, 1 failure = 75%
-      await VotingService.recordOutcome(testMemory.id, 'test', 'success')
-      await VotingService.recordOutcome(testMemory.id, 'test', 'success')
-      await VotingService.recordOutcome(testMemory.id, 'test', 'success')
-      await VotingService.recordOutcome(testMemory.id, 'test', 'failure')
+      await VotingService.recordOutcome(
+        [testMemory.id],
+        'run-123',
+        'success',
+        'test'
+      )
+      await VotingService.recordOutcome(
+        [testMemory.id],
+        'run-124',
+        'success',
+        'test'
+      )
+      await VotingService.recordOutcome(
+        [testMemory.id],
+        'run-125',
+        'success',
+        'test'
+      )
+      await VotingService.recordOutcome(
+        [testMemory.id],
+        'run-126',
+        'failure',
+        'test'
+      )
 
       const updated = await MemoryService.get(testMemory.id, 'test')
       expect(updated?.metadata.votes.success_rate).toBe(0.75)
     })
 
-    it('should throw error if memory not found', async () => {
+    it('should handle batch outcomes for multiple memories', async () => {
+      const memory2 = await MemoryService.store('Test memory 2', {
+        collection: 'test',
+        source: 'agent',
+        tags: ['test'],
+      })
+
+      // Cite both memories
+      await VotingService.cite([memory2.id], 'run-123', 'test')
+
+      // Record success for both
+      await VotingService.recordOutcome(
+        [testMemory.id, memory2.id],
+        'run-123',
+        'success',
+        'test'
+      )
+
+      const updated1 = await MemoryService.get(testMemory.id, 'test')
+      const updated2 = await MemoryService.get(memory2.id, 'test')
+
+      expect(updated1?.metadata.votes.success_rate).toBe(1.0)
+      expect(updated2?.metadata.votes.success_rate).toBe(1.0)
+    })
+
+    it('should throw error if any memory not found', async () => {
       await expect(
-        VotingService.recordOutcome(randomUUID(), 'test', 'success')
+        VotingService.recordOutcome(
+          [randomUUID()],
+          'run-123',
+          'success',
+          'test'
+        )
       ).rejects.toThrow('Memory not found')
+    })
+
+    it('should throw error if memoryIds is empty', async () => {
+      await expect(
+        VotingService.recordOutcome([], 'run-123', 'success', 'test')
+      ).rejects.toThrow('memoryIds cannot be empty')
     })
   })
 

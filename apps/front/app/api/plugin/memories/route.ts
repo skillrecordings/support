@@ -1,4 +1,8 @@
 import {
+  traceMemoryCite,
+  traceMemoryOutcome,
+} from '@skillrecordings/core/observability/axiom'
+import {
   MemoryService,
   type SearchOptions,
   type StoreMetadata,
@@ -62,6 +66,9 @@ export async function GET(request: NextRequest) {
  * - upvote: { action: 'upvote', memory_id: string, collection?: string }
  * - downvote: { action: 'downvote', memory_id: string, collection?: string }
  * - validate: { action: 'validate', memory_id: string, collection?: string }
+ * - cite: { action: 'cite', memory_ids: string[], run_id: string, collection?: string }
+ * - recordOutcome: { action: 'recordOutcome', memory_ids: string[], run_id: string, outcome: 'success'|'failure', collection?: string }
+ * - stats: { action: 'stats', collection?: string }
  */
 export async function POST(request: NextRequest) {
   try {
@@ -134,6 +141,165 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           success: true,
           message: 'Memory validated successfully',
+        })
+      }
+
+      case 'cite': {
+        const { memory_ids, run_id, collection = 'learnings' } = body
+
+        if (
+          !memory_ids ||
+          !Array.isArray(memory_ids) ||
+          memory_ids.length === 0
+        ) {
+          return NextResponse.json(
+            {
+              error: 'memory_ids is required and must be a non-empty array',
+            },
+            { status: 400 }
+          )
+        }
+
+        if (!run_id || typeof run_id !== 'string') {
+          return NextResponse.json(
+            { error: 'run_id is required and must be a string' },
+            { status: 400 }
+          )
+        }
+
+        const startTime = Date.now()
+        try {
+          await VotingService.cite(memory_ids, run_id, collection)
+          const durationMs = Date.now() - startTime
+
+          // Trace each cited memory
+          for (const memoryId of memory_ids) {
+            await traceMemoryCite({
+              memoryId,
+              collection,
+              previousCitations: 0, // VotingService doesn't return previous value
+              newCitations: 1,
+              durationMs,
+              success: true,
+            })
+          }
+
+          return NextResponse.json({
+            success: true,
+            message: `${memory_ids.length} memories cited successfully`,
+          })
+        } catch (error) {
+          const durationMs = Date.now() - startTime
+          const errorMessage =
+            error instanceof Error ? error.message : 'Citation failed'
+
+          // Trace failure
+          for (const memoryId of memory_ids) {
+            await traceMemoryCite({
+              memoryId,
+              collection,
+              previousCitations: 0,
+              newCitations: 0,
+              durationMs,
+              success: false,
+              error: errorMessage,
+            })
+          }
+
+          throw error
+        }
+      }
+
+      case 'recordOutcome': {
+        const { memory_ids, run_id, outcome, collection = 'learnings' } = body
+
+        if (
+          !memory_ids ||
+          !Array.isArray(memory_ids) ||
+          memory_ids.length === 0
+        ) {
+          return NextResponse.json(
+            {
+              error: 'memory_ids is required and must be a non-empty array',
+            },
+            { status: 400 }
+          )
+        }
+
+        if (!run_id || typeof run_id !== 'string') {
+          return NextResponse.json(
+            { error: 'run_id is required and must be a string' },
+            { status: 400 }
+          )
+        }
+
+        if (outcome !== 'success' && outcome !== 'failure') {
+          return NextResponse.json(
+            { error: 'outcome must be "success" or "failure"' },
+            { status: 400 }
+          )
+        }
+
+        const startTime = Date.now()
+        try {
+          await VotingService.recordOutcome(
+            memory_ids,
+            run_id,
+            outcome,
+            collection
+          )
+          const durationMs = Date.now() - startTime
+
+          // Trace each outcome
+          for (const memoryId of memory_ids) {
+            await traceMemoryOutcome({
+              memoryId,
+              collection,
+              outcome,
+              previousSuccessRate: 0, // VotingService doesn't return previous value
+              newSuccessRate: 0, // Would need to fetch to get actual value
+              totalOutcomes: 1,
+              durationMs,
+              success: true,
+            })
+          }
+
+          return NextResponse.json({
+            success: true,
+            message: `Outcome recorded for ${memory_ids.length} memories`,
+          })
+        } catch (error) {
+          const durationMs = Date.now() - startTime
+          const errorMessage =
+            error instanceof Error ? error.message : 'Record outcome failed'
+
+          // Trace failure
+          for (const memoryId of memory_ids) {
+            await traceMemoryOutcome({
+              memoryId,
+              collection,
+              outcome,
+              previousSuccessRate: 0,
+              newSuccessRate: 0,
+              totalOutcomes: 0,
+              durationMs,
+              success: false,
+              error: errorMessage,
+            })
+          }
+
+          throw error
+        }
+      }
+
+      case 'stats': {
+        const { collection } = body
+
+        const stats = await VotingService.stats(collection)
+
+        return NextResponse.json({
+          success: true,
+          stats,
         })
       }
 
