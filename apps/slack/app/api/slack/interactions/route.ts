@@ -75,6 +75,31 @@ export async function POST(request: Request) {
             },
           },
         ])
+
+        // Update Slack message to show approval
+        const channel = payload.channel?.id
+        const ts = payload.message?.ts
+        if (channel && ts) {
+          const blocks: SectionBlock[] = [
+            {
+              type: 'section',
+              text: {
+                type: 'mrkdwn',
+                text: `✅ *Approved* by @${username}\n\nAction: \`${metadata.actionId}\`\nApp: *${metadata.appId}*`,
+              },
+            },
+          ]
+          await updateApprovalMessage(
+            channel,
+            ts,
+            blocks,
+            `Approved by ${username}`
+          )
+        }
+
+        console.log(
+          `[slack] Approved action ${metadata.actionId} by ${username}`
+        )
       } else if (actionId === 'reject_action') {
         // Emit rejection events
         await inngest.send([
@@ -96,6 +121,31 @@ export async function POST(request: Request) {
             },
           },
         ])
+
+        // Update Slack message to show rejection
+        const channel = payload.channel?.id
+        const ts = payload.message?.ts
+        if (channel && ts) {
+          const blocks: SectionBlock[] = [
+            {
+              type: 'section',
+              text: {
+                type: 'mrkdwn',
+                text: `❌ *Rejected* by @${username}\n\nAction: \`${metadata.actionId}\`\nApp: *${metadata.appId}*`,
+              },
+            },
+          ]
+          await updateApprovalMessage(
+            channel,
+            ts,
+            blocks,
+            `Rejected by ${username}`
+          )
+        }
+
+        console.log(
+          `[slack] Rejected action ${metadata.actionId} by ${username}`
+        )
       } else if (
         actionId.startsWith('rate_good_') ||
         actionId.startsWith('rate_bad_')
