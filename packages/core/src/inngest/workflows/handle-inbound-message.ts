@@ -592,12 +592,11 @@ export const handleInboundMessage = inngest.createFunction(
       }
     }
 
-    // Select model based on complexity
+    // Select model based on complexity - Opus for complex, Sonnet for simple
     const modelToUse =
       classification.complexity === 'complex'
-        ? 'anthropic/claude-sonnet-4-5'
-        : 'anthropic/claude-haiku-4-5'
-    console.log('[workflow] Model selected:', modelToUse)
+        ? 'anthropic/claude-opus-4-5'
+        : 'anthropic/claude-sonnet-4-5'
 
     // Step 4: Run agent
     const agentResult = await step.run('run-agent', async () => {
