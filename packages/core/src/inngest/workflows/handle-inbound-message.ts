@@ -369,6 +369,88 @@ export const handleInboundMessage = inngest.createFunction(
       }
     }
 
+    // Handle instructor correspondence - skip agent, go straight to HITL approval
+    if (classification.category === 'instructor_correspondence') {
+      console.log(
+        '[workflow] ========== INSTRUCTOR CORRESPONDENCE - ROUTING TO HITL =========='
+      )
+
+      // Get app config for instructor teammate ID
+      const app = await getApp(context.appId)
+      const instructorTeammateId = app?.instructor_teammate_id
+
+      if (!instructorTeammateId) {
+        console.log(
+          '[workflow] No instructor configured, skipping instructor routing'
+        )
+        return {
+          conversationId,
+          messageId,
+          filtered: false,
+          skipped: true,
+          classification,
+          agentResult: null,
+          routingResult: { type: 'no-instructor-configured' as const },
+        }
+      }
+
+      // Create action record for HITL approval
+      const actionId = randomUUID()
+      const db = getDb()
+
+      await db.insert(ActionsTable).values({
+        id: actionId,
+        conversation_id: conversationId,
+        app_id: context.appId,
+        type: 'assign-to-instructor',
+        parameters: {
+          toolCalls: [
+            {
+              name: 'assignToInstructor',
+              args: {
+                conversationId,
+                instructorTeammateId,
+                reason: classification.reasoning,
+              },
+            },
+          ],
+        },
+        requires_approval: true,
+        created_at: new Date(),
+      })
+
+      // Send approval request event
+      await step.sendEvent('request-instructor-approval', {
+        name: 'support/approval.requested',
+        data: {
+          actionId,
+          conversationId,
+          appId: context.appId,
+          action: {
+            type: 'assign-to-instructor',
+            parameters: {
+              instructorTeammateId,
+              reason: classification.reasoning,
+            },
+          },
+          agentReasoning: `Classified as instructor correspondence: ${classification.reasoning}`,
+        },
+      })
+
+      console.log('[workflow] Instructor assignment approval requested')
+      return {
+        conversationId,
+        messageId,
+        filtered: false,
+        classification,
+        agentResult: null,
+        routingResult: {
+          type: 'instructor-approval-requested' as const,
+          actionId,
+        },
+      }
+    }
+
     // Select model based on complexity
     const modelToUse =
       classification.complexity === 'complex'
