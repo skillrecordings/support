@@ -47,5 +47,8 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "zod": "^4.3.5"
+  }
 }

@@ -1,3 +1,5 @@
+import { z } from 'zod'
+
 /**
  * User entity returned by app integration.
  * Replaces Customer for consistency with SupportIntegration interface.
@@ -165,4 +167,102 @@ export interface ContentSearchResponse {
     totalResults?: number
     searchTimeMs?: number
   }
+}
+
+/**
+ * Product type for availability checking.
+ * Self-paced is always available, live/cohort have limited seats.
+ */
+export type ProductType =
+  | 'self-paced'
+  | 'live'
+  | 'cohort'
+  | 'membership'
+  | 'source-code-access'
+  | (string & {})
+
+/**
+ * Product state lifecycle.
+ */
+export type ProductState = 'draft' | 'active' | 'unavailable' | 'archived'
+
+/**
+ * Zod schema for ProductType validation
+ */
+export const ProductTypeSchema = z.union([
+  z.literal('self-paced'),
+  z.literal('live'),
+  z.literal('cohort'),
+  z.literal('membership'),
+  z.literal('source-code-access'),
+  z.string(),
+])
+
+/**
+ * Zod schema for ProductState validation
+ */
+export const ProductStateSchema = z.enum([
+  'draft',
+  'active',
+  'unavailable',
+  'archived',
+])
+
+/**
+ * Zod schema for ProductStatus validation
+ */
+export const ProductStatusSchema = z.object({
+  productId: z.string(),
+  productType: ProductTypeSchema,
+  available: z.boolean(),
+  soldOut: z.boolean(),
+  quantityAvailable: z.number(),
+  quantityRemaining: z.number(),
+  state: ProductStateSchema,
+  startsAt: z.string().optional(),
+  endsAt: z.string().optional(),
+  enrollmentOpen: z.string().optional(),
+  enrollmentClose: z.string().optional(),
+})
+
+/**
+ * Product availability/inventory status.
+ * Used by agent to accurately report whether products can be purchased.
+ *
+ * For live events/cohorts: check soldOut and quantityRemaining
+ * For self-paced: typically available=true, quantityAvailable=-1 (unlimited)
+ */
+export interface ProductStatus {
+  /** Product identifier */
+  productId: string
+
+  /** Type of product determines availability semantics */
+  productType: ProductType
+
+  /** Whether the product can currently be purchased */
+  available: boolean
+
+  /** Whether all seats/inventory are sold */
+  soldOut: boolean
+
+  /** Total quantity available for sale (-1 = unlimited) */
+  quantityAvailable: number
+
+  /** Remaining quantity not yet sold */
+  quantityRemaining: number
+
+  /** Product lifecycle state */
+  state: ProductState
+
+  /** For live events: when the event starts */
+  startsAt?: string
+
+  /** For live events: when the event ends */
+  endsAt?: string
+
+  /** For cohorts: when enrollment opens */
+  enrollmentOpen?: string
+
+  /** For cohorts: when enrollment closes */
+  enrollmentClose?: string
 }
