@@ -40,6 +40,11 @@ export type ClassifierResult = {
   confidence: number
   reasoning: string
   complexity: ComplexityTier
+  usage?: {
+    promptTokens: number
+    completionTokens: number
+    totalTokens: number
+  }
 }
 
 function validateCategory(raw: string): ClassifierCategory {
@@ -105,10 +110,23 @@ Message: ${message}`
     schema: ClassifierResultSchema,
   })
 
+  // AI SDK v6 usage type - extract token counts safely
+  const usage = result.usage as
+    | { promptTokens?: number; completionTokens?: number; totalTokens?: number }
+    | undefined
+
   return {
     category: validateCategory(result.object.category),
     confidence: result.object.confidence,
     reasoning: result.object.reasoning,
     complexity: validateComplexity(result.object.complexity),
+    usage:
+      usage?.promptTokens !== undefined
+        ? {
+            promptTokens: usage.promptTokens,
+            completionTokens: usage.completionTokens ?? 0,
+            totalTokens: usage.totalTokens ?? usage.promptTokens,
+          }
+        : undefined,
   }
 }

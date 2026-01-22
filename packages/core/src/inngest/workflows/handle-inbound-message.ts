@@ -5,7 +5,11 @@ import { IntegrationClient } from '@skillrecordings/sdk/client'
 import { runSupportAgent } from '../../agent/index'
 import { type FrontMessage, createFrontClient } from '../../front/index'
 import { withTracing } from '../../observability/axiom'
-import { initializeLangfuse, traceAgentRun } from '../../observability/langfuse'
+import {
+  initializeLangfuse,
+  traceAgentRun,
+  traceClassification,
+} from '../../observability/langfuse'
 import { classifyMessage } from '../../router/classifier'
 import { matchRules } from '../../router/rules'
 import { systemRules } from '../../router/system-rules'
@@ -350,7 +354,13 @@ export const handleInboundMessage = inngest.createFunction(
         complexity: result.complexity,
         confidence: result.confidence,
         reasoning: result.reasoning,
+        usage: result.usage,
       })
+
+      // Trace classification to Langfuse for o11y
+      if (result.usage) {
+        await traceClassification(messageBody, result, result.usage)
+      }
 
       return result
     })
