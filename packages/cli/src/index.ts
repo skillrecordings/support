@@ -1,6 +1,5 @@
 #!/usr/bin/env bun
-
-import 'dotenv-flow/config'
+// Note: env is loaded via preload.ts before this file runs
 import { Command } from 'commander'
 import { registerAxiomCommands } from './commands/axiom/index'
 import { registerDatasetCommands } from './commands/build-dataset'
