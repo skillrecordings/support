@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "bin": {
-    "skill": "./src/index.ts"
+    "skill": "./bin/skill.ts"
   },
   "scripts": {
     "dev": "bun src/index.ts",
