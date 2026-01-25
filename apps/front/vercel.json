@@ -3,6 +3,11 @@
   "framework": "nextjs",
   "bunVersion": "1.x",
   "ignoreCommand": "npx turbo-ignore",
+  "build": {
+    "env": {
+      "SKIP_ENV_VALIDATION": "1"
+    }
+  },
   "crons": [
     {
       "path": "/api/cron",
