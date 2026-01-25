@@ -2,9 +2,9 @@ import {
   traceApprovalRequested,
   traceSlackNotification,
   traceWorkflowStep,
-} from '@skillrecordings/core/observability/axiom'
-import { buildApprovalBlocks } from '@skillrecordings/core/slack/approval-blocks'
-import { postApprovalMessage } from '@skillrecordings/core/slack/client'
+} from '../../observability/axiom'
+import { buildApprovalBlocks } from '../../slack/approval-blocks'
+import { postApprovalMessage } from '../../slack/client'
 import { ApprovalRequestsTable, eq, getDb } from '@skillrecordings/database'
 import { inngest } from '../client'
 import {
