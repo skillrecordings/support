@@ -24,6 +24,12 @@ export {
   findStaleTemplatesWorkflow,
   findStaleTemplatesOnDemand,
 } from './find-stale-templates'
+export {
+  tagGardeningWorkflow,
+  tagGardeningOnDemand,
+  tagHealthCheckWorkflow,
+  tagHealthCheckOnDemand,
+} from './tag-gardening'
 
 import { classifyWorkflow } from './classify'
 import { draftWorkflow } from './draft-response'
@@ -43,6 +49,12 @@ import { retentionCleanup } from './retention-cleanup'
 import { routeWorkflow } from './route-message'
 import { handleStripeEvent } from './stripe-refund'
 import { syncTemplatesOnDemand, syncTemplatesWorkflow } from './sync-templates'
+import {
+  tagGardeningOnDemand,
+  tagGardeningWorkflow,
+  tagHealthCheckOnDemand,
+  tagHealthCheckWorkflow,
+} from './tag-gardening'
 import { validateWorkflow } from './validate-draft'
 
 /**
@@ -52,8 +64,11 @@ import { validateWorkflow } from './validate-draft'
  * ```typescript
  * serve({ client: inngest, functions: allWorkflows })
  * ```
+ *
+ * Note: Explicit type annotation needed due to TypeScript serialization limits.
  */
-export const allWorkflows = [
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const allWorkflows: any[] = [
   classifyWorkflow,
   draftWorkflow,
   gatherWorkflow,
@@ -72,4 +87,8 @@ export const allWorkflows = [
   syncTemplatesOnDemand,
   findStaleTemplatesWorkflow,
   findStaleTemplatesOnDemand,
+  tagGardeningWorkflow,
+  tagGardeningOnDemand,
+  tagHealthCheckWorkflow,
+  tagHealthCheckOnDemand,
 ]
