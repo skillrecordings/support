@@ -35,6 +35,11 @@ export function registerEvalPipelineCommands(program: Command): void {
     )
     .option('--force-llm', 'Skip fast path, always use LLM (classify step)')
     .option('--real-tools', 'Use real Docker MySQL/Qdrant instead of mocks')
+    .option('--parallel <n>', 'Run N scenarios concurrently', parseInt, 10)
+    .option('--cache-classify', 'Cache classify results between runs')
+    .option('--clear-cache', 'Clear cached classify results before run')
+    .option('--fail-fast', 'Stop on first failure')
+    .option('--quick', 'Run smoke test subset (~10 scenarios)')
     .action(run)
 
   // Seed subcommand

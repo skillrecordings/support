@@ -4,6 +4,9 @@
  * Runs actual pipeline steps against labeled scenarios and measures accuracy.
  */
 
+import { createHash } from 'crypto'
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'fs'
+import { dirname, join } from 'path'
 import {
   type ClassifyInput,
   type ClassifyOutput,
@@ -27,6 +30,123 @@ import {
 } from './real-tools'
 
 // ============================================================================
+// Concurrency helpers
+// ============================================================================
+
+/**
+ * Run items in batches with controlled concurrency
+ */
+async function runBatch<T, R>(
+  items: T[],
+  fn: (item: T, index: number) => Promise<R>,
+  concurrency: number
+): Promise<R[]> {
+  const results: R[] = []
+  for (let i = 0; i < items.length; i += concurrency) {
+    const batch = items.slice(i, i + concurrency)
+    const batchResults = await Promise.all(
+      batch.map((item, batchIndex) => fn(item, i + batchIndex))
+    )
+    results.push(...batchResults)
+  }
+  return results
+}
+
+/**
+ * Run items in batches with fail-fast support
+ */
+async function runBatchWithFailFast<T, R extends { passed: boolean }>(
+  items: T[],
+  fn: (item: T, index: number) => Promise<R>,
+  concurrency: number,
+  failFast: boolean
+): Promise<{ results: R[]; aborted: boolean }> {
+  const results: R[] = []
+  let aborted = false
+
+  for (let i = 0; i < items.length && !aborted; i += concurrency) {
+    const batch = items.slice(i, i + concurrency)
+    const batchResults = await Promise.all(
+      batch.map((item, batchIndex) => fn(item, i + batchIndex))
+    )
+    results.push(...batchResults)
+
+    if (failFast && batchResults.some((r) => !r.passed)) {
+      aborted = true
+    }
+  }
+
+  return { results, aborted }
+}
+
+// ============================================================================
+// Classify cache helpers
+// ============================================================================
+
+const CACHE_DIR = '.eval-cache'
+
+function getCacheKey(scenarioId: string, classifySourceHash: string): string {
+  return `classify-${scenarioId}-${classifySourceHash.slice(0, 8)}`
+}
+
+function getClassifySourceHash(): string {
+  // Hash based on classify.ts content to invalidate cache when code changes
+  try {
+    // Try to read the classify source from core package
+    const possiblePaths = [
+      join(process.cwd(), 'packages/core/src/pipeline/classify.ts'),
+      join(process.cwd(), '../core/src/pipeline/classify.ts'),
+    ]
+    for (const path of possiblePaths) {
+      if (existsSync(path)) {
+        const content = readFileSync(path, 'utf-8')
+        return createHash('md5').update(content).digest('hex')
+      }
+    }
+  } catch {
+    // Fallback: use timestamp-based invalidation (cache for 1 hour)
+  }
+  // Fallback hash based on current hour
+  return createHash('md5')
+    .update(Math.floor(Date.now() / [PHONE]).toString())
+    .digest('hex')
+}
+
+function loadCachedClassify(cacheKey: string): ClassifyOutput | null {
+  const cachePath = join(CACHE_DIR, `${cacheKey}.json`)
+  try {
+    if (existsSync(cachePath)) {
+      return JSON.parse(readFileSync(cachePath, 'utf-8'))
+    }
+  } catch {
+    // Cache miss or invalid
+  }
+  return null
+}
+
+function saveCachedClassify(cacheKey: string, result: ClassifyOutput): void {
+  try {
+    if (!existsSync(CACHE_DIR)) {
+      mkdirSync(CACHE_DIR, { recursive: true })
+    }
+    const cachePath = join(CACHE_DIR, `${cacheKey}.json`)
+    writeFileSync(cachePath, JSON.stringify(result))
+  } catch {
+    // Ignore cache write errors
+  }
+}
+
+function clearClassifyCache(): void {
+  try {
+    if (existsSync(CACHE_DIR)) {
+      rmSync(CACHE_DIR, { recursive: true, force: true })
+    }
+  } catch {
+    // Ignore
+  }
+}
+
+// ============================================================================
 // Types
 // ============================================================================
 
@@ -48,6 +168,11 @@ interface RunOptions {
   model?: string
   forceLlm?: boolean
   realTools?: boolean
+  parallel?: number
+  cacheClassify?: boolean
+  clearCache?: boolean
+  failFast?: boolean
+  quick?: boolean
 }
 
 interface Scenario {
@@ -118,17 +243,48 @@ export async function run(options: RunOptions): Promise<void> {
     model,
     forceLlm,
     realTools,
+    parallel = 10,
+    cacheClassify,
+    clearCache,
+    failFast,
+    quick,
   } = options
+
+  // Clear cache if requested
+  if (clearCache) {
+    clearClassifyCache()
+    if (!json) {
+      console.log('🗑️  Cleared classify cache\n')
+    }
+  }
 
   // Load scenarios
   let scenarios = await loadScenarios(scenarioGlob, dataset)
+
+  // Apply quick filter (smoke test subset)
+  if (quick) {
+    scenarios = filterQuickScenarios(scenarios)
+    if (!json) {
+      console.log(`⚡ Quick mode: filtered to ${scenarios.length} scenarios\n`)
+    }
+  }
 
   if (limit && limit < scenarios.length) {
     scenarios = scenarios.slice(0, limit)
   }
 
   if (!json) {
-    console.log(`\n🧪 Running ${step} eval on ${scenarios.length} scenarios\n`)
+    const parallelInfo = parallel > 1 ? ` (parallel: ${parallel})` : ''
+    const flags = [
+      cacheClassify ? 'cache' : null,
+      failFast ? 'fail-fast' : null,
+    ]
+      .filter(Boolean)
+      .join(', ')
+    const flagsInfo = flags ? ` [${flags}]` : ''
+    console.log(
+      `\n🧪 Running ${step} eval on ${scenarios.length} scenarios${parallelInfo}${flagsInfo}\n`
+    )
   }
 
   // Initialize real tools if requested
@@ -153,21 +309,31 @@ export async function run(options: RunOptions): Promise<void> {
   let results: StepResult[] = []
 
   try {
+    const evalOptions = {
+      verbose,
+      model,
+      forceLlm,
+      realTools,
+      parallel,
+      cacheClassify,
+      failFast,
+    }
+
     switch (step) {
       case 'classify':
-        results = await runClassifyEval(scenarios, { verbose, model, forceLlm })
+        results = await runClassifyEval(scenarios, evalOptions)
         break
       case 'route':
-        results = await runRouteEval(scenarios, { verbose, model, forceLlm })
+        results = await runRouteEval(scenarios, evalOptions)
         break
       case 'gather':
-        results = await runGatherEval(scenarios, { verbose, realTools })
+        results = await runGatherEval(scenarios, evalOptions)
         break
       case 'validate':
-        results = await runValidateEval(scenarios, { verbose })
+        results = await runValidateEval(scenarios, evalOptions)
         break
       case 'e2e':
-        results = await runE2EEval(scenarios, { verbose, model, realTools })
+        results = await runE2EEval(scenarios, evalOptions)
         break
       case 'draft':
         console.error(
@@ -272,6 +438,39 @@ function inferCategory(item: any): MessageCategory | undefined {
 }
 
 /**
+ * Filter scenarios for quick mode (smoke test subset)
+ * Returns scenarios with smoke: true, or first 2 from each category
+ */
+function filterQuickScenarios(scenarios: Scenario[]): Scenario[] {
+  // First, try to use smoke flag
+  const smokeScenarios = scenarios.filter((s: any) => s.smoke === true)
+  if (smokeScenarios.length > 0) {
+    return smokeScenarios
+  }
+
+  // Fallback: first 2 from each category
+  const byCategory = new Map<string, Scenario[]>()
+  for (const scenario of scenarios) {
+    const cat =
+      scenario.expectedCategory ||
+      scenario.category ||
+      scenario.expectedAction ||
+      'other'
+    if (!byCategory.has(cat)) {
+      byCategory.set(cat, [])
+    }
+    byCategory.get(cat)!.push(scenario)
+  }
+
+  const result: Scenario[] = []
+  for (const [, categoryScenarios] of byCategory) {
+    result.push(...categoryScenarios.slice(0, 2))
+  }
+
+  return result
+}
+
+/**
  * Infer expected action from scenario
  */
 function inferAction(item: any): RouteAction | undefined {
@@ -300,29 +499,29 @@ interface EvalOptions {
   model?: string
   forceLlm?: boolean
   realTools?: boolean
+  parallel?: number
+  cacheClassify?: boolean
+  failFast?: boolean
 }
 
 async function runClassifyEval(
   scenarios: Scenario[],
   options: EvalOptions
 ): Promise<StepResult[]> {
-  const results: StepResult[] = []
+  const concurrency = options.parallel || 1
+  const classifyHash = options.cacheClassify ? getClassifySourceHash() : ''
+  let completed = 0
 
-  for (const [i, scenario] of scenarios.entries()) {
-    if (!options.verbose) {
-      process.stdout.write(`\r  Processing ${i + 1}/${scenarios.length}...`)
-    }
-
+  const processScenario = async (scenario: Scenario): Promise<StepResult> => {
     const trigger = scenario.trigger || scenario.triggerMessage
     if (!trigger) {
-      results.push({
+      return {
         scenarioId: scenario.id,
         passed: false,
         expected: scenario.expectedCategory || 'unknown',
         actual: 'ERROR: no trigger',
         durationMs: 0,
-      })
-      continue
+      }
     }
 
     const input: ClassifyInput = {
@@ -333,23 +532,37 @@ async function runClassifyEval(
 
     const startTime = Date.now()
     try {
-      const result = await classify(input, {
-        forceLLM: options.forceLlm,
-        model: options.model,
-      })
+      let result: ClassifyOutput
+
+      // Check cache if enabled
+      if (options.cacheClassify) {
+        const cacheKey = getCacheKey(scenario.id, classifyHash)
+        const cached = loadCachedClassify(cacheKey)
+        if (cached) {
+          result = cached
+        } else {
+          result = await classify(input, {
+            forceLLM: options.forceLlm,
+            model: options.model,
+          })
+          saveCachedClassify(cacheKey, result)
+        }
+      } else {
+        result = await classify(input, {
+          forceLLM: options.forceLlm,
+          model: options.model,
+        })
+      }
 
       const expected = scenario.expectedCategory || 'unknown'
       const passed = result.category === expected
 
-      results.push({
-        scenarioId: scenario.id,
-        passed,
-        expected,
-        actual: result.category,
-        confidence: result.confidence,
-        durationMs: Date.now() - startTime,
-        reasoning: result.reasoning,
-      })
+      completed++
+      if (!options.verbose) {
+        process.stdout.write(
+          `\r  Processing ${completed}/${scenarios.length}...`
+        )
+      }
 
       if (options.verbose && !passed) {
         console.log(`\n❌ ${scenario.id}`)
@@ -359,18 +572,39 @@ async function runClassifyEval(
         )
         console.log(`   Subject:  ${trigger.subject.slice(0, 60)}...`)
       }
+
+      return {
+        scenarioId: scenario.id,
+        passed,
+        expected,
+        actual: result.category,
+        confidence: result.confidence,
+        durationMs: Date.now() - startTime,
+        reasoning: result.reasoning,
+      }
     } catch (error) {
-      results.push({
+      completed++
+      return {
         scenarioId: scenario.id,
         passed: false,
         expected: scenario.expectedCategory || 'unknown',
         actual: `ERROR: ${error instanceof Error ? error.message : 'Unknown'}`,
         durationMs: Date.now() - startTime,
-      })
+      }
     }
   }
 
+  const { results, aborted } = await runBatchWithFailFast(
+    scenarios,
+    (scenario) => processScenario(scenario),
+    concurrency,
+    options.failFast || false
+  )
+
   if (!options.verbose) console.log('')
+  if (aborted) {
+    console.log('⚠️  Stopped early due to --fail-fast\n')
+  }
   return results
 }
 
@@ -378,23 +612,20 @@ async function runRouteEval(
   scenarios: Scenario[],
   options: EvalOptions
 ): Promise<StepResult[]> {
-  const results: StepResult[] = []
+  const concurrency = options.parallel || 1
+  const classifyHash = options.cacheClassify ? getClassifySourceHash() : ''
+  let completed = 0
 
-  for (const [i, scenario] of scenarios.entries()) {
-    if (!options.verbose) {
-      process.stdout.write(`\r  Processing ${i + 1}/${scenarios.length}...`)
-    }
-
+  const processScenario = async (scenario: Scenario): Promise<StepResult> => {
     const trigger = scenario.trigger || scenario.triggerMessage
     if (!trigger) {
-      results.push({
+      return {
         scenarioId: scenario.id,
         passed: false,
         expected: scenario.expectedAction || 'unknown',
         actual: 'ERROR: no trigger',
         durationMs: 0,
-      })
-      continue
+      }
     }
 
     const input: ClassifyInput = {
@@ -405,11 +636,27 @@ async function runRouteEval(
 
     const startTime = Date.now()
     try {
-      // First classify, then route
-      const classification = await classify(input, {
-        forceLLM: options.forceLlm,
-        model: options.model,
-      })
+      // First classify (with cache support), then route
+      let classification: ClassifyOutput
+
+      if (options.cacheClassify) {
+        const cacheKey = getCacheKey(scenario.id, classifyHash)
+        const cached = loadCachedClassify(cacheKey)
+        if (cached) {
+          classification = cached
+        } else {
+          classification = await classify(input, {
+            forceLLM: options.forceLlm,
+            model: options.model,
+          })
+          saveCachedClassify(cacheKey, classification)
+        }
+      } else {
+        classification = await classify(input, {
+          forceLLM: options.forceLlm,
+          model: options.model,
+        })
+      }
 
       const routeResult = route({
         message: input,
@@ -424,14 +671,12 @@ async function runRouteEval(
       const expected = scenario.expectedAction || 'respond'
       const passed = routeResult.action === expected
 
-      results.push({
-        scenarioId: scenario.id,
-        passed,
-        expected,
-        actual: routeResult.action,
-        durationMs: Date.now() - startTime,
-        reasoning: routeResult.reason,
-      })
+      completed++
+      if (!options.verbose) {
+        process.stdout.write(
+          `\r  Processing ${completed}/${scenarios.length}...`
+        )
+      }
 
       if (options.verbose && !passed) {
         console.log(`\n❌ ${scenario.id}`)
@@ -440,18 +685,38 @@ async function runRouteEval(
         console.log(`   Category: ${classification.category}`)
         console.log(`   Reason:   ${routeResult.reason}`)
       }
+
+      return {
+        scenarioId: scenario.id,
+        passed,
+        expected,
+        actual: routeResult.action,
+        durationMs: Date.now() - startTime,
+        reasoning: routeResult.reason,
+      }
     } catch (error) {
-      results.push({
+      completed++
+      return {
         scenarioId: scenario.id,
         passed: false,
         expected: scenario.expectedAction || 'respond',
         actual: `ERROR: ${error instanceof Error ? error.message : 'Unknown'}`,
         durationMs: Date.now() - startTime,
-      })
+      }
     }
   }
 
+  const { results, aborted } = await runBatchWithFailFast(
+    scenarios,
+    (scenario) => processScenario(scenario),
+    concurrency,
+    options.failFast || false
+  )
+
   if (!options.verbose) console.log('')
+  if (aborted) {
+    console.log('⚠️  Stopped early due to --fail-fast\n')
+  }
   return results
 }
 
@@ -459,52 +724,42 @@ async function runGatherEval(
   scenarios: Scenario[],
   options: EvalOptions
 ): Promise<StepResult[]> {
-  const results: StepResult[] = []
+  const concurrency = options.parallel || 1
+  let completed = 0
 
   // Check if real tools are available
   const useRealTools = options.realTools && isRealToolsAvailable()
 
   if (!useRealTools) {
     // Fallback to mock behavior
-    for (const [i, scenario] of scenarios.entries()) {
-      if (!options.verbose) {
-        process.stdout.write(`\r  Processing ${i + 1}/${scenarios.length}...`)
-      }
+    const results = scenarios.map((scenario) => ({
+      scenarioId: scenario.id,
+      passed: true,
+      expected: 'context_complete',
+      actual: 'context_complete',
+      durationMs: 0,
+      reasoning: 'Gather eval requires --real-tools flag with Docker services',
+    }))
 
-      results.push({
-        scenarioId: scenario.id,
-        passed: true,
-        expected: 'context_complete',
-        actual: 'context_complete',
-        durationMs: 0,
-        reasoning:
-          'Gather eval requires --real-tools flag with Docker services',
-      })
+    if (!options.verbose) {
+      console.log(`  Processing ${scenarios.length}/${scenarios.length}...`)
     }
-
-    if (!options.verbose) console.log('')
     console.log(
       '\n⚠️  Gather eval: Use --real-tools with Docker services for actual tool calls\n'
     )
     return results
   }
 
-  // Real tools are available - run actual gather evaluation
-  for (const [i, scenario] of scenarios.entries()) {
-    if (!options.verbose) {
-      process.stdout.write(`\r  Processing ${i + 1}/${scenarios.length}...`)
-    }
-
+  const processScenario = async (scenario: Scenario): Promise<StepResult> => {
     const trigger = scenario.trigger || scenario.triggerMessage
     if (!trigger) {
-      results.push({
+      return {
         scenarioId: scenario.id,
         passed: false,
         expected: 'context_complete',
         actual: 'ERROR: no trigger',
         durationMs: 0,
-      })
-      continue
+      }
     }
 
     const startTime = Date.now()
@@ -555,31 +810,49 @@ async function runGatherEval(
       const expected = 'context_complete'
       const actual = hasContext ? 'context_complete' : 'context_incomplete'
 
-      results.push({
+      completed++
+      if (!options.verbose) {
+        process.stdout.write(
+          `\r  Processing ${completed}/${scenarios.length}...`
+        )
+      }
+
+      if (options.verbose && !hasContext) {
+        console.log(`\n⚠️  ${scenario.id}`)
+        console.log(`   Context: ${toolResults.join(', ')}`)
+      }
+
+      return {
         scenarioId: scenario.id,
         passed: hasContext,
         expected,
         actual,
         durationMs: Date.now() - startTime,
         reasoning: toolResults.join(', '),
-      })
-
-      if (options.verbose && !hasContext) {
-        console.log(`\n⚠️  ${scenario.id}`)
-        console.log(`   Context: ${toolResults.join(', ')}`)
       }
     } catch (error) {
-      results.push({
+      completed++
+      return {
         scenarioId: scenario.id,
         passed: false,
         expected: 'context_complete',
         actual: `ERROR: ${error instanceof Error ? error.message : 'Unknown'}`,
         durationMs: Date.now() - startTime,
-      })
+      }
     }
   }
 
+  const { results, aborted } = await runBatchWithFailFast(
+    scenarios,
+    (scenario) => processScenario(scenario),
+    concurrency,
+    options.failFast || false
+  )
+
   if (!options.verbose) console.log('')
+  if (aborted) {
+    console.log('⚠️  Stopped early due to --fail-fast\n')
+  }
   return results
 }
 
@@ -597,7 +870,8 @@ async function runValidateEval(
   scenarios: Scenario[],
   options: EvalOptions
 ): Promise<StepResult[]> {
-  const results: StepResult[] = []
+  const concurrency = options.parallel || 1
+  let completed = 0
 
   // Filter to scenarios with drafts or assertions
   const validScenarios = scenarios.filter((s) => s.draft || s.assertions)
@@ -610,25 +884,18 @@ async function runValidateEval(
     return []
   }
 
-  for (const [i, scenario] of validScenarios.entries()) {
-    if (!options.verbose) {
-      process.stdout.write(
-        `\r  Processing ${i + 1}/${validScenarios.length}...`
-      )
-    }
-
+  const processScenario = async (scenario: Scenario): Promise<StepResult> => {
     // If scenario has no draft but has assertions, it's for checking generated drafts
     // For now, skip those (they'd need full pipeline)
     if (!scenario.draft) {
-      results.push({
+      return {
         scenarioId: scenario.id,
         passed: true, // Can't evaluate without draft
         expected: 'needs_draft',
         actual: 'skipped',
         durationMs: 0,
         reasoning: 'No draft provided - use e2e eval with assertions',
-      })
-      continue
+      }
     }
 
     const startTime = Date.now()
@@ -671,8 +938,8 @@ async function runValidateEval(
         strictMode: false,
       })
 
-      // Map issue types to assertion names
-      const issueTypeToAssertion: Record<
+      // Map issue types to assertion names (unused but kept for documentation)
+      const _issueTypeToAssertion: Record<
         ValidationIssueType,
         keyof NonNullable<Scenario['assertions']>
       > = {
@@ -721,14 +988,12 @@ async function runValidateEval(
         .map((i) => `${i.type}:${i.match || 'none'}`)
         .join(', ')
 
-      results.push({
-        scenarioId: scenario.id,
-        passed,
-        expected: 'valid',
-        actual: passed ? 'valid' : `invalid: ${failedAssertions.join('; ')}`,
-        durationMs: Date.now() - startTime,
-        reasoning: issuesSummary || 'no issues found',
-      })
+      completed++
+      if (!options.verbose) {
+        process.stdout.write(
+          `\r  Processing ${completed}/${validScenarios.length}...`
+        )
+      }
 
       if (options.verbose && !passed) {
         console.log(`\n❌ ${scenario.id}`)
@@ -736,18 +1001,38 @@ async function runValidateEval(
         console.log(`   Issues found: ${issuesSummary || 'none'}`)
         console.log(`   Draft preview: ${scenario.draft.slice(0, 80)}...`)
       }
+
+      return {
+        scenarioId: scenario.id,
+        passed,
+        expected: 'valid',
+        actual: passed ? 'valid' : `invalid: ${failedAssertions.join('; ')}`,
+        durationMs: Date.now() - startTime,
+        reasoning: issuesSummary || 'no issues found',
+      }
     } catch (error) {
-      results.push({
+      completed++
+      return {
         scenarioId: scenario.id,
         passed: false,
         expected: 'valid',
         actual: `ERROR: ${error instanceof Error ? error.message : 'Unknown'}`,
         durationMs: Date.now() - startTime,
-      })
+      }
     }
   }
 
+  const { results, aborted } = await runBatchWithFailFast(
+    validScenarios,
+    (scenario) => processScenario(scenario),
+    concurrency,
+    options.failFast || false
+  )
+
   if (!options.verbose) console.log('')
+  if (aborted) {
+    console.log('⚠️  Stopped early due to --fail-fast\n')
+  }
   return results
 }
 
@@ -756,7 +1041,8 @@ async function runE2EEval(
   options: EvalOptions
 ): Promise<StepResult[]> {
   const { runPipeline } = await import('@skillrecordings/core/pipeline')
-  const results: StepResult[] = []
+  const concurrency = options.parallel || 1
+  let completed = 0
 
   // Note: Real tools are available when --real-tools is passed
   // They're initialized globally and accessible to the pipeline's gather step
@@ -765,21 +1051,16 @@ async function runE2EEval(
     console.log(`  Real tools: ${available ? 'connected' : 'not available'}\n`)
   }
 
-  for (const [i, scenario] of scenarios.entries()) {
-    if (!options.verbose) {
-      process.stdout.write(`\r  Processing ${i + 1}/${scenarios.length}...`)
-    }
-
+  const processScenario = async (scenario: Scenario): Promise<StepResult> => {
     const trigger = scenario.trigger || scenario.triggerMessage
     if (!trigger) {
-      results.push({
+      return {
         scenarioId: scenario.id,
         passed: false,
         expected: 'respond',
         actual: 'ERROR: no trigger',
         durationMs: 0,
-      })
-      continue
+      }
     }
 
     const startTime = Date.now()
@@ -812,16 +1093,12 @@ async function runE2EEval(
       const expected = scenario.expectedAction || 'respond'
       const passed = pipelineResult.action === expected
 
-      results.push({
-        scenarioId: scenario.id,
-        passed,
-        expected,
-        actual: pipelineResult.action,
-        durationMs: Date.now() - startTime,
-        reasoning: pipelineResult.steps
-          .map((s) => `${s.step}:${s.success}`)
-          .join(', '),
-      })
+      completed++
+      if (!options.verbose) {
+        process.stdout.write(
+          `\r  Processing ${completed}/${scenarios.length}...`
+        )
+      }
 
       if (options.verbose && !passed) {
         console.log(`\n❌ ${scenario.id}`)
@@ -831,18 +1108,40 @@ async function runE2EEval(
           `   Steps:    ${pipelineResult.steps.map((s) => s.step).join(' → ')}`
         )
       }
+
+      return {
+        scenarioId: scenario.id,
+        passed,
+        expected,
+        actual: pipelineResult.action,
+        durationMs: Date.now() - startTime,
+        reasoning: pipelineResult.steps
+          .map((s) => `${s.step}:${s.success}`)
+          .join(', '),
+      }
     } catch (error) {
-      results.push({
+      completed++
+      return {
         scenarioId: scenario.id,
         passed: false,
         expected: scenario.expectedAction || 'respond',
         actual: `ERROR: ${error instanceof Error ? error.message : 'Unknown'}`,
         durationMs: Date.now() - startTime,
-      })
+      }
     }
   }
 
+  const { results, aborted } = await runBatchWithFailFast(
+    scenarios,
+    (scenario) => processScenario(scenario),
+    concurrency,
+    options.failFast || false
+  )
+
   if (!options.verbose) console.log('')
+  if (aborted) {
+    console.log('⚠️  Stopped early due to --fail-fast\n')
+  }
   return results
 }
 
