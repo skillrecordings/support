@@ -1,0 +1,1570 @@
+{
+  "generatedAt": "2026-01-25T17:23:34.642Z",
+  "templates": [
+    {
+      "id": "rsp_5eosn",
+      "name": "Live Workshop Event Recording",
+      "subject": null,
+      "body": "Hey {{ recipient.first_name | 'there' }}, <div><br /></div><div>We are working on a solution that will give you access to the recording of the live workshop.&nbsp;</div><div><br /></div><div>The content in workshop will also be released as a traditional self-paced egghead workshop as well! </div>",
+      "is_available_for_all_inboxes": true,
+      "variables": [
+        "recipient.first_name | 'there'"
+      ]
+    },
+    {
+      "id": "rsp_6vqvb",
+      "name": "Free Resources - Epic React",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>Thanks for your interest in Epic React!</div><div><br /></div><div>If it’s outside your budget, then hopefully the enormous wealth of Kent's free material available will help you in your goals.</div><div><br /></div><div>All the workshop repositories are free and open source: <a href=\"https://github.com/topics/epicreact-dev\" rel=\"noopener noreferrer\" target=\"_blank\">https://github.com/topics/epicreact-dev</a>. There’s also a free React course on Egghead <a href=\"https://kcd.im/beginner-react\" rel=\"noopener noreferrer\" target=\"_blank\">https://kcd.im/beginner-react</a>, as well as a lot of material on <a href=\"https://kentcdodds.com/blog\" rel=\"noopener noreferrer\" target=\"_blank\">https://kentcdodds.com/blog</a>, <a href=\"https://kcd.im/YouTube\" rel=\"noopener noreferrer\" target=\"_blank\">https://kcd.im/YouTube</a>, and <a href=\"https://epicreact.dev/articles\" rel=\"noopener noreferrer\" target=\"_blank\">https://epicreact.dev/articles</a>.</div><div><br /></div><div>Good luck!</div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_6vttz",
+      "name": "Request for Invoice or Receipt - Epic React",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>Once you're logged in, you can view a fully customized invoice here: <a href=\"https://epicreact.dev/invoice\" target=\"_blank\" rel=\"noopener noreferrer\">https://epicreact.dev/invoice</a>.</div><div><br /></div><div>From there, you can add any required information to the \"Prepared for\" section of the invoice.</div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_78q9z",
+      "name": "Generic Thanks",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>Thanks for the feedback, we will definitely consider that.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_7f9af",
+      "name": "Bug -- currently being worked on (e.g. outage)",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name | 'there'}},</div><div><br /></div><div>Thanks for the heads up! We're looking into this issue now and will get it resolved ASAP.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": [
+        "recipient.first_name | 'there'"
+      ]
+    },
+    {
+      "id": "rsp_7hdc7",
+      "name": "KCD Uses",
+      "subject": null,
+      "body": "<div>Hey {{recipient.name}},</div><div><br /></div><div>You can find everything Kent uses on this page:&nbsp;<a href=\"https://kcd.im/uses\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;; background-color: rgb(255, 255, 255);\">https://kcd.im/uses</a></div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.name"
+      ]
+    },
+    {
+      "id": "rsp_82dzb",
+      "name": "Alternative Payment Options",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>Thanks for reaching out!</div><div><span style=\"font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;;\"><br /></span></div><div><span style=\"font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;;\">We currently only accept payment via credit card through Stripe.</span></div><div><br /></div><div><br /></div>",
+      "is_available_for_all_inboxes": true,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_82tqf",
+      "name": "Course PDF",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>Thanks for reaching out!</div><div><br /></div><div>There are no current plans for a PDF or otherwise compiled version of Just JavaScript.</div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_8pn0n",
+      "name": "Outside of Business Hours - egghead",
+      "subject": null,
+      "body": "<div>Hi,</div><div><br /></div><div>Thanks for getting in touch!</div><div><br /></div><div>We work normal business hours, generally 9 am - 5 pm Pacific Monday through Friday and take most \"bank holidays\" off. If you email outside of those times our response might be delayed but we will get back to you as soon as possible.</div><div><br /></div><div>In the meantime, we recommend checking out the FAQ:&nbsp;https://egghead.io/faq</div><div><br /></div><div>It has a lot of useful information and may include an answer to your question.</div><div><br /></div><div>- egghead team</div>",
+      "is_available_for_all_inboxes": false,
+      "variables": []
+    },
+    {
+      "id": "rsp_8r1jb",
+      "name": "PPP Change Region Request - Partner Products",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>Thanks for reaching out!</div><div><br /></div><div>We aren't able to change the region associated with your license from the one that was used when you originally purchased the course.</div><div><br /></div><div>If you'd like to remove the location restriction, you can upgrade to the full, region-unlocked course. The details and pricing are available at the bottom of your dashboard after you've logged in.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_8r1qf",
+      "name": "Caching Issue - WBaaS Courses",
+      "subject": null,
+      "body": "<div style=\"box-sizing: content-box;\">Hey {{recipient.first_name}},</div><div style=\"box-sizing: content-box;\"><br /></div><div style=\"box-sizing: content-box;\">There may be a<span>&nbsp;</span>caching<span>&nbsp;</span>issue<span>&nbsp;</span>preventing you from viewing the course content. Please follow the steps below:</div><div style=\"box-sizing: content-box;\"><br /></div><ol style=\"box-sizing: content-box; margin-top: 0px; margin-bottom: 0px; list-style-type: decimal;\" data-front-editor-list><li>Log out of the course if you're currently logged in</li><li>Clear your browser's cache and cookies for &lt;--- COURSE URL ---&gt;</li><li>Request a new login link using the \"Restore Purchases\" button at the top of<span>&nbsp;&lt;--- COURSE URL ---&gt;</span></li></ol><div style=\"box-sizing: content-box;\"><br /></div><div style=\"box-sizing: content-box;\">Let me know if you're able to view the course as expected after doing that.</div><div style=\"box-sizing: content-box;\"><br /></div><div style=\"box-sizing: content-box;\">If you're able, can you log in using an alternative browser or in incognito mode to see if the<span>&nbsp;</span>issue<span>&nbsp;</span>persists?</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_8r7pj",
+      "name": "During Business Hours - egghead",
+      "subject": null,
+      "body": "<div>Hi,</div><div><br /></div><div>Thanks for getting in touch!</div><div><br /></div><div>Our support team has received your email and will get back to you as soon as possible.</div><div><br /></div><div>In the meantime, we recommend checking out the FAQ: https://egghead.io/faq</div><div><br /></div><div>It has a lot of useful information and may include an answer to your question.</div><div><br /></div><div>- egghead team</div>",
+      "is_available_for_all_inboxes": false,
+      "variables": []
+    },
+    {
+      "id": "rsp_8rlzb",
+      "name": "Pending Webhook Issue",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>It looks like the email address you used caused an issue with the purchase process on our side - a security workflow was triggered.</div><div><br /></div><div>You can use the coupon below to claim your license. You'll be prompted to enter your email address again, but once you've done that you should be good to go.</div><div><br /></div><div>← COUPON →</div><div><br /></div><div>Sorry for the inconvenience! Let me know if you have any questions or need anything else.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_9xqfb",
+      "name": "Custom Invoice Information",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>You can add custom information to your invoices using the supplied text box:</div><div><br /></div><div><img front-cid=\"cfcfe14d9f4849857852137a9fa187ef\" src=\"/us-west-1/api/1/companies/2023e93b68555c138b47/attachments/33f8bcad5b803daf6c442cc93b3a8175bd66ad3c\" style=\"width: 600px;\" /></div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_9xqkn",
+      "name": "Discount Request - Total TypeScript",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>Thanks for your interest in Total TypeScript!</div><div><br /></div><div>We currently aren't offering any discounts, but we do offer this material for free:</div><div><br /></div><div><a href=\"https://www.totaltypescript.com/tutorials\" rel=\"noopener noreferrer\" target=\"_blank\">https://www.totaltypescript.com/tutorials</a></div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_9y5zb",
+      "name": "PPP Discount Info",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>Thanks for your interest in the course!</div><div><br /></div><div>If we offer parity pricing in your area, it will automatically show up on the pricing page with the option to select it (it isn't automatically applied).</div><div><br /></div><div>Please note, this is automated based on IP address of the computer you are using to make the purchase. It's an imperfect system and the discount does not always display. Make sure you disable any ad/tracking blockers which we use to determine your geolocation.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_9y613",
+      "name": "License not Found - Partner Products",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>I wasn't able to find a license associated with this email address ({{recipient.email}}) – is it possible it was purchased using a different one?</div><div><br /></div><div>You'll need to enter the email address you used to purchase the course when requesting a login link.</div><div><br /></div><div>If you're not sure which email address the license belongs to, I can look it up using your payment information. I just need the last four digits and expiration date of the credit card that was used.</div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name",
+        "recipient.email"
+      ]
+    },
+    {
+      "id": "rsp_9ybt3",
+      "name": "TT: PPP FAQ Link",
+      "subject": null,
+      "body": "<div>Hey {{recipient.name}},</div><div><br /></div><div>You can read more about PPP here: <a href=\"https://totaltypescript.com/faq\" target=\"_blank\" rel=\"noopener noreferrer\">https://totaltypescript.com/faq</a></div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.name"
+      ]
+    },
+    {
+      "id": "rsp_9ybuv",
+      "name": "Declined Transaction & Alternate Payment",
+      "subject": "",
+      "body": "<div>No sorry, and they don't give us any insight into why transactions are declined.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_9yc07",
+      "name": "Thanks for Response - We Will Be Here",
+      "subject": null,
+      "body": "<div>Thank you so much for the response. We will be here when you are ready!</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_9yc93",
+      "name": "Magic Link - Pure React",
+      "subject": "",
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>You can access the course using the \"Restore Purchases\" button at the top of https://www.purereact.com/. You'll need to enter the email address you used to purchase the course to have a login link sent.</div><div><br /></div><div>If you have any trouble accessing the course, please let us know!</div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_9ycef",
+      "name": "Guarantee",
+      "subject": null,
+      "body": "<div>We've got a 100% money-back guarantee, so if you don't get value from the course within 30 days we are happy to give you a refund.</div>",
+      "is_available_for_all_inboxes": false,
+      "variables": []
+    },
+    {
+      "id": "rsp_9ychz",
+      "name": "Email Updated",
+      "subject": null,
+      "body": "<div>This is now updated. You'll need to request a new login</div>",
+      "is_available_for_all_inboxes": false,
+      "variables": []
+    },
+    {
+      "id": "rsp_9yg07",
+      "name": "Postmark Status",
+      "subject": null,
+      "body": "<div>Hi, our email service provider is currently experiencing issues. We expect them to be cleared up soon and when it does your login links will arrive as expected.</div><div><br /></div><div>Here's the current status -&gt; https://ea5d5bbc.sorryapp.com/<a href=\"https://status.postmarkapp.com/\" target=\"_blank\" rel=\"noopener noreferrer\"></a></div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_9yhdz",
+      "name": "Postmark Outage",
+      "subject": "",
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>Thanks for reaching out!</div><div><br /></div><div>Our email processor is experiencing issues right now, so login link requests are failing or the links are being sent out much later than when they are requested.</div><div><br /></div><div>We're keeping an eye on things and will let you know when they've resolved the issue that is causing this delay.</div><div><br /></div><div>I apologize for the inconvenience!</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_9ymh3",
+      "name": "TT: Launch Estimate",
+      "subject": null,
+      "body": "<div>We plan on providing progress updates as the last two modules are finished in the first quarter of 2023!</div>",
+      "is_available_for_all_inboxes": false,
+      "variables": []
+    },
+    {
+      "id": "rsp_9yw07",
+      "name": "TT: Lower Price Future",
+      "subject": null,
+      "body": "<div>Hi {{recipient.first_name}},</div><div><br /></div><div>We are working on lower-cost \"tiers\" and \"pay over time\" options, so hopefully, we hit the sweet spot on price.&nbsp;</div><div><br /></div><div>Thanks for the reply!</div><div><br /></div><div>We'll keep you posted.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_9yw1z",
+      "name": "TT Pre-Release Link/Access",
+      "subject": "",
+      "body": "<div>If you'd like to participate in the pre-release, we'd love to have you!</div><div><br /></div><div>The discount window is closed, but you can enroll here:&nbsp;<a href=\"https://www.totaltypescript.com/buy?allowPurchase=true\" target=\"_blank\" rel=\"noopener noreferrer\">https://www.totaltypescript.com/buy?allowPurchase=true</a></div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_9zabr",
+      "name": "eh: Custom Invoice w/ Link",
+      "subject": "",
+      "body": "<div><a href=\"https://egghead.io/user/subscription\" rel=\"noopener noreferrer\" target=\"_blank\">https://egghead.io/user/subscription</a>&nbsp;has all of your invoices and they can be customized however you like.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_9zadj",
+      "name": "eh: Delete Account FAQ",
+      "subject": null,
+      "body": "<div>You can find instructions for deleting your account here:&nbsp;<a href=\"https://egghead.io/faq#delete-account\" rel=\"noopener noreferrer\" target=\"_blank\">https://egghead.io/faq#delete-account</a></div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_9zk93",
+      "name": "TT: Custom Invoice",
+      "subject": "",
+      "body": "<div>You can update the details of the invoice here: <a href=\"https://totaltypescript.com/invoices\" rel=\"noopener noreferrer\" target=\"_blank\">https://totaltypescript.com/invoices</a></div><div><br /></div><div>We don't provide any additional customization, but you can always edit the PDF as needed to match internal compliance specifications for reporting expenses.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_9zop3",
+      "name": "eh: Account Deletion",
+      "subject": "",
+      "body": "<div>Sure, instructions for account deletion are here: <a href=\"https://egghead.io/faq\" target=\"_blank\" rel=\"noopener noreferrer\">https://egghead.io/faq</a></div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_9zs5j",
+      "name": "eh: 10% Discount Coupon Link",
+      "subject": "",
+      "body": "<div>Hi, here's a discount link for an egghead membership: <a href=\"https://egghead.io/pricing?coupon=8d11b808380e28ac095b\" target=\"_blank\" rel=\"noopener noreferrer\">https://egghead.io/pricing?coupon=8d11b808380e28ac095b</a></div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_a1umf",
+      "name": "egg: No Record of Membership",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name | 'there'}}, could you have used another email address? We can't find any record of a membership purchased from this one.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": [
+        "recipient.first_name | 'there'"
+      ]
+    },
+    {
+      "id": "rsp_a3ksn",
+      "name": "TT: Buy Now",
+      "subject": "",
+      "body": "<div>It's not currently for sale publicly.</div><div><br /></div><div>Here's a link that enables the purchase of the Core Volume:&nbsp;<a href=\"https://www.totaltypescript.com/buy?allowPurchase=true\" target=\"_blank\" rel=\"noopener noreferrer\">https://www.totaltypescript.com/buy?allowPurchase=true</a></div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_a3pon",
+      "name": "Email Change",
+      "subject": "",
+      "body": "<div>This is done, you'll need to log out and log in again with the requested email.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_a6pc7",
+      "name": "TT: Stackblitz",
+      "subject": "",
+      "body": "<div>Thanks for the feedback, it's not perfect for sure. We recommend using VS Code or similar locally if the inline editor is aggravating.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_a6vrb",
+      "name": "TT: Refund",
+      "subject": null,
+      "body": "<div>Hello,&nbsp;</div><div><br /></div><div>We've initiated a refund. It can take 5-10 days for the banks to reconcile and return the money to your account.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_a7w07",
+      "name": "TT Stackblitz2",
+      "subject": "",
+      "body": "<div>If it's a persistent issue we recommend cloning the repos locally and using your preferred development environment for the smoothest experience.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_aa9tz",
+      "name": "Video Quality",
+      "subject": "",
+      "body": "<div>We will see what we can do. If it's unusable we are happy to provide a refund. Also the written text is fairly complete. I know that's not the best solution, but it will work today.</div><div><br /></div><div>Sorry for this hassle.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_aa9xj",
+      "name": "custom invoice",
+      "subject": "",
+      "body": "<div>No, we don't provide custom invoices but you can:</div><div><br /></div><ul data-front-editor-list style=\"margin-top: 0px; margin-bottom: 0px;\"><li>add information to your invoice before downloading it</li><li>edit the PDF</li></ul><div><br /></div><div>Hope that helps!</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_ac1mv",
+      "name": "TT: Bonuses PPP",
+      "subject": "",
+      "body": "<div>You used a regional discount to purchase the core volume. Bonus contents are not available at the regionally discounted price. <br /></div><div><br /></div><div>Your original purchase price will be removed from the upgrade to the full unrestricted version if you should choose to upgrade.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_acbpj",
+      "name": "Regional Issues - PPP",
+      "subject": "",
+      "body": "<div>Unfortunately we aren't able to diagnose issues with purchases made with a regional discount. We recommend upgrading to the full license if it continues to be an issue. If that isn't a viable option, we can provide a refund.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_acvgn",
+      "name": "TT: Github Login",
+      "subject": "",
+      "body": "<div>If you've already logged in with github you can do the following:</div><div><br /></div><ul data-front-editor-list style=\"margin-top: 0px; margin-bottom: 0px;\"><li>log out</li><li>log in with github</li><li>visit this pagehttps://www.totaltypescript.com/profile</li><li>disconnect github</li><li>log out</li><li>log in with email used to purchase&nbsp;</li><li>visit this pagehttps://www.totaltypescript.com/profile</li><li>connect github&nbsp;</li></ul>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_adgzr",
+      "name": "Total TypeScript Auto-Responder",
+      "subject": "",
+      "body": "<div>This is an automated reply to let you know that your email has been received and we will get back to you as quickly as possible.&nbsp;<span style=\"font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;;\">We work 9-5 Pacific Monday through Friday and take most \"bank holidays\" off.&nbsp;</span></div><div><br /></div><div>You can find community support in the <b><a href=\"https://www.totaltypescript.com/discord\" rel=\"noopener noreferrer\" target=\"_blank\">Total TypeScript Discord channel</a></b>: <a href=\"https://www.totaltypescript.com/discord\" rel=\"noopener noreferrer\" target=\"_blank\"></a></div><div><br /></div><div><a href=\"https://www.totaltypescript.com/discord\" rel=\"noopener noreferrer\" target=\"_blank\">https://www.totaltypescript.com/discord</a></div><div><br /></div><div>If you've got code questions/comments/opinions, <b>Discord is the best channel</b>!</div><div><br /></div><div>--</div><div><br /></div><div>If you've purchased Total TypeScript and are looking for an invoice or receipt, you can find that here:</div><div><br /></div><div><a href=\"https://www.totaltypescript.com/purchases\" rel=\"noopener noreferrer\" target=\"_blank\">https://www.totaltypescript.com/purchases</a></div><div><br /></div><div>--</div><div><br /></div><div><b>Invoices are customizable</b> and you can enter company/tax information there. The generated PDFs are also fully editable so please <b>feel free to adjust them to suit your specific needs</b>.</div><div><br /></div><div>The <b><a href=\"https://www.totaltypescript.com/faq\" rel=\"noopener noreferrer\" target=\"_blank\">Total TypeScript FAQ</a></b> has answers to many common questions:</div><div><br /></div><div><a href=\"https://www.totaltypescript.com/faq\" rel=\"noopener noreferrer\" target=\"_blank\">https://www.totaltypescript.com/faq</a></div><div><br /></div><div>--</div><div><br /></div><div>Will you take 15 seconds share Total TypeScript?&nbsp;It really helps us get the word out. <img data-front-emoji-shortcode=\":pray:\" alt=\"🙏\" src=\"https://assets.frontapp.com/emoji-data-13.1/img-apple-64/1f64f.png\" width=\"20\" height=\"20\" style=\"vertical-align: -4.55px; object-fit: contain;\" /></div><div><br /></div><div><span style=\"font-size: 16px;\"><b><img data-front-emoji-shortcode=\":point_right:\" alt=\"👉\" src=\"https://assets.frontapp.com/emoji-data-13.1/img-apple-64/1f449.png\" width=\"23\" height=\"23\" style=\"vertical-align: -5.2px; object-fit: contain;\" />&nbsp;<a href=\"https://twitter.com/intent/tweet?text=Total%20TypeScript%20from%20%40mattpocockuk%20is%20an%20excellent%20resource%20for%20learning%20advanced%20TypeScript.%20%F0%9F%A7%99%E2%80%8D%E2%99%80%EF%B8%8F&amp;url=https%3A%2F%2Fwww.totaltypescript.com\" rel=\"noopener noreferrer\" target=\"_blank\">Send a tweet about Total TypeScript!&nbsp;</a></b></span></div><div><span style=\"font-size: 16px;\"><br /></span></div><div><span style=\"font-size: 16px;\">--</span></div><div><br /></div><div>If you've got more context to share, or if any of the above helps and you don't need a reply, please let us know. We are always here to help</div><div><span style=\"font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;;\"><br /></span></div><div><span style=\"font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;;\">-Total TypeScript <img data-front-emoji-shortcode=\":female_mage:\" alt=\"🧙‍♀️\" src=\"https://assets.frontapp.com/emoji-data-13.1/img-apple-64/1f9d9-200d-2640-fe0f.png\" width=\"20\" height=\"20\" style=\"vertical-align: -4.55px; object-fit: contain;\" /><span data-editor-role=\"insertion-point\">​</span></span></div>",
+      "is_available_for_all_inboxes": false,
+      "variables": []
+    },
+    {
+      "id": "rsp_af8av",
+      "name": "PPP Automated",
+      "subject": "",
+      "body": "<div>PPP is automated so whatever discount it displays is what's available.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_agyx3",
+      "name": "partnership response",
+      "subject": "partnership response",
+      "body": "<div>Hey there,&nbsp;</div><div><br /></div><div>Thanks for reaching out. We're not looking for partnerships right now.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_aozgn",
+      "name": "politely decline",
+      "subject": "",
+      "body": "<div>Hi there,</div><div><br /></div><div>Thanks for reaching out, but we politely decline.&nbsp;</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_ap0nb",
+      "name": "reproducing bug ",
+      "subject": "",
+      "body": "<div style=\"box-sizing: content-box;\">Hi there,&nbsp;</div><div style=\"box-sizing: content-box;\"><br /></div><div style=\"box-sizing: content-box;\">Could you send over a screenshot of what behavior and any errors in the console you might be seeing?&nbsp;</div><div style=\"box-sizing: content-box;\"><br /></div><div style=\"box-sizing: content-box;\">I wasn't able to reproduce this bug, and we aren't seeing any other requests of this kind, so I want to understand your context more.&nbsp;</div><div style=\"box-sizing: content-box;\"><br /></div><div style=\"box-sizing: content-box;\">Something else to check is if you are using a<span>&nbsp;</span>VPN<span>&nbsp;</span>service, sometimes that causes issues too.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_ap7d3",
+      "name": "not subscription found",
+      "subject": "",
+      "body": "<div style=\"box-sizing: content-box; color: rgb(0, 0, 0);\">Hi there,&nbsp;</div><div style=\"box-sizing: content-box; color: rgb(0, 0, 0);\"><br /></div><div style=\"box-sizing: content-box; color: rgb(0, 0, 0);\">I couldn't find any account under \"UPDATE\" maybe you used another email?&nbsp;If you're not sure, I can look it up using your payment information.</div><div style=\"box-sizing: content-box; color: rgb(0, 0, 0);\"><br /></div><div style=\"box-sizing: content-box; color: rgb(0, 0, 0);\">I just need the last&nbsp;4&nbsp;digits&nbsp;and the expiration date of the credit card that was used.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_apvnr",
+      "name": "egghead delete account instructions",
+      "subject": "delete account",
+      "body": "<div>Hey {recipient.first_name},</div><div><br /></div><div>You can delete your account at any time.</div><div><br /></div><div>Please follow the steps below to delete your account:</div><ol><li>Log in</li><li>Click your name in the upper right corner of any page to open your account profile</li><li>Open the <a href=\"https://egghead.io/user/profile\" rel=\"noopener noreferrer\" target=\"_blank\">\"Profile\" tab</a></li><li>Scroll to the \"Danger Zone\"</li><li>Click the \"Delete Account\" button and confirm you want to od so</li></ol>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_aq4w7",
+      "name": "canceled subscription",
+      "subject": null,
+      "body": "<div>Hi there,&nbsp;</div><div><br /></div><div>I've canceled your subscription, you'll have access to your pro membership until the end of the period. You won't be charged in the future.&nbsp;</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_atoxz",
+      "name": "TJS and ER License",
+      "subject": "",
+      "body": "<div>Yes, we will be distributing the missing licenses in the next couple of days.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_atozr",
+      "name": "Discount Tomorrow",
+      "subject": "",
+      "body": "<div>It will be generally available with a 40% discount tomorrow.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_atp3b",
+      "name": "EWD Thanks Code",
+      "subject": "",
+      "body": "<div>Sure, here you go:</div><div><br /></div><div><a href=\"https://www.epicweb.dev/buy?code=epic-thanks-2023\" target=\"_blank\" rel=\"noopener noreferrer\">https://www.epicweb.dev/buy?code=epic-thanks-2023</a></div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_atrev",
+      "name": "EW: Access Purchase",
+      "subject": "",
+      "body": "<div>Log in to <a href=\"https://epicweb.dev/products/full-stack-vol-1\" rel=\"noopener noreferrer\" target=\"_blank\">https://epicweb.dev/products/full-stack-vol-1</a>&nbsp;to access your purchase.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_atvuv",
+      "name": "Change name - Epic Web",
+      "subject": null,
+      "body": "<div>Hi there,&nbsp;</div><div><br /></div><div>You can change your name by going to&nbsp;<a rel=\"noopener noreferrer\" href=\"https://www.epicweb.dev/profile\" target=\"_blank\">https://www.epicweb.dev/profile</a></div><div><br /></div><div>Happy learning!</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_atvwn",
+      "name": "EW: Expires",
+      "subject": "",
+      "body": "<div>There is no expiration and you can take as long as you need and revisit it as much as you want.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_aua9z",
+      "name": "EW: Attach Github",
+      "subject": "",
+      "body": "<div><a href=\"https://www.epicweb.dev/profile\" rel=\"noopener noreferrer\" target=\"_blank\"></a></div><div>if you're trying to attach to a github account and have already logged in with you'll want to:</div><div><br /></div><ul style=\"margin-top: 0px; margin-bottom: 0px;\" data-front-editor-list><li>log out</li><li>log in with github</li><li>visit this page&nbsp;<a href=\"https://www.epicweb.dev/profile\" target=\"_blank\" rel=\"noopener noreferrer\">https://www.epicweb.dev/profile</a></li><li>disconnect github</li><li>log out</li><li>log in with email used to purchase&nbsp;</li><li>visit this page&nbsp;<a href=\"https://www.epicweb.dev/profile\" target=\"_blank\" rel=\"noopener noreferrer\">https://www.epicweb.dev/profile</a></li><li>connect github&nbsp;</li></ul><div><br /></div><div>If an email transfer is available you can do that <a href=\"https://epicweb.dev/products/full-stack-vol-1\" rel=\"noopener noreferrer\" target=\"_blank\">https://epicweb.dev/products/full-stack-vol-1</a></div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_av0cn",
+      "name": "emails delivered correctly",
+      "subject": "",
+      "body": "<div style=\"box-sizing: content-box; color: rgb(0, 0, 0);\">Hello,</div><div style=\"box-sizing: content-box; color: rgb(0, 0, 0);\"><br /></div><div style=\"box-sizing: content-box; color: rgb(0, 0, 0);\">All the emails are being processed and delivered correctly on our end, please check your inbox, spam folder&nbsp;or any other blockers you may have. Since the emails are being successfully delivered, it generally means that some sort of filtering is being done on your end either at the email server or in your email client.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_aw7ev",
+      "name": "update to team account",
+      "subject": "",
+      "body": "<div>Hi there,&nbsp;</div><div><br /></div><div>Once you are logged in:&nbsp;</div><div><br /></div><ol data-front-editor-list style=\"margin-top: 0px; margin-bottom: 0px; list-style-type: decimal;\"><li>Go to <a href=\"https://egghead.io/user/membership\" rel=\"noopener noreferrer\" target=\"_blank\">https://egghead.io/user/membership</a></li><li>Click the 'Update Your Subscription or Payment Method' button, click 'Update plan',&nbsp;</li><li>You'll see a 'quantity' that can be updated.<br /><br /></li><div style><img front-cid=\"f848a8a696bb43e5e3c0f93324357e03\" src=\"/us-west-1/api/1/companies/2023e93b68555c138b47/attachments/b99ad98143ab0db7e656978ae02679963c5cfbf9\" style=\"width: 311px; height: 240.258px;\" />&nbsp;</div></ol><div><span><br /></span></div><ol start=\"4\" data-front-editor-list style=\"margin-top: 0px; margin-bottom: 0px; list-style-type: decimal;\"><li><span>Once the quantity is updated you will see a 'team' section in egghead UI where an invite code is available to hand out to people or you can invite specific emails to the team.</span></li></ol><div><br /></div><div><br /></div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_awqh3",
+      "name": "Decline Refund - Over 30 Days",
+      "subject": "",
+      "body": "<div>Hello {{recipient.first_name}},</div><div><br /></div><div>Our refund policy lasts 30 days. Since 30 days have gone by since your \npurchase, unfortunately we can’t offer you a refund or exchange.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_ayr0n",
+      "name": "contact directly creator",
+      "subject": "",
+      "body": "<div>Hello,&nbsp;</div><div><br /></div><div>We support any questions related to course and functionality, you’ll have to contact Matt directly for this kind of collaboration. We don’t have Matt’s email, you’ll have to reach out on his personal website or Twitter.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_ayzuv",
+      "name": "total typescript learning path",
+      "subject": "",
+      "body": "<div style=\"box-sizing: content-box; color: rgb(0, 0, 0);\">Hi there,&nbsp;</div><div style=\"box-sizing: content-box; color: rgb(0, 0, 0);\"><br /></div><div style=\"box-sizing: content-box; color: rgb(0, 0, 0);\">This is an estimate of how long the whole course would take -&nbsp;<a style=\"text-decoration: none; color: rgb(54, 127, 238);\" rel=\"noopener noreferrer\" href=\"https://www.totaltypescript.com/typescript-learning-path\" target=\"_blank\">https://www.totaltypescript.com/typescript-learning-path</a></div><div><br /></div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_b0q13",
+      "name": "no special discounts",
+      "subject": "",
+      "body": "<div>Thanks for reaching out to us. I’m glad to hear you’re interested</div><div><br /></div><div>As much as I’d like to help, unfortunately, our promotions are strictly time-bound and we have to adhere to the rules set for everyone.</div><div><br /></div><div>This keeps things fair for all our customers who have purchased within the designated time frame.</div><div><br /></div><div>I hope you’ll still consider enrolling in our training. If you have any other questions or if there’s anything else I can assist you with, please let me know.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_b18ef",
+      "name": "Can't Sign In - No Magic Link",
+      "subject": "",
+      "body": "<div>Hey {{recipient.first_name}},&nbsp;</div><div><br /></div><div>I see an active membership under this email. I've gone ahead and sent you a magic link. Let me know if it works or not.&nbsp;</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_b2oef",
+      "name": "account set up payment by invoice",
+      "subject": "",
+      "body": "<div style=\"box-sizing: content-box; color: rgb(0, 0, 0);\">Hi there,&nbsp;</div><div style=\"box-sizing: content-box; color: rgb(0, 0, 0);\"><br /></div><div style=\"box-sizing: content-box; color: rgb(0, 0, 0);\">The account is now set up, and you are the account owner. Once you log in, please visit&nbsp;<a style=\"text-decoration: none; color: rgb(54, 127, 238);\" rel=\"noopener noreferrer\" href=\"https://www.totaltypescript.com/team\" target=\"_blank\">https://www.totaltypescript.com/team</a></div><div style=\"box-sizing: content-box; color: rgb(0, 0, 0);\"><br /></div><div style=\"box-sizing: content-box; color: rgb(0, 0, 0);\">There, you'll find the code to share with your teammates, and you'll also be able to track who claims seats<span>&nbsp;</span>within<span>&nbsp;</span>your team.</div><div style=\"box-sizing: content-box; color: rgb(0, 0, 0);\"><br /></div><div style=\"box-sizing: content-box; color: rgb(0, 0, 0);\">Please let me know if you have any other questions.</div><div style=\"box-sizing: content-box; color: rgb(0, 0, 0);\"><br /></div><div style=\"box-sizing: content-box; color: rgb(0, 0, 0);\">Happy learning!</div><div><br /></div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_b2qyv",
+      "name": "epic web free material",
+      "subject": "",
+      "body": "<div></div><div style=\"box-sizing: content-box;\">Hi there,&nbsp;</div><div style=\"box-sizing: content-box;\"><br /></div><div style=\"box-sizing: content-box;\">Thanks for reaching out to us. I’m glad to hear you’re interested</div><div style=\"box-sizing: content-box;\"><br /></div><div style=\"box-sizing: content-box;\">Unfortunately, we don't have any current discounts.&nbsp;</div><div style=\"box-sizing: content-box;\"><br /></div><div style=\"box-sizing: content-box;\">But please try the&nbsp;free material available; I'm hopeful that it will help you in your goals:</div><div style=\"box-sizing: content-box;\"><br /></div><div style=\"box-sizing: content-box;\">All the workshop repositories are free and open source:<span>&nbsp;<a href=\"https://github.com/epicweb-dev\" rel=\"noopener noreferrer\" target=\"_blank\">https://github.com/epicweb-dev</a></span><span style=\"background-color: transparent;\">.&nbsp;There’s also a&nbsp;</span><span style=\"background-color: transparent;\">lot of free material on&nbsp;<a href=\"https://www.epicweb.dev/tips\" rel=\"noopener noreferrer\" target=\"_blank\">https://www.epicweb.dev/tips</a>,&nbsp;<a href=\"https://www.epicweb.dev/tutorials\" rel=\"noopener noreferrer\" target=\"_blank\">https://www.epicweb.dev/tutorials</a>,&nbsp;<a href=\"https://www.epicweb.dev/articles\" rel=\"noopener noreferrer\" target=\"_blank\">https://www.epicweb.dev/articles</a>&nbsp;</span></div><div style=\"box-sizing: content-box;\"><br /></div><div style=\"box-sizing: content-box;\">Good luck!</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_b2r9j",
+      "name": "reset progress",
+      "subject": null,
+      "body": "<div>Hi there,&nbsp;</div><div><br /></div><div>You can reset your progress. At the end of the content list there is a button where you can do so:&nbsp;</div><div><br /></div><div><img front-cid=\"274054443ded6bd2ab572fa7a8e7dd1c\" src=\"/us-west-1/api/1/companies/2023e93b68555c138b47/attachments/a410edc7211bc9ddc1dd5fe9686717cc1f52f6df\" style=\"width: 205px; height: 596.217px;\" /></div><div><br /></div><div>Happy learning!</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_b3ifb",
+      "name": "magic link sent correctly",
+      "subject": "",
+      "body": "<div>Hi there,&nbsp;</div><div><br /></div><div>I just manually requested a confirmation email, and it was processed and delivered successfully from our side.</div><div><br /></div><div><br /></div><div><br /></div><div>Please check your inbox, spam folder or any other blockers you may have. Since the emails are being successfully delivered, it generally means that some sort of filtering is being done on your end either at the email server or in your email client.</div><div><br /></div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_b5eiv",
+      "name": "ER: v2 Free Upgrade",
+      "subject": "",
+      "body": "<div>We are working on a fully updated version that you will have access to for free if you buy the current version (that is still excellent and valid)</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_b7upz",
+      "name": "Deny Sponsor request",
+      "subject": null,
+      "body": "<div></div><div>Hey {{recipient.first_name}},</div><div><br /></div><div>At the moment, we're not taking on any sponsorship roles.</div><div><br /></div><div>Best,</div><div></div>",
+      "is_available_for_all_inboxes": true,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_b839j",
+      "name": "Deny collaboration",
+      "subject": null,
+      "body": "<div>Hi {{recipient.first_name}},</div><div><br /></div><div>Thanks, but we're not pursuing collaborations right now.&nbsp;</div><div><br /></div><div>Best,</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_b83lz",
+      "name": "No Student Discount",
+      "subject": null,
+      "body": "<div>Hi,</div><div><br /></div><div>Thanks for reaching out and showing interest in the course. Sadly, we don't have student discounts available right now.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_b9z0n",
+      "name": "Basic Bug Report Questions",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>Thank you for bringing this to our attention. Could you answer a few questions to help us out with this bug report?</div><ol class=\"fa-nqck7o fa-62rvba fa-699t68 fap55jf2\"><li class=\"fagj3a16 fagkbaot\">What browser and version are you using?</li><li class=\"fagj3a16 fagkbaot\">What operating system are you on?</li><li class=\"fagj3a16 fagkbaot\">Are you able to reproduce the error in other browsers or on other devices?</li><li class=\"fagj3a16 fagkbaot\">Can you share a screenshot of the full error message?</li><li class=\"fagj3a16 fagkbaot\">Do you have any \nbrowser extensions, ad blockers, or security software running that could\n potentially be interfering? If so, does disabling them make any \ndifference?</li></ol>",
+      "is_available_for_all_inboxes": true,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_b9z2f",
+      "name": "No plans for additional content",
+      "subject": "",
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>Thank you for your interest. But, there are no plans for additional content at this time.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_bacjr",
+      "name": "Future discounts",
+      "subject": "",
+      "body": "<div>Hi there,&nbsp;</div><div><br /></div><div>We don't have any plans at the moment, but if that changes we will communicate any sales through email. So keep an eye on those, if you haven't, we encourage you to sign up for the newsletter: https://www.epicweb.dev/#subscribe&nbsp;</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_bic5j",
+      "name": "Epic React v2 Upgrade Cost",
+      "subject": null,
+      "body": "<div>Hi,</div><div><br /></div><div>There Is an upgrade cost, but it's reasonable! It's an entirely new learning experience and was a ton of work. You can find more details here:&nbsp;<a style=\"color: rgb(86, 140, 220);\" rel=\"noopener noreferrer\" href=\"https://www.epicreact.dev/\" target=\"_blank\">https://www.epicreact.dev/</a>&nbsp;</div><div><br /></div><div>Let me know If you have anymore questions.&nbsp;</div><div><br /></div><div>Best,</div><div></div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_bic93",
+      "name": "fixed",
+      "subject": "",
+      "body": "<div>This should be fixed. Can you check? Sorry for the hassle.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_bichz",
+      "name": "email not found",
+      "subject": "",
+      "body": "<div>We don't have a record of a purchase with this email address. Could you have used a different one?</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_bj3if",
+      "name": "100% off Total TypeScript Essentials",
+      "subject": "Total TypeScript Essentials coupon code!",
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div></div><div></div><div></div><div>Thanks again for your early support of Total TypeScript Complete by Matt Pocock!</div><div><br /></div><div>As promised, here is your coupon code for 100% off the print book &amp; ebook combo of Total TypeScript Essentials (shipping not included): <span style=\"font-weight: 700;\">\"coupon code here\"</span></div><div><br /></div><div>You can redeem the code by:</div><ol><li>Navigating to Total <a href=\"https://nostarch.com/total-typescript\" rel=\"noopener noreferrer\" target=\"_blank\">TypeScript</a> on <a href=\"http://nostarch.com/\" rel=\"noopener noreferrer\" target=\"_blank\">nostarch.com</a>.</li><li>Selecting the first option for the print book &amp; ebook combo and clicking 'Pre-Order'.</li><li>In your cart, paste the code into the 'Coupon Code' field and click 'Apply to Order'.</li><li>Completing the checkout process.</li></ol><div>Best wishes,</div><div></div><div></div><div><span style=\"text-decoration-skip-ink: none;\"></span></div>",
+      "is_available_for_all_inboxes": true,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_bju2v",
+      "name": "Account sharing",
+      "subject": "",
+      "body": "<div>Hey,</div><div><br /></div><div>We discourage account sharing because it's against our policy. Theres an option to purchase a team membership on the purchase page.</div><div><br /></div><div>At the same time we can't really stop account sharing, but If y'all do we don't offer support for It, and only one email would get a sign In link. One person would have to keep sharing those links which would be inconvenient.&nbsp;</div><div><br /></div><div>I hope this answers any questions! Thanks for showing interest in the course. I hope the both of y'all get licenses to support the product.&nbsp;</div><div><br /></div><div>Best wishes,</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_bl24n",
+      "name": "translation request",
+      "subject": "",
+      "body": "<div style=\"color: rgb(0, 0, 0);\">Hi,</div><div><br /></div><div style=\"color: rgb(0, 0, 0);\">That would be awesome! We're all for making learning accessible for everyone. Please ensure that you link back to the original article</div><div><br /></div><div style=\"color: rgb(0, 0, 0);\">Thanks for translating!&nbsp;</div><div><br /></div><div style=\"color: rgb(0, 0, 0);\">Best,</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_bo2br",
+      "name": "Epic React V2 Course length",
+      "subject": "",
+      "body": "<div>Hi,</div><div><br /></div><div>it's roughly the equivalent of a full day workshop, maybe 2. There are a lot of \"it depends\" but that's generally the scope.</div><div><br /></div><div>Let me know If you have anymore questions.</div><div><br /></div><div>Best,</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_bo51j",
+      "name": "Stack  Discounts",
+      "subject": "",
+      "body": "<div>The discounts do not stack so choose the one that is best for you.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_bo8hz",
+      "name": "instructor inquiry",
+      "subject": "",
+      "body": "<div>Hi {{recipient.first_name}},</div><div><br /></div><div>Thanks for reaching out.</div><div><br /></div><div>We aren't taking applications at the moment, but if you want to learn more about building courses, we have this&nbsp;instructor resource:&nbsp;<a rel=\"noopener noreferrer\" href=\"https://howtoegghead.com/what-is-egghead\" target=\"_blank\">https://howtoegghead.com/what-is-egghead</a>. We recommend reading the guide and then just doing it. Share it with the world!</div><div><br /></div><div>Let me know If you have any questions.</div><div><br /></div><div>Best,</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_bofnr",
+      "name": "er: free resources",
+      "subject": "",
+      "body": "<div>That makes sense. Thanks for sharing.</div><div><br /></div><div>Have you checked out the free resources?</div><div><br /></div><div><a href=\"https://epicreact.dev/tutorials\" rel=\"noopener noreferrer\" target=\"_blank\">https://epicreact.dev/tutorials</a></div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_bon47",
+      "name": "er: future updates",
+      "subject": "",
+      "body": "<div>There are no promises of future updates and you should base your purchase on what is available today. Kent makes a reasonable effort to fix/update his courses, but major version may require an upgrade fee in the future.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_bon7r",
+      "name": "er: ppp stacking",
+      "subject": "",
+      "body": "<div>The discounts do not stack. That's intended. Choose the best option for your situation.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_brn9j",
+      "name": "future discount",
+      "subject": "",
+      "body": "<div>We will communicate any future discounts/promotions via email so keep an eye on those. If you haven't you can sign up for our newsletter:&nbsp; <a rel=\"noopener noreferrer\" href=\"https://www.totaltypescript.com/newsletter\" target=\"_blank\">https://www.totaltypescript.com/newsletter</a>&nbsp;</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_bt287",
+      "name": "Deny Guest Post Request",
+      "subject": "",
+      "body": "<div>Hi {{recipient.first_name}},</div><div><br /></div><div>We aren't taking on any guest posts right now, but thanks for reaching out!</div><div><br /></div><div>Best,</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_bun0n",
+      "name": "TT Book Value",
+      "subject": "Re: ",
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>All of the written content of the book is accessible for free on our site. So, there's a lot of value you can get from that right now.&nbsp;<span style=\"background-color: transparent;\">You will just need to purchase TypeScript Pro Essentials in order to view the videos that are included in the chapters.</span><span style=\"background-color: transparent;\">&nbsp;</span></div>",
+      "is_available_for_all_inboxes": true,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_bupqf",
+      "name": "Free Chapter Paywall",
+      "subject": "Re: Your Free Chapter on JustJavaScript.com",
+      "body": "<div>Hey {{recipient.first_name}},</div><div>&nbsp;</div><div>Try clicking the link again, and then refreshing the page. There's a bit of an async issue sometimes with where the subscriber cookie gets checked before it's created.&nbsp;</div><div><br /></div><div>Let me know if refreshing works</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_bvmbr",
+      "name": "Epic Bundle already own products",
+      "subject": "",
+      "body": "<div>Hello,</div><div><br /></div><div>The base discounted price for the bundle is 65% off, making it $999 USD. If you’re logged into Epic Web with the same email used to purchase <b>[PRODUCTS HERE</b>] you’ll see an additional discount to avoid paying for them twice.</div><div><br /></div><div>Let me know If you have anymore questions!&nbsp;</div><div><br /></div><div>Best,</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_bvmfb",
+      "name": "Why Isn't v2 Free",
+      "subject": null,
+      "body": "<div>Hi {{recipient.first_name}},</div><div><br /></div><div>Epic React V2 is set up as a separate product because it’s not just a small update. It’s completely rerecorded and includes brand new content with deeper dives into topics from V1.</div><div><br /></div><div>Creating something like this takes a huge amount of work. If we offered free lifetime upgrades for major releases, it wouldn’t be financially sustainable since we sell licenses, not subscriptions. In that case, Epic React V2 would not have been possible at all. Even with that said we still offer a large discount for owners of V1.</div><div><br /></div><div>We appreciate your support and hope you understand.&nbsp;</div><div><br /></div><div>Best,</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_bw0uf",
+      "name": "ew: Megabundle",
+      "subject": "",
+      "body": "<div>Yes, but you'll likely need to log in to Epic Web for it to display correctly if it isn't.</div><div><br /></div><div>Here's the calculation source if you want the TMI:&nbsp;<a href=\"https://github.com/skillrecordings/products/blob/main/apps/epic-web/src/utils/mega-bundle-discount-calculator.ts\" target=\"_blank\" rel=\"noopener noreferrer\">https://github.com/skillrecordings/products/blob/main/apps/epic-web/src/utils/mega-bundle-discount-calculator.ts</a></div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_bxpfr",
+      "name": "additional discount",
+      "subject": null,
+      "body": "<div>Hey,</div><div><br /></div><div>We don't have any additional discounts at the moment. <br /></div><div><br /></div><div>You can find our free content here&nbsp;<a href=\"https://www.totaltypescript.com/tutorials\" rel=\"noopener noreferrer\" target=\"_blank\">https://www.totaltypescript.com/tutorials</a>. We also have all of Total Typescript essentials free In book format&nbsp;<a href=\"https://www.totaltypescript.com/books/total-typescript-essentials\" rel=\"noopener noreferrer\" target=\"_blank\">https://www.totaltypescript.com/books/total-typescript-essentials</a>&nbsp;</div><div><br /></div><div>To hear about future deals you can sign up to our newsletter!&nbsp;<a href=\"https://www.totaltypescript.com/newsletter\" rel=\"noopener noreferrer\" target=\"_blank\">https://www.totaltypescript.com/newsletter</a>&nbsp;</div><div><br /></div><div>Best,</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_bxpjb",
+      "name": "No thanks",
+      "subject": "",
+      "body": "<div>Hey,</div><div><br /></div><div>Thanks for reaching out, but we're not interested at this time.&nbsp;</div><div><br /></div><div>Best,</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_bz9vr",
+      "name": "Discord Misc Question",
+      "subject": null,
+      "body": "<div style=\"line-height: normal;\" class=\"fa-q0j30e\"><span class=\"fam8ci61\" style=\"line-height: normal;\"></span></div><div style=\"line-height: normal;\" class=\"fa-q0j30e\"><span class=\"fam8ci61\" style=\"line-height: normal;\">Hi {{recipient.first_name}}</span><span class=\"fam8ci61\" style=\"line-height: normal;\">,</span></div><div style=\"line-height: normal; min-height: 15px;\" class=\"fa-ouooce\"><br /></div><div style=\"line-height: normal;\" class=\"fanb6sjz\">We appreciate the question! I'd ask this on our discord server since this inbox Is more so for site support&nbsp;<a rel=\"noopener noreferrer\" href=\"https://kcd.im/discord\" target=\"_blank\">https://kcd.im/discord</a>. <br /></div><div style=\"line-height: normal;\" class=\"fanb6sjz\"><br /></div><div style=\"line-height: normal;\" class=\"fanb6sjz\">Plus, your questions and insights can help others too.</div><div style=\"line-height: normal; min-height: 15px;\" class=\"fa-ouooce\"><br /></div><div style=\"line-height: normal;\" class=\"fanb6sjz\">I hope this helps!</div><div class=\"fa-ouooce\" style=\"line-height: normal; min-height: 15px;\"><br /></div><div class=\"fanb6sjz\" style=\"line-height: normal;\">Best,</div><div style=\"line-height: normal;\" class=\"fa-q0j30e\"></div>",
+      "is_available_for_all_inboxes": true,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_c18lj",
+      "name": "collaboration KCD",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>We support any questions related to the course and platform functionality, but you’ll have to reach out to Kent directly for this kind of collaboration.</div><div><br /></div><div><a href=\"mailto:me@kentcdodds.com\" rel=\"noopener noreferrer\" target=\"_blank\">me@kentcdodds.com</a></div><div><a href=\"https://x.com/kentcdodds\" rel=\"noopener noreferrer\" target=\"_blank\">https://x.com/kentcdodds</a>&nbsp;</div><div><a href=\"https://bsky.app/profile/kentcdodds.com\" rel=\"noopener noreferrer\" target=\"_blank\">https://bsky.app/profile/kentcdodds.com</a>&nbsp;</div><div><a href=\"https://kentcdodds.com/contact\" rel=\"noopener noreferrer\" target=\"_blank\">https://kentcdodds.com/contact</a>&nbsp;</div><div><br /></div><div>Best,</div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_c18p3",
+      "name": "collaboration matt",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>This email Is primarily to support any questions related to the course and platform functionality, but you can try to reach out to Matt directly on X/bluesky for this.</div><div><br /></div><div><a href=\"https://x.com/mattpocockuk\" rel=\"noopener noreferrer\" target=\"_blank\">https://x.com/mattpocockuk</a>&nbsp;</div><div><a href=\"https://bsky.app/profile/mattpocock.com\" rel=\"noopener noreferrer\" target=\"_blank\">https://bsky.app/profile/mattpocock.com</a>&nbsp;</div><div><a href=\"https://www.mattpocock.com/\" rel=\"noopener noreferrer\" target=\"_blank\">https://www.mattpocock.com/</a>&nbsp;</div><div><br /></div><div>Best,</div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_c2fif",
+      "name": "Joel Collaboration",
+      "subject": "",
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>We handle questions related to egghead.io and platform functionality, but for this, you’ll need to reach out to Joel directly on Bluesky, X, or his website.</div><div><br /></div><div><a rel=\"noopener noreferrer\" href=\"https://joelhooks.com/\" target=\"_blank\">https://joelhooks.com/</a>&nbsp;</div><div><a rel=\"noopener noreferrer\" href=\"https://bsky.app/profile/joelhooks.com\" target=\"_blank\">https://bsky.app/profile/joelhooks.com</a>&nbsp;</div><div><a rel=\"noopener noreferrer\" href=\"https://x.com/jhooks?lang=en\" target=\"_blank\">https://x.com/jhooks</a></div><div><br /></div><div>Best,</div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_c6pxj",
+      "name": "Matt Discord",
+      "subject": "",
+      "body": "<div class=\"fa-5drq8x\" style=\"line-height: normal;\"><span class=\"fa-16qykl\" style=\"line-height: normal;\">Hi {{recipient.first_name}}</span>,</div><div class=\"fa-d1fubi\" style=\"line-height: normal; min-height: 15px;\"><br /></div><div class=\"fa-2h707n\" style=\"line-height: normal;\">Could you ask this on our discord since that's where we do code support&nbsp;<a style=\"color: rgb(86, 140, 220);\" rel=\"noopener noreferrer\" href=\"https://www.totaltypescript.com/discord\" target=\"_blank\">https://www.totaltypescript.com/discord</a>. <br /></div><div class=\"fa-2h707n\" style=\"line-height: normal;\"><br /></div><div class=\"fa-2h707n\" style=\"line-height: normal;\">Plus, your questions and insights can help others too.</div><div class=\"fa-d1fubi\" style=\"line-height: normal; min-height: 15px;\"><br /></div><div class=\"fa-2h707n\" style=\"line-height: normal;\">I hope this helps!</div><div style=\"line-height: normal; min-height: 15px;\" class=\"fa-d1fubi\"><br /></div><div style=\"line-height: normal;\" class=\"fa-2h707n\">Best,</div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_c84uf",
+      "name": "Cursor Workshop recording?",
+      "subject": "Re: Question re: Cursor workshop on 5/22/25",
+      "body": "<div>Hey Kate,</div><div><br /></div><div>There isn't a recording provided after the workshop but we provide a detailed write up following the workshop including a sanitized transcript and screenshots that you can include in your notes or summarize / explore further with your favorite AI tools.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_ccsjr",
+      "name": "Change email address",
+      "subject": "",
+      "body": "<div>Hey <span data-front-decoration-variable=\"recipient.first_name\" contenteditable=\"false\">Michael</span>,</div><div><br /></div><div>I've got your email updated to be <b>{USER EMAIL}</b> now! Let me know If you run into any issues.</div><div><br /></div><div>Best,</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_ch3k7",
+      "name": "Course Length - ER",
+      "subject": "",
+      "body": "<div>Hey,</div><div><br /></div><div>These are self paced workshops, so there is no exact length given to complete the course because It will depend on the user.</div><div><br /></div><div>However, there Is about 18 hours of videos included in Epic React Pro and 10 hours of bonus interviews.&nbsp;</div><div><br /></div><div>Let me know If you have anymore questions.</div><div><br /></div><div>Best,</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_rp1r9",
+      "name": "new content",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>Kent definitely has more planned for the future, and Discord and the email list are the best places to stay informed!</div><div><br /></div><div><a rel=\"noopener noreferrer\" href=\"https://www.epicai.pro/newsletter\" target=\"_blank\">https://www.epicai.pro/newsletter</a>&nbsp;</div><div><a rel=\"noopener noreferrer\" href=\"https://www.epicai.pro/discord\" target=\"_blank\">https://www.epicai.pro/discord</a>&nbsp;</div><div><a rel=\"noopener noreferrer\" href=\"https://www.epicai.pro/newsletter​\" target=\"_blank\"></a></div><div><br /></div><div>Best,</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_rp1t1",
+      "name": "New content",
+      "subject": "",
+      "body": "<div>Hey,</div><div><br /></div><div>Matt definitely has more planned for the future! Discord and the email list are the best places to stay informed:</div><div><br /></div><div><a href=\"https://www.totaltypescript.com/newsletter\" rel=\"noopener noreferrer\" target=\"_blank\">https://www.totaltypescript.com/newsletter</a>&nbsp;</div><div><a href=\"https://www.totaltypescript.com/discord\" rel=\"noopener noreferrer\" target=\"_blank\">https://www.totaltypescript.com/discord</a>&nbsp;</div><div><br /></div><div>Best,</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_rp1wl",
+      "name": "Future discount",
+      "subject": "",
+      "body": "<div>Hey,</div><div><br /></div><div>Nothing confirmed right now. Discord and the email list are the best places to stay informed!</div><div><br /></div><div><a href=\"https://www.totaltypescript.com/newsletter\" rel=\"noopener noreferrer\" target=\"_blank\">https://www.totaltypescript.com/newsletter</a>&nbsp;</div><div><a href=\"https://www.totaltypescript.com/discord\" rel=\"noopener noreferrer\" target=\"_blank\">https://www.totaltypescript.com/discord</a>&nbsp;</div><div><br /></div><div>Best,</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_rp351",
+      "name": "Discord: AI Hero",
+      "subject": "",
+      "body": "<div class=\"fa-5drq8x\" style=\"line-height: normal;\"><span style=\"line-height: normal;\" class=\"fa-isvjfy\"></span></div><div class=\"fa-5drq8x\" style=\"line-height: normal;\"><span style=\"line-height: normal;\" class=\"fa-isvjfy\">Hi <span data-front-decoration-variable=\"recipient.first_name\" contenteditable=\"false\">leonardo</span></span><span style=\"line-height: normal;\" class=\"fa-isvjfy\">,</span></div><div class=\"fa-pl0z8h\" style=\"line-height: normal; min-height: 15px;\"><br /></div><div class=\"fa-sjpwl4\" style=\"line-height: normal;\">We appreciate the question! I'd ask this on our discord server since this inbox is for site support <a href=\"https://aihero.dev/discord\" rel=\"noopener noreferrer\" target=\"_blank\">https://aihero.dev/discord</a><span style=\"background-color: transparent;\">.</span></div><div class=\"fa-sjpwl4\" style=\"line-height: normal;\"><br /></div><div class=\"fa-sjpwl4\" style=\"line-height: normal;\">Plus, your questions and insights can help others too.</div><div class=\"fa-pl0z8h\" style=\"line-height: normal; min-height: 15px;\"><br /></div><div class=\"fa-sjpwl4\" style=\"line-height: normal;\">I hope this helps!</div><div style=\"line-height: normal; min-height: 15px;\" class=\"fa-pl0z8h\"><br /></div><div style=\"line-height: normal;\" class=\"fa-sjpwl4\">Best,</div><div class=\"fa-5drq8x\" style=\"line-height: normal;\"></div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_rp8v9",
+      "name": "Testing Javascript Still Worth It",
+      "subject": "",
+      "body": "<div style=\"box-sizing: content-box;\">Hi {{recipient.first_name}}!</div><div style=\"box-sizing: content-box;\"><br /></div><div style=\"box-sizing: content-box;\">The principles are all still very applicable. The tooling is quite out of date, but most modern tooling is fairly similar so I don't think you'd have a problem translating the concepts to modern tools.</div><div style=\"box-sizing: content-box;\"><br /></div><div style=\"box-sizing: content-box;\">So it's worth going through still since you already have access. But I would recommend using vitest in place of jest and playwright in place of cypress.</div><div style=\"box-sizing: content-box;\"><br /></div><div style=\"box-sizing: content-box;\">I hope that helps!</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_rp8x1",
+      "name": "Epic Web Conf In the Future",
+      "subject": "",
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>Kent Is not currently planning on running the conference again next year. Sorry.</div><div><br /></div><div>Best,</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_rpbc5",
+      "name": "appreciate code feedback",
+      "subject": "",
+      "body": "<div class=\"fa-5drq8x\" style=\"line-height: normal;\"><span style=\"line-height: normal;\" class=\"fa-isvjfy\"></span></div><div class=\"fa-5drq8x\" style=\"line-height: normal;\"><span style=\"line-height: normal;\" class=\"fa-isvjfy\">Hi</span><span style=\"line-height: normal;\" class=\"fa-isvjfy\">,</span></div><div class=\"fa-pl0z8h\" style=\"line-height: normal; min-height: 15px;\"><br /></div><div class=\"fa-sjpwl4\" style=\"line-height: normal;\">We appreciate the feedback! You can also share this In our discord server <a href=\"https://www.totaltypescript.com/discord\" rel=\"noopener noreferrer\" target=\"_blank\">https://www.totaltypescript.com/discord</a>. <br /></div><div class=\"fa-sjpwl4\" style=\"line-height: normal;\"><br /></div><div class=\"fa-sjpwl4\" style=\"line-height: normal;\">Your questions and insights can help others too.</div><div style=\"line-height: normal; min-height: 15px;\" class=\"fa-pl0z8h\"><br /></div><div style=\"line-height: normal;\" class=\"fa-sjpwl4\">Best,</div><div class=\"fa-5drq8x\" style=\"line-height: normal;\"></div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_rph0l",
+      "name": "Bonus content PPP",
+      "subject": "",
+      "body": "<div>Hello,</div><div><br /></div><div>Looks like you own a license with a Region Restricted discount. That license only has access to the core curriculum, not bonus content like the interviews. You'll have to upgrade to a full license to access the interviews.</div><div><br /></div><div>Let me know if you have any questions!&nbsp;</div><div><br /></div><div>Best,</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_rppyd",
+      "name": "No more discounts",
+      "subject": "",
+      "body": "<div>Hello,</div><div><br /></div><div>Thanks for reaching out! Unfortunately, we aren't offering any more discounts at this time.</div><div><br /></div><div>I hope you’ll still consider enrolling in our training. If you have any other questions or if there’s anything else I can assist you with, please let me know.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_21vnr",
+      "name": "Refund Request - Partner Products",
+      "subject": null,
+      "body": "<div><span style=\"font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\"><span style=\"font-size: 14px; font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\"><span style=\"font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\">Hey {{recipient.first_name}},</span></span></span></div><div><span style=\"font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\"><span style=\"font-size: 14px; font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\"><span style=\"font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\"><br style=\"font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\" /></span></span></span></div><div><span style=\"font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\"><span style=\"font-size: 14px; font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\"><span style=\"font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\">We've refunded your course enrollment and removed your access.</span></span></span></div><div><span style=\"font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\"><span style=\"font-size: 14px; font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\"><span style=\"font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\"><br style=\"font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\" /></span></span></span></div><div><span style=\"font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\"><span style=\"font-size: 14px; font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\"><span style=\"font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\"><span style=\"font-weight: 400; font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\"><span style=\"font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\">It may take 5-10 business days for the refunded amount to show up in your account, depending on how quickly it's processed by your financial institution.</span></span></span></span></span></div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_21vpj",
+      "name": "Refund Request",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name | 'there'}},</div><div><br /></div><div>I've canceled your subscription and issued a refund for the latest renewal charge.</div><div><br /></div><div>It may take 5-10 business days for the refunded amount to show up in your account, depending on how quickly it's processed by your financial institution.</div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name | 'there'"
+      ]
+    },
+    {
+      "id": "rsp_21vuv",
+      "name": "Cancel Subscription",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>You can cancel your subscription at any time before your next renewal date (&lt;--RENEWAL DATE --&gt;) to prevent it from automatically renewing. When you cancel, your subscription will remain active until the end of your current billing cycle.</div><div><br /></div><div>Please follow the steps below to cancel your subscription:</div><ol><li>Log in</li><li>Click your name in the upper right corner of any page to open your account profile</li><li>Open the \"Subscription\" tab</li><li>Click the \"Manage Your Membership\" button to open your Stripe billing screen</li><li>Click the \"Cancel Plan\" button to the right of your current plan</li></ol>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_21w07",
+      "name": "Team Plan Inquiry",
+      "subject": null,
+      "body": "<div><font color=\"#000000\"><span style=\"font-family: &quot;Aktiv Grotesk&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif; font-size: 13px; font-weight: 400;\">Hey </span><span style=\"font-size: 13px;\">{{recipient.first_name | 'there'}}</span><span style=\"font-family: &quot;Aktiv Grotesk&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif; font-size: 13px; font-weight: 400;\">,</span><br style=\"font-family: &quot;Aktiv Grotesk&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif; font-size: 14px;\" /><br style=\"font-family: &quot;Aktiv Grotesk&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif; font-size: 14px;\" /><span style=\"font-family: &quot;Aktiv Grotesk&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif; font-size: 13px; font-weight: 400;\">Thanks for reaching out!&nbsp;</span><br style=\"font-family: &quot;Aktiv Grotesk&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif; font-size: 14px;\" /><br style=\"font-family: &quot;Aktiv Grotesk&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif; font-size: 14px;\" /><span style=\"font-family: &quot;Aktiv Grotesk&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif; font-size: 13px; font-weight: 400;\">It sounds like our team plan</span><span style=\"font-family: &quot;Aktiv Grotesk&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif; font-size: 13px; font-weight: 400;\">&nbsp;might be what you're looking for. A team plan allows you to have one account with multiple team members, with one member designated as the administrator.</span><br style=\"font-family: &quot;Aktiv Grotesk&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif; font-size: 14px;\" /><br style=\"font-family: &quot;Aktiv Grotesk&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif; font-size: 14px;\" /><span style=\"font-family: &quot;Aktiv Grotesk&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif; font-size: 13px; font-weight: 400;\">With a team plan, you can switch members in and out of the team throughout the year as many times as you'd like, as well as increase/decrease the total size of your team at any time.</span></font></div><div><br /></div><div><span style=\"font-size: 13px;\"><font color=\"#000000\">Please let me know if you have any questions!</font></span></div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name | 'there'"
+      ]
+    },
+    {
+      "id": "rsp_228w7",
+      "name": "Bug Report - fixed",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name | 'there'}},</div><div><br /></div><div>Thanks for the heads up! Everything should be back up and running smoothly now. Let us know if that's not the case.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": [
+        "recipient.first_name | 'there'"
+      ]
+    },
+    {
+      "id": "rsp_228xz",
+      "name": "Subscription Not Found",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name | 'there'}},</div><div><br /></div><div>I wasn't able to find an egghead subscription associated with this email address ({{recipient.email}}) – is it possible it's registered under a different one?&nbsp;</div><div><br /></div><div>If you're not sure, I can look it up using your payment information. I just need the last 4 digits and expiration date of the credit card used to purchase the subscription.</div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name | 'there'",
+        "recipient.email"
+      ]
+    },
+    {
+      "id": "rsp_2293b",
+      "name": "Discount Request - egghead",
+      "subject": null,
+      "body": "<div><span style=\"color: rgb(0, 0, 0);\"><span style=\"font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\"><span style=\"font-size: 14px; font-weight: 400; font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\" class=\"fa-vjho98\"><span style=\"font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\">Hey </span></span><span style=\"font-size: 14px;\">{{recipient.first_name}}</span><span style=\"font-size: 14px; font-weight: 400; font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\" class=\"fa-vjho98\"><span style=\"font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\">,</span></span></span></span></div><div><span style=\"color: rgb(0, 0, 0);\"><span style=\"font-size: 14px;\"><span style=\"font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\"><br style=\"font-size: 14px; font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\" class=\"fa-vjho98\" /></span></span></span></div><div><span style=\"color: rgb(0, 0, 0);\"><span style=\"font-size: 14px;\"><span style=\"font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\"><span style=\"font-size: 14px; font-weight: 400; font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\" class=\"fa-vjho98\"><span style=\"font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\">Thanks for your interest in egghead!&nbsp;</span></span></span></span></span></div><div><span style=\"color: rgb(0, 0, 0);\"><span style=\"font-size: 14px;\"><span style=\"font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\"><br style=\"font-size: 14px; font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\" class=\"fa-vjho98\" /></span></span></span></div><div><span style=\"color: rgb(0, 0, 0);\"><span style=\"font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\"><span style=\"font-size: 14px; font-weight: 400; font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\" class=\"fa-vjho98\"><span style=\"font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\">We're not currently running any promotions, but we have sale events periodically throughout the year where you can purchase an annual subscription at a discounted price. We also have a&nbsp;</span></span><a style=\"background-image: initial; background-position: 0px 0px; background-size: initial; background-repeat: initial; background-attachment: initial; background-origin: initial; background-clip: initial; font-size: 14px; font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\" rel=\"noopener noreferrer\" href=\"https://egghead.io/pricing\" target=\"_blank\" class=\"fa6hblfy\"><span style=\"font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\">monthly subscription</span></a><span style=\"font-size: 14px; font-weight: 400; font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\" class=\"fa-vjho98\"><span style=\"font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\">&nbsp;option available.</span></span></span></span></div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_2298n",
+      "name": "Request for Invoice or Receipt - egghead",
+      "subject": null,
+      "body": "<div><font color=\"#000000\"><span style=\"font-family: Arial, Helvetica, Verdana, Tahoma, sans-serif; font-size: 14px; font-weight: 400;\">Hey </span>{{recipient.first_name}},</font></div><div><font color=\"#000000\"><br /></font></div><div><font color=\"#000000\">You can view and download all your invoices directly from here: https://egghead.io/invoices - you'll need to be logged in to access them.</font></div><div><font color=\"#000000\"><br /></font></div><div><font color=\"#000000\">From there, you can also add any required information to the \"Prepared for\" section of the invoice.</font></div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_229af",
+      "name": "Remove Credit Card Details",
+      "subject": null,
+      "body": "<div><span style=\"font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\">Hey {{recipient.first_name}},</span></div><div><span style=\"font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\"><br style=\"font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\" /></span></div><div><span style=\"font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\">I've removed your credit card information from our system.</span></div><div><span style=\"font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\"><br style=\"font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\" /></span></div><div><span style=\"font-family: &quot;Helvetica Neue&quot;, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif;\">Without an active card on file, your subscription will not automatically renew and will be canceled at the end of your current billing period.</span></div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_229c7",
+      "name": "Pro-rated Early Renewal During Sale",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>If you \"re-purchase\" during the sale, our system will apply pro-rated pricing, making your invoice amount less next year and locking it in at the more favorable rate going forward. Your subscription will continue to renew at the sale price each year unless/until it is canceled.</div><div><br /></div><div>Your last payment is credited to the \"upgrade\" price and any excess is applied to your next renewal.</div><div><br /></div><div>Let me know if you have any questions!</div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_22npj",
+      "name": "Change Email Request - Partner Products",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>I've transferred your license to ← NEW EMAIL --&gt;.</div><div><br /></div><div>Let me know if you have any issues requesting login links using that email address.</div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_22nt3",
+      "name": "Request for Invoice or Receipt - Testing JS",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>Once you're logged in, you can view a fully customized invoice here: https://testingjavascript.com/invoices.</div><div><br /></div><div>From there, you can add any necessary information to the \"Prepared for\" section.</div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_22nwn",
+      "name": "Upgrade Later",
+      "subject": null,
+      "body": "<div><span style=\"font-size: 14px;\">Hey {{recipient.first_name}},</span></div><div><span style=\"font-size: 14px;\"><br /></span></div><div><span style=\"font-size: 14px;\">Thanks for your interest in the course!</span></div><div><span style=\"font-size: 14px;\"><br /></span></div><div><span style=\"font-size: 14px;\">If you start with either the Basic or Standard Package, you have the opportunity to upgrade to the Pro package whenever you'd like.</span></div><div><span style=\"font-size: 14px;\"><br /></span></div><div><span style=\"font-size: 14px;\">The cost to upgrade will be the difference in price between what you've already paid for your current package and the current price of the Pro Package at the time you upgrade.</span></div><div><span style=\"font-size: 14px;\"><br /></span></div><div><span style=\"font-size: 14px;\">Please note, the upgrade option is only available to move up to the Pro Testing package from whichever level you start on. You can upgrade from Basic or Standard to Pro, but not from Basic to Standard as a half-step.</span></div><div><span style=\"font-size: 14px;\"><br /></span></div><div><span style=\"font-size: 14px;\">Please let me know if you have any other questions!</span></div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_22p1j",
+      "name": "Purchase Power Parity Limitations - Testing JS",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>Thanks for reaching out!</div><div><br /></div><div>If you use the parity pricing to purchase the Pro Testing plan you'll be able to stream video for all 8 modules in the course, but you won't be able to download them. Also, you will only be able to access the course while you're in the region you purchased it from.</div><div><br /></div><div>In addition to that, you will have access to fully annotated transcripts with inline code and screenshots and full source code for all modules.</div><div><br /></div><div>You will not have access to are the 9 bonus video interviews with testing experts and printable testing checklist and cheat sheets.</div><div><br /></div><div>Let us know if you have any additional questions.</div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_23bif",
+      "name": "Magic Link - Testing JS",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>You can access the course using the email login link at the top of https://testingjavascript.com. You'll need to enter the email address you used to purchase the course to have a login link sent.</div><div><br /></div><div>If you have any trouble accessing the course, please let us know!</div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_3fxl3",
+      "name": "Free Trial",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name | 'there'}},</div><div><br /></div><div>Thanks for your interest in egghead!&nbsp;</div><div><br /></div><div>While we don't offer free trials, you can check out all of our free courses&nbsp;<a href=\"https://egghead.io/q?access_state=free\" rel=\"noopener noreferrer\" target=\"_blank\">here</a>. They don't require a subscription, and they're a good way to get a better idea of the type of content we offer.</div><div><br /></div><div>You can also start out with a <a href=\"https://egghead.io/pricing\" target=\"_blank\" rel=\"noopener noreferrer\">monthly subscription</a>&nbsp;to get access to the entire egghead course library.</div><div><br /></div><div>Let me know if you have any other questions!</div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name | 'there'"
+      ]
+    },
+    {
+      "id": "rsp_3hlqf",
+      "name": "Discord Code Support Question",
+      "subject": null,
+      "body": "<div></div><div class=\"fa-q0j30e\" style=\"font-size: 20px; line-height: normal;\"><span class=\"fa-e4ykhi\" style=\"font-size: 13px; line-height: normal;\"></span></div><div class=\"fa-q0j30e\" style=\"line-height: normal;\"><span class=\"fa-e4ykhi\" style=\"line-height: normal;\">Hi {{recipient.first_name}}</span>,</div><div class=\"fa-8v4qtq\" style=\"line-height: normal; min-height: 15px;\"><br /></div><div class=\"fa9t9x88\" style=\"line-height: normal;\">Could you ask this on our discord since that's where we do code support&nbsp;<a href=\"https://discord.com/invite/8S5ujhfTB3\" rel=\"noopener noreferrer\" target=\"_blank\"><span class=\"fa70a7k9\" style=\"text-decoration: underline;\">https://discord.com/invite/8S5ujhfTB3</span></a>. <br /></div><div class=\"fa9t9x88\" style=\"line-height: normal;\"><br /></div><div class=\"fa9t9x88\" style=\"line-height: normal;\">Plus, your questions and insights can help others too.</div><div class=\"fa-8v4qtq\" style=\"line-height: normal; min-height: 15px;\"><br /></div><div class=\"fa9t9x88\" style=\"line-height: normal;\">I hope this helps!</div><div style=\"line-height: normal; min-height: 15px;\" class=\"fa-8v4qtq\"><br /></div><div style=\"line-height: normal;\" class=\"fa9t9x88\">Best,</div><div class=\"fa-q0j30e\" style=\"font-size: 20px; line-height: normal;\"></div><div class=\"fa9t9x88\" style=\"line-height: normal;\"></div><div></div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_3hls7",
+      "name": "Credit Card Issue",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>Your payment attempt is failing because (&lt;-- STRIPE REASON --&gt;).</div><div><br /></div><div>Unfortunately, there's nothing we can do on our end - this is most likely an issue your financial institution will need to address. You can also try a different card if you have one.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_3iw3r",
+      "name": "Change Email Request - egghead",
+      "subject": null,
+      "body": "<div><span style=\"font-size: 14px;\">Hey {{recipient.first_name}},</span></div><div><span style=\"font-size: 14px;\"><br /></span></div><div><span style=\"font-size: 14px;\">You can change the email address associated with your account from your profile by following the steps below:</span></div><ol><li><span style=\"font-size: 14px;\">Log in</span></li><li><div><span style=\"font-size: 14px;\">Click your name in the upper right corner of any page to open your account profile</span></div></li><li><span style=\"font-size: 14px;\">Open the \"Profile\" tab</span></li><li style><span style=\"font-size: 14px;\">Click the \"Edit\" button to the right of your current email address</span></li><li><span style=\"font-size: 14px;\">Enter your new email address in the \"Email\" text box</span></li><li><span style=\"font-size: 14px;\">Click the \"Submit\" button</span></li></ol><div><br /></div><div>You'll receive a confirmation message at your new email address with a link to complete the update.</div><div><br /></div><div>Let me know if you have any questions or need anything else!</div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_3nkxz",
+      "name": "Update Credit Card - Cancelation",
+      "subject": null,
+      "body": "<div><span style=\"font-size: 14px;\">Hey {{recipient.first_name}},</span></div><div><span style=\"font-size: 14px;\"><br /></span></div><div><span style=\"font-size: 14px;\">You may see a couple more automated notifications from us, but your subscription will be canceled automatically if the payment method on file continues to fail.</span></div><div><span style=\"font-size: 14px;\"><br /></span></div><div><span style=\"font-size: 14px;\">Alternatively, you can cancel your subscription at any time by following the steps below:</span></div><div><span style=\"font-size: 14px;\"><br /></span></div><ol data-front-editor-list style=\"margin-top: 0px; margin-bottom: 0px; list-style-type: decimal;\"><li><span style=\"font-size: 14px;\">Log in</span></li><li><span style=\"font-size: 14px;\">Click your name in the upper right corner of any page to open your account profile</span></li><li><span style=\"font-size: 14px;\">Open the \"Subscription\" tab</span></li><li><span style=\"font-size: 14px;\">Click the \"Manage Your Membership\" button to open your Stripe billing screen</span></li><li><span style=\"font-size: 14px;\">Click the \"Cancel Plan\" button to the right of your current plan</span></li></ol>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_3nkzr",
+      "name": "Update Credit Card - FYI",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>You may see a couple more automated notices from us about updating payment information, but your subscription won't be canceled if the payment method is updated within two weeks of the original charge attempt.</div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_5fds7",
+      "name": "Live Event Time Conflict",
+      "subject": null,
+      "body": "<div>Please don’t buy tickets if you can attend! They are intended to be live and interactive. <br /><br />I know that’s frustrating because of time zones, but we aren’t able to staff properly yet for more globe friendly events.<br /></div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_5icav",
+      "name": "Renewal Price",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>Thanks for reaching out!</div><div><br /></div><div>Your subscription is locked in at your current rate (&lt;-- CURRENT RATE--&gt;) and will continue to renew at that price unless/until you cancel it.</div><div><br /></div><div>You can verify your renewal information and manage your subscription in your account profile:</div><div><br /></div><ol data-front-editor-list style=\"margin-top: 0px; margin-bottom: 0px; list-style-type: decimal;\"><li>Log in</li><li>Click your name in the upper right corner of any page to open your account profile</li><li>Open the \"Subscription\" tab</li><li>Click the \"Manage Your Membership\" button to open your Stripe billing screen</li></ol><div><br /></div><div>Let me know if you have any questions!</div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_5mr7r",
+      "name": "Sale Price No Longer Available",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>Thanks for reaching out!</div><div><br /></div><div>Unfortunately, the sale price is no longer available. We'll be running more promotions in the future, so there'll be additional opportunities to purchase at a discounted price.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_5zlxj",
+      "name": "Magic Link - egghead",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div><span style=\"font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;;\">You can request a login link from https://egghead.io/login. You'll need to enter the email address associated with your account.</span></div><div><br /></div><div>We also offer the option to use Github authentication, if you'd prefer an alternative to login links. You can set that up from your account profile by following the steps below:</div><ol><li>Log in</li><li>Click on your name in the upper right corner of any page to open your account profile</li><li>Open the \"Profile\" tab</li><li>Click the \"Connect your GitHub account\" button under the \"Connect to GitHub\" section of your profile</li></ol><div><br /></div><div>Once you've connected your GitHub account, you can click the \"Sign In (or up) with GitHub\" button on the Sign In page to login.</div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_6dcg7",
+      "name": "Live Events - Workshop Recording and Upgrade Coupon Code Link",
+      "subject": "<--- EVENT NAME --> Workshop Recording",
+      "body": "<div>Hey there,<br /><br />Here's the link to unlock the workshop recording. This will also unlock the course for you when it's ready!<br /><br />&lt;-- COUPON LINK --&gt;<br /><br />Thanks again,<br />Your friends at egghead<br /></div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_6dchz",
+      "name": "Live Events - Workshop Feedback Survey",
+      "subject": "Workshop Feedback for <-- EVENT NAME -->",
+      "body": "<div><div>Hey there,</div><div><br /></div><div>Thanks for attending the workshop.</div><div><br /></div><div>If you have a few moments, it would be helpful if you could fill out the workshop feedback form:&nbsp;</div><div><a href=\"https://airtable.com/shrgsCE9NglR6pyXq\" target=\"_blank\" rel=\"noopener noreferrer\"></a><a href=\"https://airtable.com/shrgsCE9NglR6pyXq\" target=\"_blank\" rel=\"noopener noreferrer\">https://airtable.com/shrgsCE9NglR6pyXq</a></div><div><br /></div><div>We will send recording information out soon!</div><div><br /></div><div>Cheers,</div><div>Your friends at egghead</div></div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_6tzgn",
+      "name": "Publish Date",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>Thanks for reaching out!<br /><br />While publish date would be marginally useful, we've found that giving the version range with notes of changes provides more meaningful information. With that in mind, we've added version ranges and last review dates to course pages instead.<br /><br />We have a team of programmers that review lessons and courses to keep the code up-to-date with the latest versions, and make sure that it runs as expected. If you've found a course that appears to be out-of-date, please let us know and we'll prioritize getting it updated!<br /></div>",
+      "is_available_for_all_inboxes": true,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_6xjd3",
+      "name": "Epic React Business Hours",
+      "subject": null,
+      "body": "<div>Hi 👋,</div><div><br /></div><div>We work normal business hours, generally 9-5 Pacific Monday through Friday and take most \"bank holidays\" off. If you email outside of those times our response might be delayed but we will get back to you as soon as possible.</div><div><br /></div><div><a href=\"https://epicreact.dev/faq\" target=\"_blank\" rel=\"noopener noreferrer\">https://epicreact.dev/faq</a></div><div><br /></div><div>The FAQ has a lot of useful information which we recommend checking. If it answers your question, please let us know.</div>",
+      "is_available_for_all_inboxes": false,
+      "variables": []
+    },
+    {
+      "id": "rsp_6z05j",
+      "name": "Magic Link - Epic React",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>You can access the course using the \"Restore Purchases\" button at the top of https://epicreact.dev. You'll need to enter the email address you used to purchase the course to have a login link sent.</div><div><br /></div><div>If you have any trouble accessing the course, please let us know!</div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_6z0av",
+      "name": "PPP Location-restricted Video Playback",
+      "subject": null,
+      "body": "<div>Hey {{recipient.name}},</div><div><br /></div><div>It looks like you purchased the course using parity pricing based on your location (&lt;-- LOCATION --&gt;).</div><div><br /></div><div>Because the parity discount was used, the course is only accessible while you're in the region you purchased it from.</div><div><br /></div><div>Are you trying to access the course from a different region? If so, that will prevent the videos from playing. If you're in the same region, are you using a VPN or browser extensions that obscure your location?</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": [
+        "recipient.name"
+      ]
+    },
+    {
+      "id": "rsp_70don",
+      "name": "KCD Discord Question",
+      "subject": null,
+      "body": "<div></div><div style=\"line-height: normal;\" class=\"fa-cy7rlp\"><span class=\"fai5dgnd\" style=\"background-color: transparent; line-height: normal;\"></span></div><div style=\"line-height: normal;\" class=\"fa-cy7rlp\"><span class=\"fai5dgnd\" style=\"line-height: normal;\">Hi {{recipient.first_name}}</span><span class=\"fai5dgnd\" style=\"line-height: normal;\">,</span></div><div style=\"line-height: normal; min-height: 15px;\" class=\"fa-ouooce\"><br /></div><div style=\"line-height: normal;\" class=\"fanb6sjz\">We appreciate the question! I'd ask this on our discord server since this inbox Is more so for site support&nbsp;<a rel=\"noopener noreferrer\" href=\"https://kcd.im/discord\" target=\"_blank\">https://kcd.im/discord</a>. <br /></div><div style=\"line-height: normal;\" class=\"fanb6sjz\"><br /></div><div style=\"line-height: normal;\" class=\"fanb6sjz\">Plus, your questions and insights can help others too.</div><div style=\"line-height: normal; min-height: 15px;\" class=\"fa-ouooce\"><br /></div><div style=\"line-height: normal;\" class=\"fanb6sjz\">I hope this helps!</div><div class=\"fa-ouooce\" style=\"line-height: normal; min-height: 15px;\"><br /></div><div class=\"fanb6sjz\" style=\"line-height: normal;\">Best,</div><div style=\"line-height: normal;\" class=\"fa-cy7rlp\"></div><div></div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_7il8n",
+      "name": "Partner Products Business Hours",
+      "subject": null,
+      "body": "<div>Hi,</div><div><br /></div><div>We work standard business hours, generally 9-5 Pacific Monday through Friday and take most \"bank holidays\" off. If you email outside of those times our response might be delayed but we will get back to you as soon as possible.</div><div><br /></div><div>-team</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": []
+    },
+    {
+      "id": "rsp_7m7yf",
+      "name": "Hard Bounce Deactivated",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>Our email processor marked your address inactive because it received a hard bounce from your address (&lt;--- EMAIL ADDRESS ---&gt;).</div><div><br /></div><div>I've reactivated your address in our system, so you should be able to request login links again. I've also manually requested a login link for you - it was processed and delivered successfully this time.</div><div><br /></div><div>Let me know if you have any trouble requesting login links in the future!</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_7rzpj",
+      "name": "Magic Link - Technical Interviews",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>You can access the book using the \"Restore Purchases\" button at the top of https://technicalinterviews.dev/. You'll need to enter the email address you used to purchase the book to have a login link sent.</div><div><br /></div><div>If you have any trouble accessing your purchase, please let us know!</div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_81kzr",
+      "name": "Magic Link - Just JavaScript",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>You can access the course using the \"Access Purchases\" button at the top of https://justjavascript.com/. You'll need to enter the email address you used to purchase the course to have a login link sent.</div><div><br /></div><div>If you have any trouble accessing the course, please let us know!</div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_81l1j",
+      "name": "Request for Invoice or Receipt - Just JavaScript",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>Once you're logged in, you can view a fully customized invoice here: https://justjavascript.com/invoice.</div><div><br /></div><div>From there, you can add any required information to the \"Prepared for\" section of the invoice.</div>",
+      "is_available_for_all_inboxes": false,
+      "variables": [
+        "recipient.first_name"
+      ]
+    },
+    {
+      "id": "rsp_82ds7",
+      "name": "Magic Link not Received",
+      "subject": null,
+      "body": "<div>Hey {{recipient.first_name}},</div><div><br /></div><div>I just manually requested a login link for {{recipient.email}}  and it was processed and delivered successfully from our side.</div><div><br /></div><div>Let me know if you don't see that one in your inbox or spam folder, or if you have any trouble requesting login links in the future.</div>",
+      "is_available_for_all_inboxes": true,
+      "variables": [
+        "recipient.first_name",
+        "recipient.email"
+      ]
+    }
+  ],
+  "folders": [
+    {
+      "id": "rsf_4xhj",
+      "name": "Just JavaScript"
+    },
+    {
+      "id": "rsf_4ytj",
+      "name": "egghead"
+    },
+    {
+      "id": "rsf_4z9j",
+      "name": "Total TypeScript"
+    },
+    {
+      "id": "rsf_4zbb",
+      "name": "Technical Interviews"
+    },
+    {
+      "id": "rsf_4zev",
+      "name": "Auto-responders"
+    },
+    {
+      "id": "rsf_4zgn",
+      "name": "Live Events"
+    },
+    {
+      "id": "rsf_4zif",
+      "name": "z - In Review"
+    },
+    {
+      "id": "rsf_4zk7",
+      "name": "KCD"
+    },
+    {
+      "id": "rsf_4zuv",
+      "name": "Pure React"
+    }
+  ],
+  "inboxes": [
+    {
+      "id": "inb_1bwzr",
+      "name": "KCD Support"
+    },
+    {
+      "id": "inb_1c77r",
+      "name": "egghead comments"
+    },
+    {
+      "id": "inb_1zh3b",
+      "name": "egghead support"
+    },
+    {
+      "id": "inb_2l41z",
+      "name": "Pure React Support"
+    },
+    {
+      "id": "inb_2odqf",
+      "name": "Just JavaScript"
+    },
+    {
+      "id": "inb_2uaiv",
+      "name": "Learn With Jason"
+    },
+    {
+      "id": "inb_2vurr",
+      "name": "🥳 Feedback"
+    },
+    {
+      "id": "inb_3253b",
+      "name": "Canceled Users"
+    },
+    {
+      "id": "inb_355hj",
+      "name": "Technical Interviews"
+    },
+    {
+      "id": "inb_3bkef",
+      "name": "Testing Accessibility"
+    },
+    {
+      "id": "inb_3g5hj",
+      "name": "Escuela Frontend"
+    },
+    {
+      "id": "inb_3ghs7",
+      "name": "Keyboard Legend"
+    },
+    {
+      "id": "inb_3hfgn",
+      "name": "Compilers for Humans"
+    },
+    {
+      "id": "inb_3iddz",
+      "name": "Engineering Management"
+    },
+    {
+      "id": "inb_3jszr",
+      "name": "Onboarding Learners"
+    },
+    {
+      "id": "inb_3mn7r",
+      "name": "Badass Courses"
+    },
+    {
+      "id": "inb_3pqh3",
+      "name": "Pro Tailwind"
+    },
+    {
+      "id": "inb_3qabr",
+      "name": "Skill Invoices"
+    },
+    {
+      "id": "inb_3qq2v",
+      "name": "Front To Back"
+    },
+    {
+      "id": "inb_3sr7r",
+      "name": "Epic Serverless"
+    },
+    {
+      "id": "inb_3srbb",
+      "name": "Total TypeScript"
+    },
+    {
+      "id": "inb_3supz",
+      "name": "Frictionless Rails"
+    },
+    {
+      "id": "inb_3tglj",
+      "name": "TS for JS"
+    },
+    {
+      "id": "inb_3y1qf",
+      "name": "Transcript Automation"
+    },
+    {
+      "id": "inb_3zifb",
+      "name": "Colt Steele"
+    },
+    {
+      "id": "inb_41c3r",
+      "name": "ScriptKit"
+    },
+    {
+      "id": "inb_421s7",
+      "name": "Astro Party"
+    },
+    {
+      "id": "inb_43olj",
+      "name": "Pro NextJS"
+    },
+    {
+      "id": "inb_45u87",
+      "name": "Pro AWS"
+    },
+    {
+      "id": "inb_468ef",
+      "name": "devrel.fyi"
+    },
+    {
+      "id": "inb_4b493",
+      "name": "Total NodeJS"
+    },
+    {
+      "id": "inb_4bj7r",
+      "name": "AI Hero"
+    },
+    {
+      "id": "inb_4bvif",
+      "name": "Value-Based Design"
+    },
+    {
+      "id": "inb_4efbb",
+      "name": "Cursor Pro"
+    },
+    {
+      "id": "inb_4epl3",
+      "name": "Craft of UI"
+    },
+    {
+      "id": "inb_4gnpj",
+      "name": "Code with Antonio"
+    },
+    {
+      "id": "inb_jqs11",
+      "name": "Epic AI"
+    },
+    {
+      "id": "inb_jqs2t",
+      "name": "Epic Web"
+    }
+  ]
+}
