@@ -6,7 +6,7 @@
 
 import { readFile, writeFile } from 'fs/promises'
 import { runPipeline } from '../index'
-import { validate } from '../steps/validate'
+import { validateSync } from '../steps/validate'
 import type { EvalSummary, GatherOutput, PipelineOutput } from '../types'
 
 // ============================================================================
@@ -134,7 +134,7 @@ export async function runE2EEval(
           gatherErrors: [],
         }
 
-        const validationResult = validate({
+        const validationResult = validateSync({
           draft: pipelineResult.response,
           context: emptyContext,
         })

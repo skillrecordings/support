@@ -10,8 +10,8 @@ import {
   log,
   traceWorkflowStep,
 } from '../../observability/axiom'
-import { validate } from '../../pipeline/steps/validate'
-import type { GatherOutput } from '../../pipeline/types'
+import { type ValidateOptions, validate } from '../../pipeline/steps/validate'
+import type { GatherOutput, MessageCategory } from '../../pipeline/types'
 import { inngest } from '../client'
 import { SUPPORT_DRAFT_CREATED, SUPPORT_DRAFT_VALIDATED } from '../events'
 
@@ -46,10 +46,19 @@ export const validateWorkflow = inngest.createFunction(
         draftLength: draft.content.length,
       })
 
-      const result = validate({
-        draft: draft.content,
-        context: context as GatherOutput,
-      })
+      // Extract category from context if available
+      const category = (context as { category?: MessageCategory })?.category
+
+      const result = await validate(
+        {
+          draft: draft.content,
+          context: context as GatherOutput,
+        },
+        {
+          appId,
+          category,
+        }
+      )
 
       const durationMs = Date.now() - stepStartTime
 
