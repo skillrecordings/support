@@ -16,8 +16,10 @@ export { classifyWorkflow } from './classify'
 export { gatherWorkflow } from './gather-context'
 export { draftWorkflow } from './draft-response'
 export { validateWorkflow } from './validate-draft'
+export { handleValidatedDraft } from './handle-validated-draft'
 
 import { classifyWorkflow } from './classify'
+import { handleValidatedDraft } from './handle-validated-draft'
 import { draftWorkflow } from './draft-response'
 import { executeApprovedAction } from './execute-approved-action'
 import { gatherWorkflow } from './gather-context'
@@ -43,6 +45,7 @@ export const allWorkflows = [
   draftWorkflow,
   gatherWorkflow,
   handleInboundMessage,
+  handleValidatedDraft,
   requestApproval,
   executeApprovedAction,
   handleStripeEvent,
