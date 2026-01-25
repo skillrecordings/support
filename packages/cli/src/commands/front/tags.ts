@@ -114,6 +114,13 @@ interface TagWithCount {
 }
 
 /**
+ * Sleep for a given number of milliseconds
+ */
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+/**
  * Get conversation count for a tag
  * Uses the conversations endpoint and checks pagination
  */
@@ -131,6 +138,58 @@ async function getConversationCount(
   } catch {
     return 0
   }
+}
+
+/**
+ * Fetch conversation counts for tags with rate limiting
+ * @param tags - Array of tags to fetch counts for
+ * @param front - Front SDK client
+ * @param delayMs - Delay between API calls (default 100ms)
+ * @param batchSize - Number of concurrent requests (default 5)
+ * @param onProgress - Callback for progress updates
+ */
+async function fetchConversationCountsRateLimited<
+  T extends { id: string; name: string },
+>(
+  tags: T[],
+  front: ReturnType<typeof createFrontClient>,
+  options: {
+    delayMs?: number
+    batchSize?: number
+    onProgress?: (completed: number, total: number) => void
+  } = {}
+): Promise<Map<string, number>> {
+  const { delayMs = 100, batchSize = 5, onProgress } = options
+  const counts = new Map<string, number>()
+
+  // Process in batches
+  for (let i = 0; i < tags.length; i += batchSize) {
+    const batch = tags.slice(i, i + batchSize)
+
+    // Fetch batch concurrently
+    const results = await Promise.all(
+      batch.map(async (tag) => {
+        const count = await getConversationCount(front, tag.id)
+        return { id: tag.id, count }
+      })
+    )
+
+    // Store results
+    for (const { id, count } of results) {
+      counts.set(id, count)
+    }
+
+    // Progress update
+    const completed = Math.min(i + batchSize, tags.length)
+    onProgress?.(completed, tags.length)
+
+    // Rate limit delay between batches (not after last batch)
+    if (i + batchSize < tags.length) {
+      await sleep(delayMs)
+    }
+  }
+
+  return counts
 }
 
 /**
@@ -639,28 +698,35 @@ async function cleanupTags(options: { execute?: boolean }): Promise<void> {
 
     console.log('\n🔍 Analyzing tags...')
 
-    // Fetch all tags with conversation counts (raw fetch to avoid SDK validation issues)
+    // Fetch all tags (raw fetch to avoid SDK validation issues)
     const tags = await fetchTagsRaw()
-    const tagsWithCounts: TagWithConversationCount[] = await Promise.all(
-      tags.map(async (tag) => {
-        const count = await getConversationCount(front, tag.id)
-        // Cast to TagWithConversationCount - audit functions only use id/name/highlight/conversationCount
-        return {
-          id: tag.id,
-          name: tag.name,
-          highlight: tag.highlight ?? null,
-          is_private: tag.is_private,
-          description: tag.description ?? null,
-          conversationCount: count,
-          _links: {
-            self: '',
-            related: { owner: '', children: '', conversations: '' },
-          },
-        } as unknown as TagWithConversationCount
-      })
-    )
+    console.log(`   Found ${tags.length} tags`)
+    console.log('   Fetching conversation counts (rate-limited)...')
 
-    console.log(`   Found ${tagsWithCounts.length} tags`)
+    // Fetch conversation counts with rate limiting and progress
+    const counts = await fetchConversationCountsRateLimited(tags, front, {
+      delayMs: 150, // 150ms between batches
+      batchSize: 5, // 5 concurrent requests per batch
+      onProgress: (completed, total) => {
+        const pct = Math.round((completed / total) * 100)
+        process.stdout.write(`\r   Progress: ${completed}/${total} (${pct}%)`)
+      },
+    })
+    console.log('') // newline after progress
+
+    // Build tag objects with counts
+    const tagsWithCounts: TagWithConversationCount[] = tags.map((tag) => ({
+      id: tag.id,
+      name: tag.name,
+      highlight: tag.highlight ?? null,
+      is_private: tag.is_private,
+      description: tag.description ?? null,
+      conversationCount: counts.get(tag.id) ?? 0,
+      _links: {
+        self: '',
+        related: { owner: '', children: '', conversations: '' },
+      },
+    })) as unknown as TagWithConversationCount[]
 
     // Build cleanup plan
     const plan = await buildCleanupPlan(front, tagsWithCounts)
