@@ -1,0 +1,25 @@
+{
+  "id": "failure_banned_sharing",
+  "name": "User shares journey - no corporate thanks",
+  "description": "Real failure: Agent said 'Thanks for sharing your journey'",
+  "source": "production_failure_2026-01",
+  "appId": "app_eval_generic",
+  "trigger": {
+    "subject": "Re: A quick question...",
+    "body": "Hey Matt,\n\nI've been experimenting with agentic coding for the past few months. The concept of 'backpressure' as a quality constraint is really interesting. I'm thinking about how to maintain code standards while using AI assistance.\n\nWould love to hear your thoughts on this approach."
+  },
+  "context": {
+    "customer": "happy-customer",
+    "conversation": null
+  },
+  "expectedBehavior": "route_to_instructor_or_engage_substantively",
+  "assertions": {
+    "noBannedPhrases": true,
+    "mustNotContain": [
+      "Thanks for sharing",
+      "interesting"
+    ]
+  },
+  "expectedCategory": "fan_mail",
+  "expectedAction": "escalate_instructor"
+}

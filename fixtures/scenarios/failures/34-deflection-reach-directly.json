@@ -1,0 +1,26 @@
+{
+  "id": "failure_deflection_reach",
+  "name": "Question - no 'reach out directly'",
+  "description": "Real failure: Agent deflected with 'I'd recommend reaching out directly'",
+  "source": "production_failure_2026-01",
+  "appId": "app_eval_generic",
+  "trigger": {
+    "subject": "Team license question",
+    "body": "Hi,\n\nI want to buy Total TypeScript for my team of 5. Do you offer team licenses or bulk discounts?\n\nThanks"
+  },
+  "context": {
+    "customer": "no-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "check_info_or_escalate_helpfully",
+  "assertions": {
+    "noDeflection": true,
+    "mustNotContain": [
+      "reach out directly",
+      "I'd recommend",
+      "through the product website"
+    ]
+  },
+  "expectedCategory": "support_billing",
+  "expectedAction": "respond"
+}

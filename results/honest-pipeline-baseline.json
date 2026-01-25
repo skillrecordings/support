@@ -1,0 +1,625 @@
+  Processing 1/72...  Processing 2/72...  Processing 3/72...  Processing 4/72...  Processing 5/72...  Processing 6/72...  Processing 7/72...  Processing 8/72...  Processing 9/72...  Processing 10/72...  Processing 11/72...  Processing 12/72...  Processing 13/72...  Processing 14/72...  Processing 15/72...  Processing 16/72...  Processing 17/72...  Processing 18/72...  Processing 19/72...  Processing 20/72...  Processing 21/72...  Processing 22/72...  Processing 23/72...  Processing 24/72...  Processing 25/72...  Processing 26/72...  Processing 27/72...  Processing 28/72...  Processing 29/72...  Processing 30/72...  Processing 31/72...  Processing 32/72...  Processing 33/72...  Processing 34/72...  Processing 35/72...  Processing 36/72...  Processing 37/72...  Processing 38/72...  Processing 39/72...  Processing 40/72...  Processing 41/72...  Processing 42/72...  Processing 43/72...  Processing 44/72...  Processing 45/72...  Processing 46/72...  Processing 47/72...  Processing 48/72...  Processing 49/72...  Processing 50/72...  Processing 51/72...  Processing 52/72...  Processing 53/72...  Processing 54/72...  Processing 55/72...  Processing 56/72...  Processing 57/72...  Processing 58/72...  Processing 59/72...  Processing 60/72...  Processing 61/72...  Processing 62/72...  Processing 63/72...  Processing 64/72...  Processing 65/72...  Processing 66/72...  Processing 67/72...  Processing 68/72...  Processing 69/72...  Processing 70/72...  Processing 71/72...  Processing 72/72...
+{
+  "metrics": {
+    "total": 72,
+    "passed": 64,
+    "failed": 8,
+    "accuracy": 0.8888888888888888,
+    "durationMs": 109939,
+    "breakdown": {
+      "respond": {
+        "tp": 29,
+        "fp": 0,
+        "fn": 4,
+        "precision": 1,
+        "recall": 0.8787878787878788
+      },
+      "escalate_human": {
+        "tp": 2,
+        "fp": 4,
+        "fn": 0,
+        "precision": 0.3333333333333333,
+        "recall": 1
+      },
+      "escalate_instructor": {
+        "tp": 21,
+        "fp": 4,
+        "fn": 2,
+        "precision": 0.84,
+        "recall": 0.9130434782608695
+      },
+      "escalate_urgent": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1,
+        "recall": 1
+      },
+      "silence": {
+        "tp": 11,
+        "fp": 0,
+        "fn": 2,
+        "precision": 1,
+        "recall": 0.8461538461538461
+      }
+    }
+  },
+  "results": [
+    {
+      "scenarioId": "refund_within_policy",
+      "passed": true,
+      "expected": "respond",
+      "actual": "respond",
+      "durationMs": 1141,
+      "reasoning": "classify:true, route:true, gather:true, draft:true, validate:true"
+    },
+    {
+      "scenarioId": "refund_outside_policy",
+      "passed": true,
+      "expected": "escalate_human",
+      "actual": "escalate_human",
+      "durationMs": 0,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "refund_no_purchase",
+      "passed": true,
+      "expected": "respond",
+      "actual": "respond",
+      "durationMs": 1467,
+      "reasoning": "classify:true, route:true, gather:true, draft:true, validate:true"
+    },
+    {
+      "scenarioId": "access_wrong_email",
+      "passed": true,
+      "expected": "respond",
+      "actual": "respond",
+      "durationMs": 1562,
+      "reasoning": "classify:true, route:true, gather:true, draft:true, validate:true"
+    },
+    {
+      "scenarioId": "access_expired_link",
+      "passed": true,
+      "expected": "respond",
+      "actual": "respond",
+      "durationMs": 2588,
+      "reasoning": "classify:true, route:true, gather:true, draft:true, validate:true"
+    },
+    {
+      "scenarioId": "access_magic_link",
+      "passed": true,
+      "expected": "respond",
+      "actual": "respond",
+      "durationMs": 1941,
+      "reasoning": "classify:true, route:true, gather:true, draft:true, validate:true"
+    },
+    {
+      "scenarioId": "access_transfer",
+      "passed": true,
+      "expected": "respond",
+      "actual": "respond",
+      "durationMs": 996,
+      "reasoning": "classify:true, route:true, gather:true, draft:true, validate:true"
+    },
+    {
+      "scenarioId": "failure_fabrication",
+      "passed": true,
+      "expected": "respond",
+      "actual": "respond",
+      "durationMs": 3130,
+      "reasoning": "classify:true, route:true, gather:true, draft:true, validate:true"
+    },
+    {
+      "scenarioId": "failure_deflection",
+      "passed": true,
+      "expected": "respond",
+      "actual": "respond",
+      "durationMs": 2891,
+      "reasoning": "classify:true, route:true, gather:true, draft:true, validate:true"
+    },
+    {
+      "scenarioId": "failure_banned_phrases",
+      "passed": false,
+      "expected": "respond",
+      "actual": "escalate_human",
+      "durationMs": 2818,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "failure_meta_commentary",
+      "passed": true,
+      "expected": "escalate_instructor",
+      "actual": "escalate_instructor",
+      "durationMs": 2075,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "failure_internal_leak",
+      "passed": true,
+      "expected": "escalate_instructor",
+      "actual": "escalate_instructor",
+      "durationMs": 1697,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "edge_angry_customer",
+      "passed": true,
+      "expected": "escalate_human",
+      "actual": "escalate_human",
+      "durationMs": 0,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "edge_legal",
+      "passed": true,
+      "expected": "escalate_urgent",
+      "actual": "escalate_urgent",
+      "durationMs": 0,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "technical_module_error",
+      "passed": true,
+      "expected": "respond",
+      "actual": "respond",
+      "durationMs": 4270,
+      "reasoning": "classify:true, route:true, gather:true, draft:true, validate:true"
+    },
+    {
+      "scenarioId": "technical_generics",
+      "passed": true,
+      "expected": "respond",
+      "actual": "respond",
+      "durationMs": 2831,
+      "reasoning": "classify:true, route:true, gather:true, draft:true, validate:true"
+    },
+    {
+      "scenarioId": "technical_where_start",
+      "passed": true,
+      "expected": "respond",
+      "actual": "respond",
+      "durationMs": 3185,
+      "reasoning": "classify:true, route:true, gather:true, draft:true, validate:true"
+    },
+    {
+      "scenarioId": "routing_bounce",
+      "passed": true,
+      "expected": "silence",
+      "actual": "silence",
+      "durationMs": 2092,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "routing_spam",
+      "passed": true,
+      "expected": "silence",
+      "actual": "silence",
+      "durationMs": 0,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "routing_auto_reply",
+      "passed": true,
+      "expected": "silence",
+      "actual": "silence",
+      "durationMs": 0,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "routing_business",
+      "passed": true,
+      "expected": "escalate_instructor",
+      "actual": "escalate_instructor",
+      "durationMs": 0,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "routing_fan_mail",
+      "passed": true,
+      "expected": "escalate_instructor",
+      "actual": "escalate_instructor",
+      "durationMs": 0,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "failure_routing_should_go",
+      "passed": true,
+      "expected": "escalate_instructor",
+      "actual": "escalate_instructor",
+      "durationMs": 1,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "failure_fabrication_ts",
+      "passed": true,
+      "expected": "respond",
+      "actual": "respond",
+      "durationMs": 2806,
+      "reasoning": "classify:true, route:true, gather:true, draft:true, validate:true"
+    },
+    {
+      "scenarioId": "failure_meta_personal_reply",
+      "passed": true,
+      "expected": "escalate_instructor",
+      "actual": "escalate_instructor",
+      "durationMs": 0,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "failure_routing_looks_like",
+      "passed": true,
+      "expected": "escalate_instructor",
+      "actual": "escalate_instructor",
+      "durationMs": 0,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "failure_deflection_external",
+      "passed": false,
+      "expected": "respond",
+      "actual": "escalate_instructor",
+      "durationMs": 2121,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "failure_meta_invoice",
+      "passed": true,
+      "expected": "respond",
+      "actual": "respond",
+      "durationMs": 1437,
+      "reasoning": "classify:true, route:true, gather:true, draft:true, validate:true"
+    },
+    {
+      "scenarioId": "failure_routing_leak_youtube",
+      "passed": true,
+      "expected": "escalate_instructor",
+      "actual": "escalate_instructor",
+      "durationMs": 0,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "failure_deflection_routing",
+      "passed": true,
+      "expected": "silence",
+      "actual": "silence",
+      "durationMs": 1505,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "failure_banned_sharing",
+      "passed": true,
+      "expected": "escalate_instructor",
+      "actual": "escalate_instructor",
+      "durationMs": 0,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "failure_meta_business_inquiry",
+      "passed": true,
+      "expected": "escalate_instructor",
+      "actual": "escalate_instructor",
+      "durationMs": 0,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "failure_banned_great",
+      "passed": true,
+      "expected": "respond",
+      "actual": "respond",
+      "durationMs": 3432,
+      "reasoning": "classify:true, route:true, gather:true, draft:true, validate:true"
+    },
+    {
+      "scenarioId": "failure_deflection_ability",
+      "passed": true,
+      "expected": "respond",
+      "actual": "respond",
+      "durationMs": 2784,
+      "reasoning": "classify:true, route:true, gather:true, draft:true, validate:true"
+    },
+    {
+      "scenarioId": "failure_meta_no_action",
+      "passed": true,
+      "expected": "silence",
+      "actual": "silence",
+      "durationMs": 1499,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "failure_routing_instructor_missing",
+      "passed": true,
+      "expected": "escalate_instructor",
+      "actual": "escalate_instructor",
+      "durationMs": 2018,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "failure_combined_multi",
+      "passed": true,
+      "expected": "silence",
+      "actual": "silence",
+      "durationMs": 1724,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "failure_meta_appears",
+      "passed": false,
+      "expected": "escalate_instructor",
+      "actual": "escalate_human",
+      "durationMs": 2418,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "failure_banned_hope_helps",
+      "passed": true,
+      "expected": "respond",
+      "actual": "respond",
+      "durationMs": 1515,
+      "reasoning": "classify:true, route:true, gather:true, draft:true, validate:true"
+    },
+    {
+      "scenarioId": "failure_routing_leak_personal",
+      "passed": true,
+      "expected": "escalate_instructor",
+      "actual": "escalate_instructor",
+      "durationMs": 0,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "failure_deflection_reach",
+      "passed": true,
+      "expected": "respond",
+      "actual": "respond",
+      "durationMs": 3381,
+      "reasoning": "classify:true, route:true, gather:true, draft:true, validate:true"
+    },
+    {
+      "scenarioId": "failure_banned_suggest",
+      "passed": true,
+      "expected": "respond",
+      "actual": "respond",
+      "durationMs": 3323,
+      "reasoning": "classify:true, route:true, gather:true, draft:true, validate:true"
+    },
+    {
+      "scenarioId": "failure_routing_leak_partnership",
+      "passed": true,
+      "expected": "silence",
+      "actual": "silence",
+      "durationMs": 1672,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "failure_meta_joke",
+      "passed": false,
+      "expected": "escalate_instructor",
+      "actual": "escalate_human",
+      "durationMs": 1945,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "failure_banned_emdash",
+      "passed": true,
+      "expected": "respond",
+      "actual": "respond",
+      "durationMs": 3453,
+      "reasoning": "classify:true, route:true, gather:true, draft:true, validate:true"
+    },
+    {
+      "scenarioId": "failure_meta_clearly_personal",
+      "passed": true,
+      "expected": "escalate_instructor",
+      "actual": "escalate_instructor",
+      "durationMs": 0,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "failure_deflection_need",
+      "passed": true,
+      "expected": "respond",
+      "actual": "respond",
+      "durationMs": 1442,
+      "reasoning": "classify:true, route:true, gather:true, draft:true, validate:true"
+    },
+    {
+      "scenarioId": "failure_fabrication_ai",
+      "passed": true,
+      "expected": "respond",
+      "actual": "respond",
+      "durationMs": 3110,
+      "reasoning": "classify:true, route:true, gather:true, draft:true, validate:true"
+    },
+    {
+      "scenarioId": "failure_combined_leak_meta",
+      "passed": true,
+      "expected": "silence",
+      "actual": "silence",
+      "durationMs": 1615,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "failure_banned_hear",
+      "passed": true,
+      "expected": "respond",
+      "actual": "respond",
+      "durationMs": 3750,
+      "reasoning": "classify:true, route:true, gather:true, draft:true, validate:true"
+    },
+    {
+      "scenarioId": "failure_meta_module_issue",
+      "passed": false,
+      "expected": "respond",
+      "actual": "escalate_human",
+      "durationMs": 3491,
+      "reasoning": "classify:true, route:true, gather:true, draft:true, validate:true"
+    },
+    {
+      "scenarioId": "failure_banned_thanks",
+      "passed": true,
+      "expected": "respond",
+      "actual": "respond",
+      "durationMs": 2942,
+      "reasoning": "classify:true, route:true, gather:true, draft:true, validate:true"
+    },
+    {
+      "scenarioId": "failure_banned_specifically",
+      "passed": true,
+      "expected": "respond",
+      "actual": "respond",
+      "durationMs": 2648,
+      "reasoning": "classify:true, route:true, gather:true, draft:true, validate:true"
+    },
+    {
+      "scenarioId": "failure_meta_stop_here",
+      "passed": false,
+      "expected": "silence",
+      "actual": "escalate_instructor",
+      "durationMs": 0,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "failure_meta_since_routing",
+      "passed": true,
+      "expected": "escalate_instructor",
+      "actual": "escalate_instructor",
+      "durationMs": 0,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "failure_meta_marketing",
+      "passed": true,
+      "expected": "silence",
+      "actual": "silence",
+      "durationMs": 1637,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "failure_banned_happy_help",
+      "passed": true,
+      "expected": "respond",
+      "actual": "respond",
+      "durationMs": 1358,
+      "reasoning": "classify:true, route:true, gather:true, draft:true, validate:true"
+    },
+    {
+      "scenarioId": "failure_meta_vendor",
+      "passed": false,
+      "expected": "silence",
+      "actual": "escalate_instructor",
+      "durationMs": 0,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "failure_routing_cant_forward",
+      "passed": true,
+      "expected": "escalate_instructor",
+      "actual": "escalate_instructor",
+      "durationMs": 0,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "failure_banned_appreciate",
+      "passed": true,
+      "expected": "escalate_instructor",
+      "actual": "escalate_instructor",
+      "durationMs": 1577,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "failure_meta_not_spam",
+      "passed": true,
+      "expected": "silence",
+      "actual": "silence",
+      "durationMs": 0,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "failure_banned_apologize",
+      "passed": true,
+      "expected": "respond",
+      "actual": "respond",
+      "durationMs": 2724,
+      "reasoning": "classify:true, route:true, gather:true, draft:true, validate:true"
+    },
+    {
+      "scenarioId": "failure_banned_understand",
+      "passed": true,
+      "expected": "respond",
+      "actual": "respond",
+      "durationMs": 3578,
+      "reasoning": "classify:true, route:true, gather:true, draft:true, validate:true"
+    },
+    {
+      "scenarioId": "failure_routing_no_way",
+      "passed": true,
+      "expected": "escalate_instructor",
+      "actual": "escalate_instructor",
+      "durationMs": 0,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "failure_deflection_discount",
+      "passed": true,
+      "expected": "respond",
+      "actual": "respond",
+      "durationMs": 3477,
+      "reasoning": "classify:true, route:true, gather:true, draft:true, validate:true"
+    },
+    {
+      "scenarioId": "failure_routing_forward_manually",
+      "passed": true,
+      "expected": "escalate_instructor",
+      "actual": "escalate_instructor",
+      "durationMs": 0,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "failure_deflection_team",
+      "passed": true,
+      "expected": "escalate_instructor",
+      "actual": "escalate_instructor",
+      "durationMs": 0,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "failure_meta_automated",
+      "passed": true,
+      "expected": "silence",
+      "actual": "silence",
+      "durationMs": 1796,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "failure_deflection_recording",
+      "passed": false,
+      "expected": "respond",
+      "actual": "escalate_instructor",
+      "durationMs": 0,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "failure_meta_wont_draft",
+      "passed": true,
+      "expected": "escalate_instructor",
+      "actual": "escalate_instructor",
+      "durationMs": 0,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "failure_routing_system_capability",
+      "passed": true,
+      "expected": "escalate_instructor",
+      "actual": "escalate_instructor",
+      "durationMs": 0,
+      "reasoning": "classify:true, route:true"
+    },
+    {
+      "scenarioId": "failure_fabrication_lost",
+      "passed": true,
+      "expected": "respond",
+      "actual": "respond",
+      "durationMs": 3067,
+      "reasoning": "classify:true, route:true, gather:true, draft:true, validate:true"
+    }
+  ]
+}

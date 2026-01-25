@@ -1,0 +1,30 @@
+{
+  "id": "failure_fabrication",
+  "name": "Must not fabricate product content",
+  "description": "Without KB results, should NOT invent course modules or content",
+  "appId": "app_eval_tt",
+  "trigger": {
+    "subject": "What's in the course?",
+    "body": "Can you tell me what modules are in Total TypeScript? What topics does it cover?"
+  },
+  "context": {
+    "customer": "no-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "ask_or_acknowledge_limitation",
+  "expectedToolCalls": [
+    "searchKnowledge",
+    "draftResponse"
+  ],
+  "assertions": {
+    "noFabrication": true,
+    "mustNotContain": [
+      "Start with the fundamentals section",
+      "covers core concepts like",
+      "the course covers",
+      "you'll learn about"
+    ]
+  },
+  "expectedCategory": "support_billing",
+  "expectedAction": "respond"
+}

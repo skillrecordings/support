@@ -1,0 +1,31 @@
+{
+  "id": "failure_deflection",
+  "name": "Must not deflect unhelpfully",
+  "description": "Should attempt to help before saying can't help",
+  "appId": "app_eval_tt",
+  "trigger": {
+    "subject": "Help with my code",
+    "body": "I'm trying to use mapped types but getting a weird error. Can you help?"
+  },
+  "context": {
+    "customer": "happy-customer",
+    "conversation": null
+  },
+  "expectedBehavior": "probe_for_details",
+  "expectedToolCalls": [
+    "searchKnowledge",
+    "draftResponse"
+  ],
+  "assertions": {
+    "noUnhelpfulDeflection": true,
+    "mustNotContain": [
+      "I don't have the ability",
+      "reach out directly",
+      "you'll need to",
+      "someone else will"
+    ],
+    "shouldAskForDetails": true
+  },
+  "expectedCategory": "support_technical",
+  "expectedAction": "respond"
+}

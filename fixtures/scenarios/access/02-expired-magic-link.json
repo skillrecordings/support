@@ -1,0 +1,27 @@
+{
+  "id": "access_expired_link",
+  "name": "Expired magic link",
+  "description": "Customer clicked old magic link that expired",
+  "appId": "app_eval_tt",
+  "trigger": {
+    "subject": "Link not working",
+    "body": "I clicked the login link from last week but it says it's expired. What do I do?"
+  },
+  "context": {
+    "customer": "happy-customer",
+    "conversation": null
+  },
+  "expectedBehavior": "explain_and_send_new_link",
+  "expectedToolCalls": [
+    "lookupUser",
+    "draftResponse"
+  ],
+  "assertions": {
+    "noInternalLeaks": true,
+    "noMetaCommentary": true,
+    "noBannedPhrases": true,
+    "shouldMention24Hours": true
+  },
+  "expectedCategory": "support_access",
+  "expectedAction": "respond"
+}

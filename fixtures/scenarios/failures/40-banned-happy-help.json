@@ -1,0 +1,26 @@
+{
+  "id": "failure_banned_happy_help",
+  "name": "Support response - no 'Happy to help'",
+  "description": "Pattern check: Ensure no 'Happy to help' in responses",
+  "source": "pattern_prevention",
+  "appId": "app_eval_tt",
+  "trigger": {
+    "subject": "Invoice question",
+    "body": "Can you send me my invoice for tax purposes?"
+  },
+  "context": {
+    "customer": "recent-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "provide_invoice_link",
+  "assertions": {
+    "noBannedPhrases": true,
+    "mustNotContain": [
+      "Happy to help",
+      "I'm happy to",
+      "glad to help"
+    ]
+  },
+  "expectedCategory": "support_billing",
+  "expectedAction": "respond"
+}

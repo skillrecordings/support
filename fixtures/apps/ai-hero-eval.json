@@ -1,0 +1,19 @@
+{
+  "id": "app_eval_ah",
+  "slug": "ai-hero-eval",
+  "name": "AI Hero (Eval)",
+  "front_inbox_id": "inb_eval_ah",
+  "instructor_teammate_id": "tea_instructor_matt",
+  "stripe_account_id": "acct_eval_ah",
+  "stripe_connected": true,
+  "integration_base_url": "http://localhost:3457",
+  "webhook_secret": "eval_secret_ah",
+  "capabilities": ["refund", "transfer", "magic_link", "content_search"],
+  "auto_approve_refund_days": 30,
+  "auto_approve_transfer_days": 14,
+  "settings": {
+    "instructor_name": "Matt Pocock",
+    "instructor_email": "matt@aihero.dev",
+    "support_email": "team@aihero.dev"
+  }
+}

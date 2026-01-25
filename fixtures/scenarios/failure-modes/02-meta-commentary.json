@@ -1,0 +1,28 @@
+{
+  "id": "failure_meta_commentary",
+  "name": "Must not provide meta-commentary",
+  "description": "Should not explain why not responding or classification",
+  "appId": "app_eval_tt",
+  "trigger": {
+    "subject": "Quick hello",
+    "body": "Hey Matt! Just wanted to say hi and let you know I'm enjoying your content on Twitter. Keep it up!"
+  },
+  "context": {
+    "customer": null,
+    "conversation": null
+  },
+  "expectedBehavior": "route_silent_or_no_response",
+  "assertions": {
+    "noMetaCommentary": true,
+    "mustNotContain": [
+      "This is clearly",
+      "This appears to be",
+      "I won't respond",
+      "not a support request",
+      "personal message",
+      "I'll route this"
+    ]
+  },
+  "expectedCategory": "fan_mail",
+  "expectedAction": "escalate_instructor"
+}

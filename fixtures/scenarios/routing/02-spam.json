@@ -1,0 +1,23 @@
+{
+  "id": "routing_spam",
+  "name": "Spam/vendor email",
+  "description": "Marketing spam - should not respond",
+  "appId": "app_eval_tt",
+  "trigger": {
+    "subject": "Partnership opportunity - Grow your audience 10x!",
+    "body": "Hi there!\n\nI'm reaching out from GrowthHackers Pro. We help course creators like you 10x their audience using our proprietary AI-powered marketing system.\n\nWe've helped over 500 creators increase their revenue by an average of 340%!\n\nWould you like to schedule a quick 15-minute call to learn more?\n\nBest,\nJake\nGrowthHackers Pro"
+  },
+  "context": {
+    "customer": null,
+    "conversation": null
+  },
+  "expectedBehavior": "no_response",
+  "notExpectedToolCalls": [
+    "draftResponse"
+  ],
+  "assertions": {
+    "noDraftResponse": true
+  },
+  "expectedCategory": "spam",
+  "expectedAction": "silence"
+}

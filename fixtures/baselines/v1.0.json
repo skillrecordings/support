@@ -1,0 +1,91 @@
+{
+  "total": 45,
+  "timestamp": "2026-01-24T16:39:00.276Z",
+  "passRates": {
+    "internal_state_leakage": {
+      "pass": 33,
+      "fail": 12,
+      "rate": "73.3%"
+    },
+    "meta_commentary": {
+      "pass": 32,
+      "fail": 13,
+      "rate": "71.1%"
+    },
+    "banned_phrases": {
+      "pass": 32,
+      "fail": 13,
+      "rate": "71.1%"
+    },
+    "product_fabrication": {
+      "pass": 42,
+      "fail": 3,
+      "rate": "93.3%"
+    },
+    "helpfulness": {
+      "pass": 37,
+      "fail": 8,
+      "rate": "82.2%"
+    }
+  },
+  "byCategory": {
+    "tool-assisted": {
+      "internal_state_leakage": {
+        "pass": 26,
+        "fail": 10,
+        "rate": "72.2%"
+      },
+      "meta_commentary": {
+        "pass": 31,
+        "fail": 5,
+        "rate": "86.1%"
+      },
+      "banned_phrases": {
+        "pass": 26,
+        "fail": 10,
+        "rate": "72.2%"
+      },
+      "product_fabrication": {
+        "pass": 33,
+        "fail": 3,
+        "rate": "91.7%"
+      },
+      "helpfulness": {
+        "pass": 28,
+        "fail": 8,
+        "rate": "77.8%"
+      }
+    },
+    "direct-response": {
+      "internal_state_leakage": {
+        "pass": 7,
+        "fail": 2,
+        "rate": "77.8%"
+      },
+      "meta_commentary": {
+        "pass": 1,
+        "fail": 8,
+        "rate": "11.1%"
+      },
+      "banned_phrases": {
+        "pass": 6,
+        "fail": 3,
+        "rate": "66.7%"
+      },
+      "product_fabrication": {
+        "pass": 9,
+        "fail": 0,
+        "rate": "100.0%"
+      },
+      "helpfulness": {
+        "pass": 9,
+        "fail": 0,
+        "rate": "100.0%"
+      }
+    }
+  },
+  "categories": {
+    "tool-assisted": 36,
+    "direct-response": 9
+  }
+}

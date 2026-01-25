@@ -1,0 +1,28 @@
+{
+  "id": "failure_meta_invoice",
+  "name": "B2B invoice request - no meta commentary",
+  "description": "Real failure: Agent said 'This is a vendor/business invoice request, not a customer support request'",
+  "source": "production_failure_2026-01",
+  "appId": "app_eval_generic",
+  "trigger": {
+    "subject": "Request for Invoice – POWS00000300",
+    "body": "Dear Team,\n\nWe are requesting an invoice for purchase order POWS00000300. Please provide the invoice at your earliest convenience.\n\nRegards,\nAccounts Payable\nAcme Corp"
+  },
+  "context": {
+    "customer": "no-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "route_or_help_without_explanation",
+  "assertions": {
+    "noMetaCommentary": true,
+    "mustNotContain": [
+      "vendor/business invoice",
+      "not a customer support request",
+      "B2B billing inquiry",
+      "falls outside",
+      "I don't need to respond"
+    ]
+  },
+  "expectedCategory": "support_billing",
+  "expectedAction": "respond"
+}

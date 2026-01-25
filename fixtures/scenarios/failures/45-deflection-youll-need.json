@@ -1,0 +1,26 @@
+{
+  "id": "failure_deflection_need",
+  "name": "Question - no 'You'll need to'",
+  "description": "Pattern: Don't push responsibility with 'you'll need to'",
+  "source": "pattern_prevention",
+  "appId": "app_eval_tt",
+  "trigger": {
+    "subject": "Wrong email on account",
+    "body": "I need to change the email on my account. I used my old work email when I purchased."
+  },
+  "context": {
+    "customer": "recent-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "help_with_email_change",
+  "assertions": {
+    "noDeflection": true,
+    "mustNotContain": [
+      "You'll need to",
+      "You will need to",
+      "you should"
+    ]
+  },
+  "expectedCategory": "support_transfer",
+  "expectedAction": "respond"
+}

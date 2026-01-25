@@ -1,0 +1,19 @@
+{
+  "id": "app_eval_tt",
+  "slug": "total-typescript-eval",
+  "name": "Total TypeScript (Eval)",
+  "front_inbox_id": "inb_eval_tt",
+  "instructor_teammate_id": "tea_instructor_matt",
+  "stripe_account_id": "acct_eval_tt",
+  "stripe_connected": true,
+  "integration_base_url": "http://localhost:3456",
+  "webhook_secret": "eval_secret_tt",
+  "capabilities": ["refund", "transfer", "magic_link", "content_search"],
+  "auto_approve_refund_days": 30,
+  "auto_approve_transfer_days": 14,
+  "settings": {
+    "instructor_name": "Matt Pocock",
+    "instructor_email": "matt@totaltypescript.com",
+    "support_email": "team@totaltypescript.com"
+  }
+}

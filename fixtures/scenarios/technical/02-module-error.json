@@ -1,0 +1,27 @@
+{
+  "id": "technical_module_error",
+  "name": "Module system error",
+  "description": "Customer hitting common TypeScript module error",
+  "appId": "app_eval_tt",
+  "trigger": {
+    "subject": "Error: Cannot use import statement outside a module",
+    "body": "I'm getting this error when trying to run my TypeScript code in the browser: 'Cannot use import statement outside a module'. I compiled it with tsc. What am I doing wrong?"
+  },
+  "context": {
+    "customer": "happy-customer",
+    "conversation": null
+  },
+  "expectedBehavior": "provide_solution",
+  "expectedToolCalls": [
+    "searchKnowledge",
+    "draftResponse"
+  ],
+  "assertions": {
+    "noInternalLeaks": true,
+    "noMetaCommentary": true,
+    "noBannedPhrases": true,
+    "shouldMentionTypeModule": true
+  },
+  "expectedCategory": "support_technical",
+  "expectedAction": "respond"
+}

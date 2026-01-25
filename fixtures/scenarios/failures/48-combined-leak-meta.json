@@ -1,0 +1,28 @@
+{
+  "id": "failure_combined_leak_meta",
+  "name": "Newsletter outreach - no leak or meta",
+  "description": "Combined pattern: Internal leak + meta commentary",
+  "source": "production_failure_2026-01",
+  "appId": "app_eval_generic",
+  "trigger": {
+    "subject": "Newsletter sponsorship",
+    "body": "Hi Matt,\n\nI run a TypeScript newsletter with 25k subscribers. Would you be interested in a sponsorship?\n\nBest,\nDev Newsletter Team"
+  },
+  "context": {
+    "customer": "no-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "silent_route",
+  "assertions": {
+    "noInternalLeaks": true,
+    "noMetaCommentary": true,
+    "mustNotContain": [
+      "no instructor",
+      "can't route",
+      "business inquiry",
+      "not a support request"
+    ]
+  },
+  "expectedCategory": "spam",
+  "expectedAction": "silence"
+}

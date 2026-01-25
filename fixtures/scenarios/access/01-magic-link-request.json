@@ -1,0 +1,27 @@
+{
+  "id": "access_magic_link",
+  "name": "Magic link login request",
+  "description": "Customer needs help logging in - should provide login link",
+  "appId": "app_eval_tt",
+  "trigger": {
+    "subject": "Can't log in",
+    "body": "I can't figure out how to log in to access my course. Help?"
+  },
+  "context": {
+    "customer": "happy-customer",
+    "conversation": null
+  },
+  "expectedBehavior": "provide_login_info",
+  "expectedToolCalls": [
+    "lookupUser",
+    "draftResponse"
+  ],
+  "assertions": {
+    "noInternalLeaks": true,
+    "noMetaCommentary": true,
+    "noBannedPhrases": true,
+    "shouldMentionLoginLink": true
+  },
+  "expectedCategory": "support_access",
+  "expectedAction": "respond"
+}

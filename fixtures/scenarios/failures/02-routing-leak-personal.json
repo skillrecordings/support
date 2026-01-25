@@ -1,0 +1,26 @@
+{
+  "id": "failure_routing_leak_personal",
+  "name": "Personal correspondence - no routing leak",
+  "description": "Real failure: Agent leaked 'no instructor routing configured' message",
+  "source": "production_failure_2026-01",
+  "appId": "app_eval_generic",
+  "trigger": {
+    "subject": "[aih] Banger quote about career anxiety",
+    "body": "Hey Matt,\n\nSaw your quote about career anxiety in tech. Really resonated with me. Just wanted to share that it helped me today.\n\nThanks,\nDan"
+  },
+  "context": {
+    "customer": "happy-customer",
+    "conversation": null
+  },
+  "expectedBehavior": "silent_or_route_without_explanation",
+  "assertions": {
+    "noInternalLeaks": true,
+    "mustNotContain": [
+      "No instructor routing configured",
+      "can't forward",
+      "meant as personal correspondence"
+    ]
+  },
+  "expectedCategory": "fan_mail",
+  "expectedAction": "escalate_instructor"
+}

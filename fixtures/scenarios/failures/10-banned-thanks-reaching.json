@@ -1,0 +1,27 @@
+{
+  "id": "failure_banned_thanks",
+  "name": "Discount request - no corporate speak",
+  "description": "Real failure: Agent said 'Thanks for reaching out' and 'I'd recommend'",
+  "source": "production_failure_2026-01",
+  "appId": "app_eval_aih",
+  "trigger": {
+    "subject": "AI SDK Course Discount",
+    "body": "Hi,\n\nI'm a student and was wondering if there are any discounts available for the AI SDK course?\n\nThanks,\nAminata"
+  },
+  "context": {
+    "customer": "no-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "helpful_response_about_pricing",
+  "assertions": {
+    "noBannedPhrases": true,
+    "noDeflection": true,
+    "mustNotContain": [
+      "Thanks for reaching out",
+      "I'd recommend",
+      "I don't have the ability"
+    ]
+  },
+  "expectedCategory": "support_billing",
+  "expectedAction": "respond"
+}

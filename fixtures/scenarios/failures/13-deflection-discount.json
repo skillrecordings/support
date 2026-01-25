@@ -1,0 +1,26 @@
+{
+  "id": "failure_deflection_discount",
+  "name": "Discount request - no deflection",
+  "description": "Real failure: Agent deflected with 'reach out directly through the product website'",
+  "source": "production_failure_2026-01",
+  "appId": "app_eval_aih",
+  "trigger": {
+    "subject": "Student Discount Request",
+    "body": "Hi, I'm a computer science student. Do you offer any educational discounts? I'd love to take the AI course but the price is a bit high for a student budget."
+  },
+  "context": {
+    "customer": "no-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "check_for_discounts_or_escalate_helpfully",
+  "assertions": {
+    "noDeflection": true,
+    "mustNotContain": [
+      "reach out directly",
+      "I don't have the ability",
+      "through the product website"
+    ]
+  },
+  "expectedCategory": "support_billing",
+  "expectedAction": "respond"
+}

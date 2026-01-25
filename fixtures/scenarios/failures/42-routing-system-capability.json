@@ -1,0 +1,27 @@
+{
+  "id": "failure_routing_system_capability",
+  "name": "Business inquiry - no system capability leak",
+  "description": "Pattern: Don't expose what the system 'can' or 'cannot' do",
+  "source": "pattern_prevention",
+  "appId": "app_eval_generic",
+  "trigger": {
+    "subject": "Podcast invitation",
+    "body": "Hi Matt,\n\nI host a developer podcast and would love to have you as a guest. Let me know if you're interested!\n\nBest,\nSarah"
+  },
+  "context": {
+    "customer": "no-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "route_silently",
+  "assertions": {
+    "noInternalLeaks": true,
+    "mustNotContain": [
+      "I can't",
+      "I'm unable",
+      "The system",
+      "through our system"
+    ]
+  },
+  "expectedCategory": "fan_mail",
+  "expectedAction": "escalate_instructor"
+}

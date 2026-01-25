@@ -1,0 +1,27 @@
+{
+  "id": "failure_meta_no_action",
+  "name": "Non-support message - no 'No action needed' commentary",
+  "description": "Real failure: Agent concluded with 'No action needed'",
+  "source": "production_failure_2026-01",
+  "appId": "app_eval_generic",
+  "trigger": {
+    "subject": "Automated: Build passed",
+    "body": "Build #1234 passed successfully.\n\nAll tests passing.\n\nNo action required."
+  },
+  "context": {
+    "customer": "no-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "silent_no_response",
+  "assertions": {
+    "noMetaCommentary": true,
+    "noDraftResponse": true,
+    "mustNotContain": [
+      "No action needed",
+      "automated",
+      "not a customer support request"
+    ]
+  },
+  "expectedCategory": "system",
+  "expectedAction": "silence"
+}

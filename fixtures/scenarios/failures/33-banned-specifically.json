@@ -1,0 +1,26 @@
+{
+  "id": "failure_banned_specifically",
+  "name": "Vague question - no generic follow-up",
+  "description": "Real failure: Agent asked 'Is there a specific area you're curious about?'",
+  "source": "production_failure_2026-01",
+  "appId": "app_eval_tt",
+  "trigger": {
+    "subject": "TypeScript help",
+    "body": "I need help with TypeScript."
+  },
+  "context": {
+    "customer": "recent-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "probe_with_direct_question",
+  "assertions": {
+    "noBannedPhrases": true,
+    "mustNotContain": [
+      "Is there a specific area",
+      "curious about",
+      "Would you like help with"
+    ]
+  },
+  "expectedCategory": "support_technical",
+  "expectedAction": "respond"
+}

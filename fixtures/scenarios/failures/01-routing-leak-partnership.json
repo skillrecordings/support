@@ -1,0 +1,30 @@
+{
+  "id": "failure_routing_leak_partnership",
+  "name": "Partnership inquiry - no routing leak",
+  "description": "Real failure: Agent leaked routing config when handling partnership inquiry",
+  "source": "production_failure_2026-01",
+  "appId": "app_eval_generic",
+  "trigger": {
+    "subject": "Collaborate with Volter AI on Portable.dev!",
+    "body": "Hi Matt,\n\nI'm reaching out from Volter AI. We're building developer tools and think there might be a great opportunity to collaborate.\n\nWould you be open to a quick chat about a potential partnership?\n\nBest,\nAlex"
+  },
+  "context": {
+    "customer": "no-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "silent_or_route_without_explanation",
+  "assertions": {
+    "noInternalLeaks": true,
+    "noMetaCommentary": true,
+    "mustNotContain": [
+      "should be routed",
+      "no instructor",
+      "can't route",
+      "I won't respond",
+      "Per my guidelines",
+      "not a support request"
+    ]
+  },
+  "expectedCategory": "spam",
+  "expectedAction": "silence"
+}

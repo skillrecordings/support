@@ -1,0 +1,26 @@
+{
+  "id": "failure_meta_module_issue",
+  "name": "Technical issue - no 'This is a' diagnosis",
+  "description": "Real failure: Agent started with 'This is a module system issue'",
+  "source": "production_failure_2026-01",
+  "appId": "app_eval_tt",
+  "trigger": {
+    "subject": "pro-essentials-workshop - Issue with lesson 011",
+    "body": "Hey,\n\nI'm getting an error in lesson 011. When I run the code in the browser, I see:\n\nUncaught SyntaxError: Unexpected token 'export'\n\nWhat am I doing wrong?"
+  },
+  "context": {
+    "customer": "recent-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "provide_solution_directly",
+  "assertions": {
+    "noMetaCommentary": true,
+    "mustContain": [
+      "script",
+      "type=\"module\""
+    ],
+    "mustNotStartWith": "This is a"
+  },
+  "expectedCategory": "support_technical",
+  "expectedAction": "respond"
+}

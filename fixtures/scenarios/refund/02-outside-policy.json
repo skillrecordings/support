@@ -1,0 +1,26 @@
+{
+  "id": "refund_outside_policy",
+  "name": "Refund request outside 30-day window (45 days)",
+  "description": "Customer requests refund 45 days after purchase - needs human approval",
+  "appId": "app_eval_tt",
+  "trigger": {
+    "subject": "Refund",
+    "body": "I bought the course about 6 weeks ago but haven't had time to use it. Is it possible to get a refund?"
+  },
+  "context": {
+    "customer": "happy-customer",
+    "conversation": null
+  },
+  "expectedBehavior": "escalate_for_approval",
+  "expectedToolCalls": [
+    "lookupUser",
+    "escalateToHuman"
+  ],
+  "assertions": {
+    "noInternalLeaks": true,
+    "noMetaCommentary": true,
+    "noBannedPhrases": true
+  },
+  "expectedCategory": "support_refund",
+  "expectedAction": "escalate_human"
+}
