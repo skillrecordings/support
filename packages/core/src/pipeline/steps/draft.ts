@@ -17,6 +17,7 @@ import {
   formatMemoriesForPrompt,
   queryMemoriesForStage,
 } from '../../memory/query'
+import { log, traceDraftCreation } from '../../observability/axiom'
 import {
   type TemplateMatch,
   buildTemplateVariables,
@@ -150,6 +151,17 @@ export async function draft(
 
   const startTime = Date.now()
 
+  await log('debug', 'draft started', {
+    workflow: 'pipeline',
+    step: 'draft',
+    appId,
+    conversationId,
+    category: classification.category,
+    messageLength: message.body.length,
+    skipTemplateMatch,
+    skipMemoryQuery,
+  })
+
   // ─────────────────────────────────────────────────────────────────────────
   // Step 1: Try template matching first (if enabled)
   // ─────────────────────────────────────────────────────────────────────────
@@ -181,11 +193,26 @@ export async function draft(
           )
         )
 
+        const durationMs = Date.now() - startTime
+
+        await log('info', 'draft completed (template match)', {
+          workflow: 'pipeline',
+          step: 'draft',
+          appId,
+          conversationId,
+          category: classification.category,
+          usedTemplate: true,
+          templateName: matchResult.match.name,
+          templateConfidence: matchResult.match.confidence,
+          draftLength: interpolatedContent.length,
+          durationMs,
+        })
+
         return {
           draft: interpolatedContent,
           reasoning: `Template match: "${matchResult.match.name}" (confidence: ${matchResult.match.confidence.toFixed(3)})`,
           toolsUsed: ['template_match'],
-          durationMs: Date.now() - startTime,
+          durationMs,
           templateUsed: matchResult.match,
         }
       }
@@ -196,7 +223,13 @@ export async function draft(
       )
     } catch (error) {
       // Template matching failed, fall back to LLM silently
-      console.warn('[draft] Template matching failed, using LLM:', error)
+      await log('warn', 'draft template matching failed', {
+        workflow: 'pipeline',
+        step: 'draft',
+        appId,
+        conversationId,
+        error: error instanceof Error ? error.message : String(error),
+      })
     }
   }
 
@@ -227,20 +260,38 @@ export async function draft(
       if (memories.length > 0) {
         memoryContext = formatMemoriesForPrompt(memories)
 
+        await log('debug', 'draft memory query results', {
+          workflow: 'pipeline',
+          step: 'draft',
+          appId,
+          conversationId,
+          memoriesFound: memories.length,
+          topScore: memories[0]?.score ?? 0,
+          memoryIds: memories.map((m) => m.id),
+        })
+
         // Record citation for feedback tracking
         if (runId) {
           const memoryIds = memories.map((m) => m.id)
           await citeMemories(memoryIds, runId, appId).catch((err) => {
-            console.warn('[draft] Failed to record memory citations:', err)
+            log('warn', 'draft failed to record memory citations', {
+              workflow: 'pipeline',
+              step: 'draft',
+              appId,
+              error: err instanceof Error ? err.message : String(err),
+            }).catch(() => {})
           })
         }
       }
     } catch (error) {
       // Memory query failed, continue without memory context
-      console.warn(
-        '[draft] Memory query failed, drafting without memory:',
-        error
-      )
+      await log('warn', 'draft memory query failed', {
+        workflow: 'pipeline',
+        step: 'draft',
+        appId,
+        conversationId,
+        error: error instanceof Error ? error.message : String(error),
+      })
     }
   }
 
@@ -275,6 +326,21 @@ Write your response:`
   })
 
   const toolsUsed = memories.length > 0 ? ['memory_query'] : []
+  const durationMs = Date.now() - startTime
+
+  await log('info', 'draft completed (LLM)', {
+    workflow: 'pipeline',
+    step: 'draft',
+    appId,
+    conversationId,
+    category: classification.category,
+    usedTemplate: false,
+    usedMemory: memories.length > 0,
+    memoriesCited: memories.length,
+    draftLength: result.text.trim().length,
+    model,
+    durationMs,
+  })
 
   return {
     draft: result.text.trim(),
@@ -283,7 +349,7 @@ Write your response:`
         ? `Used ${memories.length} relevant memories for context`
         : undefined,
     toolsUsed,
-    durationMs: Date.now() - startTime,
+    durationMs,
     templateUsed: undefined,
     memoriesCited: memories.length > 0 ? memories : undefined,
   }
