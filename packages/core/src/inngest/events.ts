@@ -409,6 +409,34 @@ export type StaleTemplatesCheckRequestedEvent = {
   }
 }
 
+/** Event emitted to trigger manual tag gardening analysis */
+export const TAG_GARDENING_REQUESTED = 'tags/gardening.requested' as const
+
+export type TagGardeningRequestedEvent = {
+  name: typeof TAG_GARDENING_REQUESTED
+  data: {
+    /** Optional: requestor info for audit */
+    requestedBy?: string
+    /** Optional: skip Slack notification */
+    skipSlack?: boolean
+    /** Optional: custom Slack channel */
+    slackChannel?: string
+    /** Optional: override AI model */
+    model?: string
+  }
+}
+
+/** Event emitted to trigger manual tag health check */
+export const TAG_HEALTH_CHECK_REQUESTED = 'tags/health-check.requested' as const
+
+export type TagHealthCheckRequestedEvent = {
+  name: typeof TAG_HEALTH_CHECK_REQUESTED
+  data: {
+    /** Optional: requestor info for audit */
+    requestedBy?: string
+  }
+}
+
 export type EscalationPriority =
   | 'urgent'
   | 'normal'
@@ -466,4 +494,7 @@ export type Events = {
   [TEMPLATES_SYNC_REQUESTED]: TemplatesSyncRequestedEvent
   // Stale template check events
   [STALE_TEMPLATES_CHECK_REQUESTED]: StaleTemplatesCheckRequestedEvent
+  // Tag gardening events
+  [TAG_GARDENING_REQUESTED]: TagGardeningRequestedEvent
+  [TAG_HEALTH_CHECK_REQUESTED]: TagHealthCheckRequestedEvent
 }

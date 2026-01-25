@@ -65,7 +65,11 @@
     "./memory/query": "./src/memory/query.ts",
     "./memory/correction-capture": "./src/memory/correction-capture.ts",
     "./analytics": "./src/analytics/index.ts",
-    "./analytics/learning-curves": "./src/analytics/learning-curves.ts"
+    "./analytics/learning-curves": "./src/analytics/learning-curves.ts",
+    "./tags": "./src/tags/index.ts",
+    "./tags/registry": "./src/tags/registry.ts",
+    "./tags/audit": "./src/tags/audit.ts",
+    "./tags/ai-suggestions": "./src/tags/ai-suggestions.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit",
