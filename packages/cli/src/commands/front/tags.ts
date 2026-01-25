@@ -97,6 +97,35 @@ async function fetchTagsRaw(): Promise<
 }
 
 /**
+ * Raw create tag - bypasses SDK response validation
+ */
+async function createTagRaw(params: {
+  name: string
+  highlight?: string | null
+  description?: string | null
+}): Promise<void> {
+  const apiToken = getFrontApiToken()
+  const body: Record<string, unknown> = { name: params.name }
+  if (params.highlight) body.highlight = params.highlight
+  if (params.description) body.description = params.description
+
+  const response = await fetch('https://api2.frontapp.com/tags', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiToken}`,
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify(body),
+  })
+
+  if (!response.ok) {
+    const text = await response.text()
+    throw new Error(`Front API ${response.status}: ${text}`)
+  }
+}
+
+/**
  * Truncate string with ellipsis
  */
 function truncate(str: string, len: number): string {
@@ -670,9 +699,9 @@ async function executeCleanupPlan(
   for (const item of plan.missingToCreate) {
     try {
       console.log(`   Creating "${item.name}"...`)
-      await front.tags.create({
+      await createTagRaw({
         name: item.name,
-        highlight: item.highlight as any, // Front SDK typing
+        highlight: item.highlight,
         description: item.description,
       })
       console.log(`   ✅ Created "${item.name}"`)
