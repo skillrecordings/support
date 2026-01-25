@@ -4,7 +4,8 @@
  * All Inngest workflows are exported here for the serve handler.
  */
 
-export { handleInboundMessage } from './handle-inbound-message'
+// DELETED: export { handleInboundMessage } from './handle-inbound-message'
+// Replaced by event-driven workflows: classify, route, gather, draft, validate, handle-validated-draft
 export { requestApproval } from './request-approval'
 export { executeApprovedAction } from './execute-approved-action'
 export { handleStripeEvent } from './stripe-refund'
@@ -23,7 +24,7 @@ import { handleValidatedDraft } from './handle-validated-draft'
 import { draftWorkflow } from './draft-response'
 import { executeApprovedAction } from './execute-approved-action'
 import { gatherWorkflow } from './gather-context'
-import { handleInboundMessage } from './handle-inbound-message'
+// DELETED: import { handleInboundMessage } from './handle-inbound-message'
 import { indexConversation } from './index-conversation'
 import { handleMemoryVote } from './memory-vote'
 import { requestApproval } from './request-approval'
@@ -44,7 +45,7 @@ export const allWorkflows = [
   classifyWorkflow,
   draftWorkflow,
   gatherWorkflow,
-  handleInboundMessage,
+  // DELETED: handleInboundMessage - replaced by event-driven workflows
   handleValidatedDraft,
   requestApproval,
   executeApprovedAction,
