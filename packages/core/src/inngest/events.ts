@@ -289,6 +289,7 @@ export type SupportRoutedEvent = {
       category: string
       confidence: number
       signals: Record<string, boolean>
+      reasoning?: string
     }
     route: {
       action:
@@ -311,9 +312,17 @@ export type SupportContextGatheredEvent = {
     conversationId: string
     messageId: string
     appId: string
+    /** Original message subject */
+    subject: string
+    /** Original message body */
+    body: string
+    /** Sender's email address */
+    senderEmail: string
     classification: {
       category: string
       confidence: number
+      signals: Record<string, boolean>
+      reasoning?: string
     }
     route: {
       action: string
@@ -327,6 +336,11 @@ export type SupportContextGatheredEvent = {
       } | null
       knowledge: unknown[]
       memories: unknown[]
+      history: Array<{
+        body: string
+        from: string
+        date: string
+      }>
     }
   }
 }
@@ -340,6 +354,18 @@ export type SupportDraftCreatedEvent = {
     conversationId: string
     messageId: string
     appId: string
+    /** Original message subject */
+    subject: string
+    /** Original message body */
+    body: string
+    /** Sender's email address */
+    senderEmail: string
+    classification: {
+      category: string
+      confidence: number
+      signals: Record<string, boolean>
+      reasoning?: string
+    }
     draft: {
       content: string
       toolsUsed: string[]
@@ -357,6 +383,18 @@ export type SupportDraftValidatedEvent = {
     conversationId: string
     messageId: string
     appId: string
+    /** Original message subject */
+    subject: string
+    /** Original message body */
+    body: string
+    /** Sender's email address */
+    senderEmail: string
+    classification: {
+      category: string
+      confidence: number
+      signals: Record<string, boolean>
+      reasoning?: string
+    }
     draft: {
       content: string
     }
@@ -364,6 +402,8 @@ export type SupportDraftValidatedEvent = {
       valid: boolean
       issues: string[]
       score?: number
+      /** Relevance score from LLM check (0-1) */
+      relevance?: number
     }
     context?: {
       customerEmail?: string

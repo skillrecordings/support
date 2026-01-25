@@ -951,6 +951,7 @@ async function runValidateEval(
         too_long: 'noBannedPhrases', // No specific assertion
         bad_tone: 'noBannedPhrases', // No specific assertion
         repeated_mistake: 'noBannedPhrases', // No specific assertion
+        relevance: 'noBannedPhrases', // No specific assertion for relevance
       }
 
       // Check if assertions match

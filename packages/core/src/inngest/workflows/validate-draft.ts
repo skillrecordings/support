@@ -10,6 +10,10 @@ import {
   log,
   traceWorkflowStep,
 } from '../../observability/axiom'
+import {
+  assertDataIntegrity,
+  buildDataFlowCheck,
+} from '../../pipeline/assert-data-integrity'
 import { type ValidateOptions, validate } from '../../pipeline/steps/validate'
 import type { GatherOutput, MessageCategory } from '../../pipeline/types'
 import { inngest } from '../client'
@@ -23,17 +27,42 @@ export const validateWorkflow = inngest.createFunction(
   },
   { event: SUPPORT_DRAFT_CREATED },
   async ({ event, step }) => {
-    const { conversationId, messageId, appId, draft, context } = event.data
+    const {
+      conversationId,
+      messageId,
+      appId,
+      draft,
+      context,
+      subject,
+      body,
+      senderEmail,
+      classification,
+    } = event.data
 
     const workflowStartTime = Date.now()
     initializeAxiom()
 
+    // Data flow check: log what we received from draft-response
     await log('info', 'validate workflow started', {
       workflow: 'support-validate',
       conversationId,
       messageId,
       appId,
       draftLength: draft.content.length,
+      ...buildDataFlowCheck('support-validate', 'receiving', {
+        subject,
+        body,
+        category: classification?.category,
+        confidence: classification?.confidence,
+        reasoning: classification?.reasoning,
+        draftContent: draft.content,
+        signals: classification?.signals,
+      }),
+    })
+
+    // Assert critical data is present before validation
+    await assertDataIntegrity('validate-draft/receive', {
+      'draft.content': draft.content,
     })
 
     const validation = await step.run('validate-draft', async () => {
@@ -46,13 +75,22 @@ export const validateWorkflow = inngest.createFunction(
         draftLength: draft.content.length,
       })
 
-      // Extract category from context if available
-      const category = (context as { category?: MessageCategory })?.category
+      // Extract category from classification (preferred) or context fallback
+      const category =
+        (classification?.category as MessageCategory) ??
+        (context as { category?: MessageCategory })?.category
+
+      // Build customer message for relevance checking
+      const customerMessage =
+        subject || body
+          ? { subject: subject ?? '', body: body ?? '' }
+          : undefined
 
       const result = await validate(
         {
           draft: draft.content,
           context: context as GatherOutput,
+          customerMessage,
         },
         {
           appId,
@@ -79,6 +117,8 @@ export const validateWorkflow = inngest.createFunction(
           type: i.type,
           message: i.message,
         })),
+        relevanceScore: result.relevance,
+        relevanceCheckPerformed: result.relevanceCheckPerformed,
         durationMs,
       })
 
@@ -108,6 +148,9 @@ export const validateWorkflow = inngest.createFunction(
           hasMeta: (issuesByType['meta'] ?? 0) > 0,
           hasBanned: (issuesByType['banned'] ?? 0) > 0,
           hasFabrication: (issuesByType['fabrication'] ?? 0) > 0,
+          hasRelevance: (issuesByType['relevance'] ?? 0) > 0,
+          relevanceScore: result.relevance,
+          relevanceCheckPerformed: result.relevanceCheckPerformed,
           draftLength: draft.content.length,
         },
       })
@@ -115,11 +158,21 @@ export const validateWorkflow = inngest.createFunction(
       return result
     })
 
+    // Data flow check: log what we're emitting to handle-validated-draft
     await log('debug', 'emitting draft validated event', {
       workflow: 'support-validate',
       conversationId,
       messageId,
       valid: validation.valid,
+      ...buildDataFlowCheck('support-validate', 'emitting', {
+        subject,
+        body,
+        category: classification?.category,
+        confidence: classification?.confidence,
+        reasoning: classification?.reasoning,
+        draftContent: draft.content,
+        signals: classification?.signals,
+      }),
     })
 
     await step.sendEvent('emit-validated', {
@@ -128,30 +181,45 @@ export const validateWorkflow = inngest.createFunction(
         conversationId,
         messageId,
         appId,
+        subject: subject ?? '',
+        body: body ?? '',
+        senderEmail: senderEmail ?? '',
+        relevance: validation.relevance,
+        classification: classification ?? {
+          category: 'unknown',
+          confidence: 0,
+          signals: {},
+        },
         draft: { content: draft.content },
         validation: {
           valid: validation.valid,
           issues: validation.issues.map((issue) => issue.message),
           score: validation.valid ? 1.0 : 0.0,
         },
-        // Pass context through for internal comments
-        // Note: context from gather workflow has shape { customer, knowledge, memories }
-        // NOT the internal GatherOutput shape { user, purchases, priorMemory }
-        context: context
-          ? (() => {
-              const ctx = context as {
-                customer?: { email?: string; purchases?: unknown[] }
-                knowledge?: unknown[]
-                memories?: unknown[]
-              }
-              return {
-                customerEmail: ctx.customer?.email,
-                purchaseCount: ctx.customer?.purchases?.length ?? 0,
-                knowledgeCount: ctx.knowledge?.length ?? 0,
-                memoryCount: ctx.memories?.length ?? 0,
-              }
-            })()
-          : undefined,
+        // Pass enriched context through for downstream audit trail + approval comments
+        // Includes category/confidence/reasoning for audit + counts for display
+        context: (() => {
+          const ctx = (context ?? {}) as {
+            customer?: { email?: string; purchases?: unknown[] }
+            knowledge?: unknown[]
+            memories?: unknown[]
+          }
+          return {
+            // Audit trail: classification metadata
+            category: classification?.category,
+            confidence: classification?.confidence,
+            reasoning: classification?.reasoning,
+            // Original message for potential relevance checking
+            subject: subject ?? '',
+            body: body ?? '',
+            senderEmail: senderEmail ?? '',
+            // Customer + context counts for display
+            customerEmail: ctx.customer?.email,
+            purchaseCount: ctx.customer?.purchases?.length ?? 0,
+            knowledgeCount: ctx.knowledge?.length ?? 0,
+            memoryCount: ctx.memories?.length ?? 0,
+          }
+        })(),
       },
     })
 
