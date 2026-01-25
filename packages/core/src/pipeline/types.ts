@@ -280,12 +280,19 @@ export interface ValidateInput {
   draft: string
   context: GatherOutput
   strictMode?: boolean
+  /** Original customer message for relevance checking */
+  customerMessage?: {
+    subject: string
+    body: string
+  }
 }
 
 export interface ValidateOutput {
   valid: boolean
   issues: ValidationIssue[]
   suggestion?: string
+  /** Relevance score from LLM check (0-1, only present when relevance check runs) */
+  relevance?: number
 }
 
 export interface ValidationIssue {
@@ -305,6 +312,7 @@ export type ValidationIssueType =
   | 'too_long'
   | 'bad_tone'
   | 'repeated_mistake' // Draft may repeat a known corrected mistake
+  | 'relevance' // Draft doesn't address the customer's actual question
 
 // ============================================================================
 // Step 5b: Comment (for support_teammate action)
