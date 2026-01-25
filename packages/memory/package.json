@@ -26,6 +26,14 @@
     "./voting": {
       "types": "./src/voting.ts",
       "default": "./src/voting.ts"
+    },
+    "./support-schemas": {
+      "types": "./src/support-schemas.ts",
+      "default": "./src/support-schemas.ts"
+    },
+    "./support-memory": {
+      "types": "./src/support-memory.ts",
+      "default": "./src/support-memory.ts"
     }
   },
   "scripts": {
