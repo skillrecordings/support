@@ -8,12 +8,12 @@
  * with LLM-based classification for nuanced cases.
  */
 
-import { classify } from '../../pipeline/steps/classify'
 import {
   initializeAxiom,
   traceClassification,
   traceWorkflowStep,
 } from '../../observability/axiom'
+import { classify } from '../../pipeline/steps/classify'
 import { inngest } from '../client'
 import { SUPPORT_CLASSIFIED, SUPPORT_INBOUND_RECEIVED } from '../events'
 
@@ -31,18 +31,10 @@ export const classifyWorkflow = inngest.createFunction(
     const workflowStartTime = Date.now()
     initializeAxiom()
 
-    console.log('[classify-workflow] ========== STARTED ==========')
-    console.log('[classify-workflow] conversationId:', conversationId)
-    console.log('[classify-workflow] messageId:', messageId)
-    console.log('[classify-workflow] appId:', appId)
-    console.log('[classify-workflow] senderEmail:', senderEmail)
-    console.log('[classify-workflow] subject:', subject?.slice(0, 100))
-    console.log('[classify-workflow] bodyLength:', body?.length ?? 0)
-
     // Run classification
     const classification = await step.run('classify', async () => {
       const stepStartTime = Date.now()
-      
+
       const result = await classify({
         subject: subject || '',
         body,
@@ -58,7 +50,7 @@ export const classifyWorkflow = inngest.createFunction(
         appId,
         messageId,
         category: result.category,
-        complexity: 'standard', // pipeline doesn't use complexity
+        complexity: 'standard',
         confidence: result.confidence,
         reasoning: result.reasoning ?? '',
         messageLength: body?.length ?? 0,
@@ -77,12 +69,6 @@ export const classifyWorkflow = inngest.createFunction(
           confidence: result.confidence,
           signalCount: Object.values(result.signals).filter(Boolean).length,
         },
-      })
-
-      console.log('[classify-workflow] classification complete:', {
-        category: result.category,
-        confidence: result.confidence,
-        durationMs,
       })
 
       return result
@@ -108,9 +94,20 @@ export const classifyWorkflow = inngest.createFunction(
     })
 
     const totalDurationMs = Date.now() - workflowStartTime
-    console.log('[classify-workflow] ========== COMPLETED ==========')
-    console.log('[classify-workflow] totalDurationMs:', totalDurationMs)
-    console.log('[classify-workflow] category:', classification.category)
+
+    // Final trace for workflow completion
+    await traceWorkflowStep({
+      workflowName: 'support-classify',
+      conversationId,
+      appId,
+      stepName: 'complete',
+      durationMs: totalDurationMs,
+      success: true,
+      metadata: {
+        category: classification.category,
+        confidence: classification.confidence,
+      },
+    })
 
     return { conversationId, messageId, classification }
   }
