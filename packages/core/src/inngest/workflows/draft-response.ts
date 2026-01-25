@@ -10,6 +10,10 @@ import {
   log,
   traceWorkflowStep,
 } from '../../observability/axiom'
+import {
+  assertDataIntegrity,
+  buildDataFlowCheck,
+} from '../../pipeline/assert-data-integrity'
 import { draft } from '../../pipeline/steps/draft'
 import type {
   ClassifyOutput,
@@ -34,6 +38,7 @@ export const draftWorkflow = inngest.createFunction(
     const workflowStartTime = Date.now()
     initializeAxiom()
 
+    // Data flow check: log what we received from gather-context
     await log('info', 'draft workflow started', {
       workflow: 'support-draft',
       conversationId,
@@ -43,6 +48,21 @@ export const draftWorkflow = inngest.createFunction(
       hasCustomer: !!context.customer,
       knowledgeCount: context.knowledge?.length ?? 0,
       memoryCount: context.memories?.length ?? 0,
+      ...buildDataFlowCheck('support-draft', 'receiving', {
+        subject: event.data.subject,
+        body: event.data.body,
+        history: context.history,
+        purchases: context.customer?.purchases,
+        category: classification.category,
+        confidence: classification.confidence,
+        reasoning: classification.reasoning,
+        signals: classification.signals,
+      }),
+    })
+
+    // Assert critical data before calling LLM
+    await assertDataIntegrity('draft-response/receive', {
+      body: event.data.body,
     })
 
     const draftResult = await step.run('draft-response', async () => {
@@ -60,21 +80,24 @@ export const draftWorkflow = inngest.createFunction(
         category: classification.category as MessageCategory,
         confidence: classification.confidence,
         signals: {
-          hasEmailInBody: false,
-          hasPurchaseDate: false,
-          hasErrorMessage: false,
-          isReply: false,
-          mentionsInstructor: false,
-          hasAngrySentiment: false,
-          isAutomated: false,
-          isVendorOutreach: false,
-          hasLegalThreat: false,
-          hasOutsidePolicyTimeframe: false,
-          isPersonalToInstructor: false,
-          isPresalesFaq: false,
-          isPresalesTeam: false,
+          hasEmailInBody: classification.signals?.hasEmailInBody ?? false,
+          hasPurchaseDate: classification.signals?.hasPurchaseDate ?? false,
+          hasErrorMessage: classification.signals?.hasErrorMessage ?? false,
+          isReply: classification.signals?.isReply ?? false,
+          mentionsInstructor:
+            classification.signals?.mentionsInstructor ?? false,
+          hasAngrySentiment: classification.signals?.hasAngrySentiment ?? false,
+          isAutomated: classification.signals?.isAutomated ?? false,
+          isVendorOutreach: classification.signals?.isVendorOutreach ?? false,
+          hasLegalThreat: classification.signals?.hasLegalThreat ?? false,
+          hasOutsidePolicyTimeframe:
+            classification.signals?.hasOutsidePolicyTimeframe ?? false,
+          isPersonalToInstructor:
+            classification.signals?.isPersonalToInstructor ?? false,
+          isPresalesFaq: classification.signals?.isPresalesFaq ?? false,
+          isPresalesTeam: classification.signals?.isPresalesTeam ?? false,
         },
-        reasoning: undefined,
+        reasoning: classification.reasoning,
       }
 
       const gatherOutput: GatherOutput = {
@@ -113,7 +136,21 @@ export const draftWorkflow = inngest.createFunction(
             source: item.source as string | undefined,
           }
         }),
-        history: [],
+        history: (context.history ?? []).map((h: unknown) => {
+          const entry = h as Record<string, unknown>
+          const dateVal = entry.date ?? entry.timestamp ?? 0
+          return {
+            direction: (entry.from && entry.from === event.data.senderEmail
+              ? 'in'
+              : 'out') as 'in' | 'out',
+            body: String(entry.body ?? ''),
+            timestamp:
+              typeof dateVal === 'number'
+                ? dateVal
+                : new Date(String(dateVal)).getTime(),
+            author: entry.from as string | undefined,
+          }
+        }),
         priorMemory: (context.memories ?? []).map((m: unknown) => {
           const mem = m as Record<string, unknown>
           return {
@@ -128,9 +165,9 @@ export const draftWorkflow = inngest.createFunction(
 
       const draftInput: DraftInput = {
         message: {
-          subject: '',
-          body: '',
-          from: context.customer?.email,
+          subject: event.data.subject ?? '',
+          body: event.data.body ?? '',
+          from: event.data.senderEmail ?? context.customer?.email,
           conversationId,
           appId,
         },
@@ -180,11 +217,21 @@ export const draftWorkflow = inngest.createFunction(
       return result
     })
 
+    // Data flow check: log what we're emitting to validate-draft
     await log('debug', 'emitting draft created event', {
       workflow: 'support-draft',
       conversationId,
       messageId,
       draftLength: draftResult.draft.length,
+      ...buildDataFlowCheck('support-draft', 'emitting', {
+        subject: event.data.subject,
+        body: event.data.body,
+        category: classification.category,
+        confidence: classification.confidence,
+        reasoning: classification.reasoning,
+        draftContent: draftResult.draft,
+        signals: classification.signals,
+      }),
     })
 
     await step.sendEvent('emit-draft-created', {
@@ -193,6 +240,15 @@ export const draftWorkflow = inngest.createFunction(
         conversationId,
         messageId,
         appId,
+        subject: event.data.subject ?? '',
+        body: event.data.body ?? '',
+        senderEmail: event.data.senderEmail ?? '',
+        classification: {
+          category: classification.category,
+          confidence: classification.confidence,
+          signals: classification.signals ?? {},
+          reasoning: classification.reasoning,
+        },
         draft: {
           content: draftResult.draft,
           toolsUsed: draftResult.toolsUsed,
