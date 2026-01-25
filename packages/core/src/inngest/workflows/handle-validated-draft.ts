@@ -15,6 +15,7 @@ import {
   traceApprovalRequested,
   traceWorkflowStep,
 } from '../../observability/axiom'
+import { buildDataFlowCheck } from '../../pipeline/assert-data-integrity'
 import { formatApprovalComment } from '../../pipeline/steps/comment'
 import { inngest } from '../client'
 import {
@@ -31,12 +32,30 @@ export const handleValidatedDraft = inngest.createFunction(
   },
   { event: SUPPORT_DRAFT_VALIDATED },
   async ({ event, step }) => {
-    const { conversationId, messageId, appId, draft, validation, context } =
-      event.data
+    const {
+      conversationId,
+      messageId,
+      appId,
+      subject,
+      body,
+      senderEmail,
+      classification,
+      draft,
+      validation,
+      context,
+    } = event.data
+
+    // Read classification metadata: prefer top-level classification, fallback to context
+    const category = classification?.category ?? context?.category ?? undefined
+    const confidence =
+      classification?.confidence ?? context?.confidence ?? undefined
+    const reasoning =
+      classification?.reasoning ?? context?.reasoning ?? undefined
 
     const workflowStartTime = Date.now()
     initializeAxiom()
 
+    // Data flow check: log what we received from validate-draft
     await log('info', 'handle-validated workflow started', {
       workflow: 'support-handle-validated',
       conversationId,
@@ -45,6 +64,18 @@ export const handleValidatedDraft = inngest.createFunction(
       valid: validation.valid,
       issueCount: validation.issues?.length ?? 0,
       score: validation.score,
+      ...buildDataFlowCheck('support-handle-validated', 'receiving', {
+        subject,
+        body,
+        category,
+        confidence,
+        reasoning,
+        draftContent: draft.content,
+        signals: classification?.signals,
+        purchases: context?.purchaseCount
+          ? Array(context.purchaseCount)
+          : undefined,
+      }),
     })
 
     const decision = await step.run('decide-approval', async () => {
@@ -122,17 +153,21 @@ export const handleValidatedDraft = inngest.createFunction(
             messageId,
             autoApproved: true,
             validationScore: decision.score,
-            // Flatten key metadata for easy access
-            category: context?.category,
-            confidence: context?.confidence ?? decision.score,
-            reasoning: context?.reasoning,
+            // Flatten key metadata for easy access (from classification)
+            category,
+            confidence: confidence ?? decision.score,
+            reasoning,
+            // Original message for audit trail
+            subject: subject ?? '',
+            body: body ?? '',
+            senderEmail: senderEmail ?? '',
             // Keep full context for backward compatibility
             context: context ?? undefined,
           },
           // Dedicated columns for queryability
-          category: context?.category,
-          confidence: context?.confidence ?? decision.score,
-          reasoning: context?.reasoning,
+          category,
+          confidence: confidence ?? decision.score,
+          reasoning,
           requires_approval: false,
           created_at: new Date(),
         })
@@ -225,17 +260,21 @@ export const handleValidatedDraft = inngest.createFunction(
           messageId,
           validationIssues: validation.issues,
           validationScore: decision.score,
-          // Flatten key metadata for easy access
-          category: context?.category,
-          confidence: context?.confidence ?? decision.score,
-          reasoning: context?.reasoning,
+          // Flatten key metadata for easy access (from classification)
+          category,
+          confidence: confidence ?? decision.score,
+          reasoning,
+          // Original message for audit trail
+          subject: subject ?? '',
+          body: body ?? '',
+          senderEmail: senderEmail ?? '',
           // Keep full context for backward compatibility
           context: context ?? undefined,
         },
         // Dedicated columns for queryability
-        category: context?.category,
-        confidence: context?.confidence ?? decision.score,
-        reasoning: context?.reasoning,
+        category,
+        confidence: confidence ?? decision.score,
+        reasoning,
         requires_approval: true,
         created_at: new Date(),
       })
@@ -288,9 +327,9 @@ export const handleValidatedDraft = inngest.createFunction(
         const commentBody = formatApprovalComment({
           draft: draft.content,
           reviewReason: decision.reason,
-          confidence: decision.score,
-          category: context?.category,
-          customerEmail: context?.customerEmail,
+          confidence: confidence ?? decision.score,
+          category,
+          customerEmail: senderEmail ?? context?.customerEmail,
         })
 
         await front.conversations.addComment(conversationId, commentBody)
