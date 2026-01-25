@@ -70,23 +70,86 @@ Runs automatically every 5 minutes via Vercel Crons. Call manually after deployi
 
 ## CLI (`skill` command)
 
-Run from `packages/cli` to pick up env vars:
+The `skill` CLI is for investigating support issues, debugging workflows, and managing the platform.
 
+**Run from packages/cli** (picks up env vars):
 ```bash
 cd packages/cli
 bun src/index.ts <command>
 ```
 
-Key commands:
-- `skill tools list` - list registered apps
-- `skill tools search <app> <query>` - test content search
-- `skill tools lookup <app> <email>` - test user lookup
-- `skill dataset build --output data.json` - build eval dataset from Front
-- `skill front conversation <id>` - inspect Front conversation
-- `skill responses list` - list recent agent responses
+**Or use the global alias** (if installed):
+```bash
+skill <command>
+```
+
+### Key Commands
+
+**Inngest (workflow debugging):**
+```bash
+skill inngest events --after 1h           # Recent events
+skill inngest event <id>                  # Event + triggered runs
+skill inngest run <id>                    # Run status/output
+skill inngest failures --after 2h         # Aggregate failure analysis
+skill inngest stats --after 1d            # Stats + anomaly detection
+skill inngest inspect <event-id>          # Deep dive: event + runs + results
+skill inngest trace <run-id>              # Full workflow trace
+skill inngest search "email@example"      # Search event data
+```
+
+**Front (conversation data):**
+```bash
+skill front message <id>                  # Full message with body
+skill front conversation <id> -m          # Conversation + history
+```
+
+**Apps & integrations:**
+```bash
+skill tools list                          # List registered apps
+skill tools search <app> <query>          # Test content search
+skill tools lookup <app> <email>          # Test user lookup
+skill health <app-slug>                   # Check integration health
+skill wizard                              # Interactive app setup
+```
+
+**Responses & evals:**
+```bash
+skill responses list                      # Recent agent responses
+skill responses list --rating bad         # Only bad-rated
+skill responses get <id> --context        # Response + conversation
+skill dataset build --output data.json    # Build eval dataset from Front
+skill eval routing dataset.json           # Run routing eval
+```
+
+All commands support `--json` for machine-readable output.
+
+**Full CLI docs:** `@.claude/skills/skill-cli/SKILL.md`
 
 ## Skills
-Skills live under @.claude/skills/*/SKILL.md. If a task matches a skill, read it before acting. Use the skills.
+
+Skills live under `@.claude/skills/*/SKILL.md`. Claude auto-activates them based on description matching. **Read the skill before acting.**
+
+| Skill | Use When |
+|-------|----------|
+| `skill-cli` | Investigating issues, debugging workflows, inspecting Front/Inngest data |
+| `front-api` | Working with Front REST API (conversations, messages, drafts, templates) |
+| `front-webhook` | Handling inbound webhooks from Front |
+| `front-plugin` | Building Front sidebar/composer plugins |
+| `front-id-converter` | Converting Front URL IDs to API IDs |
+| `inngest-workflow` | Creating/debugging Inngest workflows |
+| `hitl-approval` | Human-in-the-loop approval flows, Slack review queue |
+| `agent-tool` | Defining agent tools (refunds, license transfers, etc.) |
+| `sdk-adapter` | SDK adapters, SupportIntegration, onboarding new apps |
+| `stripe-connect` | Stripe Connect OAuth, refunds, charges |
+| `vector-search` | RAG, semantic search, embeddings |
+| `ai-sdk` | Vercel AI SDK (generateText, streamText, tools) |
+| `ops-setup` | Environment setup, credentials, API keys |
+| `vercel-cli` | Deploying, env vars, domains |
+| `tdd-red-green-refactor` | Test-driven development with Vitest |
+| `react-best-practices` | React/Next.js components, performance |
+| `data-refresh-eval` | Refreshing eval datasets |
+
+**Skills index:** `@.claude/skills/README.md`
 
 ## AI SDK / Vercel AI Gateway
 
