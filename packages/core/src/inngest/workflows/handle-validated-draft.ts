@@ -13,6 +13,7 @@ import { ActionsTable, getDb } from '@skillrecordings/database'
 import { randomUUID } from 'crypto'
 import {
   initializeAxiom,
+  log,
   traceApprovalRequested,
   traceWorkflowStep,
 } from '../../observability/axiom'
@@ -35,6 +36,15 @@ export const handleValidatedDraft = inngest.createFunction(
 
     const workflowStartTime = Date.now()
     initializeAxiom()
+
+    await log('info', 'handle-validated workflow started', {
+      conversationId,
+      messageId,
+      appId,
+      valid: validation.valid,
+      issueCount: validation.issues?.length ?? 0,
+      score: validation.score,
+    })
 
     // Decide: auto-approve or request human approval
     const decision = await step.run('decide-approval', async () => {
