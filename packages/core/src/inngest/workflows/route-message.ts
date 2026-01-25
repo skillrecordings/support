@@ -11,6 +11,7 @@
 
 import {
   initializeAxiom,
+  log,
   traceWorkflowStep,
 } from '../../observability/axiom'
 import { route } from '../../pipeline/steps/route'
@@ -64,6 +65,14 @@ export const routeWorkflow = inngest.createFunction(
 
     const workflowStartTime = Date.now()
     initializeAxiom()
+
+    await log('info', 'route workflow started', {
+      conversationId,
+      messageId,
+      appId,
+      category: classification.category,
+      confidence: classification.confidence,
+    })
 
     // Run routing logic
     const routeResult = await step.run('route', async () => {

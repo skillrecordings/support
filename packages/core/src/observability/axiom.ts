@@ -141,6 +141,28 @@ async function sendTrace(trace: Record<string, any>): Promise<void> {
 }
 
 // ============================================================================
+// Generic logging
+// ============================================================================
+
+/**
+ * Log a message to Axiom with optional metadata.
+ * Use for debug/info logging that should go to Axiom instead of console.
+ */
+export async function log(
+  level: 'debug' | 'info' | 'warn' | 'error',
+  message: string,
+  metadata?: Record<string, unknown>
+): Promise<void> {
+  await sendTrace({
+    name: 'log',
+    type: 'log',
+    level,
+    message,
+    ...metadata,
+  })
+}
+
+// ============================================================================
 // Rich trace functions with high cardinality
 // ============================================================================
 

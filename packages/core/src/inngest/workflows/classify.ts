@@ -10,6 +10,7 @@
 
 import {
   initializeAxiom,
+  log,
   traceClassification,
   traceWorkflowStep,
 } from '../../observability/axiom'
@@ -30,6 +31,15 @@ export const classifyWorkflow = inngest.createFunction(
 
     const workflowStartTime = Date.now()
     initializeAxiom()
+
+    await log('info', 'classify workflow started', {
+      conversationId,
+      messageId,
+      appId,
+      senderEmail,
+      subjectPreview: subject?.slice(0, 100),
+      bodyLength: body?.length ?? 0,
+    })
 
     // Run classification
     const classification = await step.run('classify', async () => {

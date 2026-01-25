@@ -10,6 +10,7 @@
 
 import {
   initializeAxiom,
+  log,
   traceWorkflowStep,
 } from '../../observability/axiom'
 import { validate } from '../../pipeline/steps/validate'
@@ -29,6 +30,13 @@ export const validateWorkflow = inngest.createFunction(
 
     const workflowStartTime = Date.now()
     initializeAxiom()
+
+    await log('info', 'validate workflow started', {
+      conversationId,
+      messageId,
+      appId,
+      draftLength: draft.content.length,
+    })
 
     // Validate the draft
     const validation = await step.run('validate-draft', async () => {
