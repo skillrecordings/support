@@ -248,6 +248,159 @@ export type MemoryOutcomeRecordedEvent = {
   }
 }
 
+// ============================================================================
+// Pipeline Events (event-driven workflow chain)
+// ============================================================================
+
+/** Event emitted after message classification */
+export const SUPPORT_CLASSIFIED = 'support/inbound.classified' as const
+
+export type SupportClassifiedEvent = {
+  name: typeof SUPPORT_CLASSIFIED
+  data: {
+    conversationId: string
+    messageId: string
+    appId: string
+    subject: string
+    body: string
+    senderEmail: string
+    classification: {
+      category: string
+      confidence: number
+      signals: Record<string, boolean>
+      reasoning?: string
+    }
+  }
+}
+
+/** Event emitted after routing decision */
+export const SUPPORT_ROUTED = 'support/inbound.routed' as const
+
+export type SupportRoutedEvent = {
+  name: typeof SUPPORT_ROUTED
+  data: {
+    conversationId: string
+    messageId: string
+    appId: string
+    subject: string
+    body: string
+    senderEmail: string
+    classification: {
+      category: string
+      confidence: number
+      signals: Record<string, boolean>
+    }
+    route: {
+      action:
+        | 'respond'
+        | 'escalate_human'
+        | 'escalate_instructor'
+        | 'escalate_urgent'
+        | 'silence'
+      reason: string
+    }
+  }
+}
+
+/** Event emitted after context gathering */
+export const SUPPORT_CONTEXT_GATHERED = 'support/context.gathered' as const
+
+export type SupportContextGatheredEvent = {
+  name: typeof SUPPORT_CONTEXT_GATHERED
+  data: {
+    conversationId: string
+    messageId: string
+    appId: string
+    classification: {
+      category: string
+      confidence: number
+    }
+    route: {
+      action: string
+      reason: string
+    }
+    context: {
+      customer: {
+        email: string
+        purchases: unknown[]
+        trustScore?: number
+      } | null
+      knowledge: unknown[]
+      memories: unknown[]
+    }
+  }
+}
+
+/** Event emitted after draft creation */
+export const SUPPORT_DRAFT_CREATED = 'support/draft.created' as const
+
+export type SupportDraftCreatedEvent = {
+  name: typeof SUPPORT_DRAFT_CREATED
+  data: {
+    conversationId: string
+    messageId: string
+    appId: string
+    draft: {
+      content: string
+      toolsUsed: string[]
+    }
+    context: unknown
+  }
+}
+
+/** Event emitted after draft validation */
+export const SUPPORT_DRAFT_VALIDATED = 'support/draft.validated' as const
+
+export type SupportDraftValidatedEvent = {
+  name: typeof SUPPORT_DRAFT_VALIDATED
+  data: {
+    conversationId: string
+    messageId: string
+    appId: string
+    draft: {
+      content: string
+    }
+    validation: {
+      valid: boolean
+      issues: string[]
+      score?: number
+    }
+  }
+}
+
+/** Event emitted when routing decides to escalate */
+export const SUPPORT_ESCALATED = 'support/inbound.escalated' as const
+
+export type EscalationPriority =
+  | 'urgent'
+  | 'normal'
+  | 'instructor'
+  | 'teammate_support'
+  | 'voc'
+
+export type SupportEscalatedEvent = {
+  name: typeof SUPPORT_ESCALATED
+  data: {
+    conversationId: string
+    messageId: string
+    appId: string
+    subject: string
+    body: string
+    senderEmail: string
+    classification: {
+      category: string
+      confidence: number
+      signals: Record<string, boolean>
+      reasoning?: string
+    }
+    route: {
+      action: string
+      reason: string
+    }
+    priority: EscalationPriority
+  }
+}
+
 /**
  * Union of all support platform events.
  * Used to type the Inngest client.
@@ -264,4 +417,11 @@ export type Events = {
   [MEMORY_VOTE_REQUESTED]: MemoryVoteRequestedEvent
   [MEMORY_CITED]: MemoryCitedEvent
   [MEMORY_OUTCOME_RECORDED]: MemoryOutcomeRecordedEvent
+  // Pipeline events
+  [SUPPORT_CLASSIFIED]: SupportClassifiedEvent
+  [SUPPORT_ROUTED]: SupportRoutedEvent
+  [SUPPORT_CONTEXT_GATHERED]: SupportContextGatheredEvent
+  [SUPPORT_DRAFT_CREATED]: SupportDraftCreatedEvent
+  [SUPPORT_DRAFT_VALIDATED]: SupportDraftValidatedEvent
+  [SUPPORT_ESCALATED]: SupportEscalatedEvent
 }
