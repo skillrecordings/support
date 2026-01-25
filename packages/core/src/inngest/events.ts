@@ -371,6 +371,8 @@ export type SupportDraftValidatedEvent = {
       knowledgeCount?: number
       memoryCount?: number
       category?: string
+      confidence?: number
+      reasoning?: string
     }
   }
 }
