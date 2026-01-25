@@ -3,8 +3,11 @@
  *
  * Step 1 of the pipeline: Classifies inbound messages.
  * Triggered by SUPPORT_INBOUND_RECEIVED, emits SUPPORT_CLASSIFIED.
+ *
+ * IMPORTANT: The webhook passes empty body/senderEmail - we fetch from Front API.
  */
 
+import { createFrontClient, extractCustomerEmail } from '../../front/client'
 import {
   initializeAxiom,
   log,
@@ -39,6 +42,125 @@ export const classifyWorkflow = inngest.createFunction(
       bodyLength: body?.length ?? 0,
     })
 
+    // Fetch full message from Front API (webhook passes empty body/senderEmail)
+    const fetchedMessage = await step.run('fetch-message', async () => {
+      const stepStartTime = Date.now()
+
+      await log('debug', 'fetching message from Front API', {
+        workflow: 'support-classify',
+        step: 'fetch-message',
+        messageId,
+        conversationId,
+      })
+
+      try {
+        const frontApiToken = process.env.FRONT_API_TOKEN
+        if (!frontApiToken) {
+          await log(
+            'warn',
+            'FRONT_API_TOKEN not configured, using webhook values',
+            {
+              workflow: 'support-classify',
+              step: 'fetch-message',
+              messageId,
+              conversationId,
+            }
+          )
+          return {
+            fetchedBody: body,
+            fetchedSenderEmail: senderEmail,
+            fetched: false,
+          }
+        }
+
+        const front = createFrontClient(frontApiToken)
+        const message = await front.getMessage(messageId)
+
+        await log('debug', 'raw recipients from Front API', {
+          workflow: 'support-classify',
+          step: 'fetch-message',
+          messageId,
+          recipients: message.recipients,
+        })
+
+        // Extract sender using the helper (prioritizes reply-to, falls back to from)
+        const fetchedSenderEmail = extractCustomerEmail(message)
+        // Use text field (plain text), not body (HTML)
+        const fetchedBody = message.text || ''
+
+        const durationMs = Date.now() - stepStartTime
+
+        await log('info', 'message fetched from Front API', {
+          workflow: 'support-classify',
+          step: 'fetch-message',
+          messageId,
+          conversationId,
+          fetchedSenderEmail,
+          bodyLength: fetchedBody?.length,
+          recipientCount: message.recipients?.length ?? 0,
+          durationMs,
+        })
+
+        await traceWorkflowStep({
+          workflowName: 'support-classify',
+          conversationId,
+          appId,
+          stepName: 'fetch-message',
+          durationMs,
+          success: true,
+          metadata: {
+            fetchedSenderEmail,
+            bodyLength: fetchedBody?.length,
+            recipientCount: message.recipients?.length ?? 0,
+          },
+        })
+
+        return { fetchedBody, fetchedSenderEmail, fetched: true }
+      } catch (error) {
+        const durationMs = Date.now() - stepStartTime
+
+        await log('error', 'Front API fetch failed, using webhook values', {
+          workflow: 'support-classify',
+          step: 'fetch-message',
+          messageId,
+          conversationId,
+          error: error instanceof Error ? error.message : String(error),
+          durationMs,
+        })
+
+        await traceWorkflowStep({
+          workflowName: 'support-classify',
+          conversationId,
+          appId,
+          stepName: 'fetch-message',
+          durationMs,
+          success: false,
+          error: error instanceof Error ? error.message : String(error),
+        })
+
+        // Graceful degradation: continue with original (possibly empty) values
+        return {
+          fetchedBody: body,
+          fetchedSenderEmail: senderEmail,
+          fetched: false,
+        }
+      }
+    })
+
+    // Use fetched values, falling back to webhook values
+    const effectiveBody = fetchedMessage.fetchedBody || body || ''
+    const effectiveSenderEmail =
+      fetchedMessage.fetchedSenderEmail || senderEmail || ''
+
+    await log('debug', 'effective values for classification', {
+      workflow: 'support-classify',
+      conversationId,
+      messageId,
+      effectiveSenderEmail,
+      effectiveBodyLength: effectiveBody.length,
+      usedFetchedValues: fetchedMessage.fetched,
+    })
+
     // Run classification
     const classification = await step.run('classify', async () => {
       const stepStartTime = Date.now()
@@ -52,8 +174,8 @@ export const classifyWorkflow = inngest.createFunction(
 
       const result = await classify({
         subject: subject || '',
-        body,
-        from: senderEmail,
+        body: effectiveBody,
+        from: effectiveSenderEmail,
         appId,
       })
 
@@ -80,7 +202,7 @@ export const classifyWorkflow = inngest.createFunction(
         complexity: 'standard',
         confidence: result.confidence,
         reasoning: result.reasoning ?? '',
-        messageLength: body?.length ?? 0,
+        messageLength: effectiveBody.length,
         durationMs,
       })
 
@@ -115,8 +237,8 @@ export const classifyWorkflow = inngest.createFunction(
         messageId,
         appId,
         subject: subject || '',
-        body,
-        senderEmail,
+        body: effectiveBody,
+        senderEmail: effectiveSenderEmail,
         classification: {
           category: classification.category,
           confidence: classification.confidence,
