@@ -88,7 +88,31 @@ export {
   createCommentStep,
   formatSupportComment,
   formatMinimalComment,
+  // Decision comment (v4 - agent reasoning)
+  addDecisionComment,
+  formatDecisionComment,
+  type DecisionCommentContext,
+  type AddDecisionCommentOptions,
+  // Escalation/approval/audit formatters
+  formatEscalationComment,
+  formatApprovalComment,
+  formatAuditComment,
 } from './steps/comment'
+// Tag step (v4 - category tagging)
+export {
+  applyTag,
+  createTagStep,
+  getTagsForCategory,
+  applyMultipleTags,
+  type TagStepOptions,
+} from './steps/tag'
+// Archive step (v4 - conversation archiving)
+export {
+  archiveConversation,
+  createArchiveStep,
+  shouldArchive,
+  type ArchiveStepOptions,
+} from './steps/archive'
 
 // ============================================================================
 // Pipeline configuration

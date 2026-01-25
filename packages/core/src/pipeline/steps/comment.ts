@@ -532,3 +532,195 @@ export async function addSupportComment(
 export function createCommentStep(options: AddCommentOptions) {
   return (input: CommentInput) => addSupportComment(input, options)
 }
+
+// ============================================================================
+// Agent Decision Comment
+// ============================================================================
+
+/**
+ * Context for formatting an agent decision comment.
+ */
+export interface DecisionCommentContext {
+  /** Message category from classification */
+  category: string
+  /** Classification confidence (0-1) */
+  confidence: number
+  /** Agent's reasoning for the classification */
+  reasoning?: string
+  /** Route action taken */
+  action: string
+  /** Reason for the routing decision */
+  actionReason?: string
+  /** Customer email if found */
+  customerEmail?: string
+  /** Customer name if found */
+  customerName?: string
+  /** Number of purchases found */
+  purchaseCount?: number
+  /** Purchase product names */
+  purchaseNames?: string[]
+}
+
+/**
+ * Format an agent decision comment.
+ * Explains the classification and routing decision with context.
+ *
+ * @example For spam:
+ * ```
+ * 🤖 Agent Decision: Silenced
+ * Category: spam (98%)
+ * Reasoning: Vendor outreach/partnership proposal
+ * Action: No response needed.
+ * ```
+ *
+ * @example For support:
+ * ```
+ * 🤖 Agent Decision: Responding
+ * Category: support_access (98%)
+ * Context: User joel@example.com found with 3 purchases
+ * Action: Draft auto-approved and sent.
+ * ```
+ */
+export function formatDecisionComment(context: DecisionCommentContext): string {
+  const parts: string[] = []
+
+  // Determine emoji and action label
+  const actionEmoji = getActionEmoji(context.action)
+  const actionLabel = getActionLabel(context.action)
+
+  // Header
+  parts.push(`${actionEmoji} **Agent Decision: ${actionLabel}**\n`)
+
+  // Classification details
+  const confidencePercent = Math.round(context.confidence * 100)
+  parts.push(`**Category:** ${context.category} (${confidencePercent}%)`)
+
+  if (context.reasoning) {
+    parts.push(`**Reasoning:** ${context.reasoning}`)
+  }
+
+  // Customer context (if available)
+  if (context.customerEmail) {
+    const customerLine = context.customerName
+      ? `${context.customerName} (${context.customerEmail})`
+      : context.customerEmail
+    parts.push(`**Customer:** ${customerLine}`)
+
+    if (context.purchaseCount !== undefined) {
+      if (context.purchaseCount > 0 && context.purchaseNames) {
+        parts.push(
+          `**Purchases:** ${context.purchaseCount} (${context.purchaseNames.join(', ')})`
+        )
+      } else {
+        parts.push(`**Purchases:** None found`)
+      }
+    }
+  }
+
+  // Action explanation
+  parts.push('')
+  if (context.actionReason) {
+    parts.push(`**Action:** ${context.actionReason}`)
+  }
+
+  return parts.join('\n')
+}
+
+/**
+ * Get emoji for route action.
+ */
+function getActionEmoji(action: string): string {
+  switch (action) {
+    case 'respond':
+      return '💬'
+    case 'silence':
+      return '🔇'
+    case 'escalate_human':
+      return '⚠️'
+    case 'escalate_instructor':
+      return '👨‍🏫'
+    case 'escalate_urgent':
+      return '🚨'
+    case 'support_teammate':
+      return '🤝'
+    case 'catalog_voc':
+      return '📣'
+    default:
+      return '🤖'
+  }
+}
+
+/**
+ * Get human-readable label for route action.
+ */
+function getActionLabel(action: string): string {
+  switch (action) {
+    case 'respond':
+      return 'Responding'
+    case 'silence':
+      return 'Silenced'
+    case 'escalate_human':
+      return 'Escalated to Human'
+    case 'escalate_instructor':
+      return 'Escalated to Instructor'
+    case 'escalate_urgent':
+      return 'Urgent Escalation'
+    case 'support_teammate':
+      return 'Supporting Teammate'
+    case 'catalog_voc':
+      return 'Cataloging VOC'
+    default:
+      return action.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+  }
+}
+
+/**
+ * Options for adding a decision comment.
+ */
+export interface AddDecisionCommentOptions {
+  /** Front API token */
+  frontApiToken: string
+  /** Teammate ID to attribute the comment to (optional) */
+  authorId?: string
+}
+
+/**
+ * Add an agent decision comment to a Front conversation.
+ * Explains what the agent decided and why.
+ *
+ * @param conversationId - Front conversation ID
+ * @param context - Decision context for formatting
+ * @param options - Front API configuration
+ * @returns Result with success status
+ */
+export async function addDecisionComment(
+  conversationId: string,
+  context: DecisionCommentContext,
+  options: AddDecisionCommentOptions
+): Promise<{ added: boolean; error?: string; durationMs: number }> {
+  const startTime = Date.now()
+
+  try {
+    const front = createFrontClient({ apiToken: options.frontApiToken })
+    const body = formatDecisionComment(context)
+
+    await front.conversations.addComment(conversationId, body, options.authorId)
+
+    return {
+      added: true,
+      durationMs: Date.now() - startTime,
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    console.error(
+      `[CommentStep] Failed to add decision comment to ${conversationId}:`,
+      message
+    )
+
+    return {
+      added: false,
+      error: message,
+      durationMs: Date.now() - startTime,
+    }
+  }
+}
