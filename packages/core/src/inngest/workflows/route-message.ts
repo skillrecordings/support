@@ -11,6 +11,10 @@
 
 import { route } from '../../pipeline/steps/route'
 import type { ClassifyOutput, MessageSignals } from '../../pipeline/types'
+import {
+  initializeAxiom,
+  traceWorkflowStep,
+} from '../../observability/axiom'
 import { inngest } from '../client'
 import {
   SUPPORT_CLASSIFIED,
@@ -58,8 +62,20 @@ export const routeWorkflow = inngest.createFunction(
       classification,
     } = event.data
 
+    const workflowStartTime = Date.now()
+    initializeAxiom()
+
+    console.log('[route-workflow] ========== STARTED ==========')
+    console.log('[route-workflow] conversationId:', conversationId)
+    console.log('[route-workflow] messageId:', messageId)
+    console.log('[route-workflow] appId:', appId)
+    console.log('[route-workflow] category:', classification.category)
+    console.log('[route-workflow] confidence:', classification.confidence)
+
     // Run routing logic
     const routeResult = await step.run('route', async () => {
+      const stepStartTime = Date.now()
+
       // Convert event classification to full ClassifyOutput
       const fullClassification: ClassifyOutput = {
         category: classification.category as ClassifyOutput['category'],
@@ -68,7 +84,7 @@ export const routeWorkflow = inngest.createFunction(
         reasoning: classification.reasoning,
       }
 
-      return route({
+      const result = route({
         message: { subject, body, from: senderEmail },
         classification: fullClassification,
         appConfig: {
@@ -77,6 +93,32 @@ export const routeWorkflow = inngest.createFunction(
           autoSendEnabled: false,
         },
       })
+
+      const durationMs = Date.now() - stepStartTime
+
+      // Trace to Axiom with high cardinality
+
+      await traceWorkflowStep({
+        workflowName: 'support-route',
+        conversationId,
+        appId,
+        stepName: 'route',
+        durationMs,
+        success: true,
+        metadata: {
+          action: result.action,
+          reason: result.reason,
+          category: classification.category,
+        },
+      })
+
+      console.log('[route-workflow] routing complete:', {
+        action: result.action,
+        reason: result.reason,
+        durationMs,
+      })
+
+      return result
     })
 
     // Handle terminal actions - no further events needed
@@ -177,7 +219,6 @@ export const routeWorkflow = inngest.createFunction(
       console.log(
         `[route-workflow] Action: support_teammate - ${routeResult.reason}`
       )
-      // This is a terminal action - teammate is handling, we just add context
       await step.sendEvent('emit-support-teammate', {
         name: SUPPORT_ESCALATED,
         data: {
@@ -248,6 +289,11 @@ export const routeWorkflow = inngest.createFunction(
           },
         },
       })
+
+      const totalDurationMs = Date.now() - workflowStartTime
+      console.log('[route-workflow] ========== COMPLETED ==========')
+      console.log('[route-workflow] totalDurationMs:', totalDurationMs)
+
       return {
         conversationId,
         messageId,

@@ -8,6 +8,10 @@
  * with composable, testable steps.
  */
 
+import {
+  initializeAxiom,
+  traceWorkflowStep,
+} from '../../observability/axiom'
 import { draft } from '../../pipeline/steps/draft'
 import type {
   ClassifyOutput,
@@ -18,12 +22,6 @@ import type {
 import { inngest } from '../client'
 import { SUPPORT_CONTEXT_GATHERED, SUPPORT_DRAFT_CREATED } from '../events'
 
-/**
- * Draft Response Workflow
- *
- * Takes gathered context and generates a draft response using the LLM.
- * Uses limited retries since LLM calls are expensive.
- */
 export const draftWorkflow = inngest.createFunction(
   {
     id: 'support-draft',
@@ -35,10 +33,23 @@ export const draftWorkflow = inngest.createFunction(
     const { conversationId, messageId, appId, classification, route, context } =
       event.data
 
+    const workflowStartTime = Date.now()
+    initializeAxiom()
+
+    console.log('[draft-workflow] ========== STARTED ==========')
+    console.log('[draft-workflow] conversationId:', conversationId)
+    console.log('[draft-workflow] messageId:', messageId)
+    console.log('[draft-workflow] appId:', appId)
+    console.log('[draft-workflow] category:', classification.category)
+    console.log('[draft-workflow] hasCustomer:', !!context.customer)
+    console.log('[draft-workflow] knowledgeCount:', context.knowledge?.length ?? 0)
+    console.log('[draft-workflow] memoryCount:', context.memories?.length ?? 0)
+
     // Generate draft response
     const draftResult = await step.run('draft-response', async () => {
+      const stepStartTime = Date.now()
+
       // Map event data to DraftInput structure
-      // The event uses simplified types; we need to adapt to pipeline types
       const classifyOutput: ClassifyOutput = {
         category: classification.category as MessageCategory,
         confidence: classification.confidence,
@@ -64,7 +75,7 @@ export const draftWorkflow = inngest.createFunction(
       const gatherOutput: GatherOutput = {
         user: context.customer
           ? {
-              id: context.customer.email, // Use email as ID fallback
+              id: context.customer.email,
               email: context.customer.email,
               name: undefined,
             }
@@ -97,7 +108,7 @@ export const draftWorkflow = inngest.createFunction(
             source: item.source as string | undefined,
           }
         }),
-        history: [], // Not available in context.gathered event
+        history: [],
         priorMemory: (context.memories ?? []).map((m: unknown) => {
           const mem = m as Record<string, unknown>
           return {
@@ -110,12 +121,10 @@ export const draftWorkflow = inngest.createFunction(
         gatherErrors: [],
       }
 
-      // We need message info for DraftInput - reconstruct from available data
-      // Note: The context.gathered event should ideally include the original message
       const draftInput: DraftInput = {
         message: {
-          subject: '', // Not available in current event structure
-          body: '', // Not available in current event structure
+          subject: '',
+          body: '',
           from: context.customer?.email,
           conversationId,
           appId,
@@ -124,7 +133,32 @@ export const draftWorkflow = inngest.createFunction(
         context: gatherOutput,
       }
 
-      return draft(draftInput)
+      const result = await draft(draftInput)
+      const durationMs = Date.now() - stepStartTime
+
+      // Trace draft creation to Axiom with high cardinality
+
+      await traceWorkflowStep({
+        workflowName: 'support-draft',
+        conversationId,
+        appId,
+        stepName: 'draft',
+        durationMs,
+        success: true,
+        metadata: {
+          draftLength: result.draft.length,
+          toolsUsed: result.toolsUsed,
+          modelUsed: 'claude-haiku-4-5',
+        },
+      })
+
+      console.log('[draft-workflow] draft generated:', {
+        draftLength: result.draft.length,
+        toolsUsed: result.toolsUsed,
+        durationMs,
+      })
+
+      return result
     })
 
     // Emit draft created event
@@ -141,6 +175,11 @@ export const draftWorkflow = inngest.createFunction(
         context,
       },
     })
+
+    const totalDurationMs = Date.now() - workflowStartTime
+    console.log('[draft-workflow] ========== COMPLETED ==========')
+    console.log('[draft-workflow] totalDurationMs:', totalDurationMs)
+    console.log('[draft-workflow] draftLength:', draftResult.draft.length)
 
     return {
       conversationId,
