@@ -90,6 +90,7 @@ export const SupportMemoryService = {
         },
         stage: input.stage,
         outcome: input.outcome ?? 'success',
+        correction: input.correction,
         category: input.category,
         conversation_id: input.conversation_id,
       },

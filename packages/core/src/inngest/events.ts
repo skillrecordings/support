@@ -370,6 +370,7 @@ export type SupportDraftValidatedEvent = {
       purchaseCount?: number
       knowledgeCount?: number
       memoryCount?: number
+      category?: string
     }
   }
 }

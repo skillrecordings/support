@@ -68,6 +68,9 @@ export const StoreSupportMemoryInputSchema = z.object({
   /** Initial outcome (default: success) */
   outcome: SupportOutcomeSchema.optional(),
 
+  /** What should have happened (for 'corrected' outcome) */
+  correction: z.string().optional(),
+
   /** Support category */
   category: z.string().optional(),
 
