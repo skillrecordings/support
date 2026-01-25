@@ -122,6 +122,11 @@ export const handleValidatedDraft = inngest.createFunction(
             messageId,
             autoApproved: true,
             validationScore: decision.score,
+            // Flatten key metadata for easy access
+            category: context?.category,
+            confidence: context?.confidence ?? decision.score,
+            reasoning: context?.reasoning,
+            // Keep full context for backward compatibility
             context: context ?? undefined,
           },
           requires_approval: false,
@@ -216,6 +221,11 @@ export const handleValidatedDraft = inngest.createFunction(
           messageId,
           validationIssues: validation.issues,
           validationScore: decision.score,
+          // Flatten key metadata for easy access
+          category: context?.category,
+          confidence: context?.confidence ?? decision.score,
+          reasoning: context?.reasoning,
+          // Keep full context for backward compatibility
           context: context ?? undefined,
         },
         requires_approval: true,
