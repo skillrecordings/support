@@ -98,6 +98,9 @@ export function computeMessageSignals(
       PERSONAL_MESSAGE_PATTERN.test(text) ||
       (INSTRUCTOR_MENTION_PATTERN.test(text) &&
         /(?:thank|love|amazing|big fan)/i.test(text)),
+    // Presales signals (set by LLM classifier, defaulted here)
+    isPresalesFaq: false,
+    isPresalesTeam: false,
   }
 }
 
@@ -243,6 +246,10 @@ export function computeThreadSignals(
     isPersonalToInstructor:
       baseSignals.isPersonalToInstructor ||
       threadWideSignals.isPersonalToInstructor,
+    // Presales signals (merged from base)
+    isPresalesFaq: baseSignals.isPresalesFaq || threadWideSignals.isPresalesFaq,
+    isPresalesTeam:
+      baseSignals.isPresalesTeam || threadWideSignals.isPresalesTeam,
 
     // Thread structure
     threadLength: sorted.length,

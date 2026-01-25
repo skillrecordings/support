@@ -49,6 +49,8 @@ describe('draft step', () => {
       hasLegalThreat: false,
       hasOutsidePolicyTimeframe: false,
       isPersonalToInstructor: false,
+      isPresalesFaq: false,
+      isPresalesTeam: false,
     },
     reasoning: 'Access issue detected',
   }

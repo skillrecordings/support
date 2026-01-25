@@ -120,6 +120,49 @@ const PERSONAL_MESSAGE_PATTERNS = [
   /\b(?:big\s+fan|huge\s+fan)\b/i,
 ]
 
+// Presales FAQ patterns - answerable with KB (pricing, curriculum, requirements, discounts)
+const PRESALES_FAQ_PATTERNS = [
+  /\bhow\s+much\s+(?:does|is|do|would)\b/i, // "how much does it cost"
+  /\b(?:what(?:'s| is| are)?)\s+(?:the\s+)?(?:price|cost|pricing)\b/i, // "what's the price"
+  /\bwhat(?:'s| is)?\s+included\b/i, // "what's included"
+  /\bwhat\s+(?:do\s+)?(?:i|you)\s+(?:get|learn|cover)\b/i, // "what do I get"
+  /\bcurriculum\b/i,
+  /\bmodules?\b.*\b(?:cover|include|contain)\b/i, // "what modules does it cover"
+  /\brequirements?\b/i, // tech requirements
+  /\bprerequisites?\b/i,
+  /\bppp\b/i, // purchasing power parity
+  /\bstudent\s+discount\b/i,
+  /\bregional\s+(?:pricing|discount)\b/i,
+  /\bcoupon\b/i,
+  /\bdiscount\s+(?:code|available|offer)\b/i,
+  /\bis\s+(?:this|it)\s+right\s+for\s+me\b/i, // "is this right for me"
+  /\bsuitable\s+for\s+(?:beginners?|intermediate|advanced)\b/i,
+  /\bdo\s+(?:i|you)\s+need\s+to\s+know\b/i, // "do I need to know X"
+  /\bhow\s+long\s+(?:is|does|will)\b/i, // "how long is the course"
+  /\blifetime\s+access\b/i,
+  /\bupdates?\s+(?:included|free)\b/i,
+]
+
+// Presales Team patterns - enterprise/team sales inquiries (escalate_human)
+const PRESALES_TEAM_PATTERNS = [
+  /\bteam\s+of\s+\d+\b/i, // "team of 5 developers"
+  /\bcompany\s+license\b/i,
+  /\bsite\s+license\b/i,
+  /\benterprise\b/i,
+  /\bcorporate\s+(?:license|purchase|training)\b/i,
+  /\bprocurement\b/i,
+  /\bpurchase\s+order\b/i,
+  /\b(?:p\.?o\.?|po)\s*(?:#|number|:)/i, // "PO number", "P.O. #"
+  /\binvoice\s+(?:for\s+)?(?:our\s+)?company\b/i, // company invoice context
+  /\bl&d\s+(?:budget|team|department)\b/i, // L&D budget
+  /\blearning\s+(?:and\s+)?development\b/i,
+  /\btraining\s+budget\b/i,
+  /\bvolume\s+discount\b/i,
+  /\bbulk\s+(?:pricing|purchase|licenses?)\b/i,
+  /\bmultiple\s+(?:seats|licenses|users)\b/i,
+  /\b(?:for|across)\s+(?:my|our)\s+(?:team|department|org|organization)\b/i,
+]
+
 // Patterns that indicate genuine appreciation (not sign-offs like "Thanks,\nJohn" or business "we'd love to")
 // Must be in context of appreciation to the instructor, not polite closings
 const GENUINE_APPRECIATION_PATTERNS = [
@@ -163,7 +206,11 @@ export function extractSignals(input: ClassifyInput): MessageSignals {
     // 2. Mentions instructor AND has genuine appreciation (not just "Thanks," sign-off)
     isPersonalToInstructor:
       PERSONAL_MESSAGE_PATTERNS.some((p) => p.test(fullText)) ||
-      (INSTRUCTOR_NAMES.some((n) => text.includes(n)) && hasGenuineAppreciation),
+      (INSTRUCTOR_NAMES.some((n) => text.includes(n)) &&
+        hasGenuineAppreciation),
+    // Presales signals
+    isPresalesFaq: PRESALES_FAQ_PATTERNS.some((p) => p.test(fullText)),
+    isPresalesTeam: PRESALES_TEAM_PATTERNS.some((p) => p.test(fullText)),
   }
 }
 
@@ -276,6 +323,9 @@ const classifySchema = z.object({
     'spam',
     'system',
     'unknown',
+    'presales_faq',
+    'presales_consult',
+    'presales_team',
   ]),
   confidence: z.number().min(0).max(1),
   reasoning: z.string(),
@@ -289,6 +339,9 @@ Categories:
 - support_transfer: Move purchase to different email, license transfer
 - support_technical: Questions about course content, code help, how to use product
 - support_billing: Invoice request, receipt needed, tax documents, payment questions
+- presales_faq: Pre-purchase questions answerable with KB (pricing, what's included, curriculum, tech requirements, discounts, PPP)
+- presales_consult: Pre-purchase questions needing instructor judgment ("should I buy X or Y?", career advice tied to product)
+- presales_team: Enterprise/team inquiries (team of X, company license, procurement, PO, L&D budget, volume/bulk pricing)
 - fan_mail: Personal thank you, appreciation, feedback directed at instructor personally
 - spam: Vendor outreach, partnership proposals, marketing, SEO services
 - system: Automated replies, bounces, out-of-office, system notifications
@@ -296,6 +349,10 @@ Categories:
 
 Rules:
 - If it's clearly a customer needing help with their purchase → support_*
+- If asking about product BEFORE purchasing → presales_*
+  - Simple factual questions (price, curriculum, requirements) → presales_faq
+  - "Which course should I buy?" or career advice → presales_consult
+  - Team/enterprise/bulk inquiries → presales_team
 - If it's addressed personally to the instructor with appreciation → fan_mail
 - If it's someone trying to sell/partner → spam
 - If it's automated → system
@@ -374,6 +431,9 @@ const threadClassifySchema = z.object({
     'resolved',
     'awaiting_customer',
     'voc_response',
+    'presales_faq',
+    'presales_consult',
+    'presales_team',
   ]),
   confidence: z.number().min(0).max(1),
   reasoning: z.string(),
@@ -383,12 +443,34 @@ const THREAD_CLASSIFY_PROMPT = `You are classifying a support THREAD. Analyze th
 
 ## Categories
 
-**Support Categories (customer needs help):**
+**Support Categories (customer needs help with existing purchase):**
 - support_access: Can't access purchased content, login issues, license problems
 - support_refund: Wants money back. Look for: "refund", "cancel", "money back", dissatisfaction with purchase
 - support_transfer: Move purchase to different email, license transfer
 - support_technical: Questions about course content, code help, how-to questions
 - support_billing: Invoice/receipt requests, pricing questions, discount inquiries, tax documents
+
+**Presales Categories (BEFORE purchase - no evidence of existing purchase):**
+- presales_faq: Simple questions answerable with KB. Look for:
+  - Pricing questions ("how much", "what's the cost")
+  - "What's included?" / curriculum / modules
+  - Tech requirements / prerequisites
+  - PPP / student / regional discounts
+  - "Is this right for me if I know X?"
+  - Lifetime access, updates included
+- presales_consult: Needs instructor judgment. Look for:
+  - "Should I buy X or Y?"
+  - "Which course is right for me?"
+  - Career advice tied to product choice
+  - Complex "is this suitable for my situation" questions
+- presales_team: Enterprise/team sales inquiries. Look for:
+  - "team of X developers/engineers"
+  - "company license" / "site license"
+  - "procurement" / "purchase order" / "PO"
+  - "L&D budget" / "training budget"
+  - "volume discount" / "bulk pricing"
+  - Company domain email (not gmail/yahoo/personal)
+  - Multiple seats/licenses
 
 **Non-Support Categories:**
 - voc_response: Reply to OUR automated email sequence (check-ins, surveys). Look for quoted text from our outreach.
@@ -427,6 +509,21 @@ const THREAD_CLASSIFY_PROMPT = `You are classifying a support THREAD. Analyze th
 - "Big fan" + business pitch → spam (the "fan" is a hook)
 - "Big fan" + personal journey → fan_mail
 
+### presales_* vs support_billing
+- Key question: Does the person ALREADY OWN the product?
+- "How much does it cost?" with NO purchase evidence → presales_faq
+- "Can I get an invoice?" from an existing customer → support_billing
+- "Do you have student discounts?" BEFORE buying → presales_faq
+- "Can I get a receipt for my purchase last month?" → support_billing
+- Pricing questions from non-customers → presales_faq
+
+### presales_faq vs presales_consult
+- presales_faq: Factual, answerable from documentation (price, curriculum, requirements)
+- presales_consult: Subjective, needs instructor judgment ("which course is right for me?")
+- "What does the course cover?" → presales_faq (factual)
+- "I know X, Y, Z - is this course right for me?" → could be presales_faq if simple
+- "Should I buy A or B given my career goals?" → presales_consult (subjective advice)
+
 ## Few-Shot Examples
 
 ### Example 1: support_refund (NOT billing)
@@ -456,6 +553,22 @@ Message: "Hi, I'm Sarah from ContentBoost Agency. I'd love to discuss a partners
 ### Example 7: NOT resolved
 Thread: [Customer: "I need a refund because..."] → [Us: "Sure, processing now"]
 → support_refund (we're processing, but customer hasn't confirmed receipt)
+
+### Example 8: presales_faq
+Message: "Hi, I'm considering Total TypeScript. What's included in the Pro bundle? Do you offer PPP pricing for Brazil?"
+→ presales_faq (factual pricing/content questions, answerable from KB)
+
+### Example 9: presales_consult
+Message: "I'm a mid-level dev trying to level up. Should I start with Total TypeScript or go straight to the advanced course? I already know some generics."
+→ presales_consult (needs instructor judgment, "which course is right for me")
+
+### Example 10: presales_team
+Message: "Hi, I'm the L&D manager at Acme Corp. We have a team of 12 developers and want to purchase licenses. Do you offer volume discounts or can we pay by invoice/PO?"
+→ presales_team (enterprise inquiry: team size, L&D, volume discount, PO)
+
+### Example 11: presales_faq (NOT support_billing)
+Message: "How much does the course cost? Do you have any student discounts?"
+→ presales_faq (asking about pricing BEFORE purchase, not an existing customer billing issue)
 
 Output your classification with confidence (0.0-1.0) and brief reasoning.`
 
