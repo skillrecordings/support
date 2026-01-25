@@ -1,15 +1,22 @@
+/**
+ * Validate Draft Workflow
+ *
+ * Validates draft responses before sending for approval.
+ * Checks for: internal leaks, meta-commentary, banned phrases, fabrication, length.
+ *
+ * Triggered by: support/draft.created
+ * Emits: support/draft.validated
+ */
+
+import {
+  initializeAxiom,
+  traceWorkflowStep,
+} from '../../observability/axiom'
 import { validate } from '../../pipeline/steps/validate'
 import type { GatherOutput } from '../../pipeline/types'
 import { inngest } from '../client'
 import { SUPPORT_DRAFT_CREATED, SUPPORT_DRAFT_VALIDATED } from '../events'
 
-/**
- * Workflow: Validate Draft Response
- *
- * Triggers on support/draft.created and validates the draft content.
- * Checks for internal leaks, meta-commentary, banned phrases, fabrication, etc.
- * Emits support/draft.validated with validation results.
- */
 export const validateWorkflow = inngest.createFunction(
   {
     id: 'support-validate',
@@ -20,30 +27,62 @@ export const validateWorkflow = inngest.createFunction(
   async ({ event, step }) => {
     const { conversationId, messageId, appId, draft, context } = event.data
 
-    console.log('[validate-draft] ========== WORKFLOW STARTED ==========')
-    console.log('[validate-draft] Conversation:', conversationId)
-    console.log('[validate-draft] Message:', messageId)
-    console.log('[validate-draft] App:', appId)
+    const workflowStartTime = Date.now()
+    initializeAxiom()
+
+    console.log('[validate-workflow] ========== STARTED ==========')
+    console.log('[validate-workflow] conversationId:', conversationId)
+    console.log('[validate-workflow] messageId:', messageId)
+    console.log('[validate-workflow] appId:', appId)
+    console.log('[validate-workflow] draftLength:', draft.content.length)
 
     // Validate the draft
     const validation = await step.run('validate-draft', async () => {
-      console.log('[validate-draft] Running validation checks...')
+      const stepStartTime = Date.now()
+
+      console.log('[validate-workflow] Running validation checks...')
 
       const result = validate({
         draft: draft.content,
         context: context as GatherOutput,
       })
 
-      console.log('[validate-draft] Validation result:', {
+      const durationMs = Date.now() - stepStartTime
+
+      // Trace with high cardinality - include each issue type
+      const issuesByType: Record<string, number> = {}
+      for (const issue of result.issues) {
+        issuesByType[issue.type] = (issuesByType[issue.type] ?? 0) + 1
+      }
+
+      await traceWorkflowStep({
+        workflowName: 'support-validate',
+        conversationId,
+        appId,
+        stepName: 'validate',
+        durationMs,
+        success: result.valid,
+        metadata: {
+          valid: result.valid,
+          issueCount: result.issues.length,
+          issueTypes: issuesByType,
+          hasLeaks: issuesByType['leak'] ?? 0 > 0,
+          hasMeta: issuesByType['meta'] ?? 0 > 0,
+          hasBanned: issuesByType['banned'] ?? 0 > 0,
+          hasFabrication: issuesByType['fabrication'] ?? 0 > 0,
+          draftLength: draft.content.length,
+        },
+      })
+
+      console.log('[validate-workflow] validation complete:', {
         valid: result.valid,
         issueCount: result.issues.length,
+        issueTypes: issuesByType,
+        durationMs,
       })
 
       return result
     })
-
-    // If validation fails badly, we might want to retry drafting or escalate
-    // For now, always emit validated event (let approval workflow handle invalid drafts)
 
     // Emit validated event
     await step.sendEvent('emit-validated', {
@@ -63,9 +102,11 @@ export const validateWorkflow = inngest.createFunction(
       },
     })
 
-    console.log('[validate-draft] ========== WORKFLOW COMPLETED ==========')
-    console.log('[validate-draft] Valid:', validation.valid)
-    console.log('[validate-draft] Issues:', validation.issues.length)
+    const totalDurationMs = Date.now() - workflowStartTime
+    console.log('[validate-workflow] ========== COMPLETED ==========')
+    console.log('[validate-workflow] totalDurationMs:', totalDurationMs)
+    console.log('[validate-workflow] valid:', validation.valid)
+    console.log('[validate-workflow] issueCount:', validation.issues.length)
 
     return { conversationId, messageId, validation }
   }

@@ -14,6 +14,11 @@
 import { MemoryService } from '@skillrecordings/memory/memory'
 import { IntegrationClient } from '@skillrecordings/sdk/client'
 import { type FrontMessage, createFrontClient } from '../../front/client'
+import {
+  initializeAxiom,
+  traceMemoryRetrieval,
+  traceWorkflowStep,
+} from '../../observability/axiom'
 import { type GatherTools, gather } from '../../pipeline/steps/gather'
 import type { KnowledgeItem, MemoryItem } from '../../pipeline/types'
 import { getApp } from '../../services/app-registry'
@@ -54,7 +59,6 @@ async function createGatherTools(appId: string): Promise<GatherTools> {
                 id: p.id,
                 productId: p.productId,
                 productName: p.productName,
-                // SDK returns Date, pipeline types expect string
                 purchasedAt:
                   p.purchasedAt instanceof Date
                     ? p.purchasedAt.toISOString()
@@ -78,8 +82,6 @@ async function createGatherTools(appId: string): Promise<GatherTools> {
       _query: string,
       _appId: string
     ): Promise<KnowledgeItem[]> => {
-      // Knowledge search not yet implemented
-      // Return empty array - gather() handles this gracefully
       return []
     },
 
@@ -135,12 +137,6 @@ async function createGatherTools(appId: string): Promise<GatherTools> {
   }
 }
 
-/**
- * Gather context workflow.
- *
- * Listens to routed messages where the action is 'respond' and
- * gathers all context needed for the draft step.
- */
 export const gatherWorkflow = inngest.createFunction(
   {
     id: 'support-gather',
@@ -149,7 +145,6 @@ export const gatherWorkflow = inngest.createFunction(
   },
   {
     event: SUPPORT_ROUTED,
-    // Only trigger when route action is 'respond'
     if: 'event.data.route.action == "respond"',
   },
   async ({ event, step }) => {
@@ -164,15 +159,19 @@ export const gatherWorkflow = inngest.createFunction(
       route,
     } = event.data
 
-    console.log('[gather-workflow] Starting context gather', {
-      conversationId,
-      messageId,
-      appId,
-      category: classification.category,
-    })
+    const workflowStartTime = Date.now()
+    initializeAxiom()
+
+    console.log('[gather-workflow] ========== STARTED ==========')
+    console.log('[gather-workflow] conversationId:', conversationId)
+    console.log('[gather-workflow] messageId:', messageId)
+    console.log('[gather-workflow] appId:', appId)
+    console.log('[gather-workflow] senderEmail:', senderEmail)
+    console.log('[gather-workflow] category:', classification.category)
 
     // Gather context from various sources
     const context = await step.run('gather-context', async () => {
+      const stepStartTime = Date.now()
       const tools = await createGatherTools(appId)
 
       const result = await gather(
@@ -198,13 +197,47 @@ export const gatherWorkflow = inngest.createFunction(
         { tools, timeout: 10000 }
       )
 
-      console.log('[gather-workflow] Context gathered', {
+      const durationMs = Date.now() - stepStartTime
+
+      // Trace memory retrieval to Axiom
+      if (result.priorMemory.length > 0) {
+        await traceMemoryRetrieval({
+          conversationId,
+          appId,
+          queryLength: body?.length ?? 0,
+          memoriesFound: result.priorMemory.length,
+          topScore: result.priorMemory[0]?.relevance ?? 0,
+          durationMs,
+        })
+      }
+
+      // Trace workflow step with high cardinality
+      await traceWorkflowStep({
+        workflowName: 'support-gather',
+        conversationId,
+        appId,
+        stepName: 'gather',
+        durationMs,
+        success: result.gatherErrors.length === 0,
+        metadata: {
+          hasUser: !!result.user,
+          purchaseCount: result.purchases.length,
+          knowledgeCount: result.knowledge.length,
+          historyCount: result.history.length,
+          memoryCount: result.priorMemory.length,
+          errorCount: result.gatherErrors.length,
+          errors: result.gatherErrors,
+        },
+      })
+
+      console.log('[gather-workflow] context gathered:', {
         hasUser: !!result.user,
         purchaseCount: result.purchases.length,
         knowledgeCount: result.knowledge.length,
         historyCount: result.history.length,
         memoryCount: result.priorMemory.length,
         errorCount: result.gatherErrors.length,
+        durationMs,
       })
 
       return result
@@ -238,10 +271,11 @@ export const gatherWorkflow = inngest.createFunction(
       },
     })
 
-    console.log('[gather-workflow] Emitted context.gathered event', {
-      conversationId,
-      messageId,
-    })
+    const totalDurationMs = Date.now() - workflowStartTime
+    console.log('[gather-workflow] ========== COMPLETED ==========')
+    console.log('[gather-workflow] totalDurationMs:', totalDurationMs)
+    console.log('[gather-workflow] hasUser:', !!context.user)
+    console.log('[gather-workflow] purchaseCount:', context.purchases.length)
 
     return {
       conversationId,
