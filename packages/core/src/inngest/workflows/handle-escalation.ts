@@ -18,6 +18,11 @@ import {
   log,
   traceWorkflowStep,
 } from '../../observability/axiom'
+import {
+  type EscalationContext,
+  type PurchaseInfo,
+  formatEscalationComment,
+} from '../../pipeline/steps/comment'
 import { getApp } from '../../services/app-registry'
 import { postMessage } from '../../slack/client'
 import { inngest } from '../client'
@@ -26,13 +31,6 @@ import { type EscalationPriority, SUPPORT_ESCALATED } from '../events'
 // ============================================================================
 // Step Return Types
 // ============================================================================
-
-interface PurchaseInfo {
-  productName: string
-  purchasedAt: string
-  status: string
-  amount?: number
-}
 
 interface AppContextResult {
   app: App | null
@@ -75,88 +73,6 @@ const ESCALATION_TAGS: Record<EscalationPriority, string | undefined> = {
 /** Slack channels for notifications */
 const SLACK_ESCALATION_CHANNEL = process.env.SLACK_ESCALATION_CHANNEL
 const SLACK_INSTRUCTOR_CHANNEL = process.env.SLACK_INSTRUCTOR_CHANNEL
-
-// ============================================================================
-// Comment Formatting
-// ============================================================================
-
-interface EscalationContext {
-  customerEmail: string
-  magicLink?: string
-  purchases?: Array<{
-    productName: string
-    purchasedAt: string
-    status: string
-    amount?: number
-  }>
-  classification: {
-    category: string
-    confidence: number
-    reasoning?: string
-  }
-  route: {
-    action: string
-    reason: string
-  }
-  priority: EscalationPriority
-}
-
-/**
- * Format escalation comment for Front conversation.
- * Provides human agents with context for handling the escalation.
- */
-function formatEscalationComment(context: EscalationContext): string {
-  const parts: string[] = []
-
-  // Header with priority indicator
-  const priorityEmoji =
-    context.priority === 'urgent'
-      ? '🚨'
-      : context.priority === 'instructor'
-        ? '👨‍🏫'
-        : context.priority === 'teammate_support'
-          ? '🤝'
-          : context.priority === 'voc'
-            ? '📣'
-            : '⚠️'
-
-  parts.push(
-    `${priorityEmoji} **Agent Escalation (${context.priority.replace(/_/g, ' ')})**\n`
-  )
-
-  // Escalation reason
-  parts.push(`**Reason:** ${context.route.reason}`)
-  parts.push(`**Category:** ${context.classification.category}`)
-  parts.push(
-    `**Confidence:** ${Math.round(context.classification.confidence * 100)}%`
-  )
-
-  if (context.classification.reasoning) {
-    parts.push(`**Agent reasoning:** ${context.classification.reasoning}`)
-  }
-
-  // Customer info
-  parts.push(`\n**Customer:** ${context.customerEmail}`)
-
-  // Magic link for quick access
-  if (context.magicLink) {
-    parts.push(`**Magic link:** ${context.magicLink}`)
-  }
-
-  // Purchases if available
-  if (context.purchases && context.purchases.length > 0) {
-    parts.push('\n**Purchases:**')
-    for (const p of context.purchases) {
-      const status = p.status !== 'active' ? ` (${p.status})` : ''
-      const amount = p.amount ? ` - $${(p.amount / 100).toFixed(2)}` : ''
-      parts.push(`- ${p.productName}${amount}${status}`)
-    }
-  } else {
-    parts.push('\n**Purchases:** No purchases found for this email')
-  }
-
-  return parts.join('\n')
-}
 
 // ============================================================================
 // Slack Notification Blocks
@@ -423,19 +339,20 @@ export const handleEscalation = inngest.createFunction(
           const front = createFrontClient({ apiToken: frontToken })
 
           const escalationContext: EscalationContext = {
-            customerEmail: senderEmail,
-            magicLink: appContext.magicLink,
+            type: priority,
+            reason: route.reason,
+            customer: {
+              email: senderEmail,
+            },
             purchases: appContext.purchases,
             classification: {
               category: classification.category,
               confidence: classification.confidence,
               reasoning: classification.reasoning,
             },
-            route: {
-              action: route.action,
-              reason: route.reason,
-            },
-            priority,
+            links: appContext.magicLink
+              ? { magicLogin: appContext.magicLink }
+              : undefined,
           }
 
           const commentBody = formatEscalationComment(escalationContext)
