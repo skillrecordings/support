@@ -3,6 +3,11 @@
  *
  * Decides what action to take based on classification.
  * Routes to different handlers based on the action type.
+ *
+ * Also handles:
+ * - Tagging conversations based on category
+ * - Archiving silenced conversations
+ * - Adding agent decision comments
  */
 
 import {
@@ -10,8 +15,16 @@ import {
   log,
   traceWorkflowStep,
 } from '../../observability/axiom'
+import { archiveConversation } from '../../pipeline/steps/archive'
+import { addDecisionComment } from '../../pipeline/steps/comment'
 import { route } from '../../pipeline/steps/route'
-import type { ClassifyOutput, MessageSignals } from '../../pipeline/types'
+import { applyTag } from '../../pipeline/steps/tag'
+import { createTagRegistry, type TagRegistry } from '../../tags/registry'
+import type {
+  ClassifyOutput,
+  MessageCategory,
+  MessageSignals,
+} from '../../pipeline/types'
 import { inngest } from '../client'
 import {
   SUPPORT_CLASSIFIED,
@@ -125,14 +138,189 @@ export const routeWorkflow = inngest.createFunction(
       return result
     })
 
+    // Apply category tag to conversation (fire-and-forget)
+    const tagResult = await step.run('apply-tag', async () => {
+      const stepStartTime = Date.now()
+      const frontApiToken = process.env.FRONT_API_TOKEN
+
+      if (!frontApiToken) {
+        await log('warn', 'FRONT_API_TOKEN not set, skipping tag', {
+          workflow: 'support-route',
+          step: 'apply-tag',
+          conversationId,
+        })
+        return { tagged: false, error: 'No API token' }
+      }
+
+      try {
+        const result = await applyTag(
+          {
+            conversationId,
+            category: classification.category as MessageCategory,
+            appConfig: {
+              appId,
+              instructorConfigured: false,
+              autoSendEnabled: false,
+            },
+          },
+          { frontApiToken }
+        )
+
+        await log('info', 'tag applied', {
+          workflow: 'support-route',
+          step: 'apply-tag',
+          conversationId,
+          category: classification.category,
+          tagId: result.tagId,
+          tagName: result.tagName,
+          tagged: result.tagged,
+          durationMs: Date.now() - stepStartTime,
+        })
+
+        await traceWorkflowStep({
+          workflowName: 'support-route',
+          conversationId,
+          appId,
+          stepName: 'apply-tag',
+          durationMs: Date.now() - stepStartTime,
+          success: result.tagged,
+          metadata: {
+            tagId: result.tagId,
+            tagName: result.tagName,
+            category: classification.category,
+          },
+        })
+
+        return result
+      } catch (error) {
+        await log('error', 'tag application failed', {
+          workflow: 'support-route',
+          step: 'apply-tag',
+          conversationId,
+          error: error instanceof Error ? error.message : String(error),
+        })
+        return {
+          tagged: false,
+          error: error instanceof Error ? error.message : String(error),
+        }
+      }
+    })
+
     // Handle terminal actions
     if (routeResult.action === 'silence') {
+      // Add decision comment (fire-and-forget)
+      await step.run('add-decision-comment-silence', async () => {
+        const frontApiToken = process.env.FRONT_API_TOKEN
+        if (!frontApiToken) return { added: false, error: 'No API token' }
+
+        try {
+          const result = await addDecisionComment(
+            conversationId,
+            {
+              category: classification.category,
+              confidence: classification.confidence,
+              reasoning: classification.reasoning,
+              action: routeResult.action,
+              actionReason: routeResult.reason,
+              customerEmail: senderEmail,
+            },
+            { frontApiToken }
+          )
+
+          await log('info', 'decision comment added', {
+            workflow: 'support-route',
+            step: 'add-decision-comment',
+            conversationId,
+            action: routeResult.action,
+            added: result.added,
+          })
+
+          return result
+        } catch (error) {
+          await log('error', 'decision comment failed', {
+            workflow: 'support-route',
+            step: 'add-decision-comment',
+            conversationId,
+            error: error instanceof Error ? error.message : String(error),
+          })
+          return {
+            added: false,
+            error: error instanceof Error ? error.message : String(error),
+          }
+        }
+      })
+
+      // Archive the conversation (fire-and-forget)
+      const archiveResult = await step.run('archive-conversation', async () => {
+        const stepStartTime = Date.now()
+        const frontApiToken = process.env.FRONT_API_TOKEN
+
+        if (!frontApiToken) {
+          await log('warn', 'FRONT_API_TOKEN not set, skipping archive', {
+            workflow: 'support-route',
+            step: 'archive-conversation',
+            conversationId,
+          })
+          return { archived: false, error: 'No API token' }
+        }
+
+        try {
+          const result = await archiveConversation(
+            {
+              conversationId,
+              action: routeResult.action,
+              reason: routeResult.reason,
+              appConfig: {
+                appId,
+                instructorConfigured: false,
+                autoSendEnabled: false,
+              },
+            },
+            { frontApiToken }
+          )
+
+          await log('info', 'conversation archived', {
+            workflow: 'support-route',
+            step: 'archive-conversation',
+            conversationId,
+            archived: result.archived,
+            reason: routeResult.reason,
+            durationMs: Date.now() - stepStartTime,
+          })
+
+          await traceWorkflowStep({
+            workflowName: 'support-route',
+            conversationId,
+            appId,
+            stepName: 'archive-conversation',
+            durationMs: Date.now() - stepStartTime,
+            success: result.archived,
+            metadata: { reason: routeResult.reason },
+          })
+
+          return result
+        } catch (error) {
+          await log('error', 'archive failed', {
+            workflow: 'support-route',
+            step: 'archive-conversation',
+            conversationId,
+            error: error instanceof Error ? error.message : String(error),
+          })
+          return {
+            archived: false,
+            error: error instanceof Error ? error.message : String(error),
+          }
+        }
+      })
+
       await log('info', 'route workflow completed - silence', {
         workflow: 'support-route',
         conversationId,
         messageId,
         action: 'silence',
         reason: routeResult.reason,
+        tagged: tagResult?.tagged,
+        archived: archiveResult?.archived,
         totalDurationMs: Date.now() - workflowStartTime,
       })
       await traceWorkflowStep({
@@ -142,19 +330,84 @@ export const routeWorkflow = inngest.createFunction(
         stepName: 'complete',
         durationMs: Date.now() - workflowStartTime,
         success: true,
-        metadata: { action: 'silence', terminal: true },
+        metadata: {
+          action: 'silence',
+          terminal: true,
+          tagged: tagResult?.tagged,
+          archived: archiveResult?.archived,
+        },
       })
-      return { conversationId, messageId, route: routeResult, terminal: true }
+      return {
+        conversationId,
+        messageId,
+        route: routeResult,
+        terminal: true,
+        tagged: tagResult?.tagged,
+        archived: archiveResult?.archived,
+      }
     }
 
     // Handle escalation actions
-    const escalationActions = ['escalate_urgent', 'escalate_human', 'escalate_instructor', 'support_teammate', 'catalog_voc']
+    const escalationActions = [
+      'escalate_urgent',
+      'escalate_human',
+      'escalate_instructor',
+      'support_teammate',
+      'catalog_voc',
+    ]
     if (escalationActions.includes(routeResult.action)) {
-      const priority = routeResult.action === 'escalate_urgent' ? 'urgent' 
-        : routeResult.action === 'escalate_instructor' ? 'instructor'
-        : routeResult.action === 'support_teammate' ? 'teammate_support'
-        : routeResult.action === 'catalog_voc' ? 'voc'
-        : 'normal'
+      const priority =
+        routeResult.action === 'escalate_urgent'
+          ? 'urgent'
+          : routeResult.action === 'escalate_instructor'
+            ? 'instructor'
+            : routeResult.action === 'support_teammate'
+              ? 'teammate_support'
+              : routeResult.action === 'catalog_voc'
+                ? 'voc'
+                : 'normal'
+
+      // Add decision comment for escalation (fire-and-forget)
+      await step.run('add-decision-comment-escalation', async () => {
+        const frontApiToken = process.env.FRONT_API_TOKEN
+        if (!frontApiToken) return { added: false, error: 'No API token' }
+
+        try {
+          const result = await addDecisionComment(
+            conversationId,
+            {
+              category: classification.category,
+              confidence: classification.confidence,
+              reasoning: classification.reasoning,
+              action: routeResult.action,
+              actionReason: routeResult.reason,
+              customerEmail: senderEmail,
+            },
+            { frontApiToken }
+          )
+
+          await log('info', 'decision comment added', {
+            workflow: 'support-route',
+            step: 'add-decision-comment',
+            conversationId,
+            action: routeResult.action,
+            added: result.added,
+          })
+
+          return result
+        } catch (error) {
+          await log('error', 'decision comment failed', {
+            workflow: 'support-route',
+            step: 'add-decision-comment',
+            conversationId,
+            error: error instanceof Error ? error.message : String(error),
+          })
+          return {
+            added: false,
+            error: error instanceof Error ? error.message : String(error),
+          }
+        }
+      })
 
       await log('info', 'route workflow completed - escalation', {
         workflow: 'support-route',
@@ -163,6 +416,7 @@ export const routeWorkflow = inngest.createFunction(
         action: routeResult.action,
         priority,
         reason: routeResult.reason,
+        tagged: tagResult?.tagged,
         totalDurationMs: Date.now() - workflowStartTime,
       })
 
@@ -177,20 +431,36 @@ export const routeWorkflow = inngest.createFunction(
           senderEmail,
           classification,
           route: routeResult,
-          priority: priority as 'urgent' | 'normal' | 'instructor' | 'teammate_support' | 'voc',
+          priority: priority as
+            | 'urgent'
+            | 'normal'
+            | 'instructor'
+            | 'teammate_support'
+            | 'voc',
         },
       })
-      return { conversationId, messageId, route: routeResult, escalated: true, priority }
+      return {
+        conversationId,
+        messageId,
+        route: routeResult,
+        escalated: true,
+        priority,
+        tagged: tagResult?.tagged,
+      }
     }
 
     // Handle respond action - continue to gather step
     if (routeResult.action === 'respond') {
+      // Note: Decision comment for 'respond' is added later in the pipeline
+      // after drafting, when we have full context. See execute-approved-action.ts
+
       await log('info', 'route workflow completed - respond', {
         workflow: 'support-route',
         conversationId,
         messageId,
         action: 'respond',
         reason: routeResult.reason,
+        tagged: tagResult?.tagged,
         totalDurationMs: Date.now() - workflowStartTime,
       })
 
@@ -215,10 +485,10 @@ export const routeWorkflow = inngest.createFunction(
         stepName: 'complete',
         durationMs: Date.now() - workflowStartTime,
         success: true,
-        metadata: { action: 'respond' },
+        metadata: { action: 'respond', tagged: tagResult?.tagged },
       })
 
-      return { conversationId, messageId, route: routeResult }
+      return { conversationId, messageId, route: routeResult, tagged: tagResult?.tagged }
     }
 
     // Fallback - unknown action
