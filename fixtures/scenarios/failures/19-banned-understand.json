@@ -20,6 +20,6 @@
       "I hear you"
     ]
   },
-  "expectedCategory": "support_billing",
+  "expectedCategory": "presales_faq",
   "expectedAction": "respond"
 }

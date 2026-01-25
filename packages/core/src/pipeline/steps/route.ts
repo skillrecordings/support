@@ -55,16 +55,8 @@ const ROUTING_RULES: RoutingRule[] = [
     reason: 'Legal threat detected - urgent human review required',
   },
 
-  // Unknown with low confidence - escalate
-  {
-    name: 'unknown_escalate',
-    condition: ({ classification }) =>
-      classification.category === 'unknown' || classification.confidence < 0.5,
-    action: 'escalate_human',
-    reason: 'Cannot confidently classify - needs human review',
-  },
-
   // Fan mail - route to instructor (personal messages explicitly addressed to instructor)
+  // NOTE: Must be BEFORE unknown_escalate so personal messages aren't misrouted
   {
     name: 'fan_mail_instructor',
     condition: ({ classification }) => classification.category === 'fan_mail',
@@ -73,12 +65,22 @@ const ROUTING_RULES: RoutingRule[] = [
   },
 
   // Personal/casual messages to instructor (even if not classified as fan_mail)
+  // NOTE: Must be BEFORE unknown_escalate so isPersonalToInstructor signal is honored
   {
     name: 'personal_to_instructor',
     condition: ({ classification }) =>
       classification.signals.isPersonalToInstructor,
     action: 'escalate_instructor',
     reason: 'Personal message addressed to instructor',
+  },
+
+  // Unknown with low confidence - escalate
+  {
+    name: 'unknown_escalate',
+    condition: ({ classification }) =>
+      classification.category === 'unknown' || classification.confidence < 0.5,
+    action: 'escalate_human',
+    reason: 'Cannot confidently classify - needs human review',
   },
 
   // Refund outside policy window - needs human approval
@@ -342,16 +344,8 @@ const THREAD_ROUTING_RULES: ThreadRoutingRule[] = [
       'Voice of customer response - catalog, tag, notify Slack, maybe request testimonial expansion',
   },
 
-  // Unknown with low confidence - escalate
-  {
-    name: 'unknown_escalate',
-    condition: ({ classification }) =>
-      classification.category === 'unknown' || classification.confidence < 0.5,
-    action: 'escalate_human',
-    reason: 'Cannot confidently classify - needs human review',
-  },
-
   // Fan mail - route to instructor (personal messages)
+  // NOTE: Must be BEFORE unknown_escalate so personal messages aren't misrouted
   {
     name: 'fan_mail_instructor',
     condition: ({ classification }) => classification.category === 'fan_mail',
@@ -360,12 +354,22 @@ const THREAD_ROUTING_RULES: ThreadRoutingRule[] = [
   },
 
   // Personal/casual messages to instructor (even if not classified as fan_mail)
+  // NOTE: Must be BEFORE unknown_escalate so isPersonalToInstructor signal is honored
   {
     name: 'personal_to_instructor',
     condition: ({ classification }) =>
       classification.signals.isPersonalToInstructor,
     action: 'escalate_instructor',
     reason: 'Personal message addressed to instructor',
+  },
+
+  // Unknown with low confidence - escalate
+  {
+    name: 'unknown_escalate',
+    condition: ({ classification }) =>
+      classification.category === 'unknown' || classification.confidence < 0.5,
+    action: 'escalate_human',
+    reason: 'Cannot confidently classify - needs human review',
   },
 
   // Refund outside policy window - needs human approval
