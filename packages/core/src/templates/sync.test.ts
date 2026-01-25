@@ -99,7 +99,7 @@ describe('syncTemplates', () => {
           type: 'response',
           appId: 'test-app',
           title: 'Refund Request',
-          source: 'front_template',
+          source: 'canned-response',
           frontId: 'rsp_123',
           isGlobal: 1,
         }),
