@@ -60,7 +60,9 @@
     "./pipeline/evals/e2e.eval": "./src/pipeline/evals/e2e.eval.ts",
     "./services/teammate-registry": "./src/services/teammate-registry.ts",
     "./pipeline/steps/thread-signals": "./src/pipeline/steps/thread-signals.ts",
-    "./pipeline/steps/comment": "./src/pipeline/steps/comment.ts"
+    "./pipeline/steps/comment": "./src/pipeline/steps/comment.ts",
+    "./memory": "./src/memory/index.ts",
+    "./memory/query": "./src/memory/query.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit",
