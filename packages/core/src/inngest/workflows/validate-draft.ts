@@ -126,14 +126,20 @@ export const validateWorkflow = inngest.createFunction(
           score: validation.valid ? 1.0 : 0.0,
         },
         // Pass context through for internal comments
+        // Note: context from gather workflow has shape { customer, knowledge, memories }
+        // NOT the internal GatherOutput shape { user, purchases, priorMemory }
         context: context
           ? (() => {
-              const ctx = context as GatherOutput
+              const ctx = context as {
+                customer?: { email?: string; purchases?: unknown[] }
+                knowledge?: unknown[]
+                memories?: unknown[]
+              }
               return {
-                customerEmail: ctx.user?.email,
-                purchaseCount: ctx.purchases?.length ?? 0,
+                customerEmail: ctx.customer?.email,
+                purchaseCount: ctx.customer?.purchases?.length ?? 0,
                 knowledgeCount: ctx.knowledge?.length ?? 0,
-                memoryCount: ctx.priorMemory?.length ?? 0,
+                memoryCount: ctx.memories?.length ?? 0,
               }
             })()
           : undefined,
