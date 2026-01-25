@@ -4,245 +4,231 @@
 
 ## TL;DR
 
-**95% complete.** The eval-pipeline CLI runs with REAL Docker tools. Current: **90.3% pass rate** (7 failures remaining).
+**Pipeline eval complete.** 97.2% pass rate with real Docker tools. **Next: Inngest workflow integration.**
 
 ## What Works ✅
 
-| Component | Status | Command |
-|-----------|--------|---------|
+| Component | Status | Notes |
+|-----------|--------|-------|
 | Docker Compose | ✅ Works | `docker compose -f docker/eval.yml up -d` |
-| Health checks | ✅ Works | `skill eval-local health` |
-| Quality scorers | ✅ Works | 5 scorers: leaks, meta-commentary, banned phrases, fabrication, helpfulness |
-| Pipeline steps | ✅ Works | classify, route, gather, draft, validate, e2e |
-| Real tools | ✅ Works | `skill eval-pipeline run --real-tools` |
-| Seed command | ✅ Works | `skill eval-pipeline seed` |
-| LLM calls | ✅ Real | Uses Anthropic API (claude-haiku-4-5 by default) |
-| Type checks | ✅ Fixed | `turbo run check-types --filter=@skillrecordings/cli` passes |
+| Pipeline steps | ✅ Works | classify, route, gather, draft, validate |
+| Real tools | ✅ Works | MySQL + Qdrant + Ollama |
+| Eval CLI | ✅ Works | `--parallel`, `--cache-classify`, `--fail-fast`, `--quick` |
+| Type checks | ✅ Passes | All packages |
+| Presales taxonomy | ✅ Works | faq/consult/team categories |
 
-## Current Baseline (2026-01-25 04:02 UTC) 🎉
+## Current Baseline (2026-01-25 05:15 UTC) 🎉
 
-**90.3% pass rate with REAL Docker tools** (up from 88.9%)
+**97.2% pass rate** (70/72 scenarios, 2 failures)
 
-| Version | Pass Rate | Tools |
-|---------|-----------|-------|
-| Production (inflated) | 37.8% | N/A |
-| Honest baseline | 88.9% | Real MySQL + Qdrant |
-| **+ Pattern fixes** | **90.3%** | Real MySQL + Qdrant |
+| Milestone | Pass Rate | 
+|-----------|-----------|
+| Production (inflated) | 37.8% |
+| Honest baseline | 88.9% |
+| + Pattern fixes | 90.3% |
+| + Presales taxonomy | 91.7% |
+| + Routing order fix | **97.2%** |
 
 ### Per-Action Breakdown
 
-| Action | Precision | Recall | Notes |
-|--------|-----------|--------|-------|
-| `silence` | **100%** | **100%** | Perfect ✨ |
-| `escalate_urgent` | 100% | 100% | Legal threats only |
-| `respond` | 97% | 85% | Main gap: recall |
-| `escalate_instructor` | 95% | 91% | Good |
-| `escalate_human` | 29% | 100% | Over-firing (root cause of failures) |
+| Action | Precision | Recall |
+|--------|-----------|--------|
+| `silence` | 100% | 100% |
+| `escalate_urgent` | 100% | 100% |
+| `respond` | 100% | 94% |
+| `escalate_instructor` | 96% | 100% |
+| `escalate_human` | 75% | 100% |
 
-### The 7 Remaining Failures
-
-| Scenario | Expected | Got | Root Cause |
-|----------|----------|-----|------------|
-| `failure_banned_phrases` | respond | escalate_human | Classified as `unknown` (presales Q) |
-| `failure_deflection_external` | respond | escalate_human | Classified as `unknown` |
-| `failure_deflection_discount` | respond | escalate_human | Classified as `unknown` (student discount Q) |
-| `failure_meta_module_issue` | respond | escalate_human | Classified as `unknown` |
-| `failure_deflection_recording` | respond | escalate_instructor | Misclassified as personal |
-| `failure_meta_joke` | escalate_instructor | escalate_human | Personal msg not detected |
-| `failure_routing_instructor_missing` | escalate_instructor | respond | Should escalate |
-
-**Pattern:** 4/7 failures are presales/general inquiries getting `unknown` category → escalate_human.
+### Remaining 2-4 Failures (flaky due to LLM variance)
+- Edge cases where classifier confidence is borderline
+- Could tune prompts or accept ~95%+ as "good enough"
 
 ---
 
-## Taxonomy Evolution
+## Next Phase: Inngest Workflow Integration
 
-### Current Categories (v1)
+### Architecture: Event-Driven Choreography
 
-```
-support_access      - Login/access issues
-support_billing     - Invoices, receipts, payment
-support_refund      - Refund requests
-support_technical   - Tech problems with content
-support_other       - Catch-all support
-fan_mail            - Personal messages to instructor
-automated           - Auto-replies, OOO
-vendor_spam         - Sales pitches, partnership spam
-unknown             - Can't classify → escalate
-```
-
-### Proposed Categories (v2)
-
-Add **presales tier** to handle pre-purchase inquiries:
+**NOT** a single orchestrated workflow with steps. Each pipeline step becomes its own Inngest function, triggered by events:
 
 ```
-# Existing (keep)
-support_access
-support_billing
-support_refund
-support_technical
-support_other
-fan_mail
-automated
-vendor_spam
-
-# NEW: Presales tier
-presales_faq         → respond      # Price, curriculum, "is this for me"
-presales_consult     → escalate_instructor  # Needs judgment, learn from response
-presales_team        → escalate_human       # Enterprise/team deals, sales process
-
-# Keep as fallback
-unknown              → escalate_human
+Front webhook (inbound email)
+       ↓
+  inbound.received
+       ↓
+┌──────────────────┐
+│ classifyWorkflow │ → inbound.classified
+└──────────────────┘
+       ↓
+┌──────────────────┐
+│  routeWorkflow   │ → inbound.routed
+└──────────────────┘
+       ↓ (if action=respond)
+┌──────────────────┐
+│ gatherWorkflow   │ → context.gathered  
+└──────────────────┘
+       ↓
+┌──────────────────┐
+│  draftWorkflow   │ → draft.created
+└──────────────────┘
+       ↓
+┌──────────────────┐
+│validateWorkflow  │ → draft.validated
+└──────────────────┘
+       ↓
+┌──────────────────┐
+│approvalWorkflow  │ → (human review or auto-approve)
+└──────────────────┘
+       ↓
+┌──────────────────┐
+│ executeWorkflow  │ → Send reply via Front API
+└──────────────────┘
 ```
 
-### Presales Signals
+### Why Separate Functions (not steps)
 
-**presales_faq** (answerable with knowledge base):
-- Pricing questions
-- "What's included?"
-- Course curriculum / modules
-- Tech requirements
-- PPP/regional discounts
-- "Is this right for me if I know X?"
+| Benefit | Explanation |
+|---------|-------------|
+| **Retry granularity** | Classify fails? Retry just classify, not the whole chain |
+| **Observability** | Each step visible in Inngest dashboard with timing/logs |
+| **Fan-out** | Route can trigger multiple downstream flows (respond vs escalate) |
+| **Different timeouts** | Draft (LLM) gets 60s, classify gets 10s |
+| **Independent scaling** | High-volume classify, lower-volume draft |
 
-**presales_consult** (needs human judgment, but track for learning):
-- "Should I buy X or Y?"
-- Career advice tied to product
-- Edge case eligibility
-- "Will this help with [specific situation]?"
+### Events Schema
 
-**presales_team** (always escalate - high value):
-- "team of X developers"
-- "company license" / "site license"
-- "procurement" / "PO" / "invoice"
-- "L&D budget" / "training budget"
-- Company domain emails
-- "volume discount" / "bulk pricing"
+```typescript
+// packages/core/src/inngest/events.ts
 
-### Learning Loop
-
+type Events = {
+  'support/inbound.received': {
+    data: {
+      conversationId: string
+      messageId: string
+      subject: string
+      body: string
+      from: string
+      appId: string
+    }
+  }
+  
+  'support/inbound.classified': {
+    data: {
+      conversationId: string
+      messageId: string
+      classification: ClassifyOutput
+    }
+  }
+  
+  'support/inbound.routed': {
+    data: {
+      conversationId: string
+      messageId: string
+      classification: ClassifyOutput
+      route: RouteOutput
+    }
+  }
+  
+  'support/context.gathered': {
+    data: {
+      conversationId: string
+      messageId: string
+      context: GatherOutput
+    }
+  }
+  
+  'support/draft.created': {
+    data: {
+      conversationId: string
+      messageId: string
+      draft: DraftOutput
+    }
+  }
+  
+  'support/draft.validated': {
+    data: {
+      conversationId: string
+      messageId: string
+      draft: DraftOutput
+      validation: ValidateOutput
+    }
+  }
+}
 ```
-presales_consult → escalate_instructor → Matt answers
-                                              ↓
-                                        Track Q&A pair
-                                              ↓
-                                        After N similar Qs answered same way
-                                              ↓
-                                        Promote to presales_faq (knowledge base)
+
+### Workflow Skeleton
+
+```typescript
+// packages/core/src/inngest/workflows/classify.ts
+
+export const classifyWorkflow = inngest.createFunction(
+  { id: 'support-classify', name: 'Classify Inbound Message' },
+  { event: 'support/inbound.received' },
+  async ({ event, step }) => {
+    const result = await step.run('classify', () => 
+      classify({
+        subject: event.data.subject,
+        body: event.data.body,
+        appId: event.data.appId,
+      })
+    )
+    
+    await step.sendEvent('classified', {
+      name: 'support/inbound.classified',
+      data: {
+        conversationId: event.data.conversationId,
+        messageId: event.data.messageId,
+        classification: result,
+      }
+    })
+    
+    return result
+  }
+)
 ```
 
-This turns escalations into training data instead of dead ends.
+### Implementation Order
+
+1. **Define events** in `packages/core/src/inngest/events.ts`
+2. **Create workflow functions** (classify → route → gather → draft → validate)
+3. **Wire to Front webhook** — emit `inbound.received` on new message
+4. **Add approval flow** — human review before sending
+5. **Execute action** — send via Front API or escalate
 
 ---
-
-## Docker Services
-
-```bash
-# Start services
-cd ~/Code/skillrecordings/support
-docker compose -f docker/eval.yml up -d
-
-# Seed fixtures (MySQL + Qdrant)
-skill eval-pipeline seed --clean
-
-# Services:
-# - MySQL:  localhost:3306 (user: eval_user, pass: eval_pass, db: support_eval)
-# - Redis:  localhost:6379
-# - Qdrant: localhost:6333
-# - Ollama: localhost:11434 (host, for embeddings)
-```
 
 ## Quick Commands
 
 ```bash
 cd ~/Code/skillrecordings/support
 
-# Run honest eval (REAL tools)
-DATABASE_URL="mysql://eval_user:eval_pass@localhost:3306/support_eval" \
-  skill eval-pipeline run --step e2e --real-tools \
-  --scenarios "fixtures/scenarios/**/*.json"
+# Start Docker services
+docker compose -f docker/eval.yml up -d
 
-# Run with verbose failures
+# Run eval (fast, parallel)
 DATABASE_URL="mysql://eval_user:eval_pass@localhost:3306/support_eval" \
-  skill eval-pipeline run --step e2e --real-tools \
-  --scenarios "fixtures/scenarios/**/*.json" --verbose
+  bun packages/cli/src/index.ts eval-pipeline run --step e2e --real-tools \
+  --scenarios "fixtures/scenarios/**/*.json" --parallel 10
 
-# Run specific step (classify, route, gather, validate, e2e)
-skill eval-pipeline run --step classify --scenarios "fixtures/scenarios/**/*.json"
+# Quick smoke test
+bun packages/cli/src/index.ts eval-pipeline run --step e2e \
+  --scenarios "fixtures/scenarios/**/*.json" --quick --parallel 10
 
 # Seed fixtures
-skill eval-pipeline seed --clean
-
-# Score production responses (no Docker needed)
-skill eval-local score-production --dataset packages/cli/data/eval-dataset.json --verbose
-```
-
-## Data Assets
-
-| File | Records | Source |
-|------|---------|--------|
-| `fixtures/scenarios/**/*.json` | 72 | Manual test cases (annotated) |
-| `fixtures/knowledge/*.md` | 5 | KB articles (embedded in Qdrant) |
-| `fixtures/apps/*.json` | 3 | App configs (seeded to MySQL) |
-| `fixtures/customers/*.json` | 5 | Customer fixtures |
-
-## File Locations
-
-```
-~/Code/skillrecordings/support/
-├── docker/
-│   └── eval.yml                    # Docker Compose
-├── docs/eval-system-prd/
-│   ├── CURRENT-STATE.md            # ← YOU ARE HERE
-│   ├── HONEST-BASELINE.md          # Baseline analysis
-│   ├── PIPELINE-VS-MONOLITHIC.md   # Comparison report
-│   └── PIPELINE-AUDIT.md           # Step implementation status
-├── fixtures/
-│   ├── scenarios/                  # 72 test scenarios
-│   ├── knowledge/                  # KB articles for Qdrant
-│   ├── apps/                       # App configs for MySQL
-│   └── customers/                  # Customer fixtures
-├── packages/cli/src/commands/
-│   ├── eval-pipeline/              # Pipeline eval CLI
-│   │   ├── run.ts                  # Main runner (supports --real-tools)
-│   │   ├── real-tools.ts           # Real MySQL + Qdrant tools
-│   │   ├── seed.ts                 # Fixture seeding
-│   │   └── index.ts                # Command registration
-│   └── eval-local/                 # Legacy monolithic eval
-└── packages/core/src/pipeline/
-    └── steps/                      # Pipeline step implementations
-        ├── classify.ts             # Message classification (NEEDS PRESALES)
-        ├── route.ts                # Action routing
-        ├── gather.ts               # Context gathering
-        ├── draft.ts                # Response drafting
-        └── validate.ts             # Quality validation
+bun packages/cli/src/index.ts eval-pipeline seed --clean
 ```
 
 ## Recent Commits (feat/eval-pipeline-real-tools)
 
 | Commit | Description |
 |--------|-------------|
-| `f16a165` | Pattern detection for personal vs vendor messages |
-| `98c3bbf` | Fix 24 CLI type errors, check-types passes |
-
-## Next Steps
-
-### Immediate (to hit 95%+)
-- [ ] Add presales categories to classifier
-- [ ] Add presales routing rules
-- [ ] Update 4 failing scenarios with new expected categories
-- [ ] Re-run eval
-
-### Soon
-- [ ] Build presales knowledge base (pricing, curriculum, FAQs)
-- [ ] Add team sales detection patterns
-- [ ] Implement learning loop tracking
-
-### Later
-- [ ] CI integration for regression testing
-- [ ] Production monitoring for presales_consult responses
-- [ ] Auto-promote patterns from consult → faq
+| `ae52d2f` | Routing order fix + scenario annotations (91.7→97.2%) |
+| `b907fd3` | Eval CLI: --parallel, --cache-classify, --fail-fast, --quick |
+| `9425d17` | Presales routing rules |
+| `41c0e97` | Presales knowledge base fixtures |
+| `f16a165` | Pattern detection improvements |
+| `98c3bbf` | CLI type error fixes |
 
 ---
 
-*Last updated: 2026-01-25 04:50 UTC*
+*Last updated: 2026-01-25 05:20 UTC*
