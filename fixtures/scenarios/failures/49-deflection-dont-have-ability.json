@@ -1,0 +1,26 @@
+{
+  "id": "failure_deflection_ability",
+  "name": "Pricing question - no 'I don't have the ability'",
+  "description": "Real failure: Agent said 'I don't have the ability to authorize'",
+  "source": "production_failure_2026-01",
+  "appId": "app_eval_generic",
+  "trigger": {
+    "subject": "Regional pricing?",
+    "body": "Hi, do you offer purchasing power parity or regional pricing? I'm from Brazil and the USD price is quite high."
+  },
+  "context": {
+    "customer": "no-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "check_ppp_or_escalate_helpfully",
+  "assertions": {
+    "noDeflection": true,
+    "mustNotContain": [
+      "I don't have the ability",
+      "I'm not able to",
+      "I can't authorize"
+    ]
+  },
+  "expectedCategory": "support_technical",
+  "expectedAction": "respond"
+}

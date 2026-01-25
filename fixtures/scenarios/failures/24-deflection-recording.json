@@ -1,0 +1,26 @@
+{
+  "id": "failure_deflection_recording",
+  "name": "Workshop recording question - no deflection",
+  "description": "Real failure: Agent deflected to 'ask Matt directly' instead of answering",
+  "source": "production_failure_2026-01",
+  "appId": "app_eval_aih",
+  "trigger": {
+    "subject": "Re: Live Autonomous AI Agents with Ralph Workshop (very limited seats)",
+    "body": "Hi Matt,\n\nI'm interested in the workshop but not sure I can attend live. Would there be a recording available I could watch later?\n\nThanks,\nMartin"
+  },
+  "context": {
+    "customer": "no-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "answer_about_recording_policy",
+  "assertions": {
+    "noDeflection": true,
+    "mustNotContain": [
+      "ask him directly",
+      "Matt would need to confirm",
+      "workshop setup details can vary"
+    ]
+  },
+  "expectedCategory": "support_technical",
+  "expectedAction": "respond"
+}

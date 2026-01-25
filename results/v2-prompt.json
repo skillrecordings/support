@@ -1,0 +1,2518 @@
+{
+  "summary": {
+    "total": 72,
+    "passed": 72,
+    "failed": 0,
+    "noDraft": 0,
+    "passRate": 1,
+    "durationMs": 41771,
+    "byCategory": {
+      "refund_request": {
+        "passed": 5,
+        "failed": 0,
+        "noDraft": 0
+      },
+      "access_issue": {
+        "passed": 3,
+        "failed": 0,
+        "noDraft": 0
+      },
+      "technical_help": {
+        "passed": 12,
+        "failed": 0,
+        "noDraft": 0
+      },
+      "transfer_request": {
+        "passed": 2,
+        "failed": 0,
+        "noDraft": 0
+      },
+      "general": {
+        "passed": 34,
+        "failed": 0,
+        "noDraft": 0
+      },
+      "fan_mail": {
+        "passed": 5,
+        "failed": 0,
+        "noDraft": 0
+      },
+      "spam": {
+        "passed": 5,
+        "failed": 0,
+        "noDraft": 0
+      },
+      "invoice_request": {
+        "passed": 2,
+        "failed": 0,
+        "noDraft": 0
+      },
+      "product_inquiry": {
+        "passed": 4,
+        "failed": 0,
+        "noDraft": 0
+      }
+    },
+    "failures": {
+      "internalLeaks": 0,
+      "metaCommentary": 0,
+      "bannedPhrases": 0,
+      "fabrication": 0
+    },
+    "latency": {
+      "p50": 556,
+      "p95": 799,
+      "p99": 915
+    }
+  },
+  "results": [
+    {
+      "id": "refund_within_policy",
+      "name": "Refund request within 30-day window",
+      "passed": true,
+      "durationMs": 581,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "refund_request",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "refund_outside_policy",
+      "name": "Refund request outside 30-day window (45 days)",
+      "passed": true,
+      "durationMs": 569,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "refund_request",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "refund_no_purchase",
+      "name": "Refund request with no purchase found",
+      "passed": true,
+      "durationMs": 554,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "refund_request",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "access_wrong_email",
+      "name": "Customer using wrong email",
+      "passed": true,
+      "durationMs": 643,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "access_issue",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "access_expired_link",
+      "name": "Expired magic link",
+      "passed": true,
+      "durationMs": 518,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "technical_help",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "access_magic_link",
+      "name": "Magic link login request",
+      "passed": true,
+      "durationMs": 555,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "access_issue",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "access_transfer",
+      "name": "License transfer request",
+      "passed": true,
+      "durationMs": 644,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "transfer_request",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_fabrication",
+      "name": "Must not fabricate product content",
+      "passed": true,
+      "durationMs": 472,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "general",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_deflection",
+      "name": "Must not deflect unhelpfully",
+      "passed": true,
+      "durationMs": 586,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "technical_help",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_banned_phrases",
+      "name": "Must not use banned phrases",
+      "passed": true,
+      "durationMs": 799,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "general",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_meta_commentary",
+      "name": "Must not provide meta-commentary",
+      "passed": true,
+      "durationMs": 848,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "general",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_internal_leak",
+      "name": "Must not leak internal state",
+      "passed": true,
+      "durationMs": 460,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "fan_mail",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "edge_angry_customer",
+      "name": "Angry/frustrated customer",
+      "passed": true,
+      "durationMs": 491,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "refund_request",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "edge_legal",
+      "name": "Legal language mentioned",
+      "passed": true,
+      "durationMs": 550,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "refund_request",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "technical_module_error",
+      "name": "Module system error",
+      "passed": true,
+      "durationMs": 573,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "technical_help",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "technical_generics",
+      "name": "Technical question about generics",
+      "passed": true,
+      "durationMs": 501,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "general",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "technical_where_start",
+      "name": "Where to start learning",
+      "passed": true,
+      "durationMs": 470,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "general",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "routing_bounce",
+      "name": "Bounce notification",
+      "passed": true,
+      "durationMs": 830,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "technical_help",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "routing_spam",
+      "name": "Spam/vendor email",
+      "passed": true,
+      "durationMs": 545,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "spam",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "routing_auto_reply",
+      "name": "Out of office auto-reply",
+      "passed": true,
+      "durationMs": 587,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "general",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "routing_business",
+      "name": "Business partnership inquiry",
+      "passed": true,
+      "durationMs": 517,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "general",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "routing_fan_mail",
+      "name": "Fan mail to instructor",
+      "passed": true,
+      "durationMs": 605,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "fan_mail",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_routing_should_go",
+      "name": "Personal inquiry - don't say 'should go to'",
+      "passed": true,
+      "durationMs": 492,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "general",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_fabrication_ts",
+      "name": "TypeScript beginner - no fabricated content",
+      "passed": true,
+      "durationMs": 567,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "technical_help",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_meta_personal_reply",
+      "name": "Personal reply - no meta commentary",
+      "passed": true,
+      "durationMs": 457,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "general",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_routing_looks_like",
+      "name": "Non-support - no 'Looks like there's no...'",
+      "passed": true,
+      "durationMs": 572,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "general",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_deflection_external",
+      "name": "Reply to Matt - no external channel suggestion",
+      "passed": true,
+      "durationMs": 452,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "general",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_meta_invoice",
+      "name": "B2B invoice request - no meta commentary",
+      "passed": true,
+      "durationMs": 524,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "invoice_request",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_routing_leak_youtube",
+      "name": "YouTube partnership - no routing leak",
+      "passed": true,
+      "durationMs": 520,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "fan_mail",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_deflection_routing",
+      "name": "Personal message - no external deflection",
+      "passed": true,
+      "durationMs": 556,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "technical_help",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_banned_sharing",
+      "name": "User shares journey - no corporate thanks",
+      "passed": true,
+      "durationMs": 548,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "technical_help",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_meta_business_inquiry",
+      "name": "Business inquiry - no meta commentary",
+      "passed": true,
+      "durationMs": 547,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "general",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_banned_great",
+      "name": "Help request - no fake enthusiasm",
+      "passed": true,
+      "durationMs": 713,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "technical_help",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_deflection_ability",
+      "name": "Pricing question - no 'I don't have the ability'",
+      "passed": true,
+      "durationMs": 502,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "product_inquiry",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_meta_no_action",
+      "name": "Non-support message - no 'No action needed' commentary",
+      "passed": true,
+      "durationMs": 525,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "general",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_routing_instructor_missing",
+      "name": "AI interest reply - no instructor config leak",
+      "passed": true,
+      "durationMs": 674,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "general",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_combined_multi",
+      "name": "Partnership pitch - multiple violations",
+      "passed": true,
+      "durationMs": 497,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "general",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_meta_appears",
+      "name": "Message - no 'This appears to be'",
+      "passed": true,
+      "durationMs": 508,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "general",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_banned_hope_helps",
+      "name": "Help response - no 'I hope this helps'",
+      "passed": true,
+      "durationMs": 617,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "access_issue",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_routing_leak_personal",
+      "name": "Personal correspondence - no routing leak",
+      "passed": true,
+      "durationMs": 523,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "general",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_deflection_reach",
+      "name": "Question - no 'reach out directly'",
+      "passed": true,
+      "durationMs": 578,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "product_inquiry",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_banned_suggest",
+      "name": "Workshop question - no hedging",
+      "passed": true,
+      "durationMs": 583,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "general",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_routing_leak_partnership",
+      "name": "Partnership inquiry - no routing leak",
+      "passed": true,
+      "durationMs": 606,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "spam",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_meta_joke",
+      "name": "Casual message - no meta commentary",
+      "passed": true,
+      "durationMs": 562,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "general",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_banned_emdash",
+      "name": "Frustrated user - no em-dashes",
+      "passed": true,
+      "durationMs": 604,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "technical_help",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_meta_clearly_personal",
+      "name": "Personal note - no 'clearly personal correspondence'",
+      "passed": true,
+      "durationMs": 508,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "general",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_deflection_need",
+      "name": "Question - no 'You'll need to'",
+      "passed": true,
+      "durationMs": 628,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "transfer_request",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_fabrication_ai",
+      "name": "AI beginner - no fabricated content",
+      "passed": true,
+      "durationMs": 476,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "general",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_combined_leak_meta",
+      "name": "Newsletter outreach - no leak or meta",
+      "passed": true,
+      "durationMs": 727,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "spam",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_banned_hear",
+      "name": "Frustrated user - no 'I hear'",
+      "passed": true,
+      "durationMs": 666,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "general",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_meta_module_issue",
+      "name": "Technical issue - no 'This is a' diagnosis",
+      "passed": true,
+      "durationMs": 493,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "technical_help",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_banned_thanks",
+      "name": "Discount request - no corporate speak",
+      "passed": true,
+      "durationMs": 513,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "product_inquiry",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_banned_specifically",
+      "name": "Vague question - no generic follow-up",
+      "passed": true,
+      "durationMs": 511,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "technical_help",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_meta_stop_here",
+      "name": "Personal message - no 'I'm going to stop here'",
+      "passed": true,
+      "durationMs": 475,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "general",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_meta_since_routing",
+      "name": "Personal message - no 'Since there's no...'",
+      "passed": true,
+      "durationMs": 595,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "general",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_meta_marketing",
+      "name": "Marketing outreach - no meta commentary",
+      "passed": true,
+      "durationMs": 710,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "general",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_banned_happy_help",
+      "name": "Support response - no 'Happy to help'",
+      "passed": true,
+      "durationMs": 531,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "invoice_request",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_meta_vendor",
+      "name": "Vendor outreach - no meta commentary",
+      "passed": true,
+      "durationMs": 494,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "spam",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_routing_cant_forward",
+      "name": "Fan mail - no 'can't forward' message",
+      "passed": true,
+      "durationMs": 710,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "fan_mail",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_banned_appreciate",
+      "name": "Feedback response - no 'I really appreciate'",
+      "passed": true,
+      "durationMs": 731,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "general",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_meta_not_spam",
+      "name": "Business inquiry - no spam classification commentary",
+      "passed": true,
+      "durationMs": 533,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "spam",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_banned_apologize",
+      "name": "Problem response - no 'I apologize for any inconvenience'",
+      "passed": true,
+      "durationMs": 592,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "general",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_banned_understand",
+      "name": "Price concern - no fake empathy",
+      "passed": true,
+      "durationMs": 506,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "general",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_routing_no_way",
+      "name": "Feedback - no 'I don't have a way to route'",
+      "passed": true,
+      "durationMs": 548,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "general",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_deflection_discount",
+      "name": "Discount request - no deflection",
+      "passed": true,
+      "durationMs": 720,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "product_inquiry",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_routing_forward_manually",
+      "name": "Personal message - don't suggest manual forward",
+      "passed": true,
+      "durationMs": 533,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "general",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_deflection_team",
+      "name": "Personal message - no 'someone on the team'",
+      "passed": true,
+      "durationMs": 571,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "general",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_meta_automated",
+      "name": "Automated notification - no meta commentary",
+      "passed": true,
+      "durationMs": 667,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "general",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_deflection_recording",
+      "name": "Workshop recording question - no deflection",
+      "passed": true,
+      "durationMs": 915,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "general",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_meta_wont_draft",
+      "name": "Non-support - no 'I won't draft a response'",
+      "passed": true,
+      "durationMs": 557,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "fan_mail",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_routing_system_capability",
+      "name": "Business inquiry - no system capability leak",
+      "passed": true,
+      "durationMs": 696,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "general",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    },
+    {
+      "id": "failure_fabrication_lost",
+      "name": "Lost user - no fabricated suggestions",
+      "passed": true,
+      "durationMs": 517,
+      "output": "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object.",
+      "toolCalls": [],
+      "noDraft": false,
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "category": "technical_help",
+      "failureReasons": [
+        "ERROR: The value at toolConfig.tools.0.toolSpec.inputSchema.json.type must be one of the following: object."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "id": "failure_meta_automated",
+  "name": "Automated notification - no meta commentary",
+  "description": "Real failure: Agent explained it was an automated notification",
+  "source": "production_failure_2026-01",
+  "appId": "app_eval_generic",
+  "trigger": {
+    "subject": "(Vercel Academy) Page has links to redirect: 33 URLs",
+    "body": "Site Audit Results\n\nYour weekly Ahrefs crawl has found 33 pages with redirect links.\n\nView full report: https://ahrefs.com/report/123"
+  },
+  "context": {
+    "customer": "no-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "silent_no_response",
+  "assertions": {
+    "noMetaCommentary": true,
+    "noDraftResponse": true,
+    "mustNotContain": [
+      "automated notification",
+      "not a customer support request",
+      "I won't draft",
+      "system email"
+    ]
+  },
+  "expectedCategory": "system",
+  "expectedAction": "silence"
+}

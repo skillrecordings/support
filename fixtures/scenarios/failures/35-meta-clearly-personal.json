@@ -1,0 +1,26 @@
+{
+  "id": "failure_meta_clearly_personal",
+  "name": "Personal note - no 'clearly personal correspondence'",
+  "description": "Real failure: Agent said 'this is clearly personal correspondence'",
+  "source": "production_failure_2026-01",
+  "appId": "app_eval_generic",
+  "trigger": {
+    "subject": "Re: A quick question...",
+    "body": "Hey Matt,\n\nThanks for the email! I've been playing with Effect and it's blowing my mind. Would love to chat more about it sometime.\n\nDave"
+  },
+  "context": {
+    "customer": "happy-customer",
+    "conversation": null
+  },
+  "expectedBehavior": "route_silently",
+  "assertions": {
+    "noMetaCommentary": true,
+    "mustNotContain": [
+      "clearly personal",
+      "rather than support",
+      "I don't have a way"
+    ]
+  },
+  "expectedCategory": "fan_mail",
+  "expectedAction": "escalate_instructor"
+}

@@ -1,0 +1,25 @@
+{
+  "id": "failure_banned_appreciate",
+  "name": "Feedback response - no 'I really appreciate'",
+  "description": "Pattern: No fake appreciation language",
+  "source": "pattern_prevention",
+  "appId": "app_eval_tt",
+  "trigger": {
+    "subject": "Great course!",
+    "body": "Just finished the generics section. Finally understand mapped types! Thanks!"
+  },
+  "context": {
+    "customer": "recent-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "brief_acknowledgment_or_route",
+  "assertions": {
+    "noBannedPhrases": true,
+    "mustNotContain": [
+      "I really appreciate",
+      "What a wonderful"
+    ]
+  },
+  "expectedCategory": "fan_mail",
+  "expectedAction": "escalate_instructor"
+}

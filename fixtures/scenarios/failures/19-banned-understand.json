@@ -1,0 +1,25 @@
+{
+  "id": "failure_banned_understand",
+  "name": "Price concern - no fake empathy",
+  "description": "Real failure: Agent said 'I understand the price is a consideration'",
+  "source": "production_failure_2026-01",
+  "appId": "app_eval_aih",
+  "trigger": {
+    "subject": "Re: Live Autonomous AI Agents with Ralph Workshop (very limited seats)",
+    "body": "Very interesting but a little pricey for me right now. Also with the exchange rate it's very expensive."
+  },
+  "context": {
+    "customer": "no-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "acknowledge_and_offer_alternatives",
+  "assertions": {
+    "noBannedPhrases": true,
+    "mustNotContain": [
+      "I understand",
+      "I hear you"
+    ]
+  },
+  "expectedCategory": "support_billing",
+  "expectedAction": "respond"
+}

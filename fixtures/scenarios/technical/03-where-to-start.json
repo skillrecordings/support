@@ -1,0 +1,27 @@
+{
+  "id": "technical_where_start",
+  "name": "Where to start learning",
+  "description": "Customer asking where to start - should NOT fabricate course content",
+  "appId": "app_eval_tt",
+  "trigger": {
+    "subject": "Where should I start?",
+    "body": "Just purchased Total TypeScript. I'm pretty new to TypeScript. Where should I start?"
+  },
+  "context": {
+    "customer": "recent-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "ask_about_goals",
+  "expectedToolCalls": [
+    "searchKnowledge",
+    "draftResponse"
+  ],
+  "assertions": {
+    "noInternalLeaks": true,
+    "noMetaCommentary": true,
+    "noBannedPhrases": true,
+    "noFabrication": true
+  },
+  "expectedCategory": "support_technical",
+  "expectedAction": "respond"
+}

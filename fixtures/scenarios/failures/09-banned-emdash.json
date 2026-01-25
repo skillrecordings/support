@@ -1,0 +1,26 @@
+{
+  "id": "failure_banned_emdash",
+  "name": "Frustrated user - no em-dashes",
+  "description": "Real failure: Agent used em-dashes (AI style marker)",
+  "source": "production_failure_2026-01",
+  "appId": "app_eval_tt",
+  "trigger": {
+    "subject": "I am lost.",
+    "body": "TypeScript is so frustrating. I've been stuck for hours and nothing makes sense. Help!"
+  },
+  "context": {
+    "customer": "recent-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "helpful_direct_response",
+  "assertions": {
+    "noBannedPhrases": true,
+    "mustNotContain": [
+      "—",
+      "I'd suggest",
+      "I hear"
+    ]
+  },
+  "expectedCategory": "support_technical",
+  "expectedAction": "respond"
+}

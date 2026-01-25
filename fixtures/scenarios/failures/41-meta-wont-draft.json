@@ -1,0 +1,27 @@
+{
+  "id": "failure_meta_wont_draft",
+  "name": "Non-support - no 'I won't draft a response'",
+  "description": "Real failure: Agent explicitly said 'I won't draft a response here'",
+  "source": "production_failure_2026-01",
+  "appId": "app_eval_generic",
+  "trigger": {
+    "subject": "Coffee sometime?",
+    "body": "Hey Matt,\n\nWould love to grab coffee if you're ever in NYC. Big fan of your work!\n\nCheers"
+  },
+  "context": {
+    "customer": "no-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "silent_route",
+  "assertions": {
+    "noMetaCommentary": true,
+    "noDraftResponse": true,
+    "mustNotContain": [
+      "I won't draft",
+      "won't be drafting",
+      "I shouldn't draft"
+    ]
+  },
+  "expectedCategory": "fan_mail",
+  "expectedAction": "escalate_instructor"
+}

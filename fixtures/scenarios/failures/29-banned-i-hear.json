@@ -1,0 +1,26 @@
+{
+  "id": "failure_banned_hear",
+  "name": "Frustrated user - no 'I hear'",
+  "description": "Real failure: Agent said 'I hear the frustration'",
+  "source": "production_failure_2026-01",
+  "appId": "app_eval_tt",
+  "trigger": {
+    "subject": "I am lost.",
+    "body": "I've been trying to learn TypeScript for weeks and I still don't get it. Generics make no sense to me."
+  },
+  "context": {
+    "customer": "recent-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "provide_specific_help",
+  "assertions": {
+    "noBannedPhrases": true,
+    "mustNotContain": [
+      "I hear",
+      "frustration",
+      "you've got this"
+    ]
+  },
+  "expectedCategory": "support_technical",
+  "expectedAction": "respond"
+}

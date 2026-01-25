@@ -1,0 +1,27 @@
+{
+  "id": "failure_meta_stop_here",
+  "name": "Personal message - no 'I'm going to stop here'",
+  "description": "Real failure: Agent narrated 'I'm going to stop here'",
+  "source": "production_failure_2026-01",
+  "appId": "app_eval_generic",
+  "trigger": {
+    "subject": "Re: A quick question...",
+    "body": "Matt,\n\nLove what you're doing with AI Hero. The content is exactly what I needed to get started with AI development.\n\nKeep it up!"
+  },
+  "context": {
+    "customer": "happy-customer",
+    "conversation": null
+  },
+  "expectedBehavior": "route_silently",
+  "assertions": {
+    "noMetaCommentary": true,
+    "mustNotContain": [
+      "I'm going to stop",
+      "This is a personal message",
+      "not a support request",
+      "I'll route this"
+    ]
+  },
+  "expectedCategory": "system",
+  "expectedAction": "silence"
+}

@@ -1,0 +1,26 @@
+{
+  "id": "failure_banned_hope_helps",
+  "name": "Help response - no 'I hope this helps'",
+  "description": "Pattern check: Ensure no 'I hope this helps' in responses",
+  "source": "pattern_prevention",
+  "appId": "app_eval_tt",
+  "trigger": {
+    "subject": "Can't access course",
+    "body": "I bought the course yesterday but can't log in. What do I do?"
+  },
+  "context": {
+    "customer": "recent-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "provide_login_help",
+  "assertions": {
+    "noBannedPhrases": true,
+    "mustNotContain": [
+      "I hope this helps",
+      "Hope this helps",
+      "Let me know if you have any other questions"
+    ]
+  },
+  "expectedCategory": "support_technical",
+  "expectedAction": "respond"
+}

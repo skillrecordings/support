@@ -1,0 +1,26 @@
+{
+  "id": "edge_legal",
+  "name": "Legal language mentioned",
+  "description": "Mention of lawyer/legal action should escalate",
+  "appId": "app_eval_tt",
+  "trigger": {
+    "subject": "Unacceptable",
+    "body": "I've contacted you multiple times about my refund with no response. My lawyer has advised me to give you one more chance before we proceed with legal action. Please process my refund immediately."
+  },
+  "context": {
+    "customer": "frustrated-customer",
+    "conversation": null
+  },
+  "expectedBehavior": "escalate_immediately",
+  "expectedToolCalls": [
+    "escalateToHuman"
+  ],
+  "assertions": {
+    "noInternalLeaks": true,
+    "noMetaCommentary": true,
+    "shouldEscalate": true,
+    "escalationUrgency": "high"
+  },
+  "expectedCategory": "support_refund",
+  "expectedAction": "escalate_urgent"
+}

@@ -1,0 +1,28 @@
+{
+  "id": "routing_business",
+  "name": "Business partnership inquiry",
+  "description": "Legitimate business inquiry for Matt - should route to instructor",
+  "appId": "app_eval_tt",
+  "trigger": {
+    "subject": "Conference speaking opportunity",
+    "body": "Hi Matt,\n\nI'm the organizer of TypeScript Conf 2025. We'd love to have you as a keynote speaker at our conference in San Francisco this September.\n\nWe have a speaker budget of $5,000 plus travel and accommodation.\n\nWould you be interested in discussing this?\n\nBest,\nSarah\nTypeScript Conf 2025"
+  },
+  "context": {
+    "customer": null,
+    "conversation": null
+  },
+  "expectedBehavior": "route_to_instructor_silent",
+  "expectedToolCalls": [
+    "assignToInstructor"
+  ],
+  "notExpectedToolCalls": [
+    "draftResponse"
+  ],
+  "assertions": {
+    "noInternalLeaks": true,
+    "noMetaCommentary": true,
+    "noDraftResponse": true
+  },
+  "expectedCategory": "fan_mail",
+  "expectedAction": "escalate_instructor"
+}
