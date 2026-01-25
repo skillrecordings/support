@@ -1,0 +1,348 @@
+# Template Organization Log
+
+Generated: 2026-01-25T17:30:34.175Z
+
+## Summary
+
+- **Total templates processed:** 153
+- **Templates moved to folders:** 153
+- **Folders created:** 5
+
+## Folders Created
+
+- Epic Web
+- Epic React
+- Testing JavaScript
+- AI Hero
+- Shared
+
+## Templates by Folder
+
+| Folder | Count |
+|--------|-------|
+| Shared | 70 |
+| Total TypeScript | 24 |
+| egghead | 16 |
+| Epic React | 11 |
+| Epic Web | 10 |
+| Live Events | 5 |
+| Testing JavaScript | 5 |
+| KCD | 4 |
+| Just JavaScript | 3 |
+| AI Hero | 2 |
+| Pure React | 1 |
+| Auto-responders | 1 |
+| Technical Interviews | 1 |
+
+## Detailed Changes
+
+- **new content** (`rsp_rp1r9`) → AI Hero
+  - Reason: AI Hero or Epic AI reference
+- **Discord: AI Hero** (`rsp_rp351`) → AI Hero
+  - Reason: AI Hero or Epic AI reference
+- **Partner Products Business Hours** (`rsp_7il8n`) → Auto-responders
+  - Reason: Auto-responder pattern
+- **Outside of Business Hours - egghead** (`rsp_8pn0n`) → egghead
+  - Reason: egghead prefix or egghead.io reference
+- **During Business Hours - egghead** (`rsp_8r7pj`) → egghead
+  - Reason: egghead prefix or egghead.io reference
+- **eh: Custom Invoice w/ Link** (`rsp_9zabr`) → egghead
+  - Reason: egghead prefix or egghead.io reference
+- **eh: Delete Account FAQ** (`rsp_9zadj`) → egghead
+  - Reason: egghead prefix or egghead.io reference
+- **eh: Account Deletion** (`rsp_9zop3`) → egghead
+  - Reason: egghead prefix or egghead.io reference
+- **eh: 10% Discount Coupon Link** (`rsp_9zs5j`) → egghead
+  - Reason: egghead prefix or egghead.io reference
+- **egg: No Record of Membership** (`rsp_a1umf`) → egghead
+  - Reason: egghead prefix or egghead.io reference
+- **egghead delete account instructions** (`rsp_apvnr`) → egghead
+  - Reason: egghead prefix or egghead.io reference
+- **update to team account** (`rsp_aw7ev`) → egghead
+  - Reason: egghead prefix or egghead.io reference
+- **instructor inquiry** (`rsp_bo8hz`) → egghead
+  - Reason: egghead prefix or egghead.io reference
+- **Joel Collaboration** (`rsp_c2fif`) → egghead
+  - Reason: egghead prefix or egghead.io reference
+- **Discount Request - egghead** (`rsp_2293b`) → egghead
+  - Reason: egghead prefix or egghead.io reference
+- **Request for Invoice or Receipt - egghead** (`rsp_2298n`) → egghead
+  - Reason: egghead prefix or egghead.io reference
+- **Free Trial** (`rsp_3fxl3`) → egghead
+  - Reason: egghead prefix or egghead.io reference
+- **Change Email Request - egghead** (`rsp_3iw3r`) → egghead
+  - Reason: egghead prefix or egghead.io reference
+- **Magic Link - egghead** (`rsp_5zlxj`) → egghead
+  - Reason: egghead prefix or egghead.io reference
+- **Free Resources - Epic React** (`rsp_6vqvb`) → Epic React
+  - Reason: ER prefix or epicreact.dev reference
+- **Request for Invoice or Receipt - Epic React** (`rsp_6vttz`) → Epic React
+  - Reason: ER prefix or epicreact.dev reference
+- **ER: v2 Free Upgrade** (`rsp_b5eiv`) → Epic React
+  - Reason: ER prefix or epicreact.dev reference
+- **Epic React v2 Upgrade Cost** (`rsp_bic5j`) → Epic React
+  - Reason: ER prefix or epicreact.dev reference
+- **Epic React V2 Course length** (`rsp_bo2br`) → Epic React
+  - Reason: ER prefix or epicreact.dev reference
+- **er: free resources** (`rsp_bofnr`) → Epic React
+  - Reason: ER prefix or epicreact.dev reference
+- **er: future updates** (`rsp_bon47`) → Epic React
+  - Reason: ER prefix or epicreact.dev reference
+- **er: ppp stacking** (`rsp_bon7r`) → Epic React
+  - Reason: ER prefix or epicreact.dev reference
+- **Course Length - ER** (`rsp_ch3k7`) → Epic React
+  - Reason: ER prefix or epicreact.dev reference
+- **Epic React Business Hours** (`rsp_6xjd3`) → Epic React
+  - Reason: ER prefix or epicreact.dev reference
+- **Magic Link - Epic React** (`rsp_6z05j`) → Epic React
+  - Reason: ER prefix or epicreact.dev reference
+- **EWD Thanks Code** (`rsp_atp3b`) → Epic Web
+  - Reason: EW prefix or epicweb.dev reference
+- **EW: Access Purchase** (`rsp_atrev`) → Epic Web
+  - Reason: EW prefix or epicweb.dev reference
+- **Change name - Epic Web** (`rsp_atvuv`) → Epic Web
+  - Reason: EW prefix or epicweb.dev reference
+- **EW: Expires** (`rsp_atvwn`) → Epic Web
+  - Reason: EW prefix or epicweb.dev reference
+- **EW: Attach Github** (`rsp_aua9z`) → Epic Web
+  - Reason: EW prefix or epicweb.dev reference
+- **epic web free material** (`rsp_b2qyv`) → Epic Web
+  - Reason: EW prefix or epicweb.dev reference
+- **Future discounts** (`rsp_bacjr`) → Epic Web
+  - Reason: EW prefix or epicweb.dev reference
+- **Epic Bundle already own products** (`rsp_bvmbr`) → Epic Web
+  - Reason: EW prefix or epicweb.dev reference
+- **ew: Megabundle** (`rsp_bw0uf`) → Epic Web
+  - Reason: EW prefix or epicweb.dev reference
+- **Epic Web Conf In the Future** (`rsp_rp8x1`) → Epic Web
+  - Reason: EW prefix or epicweb.dev reference
+- **Course PDF** (`rsp_82tqf`) → Just JavaScript
+  - Reason: Just JavaScript reference
+- **Magic Link - Just JavaScript** (`rsp_81kzr`) → Just JavaScript
+  - Reason: Just JavaScript reference
+- **Request for Invoice or Receipt - Just JavaScript** (`rsp_81l1j`) → Just JavaScript
+  - Reason: Just JavaScript reference
+- **KCD Uses** (`rsp_7hdc7`) → KCD
+  - Reason: KCD reference or kentcdodds.com
+- **Discord Misc Question** (`rsp_bz9vr`) → KCD
+  - Reason: KCD reference or kentcdodds.com
+- **collaboration KCD** (`rsp_c18lj`) → KCD
+  - Reason: KCD reference or kentcdodds.com
+- **KCD Discord Question** (`rsp_70don`) → KCD
+  - Reason: KCD reference or kentcdodds.com
+- **Live Workshop Event Recording** (`rsp_5eosn`) → Live Events
+  - Reason: Live event/workshop reference
+- **Cursor Workshop recording?** (`rsp_c84uf`) → Live Events
+  - Reason: Live event/workshop reference
+- **Live Event Time Conflict** (`rsp_5fds7`) → Live Events
+  - Reason: Live event/workshop reference
+- **Live Events - Workshop Recording and Upgrade Coupon Code Link** (`rsp_6dcg7`) → Live Events
+  - Reason: Live event/workshop reference
+- **Live Events - Workshop Feedback Survey** (`rsp_6dchz`) → Live Events
+  - Reason: Live event/workshop reference
+- **Magic Link - Pure React** (`rsp_9yc93`) → Pure React
+  - Reason: Pure React reference
+- **Generic Thanks** (`rsp_78q9z`) → Shared
+  - Reason: Generic/cross-product template
+- **Bug -- currently being worked on (e.g. outage)** (`rsp_7f9af`) → Shared
+  - Reason: Generic/cross-product template
+- **Alternative Payment Options** (`rsp_82dzb`) → Shared
+  - Reason: Generic/cross-product template
+- **PPP Change Region Request - Partner Products** (`rsp_8r1jb`) → Shared
+  - Reason: Generic/cross-product template
+- **Caching Issue - WBaaS Courses** (`rsp_8r1qf`) → Shared
+  - Reason: Generic/cross-product template
+- **Pending Webhook Issue** (`rsp_8rlzb`) → Shared
+  - Reason: Generic/cross-product template
+- **Custom Invoice Information** (`rsp_9xqfb`) → Shared
+  - Reason: Generic/cross-product template
+- **PPP Discount Info** (`rsp_9y5zb`) → Shared
+  - Reason: Generic/cross-product template
+- **License not Found - Partner Products** (`rsp_9y613`) → Shared
+  - Reason: Generic/cross-product template
+- **Declined Transaction & Alternate Payment** (`rsp_9ybuv`) → Shared
+  - Reason: Generic/cross-product template
+- **Thanks for Response - We Will Be Here** (`rsp_9yc07`) → Shared
+  - Reason: Generic/cross-product template
+- **Guarantee** (`rsp_9ycef`) → Shared
+  - Reason: Generic/cross-product template
+- **Email Updated** (`rsp_9ychz`) → Shared
+  - Reason: Generic/cross-product template
+- **Postmark Status** (`rsp_9yg07`) → Shared
+  - Reason: Generic/cross-product template
+- **Postmark Outage** (`rsp_9yhdz`) → Shared
+  - Reason: Generic/cross-product template
+- **Email Change** (`rsp_a3pon`) → Shared
+  - Reason: Generic/cross-product template
+- **Video Quality** (`rsp_aa9tz`) → Shared
+  - Reason: Generic/cross-product template
+- **custom invoice** (`rsp_aa9xj`) → Shared
+  - Reason: Generic/cross-product template
+- **Regional Issues - PPP** (`rsp_acbpj`) → Shared
+  - Reason: Generic/cross-product template
+- **PPP Automated** (`rsp_af8av`) → Shared
+  - Reason: Generic/cross-product template
+- **partnership response** (`rsp_agyx3`) → Shared
+  - Reason: Generic/cross-product template
+- **politely decline** (`rsp_aozgn`) → Shared
+  - Reason: Generic/cross-product template
+- **reproducing bug ** (`rsp_ap0nb`) → Shared
+  - Reason: Generic/cross-product template
+- **not subscription found** (`rsp_ap7d3`) → Shared
+  - Reason: Generic/cross-product template
+- **canceled subscription** (`rsp_aq4w7`) → Shared
+  - Reason: Generic/cross-product template
+- **Discount Tomorrow** (`rsp_atozr`) → Shared
+  - Reason: Generic/cross-product template
+- **emails delivered correctly** (`rsp_av0cn`) → Shared
+  - Reason: Generic/cross-product template
+- **Decline Refund - Over 30 Days** (`rsp_awqh3`) → Shared
+  - Reason: Generic/cross-product template
+- **contact directly creator** (`rsp_ayr0n`) → Shared
+  - Reason: Generic/cross-product template
+- **no special discounts** (`rsp_b0q13`) → Shared
+  - Reason: Generic/cross-product template
+- **Can't Sign In - No Magic Link** (`rsp_b18ef`) → Shared
+  - Reason: Generic/cross-product template
+- **reset progress** (`rsp_b2r9j`) → Shared
+  - Reason: Generic/cross-product template
+- **magic link sent correctly** (`rsp_b3ifb`) → Shared
+  - Reason: Generic/cross-product template
+- **Deny Sponsor request** (`rsp_b7upz`) → Shared
+  - Reason: Generic/cross-product template
+- **Deny collaboration** (`rsp_b839j`) → Shared
+  - Reason: Generic/cross-product template
+- **No Student Discount** (`rsp_b83lz`) → Shared
+  - Reason: Generic/cross-product template
+- **Basic Bug Report Questions** (`rsp_b9z0n`) → Shared
+  - Reason: Generic/cross-product template
+- **No plans for additional content** (`rsp_b9z2f`) → Shared
+  - Reason: Generic/cross-product template
+- **fixed** (`rsp_bic93`) → Shared
+  - Reason: Generic/cross-product template
+- **email not found** (`rsp_bichz`) → Shared
+  - Reason: Generic/cross-product template
+- **Account sharing** (`rsp_bju2v`) → Shared
+  - Reason: Generic/cross-product template
+- **translation request** (`rsp_bl24n`) → Shared
+  - Reason: Generic/cross-product template
+- **Stack  Discounts** (`rsp_bo51j`) → Shared
+  - Reason: Generic/cross-product template
+- **Deny Guest Post Request** (`rsp_bt287`) → Shared
+  - Reason: Generic/cross-product template
+- **Free Chapter Paywall** (`rsp_bupqf`) → Shared
+  - Reason: Generic/cross-product template
+- **Why Isn't v2 Free** (`rsp_bvmfb`) → Shared
+  - Reason: Generic/cross-product template
+- **No thanks** (`rsp_bxpjb`) → Shared
+  - Reason: Generic/cross-product template
+- **Change email address** (`rsp_ccsjr`) → Shared
+  - Reason: Generic/cross-product template
+- **Bonus content PPP** (`rsp_rph0l`) → Shared
+  - Reason: Generic/cross-product template
+- **No more discounts** (`rsp_rppyd`) → Shared
+  - Reason: Generic/cross-product template
+- **Refund Request - Partner Products** (`rsp_21vnr`) → Shared
+  - Reason: Generic/cross-product template
+- **Refund Request** (`rsp_21vpj`) → Shared
+  - Reason: Generic/cross-product template
+- **Cancel Subscription** (`rsp_21vuv`) → Shared
+  - Reason: Generic/cross-product template
+- **Team Plan Inquiry** (`rsp_21w07`) → Shared
+  - Reason: Generic/cross-product template
+- **Bug Report - fixed** (`rsp_228w7`) → Shared
+  - Reason: Generic/cross-product template
+- **Subscription Not Found** (`rsp_228xz`) → Shared
+  - Reason: Generic/cross-product template
+- **Remove Credit Card Details** (`rsp_229af`) → Shared
+  - Reason: Generic/cross-product template
+- **Pro-rated Early Renewal During Sale** (`rsp_229c7`) → Shared
+  - Reason: Generic/cross-product template
+- **Change Email Request - Partner Products** (`rsp_22npj`) → Shared
+  - Reason: Generic/cross-product template
+- **Upgrade Later** (`rsp_22nwn`) → Shared
+  - Reason: Generic/cross-product template
+- **Discord Code Support Question** (`rsp_3hlqf`) → Shared
+  - Reason: Generic/cross-product template
+- **Credit Card Issue** (`rsp_3hls7`) → Shared
+  - Reason: Generic/cross-product template
+- **Update Credit Card - Cancelation** (`rsp_3nkxz`) → Shared
+  - Reason: Generic/cross-product template
+- **Update Credit Card - FYI** (`rsp_3nkzr`) → Shared
+  - Reason: Generic/cross-product template
+- **Renewal Price** (`rsp_5icav`) → Shared
+  - Reason: Generic/cross-product template
+- **Sale Price No Longer Available** (`rsp_5mr7r`) → Shared
+  - Reason: Generic/cross-product template
+- **Publish Date** (`rsp_6tzgn`) → Shared
+  - Reason: Generic/cross-product template
+- **PPP Location-restricted Video Playback** (`rsp_6z0av`) → Shared
+  - Reason: Generic/cross-product template
+- **Hard Bounce Deactivated** (`rsp_7m7yf`) → Shared
+  - Reason: Generic/cross-product template
+- **Magic Link not Received** (`rsp_82ds7`) → Shared
+  - Reason: Generic/cross-product template
+- **Magic Link - Technical Interviews** (`rsp_7rzpj`) → Technical Interviews
+  - Reason: Technical Interviews reference
+- **TJS and ER License** (`rsp_atoxz`) → Testing JavaScript
+  - Reason: Testing JavaScript reference
+- **Testing Javascript Still Worth It** (`rsp_rp8v9`) → Testing JavaScript
+  - Reason: Testing JavaScript reference
+- **Request for Invoice or Receipt - Testing JS** (`rsp_22nt3`) → Testing JavaScript
+  - Reason: Testing JavaScript reference
+- **Purchase Power Parity Limitations - Testing JS** (`rsp_22p1j`) → Testing JavaScript
+  - Reason: Testing JavaScript reference
+- **Magic Link - Testing JS** (`rsp_23bif`) → Testing JavaScript
+  - Reason: Testing JavaScript reference
+- **Discount Request - Total TypeScript** (`rsp_9xqkn`) → Total TypeScript
+  - Reason: TT prefix or totaltypescript.com reference
+- **TT: PPP FAQ Link** (`rsp_9ybt3`) → Total TypeScript
+  - Reason: TT prefix or totaltypescript.com reference
+- **TT: Launch Estimate** (`rsp_9ymh3`) → Total TypeScript
+  - Reason: TT prefix or totaltypescript.com reference
+- **TT: Lower Price Future** (`rsp_9yw07`) → Total TypeScript
+  - Reason: TT prefix or totaltypescript.com reference
+- **TT Pre-Release Link/Access** (`rsp_9yw1z`) → Total TypeScript
+  - Reason: TT prefix or totaltypescript.com reference
+- **TT: Custom Invoice** (`rsp_9zk93`) → Total TypeScript
+  - Reason: TT prefix or totaltypescript.com reference
+- **TT: Buy Now** (`rsp_a3ksn`) → Total TypeScript
+  - Reason: TT prefix or totaltypescript.com reference
+- **TT: Stackblitz** (`rsp_a6pc7`) → Total TypeScript
+  - Reason: TT prefix or totaltypescript.com reference
+- **TT: Refund** (`rsp_a6vrb`) → Total TypeScript
+  - Reason: TT prefix or totaltypescript.com reference
+- **TT Stackblitz2** (`rsp_a7w07`) → Total TypeScript
+  - Reason: TT prefix or totaltypescript.com reference
+- **TT: Bonuses PPP** (`rsp_ac1mv`) → Total TypeScript
+  - Reason: TT prefix or totaltypescript.com reference
+- **TT: Github Login** (`rsp_acvgn`) → Total TypeScript
+  - Reason: TT prefix or totaltypescript.com reference
+- **Total TypeScript Auto-Responder** (`rsp_adgzr`) → Total TypeScript
+  - Reason: TT prefix or totaltypescript.com reference
+- **total typescript learning path** (`rsp_ayzuv`) → Total TypeScript
+  - Reason: TT prefix or totaltypescript.com reference
+- **account set up payment by invoice** (`rsp_b2oef`) → Total TypeScript
+  - Reason: TT prefix or totaltypescript.com reference
+- **100% off Total TypeScript Essentials** (`rsp_bj3if`) → Total TypeScript
+  - Reason: TT prefix or totaltypescript.com reference
+- **future discount** (`rsp_brn9j`) → Total TypeScript
+  - Reason: TT prefix or totaltypescript.com reference
+- **TT Book Value** (`rsp_bun0n`) → Total TypeScript
+  - Reason: TT prefix or totaltypescript.com reference
+- **additional discount** (`rsp_bxpfr`) → Total TypeScript
+  - Reason: TT prefix or totaltypescript.com reference
+- **collaboration matt** (`rsp_c18p3`) → Total TypeScript
+  - Reason: TT prefix or totaltypescript.com reference
+- **Matt Discord** (`rsp_c6pxj`) → Total TypeScript
+  - Reason: TT prefix or totaltypescript.com reference
+- **New content** (`rsp_rp1t1`) → Total TypeScript
+  - Reason: TT prefix or totaltypescript.com reference
+- **Future discount** (`rsp_rp1wl`) → Total TypeScript
+  - Reason: TT prefix or totaltypescript.com reference
+- **appreciate code feedback** (`rsp_rpbc5`) → Total TypeScript
+  - Reason: TT prefix or totaltypescript.com reference
+
+---
+
+_This log was generated by the template organization script._

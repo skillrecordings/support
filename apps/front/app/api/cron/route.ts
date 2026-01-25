@@ -1,35 +1,41 @@
+import { initializeAxiom, log } from '@skillrecordings/core/observability/axiom'
 import { headers } from 'next/headers'
-import { log, initializeAxiom } from '@skillrecordings/core/observability/axiom'
 
 export const dynamic = 'force-dynamic'
 
 /**
  * Cron endpoint that refreshes Inngest function registration.
  * Runs every 5 minutes via Vercel Crons.
- * 
+ *
  * This ensures new/updated workflows are registered with Inngest Cloud.
  */
 export async function GET(request: Request) {
   initializeAxiom()
-  
+
   const headersList = await headers()
   const isVercelCron = headersList.get('x-vercel-cron') === '1'
   const userAgent = headersList.get('user-agent') || ''
-  
+
   await log('info', 'cron triggered', {
     workflow: 'inngest-refresh-cron',
     isVercelCron,
     userAgent: userAgent.slice(0, 100),
   })
 
-  // Use request URL origin to stay on the same deployment
-  // VERCEL_URL can point to preview deploys with auth protection
-  const url = new URL(request.url)
-  const baseUrl = url.origin
+  // Use production URL to avoid hitting preview deploys with auth protection
+  // request.url during Vercel cron invocations points to the preview deploy URL
+  // which fails with 401 due to Vercel authentication
+  const PRODUCTION_URL = 'https://skill-support-agent-front.vercel.app'
+  const isDev = process.env.NODE_ENV === 'development'
+
+  const requestUrl = new URL(request.url)
+  const baseUrl = isDev ? requestUrl.origin : PRODUCTION_URL
 
   await log('debug', 'cron using baseUrl', {
     workflow: 'inngest-refresh-cron',
     baseUrl,
+    isDev,
+    requestOrigin: requestUrl.origin,
     vercelUrl: process.env.VERCEL_URL,
   })
 
@@ -62,10 +68,13 @@ export async function GET(request: Request) {
       })
     }
 
-    return new Response(JSON.stringify({ ok, status, body: body.slice(0, 200) }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    })
+    return new Response(
+      JSON.stringify({ ok, status, body: body.slice(0, 200) }),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    )
   } catch (error) {
     await log('error', 'inngest refresh error', {
       workflow: 'inngest-refresh-cron',
