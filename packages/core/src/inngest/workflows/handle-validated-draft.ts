@@ -129,6 +129,10 @@ export const handleValidatedDraft = inngest.createFunction(
             // Keep full context for backward compatibility
             context: context ?? undefined,
           },
+          // Dedicated columns for queryability
+          category: context?.category,
+          confidence: context?.confidence ?? decision.score,
+          reasoning: context?.reasoning,
           requires_approval: false,
           created_at: new Date(),
         })
@@ -228,6 +232,10 @@ export const handleValidatedDraft = inngest.createFunction(
           // Keep full context for backward compatibility
           context: context ?? undefined,
         },
+        // Dedicated columns for queryability
+        category: context?.category,
+        confidence: context?.confidence ?? decision.score,
+        reasoning: context?.reasoning,
         requires_approval: true,
         created_at: new Date(),
       })
