@@ -21,6 +21,6 @@
       "workshop setup details can vary"
     ]
   },
-  "expectedCategory": "support_technical",
-  "expectedAction": "respond"
+  "expectedCategory": "presales_faq",
+  "expectedAction": "escalate_instructor"
 }

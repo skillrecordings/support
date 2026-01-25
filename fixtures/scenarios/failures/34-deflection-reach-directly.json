@@ -21,6 +21,6 @@
       "through the product website"
     ]
   },
-  "expectedCategory": "support_billing",
-  "expectedAction": "respond"
+  "expectedCategory": "presales_team",
+  "expectedAction": "escalate_human"
 }
