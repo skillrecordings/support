@@ -48,7 +48,14 @@ export {
   getThreadRoutingRules,
 } from './steps/route'
 export { gather, formatContextForPrompt, extractEmail } from './steps/gather'
-export { draft, getPromptForCategory } from './steps/draft'
+export {
+  draft,
+  getPromptForCategory,
+  storeDraftCorrection,
+  storeDraftSuccess,
+  type DraftResult,
+  type StoreDraftCorrectionInput,
+} from './steps/draft'
 export { validate, formatIssues, hasIssueType } from './steps/validate'
 // Thread signals (v3)
 export {

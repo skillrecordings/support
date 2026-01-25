@@ -8,12 +8,14 @@
 
 import { randomUUID } from 'crypto'
 import { ActionsTable, getDb } from '@skillrecordings/database'
+import { createFrontClient } from '@skillrecordings/front-sdk'
 import {
   initializeAxiom,
   log,
   traceApprovalRequested,
   traceWorkflowStep,
 } from '../../observability/axiom'
+import { formatApprovalComment } from '../../pipeline/steps/comment'
 import { inngest } from '../client'
 import {
   SUPPORT_ACTION_APPROVED,
@@ -242,6 +244,81 @@ export const handleValidatedDraft = inngest.createFunction(
       })
 
       return id
+    })
+
+    // Add approval comment to Front conversation
+    await step.run('add-approval-comment', async () => {
+      const stepStartTime = Date.now()
+
+      const frontToken = process.env.FRONT_API_TOKEN
+      if (!frontToken) {
+        await log(
+          'warn',
+          'FRONT_API_TOKEN not set, skipping approval comment',
+          {
+            workflow: 'support-handle-validated',
+            step: 'add-approval-comment',
+            conversationId,
+          }
+        )
+        return { added: false, error: 'FRONT_API_TOKEN not configured' }
+      }
+
+      try {
+        const front = createFrontClient({ apiToken: frontToken })
+
+        const commentBody = formatApprovalComment({
+          draft: draft.content,
+          reviewReason: decision.reason,
+          confidence: decision.score,
+          category: context?.category,
+          customerEmail: context?.customerEmail,
+        })
+
+        await front.conversations.addComment(conversationId, commentBody)
+
+        const durationMs = Date.now() - stepStartTime
+
+        await log('info', 'approval comment added to conversation', {
+          workflow: 'support-handle-validated',
+          step: 'add-approval-comment',
+          conversationId,
+          appId,
+          durationMs,
+        })
+
+        await traceWorkflowStep({
+          workflowName: 'support-handle-validated',
+          conversationId,
+          appId,
+          stepName: 'add-approval-comment',
+          durationMs,
+          success: true,
+        })
+
+        return { added: true }
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : String(error)
+
+        await log('error', 'failed to add approval comment', {
+          workflow: 'support-handle-validated',
+          step: 'add-approval-comment',
+          conversationId,
+          error: errorMsg,
+        })
+
+        await traceWorkflowStep({
+          workflowName: 'support-handle-validated',
+          conversationId,
+          appId,
+          stepName: 'add-approval-comment',
+          durationMs: Date.now() - stepStartTime,
+          success: false,
+          metadata: { error: errorMsg },
+        })
+
+        return { added: false, error: errorMsg }
+      }
     })
 
     await log('debug', 'emitting approval requested event', {

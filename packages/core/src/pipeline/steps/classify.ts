@@ -3,10 +3,21 @@
  *
  * Categorizes incoming messages before any other processing.
  * Uses a combination of rules and LLM for nuanced classification.
+ *
+ * Memory Integration:
+ * Before LLM classification, queries memory for similar past tickets
+ * and their outcomes to improve classification accuracy.
  */
 
+import { SupportMemoryService } from '@skillrecordings/memory/support-memory'
 import { generateObject } from 'ai'
 import { z } from 'zod'
+import {
+  type RelevantMemory,
+  citeMemories,
+  formatMemoriesCompact,
+  queryMemoriesForStage,
+} from '../../memory/query'
 import type {
   ClassifyInput,
   ClassifyOutput,
@@ -363,14 +374,49 @@ Output your classification with confidence (0-1) and brief reasoning.`
 export async function llmClassify(
   input: ClassifyInput,
   signals: MessageSignals,
-  model: string = 'anthropic/claude-haiku-4-5'
-): Promise<ClassifyOutput> {
+  model: string = 'anthropic/claude-haiku-4-5',
+  options: { appId?: string; runId?: string } = {}
+): Promise<ClassifyOutput & { citedMemoryIds?: string[] }> {
   const message = `Subject: ${input.subject}\n\nBody:\n${input.body}`
+
+  // Query memories for similar past classifications
+  let memoryContext = ''
+  let citedMemoryIds: string[] = []
+
+  if (options.appId) {
+    try {
+      const memories = await queryMemoriesForStage({
+        appId: options.appId,
+        stage: 'classify',
+        situation: message,
+        limit: 5,
+        threshold: 0.6,
+      })
+
+      if (memories.length > 0) {
+        memoryContext = formatMemoriesCompact(memories)
+        citedMemoryIds = memories.map((m) => m.id)
+
+        // Record citation if we have a run ID
+        if (options.runId && citedMemoryIds.length > 0) {
+          await citeMemories(citedMemoryIds, options.runId, options.appId)
+        }
+      }
+    } catch (error) {
+      // Log but don't fail classification if memory query fails
+      console.warn('[classify] Memory query failed:', error)
+    }
+  }
+
+  // Build prompt with memory context if available
+  const systemPrompt = memoryContext
+    ? `${memoryContext}\n\n${CLASSIFY_PROMPT}`
+    : CLASSIFY_PROMPT
 
   const { object } = await generateObject({
     model,
     schema: classifySchema,
-    system: CLASSIFY_PROMPT,
+    system: systemPrompt,
     prompt: message,
   })
 
@@ -379,6 +425,7 @@ export async function llmClassify(
     confidence: object.confidence,
     signals,
     reasoning: object.reasoning,
+    citedMemoryIds: citedMemoryIds.length > 0 ? citedMemoryIds : undefined,
   }
 }
 
@@ -389,13 +436,21 @@ export async function llmClassify(
 export interface ClassifyOptions {
   model?: string
   forceLLM?: boolean // Skip fast-path, always use LLM
+  appId?: string // App ID for memory queries
+  conversationId?: string // For memory citation tracking
+  runId?: string // Pipeline run ID for citation tracking
 }
 
 export async function classify(
   input: ClassifyInput,
   options: ClassifyOptions = {}
-): Promise<ClassifyOutput> {
-  const { model = 'anthropic/claude-haiku-4-5', forceLLM = false } = options
+): Promise<ClassifyOutput & { citedMemoryIds?: string[] }> {
+  const {
+    model = 'anthropic/claude-haiku-4-5',
+    forceLLM = false,
+    appId,
+    runId,
+  } = options
 
   // Extract signals first (always)
   const signals = extractSignals(input)
@@ -408,8 +463,8 @@ export async function classify(
     }
   }
 
-  // Fall back to LLM
-  return llmClassify(input, signals, model)
+  // Fall back to LLM (with memory integration)
+  return llmClassify(input, signals, model, { appId, runId })
 }
 
 // ============================================================================
@@ -754,13 +809,14 @@ export function fastClassifyThread(
 }
 
 /**
- * Thread-aware LLM classification.
+ * Thread-aware LLM classification with memory integration.
  */
 export async function llmClassifyThread(
   input: ThreadClassifyInput,
   signals: ThreadSignals,
-  model: string = 'anthropic/claude-haiku-4-5'
-): Promise<ThreadClassifyOutput> {
+  model: string = 'anthropic/claude-haiku-4-5',
+  options: { runId?: string } = {}
+): Promise<ThreadClassifyOutput & { citedMemoryIds?: string[] }> {
   // Build thread context for prompt
   const threadContext = `
 Thread with ${signals.threadLength} messages over ${signals.threadDurationHours.toFixed(1)} hours.
@@ -780,12 +836,47 @@ Last responder: ${signals.lastResponderType}
     })
     .join('\n\n')
 
+  // Query memories for similar past thread classifications
+  let memoryContext = ''
+  let citedMemoryIds: string[] = []
+
+  try {
+    // Use the trigger message for semantic search
+    const situation = `Subject: ${input.triggerMessage.subject || ''}\n\n${input.triggerMessage.body}`
+
+    const memories = await queryMemoriesForStage({
+      appId: input.appId,
+      stage: 'classify',
+      situation,
+      limit: 5,
+      threshold: 0.6,
+    })
+
+    if (memories.length > 0) {
+      memoryContext = formatMemoriesCompact(memories)
+      citedMemoryIds = memories.map((m) => m.id)
+
+      // Record citation if we have a run ID
+      if (options.runId && citedMemoryIds.length > 0) {
+        await citeMemories(citedMemoryIds, options.runId, input.appId)
+      }
+    }
+  } catch (error) {
+    // Log but don't fail classification if memory query fails
+    console.warn('[classifyThread] Memory query failed:', error)
+  }
+
+  // Build prompt with memory context if available
+  const systemPrompt = memoryContext
+    ? `${memoryContext}\n\n${THREAD_CLASSIFY_PROMPT}`
+    : THREAD_CLASSIFY_PROMPT
+
   const prompt = `${threadContext}\n\n---\n\nMessages:\n${messageHistory}`
 
   const { object } = await generateObject({
     model,
     schema: threadClassifySchema,
-    system: THREAD_CLASSIFY_PROMPT,
+    system: systemPrompt,
     prompt,
   })
 
@@ -794,18 +885,23 @@ Last responder: ${signals.lastResponderType}
     confidence: object.confidence,
     signals,
     reasoning: object.reasoning,
+    citedMemoryIds: citedMemoryIds.length > 0 ? citedMemoryIds : undefined,
   }
 }
 
 /**
  * Main thread classification function.
- * Uses fast-path when possible, falls back to LLM.
+ * Uses fast-path when possible, falls back to LLM with memory integration.
  */
 export async function classifyThread(
   input: ThreadClassifyInput,
   options: ClassifyOptions = {}
-): Promise<ThreadClassifyOutput> {
-  const { model = 'anthropic/claude-haiku-4-5', forceLLM = false } = options
+): Promise<ThreadClassifyOutput & { citedMemoryIds?: string[] }> {
+  const {
+    model = 'anthropic/claude-haiku-4-5',
+    forceLLM = false,
+    runId,
+  } = options
 
   // Compute thread signals
   const signals = computeThreadSignals(input)
@@ -818,6 +914,95 @@ export async function classifyThread(
     }
   }
 
-  // Fall back to LLM
-  return llmClassifyThread(input, signals, model)
+  // Fall back to LLM with memory integration
+  return llmClassifyThread(input, signals, model, { runId })
+}
+
+// ============================================================================
+// Misclassification Learning
+// ============================================================================
+
+export interface RecordMisclassificationInput {
+  /** App identifier */
+  appId: string
+  /** Original message subject */
+  subject: string
+  /** Original message body */
+  body: string
+  /** What the agent classified it as */
+  originalCategory: MessageCategory
+  /** What the human corrected it to */
+  correctedCategory: MessageCategory
+  /** Conversation ID for tracking */
+  conversationId: string
+  /** Optional: The run ID that produced the misclassification */
+  runId?: string
+  /** Optional: Memory IDs that were cited in the original classification */
+  citedMemoryIds?: string[]
+}
+
+/**
+ * Record a classification correction to memory.
+ *
+ * Call this when a human corrects an agent's classification.
+ * Stores the mistake so future similar tickets can learn from it.
+ *
+ * @example
+ * ```typescript
+ * await recordMisclassification({
+ *   appId: 'total-typescript',
+ *   subject: 'Invoice needed',
+ *   body: 'I need an invoice for my company...',
+ *   originalCategory: 'support_access',
+ *   correctedCategory: 'support_billing',
+ *   conversationId: 'cnv_abc123'
+ * })
+ * ```
+ */
+export async function recordMisclassification(
+  input: RecordMisclassificationInput
+): Promise<void> {
+  const {
+    appId,
+    subject,
+    body,
+    originalCategory,
+    correctedCategory,
+    conversationId,
+    runId,
+    citedMemoryIds,
+  } = input
+
+  const situation = `Subject: ${subject}\n\n${body}`
+
+  // Store the misclassification as a memory for future learning
+  await SupportMemoryService.store({
+    app_slug: appId,
+    situation,
+    decision: `Classified as: ${originalCategory}`,
+    stage: 'classify',
+    outcome: 'corrected',
+    correction: `Should have been: ${correctedCategory}`,
+    category: correctedCategory,
+    conversation_id: conversationId,
+    tags: ['misclassification', originalCategory, correctedCategory],
+  })
+
+  // If we know which memories were cited in the failed classification,
+  // record the failure outcome for those memories
+  if (runId && citedMemoryIds && citedMemoryIds.length > 0) {
+    try {
+      await SupportMemoryService.recordCitationOutcome(
+        citedMemoryIds,
+        runId,
+        'failure',
+        appId
+      )
+    } catch (error) {
+      console.warn(
+        '[recordMisclassification] Failed to record citation outcome:',
+        error
+      )
+    }
+  }
 }
