@@ -124,7 +124,7 @@ async function createGatherTools(appId: string): Promise<GatherTools> {
         return results.map((r) => ({
           id: r.memory.id,
           content: r.memory.content,
-          tags: r.memory.metadata.tags || [],
+          tags: (r.memory.metadata as { tags?: string[] }).tags || [],
           relevance: r.score,
         }))
       } catch (error) {
