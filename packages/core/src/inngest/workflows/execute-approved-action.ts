@@ -7,6 +7,7 @@ import {
 } from '@skillrecordings/database'
 import { createFrontClient as createFrontSdkClient } from '@skillrecordings/front-sdk'
 import { createFrontClient } from '../../front'
+import { formatAuditComment } from '../../pipeline/steps/comment'
 import { supportTools } from '../../tools'
 import type { ExecutionContext } from '../../tools/types'
 import { inngest } from '../client'
@@ -264,7 +265,68 @@ export const executeApprovedAction = inngest.createFunction(
       }
     })
 
-    // Step 3: Update action status and approval request
+    // Step 3: Add audit trail comment for auto-sends
+    // Configurable via ENABLE_AUDIT_COMMENTS env var (defaults to true)
+    const auditCommentsEnabled = process.env.ENABLE_AUDIT_COMMENTS !== 'false'
+
+    if (
+      auditCommentsEnabled &&
+      result.success &&
+      approvedBy === 'auto' &&
+      (action.type === 'send-draft' || action.type === 'draft-response')
+    ) {
+      await step.run('add-audit-comment', async () => {
+        const frontToken = process.env.FRONT_API_TOKEN
+        if (!frontToken) {
+          // Non-fatal - skip audit comment if token not configured
+          return { added: false, error: 'FRONT_API_TOKEN not configured' }
+        }
+
+        const conversationId = action.conversation_id
+        if (!conversationId) {
+          return { added: false, error: 'No conversation_id' }
+        }
+
+        try {
+          const front = createFrontSdkClient({ apiToken: frontToken })
+
+          // Extract classification data from action parameters
+          const params = action.parameters as {
+            validationScore?: number
+            autoApproved?: boolean
+            context?: {
+              category?: string
+              customerEmail?: string
+              confidence?: number
+            }
+          }
+
+          const category = params.context?.category ?? 'unknown'
+          // Use validation score as confidence proxy, or context confidence if available
+          const confidence =
+            params.context?.confidence ?? params.validationScore ?? 0
+
+          const auditComment = formatAuditComment({
+            action: 'auto_sent',
+            category,
+            confidence,
+            timestamp: new Date(),
+          })
+
+          await front.conversations.addComment(conversationId, auditComment)
+
+          return { added: true }
+        } catch (error) {
+          // Non-fatal - continue even if audit comment fails
+          return {
+            added: false,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          }
+        }
+      })
+    }
+
+    // Step 4: Update action status and approval request
     await step.run('update-action-status', async () => {
       const db = getDb()
 

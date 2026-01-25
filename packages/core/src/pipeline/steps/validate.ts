@@ -3,10 +3,16 @@
  *
  * Checks draft response for quality issues before sending.
  * All checks are deterministic (no LLM) - fast and predictable.
+ *
+ * Memory Integration:
+ * Before returning, queries memory for similar corrected drafts to catch
+ * repeated mistakes. This is the "does this draft repeat a known mistake?" check.
  */
 
+import { type RelevantMemory, queryCorrectedMemories } from '../../memory/query'
 import type {
   GatherOutput,
+  MessageCategory,
   ValidateInput,
   ValidateOutput,
   ValidationIssue,
@@ -198,7 +204,35 @@ function checkLength(draft: string): ValidationIssue[] {
 // Main validate function
 // ============================================================================
 
-export function validate(input: ValidateInput): ValidateOutput {
+/**
+ * Options for memory-enhanced validation
+ */
+export interface ValidateOptions {
+  /** App ID for memory lookup */
+  appId?: string
+  /** Category of the support request (for more targeted memory queries) */
+  category?: MessageCategory
+  /** Skip memory query (for testing or when memory service unavailable) */
+  skipMemoryQuery?: boolean
+  /** Similarity threshold for matching corrections (default: 0.7) */
+  correctionThreshold?: number
+}
+
+/**
+ * Extended validation result with memory context
+ */
+export interface ValidateResult extends ValidateOutput {
+  /** Corrections that were checked against */
+  correctionsChecked?: RelevantMemory[]
+  /** Whether memory check was performed */
+  memoryCheckPerformed: boolean
+}
+
+/**
+ * Synchronous validation - pattern checks only, no memory lookup.
+ * Use this for fast, deterministic validation when memory isn't needed.
+ */
+export function validateSync(input: ValidateInput): ValidateOutput {
   const { draft, context, strictMode = false } = input
 
   const allIssues: ValidationIssue[] = [
@@ -223,6 +257,195 @@ export function validate(input: ValidateInput): ValidateOutput {
       ? 'Response has quality issues that would be visible to customers'
       : undefined,
   }
+}
+
+/**
+ * Full validation with memory integration.
+ * Queries memory for similar corrected drafts to catch repeated mistakes.
+ *
+ * @example
+ * ```typescript
+ * const result = await validate(
+ *   { draft, context },
+ *   { appId: 'total-typescript', category: 'support_refund' }
+ * )
+ *
+ * if (!result.valid) {
+ *   console.log('Issues:', result.issues)
+ *   console.log('Corrections checked:', result.correctionsChecked?.length)
+ * }
+ * ```
+ */
+export async function validate(
+  input: ValidateInput,
+  options: ValidateOptions = {}
+): Promise<ValidateResult> {
+  const { draft, context, strictMode = false } = input
+  const {
+    appId,
+    category,
+    skipMemoryQuery = false,
+    correctionThreshold = 0.7,
+  } = options
+
+  // Start with synchronous pattern checks
+  const allIssues: ValidationIssue[] = [
+    ...checkInternalLeaks(draft),
+    ...checkMetaCommentary(draft),
+    ...checkBannedPhrases(draft),
+    ...checkFabrication(draft, context),
+    ...checkLength(draft),
+  ]
+
+  let correctionsChecked: RelevantMemory[] | undefined
+  let memoryCheckPerformed = false
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Memory Check: Does this draft repeat a known mistake?
+  // ─────────────────────────────────────────────────────────────────────────
+  if (!skipMemoryQuery && appId) {
+    try {
+      // Build situation context for memory query
+      const situation = buildValidationSituation(category, draft)
+
+      // Query specifically for corrected memories (mistakes we've learned from)
+      const corrections = await queryCorrectedMemories({
+        appId,
+        situation,
+        stage: 'draft',
+        limit: 5,
+      })
+
+      memoryCheckPerformed = true
+      correctionsChecked = corrections
+
+      // Check if current draft repeats any known mistakes
+      if (corrections.length > 0) {
+        const memoryIssues = await checkAgainstCorrections(
+          draft,
+          corrections,
+          correctionThreshold
+        )
+        allIssues.push(...memoryIssues)
+      }
+    } catch (error) {
+      // Memory query failed - log but don't fail validation
+      console.warn(
+        '[validate] Memory query failed, continuing without memory check:',
+        error
+      )
+      memoryCheckPerformed = false
+    }
+  }
+
+  // In strict mode, warnings are errors
+  const hasErrors = allIssues.some((i) => i.severity === 'error')
+
+  return {
+    valid: !hasErrors,
+    issues: allIssues,
+    suggestion: hasErrors
+      ? 'Response has quality issues that would be visible to customers'
+      : undefined,
+    correctionsChecked,
+    memoryCheckPerformed,
+  }
+}
+
+/**
+ * Build a situation string for memory query from validation context.
+ */
+function buildValidationSituation(
+  category: MessageCategory | undefined,
+  draft: string
+): string {
+  const parts: string[] = []
+
+  if (category) {
+    parts.push(`Category: ${category}`)
+  }
+
+  // Include draft content (truncated for query efficiency)
+  const draftPreview = draft.slice(0, 300)
+  parts.push(`Draft: ${draftPreview}`)
+
+  return parts.join('\n')
+}
+
+/**
+ * Check if draft content matches any known corrections.
+ * Uses text similarity to detect potential repeated mistakes.
+ */
+async function checkAgainstCorrections(
+  draft: string,
+  corrections: RelevantMemory[],
+  threshold: number
+): Promise<ValidationIssue[]> {
+  const issues: ValidationIssue[] = []
+
+  for (const correction of corrections) {
+    // Only flag if similarity is above threshold AND score is high
+    // (high score means the situation is very similar)
+    if (correction.score >= threshold) {
+      // Check if draft contains similar problematic patterns
+      const similarity = textSimilarity(draft, correction.decision)
+
+      if (similarity >= 0.6) {
+        // Draft is similar to a known bad decision
+        issues.push({
+          type: 'repeated_mistake',
+          severity: 'error',
+          message: `Draft may repeat a previously corrected mistake`,
+          match: correction.correction
+            ? `Previously corrected: ${truncate(correction.correction, 100)}`
+            : `Similar to failed draft (${Math.round(correction.score * 100)}% match)`,
+        })
+      }
+    }
+  }
+
+  return issues
+}
+
+/**
+ * Simple text similarity using Jaccard coefficient on word sets.
+ * Good enough for detecting if two texts cover similar content.
+ */
+function textSimilarity(text1: string, text2: string): number {
+  const normalize = (text: string): string[] => {
+    return text
+      .toLowerCase()
+      .replace(/[^\w\s]/g, ' ')
+      .split(/\s+/)
+      .filter((word) => word.length > 2)
+  }
+
+  const words1 = normalize(text1)
+  const words2 = normalize(text2)
+
+  if (words1.length === 0 || words2.length === 0) return 0
+
+  const set1 = new Set(words1)
+  const set2 = new Set(words2)
+
+  // Count intersection
+  let intersectionCount = 0
+  for (const word of words1) {
+    if (set2.has(word)) {
+      intersectionCount++
+      set2.delete(word) // Avoid double counting
+    }
+  }
+
+  // Union size = set1 size + remaining set2 size
+  const unionSize = set1.size + set2.size
+
+  return intersectionCount / unionSize
+}
+
+function truncate(text: string, maxLength: number): string {
+  if (text.length <= maxLength) return text
+  return text.slice(0, maxLength - 3) + '...'
 }
 
 // ============================================================================
