@@ -49,28 +49,21 @@ export const executeApprovedAction = inngest.createFunction(
 
     // Step 2: Execute based on action type
     const result = await step.run('execute-action', async () => {
-      // Handle draft-response: create draft in Front
-      if (action.type === 'draft-response') {
+      // Handle send-draft (from handle-validated-draft) or draft-response
+      if (action.type === 'send-draft' || action.type === 'draft-response') {
         const params = action.parameters as {
           response?: string
+          draft?: string // from send-draft action type
           inboxId?: string
         }
-        const response = params?.response
-        const inboxId = params?.inboxId
+        // Support both 'draft' (from send-draft) and 'response' (from draft-response)
+        const response = params?.draft || params?.response
 
         if (!response) {
           return {
             success: false,
             output: null,
-            error: 'No response text in draft-response action',
-          }
-        }
-
-        if (!inboxId) {
-          return {
-            success: false,
-            output: null,
-            error: 'No inboxId in draft-response action',
+            error: 'No response/draft text in action',
           }
         }
 
@@ -93,7 +86,29 @@ export const executeApprovedAction = inngest.createFunction(
           }
         }
 
-        const draft = await front.createDraft(conversationId, response, inboxId)
+        // Get channel ID for creating draft (required by Front API)
+        let channelId: string | null = params?.inboxId ?? null // legacy param name
+        if (!channelId) {
+          // Look up inbox then channel from conversation
+          const inboxId = await front.getConversationInbox(conversationId)
+          if (inboxId) {
+            channelId = await front.getInboxChannel(inboxId)
+          }
+        }
+
+        if (!channelId) {
+          return {
+            success: false,
+            output: null,
+            error: 'Could not determine channel for draft',
+          }
+        }
+
+        const draft = await front.createDraft(
+          conversationId,
+          response,
+          channelId
+        )
         return {
           success: true,
           output: { draftId: draft.id, conversationId },
