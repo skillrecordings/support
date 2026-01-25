@@ -15,6 +15,7 @@ import {
   formatMemoriesCompact,
   queryMemoriesForStage,
 } from '../../memory/query'
+import { log, traceRouting } from '../../observability/axiom'
 import type {
   AppConfig,
   MessageCategory,
@@ -152,21 +153,50 @@ const ROUTING_RULES: RoutingRule[] = [
 // ============================================================================
 
 export function route(input: RouteInput): RouteOutput {
+  const startTime = Date.now()
+
   // Apply rules in order (first match wins)
   for (const rule of ROUTING_RULES) {
     if (rule.condition(input)) {
-      return {
+      const result = {
         action: rule.action,
         reason: rule.reason,
       }
+
+      // Fire-and-forget logging (sync function can't await)
+      log('info', 'route decision made', {
+        workflow: 'pipeline',
+        step: 'route',
+        appId: input.appConfig?.appId,
+        category: input.classification.category,
+        confidence: input.classification.confidence,
+        action: result.action,
+        reason: result.reason,
+        ruleName: rule.name,
+        durationMs: Date.now() - startTime,
+      }).catch(() => {})
+
+      return result
     }
   }
 
   // Default: escalate if nothing matched
-  return {
-    action: 'escalate_human',
+  const defaultResult = {
+    action: 'escalate_human' as const,
     reason: 'No routing rule matched - needs human review',
   }
+
+  log('info', 'route decision made (default)', {
+    workflow: 'pipeline',
+    step: 'route',
+    appId: input.appConfig?.appId,
+    category: input.classification.category,
+    action: defaultResult.action,
+    reason: defaultResult.reason,
+    durationMs: Date.now() - startTime,
+  }).catch(() => {})
+
+  return defaultResult
 }
 
 // ============================================================================
@@ -441,19 +471,49 @@ const THREAD_ROUTING_RULES: ThreadRoutingRule[] = [
  * Includes thread-aware rules (resolved, awaiting, support_teammate).
  */
 export function routeThread(input: ThreadRouteInput): RouteOutput {
+  const startTime = Date.now()
+
   for (const rule of THREAD_ROUTING_RULES) {
     if (rule.condition(input)) {
-      return {
+      const result = {
         action: rule.action,
         reason: rule.reason,
       }
+
+      // Fire-and-forget logging
+      log('info', 'routeThread decision made', {
+        workflow: 'pipeline',
+        step: 'routeThread',
+        appId: input.appConfig?.appId,
+        category: input.classification.category,
+        confidence: input.classification.confidence,
+        threadLength: input.classification.signals.threadLength,
+        action: result.action,
+        reason: result.reason,
+        ruleName: rule.name,
+        durationMs: Date.now() - startTime,
+      }).catch(() => {})
+
+      return result
     }
   }
 
-  return {
-    action: 'escalate_human',
+  const defaultResult = {
+    action: 'escalate_human' as const,
     reason: 'No routing rule matched - needs human review',
   }
+
+  log('info', 'routeThread decision made (default)', {
+    workflow: 'pipeline',
+    step: 'routeThread',
+    appId: input.appConfig?.appId,
+    category: input.classification.category,
+    action: defaultResult.action,
+    reason: defaultResult.reason,
+    durationMs: Date.now() - startTime,
+  }).catch(() => {})
+
+  return defaultResult
 }
 
 /**
@@ -518,6 +578,16 @@ export async function routeWithMemory(
 ): Promise<RouteWithMemoryOutput> {
   const { message, classification, appConfig, conversationId, runId } = input
 
+  const startTime = Date.now()
+
+  await log('debug', 'routeWithMemory started', {
+    workflow: 'pipeline',
+    step: 'routeWithMemory',
+    appId: appConfig.appId,
+    conversationId,
+    category: classification.category,
+  })
+
   // Get base rule-based routing first
   const baseResult = route({ message, classification, appConfig })
 
@@ -544,6 +614,17 @@ export async function routeWithMemory(
       // Analyze memories for routing guidance
       memoryOverride = analyzeMemoriesForRouting(memories, baseResult.action)
 
+      await log('debug', 'routeWithMemory memory query results', {
+        workflow: 'pipeline',
+        step: 'routeWithMemory',
+        appId: appConfig.appId,
+        conversationId,
+        memoriesFound: memories.length,
+        topScore: memories[0]?.score ?? 0,
+        hasOverride: !!memoryOverride,
+        suggestedOverride: memoryOverride?.suggestedAction,
+      })
+
       // Record citation if we have a run ID
       if (runId) {
         const citedIds = memories.map((m) => m.id)
@@ -551,9 +632,28 @@ export async function routeWithMemory(
       }
     }
   } catch (error) {
-    // Log but don't fail routing if memory query fails
-    console.warn('[route] Memory query failed:', error)
+    await log('warn', 'routeWithMemory memory query failed', {
+      workflow: 'pipeline',
+      step: 'routeWithMemory',
+      appId: appConfig.appId,
+      conversationId,
+      error: error instanceof Error ? error.message : String(error),
+    })
   }
+
+  const durationMs = Date.now() - startTime
+
+  await log('info', 'routeWithMemory completed', {
+    workflow: 'pipeline',
+    step: 'routeWithMemory',
+    appId: appConfig.appId,
+    conversationId,
+    action: baseResult.action,
+    reason: baseResult.reason,
+    memoriesCited: memories.length,
+    hasOverride: !!memoryOverride,
+    durationMs,
+  })
 
   // If memory strongly suggests a different action, include the recommendation
   // but don't override automatically - let the caller decide
@@ -586,6 +686,17 @@ export async function routeThreadWithMemory(
 ): Promise<RouteWithMemoryOutput> {
   const { classification, appConfig, conversationId, runId } = input
 
+  const startTime = Date.now()
+
+  await log('debug', 'routeThreadWithMemory started', {
+    workflow: 'pipeline',
+    step: 'routeThreadWithMemory',
+    appId: appConfig.appId,
+    conversationId,
+    category: classification.category,
+    threadLength: classification.signals.threadLength,
+  })
+
   // Get base rule-based routing first
   const baseResult = routeThread({ classification, appConfig })
 
@@ -612,6 +723,17 @@ export async function routeThreadWithMemory(
       // Analyze memories for routing guidance
       memoryOverride = analyzeMemoriesForRouting(memories, baseResult.action)
 
+      await log('debug', 'routeThreadWithMemory memory query results', {
+        workflow: 'pipeline',
+        step: 'routeThreadWithMemory',
+        appId: appConfig.appId,
+        conversationId,
+        memoriesFound: memories.length,
+        topScore: memories[0]?.score ?? 0,
+        hasOverride: !!memoryOverride,
+        suggestedOverride: memoryOverride?.suggestedAction,
+      })
+
       // Record citation if we have a run ID
       if (runId) {
         const citedIds = memories.map((m) => m.id)
@@ -619,9 +741,28 @@ export async function routeThreadWithMemory(
       }
     }
   } catch (error) {
-    // Log but don't fail routing if memory query fails
-    console.warn('[routeThread] Memory query failed:', error)
+    await log('warn', 'routeThreadWithMemory memory query failed', {
+      workflow: 'pipeline',
+      step: 'routeThreadWithMemory',
+      appId: appConfig.appId,
+      conversationId,
+      error: error instanceof Error ? error.message : String(error),
+    })
   }
+
+  const durationMs = Date.now() - startTime
+
+  await log('info', 'routeThreadWithMemory completed', {
+    workflow: 'pipeline',
+    step: 'routeThreadWithMemory',
+    appId: appConfig.appId,
+    conversationId,
+    action: baseResult.action,
+    reason: baseResult.reason,
+    memoriesCited: memories.length,
+    hasOverride: !!memoryOverride,
+    durationMs,
+  })
 
   return {
     action: baseResult.action,

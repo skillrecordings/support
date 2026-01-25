@@ -18,6 +18,7 @@ import {
   formatMemoriesCompact,
   queryMemoriesForStage,
 } from '../../memory/query'
+import { log, traceClassification } from '../../observability/axiom'
 import type {
   ClassifyInput,
   ClassifyOutput,
@@ -397,6 +398,15 @@ export async function llmClassify(
         memoryContext = formatMemoriesCompact(memories)
         citedMemoryIds = memories.map((m) => m.id)
 
+        await log('debug', 'classify memory query results', {
+          workflow: 'pipeline',
+          step: 'classify',
+          appId: options.appId,
+          memoriesFound: memories.length,
+          topScore: memories[0]?.score ?? 0,
+          memoryIds: citedMemoryIds,
+        })
+
         // Record citation if we have a run ID
         if (options.runId && citedMemoryIds.length > 0) {
           await citeMemories(citedMemoryIds, options.runId, options.appId)
@@ -404,7 +414,12 @@ export async function llmClassify(
       }
     } catch (error) {
       // Log but don't fail classification if memory query fails
-      console.warn('[classify] Memory query failed:', error)
+      await log('warn', 'classify memory query failed', {
+        workflow: 'pipeline',
+        step: 'classify',
+        appId: options.appId,
+        error: error instanceof Error ? error.message : String(error),
+      })
     }
   }
 
@@ -450,7 +465,19 @@ export async function classify(
     forceLLM = false,
     appId,
     runId,
+    conversationId,
   } = options
+
+  const startTime = Date.now()
+
+  await log('debug', 'classify started', {
+    workflow: 'pipeline',
+    step: 'classify',
+    appId,
+    conversationId,
+    messageLength: input.body.length,
+    forceLLM,
+  })
 
   // Extract signals first (always)
   const signals = extractSignals(input)
@@ -459,12 +486,43 @@ export async function classify(
   if (!forceLLM) {
     const fastResult = fastClassify(input, signals)
     if (fastResult) {
+      const durationMs = Date.now() - startTime
+
+      await log('info', 'classify completed (fast-path)', {
+        workflow: 'pipeline',
+        step: 'classify',
+        appId,
+        conversationId,
+        category: fastResult.category,
+        confidence: fastResult.confidence,
+        reasoning: fastResult.reasoning,
+        usedLLM: false,
+        durationMs,
+      })
+
       return fastResult
     }
   }
 
   // Fall back to LLM (with memory integration)
-  return llmClassify(input, signals, model, { appId, runId })
+  const result = await llmClassify(input, signals, model, { appId, runId })
+
+  const durationMs = Date.now() - startTime
+
+  await log('info', 'classify completed (LLM)', {
+    workflow: 'pipeline',
+    step: 'classify',
+    appId,
+    conversationId,
+    category: result.category,
+    confidence: result.confidence,
+    reasoning: result.reasoning,
+    usedLLM: true,
+    memoriesCited: result.citedMemoryIds?.length ?? 0,
+    durationMs,
+  })
+
+  return result
 }
 
 // ============================================================================
@@ -856,6 +914,15 @@ Last responder: ${signals.lastResponderType}
       memoryContext = formatMemoriesCompact(memories)
       citedMemoryIds = memories.map((m) => m.id)
 
+      await log('debug', 'classifyThread memory query results', {
+        workflow: 'pipeline',
+        step: 'classifyThread',
+        appId: input.appId,
+        memoriesFound: memories.length,
+        topScore: memories[0]?.score ?? 0,
+        memoryIds: citedMemoryIds,
+      })
+
       // Record citation if we have a run ID
       if (options.runId && citedMemoryIds.length > 0) {
         await citeMemories(citedMemoryIds, options.runId, input.appId)
@@ -863,7 +930,12 @@ Last responder: ${signals.lastResponderType}
     }
   } catch (error) {
     // Log but don't fail classification if memory query fails
-    console.warn('[classifyThread] Memory query failed:', error)
+    await log('warn', 'classifyThread memory query failed', {
+      workflow: 'pipeline',
+      step: 'classifyThread',
+      appId: input.appId,
+      error: error instanceof Error ? error.message : String(error),
+    })
   }
 
   // Build prompt with memory context if available
@@ -903,6 +975,16 @@ export async function classifyThread(
     runId,
   } = options
 
+  const startTime = Date.now()
+
+  await log('debug', 'classifyThread started', {
+    workflow: 'pipeline',
+    step: 'classifyThread',
+    appId: input.appId,
+    threadLength: input.messages.length,
+    forceLLM,
+  })
+
   // Compute thread signals
   const signals = computeThreadSignals(input)
 
@@ -910,12 +992,41 @@ export async function classifyThread(
   if (!forceLLM) {
     const fastResult = fastClassifyThread(input, signals)
     if (fastResult) {
+      const durationMs = Date.now() - startTime
+
+      await log('info', 'classifyThread completed (fast-path)', {
+        workflow: 'pipeline',
+        step: 'classifyThread',
+        appId: input.appId,
+        category: fastResult.category,
+        confidence: fastResult.confidence,
+        reasoning: fastResult.reasoning,
+        usedLLM: false,
+        durationMs,
+      })
+
       return fastResult
     }
   }
 
   // Fall back to LLM with memory integration
-  return llmClassifyThread(input, signals, model, { runId })
+  const result = await llmClassifyThread(input, signals, model, { runId })
+
+  const durationMs = Date.now() - startTime
+
+  await log('info', 'classifyThread completed (LLM)', {
+    workflow: 'pipeline',
+    step: 'classifyThread',
+    appId: input.appId,
+    category: result.category,
+    confidence: result.confidence,
+    reasoning: result.reasoning,
+    usedLLM: true,
+    memoriesCited: result.citedMemoryIds?.length ?? 0,
+    durationMs,
+  })
+
+  return result
 }
 
 // ============================================================================
