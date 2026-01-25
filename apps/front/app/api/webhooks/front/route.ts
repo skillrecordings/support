@@ -221,8 +221,10 @@ export async function POST(request: NextRequest) {
       messageId,
       // Preview may not have these - workflow fetches full data
       subject: subject || '',
-      body: '', // Must fetch via Front API
-      senderEmail: '', // Must fetch via Front API
+      // Body and senderEmail are fetched by classify workflow via front.getMessage()
+      // Webhook sends preview only - full data fetched in first workflow step
+      body: '', // Populated by classify workflow from message.text
+      senderEmail: '', // Populated by classify workflow from message.recipients[role=from]
       appId: appSlug,
       inboxId,
       // Include links for API fetching

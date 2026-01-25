@@ -60,6 +60,30 @@ export function extractEmail(text: string): string | null {
   return filtered[0] || null
 }
 
+/**
+ * Determine customer email using senderEmail as PRIMARY source,
+ * with body text extraction as FALLBACK.
+ *
+ * Returns the email to use and the source it came from.
+ */
+export function determineCustomerEmail(
+  senderEmail: string | undefined,
+  bodyText: string
+): { email: string | null; source: 'sender' | 'body' | 'none' } {
+  // PRIMARY: Use sender email if available and valid
+  if (senderEmail && senderEmail.trim()) {
+    return { email: senderEmail.trim(), source: 'sender' }
+  }
+
+  // FALLBACK: Extract from body text (customer might mention a different email)
+  const bodyEmail = extractEmail(bodyText)
+  if (bodyEmail) {
+    return { email: bodyEmail, source: 'body' }
+  }
+
+  return { email: null, source: 'none' }
+}
+
 // ============================================================================
 // Main gather function
 // ============================================================================
@@ -69,14 +93,21 @@ export interface GatherOptions {
   timeout?: number
 }
 
+export interface EmailResolution {
+  email: string | null
+  source: 'sender' | 'body' | 'none'
+  senderEmail?: string
+  bodyExtractedEmail?: string | null
+}
+
 export async function gather(
   input: GatherInput,
   options: GatherOptions = {}
-): Promise<GatherOutput> {
+): Promise<GatherOutput & { emailResolution?: EmailResolution }> {
   const { tools = {}, timeout = 5000 } = options
   const { message, classification, appId } = input
 
-  const result: GatherOutput = {
+  const result: GatherOutput & { emailResolution?: EmailResolution } = {
     user: null,
     purchases: [],
     knowledge: [],
@@ -85,8 +116,21 @@ export async function gather(
     gatherErrors: [],
   }
 
-  // Extract customer email from message
-  const customerEmail = extractEmail(`${message.subject} ${message.body}`)
+  // Determine customer email - prioritize senderEmail, fallback to body extraction
+  const bodyText = `${message.subject} ${message.body}`
+  const bodyExtractedEmail = extractEmail(bodyText)
+  const { email: customerEmail, source: emailSource } = determineCustomerEmail(
+    message.from,
+    bodyText
+  )
+
+  // Store resolution details for logging/debugging
+  result.emailResolution = {
+    email: customerEmail,
+    source: emailSource,
+    senderEmail: message.from,
+    bodyExtractedEmail,
+  }
 
   // Run all gather operations in parallel with timeout
   const gatherPromises: Promise<void>[] = []
