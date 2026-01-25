@@ -10,6 +10,7 @@
  */
 
 import { type RelevantMemory, queryCorrectedMemories } from '../../memory/query'
+import { log } from '../../observability/axiom'
 import type {
   GatherOutput,
   MessageCategory,
@@ -288,6 +289,18 @@ export async function validate(
     correctionThreshold = 0.7,
   } = options
 
+  const startTime = Date.now()
+
+  await log('debug', 'validate started', {
+    workflow: 'pipeline',
+    step: 'validate',
+    appId,
+    category,
+    draftLength: draft.length,
+    strictMode,
+    skipMemoryQuery,
+  })
+
   // Start with synchronous pattern checks
   const allIssues: ValidationIssue[] = [
     ...checkInternalLeaks(draft),
@@ -296,6 +309,8 @@ export async function validate(
     ...checkFabrication(draft, context),
     ...checkLength(draft),
   ]
+
+  const patternIssueCount = allIssues.length
 
   let correctionsChecked: RelevantMemory[] | undefined
   let memoryCheckPerformed = false
@@ -319,6 +334,17 @@ export async function validate(
       memoryCheckPerformed = true
       correctionsChecked = corrections
 
+      if (corrections.length > 0) {
+        await log('debug', 'validate memory corrections found', {
+          workflow: 'pipeline',
+          step: 'validate',
+          appId,
+          category,
+          correctionsFound: corrections.length,
+          topScore: corrections[0]?.score ?? 0,
+        })
+      }
+
       // Check if current draft repeats any known mistakes
       if (corrections.length > 0) {
         const memoryIssues = await checkAgainstCorrections(
@@ -330,16 +356,42 @@ export async function validate(
       }
     } catch (error) {
       // Memory query failed - log but don't fail validation
-      console.warn(
-        '[validate] Memory query failed, continuing without memory check:',
-        error
-      )
+      await log('warn', 'validate memory query failed', {
+        workflow: 'pipeline',
+        step: 'validate',
+        appId,
+        category,
+        error: error instanceof Error ? error.message : String(error),
+      })
       memoryCheckPerformed = false
     }
   }
 
   // In strict mode, warnings are errors
   const hasErrors = allIssues.some((i) => i.severity === 'error')
+
+  const durationMs = Date.now() - startTime
+
+  // Group issues by type for logging
+  const issuesByType: Record<string, number> = {}
+  for (const issue of allIssues) {
+    issuesByType[issue.type] = (issuesByType[issue.type] ?? 0) + 1
+  }
+
+  await log('info', 'validate completed', {
+    workflow: 'pipeline',
+    step: 'validate',
+    appId,
+    category,
+    valid: !hasErrors,
+    totalIssues: allIssues.length,
+    patternIssues: patternIssueCount,
+    memoryIssues: allIssues.length - patternIssueCount,
+    issuesByType,
+    memoryCheckPerformed,
+    correctionsChecked: correctionsChecked?.length ?? 0,
+    durationMs,
+  })
 
   return {
     valid: !hasErrors,

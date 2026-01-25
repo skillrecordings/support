@@ -391,6 +391,22 @@ export type TemplatesSyncRequestedEvent = {
   }
 }
 
+/** Event emitted to trigger manual stale template check */
+export const STALE_TEMPLATES_CHECK_REQUESTED =
+  'templates/stale-check.requested' as const
+
+export type StaleTemplatesCheckRequestedEvent = {
+  name: typeof STALE_TEMPLATES_CHECK_REQUESTED
+  data: {
+    /** Optional: specific app to check (checks all if not provided) */
+    appId?: string
+    /** Optional: override unused days threshold */
+    unusedDays?: number
+    /** Optional: requestor info for audit */
+    requestedBy?: string
+  }
+}
+
 export type EscalationPriority =
   | 'urgent'
   | 'normal'
@@ -446,4 +462,6 @@ export type Events = {
   [SUPPORT_ESCALATED]: SupportEscalatedEvent
   // Template sync events
   [TEMPLATES_SYNC_REQUESTED]: TemplatesSyncRequestedEvent
+  // Stale template check events
+  [STALE_TEMPLATES_CHECK_REQUESTED]: StaleTemplatesCheckRequestedEvent
 }

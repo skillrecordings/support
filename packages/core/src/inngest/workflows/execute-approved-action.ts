@@ -7,6 +7,11 @@ import {
 } from '@skillrecordings/database'
 import { createFrontClient as createFrontSdkClient } from '@skillrecordings/front-sdk'
 import { createFrontClient } from '../../front'
+import {
+  initializeAxiom,
+  log,
+  traceWorkflowStep,
+} from '../../observability/axiom'
 import { formatAuditComment } from '../../pipeline/steps/comment'
 import { supportTools } from '../../tools'
 import type { ExecutionContext } from '../../tools/types'
@@ -33,8 +38,26 @@ export const executeApprovedAction = inngest.createFunction(
   async ({ event, step }) => {
     const { actionId, approvedBy, approvedAt } = event.data
 
+    const workflowStartTime = Date.now()
+    initializeAxiom()
+
+    await log('info', 'execute-approved-action workflow started', {
+      workflow: 'execute-approved-action',
+      actionId,
+      approvedBy,
+      approvedAt,
+    })
+
     // Step 1: Look up action from database
     const action = await step.run('lookup-action', async () => {
+      const stepStartTime = Date.now()
+
+      await log('debug', 'looking up action', {
+        workflow: 'execute-approved-action',
+        step: 'lookup-action',
+        actionId,
+      })
+
       const db = getDb()
       const [actionRecord] = await db
         .select()
@@ -42,14 +65,51 @@ export const executeApprovedAction = inngest.createFunction(
         .where(eq(ActionsTable.id, actionId))
 
       if (!actionRecord) {
+        await log('error', 'action not found', {
+          workflow: 'execute-approved-action',
+          step: 'lookup-action',
+          actionId,
+        })
         throw new Error(`Action ${actionId} not found`)
       }
+
+      const durationMs = Date.now() - stepStartTime
+
+      await log('info', 'action lookup complete', {
+        workflow: 'execute-approved-action',
+        step: 'lookup-action',
+        actionId,
+        actionType: actionRecord.type,
+        conversationId: actionRecord.conversation_id,
+        appId: actionRecord.app_id,
+        durationMs,
+      })
+
+      await traceWorkflowStep({
+        workflowName: 'execute-approved-action',
+        conversationId: actionRecord.conversation_id ?? undefined,
+        appId: actionRecord.app_id ?? undefined,
+        stepName: 'lookup-action',
+        durationMs,
+        success: true,
+        metadata: { actionType: actionRecord.type },
+      })
 
       return actionRecord
     })
 
     // Step 2: Execute based on action type
     const result = await step.run('execute-action', async () => {
+      const stepStartTime = Date.now()
+
+      await log('debug', 'executing action', {
+        workflow: 'execute-approved-action',
+        step: 'execute-action',
+        actionId,
+        actionType: action.type,
+        conversationId: action.conversation_id,
+      })
+
       // Handle send-draft (from handle-validated-draft) or draft-response
       if (action.type === 'send-draft' || action.type === 'draft-response') {
         const params = action.parameters as {
@@ -136,6 +196,27 @@ export const executeApprovedAction = inngest.createFunction(
             // Non-fatal - continue even if comment fails
           }
         }
+
+        const durationMs = Date.now() - stepStartTime
+
+        await log('info', 'draft created successfully', {
+          workflow: 'execute-approved-action',
+          step: 'execute-action',
+          actionId,
+          conversationId,
+          draftId: draft.id,
+          durationMs,
+        })
+
+        await traceWorkflowStep({
+          workflowName: 'execute-approved-action',
+          conversationId,
+          appId: action.app_id ?? undefined,
+          stepName: 'execute-action',
+          durationMs,
+          success: true,
+          metadata: { actionType: action.type, draftId: draft.id },
+        })
 
         return {
           success: true,
@@ -328,6 +409,15 @@ export const executeApprovedAction = inngest.createFunction(
 
     // Step 4: Update action status and approval request
     await step.run('update-action-status', async () => {
+      const stepStartTime = Date.now()
+
+      await log('debug', 'updating action status', {
+        workflow: 'execute-approved-action',
+        step: 'update-action-status',
+        actionId,
+        success: result.success,
+      })
+
       const db = getDb()
 
       // Update ActionsTable
@@ -351,6 +441,57 @@ export const executeApprovedAction = inngest.createFunction(
           status: result.success ? 'approved' : 'rejected',
         })
         .where(eq(ApprovalRequestsTable.action_id, actionId))
+
+      const durationMs = Date.now() - stepStartTime
+
+      await log('info', 'action status updated', {
+        workflow: 'execute-approved-action',
+        step: 'update-action-status',
+        actionId,
+        success: result.success,
+        durationMs,
+      })
+
+      await traceWorkflowStep({
+        workflowName: 'execute-approved-action',
+        conversationId: action.conversation_id ?? undefined,
+        appId: action.app_id ?? undefined,
+        stepName: 'update-action-status',
+        durationMs,
+        success: true,
+      })
+    })
+
+    const totalDurationMs = Date.now() - workflowStartTime
+
+    await log('info', 'execute-approved-action workflow completed', {
+      workflow: 'execute-approved-action',
+      actionId,
+      actionType: action.type,
+      conversationId: action.conversation_id,
+      appId: action.app_id,
+      approvedBy,
+      executed: result.success,
+      error: result.success
+        ? undefined
+        : 'error' in result
+          ? result.error
+          : 'Unknown error',
+      totalDurationMs,
+    })
+
+    await traceWorkflowStep({
+      workflowName: 'execute-approved-action',
+      conversationId: action.conversation_id ?? undefined,
+      appId: action.app_id ?? undefined,
+      stepName: 'complete',
+      durationMs: totalDurationMs,
+      success: result.success,
+      metadata: {
+        actionType: action.type,
+        approvedBy,
+        executed: result.success,
+      },
     })
 
     return {

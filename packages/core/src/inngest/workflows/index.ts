@@ -20,10 +20,18 @@ export { validateWorkflow } from './validate-draft'
 export { handleValidatedDraft } from './handle-validated-draft'
 export { syncTemplatesWorkflow, syncTemplatesOnDemand } from './sync-templates'
 export { handleEscalation } from './handle-escalation'
+export {
+  findStaleTemplatesWorkflow,
+  findStaleTemplatesOnDemand,
+} from './find-stale-templates'
 
 import { classifyWorkflow } from './classify'
 import { draftWorkflow } from './draft-response'
 import { executeApprovedAction } from './execute-approved-action'
+import {
+  findStaleTemplatesOnDemand,
+  findStaleTemplatesWorkflow,
+} from './find-stale-templates'
 import { gatherWorkflow } from './gather-context'
 import { handleEscalation } from './handle-escalation'
 import { handleValidatedDraft } from './handle-validated-draft'
@@ -62,4 +70,6 @@ export const allWorkflows = [
   validateWorkflow,
   syncTemplatesWorkflow,
   syncTemplatesOnDemand,
+  findStaleTemplatesWorkflow,
+  findStaleTemplatesOnDemand,
 ]

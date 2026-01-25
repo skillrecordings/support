@@ -63,7 +63,9 @@
     "./pipeline/steps/comment": "./src/pipeline/steps/comment.ts",
     "./memory": "./src/memory/index.ts",
     "./memory/query": "./src/memory/query.ts",
-    "./memory/correction-capture": "./src/memory/correction-capture.ts"
+    "./memory/correction-capture": "./src/memory/correction-capture.ts",
+    "./analytics": "./src/analytics/index.ts",
+    "./analytics/learning-curves": "./src/analytics/learning-curves.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit",
