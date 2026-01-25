@@ -87,7 +87,7 @@ export async function traceAgentRun(
       },
     })
 
-    const model = 'claude-sonnet-4-20250514' // Default model
+    const model = 'claude-sonnet-4-5' // Default model (versionless)
     const usage = agentRun.usage || {
       promptTokens: 0,
       completionTokens: 0,

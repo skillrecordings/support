@@ -49,6 +49,7 @@
     "packages/*"
   ],
   "dependencies": {
+    "ai": "^6.0.49",
     "zod": "^4.3.5"
   }
 }

@@ -55,6 +55,40 @@ Key commands:
 ## Skills
 Skills live under @.claude/skills/*/SKILL.md. If a task matches a skill, read it before acting. Use the skills.
 
+## AI SDK / Vercel AI Gateway
+
+Model references are **just strings** — no provider setup needed:
+
+```typescript
+import { generateObject, generateText } from 'ai'
+
+// Just pass the model string directly
+const { object } = await generateObject({
+  model: 'anthropic/claude-haiku-4-5',  // ← string, not a provider call
+  schema: mySchema,
+  prompt: '...',
+})
+```
+
+### Model Names (STRICT)
+
+**ALWAYS use versionless names. No date suffixes. Nothing else.**
+
+| Model | Use Case |
+|-------|----------|
+| `anthropic/claude-haiku-4-5` | Fast, cheap (evals, classification) |
+| `anthropic/claude-sonnet-4-5` | Balanced (drafting, general) |
+| `anthropic/claude-opus-4-5` | Best quality (complex reasoning) |
+
+❌ **Never:** `claude-sonnet-4-20250514`, `claude-3-5-sonnet-latest`, etc.
+✅ **Always:** `claude-sonnet-4-5`, `claude-haiku-4-5`, `claude-opus-4-5`
+
+### Auth
+
+The Vercel AI Gateway uses `AI_GATEWAY_API_KEY` (stable token, in `packages/cli/.env.local`).
+- OIDC tokens (`VERCEL_OIDC_TOKEN`) expire and need refresh — avoid for scripts
+- Pull env: `cd packages/cli && vercel env pull .env.local`
+
 ## Critical Anti-Patterns (learned the hard way)
 
 ### Testing
