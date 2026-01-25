@@ -1,5 +1,21 @@
+/**
+ * Handle Validated Draft Workflow
+ *
+ * Bridges the gap between validation and approval.
+ * - If validation passed and score is high → auto-approve
+ * - If validation failed or score is low → request human approval
+ *
+ * Triggered by: support/draft.validated
+ * Emits: support/action.approved OR support/approval.requested
+ */
+
 import { ActionsTable, getDb } from '@skillrecordings/database'
 import { randomUUID } from 'crypto'
+import {
+  initializeAxiom,
+  traceApprovalRequested,
+  traceWorkflowStep,
+} from '../../observability/axiom'
 import { inngest } from '../client'
 import {
   SUPPORT_ACTION_APPROVED,
@@ -7,16 +23,6 @@ import {
   SUPPORT_DRAFT_VALIDATED,
 } from '../events'
 
-/**
- * Workflow: Handle Validated Draft
- *
- * Bridges the gap between validation and approval.
- * - If validation passed and score is high → auto-approve
- * - If validation failed or score is low → request human approval
- *
- * Triggered by: support/draft.validated
- * Emits: support/approval.requested OR support/action.approved
- */
 export const handleValidatedDraft = inngest.createFunction(
   {
     id: 'support-handle-validated',
@@ -27,13 +33,21 @@ export const handleValidatedDraft = inngest.createFunction(
   async ({ event, step }) => {
     const { conversationId, messageId, appId, draft, validation } = event.data
 
-    console.log('[handle-validated] ========== WORKFLOW STARTED ==========')
-    console.log('[handle-validated] Conversation:', conversationId)
-    console.log('[handle-validated] Valid:', validation.valid)
-    console.log('[handle-validated] Issues:', validation.issues?.length ?? 0)
+    const workflowStartTime = Date.now()
+    initializeAxiom()
+
+    console.log('[handle-validated] ========== STARTED ==========')
+    console.log('[handle-validated] conversationId:', conversationId)
+    console.log('[handle-validated] messageId:', messageId)
+    console.log('[handle-validated] appId:', appId)
+    console.log('[handle-validated] valid:', validation.valid)
+    console.log('[handle-validated] issueCount:', validation.issues?.length ?? 0)
+    console.log('[handle-validated] score:', validation.score)
 
     // Decide: auto-approve or request human approval
     const decision = await step.run('decide-approval', async () => {
+      const stepStartTime = Date.now()
+
       // Auto-approve if:
       // 1. Validation passed
       // 2. No critical issues
@@ -41,21 +55,43 @@ export const handleValidatedDraft = inngest.createFunction(
       const autoApproveThreshold = 0.8
       const score = validation.score ?? (validation.valid ? 1.0 : 0.0)
 
-      if (validation.valid && score >= autoApproveThreshold) {
-        console.log('[handle-validated] Auto-approving (score:', score, ')')
-        return { autoApprove: true, reason: 'Validation passed with high confidence' }
-      }
+      const autoApprove = validation.valid && score >= autoApproveThreshold
+      const reason = autoApprove
+        ? 'Validation passed with high confidence'
+        : validation.issues?.join(', ') || 'Validation did not pass threshold'
 
-      console.log('[handle-validated] Requesting human approval (score:', score, ')')
-      return {
-        autoApprove: false,
-        reason: validation.issues?.join(', ') || 'Validation did not pass threshold',
-      }
+      const durationMs = Date.now() - stepStartTime
+
+      await traceWorkflowStep({
+        workflowName: 'support-handle-validated',
+        conversationId,
+        appId,
+        stepName: 'decide-approval',
+        durationMs,
+        success: true,
+        metadata: {
+          autoApprove,
+          score,
+          threshold: autoApproveThreshold,
+          validationPassed: validation.valid,
+          issueCount: validation.issues?.length ?? 0,
+        },
+      })
+
+      console.log('[handle-validated] decision:', {
+        autoApprove,
+        score,
+        reason,
+        durationMs,
+      })
+
+      return { autoApprove, reason, score }
     })
 
     if (decision.autoApprove) {
       // Create action record and auto-approve
       const actionId = await step.run('create-approved-action', async () => {
+        const stepStartTime = Date.now()
         const db = getDb()
         const id = randomUUID()
 
@@ -68,10 +104,14 @@ export const handleValidatedDraft = inngest.createFunction(
             draft: draft.content,
             messageId,
             autoApproved: true,
+            validationScore: decision.score,
           },
           requires_approval: false,
           created_at: new Date(),
         })
+
+        const durationMs = Date.now() - stepStartTime
+        console.log('[handle-validated] action created:', { actionId: id, durationMs })
 
         return id
       })
@@ -86,12 +126,18 @@ export const handleValidatedDraft = inngest.createFunction(
         },
       })
 
+      const totalDurationMs = Date.now() - workflowStartTime
+
       console.log('[handle-validated] ========== AUTO-APPROVED ==========')
+      console.log('[handle-validated] actionId:', actionId)
+      console.log('[handle-validated] totalDurationMs:', totalDurationMs)
+
       return { conversationId, messageId, autoApproved: true, actionId }
     }
 
     // Request human approval
     const actionId = await step.run('create-pending-action', async () => {
+      const stepStartTime = Date.now()
       const db = getDb()
       const id = randomUUID()
 
@@ -104,10 +150,14 @@ export const handleValidatedDraft = inngest.createFunction(
           draft: draft.content,
           messageId,
           validationIssues: validation.issues,
+          validationScore: decision.score,
         },
         requires_approval: true,
         created_at: new Date(),
       })
+
+      const durationMs = Date.now() - stepStartTime
+      console.log('[handle-validated] pending action created:', { actionId: id, durationMs })
 
       return id
     })
@@ -129,7 +179,20 @@ export const handleValidatedDraft = inngest.createFunction(
       },
     })
 
+    // Trace approval requested
+    await traceApprovalRequested({
+      conversationId,
+      appId,
+      actionId,
+      actionType: 'send-draft',
+    })
+
+    const totalDurationMs = Date.now() - workflowStartTime
     console.log('[handle-validated] ========== APPROVAL REQUESTED ==========')
+    console.log('[handle-validated] actionId:', actionId)
+    console.log('[handle-validated] reason:', decision.reason)
+    console.log('[handle-validated] totalDurationMs:', totalDurationMs)
+
     return { conversationId, messageId, autoApproved: false, actionId }
   }
 )
