@@ -1,0 +1,130 @@
+[
+  {
+    "id": "fbdce81a-808f-4221-8242-917b8f367320",
+    "app": "unknown",
+    "conversationId": "cnv_1jdnbxd1",
+    "customerEmail": "unknown",
+    "triggerMessage": {
+      "subject": "👋  Feedback from girardier.thomas@gmail.com about Total TypeScript",
+      "body": "Hi, I bought total typescript on Oct 18 2025 and I don’t have access to it\nanymore after logging in with GitHub. Could you please restore the access?\nThanks!\n",
+      "timestamp": 1769192228
+    },
+    "agentResponse": {
+      "text": "I can see your account but there's no purchase showing up under girardier.thomas@gmail.com. This usually means you purchased with a different email address.\n\nCheck your email from October 18th for the purchase receipt - it'll show which email was used. If you find it, let me know what that email is and I can help transfer the purchase to your current account.\n\nIf you can't find the receipt, what payment method did you use? I can try searching by that.",
+      "category": "tool-assisted",
+      "timestamp": "2026-01-23T18:17:34.000Z"
+    }
+  },
+  {
+    "id": "fc87b6bd-7359-4450-8996-b61e48efaba4",
+    "app": "unknown",
+    "conversationId": "cnv_1jdlpt0l",
+    "customerEmail": "unknown",
+    "triggerMessage": {
+      "subject": "Re: You're in! Get Ready for Autonomous AI Agents Live Workshop Ticket! 🎉",
+      "body": "Dear AI Hero Team,\n\nI received the calendar invite, but there's no Zoom link. Also, no email\nwith the Zoom link. Should I be worried? 😅\n\nRegards,\nStojke\n\n\n\n\n\n\nOn Thu, Jan 22, 2026 at 6:19 PM AI Hero <team@aihero.dev> wrote:\n\n> You're In! Get Ready for Turn AI Agents Into Autonomous Software Engineers\n> with Ralph!\n>\n>  ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿\n> You're In! Get Ready! 🚀\n>\n> Hey Milan,\n>\n> You've successfully secured your spot for *Turn AI Agents Into Autonomous\n> Software Engineers with Ralph* – we're excited to have you!\n>\n> Here's a quick confirmation of the critical details:\n>\n> *Event:* Turn AI Agents Into Autonomous Software Engineers with Ralph\n>\n> *Date:* February 11th, 2026\n>\n> *Time:* 9:00 AM - 1:00 PM (Pacific Time). View in your timezone\n> <https://everytimezone.com/?t=698bc680,3fc>\n>\n> *What Happens Next? Keep an Eye on Your Inbox!*\n>\n> Shortly, you'll receive a separate email containing:\n>\n> ✓ The official Google Calendar invite (lock it in!)\n>\n> ✓ The Zoom link for the live event.\n>\n> ✓ Any pre-event materials or recommended prep work.\n>\n> To ensure you don't miss these crucial updates, please add *team@aihero.dev\n> <team@aihero.dev>* to your trusted senders or whitelist.\n>\n> *Important Policies & Info:*\n>\n> *Live & Interactive:* This is a live workshop. No recording of this live\n> event will be provided, but you will get access to the self-paced version\n> of the workshop.\n>\n> *Tickets:* Non-refundable, but totally transferable. If life happens, you\n> can transfer your spot to a friend or colleague yourself via your invoice\n> page <https://www.aihero.dev/invoices>.\n>\n> *Invoice Access:* Need to wrangle an invoice? Log in to your account to\n> view, customize, and download it right here\n> <https://www.aihero.dev/invoices>.\n>\n> We're stoked to have you and can't wait to dive into this with you!\n>\n> See you there,\n>\n> The AI Hero Team\n>\n",
+      "timestamp": 1769103463
+    },
+    "agentResponse": {
+      "text": "No need to worry. The confirmation email you received on Jan 22nd mentioned the Zoom link would come in a separate email. \n\nIf you got the calendar invite but it's missing the Zoom link, check your inbox for another email from team@aihero.dev with the Zoom details. It might have landed in spam or gotten filtered.\n\nIf you still can't find it, let me know and I'll track down what happened.",
+      "category": "tool-assisted",
+      "timestamp": "2026-01-22T17:38:49.000Z"
+    }
+  },
+  {
+    "id": "d6f73028-33fc-4509-88b3-eb7ff378cad1",
+    "app": "unknown",
+    "conversationId": "cnv_1jdlplgl",
+    "customerEmail": "unknown",
+    "triggerMessage": {
+      "subject": "Re: Live Autonomous AI Agents with Ralph Workshop (very limited seats)",
+      "body": "😭😭😭 Is it already sold out? The Buy button doesn't work\n\nOn Thu, Jan 22, 2026 at 8:20 AM Matt Pocock (AI Hero) <matt@aihero.dev>\nwrote:\n\n> Hey Jason,\n>\n> The future of AI coding is a loop. It’s one of the simplest primitives\n> available to developers, but we’ve been criminally underusing it in the AI\n> coding world.\n>\n> Instead, we’re stuck in that frustrating cycle with AI coding assistants.\n> You ask for Feature A, get half a solution, manually fix it, ask for\n> Feature B, and it breaks Feature A. Rinse, repeat.\n>\n> But here’s what’s actually happening right now in production: developers\n> are setting up agents that run in loops with structured feedback\n> mechanisms. They point them at GitHub backlogs. Real PRs get created.\n> Without constant babysitting.\n>\n> It’s called the Ralph Wiggum technique, and it’s not magic. It’s a simple,\n> learnable pattern.\n>\n> *I’m running **a live workshop on February 11 at 9 AM PST*\n> <https://7751c435.click.convertkit-mail2.com/d0ud5pe6z6a0hod693zhmhzlveq44blh00llw/dphehmued0v29ncm/aHR0cHM6Ly93d3cuYWloZXJvLmRldi9zL3JhbHBoLXdvcmtzaG9wLTAx>\n> to teach you exactly how to build it. We’re capping at 40 developers\n> because this is hands-on. You’ll be debugging YOUR code, not just watching\n> me code.\n>\n> Here’s what you’ll leave with:\n>\n>    - Your own bash loop running\n>    - Feedback mechanisms that let agents catch their own mistakes\n>    - Your GitHub backlog wired up to actually execute tasks\n>    - The PRD structure that makes agents do what you actually want\n>\n> By 1 PM, you’ll have real PRs being generated from your actual issues.\n>\n> *Sign-ups are open now.* Limited spots, and we’ve got a discount running\n> through Feb 5th. Grab yours before they sell out.\n>\n> The full details are here, including what actually breaks, why this works\n> now (and didn’t before), and exactly what you need to bring.\n> *Secure Your Seat*\n> <https://7751c435.click.convertkit-mail2.com/d0ud5pe6z6a0hod693zhmhzlveq44blh00llw/dphehmued0v29ncm/aHR0cHM6Ly93d3cuYWloZXJvLmRldi9zL3JhbHBoLXdvcmtzaG9wLTAx>\n>\n> See you on February 11.\n>\n> Unsubscribe from AI Hero Emails\n> <https://7751c435.click.convertkit-mail2.com/d0ud5pe6z6a0hod693zhmhzlveq44blh00llw/rehm5x5qf9umk04olri2/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==>.\n> You can also unsubscribe\n> <https://7751c435.unsubscribe.convertkit-mail2.com/d0ud5pe6z6a0hod693zhmhzlveq44blh00llw>\n> from all emails at any time.\n>\n> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080\n>\n> ​\n>\n",
+      "timestamp": 1769103281
+    },
+    "agentResponse": {
+      "text": "Not sold out. What's happening when you click the Buy button? Any error message, or does nothing happen at all?\n\nTry opening the link in an incognito/private window to rule out browser extension issues. If that doesn't work, let me know what browser you're using.",
+      "category": "tool-assisted",
+      "timestamp": "2026-01-22T17:35:43.000Z"
+    }
+  },
+  {
+    "id": "ae91e693-ec8d-4862-adf7-6b8b99088a06",
+    "app": "unknown",
+    "conversationId": "cnv_1jdlg38l",
+    "customerEmail": "unknown",
+    "triggerMessage": {
+      "subject": "Re: You're in! Get Ready for Autonomous AI Agents Live Workshop Ticket! 🎉",
+      "body": "Hello,\n\nI am excited for this workshop. I have not received the email with the workshop materials and code examples yet. I really want your refined Ralph setup! We’re having a lot of success with it, but are running into some of the issues you’ve outlined solutions for in your latest video on X.\n\nThanks,\n\nChristian\n\nGet Outlook for iOS<https://aka.ms/o0ukef>\n________________________________\nFrom: AI Hero <team@aihero.dev>\nSent: Thursday, January 22, 2026 10:48:15 AM\nTo: Christian Wierzbicki <cwierzbicki@enbasis.com>\nSubject: You're in! Get Ready for Autonomous AI Agents Live Workshop Ticket! 🎉\n\nYou're In! Get Ready for Turn AI Agents Into Autonomous Software Engineers with Ralph!\n ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿\nYou're In! Get Ready! 🚀\n\nHey Christian,\n\nYou've successfully secured your spot for Turn AI Agents Into Autonomous Software Engineers with Ralph – we're excited to have you!\n\nHere's a quick confirmation of the critical details:\n\nEvent: Turn AI Agents Into Autonomous Software Engineers with Ralph\n\nDate: February 11th, 2026\n\nTime: 9:00 AM - 1:00 PM (Pacific Time). View in your timezone<https://everytimezone.com/?t=698bc680,3fc>\n\nWhat Happens Next? Keep an Eye on Your Inbox!\n\nShortly, you'll receive a separate email containing:\n\n✓ The official Google Calendar invite (lock it in!)\n\n✓ The Zoom link for the live event.\n\n✓ Any pre-event materials or recommended prep work.\n\nTo ensure you don't miss these crucial updates, please add team@aihero.dev to your trusted senders or whitelist.\n\nImportant Policies & Info:\n\nLive & Interactive: This is a live workshop. No recording of this live event will be provided, but you will get access to the self-paced version of the workshop.\n\nTickets: Non-refundable, but totally transferable. If life happens, you can transfer your spot to a friend or colleague yourself via your invoice page<https://www.aihero.dev/invoices>.\n\nInvoice Access: Need to wrangle an invoice? Log in to your account to view, customize, and download it right here<https://www.aihero.dev/invoices>.\n\nWe're stoked to have you and can't wait to dive into this with you!\n\nSee you there,\n\nThe AI Hero Team\n\n\nChristian Wierzbicki\nDirector of Technology  [https://enbasis.com/enbasis-logo-email.png]  <https://enbasis.com/>\n\nEmail: cwierzbicki@enbasis.com\nDirect: (330) 906-9854\n\nEnbasis Inc.\n1041 W. Market St., Akron, Ohio 44313\n\nEnbasis.com <http://Enbasis.com>\nConfidentiality Notice: This email, including any attachments, is for the sole use of the intended recipient(s) and may contain confidential and privileged information. Any unauthorized review, use, disclosure, or distribution is prohibited. If you are not the intended recipient, please contact the sender by reply email and destroy all copies of the original message.\n",
+      "timestamp": 1769097575
+    },
+    "agentResponse": {
+      "text": "The confirmation email you received is the first one. You'll get a separate email soon with the Google Calendar invite, Zoom link, and workshop materials/code examples.\n\nThat second email should arrive within the next day or so. If you don't see it by end of week, check your spam folder or let me know.",
+      "category": "tool-assisted",
+      "timestamp": "2026-01-22T16:00:14.000Z"
+    }
+  },
+  {
+    "id": "f63a54b3-89c5-4bf3-bb49-662b806c847e",
+    "app": "unknown",
+    "conversationId": "cnv_1jdlezc5",
+    "customerEmail": "unknown",
+    "triggerMessage": {
+      "subject": "Re: Live Autonomous AI Agents with Ralph Workshop (very limited seats)",
+      "body": "Very interesting Matt is a little pricey as I am not working right now.\nAlso with the exchange its very expensive.\n\nOn Thu, Jan 22, 2026 at 9:20 AM Matt Pocock (AI Hero) <matt@aihero.dev>\nwrote:\n\n> Hey Kevin Youkhana,\n>\n> The future of AI coding is a loop. It’s one of the simplest primitives\n> available to developers, but we’ve been criminally underusing it in the AI\n> coding world.\n>\n> Instead, we’re stuck in that frustrating cycle with AI coding assistants.\n> You ask for Feature A, get half a solution, manually fix it, ask for\n> Feature B, and it breaks Feature A. Rinse, repeat.\n>\n> But here’s what’s actually happening right now in production: developers\n> are setting up agents that run in loops with structured feedback\n> mechanisms. They point them at GitHub backlogs. Real PRs get created.\n> Without constant babysitting.\n>\n> It’s called the Ralph Wiggum technique, and it’s not magic. It’s a simple,\n> learnable pattern.\n>\n> *I’m running **a live workshop on February 11 at 9 AM PST*\n> <https://7751c435.click.convertkit-mail2.com/5qux07rrn5a7hn3xdeph6h92qw344bnhrreez/dphehmued0v29ncm/aHR0cHM6Ly93d3cuYWloZXJvLmRldi9zL3JhbHBoLXdvcmtzaG9wLTAx>\n> to teach you exactly how to build it. We’re capping at 40 developers\n> because this is hands-on. You’ll be debugging YOUR code, not just watching\n> me code.\n>\n> Here’s what you’ll leave with:\n>\n>    - Your own bash loop running\n>    - Feedback mechanisms that let agents catch their own mistakes\n>    - Your GitHub backlog wired up to actually execute tasks\n>    - The PRD structure that makes agents do what you actually want\n>\n> By 1 PM, you’ll have real PRs being generated from your actual issues.\n>\n> *Sign-ups are open now.* Limited spots, and we’ve got a discount running\n> through Feb 5th. Grab yours before they sell out.\n>\n> The full details are here, including what actually breaks, why this works\n> now (and didn’t before), and exactly what you need to bring.\n> *Secure Your Seat*\n> <https://7751c435.click.convertkit-mail2.com/5qux07rrn5a7hn3xdeph6h92qw344bnhrreez/dphehmued0v29ncm/aHR0cHM6Ly93d3cuYWloZXJvLmRldi9zL3JhbHBoLXdvcmtzaG9wLTAx>\n>\n> See you on February 11.\n>\n> Unsubscribe from AI Hero Emails\n> <https://7751c435.click.convertkit-mail2.com/5qux07rrn5a7hn3xdeph6h92qw344bnhrreez/rehm5x5qf9umk04olri2/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==>.\n> You can also unsubscribe\n> <https://7751c435.unsubscribe.convertkit-mail2.com/5qux07rrn5a7hn3xdeph6h92qw344bnhrreez>\n> from all emails at any time.\n>\n> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080\n>\n> ​\n>\n\n\n-- \nCreate your own email signature\n<https://www.wisestamp.com/create-own-signature/?utm_source=promotion&utm_medium=signature&utm_campaign=create_your_own&srcid=>\n‌\n",
+      "timestamp": 1769096717
+    },
+    "agentResponse": {
+      "text": "Thanks for the feedback. I understand the price is a consideration, especially with exchange rates.\n\nWe run occasional discounts, and there's currently one active through Feb 5th. If you're interested in the workshop but the timing or price doesn't work right now, you could also check back closer to future workshops to see if there are other discount windows.",
+      "category": "tool-assisted",
+      "timestamp": "2026-01-22T15:45:51.000Z"
+    }
+  },
+  {
+    "id": "6dd81ba1-bff5-499b-9185-5f14a64d8186",
+    "app": "unknown",
+    "conversationId": "cnv_1jdlbzol",
+    "customerEmail": "unknown",
+    "triggerMessage": {
+      "subject": "Re: Live Autonomous AI Agents with Ralph Workshop (very limited seats)",
+      "body": "Hi Matt,\nSounds fantastic!\nPrice is on the edge what I can afford right now but trying to find a way next days.\nMost important thing is : not sure if I can attend the workshop live. \nWould there be a recording available I could watch later?\n\nThanks for the update and looking forward to a new self paced workshop in the future regarding this topic!\n\nMartin\n\n> On 22. Jan 2026, at 15:20, Matt Pocock (AI Hero) <matt@aihero.dev> wrote:\n> \n> Hey ,\n> \n> The future of AI coding is a loop. It’s one of the simplest primitives available to developers, but we’ve been criminally underusing it in the AI coding world.\n> \n> Instead, we’re stuck in that frustrating cycle with AI coding assistants. You ask for Feature A, get half a solution, manually fix it, ask for Feature B, and it breaks Feature A. Rinse, repeat.\n> \n> But here’s what’s actually happening right now in production: developers are setting up agents that run in loops with structured feedback mechanisms. They point them at GitHub backlogs. Real PRs get created. Without constant babysitting.\n> \n> It’s called the Ralph Wiggum technique, and it’s not magic. It’s a simple, learnable pattern.\n> \n> I’m running a live workshop on February 11 at 9 AM PST <https://7751c435.click.convertkit-mail2.com/0vu3qe8zxzc9h9ne680hlhvze4k55hnh77003/dphehmued0v29ncm/aHR0cHM6Ly93d3cuYWloZXJvLmRldi9zL3JhbHBoLXdvcmtzaG9wLTAx> to teach you exactly how to build it. We’re capping at 40 developers because this is hands-on. You’ll be debugging YOUR code, not just watching me code.\n> \n> Here’s what you’ll leave with:\n> \n> Your own bash loop running\n> Feedback mechanisms that let agents catch their own mistakes\n> Your GitHub backlog wired up to actually execute tasks\n> The PRD structure that makes agents do what you actually want\n> By 1 PM, you’ll have real PRs being generated from your actual issues.\n> \n> Sign-ups are open now. Limited spots, and we’ve got a discount running through Feb 5th. Grab yours before they sell out.\n> \n> The full details are here, including what actually breaks, why this works now (and didn’t before), and exactly what you need to bring.\n> \n> Secure Your Seat <https://7751c435.click.convertkit-mail2.com/0vu3qe8zxzc9h9ne680hlhvze4k55hnh77003/dphehmued0v29ncm/aHR0cHM6Ly93d3cuYWloZXJvLmRldi9zL3JhbHBoLXdvcmtzaG9wLTAx>\n> See you on February 11.\n> \n> Unsubscribe from AI Hero Emails <https://7751c435.click.convertkit-mail2.com/0vu3qe8zxzc9h9ne680hlhvze4k55hnh77003/rehm5x5qf9umk04olri2/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==>. You can also unsubscribe <https://7751c435.unsubscribe.convertkit-mail2.com/0vu3qe8zxzc9h9ne680hlhvze4k55hnh77003> from all emails at any time.\n> \n> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080\n> \n> ​\n\n",
+      "timestamp": 1769094336
+    },
+    "agentResponse": {
+      "text": "Hey Martin,\n\nGood question on the recording. That's something Matt would need to confirm directly, since workshop setup details can vary. I'd suggest replying to this email chain to ask him directly, or reaching out through the workshop signup page if there's a contact option there.\n\nOn the pricing side, if cost is the main blocker, you could also wait to see if a self-paced version becomes available down the line, since you mentioned interest in that format anyway.",
+      "category": "tool-assisted",
+      "timestamp": "2026-01-22T15:06:40.000Z"
+    }
+  },
+  {
+    "id": "d4ab0d49-65e2-4758-b232-9f487852dddb",
+    "app": "unknown",
+    "conversationId": "cnv_1jdl8zj9",
+    "customerEmail": "unknown",
+    "triggerMessage": {
+      "subject": "👋  Feedback from LI YUEN TAT about Total TypeScript",
+      "body": "Hi, I need a refund, my firm does not allow me to claim this\n\n\n\nThanks\n\nDenis\n",
+      "timestamp": 1769091654
+    },
+    "agentResponse": {
+      "text": "I see there are no purchases on record for this account. Can you confirm which purchase you'd like refunded? It's possible the purchase was made under a different email address, or I may need to look at a specific transaction ID or charge.",
+      "category": "tool-assisted",
+      "timestamp": "2026-01-22T14:21:11.000Z"
+    }
+  },
+  {
+    "id": "53fcea14-1411-486c-b6bf-e97bf040e8a4",
+    "app": "unknown",
+    "conversationId": "cnv_1jdkw97p",
+    "customerEmail": "unknown",
+    "triggerMessage": {
+      "subject": "Re: A quick question...",
+      "body": "Stay up to Date on the Most recent Reddit / X techniques for working with\nAgents. Stuff is changing Fast and I got constant FOMO\n\n*Freundliche Grüße*\nMaxim Buz\n\n\nOn Thu 22. Jan 2026 at 03:01, Total TypeScript <team@totaltypescript.com>\nwrote:\n\n> Hey Maxim Buz,\n>\n> You might know me from the TypeScript community\n> <https://7751c435.click.convertkit-mail2.com/5qu74oz2o2i8uvnqopdh6h92qw344bnhrreez/8ghqh3uog0v3vrik/aHR0cDovL3RvdGFsdHlwZXNjcmlwdC5jb20v>\n> which I've been a part of for a long time, but the world of AI is pretty\n> new to me.\n>\n> I'd love to get to know you better.\n>\n> What interests you about AI? What do you most want to learn about?\n>\n> -Matt\n>\n> Unsubscribe from AI Hero Emails\n> <https://7751c435.click.convertkit-mail2.com/5qu74oz2o2i8uvnqopdh6h92qw344bnhrreez/3ohqegeridu3qolrlksr/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==>.\n> You can also unsubscribe\n> <https://7751c435.unsubscribe.convertkit-mail2.com/5qu74oz2o2i8uvnqopdh6h92qw344bnhrreez>\n> from all emails at any time.\n>\n> 12333 Sowden Rd, Ste. B\n> <https://www.google.com/maps/search/12333+Sowden+Rd,+Ste.+B?entry=gmail&source=g>,\n> PMB #97429, Houston, TX 77080\n>\n> ​\n>\n",
+      "timestamp": 1769058207
+    },
+    "agentResponse": {
+      "text": "I'm going to stop here. This is a personal message from Matt (the instructor) asking you to engage directly about your interests in AI. It's not a support request.\n\nI'll route this to Matt so he sees your response.",
+      "category": "direct-response",
+      "timestamp": "2026-01-22T05:03:55.000Z"
+    }
+  }
+]

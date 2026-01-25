@@ -200,9 +200,9 @@ async function loadKnowledgeFiles(basePath: string): Promise<KnowledgeDoc[]> {
 
     // Extract title from first markdown heading or filename
     const titleMatch = body.match(/^#\s+(.+)$/m)
-    const title = titleMatch
-      ? titleMatch[1]
-      : filePath.split('/').pop()?.replace('.md', '') || 'Untitled'
+    const title = titleMatch?.[1]
+      ?? filePath.split('/').pop()?.replace('.md', '')
+      ?? 'Untitled'
 
     docs.push({
       id: generateUUID(),
@@ -316,6 +316,7 @@ async function seedKnowledgeBase(
 
   for (let i = 0; i < docs.length; i++) {
     const doc = docs[i]
+    if (!doc) continue
 
     try {
       // Generate embedding via Ollama
@@ -333,8 +334,11 @@ async function seedKnowledgeBase(
         throw new Error(`Embedding failed: ${error}`)
       }
 
-      const embedData = await embedRes.json()
-      const vector = embedData.embeddings?.[0] || embedData.embedding
+      const embedData = (await embedRes.json()) as {
+        embeddings?: number[][]
+        embedding?: number[]
+      }
+      const vector = embedData.embeddings?.[0] ?? embedData.embedding
 
       if (!vector) {
         throw new Error('No embedding returned from Ollama')

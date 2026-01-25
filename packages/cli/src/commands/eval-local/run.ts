@@ -712,8 +712,10 @@ export async function run(options: RunOptions): Promise<void> {
       process.stdout.write(`\r  Processing ${i + 1}/${scenarios.length}...`)
     }
 
+    const scenario = scenarios[i]
+    if (!scenario) continue
     const result = await runScenario(
-      scenarios[i],
+      scenario,
       systemPrompt,
       model,
       verbose,
@@ -871,6 +873,7 @@ App: ${scenario.appId || 'total-typescript'}`
       )
       for (let i = 0; i < result.steps.length; i++) {
         const step = result.steps[i]
+        if (!step) continue
         const calls = (step.toolCalls || [])
           .map((tc) => `${tc.toolName}`)
           .join(', ')
