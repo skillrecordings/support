@@ -32,9 +32,6 @@ async function createGatherTools(appId: string): Promise<GatherTools> {
   const app = await getApp(appId)
 
   return {
-    /**
-     * Lookup user and purchases via app integration endpoint.
-     */
     lookupUser: app
       ? async (email: string, appId: string) => {
           const client = new IntegrationClient({
@@ -67,17 +64,12 @@ async function createGatherTools(appId: string): Promise<GatherTools> {
                 status: p.status as 'active' | 'refunded' | 'transferred',
               })),
             }
-          } catch (error) {
-            console.error('[gather] lookupUser error:', error)
+          } catch {
             return { user: null, purchases: [] }
           }
         }
       : undefined,
 
-    /**
-     * Search knowledge base (not yet implemented - returns empty).
-     * TODO: Integrate with Qdrant/Upstash when available.
-     */
     searchKnowledge: async (
       _query: string,
       _appId: string
@@ -85,13 +77,9 @@ async function createGatherTools(appId: string): Promise<GatherTools> {
       return []
     },
 
-    /**
-     * Get conversation history from Front API.
-     */
     getHistory: async (conversationId: string) => {
       const frontToken = process.env.FRONT_API_TOKEN
       if (!frontToken) {
-        console.warn('[gather] FRONT_API_TOKEN not set, skipping history')
         return []
       }
 
@@ -105,15 +93,11 @@ async function createGatherTools(appId: string): Promise<GatherTools> {
           timestamp: msg.created_at,
           author: msg.author?.email,
         }))
-      } catch (error) {
-        console.error('[gather] getHistory error:', error)
+      } catch {
         return []
       }
     },
 
-    /**
-     * Search memories via MemoryService.
-     */
     searchMemory: async (query: string): Promise<MemoryItem[]> => {
       try {
         const results = await MemoryService.find(query, {
@@ -129,8 +113,7 @@ async function createGatherTools(appId: string): Promise<GatherTools> {
           tags: (r.memory.metadata as { tags?: string[] }).tags || [],
           relevance: r.score,
         }))
-      } catch (error) {
-        console.error('[gather] searchMemory error:', error)
+      } catch {
         return []
       }
     },
@@ -161,13 +144,6 @@ export const gatherWorkflow = inngest.createFunction(
 
     const workflowStartTime = Date.now()
     initializeAxiom()
-
-    console.log('[gather-workflow] ========== STARTED ==========')
-    console.log('[gather-workflow] conversationId:', conversationId)
-    console.log('[gather-workflow] messageId:', messageId)
-    console.log('[gather-workflow] appId:', appId)
-    console.log('[gather-workflow] senderEmail:', senderEmail)
-    console.log('[gather-workflow] category:', classification.category)
 
     // Gather context from various sources
     const context = await step.run('gather-context', async () => {
@@ -230,16 +206,6 @@ export const gatherWorkflow = inngest.createFunction(
         },
       })
 
-      console.log('[gather-workflow] context gathered:', {
-        hasUser: !!result.user,
-        purchaseCount: result.purchases.length,
-        knowledgeCount: result.knowledge.length,
-        historyCount: result.history.length,
-        memoryCount: result.priorMemory.length,
-        errorCount: result.gatherErrors.length,
-        durationMs,
-      })
-
       return result
     })
 
@@ -271,11 +237,22 @@ export const gatherWorkflow = inngest.createFunction(
       },
     })
 
-    const totalDurationMs = Date.now() - workflowStartTime
-    console.log('[gather-workflow] ========== COMPLETED ==========')
-    console.log('[gather-workflow] totalDurationMs:', totalDurationMs)
-    console.log('[gather-workflow] hasUser:', !!context.user)
-    console.log('[gather-workflow] purchaseCount:', context.purchases.length)
+    // Final completion trace
+    await traceWorkflowStep({
+      workflowName: 'support-gather',
+      conversationId,
+      appId,
+      stepName: 'complete',
+      durationMs: Date.now() - workflowStartTime,
+      success: true,
+      metadata: {
+        hasUser: !!context.user,
+        purchaseCount: context.purchases.length,
+        knowledgeCount: context.knowledge.length,
+        historyCount: context.history.length,
+        memoryCount: context.priorMemory.length,
+      },
+    })
 
     return {
       conversationId,

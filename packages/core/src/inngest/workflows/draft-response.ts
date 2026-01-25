@@ -26,7 +26,7 @@ export const draftWorkflow = inngest.createFunction(
   {
     id: 'support-draft',
     name: 'Draft Response',
-    retries: 1, // LLM calls are expensive, limit retries
+    retries: 1,
   },
   { event: SUPPORT_CONTEXT_GATHERED },
   async ({ event, step }) => {
@@ -36,20 +36,10 @@ export const draftWorkflow = inngest.createFunction(
     const workflowStartTime = Date.now()
     initializeAxiom()
 
-    console.log('[draft-workflow] ========== STARTED ==========')
-    console.log('[draft-workflow] conversationId:', conversationId)
-    console.log('[draft-workflow] messageId:', messageId)
-    console.log('[draft-workflow] appId:', appId)
-    console.log('[draft-workflow] category:', classification.category)
-    console.log('[draft-workflow] hasCustomer:', !!context.customer)
-    console.log('[draft-workflow] knowledgeCount:', context.knowledge?.length ?? 0)
-    console.log('[draft-workflow] memoryCount:', context.memories?.length ?? 0)
-
     // Generate draft response
     const draftResult = await step.run('draft-response', async () => {
       const stepStartTime = Date.now()
 
-      // Map event data to DraftInput structure
       const classifyOutput: ClassifyOutput = {
         category: classification.category as MessageCategory,
         confidence: classification.confidence,
@@ -71,7 +61,6 @@ export const draftWorkflow = inngest.createFunction(
         reasoning: undefined,
       }
 
-      // Map context from event to GatherOutput
       const gatherOutput: GatherOutput = {
         user: context.customer
           ? {
@@ -136,8 +125,6 @@ export const draftWorkflow = inngest.createFunction(
       const result = await draft(draftInput)
       const durationMs = Date.now() - stepStartTime
 
-      // Trace draft creation to Axiom with high cardinality
-
       await traceWorkflowStep({
         workflowName: 'support-draft',
         conversationId,
@@ -149,13 +136,11 @@ export const draftWorkflow = inngest.createFunction(
           draftLength: result.draft.length,
           toolsUsed: result.toolsUsed,
           modelUsed: 'claude-haiku-4-5',
+          hasKnowledge: (context.knowledge?.length ?? 0) > 0,
+          hasMemory: (context.memories?.length ?? 0) > 0,
+          hasCustomer: !!context.customer,
+          category: classification.category,
         },
-      })
-
-      console.log('[draft-workflow] draft generated:', {
-        draftLength: result.draft.length,
-        toolsUsed: result.toolsUsed,
-        durationMs,
       })
 
       return result
@@ -176,10 +161,18 @@ export const draftWorkflow = inngest.createFunction(
       },
     })
 
-    const totalDurationMs = Date.now() - workflowStartTime
-    console.log('[draft-workflow] ========== COMPLETED ==========')
-    console.log('[draft-workflow] totalDurationMs:', totalDurationMs)
-    console.log('[draft-workflow] draftLength:', draftResult.draft.length)
+    // Final completion trace
+    await traceWorkflowStep({
+      workflowName: 'support-draft',
+      conversationId,
+      appId,
+      stepName: 'complete',
+      durationMs: Date.now() - workflowStartTime,
+      success: true,
+      metadata: {
+        draftLength: draftResult.draft.length,
+      },
+    })
 
     return {
       conversationId,
