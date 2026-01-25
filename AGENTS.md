@@ -21,11 +21,44 @@ Support platform monorepo (agent-first, Front is source of truth, HITL approvals
 
 ## Production URLs
 
-| App | URL |
-|-----|-----|
-| Web (dashboard, Stripe) | https://skill-support-agent-web.vercel.app |
-| Front Plugin | https://skill-support-agent-front.vercel.app |
-| Slack Bot | https://skill-support-agent-slack.vercel.app |
+| App | URL | Purpose |
+|-----|-----|---------|
+| Front Plugin | https://skill-support-agent-front.vercel.app | Inngest workflows, webhooks, cron |
+| Web Dashboard | https://skill-support-agent-web.vercel.app | Admin UI, Stripe connect |
+| Slack Bot | https://skill-support-agent-slack.vercel.app | Slack integration |
+
+### Vercel Access
+
+All apps deployed to **skillrecordings** org on Vercel.
+
+```bash
+# List projects
+vercel project ls --scope skillrecordings
+
+# List deployments for a specific app
+vercel ls skill-support-agent-front --scope skillrecordings
+
+# Inspect a deployment
+vercel inspect <deployment-url> --scope skillrecordings
+
+# View logs
+vercel logs <deployment-url> --scope skillrecordings
+
+# Pull env vars (from app directory)
+cd apps/front && vercel env pull .env.local --scope skillrecordings
+```
+
+### API Endpoints
+
+**Cron (refreshes Inngest function registration):**
+```bash
+curl https://skill-support-agent-front.vercel.app/api/cron
+```
+Runs automatically every 5 minutes via Vercel Crons. Call manually after deploying new workflows.
+
+**Inngest:**
+- Dev UI: https://skill-support-agent-front.vercel.app/api/inngest (PUT to register)
+- Cloud dashboard: https://app.inngest.com (skillrecordings workspace)
 
 ## Adding a New Product (App)
 
