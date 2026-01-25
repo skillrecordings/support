@@ -12,7 +12,6 @@ export const dynamic = 'force-dynamic'
 export async function GET(request: Request) {
   initializeAxiom()
   
-  // Verify this is a legitimate Vercel cron call (optional but good practice)
   const headersList = await headers()
   const isVercelCron = headersList.get('x-vercel-cron') === '1'
   const userAgent = headersList.get('user-agent') || ''
@@ -23,9 +22,16 @@ export async function GET(request: Request) {
     userAgent: userAgent.slice(0, 100),
   })
 
-  const baseUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : 'http://localhost:3000'
+  // Use request URL origin to stay on the same deployment
+  // VERCEL_URL can point to preview deploys with auth protection
+  const url = new URL(request.url)
+  const baseUrl = url.origin
+
+  await log('debug', 'cron using baseUrl', {
+    workflow: 'inngest-refresh-cron',
+    baseUrl,
+    vercelUrl: process.env.VERCEL_URL,
+  })
 
   try {
     const response = await fetch(`${baseUrl}/api/inngest`, {
@@ -34,12 +40,17 @@ export async function GET(request: Request) {
 
     const status = response.status
     const ok = response.ok
+    let body = ''
+    try {
+      body = await response.text()
+    } catch {}
 
     await log('info', 'inngest refresh completed', {
       workflow: 'inngest-refresh-cron',
       baseUrl,
       status,
       ok,
+      body: body.slice(0, 500),
     })
 
     if (!ok) {
@@ -47,10 +58,11 @@ export async function GET(request: Request) {
         workflow: 'inngest-refresh-cron',
         status,
         statusText: response.statusText,
+        body: body.slice(0, 500),
       })
     }
 
-    return new Response(JSON.stringify({ ok, status }), {
+    return new Response(JSON.stringify({ ok, status, body: body.slice(0, 200) }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     })
