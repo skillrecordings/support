@@ -14,6 +14,7 @@ import {
 } from '@skillrecordings/core/front'
 import { createFrontClient as createSdkClient } from '@skillrecordings/front-sdk'
 import type { Command } from 'commander'
+import { registerPullCommand } from './pull-conversations'
 
 type Message = FrontMessage
 
@@ -326,4 +327,7 @@ export function registerFrontCommands(program: Command): void {
     .argument('<id>', 'Teammate ID (e.g., tea_xxx or username)')
     .option('--json', 'Output as JSON')
     .action(getTeammate)
+
+  // Register pull command for building eval datasets
+  registerPullCommand(front)
 }

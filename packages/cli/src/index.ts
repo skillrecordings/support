@@ -3,7 +3,11 @@
 import { Command } from 'commander'
 import { registerAxiomCommands } from './commands/axiom/index'
 import { registerDatasetCommands } from './commands/build-dataset'
+import { registerEvalPromptCommands } from './commands/eval-prompt'
 import { runEval } from './commands/eval'
+import { registerEvalLocalCommands } from './commands/eval-local/index'
+import { registerEvalPipelineCommands } from './commands/eval-pipeline/index'
+import { registerPipelineCommands } from './commands/pipeline'
 import { registerFrontCommands } from './commands/front/index'
 import { health } from './commands/health'
 import { init } from './commands/init'
@@ -113,8 +117,18 @@ registerToolsCommands(program)
 
 // Register Dataset commands (eval dataset building)
 registerDatasetCommands(program)
+registerEvalPromptCommands(program)
 
 // Register Axiom commands (log querying)
 registerAxiomCommands(program)
+
+// Register eval-local commands (local eval environment)
+registerEvalLocalCommands(program)
+
+// Register eval-pipeline commands (step-by-step pipeline eval)
+registerEvalPipelineCommands(program)
+
+// Register pipeline commands (new step-based architecture)
+registerPipelineCommands(program)
 
 program.parse()

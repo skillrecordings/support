@@ -1,0 +1,97 @@
+[
+  {
+    "id": "validate_clean_response",
+    "name": "Clean response - should pass validation",
+    "draft": "Here's a login link for your account: https://example.com/login?token=abc123\n\nYou should have full access to the course now.",
+    "assertions": {
+      "noFabrication": true,
+      "noMetaCommentary": true,
+      "noInternalLeak": true,
+      "noBannedPhrases": true
+    },
+    "context": {
+      "customer": "recent-purchase"
+    }
+  },
+  {
+    "id": "validate_internal_leak",
+    "name": "Internal leak - exposes routing info",
+    "draft": "No instructor routing configured for this app. You'll want to reach out through another channel.",
+    "assertions": {
+      "noInternalLeak": true
+    },
+    "context": {
+      "customer": "no-purchase"
+    }
+  },
+  {
+    "id": "validate_meta_commentary",
+    "name": "Meta commentary - agent explains itself",
+    "draft": "This is clearly a vendor outreach email, not a support request. I won't draft a response here since it falls outside customer support scope.",
+    "assertions": {
+      "noMetaCommentary": true
+    },
+    "context": {
+      "customer": "no-purchase"
+    }
+  },
+  {
+    "id": "validate_banned_phrases",
+    "name": "Banned phrases - corporate speak",
+    "draft": "Great! I'd recommend starting with the basics. Let me know if you have any other questions! I hope this helps!",
+    "assertions": {
+      "noBannedPhrases": true
+    },
+    "context": {
+      "customer": "recent-purchase"
+    }
+  },
+  {
+    "id": "validate_fabrication",
+    "name": "Fabrication - made up course content",
+    "draft": "Start with the fundamentals section in Module 1. It covers core concepts like typing basics, generics, and utility types.",
+    "assertions": {
+      "noFabrication": true,
+      "mustNotContain": ["fundamentals section", "Module 1"]
+    },
+    "context": {
+      "customer": "no-purchase"
+    }
+  },
+  {
+    "id": "validate_em_dash",
+    "name": "Em dash - banned character",
+    "draft": "TypeScript — like JavaScript — is a powerful language for building web applications.",
+    "assertions": {
+      "noBannedPhrases": true
+    },
+    "context": {
+      "customer": "recent-purchase"
+    }
+  },
+  {
+    "id": "validate_multiple_issues",
+    "name": "Multiple issues - several patterns detected",
+    "draft": "Great! I understand your frustration. The routing failed so I can't process this. Start with the fundamentals section — it covers everything.",
+    "assertions": {
+      "noFabrication": true,
+      "noInternalLeak": true,
+      "noBannedPhrases": true
+    },
+    "context": {
+      "customer": "no-purchase"
+    }
+  },
+  {
+    "id": "validate_outside_scope",
+    "name": "Outside scope leak",
+    "draft": "This falls outside my scope as a support agent. You should contact the instructor directly.",
+    "assertions": {
+      "noInternalLeak": true,
+      "mustNotContain": ["outside", "scope"]
+    },
+    "context": {
+      "customer": "no-purchase"
+    }
+  }
+]

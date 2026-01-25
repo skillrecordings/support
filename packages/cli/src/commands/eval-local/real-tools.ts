@@ -10,7 +10,7 @@ import {
   createQdrantClient,
 } from '@skillrecordings/core/adapters/qdrant'
 import { tool } from 'ai'
-import { Pool, createPool } from 'mysql2/promise'
+import { type Pool, createPool } from 'mysql2/promise'
 import { z } from 'zod'
 
 let mysqlPool: Pool | null = null
