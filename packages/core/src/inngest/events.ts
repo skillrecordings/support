@@ -365,6 +365,12 @@ export type SupportDraftValidatedEvent = {
       issues: string[]
       score?: number
     }
+    context?: {
+      customerEmail?: string
+      purchaseCount?: number
+      knowledgeCount?: number
+      memoryCount?: number
+    }
   }
 }
 

@@ -66,7 +66,10 @@ export const validateWorkflow = inngest.createFunction(
         valid: result.valid,
         issueCount: result.issues.length,
         issueTypes: issuesByType,
-        issues: result.issues.map((i) => ({ type: i.type, message: i.message })),
+        issues: result.issues.map((i) => ({
+          type: i.type,
+          message: i.message,
+        })),
         durationMs,
       })
 
@@ -122,6 +125,18 @@ export const validateWorkflow = inngest.createFunction(
           issues: validation.issues.map((issue) => issue.message),
           score: validation.valid ? 1.0 : 0.0,
         },
+        // Pass context through for internal comments
+        context: context
+          ? (() => {
+              const ctx = context as GatherOutput
+              return {
+                customerEmail: ctx.user?.email,
+                purchaseCount: ctx.purchases?.length ?? 0,
+                knowledgeCount: ctx.knowledge?.length ?? 0,
+                memoryCount: ctx.priorMemory?.length ?? 0,
+              }
+            })()
+          : undefined,
       },
     })
 

@@ -202,6 +202,18 @@ export function createFrontClient(apiToken: string) {
       )
       return response
     },
+
+    /**
+     * Add an internal comment to a conversation (visible to team only)
+     * Used for agent context notes, lookup results, etc.
+     */
+    async addComment(
+      conversationId: string,
+      body: string,
+      authorId?: string
+    ): Promise<void> {
+      await sdk.conversations.addComment(conversationId, body, authorId)
+    },
   }
 }
 

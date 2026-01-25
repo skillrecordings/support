@@ -6,8 +6,8 @@
  * - If validation failed or score is low → request human approval
  */
 
-import { ActionsTable, getDb } from '@skillrecordings/database'
 import { randomUUID } from 'crypto'
+import { ActionsTable, getDb } from '@skillrecordings/database'
 import {
   initializeAxiom,
   log,
@@ -29,7 +29,8 @@ export const handleValidatedDraft = inngest.createFunction(
   },
   { event: SUPPORT_DRAFT_VALIDATED },
   async ({ event, step }) => {
-    const { conversationId, messageId, appId, draft, validation } = event.data
+    const { conversationId, messageId, appId, draft, validation, context } =
+      event.data
 
     const workflowStartTime = Date.now()
     initializeAxiom()
@@ -119,6 +120,7 @@ export const handleValidatedDraft = inngest.createFunction(
             messageId,
             autoApproved: true,
             validationScore: decision.score,
+            context: context ?? undefined,
           },
           requires_approval: false,
           created_at: new Date(),
@@ -212,6 +214,7 @@ export const handleValidatedDraft = inngest.createFunction(
           messageId,
           validationIssues: validation.issues,
           validationScore: decision.score,
+          context: context ?? undefined,
         },
         requires_approval: true,
         created_at: new Date(),
@@ -270,16 +273,20 @@ export const handleValidatedDraft = inngest.createFunction(
 
     const totalDurationMs = Date.now() - workflowStartTime
 
-    await log('info', 'handle-validated workflow completed - approval requested', {
-      workflow: 'support-handle-validated',
-      conversationId,
-      messageId,
-      appId,
-      actionId,
-      outcome: 'approval-requested',
-      reason: decision.reason,
-      totalDurationMs,
-    })
+    await log(
+      'info',
+      'handle-validated workflow completed - approval requested',
+      {
+        workflow: 'support-handle-validated',
+        conversationId,
+        messageId,
+        appId,
+        actionId,
+        outcome: 'approval-requested',
+        reason: decision.reason,
+        totalDurationMs,
+      }
+    )
 
     await traceWorkflowStep({
       workflowName: 'support-handle-validated',

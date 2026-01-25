@@ -55,6 +55,12 @@ export const executeApprovedAction = inngest.createFunction(
           response?: string
           draft?: string // from send-draft action type
           inboxId?: string
+          context?: {
+            customerEmail?: string
+            purchaseCount?: number
+            knowledgeCount?: number
+            memoryCount?: number
+          }
         }
         // Support both 'draft' (from send-draft) and 'response' (from draft-response)
         const response = params?.draft || params?.response
@@ -109,6 +115,27 @@ export const executeApprovedAction = inngest.createFunction(
           response,
           channelId
         )
+
+        // Add internal comment with context summary for support team
+        if (params.context) {
+          const ctx = params.context
+          const lines = ['🤖 **Agent Context**']
+          if (ctx.customerEmail) {
+            lines.push(`• Customer: ${ctx.customerEmail}`)
+          } else {
+            lines.push('• Customer: Not found in system')
+          }
+          lines.push(`• Purchases: ${ctx.purchaseCount ?? 0}`)
+          lines.push(`• Knowledge matches: ${ctx.knowledgeCount ?? 0}`)
+          lines.push(`• Memory matches: ${ctx.memoryCount ?? 0}`)
+
+          try {
+            await front.addComment(conversationId, lines.join('\n'))
+          } catch {
+            // Non-fatal - continue even if comment fails
+          }
+        }
+
         return {
           success: true,
           output: { draftId: draft.id, conversationId },
