@@ -5,7 +5,7 @@
  */
 
 import { readFile, writeFile } from 'fs/promises'
-import { formatIssues, validate } from '../steps/validate'
+import { formatIssues, validateSync } from '../steps/validate'
 import type {
   EvalSummary,
   GatherOutput,
@@ -222,7 +222,10 @@ export async function runValidateEval(
   for (const scenario of scenarios) {
     const scenarioStart = Date.now()
 
-    const result = validate({ draft: scenario.draft, context: emptyContext })
+    const result = validateSync({
+      draft: scenario.draft,
+      context: emptyContext,
+    })
     const actualIssues = [...new Set(result.issues.map((i) => i.type))]
 
     const missingIssues = scenario.expectedIssues.filter(

@@ -932,7 +932,7 @@ async function runValidateEval(
     }
 
     try {
-      const result = validate({
+      const result = await validate({
         draft: scenario.draft,
         context: mockContext,
         strictMode: false,
@@ -950,12 +950,15 @@ async function runValidateEval(
         too_short: 'noBannedPhrases', // No specific assertion
         too_long: 'noBannedPhrases', // No specific assertion
         bad_tone: 'noBannedPhrases', // No specific assertion
+        repeated_mistake: 'noBannedPhrases', // No specific assertion
       }
 
       // Check if assertions match
       const assertions = scenario.assertions || {}
       const failedAssertions: string[] = []
-      const foundIssueTypes = new Set(result.issues.map((i) => i.type))
+      const foundIssueTypes = new Set(
+        result.issues.map((i: { type: string }) => i.type)
+      )
 
       // Check negative assertions (noX = expect no issues of type X)
       if (assertions.noFabrication && foundIssueTypes.has('fabrication')) {
@@ -985,7 +988,10 @@ async function runValidateEval(
 
       const passed = failedAssertions.length === 0
       const issuesSummary = result.issues
-        .map((i) => `${i.type}:${i.match || 'none'}`)
+        .map(
+          (i: { type: string; match?: string }) =>
+            `${i.type}:${i.match || 'none'}`
+        )
         .join(', ')
 
       completed++

@@ -62,7 +62,8 @@
     "./pipeline/steps/thread-signals": "./src/pipeline/steps/thread-signals.ts",
     "./pipeline/steps/comment": "./src/pipeline/steps/comment.ts",
     "./memory": "./src/memory/index.ts",
-    "./memory/query": "./src/memory/query.ts"
+    "./memory/query": "./src/memory/query.ts",
+    "./memory/correction-capture": "./src/memory/correction-capture.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit",

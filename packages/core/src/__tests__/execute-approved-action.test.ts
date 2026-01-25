@@ -1,7 +1,7 @@
 // Set environment variables BEFORE any imports
 process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test'
 
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Mock the database module
 const mockDb = {
@@ -17,6 +17,29 @@ vi.mock('@skillrecordings/database', () => ({
   ActionsTable: {},
   ApprovalRequestsTable: {},
   eq: vi.fn((field, value) => ({ field, value })),
+}))
+
+// Mock Front SDK for audit comments
+const mockAddComment = vi.fn().mockResolvedValue({})
+const mockFrontSdkClient = {
+  conversations: {
+    addComment: mockAddComment,
+    updateAssignee: vi.fn().mockResolvedValue({}),
+  },
+}
+vi.mock('@skillrecordings/front-sdk', () => ({
+  createFrontClient: vi.fn(() => mockFrontSdkClient),
+}))
+
+// Mock internal front client
+const mockFrontClient = {
+  createDraft: vi.fn().mockResolvedValue({ id: 'draft-123' }),
+  addComment: vi.fn().mockResolvedValue({}),
+  getConversationInbox: vi.fn().mockResolvedValue('inbox-123'),
+  getInboxChannel: vi.fn().mockResolvedValue('channel-123'),
+}
+vi.mock('../front', () => ({
+  createFrontClient: vi.fn(() => mockFrontClient),
 }))
 
 // Mock supportTools - use vi.hoisted to ensure mock fn is available
@@ -297,6 +320,219 @@ describe('executeApprovedAction workflow', () => {
         executed: true,
         approvedBy,
       })
+    })
+  })
+
+  describe('audit trail comments', () => {
+    let mockStep: any
+    const originalEnv = process.env.ENABLE_AUDIT_COMMENTS
+
+    beforeEach(() => {
+      vi.clearAllMocks()
+      mockDb.select.mockReturnThis()
+      mockDb.from.mockReturnThis()
+      mockDb.update.mockReturnThis()
+      mockDb.set.mockReturnThis()
+
+      // Reset internal front client mocks
+      mockFrontClient.createDraft.mockResolvedValue({ id: 'draft-123' })
+      mockFrontClient.addComment.mockResolvedValue({})
+      mockFrontClient.getConversationInbox.mockResolvedValue('inbox-123')
+      mockFrontClient.getInboxChannel.mockResolvedValue('channel-123')
+
+      // Reset SDK mocks
+      mockAddComment.mockResolvedValue({})
+
+      // Reset env var
+      delete process.env.ENABLE_AUDIT_COMMENTS
+
+      // Set FRONT_API_TOKEN for audit comment tests
+      process.env.FRONT_API_TOKEN = 'test-token'
+
+      mockStep = {
+        run: vi.fn((stepName: string, handler: Function) => {
+          return handler()
+        }),
+      }
+    })
+
+    afterEach(() => {
+      if (originalEnv !== undefined) {
+        process.env.ENABLE_AUDIT_COMMENTS = originalEnv
+      } else {
+        delete process.env.ENABLE_AUDIT_COMMENTS
+      }
+    })
+
+    it('should add audit comment for auto-approved send-draft actions', async () => {
+      const actionId = 'action-123'
+      const mockAction = {
+        id: actionId,
+        type: 'send-draft',
+        parameters: {
+          draft: 'Hello, here is your magic link...',
+          autoApproved: true,
+          validationScore: 0.92,
+          context: {
+            category: 'support_access',
+            customerEmail: 'test@example.com',
+          },
+        },
+        conversation_id: 'conv-789',
+        app_id: 'app-tt',
+      }
+
+      // Return array for lookup, then undefined for updates
+      mockDb.where
+        .mockResolvedValueOnce([mockAction])
+        .mockResolvedValueOnce(undefined)
+        .mockResolvedValueOnce(undefined)
+
+      const event = {
+        name: SUPPORT_ACTION_APPROVED,
+        data: {
+          actionId,
+          approvedBy: 'auto',
+          approvedAt: new Date().toISOString(),
+        },
+      }
+
+      await (executeApprovedAction as any).fn({ event, step: mockStep })
+
+      // Verify add-audit-comment step was called
+      expect(mockStep.run).toHaveBeenCalledWith(
+        'add-audit-comment',
+        expect.any(Function)
+      )
+
+      // Verify Front SDK addComment was called with audit comment
+      expect(mockAddComment).toHaveBeenCalledWith(
+        'conv-789',
+        expect.stringContaining('Auto-sent')
+      )
+    })
+
+    it('should not add audit comment when ENABLE_AUDIT_COMMENTS=false', async () => {
+      process.env.ENABLE_AUDIT_COMMENTS = 'false'
+
+      const actionId = 'action-123'
+      const mockAction = {
+        id: actionId,
+        type: 'send-draft',
+        parameters: {
+          draft: 'Hello, here is your magic link...',
+          autoApproved: true,
+          validationScore: 0.92,
+        },
+        conversation_id: 'conv-789',
+        app_id: 'app-tt',
+      }
+
+      mockDb.where
+        .mockResolvedValueOnce([mockAction])
+        .mockResolvedValueOnce(undefined)
+        .mockResolvedValueOnce(undefined)
+
+      const event = {
+        name: SUPPORT_ACTION_APPROVED,
+        data: {
+          actionId,
+          approvedBy: 'auto',
+          approvedAt: new Date().toISOString(),
+        },
+      }
+
+      await (executeApprovedAction as any).fn({ event, step: mockStep })
+
+      // Verify add-audit-comment step was NOT called
+      const stepNames = mockStep.run.mock.calls.map((call: any[]) => call[0])
+      expect(stepNames).not.toContain('add-audit-comment')
+
+      // Verify Front SDK addComment was NOT called for audit
+      expect(mockAddComment).not.toHaveBeenCalled()
+    })
+
+    it('should not add audit comment for human-approved actions', async () => {
+      const actionId = 'action-123'
+      const mockAction = {
+        id: actionId,
+        type: 'send-draft',
+        parameters: {
+          draft: 'Hello, here is your magic link...',
+          validationScore: 0.75,
+        },
+        conversation_id: 'conv-789',
+        app_id: 'app-tt',
+      }
+
+      mockDb.where
+        .mockResolvedValueOnce([mockAction])
+        .mockResolvedValueOnce(undefined)
+        .mockResolvedValueOnce(undefined)
+
+      const event = {
+        name: SUPPORT_ACTION_APPROVED,
+        data: {
+          actionId,
+          approvedBy: 'admin@example.com', // Human approval
+          approvedAt: new Date().toISOString(),
+        },
+      }
+
+      await (executeApprovedAction as any).fn({ event, step: mockStep })
+
+      // Verify add-audit-comment step was NOT called
+      const stepNames = mockStep.run.mock.calls.map((call: any[]) => call[0])
+      expect(stepNames).not.toContain('add-audit-comment')
+
+      // Verify Front SDK addComment was NOT called for audit
+      expect(mockAddComment).not.toHaveBeenCalled()
+    })
+
+    it('should not add audit comment for non-send action types', async () => {
+      const actionId = 'action-123'
+      const mockAction = {
+        id: actionId,
+        type: 'pending-action', // Not send-draft
+        parameters: {
+          toolCalls: [
+            {
+              name: 'processRefund',
+              args: { purchaseId: 'p-1', appId: 'app', reason: 'test' },
+            },
+          ],
+        },
+        conversation_id: 'conv-789',
+        app_id: 'app-tt',
+      }
+
+      mockDb.where
+        .mockResolvedValueOnce([mockAction])
+        .mockResolvedValueOnce(undefined)
+        .mockResolvedValueOnce(undefined)
+
+      const event = {
+        name: SUPPORT_ACTION_APPROVED,
+        data: {
+          actionId,
+          approvedBy: 'auto',
+          approvedAt: new Date().toISOString(),
+        },
+      }
+
+      mockProcessRefund.mockResolvedValue({
+        success: true,
+        data: { refundId: 'ref-123' },
+      })
+
+      await (executeApprovedAction as any).fn({ event, step: mockStep })
+
+      // Verify add-audit-comment step was NOT called (not a send-draft action)
+      const stepNames = mockStep.run.mock.calls.map((call: any[]) => call[0])
+      expect(stepNames).not.toContain('add-audit-comment')
+
+      // Verify Front SDK addComment was NOT called for audit
+      expect(mockAddComment).not.toHaveBeenCalled()
     })
   })
 })

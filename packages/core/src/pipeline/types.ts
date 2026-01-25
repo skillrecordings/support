@@ -304,6 +304,7 @@ export type ValidationIssueType =
   | 'too_short'
   | 'too_long'
   | 'bad_tone'
+  | 'repeated_mistake' // Draft may repeat a known corrected mistake
 
 // ============================================================================
 // Step 5b: Comment (for support_teammate action)

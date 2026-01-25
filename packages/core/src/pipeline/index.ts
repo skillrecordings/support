@@ -46,6 +46,17 @@ export {
   // Thread-aware (v3)
   routeThread,
   getThreadRoutingRules,
+  // Memory-aware (v4)
+  routeWithMemory,
+  routeThreadWithMemory,
+  recordRoutingOutcome,
+  recordEscalationConfirmed,
+  recordShouldHaveEscalated,
+  recordUnnecessaryEscalation,
+  type RouteWithMemoryInput,
+  type ThreadRouteWithMemoryInput,
+  type RouteWithMemoryOutput,
+  type RecordRoutingOutcomeInput,
 } from './steps/route'
 export { gather, formatContextForPrompt, extractEmail } from './steps/gather'
 export {
@@ -56,7 +67,14 @@ export {
   type DraftResult,
   type StoreDraftCorrectionInput,
 } from './steps/draft'
-export { validate, formatIssues, hasIssueType } from './steps/validate'
+export {
+  validate,
+  validateSync,
+  formatIssues,
+  hasIssueType,
+  type ValidateOptions,
+  type ValidateResult,
+} from './steps/validate'
 // Thread signals (v3)
 export {
   computeThreadSignals,
@@ -271,15 +289,21 @@ export async function runPipeline(
   }
 
   // -------------------------------------------------------------------------
-  // Step 5: Validate
+  // Step 5: Validate (with memory check for repeated mistakes)
   // -------------------------------------------------------------------------
   const validateStart = Date.now()
   try {
-    validation = validate({
-      draft: draftResult.draft,
-      context,
-      strictMode: options.validateStrictMode,
-    })
+    validation = await validate(
+      {
+        draft: draftResult.draft,
+        context,
+        strictMode: options.validateStrictMode,
+      },
+      {
+        appId: input.appConfig.appId,
+        category: classification?.category,
+      }
+    )
     steps.push({
       step: 'validate',
       durationMs: Date.now() - validateStart,
@@ -662,15 +686,21 @@ export async function runThreadPipeline(
   }
 
   // -------------------------------------------------------------------------
-  // Step 5: Validate
+  // Step 5: Validate (with memory check for repeated mistakes)
   // -------------------------------------------------------------------------
   const validateStart = Date.now()
   try {
-    validation = validate({
-      draft: draftResult.draft,
-      context,
-      strictMode: options.validateStrictMode,
-    })
+    validation = await validate(
+      {
+        draft: draftResult.draft,
+        context,
+        strictMode: options.validateStrictMode,
+      },
+      {
+        appId: input.appConfig.appId,
+        category: classification?.category,
+      }
+    )
     steps.push({
       step: 'validate',
       durationMs: Date.now() - validateStart,
