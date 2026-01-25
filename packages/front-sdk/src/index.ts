@@ -172,7 +172,7 @@ import { createTemplatesClient } from './client/templates.js'
  * ```
  */
 export async function paginate<
-  T extends { _results: unknown[]; _pagination?: { next?: string } },
+  T extends { _results: unknown[]; _pagination?: { next?: string | null } },
 >(
   firstPage: () => Promise<T>,
   getPage: (url: string) => Promise<T>
