@@ -31,6 +31,72 @@ function getFrontSdkClient() {
 }
 
 /**
+ * Get Front API token
+ */
+function getFrontApiToken() {
+  const apiToken = process.env.FRONT_API_TOKEN
+  if (!apiToken) {
+    throw new Error('FRONT_API_TOKEN environment variable is required')
+  }
+  return apiToken
+}
+
+/**
+ * Raw fetch for tags - bypasses SDK validation which chokes on Front's messy data
+ */
+async function fetchTagsRaw(): Promise<
+  Array<{
+    id: string
+    name: string
+    highlight?: string | null
+    is_private: boolean
+    description?: string | null
+  }>
+> {
+  const apiToken = getFrontApiToken()
+  const allTags: Array<{
+    id: string
+    name: string
+    highlight?: string | null
+    is_private: boolean
+    description?: string | null
+  }> = []
+
+  let nextUrl: string | null = 'https://api2.frontapp.com/tags'
+
+  while (nextUrl) {
+    const response = await fetch(nextUrl, {
+      headers: {
+        Authorization: `Bearer ${apiToken}`,
+        Accept: 'application/json',
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(
+        `Front API error: ${response.status} ${response.statusText}`
+      )
+    }
+
+    const data = (await response.json()) as {
+      _results: Array<{
+        id: string
+        name: string
+        highlight?: string | null
+        is_private: boolean
+        description?: string | null
+      }>
+      _pagination?: { next?: string }
+    }
+
+    allTags.push(...data._results)
+    nextUrl = data._pagination?.next ?? null
+  }
+
+  return allTags
+}
+
+/**
  * Truncate string with ellipsis
  */
 function truncate(str: string, len: number): string {
@@ -77,11 +143,11 @@ async function listTags(options: {
 }): Promise<void> {
   try {
     const front = getFrontSdkClient()
-    const result = await front.tags.list()
+    const tags = await fetchTagsRaw()
 
     // Fetch conversation counts for each tag
     const tagsWithCounts: TagWithCount[] = await Promise.all(
-      result._results.map(async (tag) => {
+      tags.map(async (tag) => {
         const count = await getConversationCount(front, tag.id)
         return {
           id: tag.id,
@@ -573,15 +639,24 @@ async function cleanupTags(options: { execute?: boolean }): Promise<void> {
 
     console.log('\n🔍 Analyzing tags...')
 
-    // Fetch all tags with conversation counts
-    const result = await front.tags.list()
+    // Fetch all tags with conversation counts (raw fetch to avoid SDK validation issues)
+    const tags = await fetchTagsRaw()
     const tagsWithCounts: TagWithConversationCount[] = await Promise.all(
-      result._results.map(async (tag) => {
+      tags.map(async (tag) => {
         const count = await getConversationCount(front, tag.id)
+        // Cast to TagWithConversationCount - audit functions only use id/name/highlight/conversationCount
         return {
-          ...tag,
+          id: tag.id,
+          name: tag.name,
+          highlight: tag.highlight ?? null,
+          is_private: tag.is_private,
+          description: tag.description ?? null,
           conversationCount: count,
-        }
+          _links: {
+            self: '',
+            related: { owner: '', children: '', conversations: '' },
+          },
+        } as unknown as TagWithConversationCount
       })
     )
 
