@@ -17,6 +17,10 @@ import {
   traceMemoryRetrieval,
   traceWorkflowStep,
 } from '../../observability/axiom'
+import {
+  assertDataIntegrity,
+  buildDataFlowCheck,
+} from '../../pipeline/assert-data-integrity'
 import { type GatherTools, gather } from '../../pipeline/steps/gather'
 import type { KnowledgeItem, MemoryItem } from '../../pipeline/types'
 import { getApp } from '../../services/app-registry'
@@ -228,6 +232,19 @@ export const gatherWorkflow = inngest.createFunction(
       appId,
       senderEmail,
       category: classification.category,
+      ...buildDataFlowCheck('support-gather', 'receiving', {
+        subject,
+        body,
+        category: classification.category,
+        confidence: classification.confidence,
+        signals: classification.signals,
+      }),
+    })
+
+    // Assert critical data from upstream (route workflow)
+    await assertDataIntegrity('gather-context/receive', {
+      body,
+      subject,
     })
 
     const context = await step.run('gather-context', async () => {
@@ -333,10 +350,21 @@ export const gatherWorkflow = inngest.createFunction(
       return result
     })
 
+    // Data flow check: log what we're emitting to draft-response
     await log('debug', 'emitting context gathered event', {
       workflow: 'support-gather',
       conversationId,
       messageId,
+      ...buildDataFlowCheck('support-gather', 'emitting', {
+        subject,
+        body,
+        history: context.history,
+        purchases: context.purchases,
+        category: classification.category,
+        confidence: classification.confidence,
+        reasoning: classification.reasoning,
+        signals: classification.signals,
+      }),
     })
 
     await step.sendEvent('emit-context-gathered', {
@@ -345,9 +373,14 @@ export const gatherWorkflow = inngest.createFunction(
         conversationId,
         messageId,
         appId,
+        subject,
+        body,
+        senderEmail,
         classification: {
           category: classification.category,
           confidence: classification.confidence,
+          signals: classification.signals,
+          reasoning: classification.reasoning,
         },
         route: {
           action: route.action,
@@ -359,6 +392,14 @@ export const gatherWorkflow = inngest.createFunction(
             : null,
           knowledge: context.knowledge,
           memories: context.priorMemory,
+          history: context.history.map((h) => ({
+            body: h.body,
+            from: h.author ?? (h.direction === 'in' ? senderEmail : 'agent'),
+            date:
+              typeof h.timestamp === 'number'
+                ? String(h.timestamp)
+                : String(h.timestamp ?? ''),
+          })),
         },
       },
     })
