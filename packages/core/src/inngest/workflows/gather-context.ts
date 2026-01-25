@@ -273,6 +273,20 @@ export const gatherWorkflow = inngest.createFunction(
 
       const durationMs = Date.now() - stepStartTime
 
+      // Log email resolution decision
+      if (result.emailResolution) {
+        await log('debug', 'customer email determined', {
+          workflow: 'support-gather',
+          step: 'gather-context',
+          conversationId,
+          senderEmail: result.emailResolution.senderEmail,
+          bodyExtractedEmail: result.emailResolution.bodyExtractedEmail,
+          resolvedEmail: result.emailResolution.email,
+          emailSource: result.emailResolution.source,
+          usedFallback: result.emailResolution.source === 'body',
+        })
+      }
+
       await log('info', 'context gathered', {
         workflow: 'support-gather',
         step: 'gather-context',
