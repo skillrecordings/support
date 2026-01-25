@@ -204,6 +204,62 @@ async function getEvent(
 }
 
 /**
+ * Command: skill inngest replay <id>
+ * Replay an event by re-emitting with the same name and data
+ */
+async function replayEvent(
+  id: string,
+  options: { json?: boolean; dev?: boolean }
+): Promise<void> {
+  try {
+    const client = new InngestClient({ dev: options.dev })
+
+    console.log(`\n🔄 Replaying event ${id}...`)
+
+    const { newEventId, event } = await client.replayEvent(id)
+
+    if (options.json) {
+      console.log(
+        JSON.stringify(
+          {
+            success: true,
+            originalEventId: id,
+            newEventId,
+            eventName: event.name,
+            eventData: event.data,
+          },
+          null,
+          2
+        )
+      )
+    } else {
+      console.log(`\n✅ Event replayed successfully!`)
+      console.log(`   Original ID: ${id}`)
+      console.log(`   New ID:      ${newEventId}`)
+      console.log(`   Name:        ${event.name}`)
+      console.log(`   Data:        ${JSON.stringify(event.data, null, 2)}`)
+      console.log(
+        `\nUse 'skill inngest event ${newEventId}' to check triggered runs.`
+      )
+    }
+  } catch (error) {
+    if (options.json) {
+      console.error(
+        JSON.stringify({
+          error: error instanceof Error ? error.message : 'Unknown error',
+        })
+      )
+    } else {
+      console.error(
+        '❌ Replay failed:',
+        error instanceof Error ? error.message : 'Unknown error'
+      )
+    }
+    process.exit(1)
+  }
+}
+
+/**
  * Register events commands with Commander
  */
 export function registerEventsCommands(program: Command): void {
@@ -226,6 +282,14 @@ export function registerEventsCommands(program: Command): void {
     .option('--json', 'Output as JSON')
     .option('--dev', 'Use dev server (localhost:8288)')
     .action(getEvent)
+
+  inngest
+    .command('replay')
+    .description('Replay an event (re-emit with same name and data)')
+    .argument('<id>', 'Event internal ID to replay')
+    .option('--json', 'Output as JSON')
+    .option('--dev', 'Use dev server (localhost:8288)')
+    .action(replayEvent)
 
   // Register investigation/spelunking commands
   registerInvestigateCommands(inngest)
