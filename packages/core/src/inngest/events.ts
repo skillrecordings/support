@@ -377,6 +377,19 @@ export type SupportDraftValidatedEvent = {
 /** Event emitted when routing decides to escalate */
 export const SUPPORT_ESCALATED = 'support/inbound.escalated' as const
 
+/** Event emitted to trigger manual template sync */
+export const TEMPLATES_SYNC_REQUESTED = 'templates/sync.requested' as const
+
+export type TemplatesSyncRequestedEvent = {
+  name: typeof TEMPLATES_SYNC_REQUESTED
+  data: {
+    /** Optional: specific app to sync (syncs all if not provided) */
+    appId?: string
+    /** Optional: requestor info for audit */
+    requestedBy?: string
+  }
+}
+
 export type EscalationPriority =
   | 'urgent'
   | 'normal'
@@ -430,4 +443,6 @@ export type Events = {
   [SUPPORT_DRAFT_CREATED]: SupportDraftCreatedEvent
   [SUPPORT_DRAFT_VALIDATED]: SupportDraftValidatedEvent
   [SUPPORT_ESCALATED]: SupportEscalatedEvent
+  // Template sync events
+  [TEMPLATES_SYNC_REQUESTED]: TemplatesSyncRequestedEvent
 }
