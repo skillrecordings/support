@@ -82,6 +82,11 @@ export const ActionsTable = mysqlTable('SUPPORT_actions', {
   type: varchar('type', { length: 255 }).notNull(),
   parameters: json('parameters').$type<Record<string, unknown>>().notNull(),
 
+  // Classification metadata (promoted from parameters.context for queryability)
+  category: varchar('category', { length: 100 }),
+  confidence: double('confidence'),
+  reasoning: text('reasoning'),
+
   requires_approval: boolean('requires_approval').default(false),
   approved_by: varchar('approved_by', { length: 255 }),
   approved_at: datetime('approved_at'),
