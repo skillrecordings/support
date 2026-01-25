@@ -2,13 +2,20 @@
  * Step 5: VALIDATE
  *
  * Checks draft response for quality issues before sending.
- * All checks are deterministic (no LLM) - fast and predictable.
+ * Pattern checks are deterministic (no LLM) - fast and predictable.
  *
  * Memory Integration:
  * Before returning, queries memory for similar corrected drafts to catch
  * repeated mistakes. This is the "does this draft repeat a known mistake?" check.
+ *
+ * Relevance Check (LLM):
+ * When the original customer message is available, uses a lightweight LLM call
+ * (claude-haiku) to verify the draft actually addresses what the customer asked.
+ * This prevents sending generic/off-topic responses to specific questions.
  */
 
+import { generateObject } from 'ai'
+import { z } from 'zod'
 import { type RelevantMemory, queryCorrectedMemories } from '../../memory/query'
 import { log } from '../../observability/axiom'
 import type {
@@ -202,6 +209,89 @@ function checkLength(draft: string): ValidationIssue[] {
 }
 
 // ============================================================================
+// Relevance check (LLM-based)
+// ============================================================================
+
+const relevanceSchema = z.object({
+  relevant: z
+    .boolean()
+    .describe('Whether the draft response addresses the customer message'),
+  score: z
+    .number()
+    .min(0)
+    .max(1)
+    .describe(
+      'Relevance score from 0 (completely off-topic) to 1 (directly addresses the question)'
+    ),
+  reasoning: z
+    .string()
+    .describe('Brief explanation of the relevance assessment'),
+})
+
+const RELEVANCE_CHECK_PROMPT = `You are a quality assurance checker for customer support responses.
+
+Your job: determine whether the draft response actually addresses what the customer asked.
+
+Flag as NOT relevant if the draft:
+- Is generic/templated when the customer asked a specific question
+- Is off-topic or clearly not responding to what was asked
+- Refers to missing or empty content (e.g., "I notice your message came through without a subject line" when the customer clearly wrote something)
+- Provides a canned greeting without addressing the actual question
+- Answers a completely different question than what was asked
+
+Flag as relevant if the draft:
+- Directly addresses the customer's question or concern
+- Acknowledges and responds to the specific topic raised
+- Even if imperfect, is clearly attempting to address the right topic
+
+Be practical — a response doesn't need to be perfect, just on-topic.`
+
+/**
+ * Check if the draft response is relevant to the customer's message.
+ * Uses a lightweight LLM call (claude-haiku) for semantic understanding.
+ * Only runs when the customer message body is non-empty.
+ */
+async function checkRelevance(
+  draft: string,
+  customerMessage: { subject: string; body: string },
+  model: string = 'anthropic/claude-haiku-4-5'
+): Promise<{ issues: ValidationIssue[]; score: number }> {
+  const customerText = [
+    customerMessage.subject ? `Subject: ${customerMessage.subject}` : '',
+    customerMessage.body ? `Body: ${customerMessage.body}` : '',
+  ]
+    .filter(Boolean)
+    .join('\n')
+
+  const prompt = `Customer message:
+${customerText}
+
+Draft response:
+${draft}
+
+Is this draft response relevant to what the customer asked?`
+
+  const { object } = await generateObject({
+    model,
+    schema: relevanceSchema,
+    system: RELEVANCE_CHECK_PROMPT,
+    prompt,
+  })
+
+  const issues: ValidationIssue[] = []
+
+  if (!object.relevant || object.score < 0.5) {
+    issues.push({
+      type: 'relevance',
+      severity: 'error',
+      message: `Draft does not address the customer's message: ${object.reasoning}`,
+    })
+  }
+
+  return { issues, score: object.score }
+}
+
+// ============================================================================
 // Main validate function
 // ============================================================================
 
@@ -217,6 +307,10 @@ export interface ValidateOptions {
   skipMemoryQuery?: boolean
   /** Similarity threshold for matching corrections (default: 0.7) */
   correctionThreshold?: number
+  /** Skip relevance check (for testing or when LLM unavailable) */
+  skipRelevanceCheck?: boolean
+  /** Model to use for relevance check (default: 'anthropic/claude-haiku-4-5') */
+  relevanceModel?: string
 }
 
 /**
@@ -227,6 +321,8 @@ export interface ValidateResult extends ValidateOutput {
   correctionsChecked?: RelevantMemory[]
   /** Whether memory check was performed */
   memoryCheckPerformed: boolean
+  /** Whether relevance check was performed */
+  relevanceCheckPerformed: boolean
 }
 
 /**
@@ -281,12 +377,14 @@ export async function validate(
   input: ValidateInput,
   options: ValidateOptions = {}
 ): Promise<ValidateResult> {
-  const { draft, context, strictMode = false } = input
+  const { draft, context, strictMode = false, customerMessage } = input
   const {
     appId,
     category,
     skipMemoryQuery = false,
     correctionThreshold = 0.7,
+    skipRelevanceCheck = false,
+    relevanceModel = 'anthropic/claude-haiku-4-5',
   } = options
 
   const startTime = Date.now()
@@ -367,6 +465,58 @@ export async function validate(
     }
   }
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // Relevance Check: Does this draft actually address the customer's message?
+  // ─────────────────────────────────────────────────────────────────────────
+  let relevanceScore: number | undefined
+  let relevanceCheckPerformed = false
+
+  const hasCustomerBody =
+    customerMessage?.body && customerMessage.body.trim().length > 0
+
+  if (!skipRelevanceCheck && hasCustomerBody && customerMessage) {
+    try {
+      await log('debug', 'running relevance check', {
+        workflow: 'pipeline',
+        step: 'validate',
+        appId,
+        category,
+        customerMessageLength:
+          (customerMessage.subject?.length ?? 0) +
+          (customerMessage.body?.length ?? 0),
+        draftLength: draft.length,
+      })
+
+      const relevanceResult = await checkRelevance(
+        draft,
+        customerMessage,
+        relevanceModel
+      )
+      relevanceCheckPerformed = true
+      relevanceScore = relevanceResult.score
+      allIssues.push(...relevanceResult.issues)
+
+      await log('debug', 'relevance check completed', {
+        workflow: 'pipeline',
+        step: 'validate',
+        appId,
+        category,
+        relevanceScore: relevanceResult.score,
+        relevanceIssues: relevanceResult.issues.length,
+      })
+    } catch (error) {
+      // Relevance check failed - log but don't fail validation
+      await log('warn', 'relevance check failed', {
+        workflow: 'pipeline',
+        step: 'validate',
+        appId,
+        category,
+        error: error instanceof Error ? error.message : String(error),
+      })
+      relevanceCheckPerformed = false
+    }
+  }
+
   // In strict mode, warnings are errors
   const hasErrors = allIssues.some((i) => i.severity === 'error')
 
@@ -387,8 +537,10 @@ export async function validate(
     totalIssues: allIssues.length,
     patternIssues: patternIssueCount,
     memoryIssues: allIssues.length - patternIssueCount,
+    relevanceScore,
     issuesByType,
     memoryCheckPerformed,
+    relevanceCheckPerformed,
     correctionsChecked: correctionsChecked?.length ?? 0,
     durationMs,
   })
@@ -399,8 +551,10 @@ export async function validate(
     suggestion: hasErrors
       ? 'Response has quality issues that would be visible to customers'
       : undefined,
+    relevance: relevanceScore,
     correctionsChecked,
     memoryCheckPerformed,
+    relevanceCheckPerformed,
   }
 }
 
