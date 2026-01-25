@@ -16,6 +16,7 @@ import { IntegrationClient } from '@skillrecordings/sdk/client'
 import { type FrontMessage, createFrontClient } from '../../front/client'
 import {
   initializeAxiom,
+  log,
   traceMemoryRetrieval,
   traceWorkflowStep,
 } from '../../observability/axiom'
@@ -144,6 +145,14 @@ export const gatherWorkflow = inngest.createFunction(
 
     const workflowStartTime = Date.now()
     initializeAxiom()
+
+    await log('info', 'gather workflow started', {
+      conversationId,
+      messageId,
+      appId,
+      senderEmail,
+      category: classification.category,
+    })
 
     // Gather context from various sources
     const context = await step.run('gather-context', async () => {

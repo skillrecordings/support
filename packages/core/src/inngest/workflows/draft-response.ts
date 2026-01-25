@@ -10,6 +10,7 @@
 
 import {
   initializeAxiom,
+  log,
   traceWorkflowStep,
 } from '../../observability/axiom'
 import { draft } from '../../pipeline/steps/draft'
@@ -35,6 +36,16 @@ export const draftWorkflow = inngest.createFunction(
 
     const workflowStartTime = Date.now()
     initializeAxiom()
+
+    await log('info', 'draft workflow started', {
+      conversationId,
+      messageId,
+      appId,
+      category: classification.category,
+      hasCustomer: !!context.customer,
+      knowledgeCount: context.knowledge?.length ?? 0,
+      memoryCount: context.memories?.length ?? 0,
+    })
 
     // Generate draft response
     const draftResult = await step.run('draft-response', async () => {
