@@ -393,3 +393,106 @@ export interface EvalSummary {
   durationMs: number
   byTag?: Record<string, { passed: number; failed: number }>
 }
+
+// ============================================================================
+// Tagging and Archiving
+// ============================================================================
+
+/**
+ * Valid highlight colors for Front tags.
+ * @see https://dev.frontapp.com/reference/tags
+ */
+export type TagHighlight =
+  | 'red'
+  | 'orange'
+  | 'yellow'
+  | 'green'
+  | 'teal'
+  | 'blue'
+  | 'purple'
+  | 'pink'
+  | 'grey'
+  | 'black'
+
+/**
+ * Configuration for mapping a category to a Front tag.
+ */
+export interface CategoryTagConfig {
+  /** Name of the tag in Front */
+  tagName: string
+  /** Highlight color for visual organization */
+  highlight: TagHighlight
+  /** Optional description for the tag */
+  description?: string
+}
+
+/**
+ * Maps message categories to Front tag configurations.
+ */
+export type CategoryTagMapping = Record<MessageCategory, CategoryTagConfig>
+
+/**
+ * Input for the tag step.
+ */
+export interface TagInput {
+  /** Front conversation ID (cnv_xxx) */
+  conversationId: string
+  /** Message category from classification */
+  category: MessageCategory
+  /** App configuration */
+  appConfig: AppConfig
+}
+
+/**
+ * Output from the tag step.
+ */
+export interface TagOutput {
+  /** Whether the tag was successfully applied */
+  tagged: boolean
+  /** Front tag ID if successful */
+  tagId?: string
+  /** Tag name that was applied */
+  tagName?: string
+  /** Error message if failed */
+  error?: string
+  /** Duration of the operation in ms */
+  durationMs?: number
+}
+
+/**
+ * Input for the archive step.
+ */
+export interface ArchiveInput {
+  /** Front conversation ID (cnv_xxx) */
+  conversationId: string
+  /** Route action that was taken */
+  action: RouteAction
+  /** Reason for the action (from routing) */
+  reason: string
+  /** App configuration */
+  appConfig: AppConfig
+}
+
+/**
+ * Output from the archive step.
+ */
+export interface ArchiveOutput {
+  /** Whether the conversation was archived */
+  archived: boolean
+  /** Error message if failed */
+  error?: string
+  /** Duration of the operation in ms */
+  durationMs?: number
+}
+
+/**
+ * Result of applying a decision comment to a conversation.
+ */
+export interface DecisionCommentOutput {
+  /** Whether the comment was added */
+  added: boolean
+  /** Error message if failed */
+  error?: string
+  /** Duration of the operation in ms */
+  durationMs?: number
+}
