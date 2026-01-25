@@ -1,7 +1,7 @@
 {
   "id": "failure_meta_appears",
   "name": "Message - no 'This appears to be'",
-  "description": "Pattern: Don't start by diagnosing message type",
+  "description": "Pattern: Don't start by diagnosing message type. Ambiguous forwards without context should be silenced (safe default).",
   "source": "pattern_prevention",
   "appId": "app_eval_generic",
   "trigger": {
@@ -17,6 +17,6 @@
     "noMetaCommentary": true,
     "mustNotStartWith": "This appears"
   },
-  "expectedCategory": "fan_mail",
-  "expectedAction": "escalate_instructor"
+  "expectedCategory": "system",
+  "expectedAction": "silence"
 }
