@@ -107,6 +107,34 @@ const ROUTING_RULES: RoutingRule[] = [
     action: 'respond',
     reason: 'Support request - agent should respond',
   },
+
+  // Presales FAQ - agent can answer from knowledge base
+  {
+    name: 'presales_faq_respond',
+    condition: ({ classification }) =>
+      classification.category === 'presales_faq',
+    action: 'respond',
+    reason: 'Presales FAQ - can answer from knowledge base',
+  },
+
+  // Presales team/enterprise - needs sales process
+  {
+    name: 'presales_team_escalate',
+    condition: ({ classification }) =>
+      classification.category === 'presales_team',
+    action: 'escalate_human',
+    reason: 'Team/enterprise inquiry - needs sales process',
+  },
+
+  // Presales consult - needs instructor judgment, track for learning
+  {
+    name: 'presales_consult_escalate',
+    condition: ({ classification }) =>
+      classification.category === 'presales_consult',
+    action: 'escalate_instructor',
+    reason:
+      'Presales consultation - instructor can provide personalized guidance',
+  },
 ]
 
 // ============================================================================
@@ -365,6 +393,34 @@ const THREAD_ROUTING_RULES: ThreadRoutingRule[] = [
       classification.category.startsWith('support_'),
     action: 'respond',
     reason: 'Support request - agent should respond',
+  },
+
+  // Presales FAQ - agent can answer from knowledge base
+  {
+    name: 'presales_faq_respond',
+    condition: ({ classification }) =>
+      classification.category === 'presales_faq',
+    action: 'respond',
+    reason: 'Presales FAQ - can answer from knowledge base',
+  },
+
+  // Presales team/enterprise - needs sales process
+  {
+    name: 'presales_team_escalate',
+    condition: ({ classification }) =>
+      classification.category === 'presales_team',
+    action: 'escalate_human',
+    reason: 'Team/enterprise inquiry - needs sales process',
+  },
+
+  // Presales consult - needs instructor judgment, track for learning
+  {
+    name: 'presales_consult_escalate',
+    condition: ({ classification }) =>
+      classification.category === 'presales_consult',
+    action: 'escalate_instructor',
+    reason:
+      'Presales consultation - instructor can provide personalized guidance',
   },
 ]
 

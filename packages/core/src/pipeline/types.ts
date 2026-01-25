@@ -24,6 +24,10 @@ export type MessageCategory =
   | 'resolved' // Thread already resolved
   | 'awaiting_customer' // Waiting for customer reply
   | 'voc_response' // Voice of customer: replies to our outreach/surveys
+  // Presales categories (v4)
+  | 'presales_faq' // Answerable with KB (pricing, curriculum, requirements)
+  | 'presales_consult' // Needs instructor judgment (which course, career advice)
+  | 'presales_team' // Enterprise/team sales inquiries
 
 export type RouteAction =
   | 'respond' // Agent should draft a response
@@ -153,6 +157,9 @@ export interface MessageSignals {
   hasLegalThreat: boolean // "lawyer", "legal action", "sue", etc.
   hasOutsidePolicyTimeframe: boolean // mentions purchasing > 30 days ago
   isPersonalToInstructor: boolean // casual/personal message to instructor
+  // Presales signals
+  isPresalesFaq: boolean // pricing, curriculum, requirements, discounts
+  isPresalesTeam: boolean // enterprise/team sales inquiries
 }
 
 // ============================================================================
