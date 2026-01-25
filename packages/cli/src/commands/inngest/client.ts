@@ -242,4 +242,53 @@ export class InngestClient {
     })
     return SignalResponseSchema.parse(response)
   }
+
+  /**
+   * Replay an event by re-emitting it with the same name and data
+   * @param eventId - Event internal_id to replay
+   * @returns The new event ID from inn.gs
+   */
+  async replayEvent(
+    eventId: string
+  ): Promise<{ newEventId: string; event: Event }> {
+    // 1. Fetch the original event
+    const event = await this.getEvent(eventId)
+    if (!event) {
+      throw new Error(`Event ${eventId} not found or archived`)
+    }
+    if (!event.data) {
+      throw new Error(`Event ${eventId} has no data to replay`)
+    }
+
+    // 2. Re-emit via inn.gs using event key
+    const eventKey = process.env.INNGEST_EVENT_KEY
+    if (!eventKey) {
+      throw new Error(
+        'INNGEST_EVENT_KEY environment variable is required for replay'
+      )
+    }
+
+    const res = await fetch(`https://inn.gs/e/${eventKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: event.name,
+        data: event.data,
+      }),
+    })
+
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}))
+      throw new Error(
+        (error as { error?: string }).error ||
+          `inn.gs returned HTTP ${res.status}`
+      )
+    }
+
+    const result = (await res.json()) as { ids: string[]; status: number }
+    return {
+      newEventId: result.ids[0] ?? 'unknown',
+      event,
+    }
+  }
 }
