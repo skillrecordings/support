@@ -30,7 +30,7 @@ export const MessageTemplateSchema = z.object({
   }),
   id: z.string(),
   name: z.string(),
-  subject: z.string(),
+  subject: z.string().nullable(),
   body: z.string(),
   is_available_for_all_inboxes: z.boolean(),
   attachments: z.array(AttachmentSchema).optional(),
