@@ -1,0 +1,22 @@
+{
+  "id": "user_frustrated",
+  "email": "frustrated@example.com",
+  "name": "Frustrated User",
+  "purchases": [
+    {
+      "id": "purch_frust_1",
+      "product": "Total TypeScript Core",
+      "product_id": "prod_tt_core",
+      "stripe_charge_id": "ch_frust_1",
+      "amount_cents": 29900,
+      "purchased_at": "2025-01-05T14:00:00Z",
+      "status": "active"
+    }
+  ],
+  "traits": {
+    "sentiment": "negative",
+    "previous_tickets": 5,
+    "lifetime_value": 299,
+    "flags": ["multiple_support_contacts", "sentiment_escalation_risk"]
+  }
+}

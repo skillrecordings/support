@@ -1,0 +1,28 @@
+{
+  "id": "failure_deflection_routing",
+  "name": "Personal message - no external deflection",
+  "description": "Real failure: Agent told customer to 'reach out through his personal channels'",
+  "source": "production_failure_2026-01",
+  "appId": "app_eval_generic",
+  "trigger": {
+    "subject": "Re: Paid \"Codebuff\" YouTube video opportunity!",
+    "body": "Hi Matt,\n\nJust following up on the sponsorship opportunity. Let me know if you're interested!\n\nBest,\nCodebuff Team"
+  },
+  "context": {
+    "customer": "no-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "silent_or_internal_escalation",
+  "assertions": {
+    "noDeflection": true,
+    "noInternalLeaks": true,
+    "mustNotContain": [
+      "reach out through",
+      "personal channels",
+      "can't route",
+      "business inquiry"
+    ]
+  },
+  "expectedCategory": "spam",
+  "expectedAction": "silence"
+}

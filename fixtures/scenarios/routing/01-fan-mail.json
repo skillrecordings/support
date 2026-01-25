@@ -1,0 +1,28 @@
+{
+  "id": "routing_fan_mail",
+  "name": "Fan mail to instructor",
+  "description": "Personal appreciation message for Matt - should route silently",
+  "appId": "app_eval_tt",
+  "trigger": {
+    "subject": "Thank you Matt!",
+    "body": "Hi Matt,\n\nI just wanted to say thank you. Your Total TypeScript course completely changed my career. I went from struggling with any types to actually understanding the type system. I just got a new job as a senior developer and your course was a huge part of that.\n\nYou're awesome!\n\nThanks,\nJohn"
+  },
+  "context": {
+    "customer": "happy-customer",
+    "conversation": null
+  },
+  "expectedBehavior": "route_to_instructor_silent",
+  "expectedToolCalls": [
+    "assignToInstructor"
+  ],
+  "notExpectedToolCalls": [
+    "draftResponse"
+  ],
+  "assertions": {
+    "noInternalLeaks": true,
+    "noMetaCommentary": true,
+    "noDraftResponse": true
+  },
+  "expectedCategory": "fan_mail",
+  "expectedAction": "escalate_instructor"
+}

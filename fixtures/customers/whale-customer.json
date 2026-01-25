@@ -1,0 +1,40 @@
+{
+  "id": "user_whale",
+  "email": "whale@example.com",
+  "name": "Whale Customer",
+  "purchases": [
+    {
+      "id": "purch_whale_1",
+      "product": "Total TypeScript Pro",
+      "product_id": "prod_tt_pro",
+      "stripe_charge_id": "ch_whale_1",
+      "amount_cents": 49900,
+      "purchased_at": "2024-06-15T10:00:00Z",
+      "status": "active"
+    },
+    {
+      "id": "purch_whale_2",
+      "product": "AI Hero Workshop",
+      "product_id": "prod_ah_workshop",
+      "stripe_charge_id": "ch_whale_2",
+      "amount_cents": 79900,
+      "purchased_at": "2024-12-01T10:00:00Z",
+      "status": "active"
+    },
+    {
+      "id": "purch_whale_3",
+      "product": "Pro Tailwind",
+      "product_id": "prod_pt",
+      "stripe_charge_id": "ch_whale_3",
+      "amount_cents": 29900,
+      "purchased_at": "2024-09-20T10:00:00Z",
+      "status": "active"
+    }
+  ],
+  "traits": {
+    "sentiment": "positive",
+    "previous_tickets": 2,
+    "lifetime_value": 1597,
+    "flags": ["high_value_customer", "multi_product"]
+  }
+}

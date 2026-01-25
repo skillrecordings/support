@@ -1,0 +1,28 @@
+{
+  "id": "failure_meta_business_inquiry",
+  "name": "Business inquiry - no meta commentary",
+  "description": "Real failure: Agent narrated 'This is a business outreach/partnership pitch'",
+  "source": "production_failure_2026-01",
+  "appId": "app_eval_generic",
+  "trigger": {
+    "subject": "Hi Matt Pocock – Invite to Make a YouTube Video",
+    "body": "Hi Matt,\n\nI run a developer education YouTube channel with 50K subscribers. We'd love to have you on for an interview about TypeScript.\n\nWould you be interested?\n\nBest,\nSarah"
+  },
+  "context": {
+    "customer": "no-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "silent_or_route_without_explanation",
+  "assertions": {
+    "noMetaCommentary": true,
+    "mustNotContain": [
+      "This is a",
+      "This appears to be",
+      "partnership pitch",
+      "not a customer support request",
+      "personal inbox"
+    ]
+  },
+  "expectedCategory": "fan_mail",
+  "expectedAction": "escalate_instructor"
+}

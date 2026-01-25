@@ -1,0 +1,26 @@
+{
+  "id": "failure_routing_should_go",
+  "name": "Personal inquiry - don't say 'should go to'",
+  "description": "Real failure: Agent said message 'should go to his personal inbox'",
+  "source": "production_failure_2026-01",
+  "appId": "app_eval_generic",
+  "trigger": {
+    "subject": "Hi Matt Pocock – Quick Question",
+    "body": "Hey Matt!\n\nQuick question - do you do any consulting work? I'd love to pick your brain about TypeScript architecture.\n\nThanks!"
+  },
+  "context": {
+    "customer": "no-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "route_silently_or_provide_info",
+  "assertions": {
+    "noInternalLeaks": true,
+    "mustNotContain": [
+      "should go to",
+      "personal inbox",
+      "business contact"
+    ]
+  },
+  "expectedCategory": "fan_mail",
+  "expectedAction": "escalate_instructor"
+}

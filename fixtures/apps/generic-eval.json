@@ -1,0 +1,17 @@
+{
+  "id": "app_eval_generic",
+  "slug": "generic-eval",
+  "name": "Generic Test App (Eval)",
+  "front_inbox_id": "inb_eval_generic",
+  "instructor_teammate_id": null,
+  "stripe_account_id": "acct_eval_generic",
+  "stripe_connected": true,
+  "integration_base_url": "http://localhost:3458",
+  "webhook_secret": "eval_secret_generic",
+  "capabilities": ["refund"],
+  "auto_approve_refund_days": 30,
+  "auto_approve_transfer_days": 14,
+  "settings": {
+    "support_email": "support@generic-eval.test"
+  }
+}

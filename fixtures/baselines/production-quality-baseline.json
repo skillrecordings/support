@@ -1,0 +1,1503 @@
+{
+  "summary": {
+    "total": 45,
+    "withResponses": 45,
+    "noResponse": 0,
+    "passed": 16,
+    "failed": 29,
+    "passRate": 35.55555555555556,
+    "failures": {
+      "internalLeaks": 12,
+      "metaCommentary": 13,
+      "bannedPhrases": 13,
+      "fabrication": 3
+    }
+  },
+  "results": [
+    {
+      "id": "fbdce81a-808f-4221-8242-917b8f367320",
+      "subject": "👋  Feedback from girardier.thomas@gmail.com about Total TypeScript",
+      "hadResponse": true,
+      "productionResponse": "I can see your account but there's no purchase showing up under girardier.thomas@gmail.com. This usually means you purchased with a different email address.\n\nCheck your email from October 18th for the purchase receipt - it'll show which email was used. If you find it, let me know what that email is and I can help transfer the purchase to your current account.\n\nIf you can't find the receipt, what payment method did you use? I can try searching by that.",
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 1
+        }
+      },
+      "passed": true,
+      "failureReasons": []
+    },
+    {
+      "id": "fc87b6bd-7359-4450-8996-b61e48efaba4",
+      "subject": "Re: You're in! Get Ready for Autonomous AI Agents Live Workshop Ticket! 🎉",
+      "hadResponse": true,
+      "productionResponse": "No need to worry. The confirmation email you received on Jan 22nd mentioned the Zoom link would come in a separate email. \n\nIf you got the calendar invite but it's missing the Zoom link, check your inbox for another email from team@aihero.dev with the Zoom details. It might have landed in spam or gotten filtered.\n\nIf you still can't find it, let me know and I'll track down what happened.",
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "passed": true,
+      "failureReasons": []
+    },
+    {
+      "id": "d6f73028-33fc-4509-88b3-eb7ff378cad1",
+      "subject": "Re: Live Autonomous AI Agents with Ralph Workshop (very limited seats)",
+      "hadResponse": true,
+      "productionResponse": "Not sold out. What's happening when you click the Buy button? Any error message, or does nothing happen at all?\n\nTry opening the link in an incognito/private window to rule out browser extension issues. If that doesn't work, let me know what browser you're using.",
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "passed": true,
+      "failureReasons": []
+    },
+    {
+      "id": "ae91e693-ec8d-4862-adf7-6b8b99088a06",
+      "subject": "Re: You're in! Get Ready for Autonomous AI Agents Live Workshop Ticket! 🎉",
+      "hadResponse": true,
+      "productionResponse": "The confirmation email you received is the first one. You'll get a separate email soon with the Google Calendar invite, Zoom link, and workshop materials/code examples.\n\nThat second email should arrive within the next day or so. If you don't see it by end of week, check your spam folder or let me know.",
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "passed": true,
+      "failureReasons": []
+    },
+    {
+      "id": "f63a54b3-89c5-4bf3-bb49-662b806c847e",
+      "subject": "Re: Live Autonomous AI Agents with Ralph Workshop (very limited seats)",
+      "hadResponse": true,
+      "productionResponse": "Thanks for the feedback. I understand the price is a consideration, especially with exchange rates.\n\nWe run occasional discounts, and there's currently one active through Feb 5th. If you're interested in the workshop but the timing or price doesn't work right now, you could also check back closer to future workshops to see if there are other discount windows.",
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": false,
+          "matches": [
+            "I understand"
+          ]
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "passed": false,
+      "failureReasons": [
+        "Banned phrase: I understand"
+      ]
+    },
+    {
+      "id": "6dd81ba1-bff5-499b-9185-5f14a64d8186",
+      "subject": "Re: Live Autonomous AI Agents with Ralph Workshop (very limited seats)",
+      "hadResponse": true,
+      "productionResponse": "Hey Martin,\n\nGood question on the recording. That's something Matt would need to confirm directly, since workshop setup details can vary. I'd suggest replying to this email chain to ask him directly, or reaching out through the workshop signup page if there's a contact option there.\n\nOn the pricing side, if cost is the main blocker, you could also wait to see if a self-paced version becomes available down the line, since you mentioned interest in that format anyway.",
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": false,
+          "matches": [
+            "I'd suggest"
+          ]
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "passed": false,
+      "failureReasons": [
+        "Banned phrase: I'd suggest"
+      ]
+    },
+    {
+      "id": "d4ab0d49-65e2-4758-b232-9f487852dddb",
+      "subject": "👋  Feedback from LI YUEN TAT about Total TypeScript",
+      "hadResponse": true,
+      "productionResponse": "I see there are no purchases on record for this account. Can you confirm which purchase you'd like refunded? It's possible the purchase was made under a different email address, or I may need to look at a specific transaction ID or charge.",
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 1
+        }
+      },
+      "passed": true,
+      "failureReasons": []
+    },
+    {
+      "id": "53fcea14-1411-486c-b6bf-e97bf040e8a4",
+      "subject": "Re: A quick question...",
+      "hadResponse": true,
+      "productionResponse": "I'm going to stop here. This is a personal message from Matt (the instructor) asking you to engage directly about your interests in AI. It's not a support request.\n\nI'll route this to Matt so he sees your response.",
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": false,
+          "matches": [
+            "not a support request"
+          ]
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "passed": false,
+      "failureReasons": [
+        "Meta commentary: not a support request"
+      ]
+    },
+    {
+      "id": "6c4bb6be-a632-4df8-be43-d94eec608c57",
+      "subject": "Re: Help access my account",
+      "hadResponse": true,
+      "productionResponse": "What's the URL you're trying to access? If you're clicking an old magic link, those expire after 24h.\n\nTry requesting a fresh login link here: https://www.totaltypescript.com/login\n\nEnter aab@arvind.dk and it should send you a new link that works.",
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "passed": true,
+      "failureReasons": []
+    },
+    {
+      "id": "7f4d9d30-49ab-4691-a739-e3db7d50c65d",
+      "subject": "Collaborate with Volter AI on Portable.dev!",
+      "hadResponse": true,
+      "productionResponse": "This is a business outreach/partnership pitch directed at Matt (the instructor), not a customer support request. It's not spam—it's a legitimate professional inquiry to the creator.\n\nI won't respond to this. Per my guidelines, this should be routed directly to Matt for personal correspondence, but since I don't have a conversation ID from the system, I can't use assignToInstructor.\n\nNo action needed—this message will be handled through normal instructor routing channels.",
+      "scores": {
+        "internalLeaks": {
+          "passed": false,
+          "matches": [
+            "should be routed"
+          ]
+        },
+        "metaCommentary": {
+          "passed": false,
+          "matches": [
+            "This is a ",
+            "I won't respond",
+            "this should be routed",
+            "Per my guidelines"
+          ]
+        },
+        "bannedPhrases": {
+          "passed": false,
+          "matches": [
+            "—"
+          ]
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "passed": false,
+      "failureReasons": [
+        "Internal leak: should be routed",
+        "Meta commentary: This is a , I won't respond, this should be routed, Per my guidelines",
+        "Banned phrase: —"
+      ]
+    },
+    {
+      "id": "736cd845-472a-4650-9873-2f04cccd7e3c",
+      "subject": "[aih] Banger quote about career anxiety",
+      "hadResponse": true,
+      "productionResponse": "No instructor routing configured for this app, so I can't forward it that way. But wanted to flag that this seems like it's meant as personal correspondence rather than a support request.",
+      "scores": {
+        "internalLeaks": {
+          "passed": false,
+          "matches": [
+            "No instructor routing",
+            "routing configured"
+          ]
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "passed": false,
+      "failureReasons": [
+        "Internal leak: No instructor routing, routing configured"
+      ]
+    },
+    {
+      "id": "dbc4c68d-ba1e-407f-a5e5-bae2fc261074",
+      "subject": "Re: A quick question...",
+      "hadResponse": true,
+      "productionResponse": "This is personal correspondence meant for Matt directly rather than a support request. Since there's no instructor routing configured, you may need to forward this manually or through your internal process to ensure Matt sees it.",
+      "scores": {
+        "internalLeaks": {
+          "passed": false,
+          "matches": [
+            "no instructor routing",
+            "routing configured"
+          ]
+        },
+        "metaCommentary": {
+          "passed": false,
+          "matches": [
+            "This is "
+          ]
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0
+        }
+      },
+      "passed": false,
+      "failureReasons": [
+        "Internal leak: no instructor routing, routing configured",
+        "Meta commentary: This is "
+      ]
+    },
+    {
+      "id": "516e2785-6911-4911-bacd-d1f39289e586",
+      "subject": "Re: Welcome to AI Hero!",
+      "hadResponse": true,
+      "productionResponse": "Thanks Dan, really glad you got through the course so quickly. Your point about the frontend/backend setup makes sense - that `useChat` endpoint behavior could definitely be documented more explicitly upfront so people don't have to dig for it. That's solid feedback.\n\nAppreciate you taking the time to share this.",
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "passed": true,
+      "failureReasons": []
+    },
+    {
+      "id": "b9c47568-9cf9-4f44-988d-0afb3dc5b856",
+      "subject": "😭  Feedback from Dewin Pena about Total TypeScript",
+      "hadResponse": true,
+      "productionResponse": "I'm running into a technical issue pulling up your account. Can you provide:\n\n1. The purchase date or approximate timeframe\n2. The purchase/order ID if you have it\n3. The amount or product name\n\nOnce I have those details, I can process the refund for you.",
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 1
+        }
+      },
+      "passed": true,
+      "failureReasons": []
+    },
+    {
+      "id": "aab261ec-5955-4b21-963e-c3c5fcc31b0d",
+      "subject": "Re: A quick question...",
+      "hadResponse": true,
+      "productionResponse": "Looks like I can't route this directly through the system, but Matt should see this - it came through as a reply to his email outreach and Chris is responding thoughtfully about his interests in AI and implementation challenges.",
+      "scores": {
+        "internalLeaks": {
+          "passed": false,
+          "matches": [
+            "can't route this"
+          ]
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "passed": false,
+      "failureReasons": [
+        "Internal leak: can't route this"
+      ]
+    },
+    {
+      "id": "69a48933-34d0-4c94-bc8d-204455b11b96",
+      "subject": "AI SDK Course Discount",
+      "hadResponse": true,
+      "productionResponse": "Hi Aminata,\n\nThanks for reaching out. I don't have the ability to authorize discounts on pricing, but I'd recommend reaching out directly through the product website or checking if there are any current promotions running. Depending on timing, there may be opportunities available.\n\nFeel free to follow up if you have other questions.\n\nRegards",
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": false,
+          "matches": [
+            "I'd recommend",
+            "Thanks for reaching out"
+          ]
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0
+        }
+      },
+      "passed": false,
+      "failureReasons": [
+        "Banned phrase: I'd recommend, Thanks for reaching out"
+      ]
+    },
+    {
+      "id": "4970d724-5bde-47a6-8b62-fe1504092c54",
+      "subject": "YouTube Partnership || Open Claude CoWork",
+      "hadResponse": true,
+      "productionResponse": "I'm unable to route this directly to Matt through the system. Since this is a business partnership inquiry rather than a product support question, it should be forwarded to Matt's business development contact directly. You'll want to reach out to the appropriate business contact channel for Total TypeScript rather than through support.",
+      "scores": {
+        "internalLeaks": {
+          "passed": false,
+          "matches": [
+            "unable to route"
+          ]
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0
+        }
+      },
+      "passed": false,
+      "failureReasons": [
+        "Internal leak: unable to route"
+      ]
+    },
+    {
+      "id": "fffa4b91-2f45-43cd-8df4-88cec04d1f7c",
+      "subject": "Re: A quick question...",
+      "hadResponse": true,
+      "productionResponse": "Thanks for sharing your journey with agentic coding. The concept of \"backpressure\" as a quality constraint is interesting, and it sounds like you're thinking deeply about how to maintain code standards while working with AI.\n\nI'm flagging this to Matt so he can respond directly to your thoughts about Ralph Wiggum and what you want to explore next.",
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": false,
+          "matches": [
+            "Thanks for sharing"
+          ]
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "passed": false,
+      "failureReasons": [
+        "Banned phrase: Thanks for sharing"
+      ]
+    },
+    {
+      "id": "68900624-e22e-42d3-9a19-023ac122ff15",
+      "subject": "Hi Matt Pocock – Invite to Make a YouTube Video",
+      "hadResponse": true,
+      "productionResponse": "Looks like there's no instructor routing configured for this app. Given that this is a partnership pitch directed at Matt personally rather than a support issue, it should go to his personal inbox or business contact rather than through the support channel. Leonard Yu should reach out directly through Mat's public contact channels if this is still pending.",
+      "scores": {
+        "internalLeaks": {
+          "passed": false,
+          "matches": [
+            "no instructor routing",
+            "routing configured",
+            "should go to"
+          ]
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0
+        }
+      },
+      "passed": false,
+      "failureReasons": [
+        "Internal leak: no instructor routing, routing configured, should go to"
+      ]
+    },
+    {
+      "id": "c4f9ab62-ca97-4dc7-8904-e13b0784d7c7",
+      "subject": "pro-essentials-workshop - Issue with lesson 011",
+      "hadResponse": true,
+      "productionResponse": "This is a module system issue, not a version problem. Your compiled JavaScript has `export` statements, but browsers need a module-aware script tag to understand them.\n\nIn your HTML file, change:\n```html\n<script src=\"example.js\"></script>\n```\n\nTo:\n```html\n<script type=\"module\" src=\"example.js\"></script>\n```\n\nThe `type=\"module\"` tells the browser to treat the file as an ES module, which supports import/export syntax.\n\nIf that doesn't match what the lesson expects, the alternative is changing your TypeScript compiler settings to output a different module format (like CommonJS or a bundled file), but adding `type=\"module\"` to the script tag is the typical fix here.",
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": false,
+          "matches": [
+            "This is a "
+          ]
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "passed": false,
+      "failureReasons": [
+        "Meta commentary: This is a "
+      ]
+    },
+    {
+      "id": "ec82b4fa-6ca0-4832-9a2d-fbc1523bdf4d",
+      "subject": "Re: A quick question...",
+      "hadResponse": true,
+      "productionResponse": "Looks like there's no instructor routing set up for this app. I won't draft a response here since this is clearly meant as personal correspondence for Matt rather than a support request. Someone on the team will need to see this directly.",
+      "scores": {
+        "internalLeaks": {
+          "passed": false,
+          "matches": [
+            "no instructor routing",
+            "routing set up"
+          ]
+        },
+        "metaCommentary": {
+          "passed": false,
+          "matches": [
+            "I won't draft",
+            "is clearly meant"
+          ]
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0
+        }
+      },
+      "passed": false,
+      "failureReasons": [
+        "Internal leak: no instructor routing, routing set up",
+        "Meta commentary: I won't draft, is clearly meant"
+      ]
+    },
+    {
+      "id": "051e7622-d4f2-466b-b39e-ab12f9c5643d",
+      "subject": "Re: A quick question...",
+      "hadResponse": true,
+      "productionResponse": "Since this is a direct response to Matt's personal email asking what you want to learn about AI, he'll want to see this. I'd recommend replying directly to him at team@totaltypescript.com so he gets your message directly rather than through support channels.",
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": false,
+          "matches": [
+            "I'd recommend"
+          ]
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "passed": false,
+      "failureReasons": [
+        "Banned phrase: I'd recommend"
+      ]
+    },
+    {
+      "id": "8a0e171e-74c8-4988-bfa5-4830c5f2c30f",
+      "subject": "Re: A quick question...",
+      "hadResponse": true,
+      "productionResponse": "Looks like there's no instructor assignment set up for this app. But this is clearly a personal message from Urban responding to Matt's direct outreach about AI and Effect. This should get to Matt directly rather than going through standard support.\n\nYou may want to manually forward this to Matt or check if there's another routing for personal instructor correspondence on Total TypeScript.",
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0
+        }
+      },
+      "passed": true,
+      "failureReasons": []
+    },
+    {
+      "id": "34beb268-1ad0-402b-abc2-645cb6046ebf",
+      "subject": "Reaching out from AI-Led Growth Community",
+      "hadResponse": true,
+      "productionResponse": "Since there's no instructor assignment configured for this app, I'll note that this is a business development inquiry that should be routed to whoever handles partnerships and sponsorships at the company level. This is outside the scope of product support.",
+      "scores": {
+        "internalLeaks": {
+          "passed": false,
+          "matches": [
+            "I'll note that this",
+            "should be routed"
+          ]
+        },
+        "metaCommentary": {
+          "passed": false,
+          "matches": [
+            "outside the scope",
+            "This is outside"
+          ]
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "passed": false,
+      "failureReasons": [
+        "Internal leak: I'll note that this, should be routed",
+        "Meta commentary: outside the scope, This is outside"
+      ]
+    },
+    {
+      "id": "bf8fdabd-4995-431d-afec-abb5f98547ad",
+      "subject": "👋  Feedback from mail.gcs06@gmail.com about Total TypeScript",
+      "hadResponse": true,
+      "productionResponse": "I don't have documentation on that feature. What I can do is escalate this to someone who can give you a definitive answer about light mode support.\n\nAre you currently experiencing an issue with the display, or just checking if it's available before purchasing?",
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "passed": true,
+      "failureReasons": []
+    },
+    {
+      "id": "5ae9e967-8f3b-4b4f-b978-dcf66a71c751",
+      "subject": "Request for Invoice – POWS00000300",
+      "hadResponse": true,
+      "productionResponse": "This is a vendor/business invoice request, not a customer support request for the ai-hero product. This appears to be a B2B billing inquiry from a company's finance team requesting an invoice for a purchase order.\n\nI don't need to respond to this. This falls outside customer product support and should be routed to the appropriate billing/accounts department through your normal vendor management channels.",
+      "scores": {
+        "internalLeaks": {
+          "passed": false,
+          "matches": [
+            "should be routed",
+            "falls outside"
+          ]
+        },
+        "metaCommentary": {
+          "passed": false,
+          "matches": [
+            "This is a ",
+            "I don't need to respond",
+            "This falls outside"
+          ]
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "passed": false,
+      "failureReasons": [
+        "Internal leak: should be routed, falls outside",
+        "Meta commentary: This is a , I don't need to respond, This falls outside"
+      ]
+    },
+    {
+      "id": "9327fd9e-2556-4c8b-af94-8f1a7e0e2af6",
+      "subject": "Re: A quick question...",
+      "hadResponse": true,
+      "productionResponse": "I don't have a way to route this directly to Matt in the system, but this is clearly personal correspondence that should go to him directly rather than support.\n\nCan you forward this conversation to Matt? Tasos is sharing thoughtful feedback about AI adoption and how it connects to developer productivity on his team. This is the kind of thing he reads personally.",
+      "scores": {
+        "internalLeaks": {
+          "passed": false,
+          "matches": [
+            "should go to"
+          ]
+        },
+        "metaCommentary": {
+          "passed": false,
+          "matches": [
+            "is clearly personal"
+          ]
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "passed": false,
+      "failureReasons": [
+        "Internal leak: should go to",
+        "Meta commentary: is clearly personal"
+      ]
+    },
+    {
+      "id": "05c1fa3c-cf6a-4f3d-9df4-ba2c95a0d9a9",
+      "subject": "Re: A quick question...",
+      "hadResponse": true,
+      "productionResponse": "Matt will see this directly. He loves hearing how folks are using the material and where they're coming from.",
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "passed": true,
+      "failureReasons": []
+    },
+    {
+      "id": "99a13dd1-43fe-4343-8337-feadd99cc4af",
+      "subject": "Re: A quick question...",
+      "hadResponse": true,
+      "productionResponse": "I don't have an instructor configured in the system for this app, so I can't route this directly. But this is clearly a personal message meant for Matt in response to his outreach about AI interests. You'll want to get this to him through whatever internal process you use for instructor correspondence.",
+      "scores": {
+        "internalLeaks": {
+          "passed": false,
+          "matches": [
+            "can't route this"
+          ]
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0
+        }
+      },
+      "passed": false,
+      "failureReasons": [
+        "Internal leak: can't route this"
+      ]
+    },
+    {
+      "id": "a843e50b-d272-4ce0-a315-afd98ff3954a",
+      "subject": "Re: Welcome to AI SDK v5 Crash Course!",
+      "hadResponse": true,
+      "productionResponse": "I don't see a transfer request in our system. Did you try to transfer it yourself through the site, or did you just start using the brennan@gopointtech.com email?\n\nIf you already purchased with funky.tickles8z@icloud.com, I can transfer it to brennan@gopointtech.com for you. Just confirm that's what you need and I'll process it.",
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 1
+        }
+      },
+      "passed": true,
+      "failureReasons": []
+    },
+    {
+      "id": "e773cbe1-a676-4934-88f4-c9afdafa1408",
+      "subject": "Re: Welcome to AI SDK v5 Crash Course!",
+      "hadResponse": true,
+      "productionResponse": "The purchase is still attached to funky.tickles8z@icloud.com. It wasn't transferred to brennan@gopointtech.com, which is why you're seeing the purchase prompt there.\n\nCan you confirm which email you want the course on? Once you confirm, I can transfer it over.",
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 1
+        }
+      },
+      "passed": true,
+      "failureReasons": []
+    },
+    {
+      "id": "277eb8e7-c117-40b8-a083-c178e6bbc31d",
+      "subject": "Re: Paid \"Codebuff\" YouTube video opportunity!",
+      "hadResponse": true,
+      "productionResponse": "I can't route this directly to Matt through our system, but this is a business inquiry that needs his personal attention, not support team handling.\n\nYou'll want to reach out through his personal channels or social media to get a direct response on the sponsorship opportunity. The support inbox isn't the right place for partnership discussions.",
+      "scores": {
+        "internalLeaks": {
+          "passed": false,
+          "matches": [
+            "can't route this",
+            "You'll want to reach out through"
+          ]
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0
+        }
+      },
+      "passed": false,
+      "failureReasons": [
+        "Internal leak: can't route this, You'll want to reach out through"
+      ]
+    },
+    {
+      "id": "62737986-7116-4c7f-acb7-25d2e45f2ae3",
+      "subject": "AI is so confusing, where do i start?",
+      "hadResponse": true,
+      "productionResponse": "The knowledge base isn't returning results, but here's what I'd suggest: Start with the fundamentals section in AI Hero. It covers core concepts like how AI models work, prompt engineering basics, and common use cases. Work through one module at a time rather than trying to absorb everything at once.\n\nWhat specific part of AI are you most interested in - the theory side, practical applications, or something else?",
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": false,
+          "matches": [
+            "I'd suggest"
+          ]
+        },
+        "fabrication": {
+          "passed": false,
+          "matches": [
+            "Start with the fundamentals section",
+            "covers core concepts like",
+            "fundamentals section in AI Hero. It covers"
+          ]
+        },
+        "helpfulness": {
+          "score": 1
+        }
+      },
+      "passed": false,
+      "failureReasons": [
+        "Banned phrase: I'd suggest",
+        "Fabrication: Start with the fundamentals section, covers core concepts like, fundamentals section in AI Hero. It covers"
+      ]
+    },
+    {
+      "id": "08c26c7e-7cc6-43c8-88ce-9462c1357770",
+      "subject": "Re: A quick question...",
+      "hadResponse": true,
+      "productionResponse": "This is a customer response to a marketing email from Matt Pocock at Total TypeScript. Thorr is sharing genuine interest in the products and providing positive feedback about how Matt's work has influenced their project.\n\nThis isn't a support request, so I won't draft a response. This is a community/relationship-building message that should be handled by the Total TypeScript team directly, not through the support system.\n\nHowever, since this came through support channels, I can note: Thorr appears to be an engaged community member building on Total TypeScript's ideas and would likely be a good fit for deeper community engagement or partnership discussions. This should probably be routed to the business development or community team rather than support.",
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": false,
+          "matches": [
+            "This is a ",
+            "I won't draft"
+          ]
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "passed": false,
+      "failureReasons": [
+        "Meta commentary: This is a , I won't draft"
+      ]
+    },
+    {
+      "id": "e42367e0-5737-47eb-8062-4454481ea491",
+      "subject": "Re: A quick question...",
+      "hadResponse": true,
+      "productionResponse": "I appreciate you reaching out, Andrew, but I need to let you know this appears to be a personal conversation with Matt rather than a support request.\n\nSince this isn't a customer service issue (no purchase problem, access issue, or product question), there's nothing I can help with here. This looks like it should stay between you and Matt directly.\n\nIf you do run into any issues accessing Total TypeScript courses or have questions about the material, just shoot me a message and I'll get you sorted.",
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "passed": true,
+      "failureReasons": []
+    },
+    {
+      "id": "ff783555-f7a8-40e0-a7ac-f418f7c2180a",
+      "subject": "TypeScript is so cool",
+      "hadResponse": true,
+      "productionResponse": "Generics are legitimately one of the harder concepts in TypeScript, so you're not alone there. They click once you start using them in real code, but the mental model takes time.\n\nWhat specifically is tripping you up? Are you stuck on:\n- Basic syntax like `<T>`?\n- Understanding constraints (`extends`)?\n- Using generics with functions vs. types?\n- Something else?\n\nOnce I know where you're hitting the wall, I can point you in the right direction.",
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "passed": true,
+      "failureReasons": []
+    },
+    {
+      "id": "0f3b9d92-235e-4c1b-8dc5-832e584bfd48",
+      "subject": "Please Help me",
+      "hadResponse": true,
+      "productionResponse": "Great! If you're just starting out with TypeScript, I'd recommend beginning with the fundamentals:\n\n**Start with the basics** - Learn how TypeScript differs from JavaScript, type annotations, interfaces, and basic types. Most learners find it helpful to work through exercises that show you how types prevent bugs.\n\n**Practice incrementally** - Don't try to learn everything at once. Focus on types first, then move into more advanced concepts like generics, utility types, and advanced patterns once you're comfortable with the foundation.\n\nIs there a specific area you're curious about, or would you like help navigating the Total TypeScript resources available?",
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": false,
+          "matches": [
+            "Great!",
+            "I'd recommend",
+            "Is there a specific area you're curious about"
+          ]
+        },
+        "fabrication": {
+          "passed": false,
+          "matches": [
+            "Start with the basics** - Learn how"
+          ]
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "passed": false,
+      "failureReasons": [
+        "Banned phrase: Great!, I'd recommend, Is there a specific area you're curious about",
+        "Fabrication: Start with the basics** - Learn how"
+      ]
+    },
+    {
+      "id": "a32b737a-c01e-4a2b-b384-989fb3c7a352",
+      "subject": "This is Crazy",
+      "hadResponse": true,
+      "productionResponse": "This message is clearly not a customer support request — it's a casual/joking message without any actual issue to resolve. Per my guidelines, I should not draft a response to this.\n\nIf Joel has an actual support question or issue related to Total TypeScript, I'm ready to help when he reaches out.",
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": false,
+          "matches": [
+            "I should not draft",
+            "Per my guidelines",
+            "is clearly not"
+          ]
+        },
+        "bannedPhrases": {
+          "passed": false,
+          "matches": [
+            "—"
+          ]
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "passed": false,
+      "failureReasons": [
+        "Meta commentary: I should not draft, Per my guidelines, is clearly not",
+        "Banned phrase: —"
+      ]
+    },
+    {
+      "id": "9cd38d6b-a59e-4522-9b37-e261a753c286",
+      "subject": "I am lost.",
+      "hadResponse": true,
+      "productionResponse": "Joel, I'm having trouble pulling up your account details at the moment. Let me help you anyway:\n\nWhat specific TypeScript concept is giving you trouble? Are you stuck on:\n- Basic types and interfaces\n- Generics\n- Advanced type patterns\n- Something else\n\nOnce I know what's blocking you, I can point you to the exact Total TypeScript lessons that'll clear it up. TypeScript takes practice, but the course is structured to make it click.",
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 1
+        }
+      },
+      "passed": true,
+      "failureReasons": []
+    },
+    {
+      "id": "0c336520-3798-43b3-be0a-62b56fd9952b",
+      "subject": "I am lost.",
+      "hadResponse": true,
+      "productionResponse": "Hey Joel,\n\nI hear the frustration—TypeScript can feel overwhelming at first, but you've got this. The good news is you've got Total TypeScript, which is specifically designed to take you from confused to confident.\n\nHere's what I'd suggest:\n\n**Start small**: Don't try to learn everything at once. Pick one concept (types, generics, syntax) and nail it before moving on. The course is structured to build progressively.\n\n**You're building valuable skills**: TypeScript is in *high* demand right now and growing. Learning it now positions you well for what's coming next in your career.\n\n**What specifically is stuck?** Is it understanding types? Generics? The syntax? Tell me what's throwing you off and I can point you to the exact lessons that'll make it click.\n\nYou've already invested in the course—let's make sure you get real value from it.\n\nWhat do you want to tackle first?",
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": false,
+          "matches": [
+            "I'd suggest",
+            "—"
+          ]
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 1
+        }
+      },
+      "passed": false,
+      "failureReasons": [
+        "Banned phrase: I'd suggest, —"
+      ]
+    },
+    {
+      "id": "7599fe27-c24d-4681-aea4-0f556ef1b206",
+      "subject": "I am lost.",
+      "hadResponse": true,
+      "productionResponse": "Hey Joel,\n\nI hear the frustration—TypeScript can feel overwhelming at first, but you've got this. The good news is you already have access to Total TypeScript, which is designed to take you from confused to confident.\n\nHere's what I'd suggest:\n- Start with the fundamentals section if you haven't already—it's built to click things into place\n- Don't try to learn everything at once. Pick one concept and really nail it before moving on\n- TypeScript is actually going to *add* to your skillset, not replace it. The demand for TypeScript skills is growing, not shrinking\n\nWhat specific part of TypeScript is throwing you off? Types? Generics? Syntax? Let me know and I can point you toward the exact lessons that'll help.\n\nYou've got the course—let's make sure you get real value from it.",
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": false,
+          "matches": [
+            "I'd suggest",
+            "—"
+          ]
+        },
+        "fabrication": {
+          "passed": false,
+          "matches": [
+            "Start with the fundamentals section"
+          ]
+        },
+        "helpfulness": {
+          "score": 1
+        }
+      },
+      "passed": false,
+      "failureReasons": [
+        "Banned phrase: I'd suggest, —",
+        "Fabrication: Start with the fundamentals section"
+      ]
+    },
+    {
+      "id": "d6e5cd99-f842-4710-8dc9-41869d6da4e1",
+      "subject": "Pleas help.",
+      "hadResponse": true,
+      "productionResponse": "Alright, what specific part of TypeScript has you stuck? Are you dealing with:\n\n- Type annotations and basic types?\n- Interfaces and generics?\n- Something else entirely?\n\nGive me a bit more detail on where you're getting tripped up and I can point you in the right direction. And don't worry—AI isn't stealing jobs from people willing to learn. You've got this! 💪",
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": true,
+          "matches": []
+        },
+        "bannedPhrases": {
+          "passed": false,
+          "matches": [
+            "—"
+          ]
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "passed": false,
+      "failureReasons": [
+        "Banned phrase: —"
+      ]
+    },
+    {
+      "id": "dff3d45d-22fb-413a-8463-cc6ee7566318",
+      "subject": "(Vercel Academy) Page has links to redirect: 33 URLs",
+      "hadResponse": true,
+      "productionResponse": "This is an automated notification from Ahrefs about a Site Audit crawl result for the Vercel Academy project. This is not a customer support request, so I won't draft a response.\n\nThe email is a system notification showing:\n- New crawl completed (130 URLs analyzed)\n- Health Score: 98 (+6 improvement)\n- Issues summary (3 errors, 130 warnings, 19 notices)\n- Various audit findings and recommendations\n\nNo action is needed from support.",
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": false,
+          "matches": [
+            "This is an ",
+            "I won't draft"
+          ]
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "passed": false,
+      "failureReasons": [
+        "Meta commentary: This is an , I won't draft"
+      ]
+    },
+    {
+      "id": "1b7156d1-e705-43dc-9e4c-532ae29e3fb2",
+      "subject": "Improved paid collab proposal for Pippit AI",
+      "hadResponse": true,
+      "productionResponse": "This is a vendor/partnership outreach email from Aha (a creator agency) to a content creator — not a customer support request for a technical education product.\n\nPer the guidelines, I won't be drafting a response to this message, as it's not from an actual customer seeking support for one of our products.",
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": false,
+          "matches": [
+            "This is a "
+          ]
+        },
+        "bannedPhrases": {
+          "passed": false,
+          "matches": [
+            "—"
+          ]
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "passed": false,
+      "failureReasons": [
+        "Meta commentary: This is a ",
+        "Banned phrase: —"
+      ]
+    },
+    {
+      "id": "120ead92-90b6-401a-b1a7-1dcb0b403b35",
+      "subject": "Invitation to Explore SeaVerse.AI (Credits Provided)",
+      "hadResponse": true,
+      "productionResponse": "This is a marketing/outreach email from SeaVerse.AI's team inviting developers to explore their platform. This is not a customer support request from someone with an existing issue.\n\nPer my guidelines, I should not draft a response to vendor/promotional emails that aren't actual customer support inquiries.\n\nNo action needed.",
+      "scores": {
+        "internalLeaks": {
+          "passed": true,
+          "matches": []
+        },
+        "metaCommentary": {
+          "passed": false,
+          "matches": [
+            "This is a ",
+            "I should not draft",
+            "Per my guidelines"
+          ]
+        },
+        "bannedPhrases": {
+          "passed": true,
+          "matches": []
+        },
+        "fabrication": {
+          "passed": true,
+          "matches": []
+        },
+        "helpfulness": {
+          "score": 0.5
+        }
+      },
+      "passed": false,
+      "failureReasons": [
+        "Meta commentary: This is a , I should not draft, Per my guidelines"
+      ]
+    }
+  ]
+}

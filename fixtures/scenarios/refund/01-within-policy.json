@@ -1,0 +1,28 @@
+{
+  "id": "refund_within_policy",
+  "name": "Refund request within 30-day window",
+  "description": "Customer requests refund 5 days after purchase - should auto-approve",
+  "appId": "app_eval_tt",
+  "trigger": {
+    "subject": "Refund request",
+    "body": "Hi, I purchased Total TypeScript last week but realized it's not what I need right now. Can I get a refund?"
+  },
+  "context": {
+    "customer": "recent-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "draft_refund_response",
+  "expectedToolCalls": [
+    "lookupUser",
+    "processRefund",
+    "draftResponse"
+  ],
+  "assertions": {
+    "noInternalLeaks": true,
+    "noMetaCommentary": true,
+    "noBannedPhrases": true,
+    "shouldMentionRefund": true
+  },
+  "expectedCategory": "support_refund",
+  "expectedAction": "respond"
+}

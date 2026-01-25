@@ -1,0 +1,25 @@
+{
+  "id": "failure_routing_looks_like",
+  "name": "Non-support - no 'Looks like there's no...'",
+  "description": "Real failure: Agent started with 'Looks like there's no instructor routing'",
+  "source": "production_failure_2026-01",
+  "appId": "app_eval_generic",
+  "trigger": {
+    "subject": "Speaking opportunity at DevConf",
+    "body": "Hi Matt,\n\nWe're organizing DevConf 2026 and would love to invite you to speak. Interested?\n\nDevConf Team"
+  },
+  "context": {
+    "customer": "no-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "route_silently",
+  "assertions": {
+    "noInternalLeaks": true,
+    "mustNotContain": [
+      "Looks like there's no",
+      "Looks like I"
+    ]
+  },
+  "expectedCategory": "fan_mail",
+  "expectedAction": "escalate_instructor"
+}

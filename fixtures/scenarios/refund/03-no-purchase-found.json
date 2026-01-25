@@ -1,0 +1,26 @@
+{
+  "id": "refund_no_purchase",
+  "name": "Refund request with no purchase found",
+  "description": "Customer requests refund but has no purchase history",
+  "appId": "app_eval_tt",
+  "trigger": {
+    "subject": "I want my money back",
+    "body": "Please refund my purchase of Total TypeScript."
+  },
+  "context": {
+    "customer": "no-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "ask_for_details",
+  "expectedToolCalls": [
+    "lookupUser",
+    "draftResponse"
+  ],
+  "assertions": {
+    "noInternalLeaks": true,
+    "noMetaCommentary": true,
+    "shouldAskForPurchaseDetails": true
+  },
+  "expectedCategory": "support_refund",
+  "expectedAction": "respond"
+}

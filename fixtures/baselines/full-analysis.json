@@ -1,0 +1,521 @@
+{
+  "total": 45,
+  "scorers": {
+    "internal_state_leakage": {
+      "pass": 33,
+      "fail": 12,
+      "failures": [
+        {
+          "id": "7f4d9d30-49ab-4691-a739-e3db7d50c65d",
+          "trigger": "Collaborate with Volter AI on Portable.dev!",
+          "response": "This is a business outreach/partnership pitch directed at Matt (the instructor), not a customer support request. It's not spam—it's a legitimate professional inquiry to the creator.\n\nI won't respond t",
+          "found": [
+            "should be routed"
+          ]
+        },
+        {
+          "id": "736cd845-472a-4650-9873-2f04cccd7e3c",
+          "trigger": "[aih] Banger quote about career anxiety",
+          "response": "No instructor routing configured for this app, so I can't forward it that way. But wanted to flag that this seems like it's meant as personal correspondence rather than a support request.",
+          "found": [
+            "No instructor routing",
+            "routing configured"
+          ]
+        },
+        {
+          "id": "dbc4c68d-ba1e-407f-a5e5-bae2fc261074",
+          "trigger": "Re: A quick question...",
+          "response": "This is personal correspondence meant for Matt directly rather than a support request. Since there's no instructor routing configured, you may need to forward this manually or through your internal pr",
+          "found": [
+            "no instructor routing",
+            "routing configured"
+          ]
+        },
+        {
+          "id": "aab261ec-5955-4b21-963e-c3c5fcc31b0d",
+          "trigger": "Re: A quick question...",
+          "response": "Looks like I can't route this directly through the system, but Matt should see this - it came through as a reply to his email outreach and Chris is responding thoughtfully about his interests in AI an",
+          "found": [
+            "can't route this"
+          ]
+        },
+        {
+          "id": "4970d724-5bde-47a6-8b62-fe1504092c54",
+          "trigger": "YouTube Partnership || Open Claude CoWork",
+          "response": "I'm unable to route this directly to Matt through the system. Since this is a business partnership inquiry rather than a product support question, it should be forwarded to Matt's business development",
+          "found": [
+            "unable to route"
+          ]
+        },
+        {
+          "id": "68900624-e22e-42d3-9a19-023ac122ff15",
+          "trigger": "Hi Matt Pocock – Invite to Make a YouTube Video",
+          "response": "Looks like there's no instructor routing configured for this app. Given that this is a partnership pitch directed at Matt personally rather than a support issue, it should go to his personal inbox or ",
+          "found": [
+            "no instructor routing",
+            "routing configured",
+            "should go to"
+          ]
+        },
+        {
+          "id": "ec82b4fa-6ca0-4832-9a2d-fbc1523bdf4d",
+          "trigger": "Re: A quick question...",
+          "response": "Looks like there's no instructor routing set up for this app. I won't draft a response here since this is clearly meant as personal correspondence for Matt rather than a support request. Someone on th",
+          "found": [
+            "no instructor routing",
+            "routing set up"
+          ]
+        },
+        {
+          "id": "34beb268-1ad0-402b-abc2-645cb6046ebf",
+          "trigger": "Reaching out from AI-Led Growth Community",
+          "response": "Since there's no instructor assignment configured for this app, I'll note that this is a business development inquiry that should be routed to whoever handles partnerships and sponsorships at the comp",
+          "found": [
+            "I'll note that this",
+            "should be routed"
+          ]
+        },
+        {
+          "id": "5ae9e967-8f3b-4b4f-b978-dcf66a71c751",
+          "trigger": "Request for Invoice – POWS00000300",
+          "response": "This is a vendor/business invoice request, not a customer support request for the ai-hero product. This appears to be a B2B billing inquiry from a company's finance team requesting an invoice for a pu",
+          "found": [
+            "should be routed",
+            "falls outside"
+          ]
+        },
+        {
+          "id": "9327fd9e-2556-4c8b-af94-8f1a7e0e2af6",
+          "trigger": "Re: A quick question...",
+          "response": "I don't have a way to route this directly to Matt in the system, but this is clearly personal correspondence that should go to him directly rather than support.\n\nCan you forward this conversation to M",
+          "found": [
+            "should go to"
+          ]
+        },
+        {
+          "id": "99a13dd1-43fe-4343-8337-feadd99cc4af",
+          "trigger": "Re: A quick question...",
+          "response": "I don't have an instructor configured in the system for this app, so I can't route this directly. But this is clearly a personal message meant for Matt in response to his outreach about AI interests. ",
+          "found": [
+            "can't route this"
+          ]
+        },
+        {
+          "id": "277eb8e7-c117-40b8-a083-c178e6bbc31d",
+          "trigger": "Re: Paid \"Codebuff\" YouTube video opportunity!",
+          "response": "I can't route this directly to Matt through our system, but this is a business inquiry that needs his personal attention, not support team handling.\n\nYou'll want to reach out through his personal chan",
+          "found": [
+            "can't route this",
+            "You'll want to reach out through"
+          ]
+        }
+      ]
+    },
+    "meta_commentary": {
+      "pass": 32,
+      "fail": 13,
+      "failures": [
+        {
+          "id": "53fcea14-1411-486c-b6bf-e97bf040e8a4",
+          "trigger": "Re: A quick question...",
+          "response": "I'm going to stop here. This is a personal message from Matt (the instructor) asking you to engage directly about your interests in AI. It's not a support request.\n\nI'll route this to Matt so he sees ",
+          "found": [
+            "not a support request"
+          ]
+        },
+        {
+          "id": "7f4d9d30-49ab-4691-a739-e3db7d50c65d",
+          "trigger": "Collaborate with Volter AI on Portable.dev!",
+          "response": "This is a business outreach/partnership pitch directed at Matt (the instructor), not a customer support request. It's not spam—it's a legitimate professional inquiry to the creator.\n\nI won't respond t",
+          "found": [
+            "This is a ",
+            "I won't respond",
+            "this should be routed",
+            "Per my guidelines"
+          ]
+        },
+        {
+          "id": "dbc4c68d-ba1e-407f-a5e5-bae2fc261074",
+          "trigger": "Re: A quick question...",
+          "response": "This is personal correspondence meant for Matt directly rather than a support request. Since there's no instructor routing configured, you may need to forward this manually or through your internal pr",
+          "found": [
+            "This is "
+          ]
+        },
+        {
+          "id": "c4f9ab62-ca97-4dc7-8904-e13b0784d7c7",
+          "trigger": "pro-essentials-workshop - Issue with lesson 011",
+          "response": "This is a module system issue, not a version problem. Your compiled JavaScript has `export` statements, but browsers need a module-aware script tag to understand them.\n\nIn your HTML file, change:\n```h",
+          "found": [
+            "This is a "
+          ]
+        },
+        {
+          "id": "ec82b4fa-6ca0-4832-9a2d-fbc1523bdf4d",
+          "trigger": "Re: A quick question...",
+          "response": "Looks like there's no instructor routing set up for this app. I won't draft a response here since this is clearly meant as personal correspondence for Matt rather than a support request. Someone on th",
+          "found": [
+            "I won't draft",
+            "is clearly meant"
+          ]
+        },
+        {
+          "id": "34beb268-1ad0-402b-abc2-645cb6046ebf",
+          "trigger": "Reaching out from AI-Led Growth Community",
+          "response": "Since there's no instructor assignment configured for this app, I'll note that this is a business development inquiry that should be routed to whoever handles partnerships and sponsorships at the comp",
+          "found": [
+            "outside the scope",
+            "This is outside"
+          ]
+        },
+        {
+          "id": "5ae9e967-8f3b-4b4f-b978-dcf66a71c751",
+          "trigger": "Request for Invoice – POWS00000300",
+          "response": "This is a vendor/business invoice request, not a customer support request for the ai-hero product. This appears to be a B2B billing inquiry from a company's finance team requesting an invoice for a pu",
+          "found": [
+            "This is a ",
+            "I don't need to respond",
+            "This falls outside"
+          ]
+        },
+        {
+          "id": "9327fd9e-2556-4c8b-af94-8f1a7e0e2af6",
+          "trigger": "Re: A quick question...",
+          "response": "I don't have a way to route this directly to Matt in the system, but this is clearly personal correspondence that should go to him directly rather than support.\n\nCan you forward this conversation to M",
+          "found": [
+            "is clearly personal"
+          ]
+        },
+        {
+          "id": "08c26c7e-7cc6-43c8-88ce-9462c1357770",
+          "trigger": "Re: A quick question...",
+          "response": "This is a customer response to a marketing email from Matt Pocock at Total TypeScript. Thorr is sharing genuine interest in the products and providing positive feedback about how Matt's work has influ",
+          "found": [
+            "This is a ",
+            "I won't draft"
+          ]
+        },
+        {
+          "id": "a32b737a-c01e-4a2b-b384-989fb3c7a352",
+          "trigger": "This is Crazy",
+          "response": "This message is clearly not a customer support request — it's a casual/joking message without any actual issue to resolve. Per my guidelines, I should not draft a response to this.\n\nIf Joel has an act",
+          "found": [
+            "I should not draft",
+            "Per my guidelines",
+            "is clearly not"
+          ]
+        },
+        {
+          "id": "dff3d45d-22fb-413a-8463-cc6ee7566318",
+          "trigger": "(Vercel Academy) Page has links to redirect: 33 URLs",
+          "response": "This is an automated notification from Ahrefs about a Site Audit crawl result for the Vercel Academy project. This is not a customer support request, so I won't draft a response.\n\nThe email is a syste",
+          "found": [
+            "This is an ",
+            "I won't draft"
+          ]
+        },
+        {
+          "id": "1b7156d1-e705-43dc-9e4c-532ae29e3fb2",
+          "trigger": "Improved paid collab proposal for Pippit AI",
+          "response": "This is a vendor/partnership outreach email from Aha (a creator agency) to a content creator — not a customer support request for a technical education product.\n\nPer the guidelines, I won't be draftin",
+          "found": [
+            "This is a "
+          ]
+        },
+        {
+          "id": "120ead92-90b6-401a-b1a7-1dcb0b403b35",
+          "trigger": "Invitation to Explore SeaVerse.AI (Credits Provided)",
+          "response": "This is a marketing/outreach email from SeaVerse.AI's team inviting developers to explore their platform. This is not a customer support request from someone with an existing issue.\n\nPer my guidelines",
+          "found": [
+            "This is a ",
+            "I should not draft",
+            "Per my guidelines"
+          ]
+        }
+      ]
+    },
+    "banned_phrases": {
+      "pass": 32,
+      "fail": 13,
+      "failures": [
+        {
+          "id": "f63a54b3-89c5-4bf3-bb49-662b806c847e",
+          "trigger": "Re: Live Autonomous AI Agents with Ralph Workshop (very limi",
+          "response": "Thanks for the feedback. I understand the price is a consideration, especially with exchange rates.\n\nWe run occasional discounts, and there's currently one active through Feb 5th. If you're interested",
+          "found": [
+            "I understand"
+          ]
+        },
+        {
+          "id": "6dd81ba1-bff5-499b-9185-5f14a64d8186",
+          "trigger": "Re: Live Autonomous AI Agents with Ralph Workshop (very limi",
+          "response": "Hey Martin,\n\nGood question on the recording. That's something Matt would need to confirm directly, since workshop setup details can vary. I'd suggest replying to this email chain to ask him directly, ",
+          "found": [
+            "I'd suggest"
+          ]
+        },
+        {
+          "id": "7f4d9d30-49ab-4691-a739-e3db7d50c65d",
+          "trigger": "Collaborate with Volter AI on Portable.dev!",
+          "response": "This is a business outreach/partnership pitch directed at Matt (the instructor), not a customer support request. It's not spam—it's a legitimate professional inquiry to the creator.\n\nI won't respond t",
+          "found": [
+            "—"
+          ]
+        },
+        {
+          "id": "69a48933-34d0-4c94-bc8d-204455b11b96",
+          "trigger": "AI SDK Course Discount",
+          "response": "Hi Aminata,\n\nThanks for reaching out. I don't have the ability to authorize discounts on pricing, but I'd recommend reaching out directly through the product website or checking if there are any curre",
+          "found": [
+            "I'd recommend",
+            "Thanks for reaching out"
+          ]
+        },
+        {
+          "id": "fffa4b91-2f45-43cd-8df4-88cec04d1f7c",
+          "trigger": "Re: A quick question...",
+          "response": "Thanks for sharing your journey with agentic coding. The concept of \"backpressure\" as a quality constraint is interesting, and it sounds like you're thinking deeply about how to maintain code standard",
+          "found": [
+            "Thanks for sharing"
+          ]
+        },
+        {
+          "id": "051e7622-d4f2-466b-b39e-ab12f9c5643d",
+          "trigger": "Re: A quick question...",
+          "response": "Since this is a direct response to Matt's personal email asking what you want to learn about AI, he'll want to see this. I'd recommend replying directly to him at team@totaltypescript.com so he gets y",
+          "found": [
+            "I'd recommend"
+          ]
+        },
+        {
+          "id": "62737986-7116-4c7f-acb7-25d2e45f2ae3",
+          "trigger": "AI is so confusing, where do i start?",
+          "response": "The knowledge base isn't returning results, but here's what I'd suggest: Start with the fundamentals section in AI Hero. It covers core concepts like how AI models work, prompt engineering basics, and",
+          "found": [
+            "I'd suggest"
+          ]
+        },
+        {
+          "id": "0f3b9d92-235e-4c1b-8dc5-832e584bfd48",
+          "trigger": "Please Help me",
+          "response": "Great! If you're just starting out with TypeScript, I'd recommend beginning with the fundamentals:\n\n**Start with the basics** - Learn how TypeScript differs from JavaScript, type annotations, interfac",
+          "found": [
+            "Great!",
+            "I'd recommend",
+            "Is there a specific area you're curious about"
+          ]
+        },
+        {
+          "id": "a32b737a-c01e-4a2b-b384-989fb3c7a352",
+          "trigger": "This is Crazy",
+          "response": "This message is clearly not a customer support request — it's a casual/joking message without any actual issue to resolve. Per my guidelines, I should not draft a response to this.\n\nIf Joel has an act",
+          "found": [
+            "—"
+          ]
+        },
+        {
+          "id": "0c336520-3798-43b3-be0a-62b56fd9952b",
+          "trigger": "I am lost.",
+          "response": "Hey Joel,\n\nI hear the frustration—TypeScript can feel overwhelming at first, but you've got this. The good news is you've got Total TypeScript, which is specifically designed to take you from confused",
+          "found": [
+            "I'd suggest",
+            "—"
+          ]
+        },
+        {
+          "id": "7599fe27-c24d-4681-aea4-0f556ef1b206",
+          "trigger": "I am lost.",
+          "response": "Hey Joel,\n\nI hear the frustration—TypeScript can feel overwhelming at first, but you've got this. The good news is you already have access to Total TypeScript, which is designed to take you from confu",
+          "found": [
+            "I'd suggest",
+            "—"
+          ]
+        },
+        {
+          "id": "d6e5cd99-f842-4710-8dc9-41869d6da4e1",
+          "trigger": "Pleas help.",
+          "response": "Alright, what specific part of TypeScript has you stuck? Are you dealing with:\n\n- Type annotations and basic types?\n- Interfaces and generics?\n- Something else entirely?\n\nGive me a bit more detail on ",
+          "found": [
+            "—"
+          ]
+        },
+        {
+          "id": "1b7156d1-e705-43dc-9e4c-532ae29e3fb2",
+          "trigger": "Improved paid collab proposal for Pippit AI",
+          "response": "This is a vendor/partnership outreach email from Aha (a creator agency) to a content creator — not a customer support request for a technical education product.\n\nPer the guidelines, I won't be draftin",
+          "found": [
+            "—"
+          ]
+        }
+      ]
+    },
+    "product_fabrication": {
+      "pass": 42,
+      "fail": 3,
+      "failures": [
+        {
+          "id": "62737986-7116-4c7f-acb7-25d2e45f2ae3",
+          "trigger": "AI is so confusing, where do i start?",
+          "response": "The knowledge base isn't returning results, but here's what I'd suggest: Start with the fundamentals section in AI Hero. It covers core concepts like how AI models work, prompt engineering basics, and",
+          "found": [
+            "Start with the fundamentals section",
+            "covers core concepts like",
+            "fundamentals section in AI Hero. It covers"
+          ]
+        },
+        {
+          "id": "0f3b9d92-235e-4c1b-8dc5-832e584bfd48",
+          "trigger": "Please Help me",
+          "response": "Great! If you're just starting out with TypeScript, I'd recommend beginning with the fundamentals:\n\n**Start with the basics** - Learn how TypeScript differs from JavaScript, type annotations, interfac",
+          "found": [
+            "Start with the basics** - Learn how"
+          ]
+        },
+        {
+          "id": "7599fe27-c24d-4681-aea4-0f556ef1b206",
+          "trigger": "I am lost.",
+          "response": "Hey Joel,\n\nI hear the frustration—TypeScript can feel overwhelming at first, but you've got this. The good news is you already have access to Total TypeScript, which is designed to take you from confu",
+          "found": [
+            "Start with the fundamentals section"
+          ]
+        }
+      ]
+    },
+    "helpfulness": {
+      "pass": 37,
+      "fail": 8,
+      "failures": [
+        {
+          "id": "dbc4c68d-ba1e-407f-a5e5-bae2fc261074",
+          "trigger": "Re: A quick question...",
+          "response": "This is personal correspondence meant for Matt directly rather than a support request. Since there's no instructor routing configured, you may need to forward this manually or through your internal pr",
+          "score": 0,
+          "metadata": {
+            "deflections": 1,
+            "helpfulIndicators": 0
+          }
+        },
+        {
+          "id": "69a48933-34d0-4c94-bc8d-204455b11b96",
+          "trigger": "AI SDK Course Discount",
+          "response": "Hi Aminata,\n\nThanks for reaching out. I don't have the ability to authorize discounts on pricing, but I'd recommend reaching out directly through the product website or checking if there are any curre",
+          "score": 0,
+          "metadata": {
+            "deflections": 1,
+            "helpfulIndicators": 0
+          }
+        },
+        {
+          "id": "4970d724-5bde-47a6-8b62-fe1504092c54",
+          "trigger": "YouTube Partnership || Open Claude CoWork",
+          "response": "I'm unable to route this directly to Matt through the system. Since this is a business partnership inquiry rather than a product support question, it should be forwarded to Matt's business development",
+          "score": 0,
+          "metadata": {
+            "deflections": 2,
+            "helpfulIndicators": 0
+          }
+        },
+        {
+          "id": "68900624-e22e-42d3-9a19-023ac122ff15",
+          "trigger": "Hi Matt Pocock – Invite to Make a YouTube Video",
+          "response": "Looks like there's no instructor routing configured for this app. Given that this is a partnership pitch directed at Matt personally rather than a support issue, it should go to his personal inbox or ",
+          "score": 0,
+          "metadata": {
+            "deflections": 2,
+            "helpfulIndicators": 0
+          }
+        },
+        {
+          "id": "ec82b4fa-6ca0-4832-9a2d-fbc1523bdf4d",
+          "trigger": "Re: A quick question...",
+          "response": "Looks like there's no instructor routing set up for this app. I won't draft a response here since this is clearly meant as personal correspondence for Matt rather than a support request. Someone on th",
+          "score": 0,
+          "metadata": {
+            "deflections": 1,
+            "helpfulIndicators": 0
+          }
+        },
+        {
+          "id": "8a0e171e-74c8-4988-bfa5-4830c5f2c30f",
+          "trigger": "Re: A quick question...",
+          "response": "Looks like there's no instructor assignment set up for this app. But this is clearly a personal message from Urban responding to Matt's direct outreach about AI and Effect. This should get to Matt dir",
+          "score": 0,
+          "metadata": {
+            "deflections": 1,
+            "helpfulIndicators": 0
+          }
+        },
+        {
+          "id": "99a13dd1-43fe-4343-8337-feadd99cc4af",
+          "trigger": "Re: A quick question...",
+          "response": "I don't have an instructor configured in the system for this app, so I can't route this directly. But this is clearly a personal message meant for Matt in response to his outreach about AI interests. ",
+          "score": 0,
+          "metadata": {
+            "deflections": 2,
+            "helpfulIndicators": 0
+          }
+        },
+        {
+          "id": "277eb8e7-c117-40b8-a083-c178e6bbc31d",
+          "trigger": "Re: Paid \"Codebuff\" YouTube video opportunity!",
+          "response": "I can't route this directly to Matt through our system, but this is a business inquiry that needs his personal attention, not support team handling.\n\nYou'll want to reach out through his personal chan",
+          "score": 0,
+          "metadata": {
+            "deflections": 2,
+            "helpfulIndicators": 0
+          }
+        }
+      ]
+    }
+  },
+  "categories": {
+    "tool-assisted": 36,
+    "direct-response": 9
+  },
+  "byCategory": {
+    "tool-assisted": {
+      "internal_state_leakage": {
+        "pass": 26,
+        "fail": 10
+      },
+      "meta_commentary": {
+        "pass": 31,
+        "fail": 5
+      },
+      "banned_phrases": {
+        "pass": 26,
+        "fail": 10
+      },
+      "product_fabrication": {
+        "pass": 33,
+        "fail": 3
+      },
+      "helpfulness": {
+        "pass": 28,
+        "fail": 8
+      }
+    },
+    "direct-response": {
+      "internal_state_leakage": {
+        "pass": 7,
+        "fail": 2
+      },
+      "meta_commentary": {
+        "pass": 1,
+        "fail": 8
+      },
+      "banned_phrases": {
+        "pass": 6,
+        "fail": 3
+      },
+      "product_fabrication": {
+        "pass": 9,
+        "fail": 0
+      },
+      "helpfulness": {
+        "pass": 9,
+        "fail": 0
+      }
+    }
+  }
+}

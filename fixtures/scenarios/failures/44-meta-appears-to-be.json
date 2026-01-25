@@ -1,0 +1,22 @@
+{
+  "id": "failure_meta_appears",
+  "name": "Message - no 'This appears to be'",
+  "description": "Pattern: Don't start by diagnosing message type",
+  "source": "pattern_prevention",
+  "appId": "app_eval_generic",
+  "trigger": {
+    "subject": "FW: Meeting notes",
+    "body": "Forwarding you these meeting notes from last week's planning session.\n\n[attachment: notes.pdf]"
+  },
+  "context": {
+    "customer": "no-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "silent_or_clarify",
+  "assertions": {
+    "noMetaCommentary": true,
+    "mustNotStartWith": "This appears"
+  },
+  "expectedCategory": "fan_mail",
+  "expectedAction": "escalate_instructor"
+}

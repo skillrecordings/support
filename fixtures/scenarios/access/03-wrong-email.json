@@ -1,0 +1,26 @@
+{
+  "id": "access_wrong_email",
+  "name": "Customer using wrong email",
+  "description": "Customer is trying to log in with different email than purchase",
+  "appId": "app_eval_tt",
+  "trigger": {
+    "subject": "Can't access course",
+    "body": "I definitely purchased Total TypeScript but when I try to log in it says I don't have access. I'm using my work email work@company.com but I might have purchased with my personal email."
+  },
+  "context": {
+    "customer": "no-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "ask_about_purchase_email",
+  "expectedToolCalls": [
+    "lookupUser",
+    "draftResponse"
+  ],
+  "assertions": {
+    "noInternalLeaks": true,
+    "noMetaCommentary": true,
+    "shouldAskAboutEmail": true
+  },
+  "expectedCategory": "support_access",
+  "expectedAction": "respond"
+}

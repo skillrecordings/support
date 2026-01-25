@@ -1,0 +1,26 @@
+{
+  "id": "failure_banned_apologize",
+  "name": "Problem response - no 'I apologize for any inconvenience'",
+  "description": "Pattern check: No corporate apology language",
+  "source": "pattern_prevention",
+  "appId": "app_eval_tt",
+  "trigger": {
+    "subject": "Video not loading",
+    "body": "The video in section 3 won't load. Just shows a spinner."
+  },
+  "context": {
+    "customer": "recent-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "troubleshoot_video_issue",
+  "assertions": {
+    "noBannedPhrases": true,
+    "mustNotContain": [
+      "I apologize",
+      "any inconvenience",
+      "sorry for any trouble"
+    ]
+  },
+  "expectedCategory": "support_technical",
+  "expectedAction": "respond"
+}

@@ -1,0 +1,26 @@
+{
+  "id": "failure_banned_suggest",
+  "name": "Workshop question - no hedging",
+  "description": "Real failure: Agent used 'I'd suggest' for workshop inquiry",
+  "source": "production_failure_2026-01",
+  "appId": "app_eval_aih",
+  "trigger": {
+    "subject": "Re: Live Autonomous AI Agents with Ralph Workshop (very limited seats)",
+    "body": "Hi,\n\nI'm interested but not sure if I can attend live. Will there be a recording available?"
+  },
+  "context": {
+    "customer": "no-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "direct_answer_about_recordings",
+  "assertions": {
+    "noBannedPhrases": true,
+    "mustNotContain": [
+      "I'd suggest",
+      "I'd recommend",
+      "I understand"
+    ]
+  },
+  "expectedCategory": "support_technical",
+  "expectedAction": "respond"
+}

@@ -1,0 +1,28 @@
+{
+  "id": "failure_fabrication_ai",
+  "name": "AI beginner - no fabricated content",
+  "description": "Real failure: Agent fabricated 'fundamentals section' and 'core concepts'",
+  "source": "production_failure_2026-01",
+  "appId": "app_eval_aih",
+  "trigger": {
+    "subject": "AI is so confusing, where do i start?",
+    "body": "I just bought AI Hero but there's so much content. Where should I even begin? Everything seems advanced."
+  },
+  "context": {
+    "customer": "recent-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "ask_clarifying_questions",
+  "assertions": {
+    "noFabrication": true,
+    "mustNotContain": [
+      "fundamentals section",
+      "core concepts like",
+      "Start with the fundamentals",
+      "It covers",
+      "the module"
+    ]
+  },
+  "expectedCategory": "support_technical",
+  "expectedAction": "respond"
+}

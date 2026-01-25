@@ -1,0 +1,28 @@
+{
+  "id": "failure_meta_joke",
+  "name": "Casual message - no meta commentary",
+  "description": "Real failure: Agent said 'This message is clearly not a customer support request'",
+  "source": "production_failure_2026-01",
+  "appId": "app_eval_generic",
+  "trigger": {
+    "subject": "This is Crazy",
+    "body": "lol this is wild"
+  },
+  "context": {
+    "customer": "happy-customer",
+    "conversation": null
+  },
+  "expectedBehavior": "silent_no_response",
+  "assertions": {
+    "noMetaCommentary": true,
+    "mustNotContain": [
+      "clearly not a customer support request",
+      "casual/joking message",
+      "Per my guidelines",
+      "I should not draft",
+      "If Joel has an actual"
+    ]
+  },
+  "expectedCategory": "fan_mail",
+  "expectedAction": "escalate_instructor"
+}

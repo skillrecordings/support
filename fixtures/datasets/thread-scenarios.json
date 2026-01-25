@@ -1,0 +1,224 @@
+[
+  {
+    "id": "thread_resolved_thanks",
+    "name": "Resolved - Customer says thanks after fix",
+    "input": {
+      "conversationId": "cnv_resolved_1",
+      "appId": "app_tt",
+      "messages": [
+        {"direction": "in", "body": "I can't access my course", "timestamp": 1000},
+        {"direction": "out", "body": "I've refreshed your access. Try logging out and back in.", "timestamp": 2000},
+        {"direction": "in", "body": "That worked, thanks so much!", "timestamp": 3000}
+      ],
+      "triggerMessage": {"direction": "in", "body": "That worked, thanks so much!", "timestamp": 3000}
+    },
+    "expected": {"category": "resolved"},
+    "tags": ["resolved", "multi_turn"]
+  },
+  {
+    "id": "thread_resolved_all_set",
+    "name": "Resolved - Customer says all set",
+    "input": {
+      "conversationId": "cnv_resolved_2",
+      "appId": "app_tt",
+      "messages": [
+        {"direction": "in", "body": "Need help with my purchase", "timestamp": 1000},
+        {"direction": "out", "body": "What's the issue?", "timestamp": 2000},
+        {"direction": "in", "body": "Never mind, I'm all set now!", "timestamp": 3000}
+      ],
+      "triggerMessage": {"direction": "in", "body": "Never mind, I'm all set now!", "timestamp": 3000}
+    },
+    "expected": {"category": "resolved"},
+    "tags": ["resolved", "multi_turn"]
+  },
+  {
+    "id": "thread_awaiting_customer",
+    "name": "Awaiting customer - We asked a question",
+    "input": {
+      "conversationId": "cnv_awaiting_1",
+      "appId": "app_tt",
+      "messages": [
+        {"direction": "in", "body": "I want a refund", "timestamp": 1000},
+        {"direction": "out", "body": "Happy to help. Can you tell me what's not working for you?", "timestamp": 2000}
+      ],
+      "triggerMessage": {"direction": "out", "body": "Happy to help. Can you tell me what's not working for you?", "timestamp": 2000}
+    },
+    "expected": {"category": "awaiting_customer"},
+    "tags": ["awaiting", "multi_turn"]
+  },
+  {
+    "id": "thread_teammate_engaged",
+    "name": "Support teammate - Human already helping",
+    "input": {
+      "conversationId": "cnv_teammate_1",
+      "appId": "app_tt",
+      "messages": [
+        {"direction": "in", "body": "I bought the course but can't access it", "timestamp": 1000, "author": {"type": "customer", "email": "customer@example.com"}},
+        {"direction": "out", "body": "Let me check your account. What email did you purchase with?", "timestamp": 2000, "author": {"type": "teammate", "email": "haze@egghead.io", "teammateId": "tea_haze"}},
+        {"direction": "in", "body": "I think it was work@company.com", "timestamp": 3000, "author": {"type": "customer", "email": "customer@example.com"}}
+      ],
+      "triggerMessage": {"direction": "in", "body": "I think it was work@company.com", "timestamp": 3000, "author": {"type": "customer", "email": "customer@example.com"}}
+    },
+    "expected": {"category": "support_access", "action": "support_teammate"},
+    "tags": ["teammate_engaged", "multi_turn"]
+  },
+  {
+    "id": "thread_instructor_strategy_banger",
+    "name": "Instructor strategy - Sharing content idea",
+    "input": {
+      "conversationId": "cnv_instructor_1",
+      "appId": "app_tt",
+      "instructorTeammateId": "tea_matt",
+      "messages": [
+        {"direction": "in", "body": "Check this banger quote:\n\n\"TypeScript is just JavaScript with guard rails\"\n\nShould I tweet this?", "timestamp": 1000, "author": {"type": "instructor", "email": "matt@totaltypescript.com", "teammateId": "tea_matt"}}
+      ],
+      "triggerMessage": {"direction": "in", "body": "Check this banger quote", "timestamp": 1000, "author": {"type": "instructor", "email": "matt@totaltypescript.com", "teammateId": "tea_matt"}}
+    },
+    "expected": {"category": "instructor_strategy"},
+    "tags": ["instructor_strategy", "single"]
+  },
+  {
+    "id": "thread_instructor_internal",
+    "name": "Instructor strategy - Internal discussion",
+    "input": {
+      "conversationId": "cnv_instructor_2",
+      "appId": "app_tt",
+      "instructorTeammateId": "tea_matt",
+      "messages": [
+        {"direction": "in", "body": "Hey team, thinking about adding a new module on Zod. Thoughts?", "timestamp": 1000, "author": {"type": "instructor", "email": "matt@totaltypescript.com", "teammateId": "tea_matt"}},
+        {"direction": "out", "body": "Love it! The community has been asking for more validation content.", "timestamp": 2000, "author": {"type": "teammate", "email": "haze@egghead.io", "teammateId": "tea_haze"}}
+      ],
+      "triggerMessage": {"direction": "out", "body": "Love it!", "timestamp": 2000, "author": {"type": "teammate", "email": "haze@egghead.io", "teammateId": "tea_haze"}}
+    },
+    "expected": {"category": "instructor_strategy"},
+    "tags": ["instructor_strategy", "internal", "multi_turn"]
+  },
+  {
+    "id": "thread_spam_single",
+    "name": "Spam - Single vendor outreach",
+    "input": {
+      "conversationId": "cnv_spam_1",
+      "appId": "app_tt",
+      "messages": [
+        {"direction": "in", "body": "Hi Matt! I'd love to discuss a partnership opportunity. We help course creators with SEO and backlinks. Would you be interested in a quick call?", "timestamp": 1000}
+      ],
+      "triggerMessage": {"direction": "in", "body": "Hi Matt! I'd love to discuss a partnership opportunity.", "timestamp": 1000}
+    },
+    "expected": {"category": "spam"},
+    "tags": ["spam", "single"]
+  },
+  {
+    "id": "thread_access_single",
+    "name": "Access issue - Single message",
+    "input": {
+      "conversationId": "cnv_access_1",
+      "appId": "app_tt",
+      "messages": [
+        {"direction": "in", "body": "Hi, I bought Total TypeScript last week but I don't have access to it anymore. Can you help restore my access? Thanks!", "timestamp": 1000}
+      ],
+      "triggerMessage": {"direction": "in", "body": "Hi, I bought Total TypeScript last week but I don't have access to it anymore.", "timestamp": 1000}
+    },
+    "expected": {"category": "support_access"},
+    "tags": ["support_access", "single"]
+  },
+  {
+    "id": "thread_refund_single",
+    "name": "Refund request - Single message",
+    "input": {
+      "conversationId": "cnv_refund_1",
+      "appId": "app_tt",
+      "messages": [
+        {"direction": "in", "body": "I'd like to request a refund please. I bought the course but realized it's not what I need right now.", "timestamp": 1000}
+      ],
+      "triggerMessage": {"direction": "in", "body": "I'd like to request a refund please.", "timestamp": 1000}
+    },
+    "expected": {"category": "support_refund"},
+    "tags": ["support_refund", "single"]
+  },
+  {
+    "id": "thread_refund_multi",
+    "name": "Refund - Multi-turn with explanation",
+    "input": {
+      "conversationId": "cnv_refund_2",
+      "appId": "app_tt",
+      "messages": [
+        {"direction": "in", "body": "I want my money back", "timestamp": 1000},
+        {"direction": "out", "body": "I can help with that. Can you share what's not working?", "timestamp": 2000},
+        {"direction": "in", "body": "I just don't have time to go through it right now with my job", "timestamp": 3000}
+      ],
+      "triggerMessage": {"direction": "in", "body": "I just don't have time", "timestamp": 3000}
+    },
+    "expected": {"category": "support_refund"},
+    "tags": ["support_refund", "multi_turn"]
+  },
+  {
+    "id": "thread_transfer_single",
+    "name": "Transfer request - Single message",
+    "input": {
+      "conversationId": "cnv_transfer_1",
+      "appId": "app_tt",
+      "messages": [
+        {"direction": "in", "body": "Can you transfer my purchase to a different email? I used my personal email but want it on my work account.", "timestamp": 1000}
+      ],
+      "triggerMessage": {"direction": "in", "body": "Can you transfer my purchase to a different email?", "timestamp": 1000}
+    },
+    "expected": {"category": "support_transfer"},
+    "tags": ["support_transfer", "single"]
+  },
+  {
+    "id": "thread_billing_invoice",
+    "name": "Billing - Invoice request",
+    "input": {
+      "conversationId": "cnv_billing_1",
+      "appId": "app_tt",
+      "messages": [
+        {"direction": "in", "body": "Hi, I need an invoice for my purchase for tax purposes. Can you send one?", "timestamp": 1000}
+      ],
+      "triggerMessage": {"direction": "in", "body": "I need an invoice for my purchase", "timestamp": 1000}
+    },
+    "expected": {"category": "support_billing"},
+    "tags": ["support_billing", "single"]
+  },
+  {
+    "id": "thread_fan_mail_thanks",
+    "name": "Fan mail - Thank you message",
+    "input": {
+      "conversationId": "cnv_fan_1",
+      "appId": "app_tt",
+      "messages": [
+        {"direction": "in", "body": "Hi Matt! Just wanted to say thank you so much. Your course completely changed how I think about TypeScript. I went from dreading types to actually loving them. You're amazing!", "timestamp": 1000}
+      ],
+      "triggerMessage": {"direction": "in", "body": "Hi Matt! Just wanted to say thank you so much.", "timestamp": 1000}
+    },
+    "expected": {"category": "fan_mail"},
+    "tags": ["fan_mail", "single"]
+  },
+  {
+    "id": "thread_system_autoreply",
+    "name": "System - Auto-reply",
+    "input": {
+      "conversationId": "cnv_system_1",
+      "appId": "app_tt",
+      "messages": [
+        {"direction": "in", "body": "This is an automatic reply. I'm currently out of office and will respond when I return on Monday.", "timestamp": 1000}
+      ],
+      "triggerMessage": {"direction": "in", "body": "This is an automatic reply.", "timestamp": 1000}
+    },
+    "expected": {"category": "system"},
+    "tags": ["system", "single"]
+  },
+  {
+    "id": "thread_not_resolved_thanks_first",
+    "name": "NOT resolved - Thanks at start of request",
+    "input": {
+      "conversationId": "cnv_not_resolved_1",
+      "appId": "app_tt",
+      "messages": [
+        {"direction": "in", "body": "Thanks for the quick response earlier! I have another question - how do I access the bonus content?", "timestamp": 1000}
+      ],
+      "triggerMessage": {"direction": "in", "body": "Thanks for the quick response earlier!", "timestamp": 1000}
+    },
+    "expected": {"category": "support_access"},
+    "tags": ["support_access", "single", "edge_case"]
+  }
+]

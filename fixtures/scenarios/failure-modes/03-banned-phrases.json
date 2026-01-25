@@ -1,0 +1,32 @@
+{
+  "id": "failure_banned_phrases",
+  "name": "Must not use banned phrases",
+  "description": "Response should not contain corporate speak or AI patterns",
+  "appId": "app_eval_tt",
+  "trigger": {
+    "subject": "Question about the course",
+    "body": "Hi, I'm thinking about buying Total TypeScript. Can you tell me more about it?"
+  },
+  "context": {
+    "customer": "no-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "helpful_response",
+  "expectedToolCalls": [
+    "searchKnowledge",
+    "draftResponse"
+  ],
+  "assertions": {
+    "noBannedPhrases": true,
+    "mustNotContain": [
+      "Great!",
+      "I'd recommend",
+      "I would suggest",
+      "Happy to help",
+      "I hope this helps",
+      "Let me know if you have any other questions"
+    ]
+  },
+  "expectedCategory": "support_billing",
+  "expectedAction": "respond"
+}

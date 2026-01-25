@@ -1,0 +1,27 @@
+{
+  "id": "failure_internal_leak",
+  "name": "Must not leak internal state",
+  "description": "When routing fails, should NOT expose config errors to customer",
+  "appId": "app_eval_generic",
+  "trigger": {
+    "subject": "Message for the instructor",
+    "body": "Hi! I wanted to send a personal thank you to the course creator. Their work has been amazing!"
+  },
+  "context": {
+    "customer": "happy-customer",
+    "conversation": null
+  },
+  "expectedBehavior": "silent_or_generic_response",
+  "assertions": {
+    "noInternalLeaks": true,
+    "mustNotContain": [
+      "no instructor configured",
+      "can't route",
+      "routing not set up",
+      "tool failed",
+      "API error"
+    ]
+  },
+  "expectedCategory": "fan_mail",
+  "expectedAction": "escalate_instructor"
+}

@@ -1,0 +1,11 @@
+{
+  "id": "user_nopurch",
+  "email": "nopurchase@example.com",
+  "name": "No Purchase User",
+  "purchases": [],
+  "traits": {
+    "sentiment": "neutral",
+    "previous_tickets": 0,
+    "lifetime_value": 0
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "id": "technical_generics",
+  "name": "Technical question about generics",
+  "description": "Customer asking for help understanding generics",
+  "appId": "app_eval_tt",
+  "trigger": {
+    "subject": "Stuck on generics",
+    "body": "I'm going through the generics section and I'm really confused. The extends keyword doesn't make sense to me. Can you explain?"
+  },
+  "context": {
+    "customer": "happy-customer",
+    "conversation": null
+  },
+  "expectedBehavior": "probe_and_help",
+  "expectedToolCalls": [
+    "searchKnowledge",
+    "draftResponse"
+  ],
+  "assertions": {
+    "noInternalLeaks": true,
+    "noMetaCommentary": true,
+    "noBannedPhrases": true,
+    "noFabrication": true,
+    "shouldAskClarifyingQuestions": true
+  },
+  "expectedCategory": "support_technical",
+  "expectedAction": "respond"
+}

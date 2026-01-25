@@ -1,0 +1,1517 @@
+[
+  {
+    "id": "prod_fbdce81a",
+    "name": "support_access: 👋  Feedback from customer1@example.com about Tota",
+    "source": "cnv_1jdnbxd1",
+    "input": {
+      "conversationId": "cnv_1jdnbxd1",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "Hi, I bought total typescript on Oct 18 2025 and I don’t have access to it\nanymore after logging in with GitHub. Could you please restore the access?\nThanks!\n",
+          "timestamp": 1769192228000,
+          "subject": "👋  Feedback from customer1@example.com about Total TypeScript"
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "Hi, I bought total typescript on Oct 18 2025 and I don’t have access to it\nanymore after logging in with GitHub. Could you please restore the access?\nThanks!\n",
+        "timestamp": 1769192228000,
+        "subject": "👋  Feedback from customer1@example.com about Total TypeScript"
+      }
+    },
+    "expected": {
+      "category": "support_access"
+    },
+    "tags": [
+      "support_access",
+      "single",
+      "has_thanks"
+    ]
+  },
+  {
+    "id": "prod_fc87b6bd",
+    "name": "support_refund: Re: You're in! Get Ready for Autonomous AI Agents ",
+    "source": "cnv_1jdlpt0l",
+    "input": {
+      "conversationId": "cnv_1jdlpt0l",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "Dear AI Hero Team,\n\nI received the calendar invite, but there's no Zoom link. Also, no email\nwith the Zoom link. Should I be worried? 😅\n\nRegards,\nCustomer\n\n\n\n\n\n\nOn Thu, Jan 22, 2026 at 6:19 PM AI Hero <team@product.dev> wrote:\n\n> You're In! Get Ready for Turn AI Agents Into Autonomous Software Engineers\n> with Ralph!\n>\n>  ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿\n> You're In! Get Ready! 🚀\n>\n> Hey Customer,\n>\n> You've successfully secured your spot for *Turn AI Agents Into Autonomous\n> Software Engineers with Ralph* – we're excited to have you!\n>\n> Here's a quick confirmation of the critical details:\n>\n> *Event:* Turn AI Agents Into Autonomous Software Engineers with Ralph\n>\n> *Date:* February 11th, 2026\n>\n> *Time:* 9:00 AM - 1:00 PM (Pacific Time). View in your timezone\n> <https://everytimezone.com/>\n>\n> *What Happens Next? Keep an Eye on Your Inbox!*\n>\n> Shortly, you'll receive a separate email containing:\n>\n> ✓ The official Google Calendar invite (lock it in!)\n>\n> ✓ The Zoom link for the live event.\n>\n> ✓ Any pre-event materials or recommended prep work.\n>\n> To ensure you don't miss these crucial updates, please add *team@product.dev\n> <team@product.dev>* to your trusted senders or whitelist.\n>\n> *Important Policies & Info:*\n>\n> *Live & Interactive:* This is a live workshop. No recording of this live\n> event will be provided, but you will get access to the self-paced version\n> of the workshop.\n>\n> *Tickets:* Non-refundable, but totally transferable. If life happens, you\n> can transfer your spot to a friend or colleague yourself via your invoice\n> page <https://www.aihero.dev/invoices>.\n>\n> *Invoice Access:* Need to wrangle an invoice? Log in to your account to\n> view, customize, and download it right here\n> <https://www.aihero.dev/invoices>.\n>\n> We're stoked to have you and can't wait to dive into this with you!\n>\n> See you there,\n>\n> The AI Hero Team\n>\n",
+          "timestamp": 1769103463000,
+          "subject": "Re: You're in! Get Ready for Autonomous AI Agents Live Workshop Ticket! 🎉"
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "Dear AI Hero Team,\n\nI received the calendar invite, but there's no Zoom link. Also, no email\nwith the Zoom link. Should I be worried? 😅\n\nRegards,\nCustomer\n\n\n\n\n\n\nOn Thu, Jan 22, 2026 at 6:19 PM AI Hero <team@product.dev> wrote:\n\n> You're In! Get Ready for Turn AI Agents Into Autonomous Software Engineers\n> with Ralph!\n>\n>  ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿\n> You're In! Get Ready! 🚀\n>\n> Hey Customer,\n>\n> You've successfully secured your spot for *Turn AI Agents Into Autonomous\n> Software Engineers with Ralph* – we're excited to have you!\n>\n> Here's a quick confirmation of the critical details:\n>\n> *Event:* Turn AI Agents Into Autonomous Software Engineers with Ralph\n>\n> *Date:* February 11th, 2026\n>\n> *Time:* 9:00 AM - 1:00 PM (Pacific Time). View in your timezone\n> <https://everytimezone.com/>\n>\n> *What Happens Next? Keep an Eye on Your Inbox!*\n>\n> Shortly, you'll receive a separate email containing:\n>\n> ✓ The official Google Calendar invite (lock it in!)\n>\n> ✓ The Zoom link for the live event.\n>\n> ✓ Any pre-event materials or recommended prep work.\n>\n> To ensure you don't miss these crucial updates, please add *team@product.dev\n> <team@product.dev>* to your trusted senders or whitelist.\n>\n> *Important Policies & Info:*\n>\n> *Live & Interactive:* This is a live workshop. No recording of this live\n> event will be provided, but you will get access to the self-paced version\n> of the workshop.\n>\n> *Tickets:* Non-refundable, but totally transferable. If life happens, you\n> can transfer your spot to a friend or colleague yourself via your invoice\n> page <https://www.aihero.dev/invoices>.\n>\n> *Invoice Access:* Need to wrangle an invoice? Log in to your account to\n> view, customize, and download it right here\n> <https://www.aihero.dev/invoices>.\n>\n> We're stoked to have you and can't wait to dive into this with you!\n>\n> See you there,\n>\n> The AI Hero Team\n>\n",
+        "timestamp": 1769103463000,
+        "subject": "Re: You're in! Get Ready for Autonomous AI Agents Live Workshop Ticket! 🎉"
+      }
+    },
+    "expected": {
+      "category": "support_refund"
+    },
+    "tags": [
+      "support_refund",
+      "single"
+    ]
+  },
+  {
+    "id": "prod_d6f73028",
+    "name": "support_technical: Re: Live Autonomous AI Agents with Ralph Workshop ",
+    "source": "cnv_1jdlplgl",
+    "input": {
+      "conversationId": "cnv_1jdlplgl",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "😭😭😭 Is it already sold out? The Buy button doesn't work\n\nOn Thu, Jan 22, 2026 at 8:20 AM Matt Pocock (AI Hero) <team@product.dev>\nwrote:\n\n> Hey Customer,\n>\n> The future of AI coding is a loop. It’s one of the simplest primitives\n> available to developers, but we’ve been criminally underusing it in the AI\n> coding world.\n>\n> Instead, we’re stuck in that frustrating cycle with AI coding assistants.\n> You ask for Feature A, get half a solution, manually fix it, ask for\n> Feature B, and it breaks Feature A. Rinse, repeat.\n>\n> But here’s what’s actually happening right now in production: developers\n> are setting up agents that run in loops with structured feedback\n> mechanisms. They point them at GitHub backlogs. Real PRs get created.\n> Without constant babysitting.\n>\n> It’s called the Ralph Wiggum technique, and it’s not magic. It’s a simple,\n> learnable pattern.\n>\n> *I’m running **a live workshop on February 11 at 9 AM PST*\n> <https://7751c435.click.convertkit-mail2.com/d0ud5pe6z6a0hod693zhmhzlveq44blh00llw/dphehmued0v29ncm/aHR0cHM6Ly93d3cuYWloZXJvLmRldi9zL3JhbHBoLXdvcmtzaG9wLTAx>\n> to teach you exactly how to build it. We’re capping at 40 developers\n> because this is hands-on. You’ll be debugging YOUR code, not just watching\n> me code.\n>\n> Here’s what you’ll leave with:\n>\n>    - Your own bash loop running\n>    - Feedback mechanisms that let agents catch their own mistakes\n>    - Your GitHub backlog wired up to actually execute tasks\n>    - The PRD structure that makes agents do what you actually want\n>\n> By 1 PM, you’ll have real PRs being generated from your actual issues.\n>\n> *Sign-ups are open now.* Limited spots, and we’ve got a discount running\n> through Feb 5th. Grab yours before they sell out.\n>\n> The full details are here, including what actually breaks, why this works\n> now (and didn’t before), and exactly what you need to bring.\n> *Secure Your Seat*\n> <https://7751c435.click.convertkit-mail2.com/d0ud5pe6z6a0hod693zhmhzlveq44blh00llw/dphehmued0v29ncm/aHR0cHM6Ly93d3cuYWloZXJvLmRldi9zL3JhbHBoLXdvcmtzaG9wLTAx>\n>\n> See you on February 11.\n>\n> Unsubscribe from AI Hero Emails\n> <https://7751c435.click.convertkit-mail2.com/d0ud5pe6z6a0hod693zhmhzlveq44blh00llw/rehm5x5qf9umk04olri2/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==>.\n> You can also unsubscribe\n> <https://7751c435.unsubscribe.convertkit-mail2.com/d0ud5pe6z6a0hod693zhmhzlveq44blh00llw>\n> from all emails at any time.\n>\n> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080\n>\n> ​\n>\n",
+          "timestamp": 1769103281000,
+          "subject": "Re: Live Autonomous AI Agents with Ralph Workshop (very limited seats)"
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "😭😭😭 Is it already sold out? The Buy button doesn't work\n\nOn Thu, Jan 22, 2026 at 8:20 AM Matt Pocock (AI Hero) <team@product.dev>\nwrote:\n\n> Hey Customer,\n>\n> The future of AI coding is a loop. It’s one of the simplest primitives\n> available to developers, but we’ve been criminally underusing it in the AI\n> coding world.\n>\n> Instead, we’re stuck in that frustrating cycle with AI coding assistants.\n> You ask for Feature A, get half a solution, manually fix it, ask for\n> Feature B, and it breaks Feature A. Rinse, repeat.\n>\n> But here’s what’s actually happening right now in production: developers\n> are setting up agents that run in loops with structured feedback\n> mechanisms. They point them at GitHub backlogs. Real PRs get created.\n> Without constant babysitting.\n>\n> It’s called the Ralph Wiggum technique, and it’s not magic. It’s a simple,\n> learnable pattern.\n>\n> *I’m running **a live workshop on February 11 at 9 AM PST*\n> <https://7751c435.click.convertkit-mail2.com/d0ud5pe6z6a0hod693zhmhzlveq44blh00llw/dphehmued0v29ncm/aHR0cHM6Ly93d3cuYWloZXJvLmRldi9zL3JhbHBoLXdvcmtzaG9wLTAx>\n> to teach you exactly how to build it. We’re capping at 40 developers\n> because this is hands-on. You’ll be debugging YOUR code, not just watching\n> me code.\n>\n> Here’s what you’ll leave with:\n>\n>    - Your own bash loop running\n>    - Feedback mechanisms that let agents catch their own mistakes\n>    - Your GitHub backlog wired up to actually execute tasks\n>    - The PRD structure that makes agents do what you actually want\n>\n> By 1 PM, you’ll have real PRs being generated from your actual issues.\n>\n> *Sign-ups are open now.* Limited spots, and we’ve got a discount running\n> through Feb 5th. Grab yours before they sell out.\n>\n> The full details are here, including what actually breaks, why this works\n> now (and didn’t before), and exactly what you need to bring.\n> *Secure Your Seat*\n> <https://7751c435.click.convertkit-mail2.com/d0ud5pe6z6a0hod693zhmhzlveq44blh00llw/dphehmued0v29ncm/aHR0cHM6Ly93d3cuYWloZXJvLmRldi9zL3JhbHBoLXdvcmtzaG9wLTAx>\n>\n> See you on February 11.\n>\n> Unsubscribe from AI Hero Emails\n> <https://7751c435.click.convertkit-mail2.com/d0ud5pe6z6a0hod693zhmhzlveq44blh00llw/rehm5x5qf9umk04olri2/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==>.\n> You can also unsubscribe\n> <https://7751c435.unsubscribe.convertkit-mail2.com/d0ud5pe6z6a0hod693zhmhzlveq44blh00llw>\n> from all emails at any time.\n>\n> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080\n>\n> ​\n>\n",
+        "timestamp": 1769103281000,
+        "subject": "Re: Live Autonomous AI Agents with Ralph Workshop (very limited seats)"
+      }
+    },
+    "expected": {
+      "category": "support_technical"
+    },
+    "tags": [
+      "support_technical",
+      "single"
+    ]
+  },
+  {
+    "id": "prod_ae91e693",
+    "name": "resolved: Re: You're in! Get Ready for Autonomous AI Agents ",
+    "source": "cnv_1jdlg38l",
+    "input": {
+      "conversationId": "cnv_1jdlg38l",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "Hello,\n\nI am excited for this workshop. I have not received the email with the workshop materials and code examples yet. I really want your refined Ralph setup! We’re having a lot of success with it, but are running into some of the issues you’ve outlined solutions for in your latest video on X.\n\nThanks,\n\nCustomer\n\nGet Outlook for iOS<https://aka.ms/o0ukef>\n________________________________\nFrom: AI Hero <team@product.dev>\nSent: Thursday, January 22, 2026 10:48:15 AM\nTo: Christian Wierzbicki <user2@company.com>\nSubject: You're in! Get Ready for Autonomous AI Agents Live Workshop Ticket! 🎉\n\nYou're In! Get Ready for Turn AI Agents Into Autonomous Software Engineers with Ralph!\n ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿\nYou're In! Get Ready! 🚀\n\nHey Customer,\n\nYou've successfully secured your spot for Turn AI Agents Into Autonomous Software Engineers with Ralph – we're excited to have you!\n\nHere's a quick confirmation of the critical details:\n\nEvent: Turn AI Agents Into Autonomous Software Engineers with Ralph\n\nDate: February 11th, 2026\n\nTime: 9:00 AM - 1:00 PM (Pacific Time). View in your timezone<https://everytimezone.com/>\n\nWhat Happens Next? Keep an Eye on Your Inbox!\n\nShortly, you'll receive a separate email containing:\n\n✓ The official Google Calendar invite (lock it in!)\n\n✓ The Zoom link for the live event.\n\n✓ Any pre-event materials or recommended prep work.\n\nTo ensure you don't miss these crucial updates, please add team@product.dev to your trusted senders or whitelist.\n\nImportant Policies & Info:\n\nLive & Interactive: This is a live workshop. No recording of this live event will be provided, but you will get access to the self-paced version of the workshop.\n\nTickets: Non-refundable, but totally transferable. If life happens, you can transfer your spot to a friend or colleague yourself via your invoice page<https://www.aihero.dev/invoices>.\n\nInvoice Access: Need to wrangle an invoice? Log in to your account to view, customize, and download it right here<https://www.aihero.dev/invoices>.\n\nWe're stoked to have you and can't wait to dive into this with you!\n\nSee you there,\n\nThe AI Hero Team\n\n\nChristian Wierzbicki\nDirector of Technology  [https://enbasis.com/enbasis-logo-email.png]  <https://enbasis.com/>\n\nEmail: user2@company.com\nDirect: [PHONE]\n\nEnbasis Inc.\n1041 W. Market St., Akron, Ohio 44313\n\nEnbasis.com <http://enbasis.com/>\nConfidentiality Notice: This email, including any attachments, is for the sole use of the intended recipient(s) and may contain confidential and privileged information. Any unauthorized review, use, disclosure, or distribution is prohibited. If you are not the intended recipient, please contact the sender by reply email and destroy all copies of the original message.\n",
+          "timestamp": 1769097575000,
+          "subject": "Re: You're in! Get Ready for Autonomous AI Agents Live Workshop Ticket! 🎉"
+        },
+        {
+          "direction": "out",
+          "body": "The confirmation email you received is the first one. You'll get a separate email soon with the Google Calendar invite, Zoom link, and workshop materials/code examples.\nThat second email should arrive within the next day or so. If you don't see it by end of week, check your spam folder or let me know.",
+          "timestamp": 1769097615114,
+          "author": {
+            "type": "agent",
+            "email": "api_jwt_t4h1@2023e93b68555c138b47"
+          }
+        },
+        {
+          "direction": "in",
+          "body": "Hello,\n\nWhen do you think this material will be available ahead of the workshop?\n\nThanks,\n\nCustomer\n\nGet Outlook for iOS<https://aka.ms/o0ukef>\n________________________________\nFrom: Christian Wierzbicki <user1@company.com>\nSent: Thursday, January 22, 2026 10:59:35 AM\nTo: team@product.dev <team@product.dev>\nSubject: Re: You're in! Get Ready for Autonomous AI Agents Live Workshop Ticket! 🎉\n\nHello,\n\nI am excited for this workshop. I have not received the email with the workshop materials and code examples yet. I really want your refined Ralph setup! We’re having a lot of success with it, but are running into some of the issues you’ve outlined solutions for in your latest video on X.\n\nThanks,\n\nCustomer\n\nGet Outlook for iOS<https://aka.ms/o0ukef>\n________________________________\nFrom: AI Hero <team@product.dev>\nSent: Thursday, January 22, 2026 10:48:15 AM\nTo: Christian Wierzbicki <user1@company.com>\nSubject: You're in! Get Ready for Autonomous AI Agents Live Workshop Ticket! 🎉\n\nYou're In! Get Ready for Turn AI Agents Into Autonomous Software Engineers with Ralph!\n ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿\nYou're In! Get Ready! 🚀\n\nHey Customer,\n\nYou've successfully secured your spot for Turn AI Agents Into Autonomous Software Engineers with Ralph – we're excited to have you!\n\nHere's a quick confirmation of the critical details:\n\nEvent: Turn AI Agents Into Autonomous Software Engineers with Ralph\n\nDate: February 11th, 2026\n\nTime: 9:00 AM - 1:00 PM (Pacific Time). View in your timezone<https://everytimezone.com/>\n\nWhat Happens Next? Keep an Eye on Your Inbox!\n\nShortly, you'll receive a separate email containing:\n\n✓ The official Google Calendar invite (lock it in!)\n\n✓ The Zoom link for the live event.\n\n✓ Any pre-event materials or recommended prep work.\n\nTo ensure you don't miss these crucial updates, please add team@product.dev to your trusted senders or whitelist.\n\nImportant Policies & Info:\n\nLive & Interactive: This is a live workshop. No recording of this live event will be provided, but you will get access to the self-paced version of the workshop.\n\nTickets: Non-refundable, but totally transferable. If life happens, you can transfer your spot to a friend or colleague yourself via your invoice page<https://www.aihero.dev/invoices>.\n\nInvoice Access: Need to wrangle an invoice? Log in to your account to view, customize, and download it right here<https://www.aihero.dev/invoices>.\n\nWe're stoked to have you and can't wait to dive into this with you!\n\nSee you there,\n\nThe AI Hero Team\n\n\nChristian Wierzbicki\nDirector of Technology  [https://enbasis.com/enbasis-logo-email.png]  <https://enbasis.com/>\n\nEmail: user1@company.com\nDirect: [PHONE]\n\nEnbasis Inc.\n1041 W. Market St., Akron, Ohio 44313\n\nEnbasis.com <http://enbasis.com/>\nConfidentiality Notice: This email, including any attachments, is for the sole use of the intended recipient(s) and may contain confidential and privileged information. Any unauthorized review, use, disclosure, or distribution is prohibited. If you are not the intended recipient, please contact the sender by reply email and destroy all copies of the original message.\n",
+          "timestamp": 1769207674000,
+          "subject": "Re: You're in! Get Ready for Autonomous AI Agents Live Workshop Ticket! 🎉"
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "Hello,\n\nWhen do you think this material will be available ahead of the workshop?\n\nThanks,\n\nCustomer\n\nGet Outlook for iOS<https://aka.ms/o0ukef>\n________________________________\nFrom: Christian Wierzbicki <user1@company.com>\nSent: Thursday, January 22, 2026 10:59:35 AM\nTo: team@product.dev <team@product.dev>\nSubject: Re: You're in! Get Ready for Autonomous AI Agents Live Workshop Ticket! 🎉\n\nHello,\n\nI am excited for this workshop. I have not received the email with the workshop materials and code examples yet. I really want your refined Ralph setup! We’re having a lot of success with it, but are running into some of the issues you’ve outlined solutions for in your latest video on X.\n\nThanks,\n\nCustomer\n\nGet Outlook for iOS<https://aka.ms/o0ukef>\n________________________________\nFrom: AI Hero <team@product.dev>\nSent: Thursday, January 22, 2026 10:48:15 AM\nTo: Christian Wierzbicki <user1@company.com>\nSubject: You're in! Get Ready for Autonomous AI Agents Live Workshop Ticket! 🎉\n\nYou're In! Get Ready for Turn AI Agents Into Autonomous Software Engineers with Ralph!\n ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿\nYou're In! Get Ready! 🚀\n\nHey Customer,\n\nYou've successfully secured your spot for Turn AI Agents Into Autonomous Software Engineers with Ralph – we're excited to have you!\n\nHere's a quick confirmation of the critical details:\n\nEvent: Turn AI Agents Into Autonomous Software Engineers with Ralph\n\nDate: February 11th, 2026\n\nTime: 9:00 AM - 1:00 PM (Pacific Time). View in your timezone<https://everytimezone.com/>\n\nWhat Happens Next? Keep an Eye on Your Inbox!\n\nShortly, you'll receive a separate email containing:\n\n✓ The official Google Calendar invite (lock it in!)\n\n✓ The Zoom link for the live event.\n\n✓ Any pre-event materials or recommended prep work.\n\nTo ensure you don't miss these crucial updates, please add team@product.dev to your trusted senders or whitelist.\n\nImportant Policies & Info:\n\nLive & Interactive: This is a live workshop. No recording of this live event will be provided, but you will get access to the self-paced version of the workshop.\n\nTickets: Non-refundable, but totally transferable. If life happens, you can transfer your spot to a friend or colleague yourself via your invoice page<https://www.aihero.dev/invoices>.\n\nInvoice Access: Need to wrangle an invoice? Log in to your account to view, customize, and download it right here<https://www.aihero.dev/invoices>.\n\nWe're stoked to have you and can't wait to dive into this with you!\n\nSee you there,\n\nThe AI Hero Team\n\n\nChristian Wierzbicki\nDirector of Technology  [https://enbasis.com/enbasis-logo-email.png]  <https://enbasis.com/>\n\nEmail: user1@company.com\nDirect: [PHONE]\n\nEnbasis Inc.\n1041 W. Market St., Akron, Ohio 44313\n\nEnbasis.com <http://enbasis.com/>\nConfidentiality Notice: This email, including any attachments, is for the sole use of the intended recipient(s) and may contain confidential and privileged information. Any unauthorized review, use, disclosure, or distribution is prohibited. If you are not the intended recipient, please contact the sender by reply email and destroy all copies of the original message.\n",
+        "timestamp": 1769207674000,
+        "subject": "Re: You're in! Get Ready for Autonomous AI Agents Live Workshop Ticket! 🎉"
+      }
+    },
+    "expected": {
+      "category": "resolved"
+    },
+    "tags": [
+      "resolved",
+      "multi_turn",
+      "has_thanks"
+    ]
+  },
+  {
+    "id": "prod_f63a54b3",
+    "name": "support_technical: Re: Live Autonomous AI Agents with Ralph Workshop ",
+    "source": "cnv_1jdlezc5",
+    "input": {
+      "conversationId": "cnv_1jdlezc5",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "Very interesting Matt is a little pricey as I am not working right now.\nAlso with the exchange its very expensive.\n\nOn Thu, Jan 22, 2026 at 9:20 AM Matt Pocock (AI Hero) <team@product.dev>\nwrote:\n\n> Hey Customer Youkhana,\n>\n> The future of AI coding is a loop. It’s one of the simplest primitives\n> available to developers, but we’ve been criminally underusing it in the AI\n> coding world.\n>\n> Instead, we’re stuck in that frustrating cycle with AI coding assistants.\n> You ask for Feature A, get half a solution, manually fix it, ask for\n> Feature B, and it breaks Feature A. Rinse, repeat.\n>\n> But here’s what’s actually happening right now in production: developers\n> are setting up agents that run in loops with structured feedback\n> mechanisms. They point them at GitHub backlogs. Real PRs get created.\n> Without constant babysitting.\n>\n> It’s called the Ralph Wiggum technique, and it’s not magic. It’s a simple,\n> learnable pattern.\n>\n> *I’m running **a live workshop on February 11 at 9 AM PST*\n> <https://7751c435.click.convertkit-mail2.com/5qux07rrn5a7hn3xdeph6h92qw344bnhrreez/dphehmued0v29ncm/aHR0cHM6Ly93d3cuYWloZXJvLmRldi9zL3JhbHBoLXdvcmtzaG9wLTAx>\n> to teach you exactly how to build it. We’re capping at 40 developers\n> because this is hands-on. You’ll be debugging YOUR code, not just watching\n> me code.\n>\n> Here’s what you’ll leave with:\n>\n>    - Your own bash loop running\n>    - Feedback mechanisms that let agents catch their own mistakes\n>    - Your GitHub backlog wired up to actually execute tasks\n>    - The PRD structure that makes agents do what you actually want\n>\n> By 1 PM, you’ll have real PRs being generated from your actual issues.\n>\n> *Sign-ups are open now.* Limited spots, and we’ve got a discount running\n> through Feb 5th. Grab yours before they sell out.\n>\n> The full details are here, including what actually breaks, why this works\n> now (and didn’t before), and exactly what you need to bring.\n> *Secure Your Seat*\n> <https://7751c435.click.convertkit-mail2.com/5qux07rrn5a7hn3xdeph6h92qw344bnhrreez/dphehmued0v29ncm/aHR0cHM6Ly93d3cuYWloZXJvLmRldi9zL3JhbHBoLXdvcmtzaG9wLTAx>\n>\n> See you on February 11.\n>\n> Unsubscribe from AI Hero Emails\n> <https://7751c435.click.convertkit-mail2.com/5qux07rrn5a7hn3xdeph6h92qw344bnhrreez/rehm5x5qf9umk04olri2/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==>.\n> You can also unsubscribe\n> <https://7751c435.unsubscribe.convertkit-mail2.com/5qux07rrn5a7hn3xdeph6h92qw344bnhrreez>\n> from all emails at any time.\n>\n> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080\n>\n> ​\n>\n\n\n-- \nCreate your own email signature\n<https://www.wisestamp.com/create-own-signature/>\n‌\n",
+          "timestamp": 1769096717000,
+          "subject": "Re: Live Autonomous AI Agents with Ralph Workshop (very limited seats)"
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "Very interesting Matt is a little pricey as I am not working right now.\nAlso with the exchange its very expensive.\n\nOn Thu, Jan 22, 2026 at 9:20 AM Matt Pocock (AI Hero) <team@product.dev>\nwrote:\n\n> Hey Customer Youkhana,\n>\n> The future of AI coding is a loop. It’s one of the simplest primitives\n> available to developers, but we’ve been criminally underusing it in the AI\n> coding world.\n>\n> Instead, we’re stuck in that frustrating cycle with AI coding assistants.\n> You ask for Feature A, get half a solution, manually fix it, ask for\n> Feature B, and it breaks Feature A. Rinse, repeat.\n>\n> But here’s what’s actually happening right now in production: developers\n> are setting up agents that run in loops with structured feedback\n> mechanisms. They point them at GitHub backlogs. Real PRs get created.\n> Without constant babysitting.\n>\n> It’s called the Ralph Wiggum technique, and it’s not magic. It’s a simple,\n> learnable pattern.\n>\n> *I’m running **a live workshop on February 11 at 9 AM PST*\n> <https://7751c435.click.convertkit-mail2.com/5qux07rrn5a7hn3xdeph6h92qw344bnhrreez/dphehmued0v29ncm/aHR0cHM6Ly93d3cuYWloZXJvLmRldi9zL3JhbHBoLXdvcmtzaG9wLTAx>\n> to teach you exactly how to build it. We’re capping at 40 developers\n> because this is hands-on. You’ll be debugging YOUR code, not just watching\n> me code.\n>\n> Here’s what you’ll leave with:\n>\n>    - Your own bash loop running\n>    - Feedback mechanisms that let agents catch their own mistakes\n>    - Your GitHub backlog wired up to actually execute tasks\n>    - The PRD structure that makes agents do what you actually want\n>\n> By 1 PM, you’ll have real PRs being generated from your actual issues.\n>\n> *Sign-ups are open now.* Limited spots, and we’ve got a discount running\n> through Feb 5th. Grab yours before they sell out.\n>\n> The full details are here, including what actually breaks, why this works\n> now (and didn’t before), and exactly what you need to bring.\n> *Secure Your Seat*\n> <https://7751c435.click.convertkit-mail2.com/5qux07rrn5a7hn3xdeph6h92qw344bnhrreez/dphehmued0v29ncm/aHR0cHM6Ly93d3cuYWloZXJvLmRldi9zL3JhbHBoLXdvcmtzaG9wLTAx>\n>\n> See you on February 11.\n>\n> Unsubscribe from AI Hero Emails\n> <https://7751c435.click.convertkit-mail2.com/5qux07rrn5a7hn3xdeph6h92qw344bnhrreez/rehm5x5qf9umk04olri2/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==>.\n> You can also unsubscribe\n> <https://7751c435.unsubscribe.convertkit-mail2.com/5qux07rrn5a7hn3xdeph6h92qw344bnhrreez>\n> from all emails at any time.\n>\n> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080\n>\n> ​\n>\n\n\n-- \nCreate your own email signature\n<https://www.wisestamp.com/create-own-signature/>\n‌\n",
+        "timestamp": 1769096717000,
+        "subject": "Re: Live Autonomous AI Agents with Ralph Workshop (very limited seats)"
+      }
+    },
+    "expected": {
+      "category": "support_technical"
+    },
+    "tags": [
+      "support_technical",
+      "single"
+    ]
+  },
+  {
+    "id": "prod_6dd81ba1",
+    "name": "support_technical: Re: Live Autonomous AI Agents with Ralph Workshop ",
+    "source": "cnv_1jdlbzol",
+    "input": {
+      "conversationId": "cnv_1jdlbzol",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "Hi Matt,\nSounds fantastic!\nPrice is on the edge what I can afford right now but trying to find a way next days.\nMost important thing is : not sure if I can attend the workshop live. \nWould there be a recording available I could watch later?\n\nThanks for the update and looking forward to a new self paced workshop in the future regarding this topic!\n\nMartin\n\n> On 22. Jan 2026, at 15:20, Matt Pocock (AI Hero) <team@product.dev> wrote:\n> \n> Hey ,\n> \n> The future of AI coding is a loop. It’s one of the simplest primitives available to developers, but we’ve been criminally underusing it in the AI coding world.\n> \n> Instead, we’re stuck in that frustrating cycle with AI coding assistants. You ask for Feature A, get half a solution, manually fix it, ask for Feature B, and it breaks Feature A. Rinse, repeat.\n> \n> But here’s what’s actually happening right now in production: developers are setting up agents that run in loops with structured feedback mechanisms. They point them at GitHub backlogs. Real PRs get created. Without constant babysitting.\n> \n> It’s called the Ralph Wiggum technique, and it’s not magic. It’s a simple, learnable pattern.\n> \n> I’m running a live workshop on February 11 at 9 AM PST <https://7751c435.click.convertkit-mail2.com/0vu3qe8zxzc9h9ne680hlhvze4k55hnh77003/dphehmued0v29ncm/aHR0cHM6Ly93d3cuYWloZXJvLmRldi9zL3JhbHBoLXdvcmtzaG9wLTAx> to teach you exactly how to build it. We’re capping at 40 developers because this is hands-on. You’ll be debugging YOUR code, not just watching me code.\n> \n> Here’s what you’ll leave with:\n> \n> Your own bash loop running\n> Feedback mechanisms that let agents catch their own mistakes\n> Your GitHub backlog wired up to actually execute tasks\n> The PRD structure that makes agents do what you actually want\n> By 1 PM, you’ll have real PRs being generated from your actual issues.\n> \n> Sign-ups are open now. Limited spots, and we’ve got a discount running through Feb 5th. Grab yours before they sell out.\n> \n> The full details are here, including what actually breaks, why this works now (and didn’t before), and exactly what you need to bring.\n> \n> Secure Your Seat <https://7751c435.click.convertkit-mail2.com/0vu3qe8zxzc9h9ne680hlhvze4k55hnh77003/dphehmued0v29ncm/aHR0cHM6Ly93d3cuYWloZXJvLmRldi9zL3JhbHBoLXdvcmtzaG9wLTAx>\n> See you on February 11.\n> \n> Unsubscribe from AI Hero Emails <https://7751c435.click.convertkit-mail2.com/0vu3qe8zxzc9h9ne680hlhvze4k55hnh77003/rehm5x5qf9umk04olri2/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==>. You can also unsubscribe <https://7751c435.unsubscribe.convertkit-mail2.com/0vu3qe8zxzc9h9ne680hlhvze4k55hnh77003> from all emails at any time.\n> \n> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080\n> \n> ​\n\n",
+          "timestamp": 1769094336000,
+          "subject": "Re: Live Autonomous AI Agents with Ralph Workshop (very limited seats)"
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "Hi Matt,\nSounds fantastic!\nPrice is on the edge what I can afford right now but trying to find a way next days.\nMost important thing is : not sure if I can attend the workshop live. \nWould there be a recording available I could watch later?\n\nThanks for the update and looking forward to a new self paced workshop in the future regarding this topic!\n\nMartin\n\n> On 22. Jan 2026, at 15:20, Matt Pocock (AI Hero) <team@product.dev> wrote:\n> \n> Hey ,\n> \n> The future of AI coding is a loop. It’s one of the simplest primitives available to developers, but we’ve been criminally underusing it in the AI coding world.\n> \n> Instead, we’re stuck in that frustrating cycle with AI coding assistants. You ask for Feature A, get half a solution, manually fix it, ask for Feature B, and it breaks Feature A. Rinse, repeat.\n> \n> But here’s what’s actually happening right now in production: developers are setting up agents that run in loops with structured feedback mechanisms. They point them at GitHub backlogs. Real PRs get created. Without constant babysitting.\n> \n> It’s called the Ralph Wiggum technique, and it’s not magic. It’s a simple, learnable pattern.\n> \n> I’m running a live workshop on February 11 at 9 AM PST <https://7751c435.click.convertkit-mail2.com/0vu3qe8zxzc9h9ne680hlhvze4k55hnh77003/dphehmued0v29ncm/aHR0cHM6Ly93d3cuYWloZXJvLmRldi9zL3JhbHBoLXdvcmtzaG9wLTAx> to teach you exactly how to build it. We’re capping at 40 developers because this is hands-on. You’ll be debugging YOUR code, not just watching me code.\n> \n> Here’s what you’ll leave with:\n> \n> Your own bash loop running\n> Feedback mechanisms that let agents catch their own mistakes\n> Your GitHub backlog wired up to actually execute tasks\n> The PRD structure that makes agents do what you actually want\n> By 1 PM, you’ll have real PRs being generated from your actual issues.\n> \n> Sign-ups are open now. Limited spots, and we’ve got a discount running through Feb 5th. Grab yours before they sell out.\n> \n> The full details are here, including what actually breaks, why this works now (and didn’t before), and exactly what you need to bring.\n> \n> Secure Your Seat <https://7751c435.click.convertkit-mail2.com/0vu3qe8zxzc9h9ne680hlhvze4k55hnh77003/dphehmued0v29ncm/aHR0cHM6Ly93d3cuYWloZXJvLmRldi9zL3JhbHBoLXdvcmtzaG9wLTAx>\n> See you on February 11.\n> \n> Unsubscribe from AI Hero Emails <https://7751c435.click.convertkit-mail2.com/0vu3qe8zxzc9h9ne680hlhvze4k55hnh77003/rehm5x5qf9umk04olri2/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==>. You can also unsubscribe <https://7751c435.unsubscribe.convertkit-mail2.com/0vu3qe8zxzc9h9ne680hlhvze4k55hnh77003> from all emails at any time.\n> \n> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080\n> \n> ​\n\n",
+        "timestamp": 1769094336000,
+        "subject": "Re: Live Autonomous AI Agents with Ralph Workshop (very limited seats)"
+      }
+    },
+    "expected": {
+      "category": "support_technical"
+    },
+    "tags": [
+      "support_technical",
+      "single",
+      "has_thanks"
+    ]
+  },
+  {
+    "id": "prod_d4ab0d49",
+    "name": "support_refund: 👋  Feedback from LI YUEN TAT about Total TypeScri",
+    "source": "cnv_1jdl8zj9",
+    "input": {
+      "conversationId": "cnv_1jdl8zj9",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "Dear Customer Typescript\n\nMy company did not approve my claim for this purchase, I want to\nrequire for the refund.\n\nAccount: customer1@example.com\n\nBest Customer\nCustomer\n",
+          "timestamp": 1768884836000,
+          "subject": "👋  Feedback from LI YUEN TAT about Total TypeScript"
+        },
+        {
+          "direction": "out",
+          "body": "This is an automated reply to let you know that your email has been received and we will get back to you as quickly as possible. We work 9-5 Pacific Monday through Friday and take most \"bank holidays\" off. \n\n\nYou can find community support in the Total TypeScript Discord channel: \n\n\nhttps://www.totaltypescript.com/discord\n\n\nIf you've got code questions/comments/opinions, Discord is the best Customer!\n\n\n--\n\n\nIf you've purchased Total TypeScript and are looking for an invoice or receipt, you can find that here:\n\n\nhttps://www.totaltypescript.com/purchases\n\n\n--\n\n\nInvoices are customizable and you can enter company/tax information there. The generated PDFs are also fully editable so please feel free to adjust them to suit your specific needs.\n\n\nThe Total TypeScript FAQ has answers to many common questions:\n\n\nhttps://www.totaltypescript.com/faq\n\n\n--\n\n\nWill you take 15 seconds share Total TypeScript? It really helps us get the word out. 🙏\n\n\n👉 Send a tweet about Total TypeScript! \n\n\n--\n\n\nIf you've got more context to share, or if any of the above helps and you don't need a reply, please let us know. We are always here to help\n\n\n-Total TypeScript 🧙‍♀️​",
+          "timestamp": 1768884878156
+        },
+        {
+          "direction": "in",
+          "body": "Hi, I need a refund, my firm does not allow me to claim this\n\n\n\nThanks\n\nCustomer\n",
+          "timestamp": 1769091654000,
+          "subject": "👋  Feedback from LI YUEN TAT about Total TypeScript"
+        },
+        {
+          "direction": "out",
+          "body": "This is an automated reply to let you know that your email has been received and we will get back to you as quickly as possible. We work 9-5 Pacific Monday through Friday and take most \"bank holidays\" off. \n\n\nYou can find community support in the Total TypeScript Discord channel: \n\n\nhttps://www.totaltypescript.com/discord\n\n\nIf you've got code questions/comments/opinions, Discord is the best Customer!\n\n\n--\n\n\nIf you've purchased Total TypeScript and are looking for an invoice or receipt, you can find that here:\n\n\nhttps://www.totaltypescript.com/purchases\n\n\n--\n\n\nInvoices are customizable and you can enter company/tax information there. The generated PDFs are also fully editable so please feel free to adjust them to suit your specific needs.\n\n\nThe Total TypeScript FAQ has answers to many common questions:\n\n\nhttps://www.totaltypescript.com/faq\n\n\n--\n\n\nWill you take 15 seconds share Total TypeScript? It really helps us get the word out. 🙏\n\n\n👉 Send a tweet about Total TypeScript! \n\n\n--\n\n\nIf you've got more context to share, or if any of the above helps and you don't need a reply, please let us know. We are always here to help\n\n\n-Total TypeScript 🧙‍♀️​",
+          "timestamp": 1769091659967
+        },
+        {
+          "direction": "in",
+          "body": "Dear Customer typescript \n\nPlease help to proceed with my refund, attached the invoice.\n\n\n\n\nBest Customer,\nCustomer",
+          "timestamp": 1769091783000,
+          "subject": "👋  Feedback from LI YUEN TAT about Total TypeScript"
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "Dear Customer typescript \n\nPlease help to proceed with my refund, attached the invoice.\n\n\n\n\nBest Customer,\nCustomer",
+        "timestamp": 1769091783000,
+        "subject": "👋  Feedback from LI YUEN TAT about Total TypeScript"
+      }
+    },
+    "expected": {
+      "category": "support_refund"
+    },
+    "tags": [
+      "support_refund",
+      "multi_turn"
+    ]
+  },
+  {
+    "id": "prod_53fcea14",
+    "name": "support_technical: Re: A quick question...",
+    "source": "cnv_1jdkw97p",
+    "input": {
+      "conversationId": "cnv_1jdkw97p",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "Stay up to Date on the Most recent Reddit / X techniques for working with\nAgents. Stuff is changing Fast and I got constant FOMO\n\n*Freundliche Grüße*\nMaxim Buz\n\n\nOn Thu 22. Jan 2026 at 03:01, Total TypeScript <team@product.dev>\nwrote:\n\n> Hey Customer Buz,\n>\n> You might know me from the TypeScript community\n> <https://7751c435.click.convertkit-mail2.com/5qu74oz2o2i8uvnqopdh6h92qw344bnhrreez/8ghqh3uog0v3vrik/aHR0cDovL3RvdGFsdHlwZXNjcmlwdC5jb20v>\n> which I've been a part of for a long time, but the world of AI is pretty\n> new to me.\n>\n> I'd love to get to know you better.\n>\n> What interests you about AI? What do you most want to learn about?\n>\n> -Matt\n>\n> Unsubscribe from AI Hero Emails\n> <https://7751c435.click.convertkit-mail2.com/5qu74oz2o2i8uvnqopdh6h92qw344bnhrreez/3ohqegeridu3qolrlksr/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==>.\n> You can also unsubscribe\n> <https://7751c435.unsubscribe.convertkit-mail2.com/5qu74oz2o2i8uvnqopdh6h92qw344bnhrreez>\n> from all emails at any time.\n>\n> 12333 Sowden Rd, Ste. B\n> <https://www.google.com/maps/search/12333+Sowden+Rd,+Ste.+B>,\n> PMB #97429, Houston, TX 77080\n>\n> ​\n>\n",
+          "timestamp": 1769058207000,
+          "subject": "Re: A quick question..."
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "Stay up to Date on the Most recent Reddit / X techniques for working with\nAgents. Stuff is changing Fast and I got constant FOMO\n\n*Freundliche Grüße*\nMaxim Buz\n\n\nOn Thu 22. Jan 2026 at 03:01, Total TypeScript <team@product.dev>\nwrote:\n\n> Hey Customer Buz,\n>\n> You might know me from the TypeScript community\n> <https://7751c435.click.convertkit-mail2.com/5qu74oz2o2i8uvnqopdh6h92qw344bnhrreez/8ghqh3uog0v3vrik/aHR0cDovL3RvdGFsdHlwZXNjcmlwdC5jb20v>\n> which I've been a part of for a long time, but the world of AI is pretty\n> new to me.\n>\n> I'd love to get to know you better.\n>\n> What interests you about AI? What do you most want to learn about?\n>\n> -Matt\n>\n> Unsubscribe from AI Hero Emails\n> <https://7751c435.click.convertkit-mail2.com/5qu74oz2o2i8uvnqopdh6h92qw344bnhrreez/3ohqegeridu3qolrlksr/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==>.\n> You can also unsubscribe\n> <https://7751c435.unsubscribe.convertkit-mail2.com/5qu74oz2o2i8uvnqopdh6h92qw344bnhrreez>\n> from all emails at any time.\n>\n> 12333 Sowden Rd, Ste. B\n> <https://www.google.com/maps/search/12333+Sowden+Rd,+Ste.+B>,\n> PMB #97429, Houston, TX 77080\n>\n> ​\n>\n",
+        "timestamp": 1769058207000,
+        "subject": "Re: A quick question..."
+      }
+    },
+    "expected": {
+      "category": "support_technical"
+    },
+    "tags": [
+      "support_technical",
+      "single"
+    ]
+  },
+  {
+    "id": "prod_6c4bb6be",
+    "name": "support_transfer: Re: Help access my account",
+    "source": "cnv_1jdezmlh",
+    "input": {
+      "conversationId": "cnv_1jdezmlh",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "Hi there\nI have purchased a while back and I am trying to access the course. Though the email I used to purchase the course is no longer available. \n\nI could find the email I got at the time that shows I purchased the course which I will attach a screenshot for.\n\nCan you guys please change the email address to user1@company.com <mailto:user1@company.com>? \nI’d appreciate it.\n\nBest Customer,\nCustomer\n\n￼\n\n",
+          "timestamp": 1768595990000,
+          "subject": "Re: Help access my account"
+        },
+        {
+          "direction": "out",
+          "body": "This is an automated reply to let you know that your email has been received and we will get back to you as quickly as possible. We work 9-5 Pacific Monday through Friday and take most \"bank holidays\" off. \n\n\nYou can find community support in the Total TypeScript Discord channel: \n\n\nhttps://www.totaltypescript.com/discord\n\n\nIf you've got code questions/comments/opinions, Discord is the best Customer!\n\n\n--\n\n\nIf you've purchased Total TypeScript and are looking for an invoice or receipt, you can find that here:\n\n\nhttps://www.totaltypescript.com/purchases\n\n\n--\n\n\nInvoices are customizable and you can enter company/tax information there. The generated PDFs are also fully editable so please feel free to adjust them to suit your specific needs.\n\n\nThe Total TypeScript FAQ has answers to many common questions:\n\n\nhttps://www.totaltypescript.com/faq\n\n\n--\n\n\nWill you take 15 seconds share Total TypeScript? It really helps us get the word out. 🙏\n\n\n👉 Send a tweet about Total TypeScript! \n\n\n--\n\n\nIf you've got more context to share, or if any of the above helps and you don't need a reply, please let us know. We are always here to help\n\n\n-Total TypeScript 🧙‍♀️​",
+          "timestamp": 1768596427666
+        },
+        {
+          "direction": "out",
+          "body": "Hey,\n\n\nI've transferred your license to user1@company.com!\n\n\nLet me know if you have any issues requesting login links.",
+          "timestamp": 1768873610635,
+          "author": {
+            "type": "agent",
+            "email": "team@product.dev"
+          }
+        },
+        {
+          "direction": "in",
+          "body": "Hej there\nThanks for your reply!\n\nI get 404 page when I try to  login\nArvind\n\n> On 20 Jan 2026, at 02.46, Haze Provinsal <team@product.dev> wrote:\n> \n> Hey,\n> \n> I've transferred your license to user2@company.com <mailto:user2@company.com>!\n> \n> Let me know if you have any issues requesting login links.\n> \n> —\n> Haze\n> \n>> On January 16, 2026 at 12:39 PM PST user2@company.com <mailto:user2@company.com> wrote:\n>> \n>> Hi there\n>> I have purchased a while back and I am trying to access the course. Though the email I used to purchase the course is no longer available. \n>> \n>> I could find the email I got at the time that shows I purchased the course which I will attach a screenshot for.\n>> \n>> Can you guys please change the email address to user2@company.com <mailto:user2@company.com>? \n>> I’d appreciate it.\n>> \n>> Best Customer,\n>> Arvind\n>> \n>> <Screenshot 2026-01-16 at user3@company.com>\n>> \n\n",
+          "timestamp": 1769028856000,
+          "subject": "Re: Help access my account"
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "Hej there\nThanks for your reply!\n\nI get 404 page when I try to  login\nArvind\n\n> On 20 Jan 2026, at 02.46, Haze Provinsal <team@product.dev> wrote:\n> \n> Hey,\n> \n> I've transferred your license to user2@company.com <mailto:user2@company.com>!\n> \n> Let me know if you have any issues requesting login links.\n> \n> —\n> Haze\n> \n>> On January 16, 2026 at 12:39 PM PST user2@company.com <mailto:user2@company.com> wrote:\n>> \n>> Hi there\n>> I have purchased a while back and I am trying to access the course. Though the email I used to purchase the course is no longer available. \n>> \n>> I could find the email I got at the time that shows I purchased the course which I will attach a screenshot for.\n>> \n>> Can you guys please change the email address to user2@company.com <mailto:user2@company.com>? \n>> I’d appreciate it.\n>> \n>> Best Customer,\n>> Arvind\n>> \n>> <Screenshot 2026-01-16 at user3@company.com>\n>> \n\n",
+        "timestamp": 1769028856000,
+        "subject": "Re: Help access my account"
+      }
+    },
+    "expected": {
+      "category": "support_transfer"
+    },
+    "tags": [
+      "support_transfer",
+      "multi_turn",
+      "has_thanks"
+    ]
+  },
+  {
+    "id": "prod_7f4d9d30",
+    "name": "spam: Collaborate with Volter AI on Portable.dev!",
+    "source": "cnv_1jdkho2t",
+    "input": {
+      "conversationId": "cnv_1jdkho2t",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "Hi Matt,\n\nI hope this message finds you well! I’ve been following your content on\n*YouTube **@mattpocockuk*, and I really love the unique vibe and creativity\nyou bring to your videos.\n\nI’m reaching out on behalf of* Volter AI* to invite you to join our UGC\nteam. We’re excited to introduce *Portable.dev*, an innovative AI\ndevelopment environment for mobile devices, featuring full GitHub\nintegration.\nWe’re looking for creators to produce engaging short-form content about our\nplatform. We offer competitive compensation, paying per 1k views, so it’s a\nfantastic opportunity to collaborate and earn. If this sounds interesting\nto you, I’d love to connect you with our ops manager to provide more\ndetails and give you access to the platform for a hands-on experience.\n\nLooking forward to the possibility of working together!\n\nBest Customer,\n\n*Jeshua Méndez**Vibe Coder | QA Tester & Creative Technologist @ Volter Ai*\n\n\n> \"In life and Jazz, there are no wrong notes 🎶\"\n>\n>  *|| *https://www.volter.ai/* ||* https://portable.dev/* ||*\nhttps://promptcannon.com*/ || *https:/runhuman.com <https://runhuman.com/>\n* ||*\n*|| *https://graph.plus*/ ||* https://workflow.subscribe.dev*/ ||*\nhttps://www.freeaicode.com*/ ||*\n",
+          "timestamp": 1769028215000,
+          "subject": "Collaborate with Volter AI on Portable.dev!"
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "Hi Matt,\n\nI hope this message finds you well! I’ve been following your content on\n*YouTube **@mattpocockuk*, and I really love the unique vibe and creativity\nyou bring to your videos.\n\nI’m reaching out on behalf of* Volter AI* to invite you to join our UGC\nteam. We’re excited to introduce *Portable.dev*, an innovative AI\ndevelopment environment for mobile devices, featuring full GitHub\nintegration.\nWe’re looking for creators to produce engaging short-form content about our\nplatform. We offer competitive compensation, paying per 1k views, so it’s a\nfantastic opportunity to collaborate and earn. If this sounds interesting\nto you, I’d love to connect you with our ops manager to provide more\ndetails and give you access to the platform for a hands-on experience.\n\nLooking forward to the possibility of working together!\n\nBest Customer,\n\n*Jeshua Méndez**Vibe Coder | QA Tester & Creative Technologist @ Volter Ai*\n\n\n> \"In life and Jazz, there are no wrong notes 🎶\"\n>\n>  *|| *https://www.volter.ai/* ||* https://portable.dev/* ||*\nhttps://promptcannon.com*/ || *https:/runhuman.com <https://runhuman.com/>\n* ||*\n*|| *https://graph.plus*/ ||* https://workflow.subscribe.dev*/ ||*\nhttps://www.freeaicode.com*/ ||*\n",
+        "timestamp": 1769028215000,
+        "subject": "Collaborate with Volter AI on Portable.dev!"
+      }
+    },
+    "expected": {
+      "category": "spam"
+    },
+    "tags": [
+      "spam",
+      "single"
+    ]
+  },
+  {
+    "id": "prod_736cd845",
+    "name": "support_technical: [aih] Banger quote about career anxiety",
+    "source": "cnv_1jdkck6d",
+    "input": {
+      "conversationId": "cnv_1jdkck6d",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "This quote encapsulates how I feel about software atm:\n\nhttps://x.com/cramforce/status/[PHONE]638986138\n\n> The job of the software engineer is changing. How we learn it is not.\nI'm more worried about mid-career engineers not adapting rather than the\nnext generation. The AI-native devs learning engineering now will run leaps\naround us old farts\n\nOur job should be to help the mid-career engineers adapt. LOTS of useful\ncontent to be made there.\n\n",
+          "timestamp": 1769023424000,
+          "subject": "[aih] Banger quote about career anxiety"
+        },
+        {
+          "direction": "in",
+          "body": "I like this insight a lot, great north star here.\n\nCurious if there are any specific attributes that you think come along with\nmid-career. I'm gonna avoid leading the question, so if it's not clear\nlemme know ;)\n\n\n-Alex\n\n📙  my book: tiny.mba\n🤝  my community: indyhall.org\n📈  my 10 year goal: 10k.city\n\n\nOn Wed, Jan 21, 2026 at 2:23 PM Matt Pocock <customer1@example.com>\nwrote:\n\n> This quote encapsulates how I feel about software atm:\n>\n> https://x.com/cramforce/status/[PHONE]638986138\n>\n> > The job of the software engineer is changing. How we learn it is not.\n> I'm more worried about mid-career engineers not adapting rather than the\n> next generation. The AI-native devs learning engineering now will run leaps\n> around us old farts\n>\n> Our job should be to help the mid-career engineers adapt. LOTS of useful\n> content to be made there.\n>\n> To unsubscribe from this group and stop receiving emails from it, send an\n> email to team@product.dev.\n>\n\n",
+          "timestamp": 1769032079000,
+          "subject": "[aih] Banger quote about career anxiety"
+        },
+        {
+          "direction": "in",
+          "body": "What kind of attributes do you mean? Like their personal circumstances or\ntheir personality, or?\n\nOn Wed, Jan 21, 2026 at 9:48 PM Alex Hillman <user1@company.com> wrote:\n\n> I like this insight a lot, great north star here.\n>\n> Curious if there are any specific attributes that you think come along\n> with mid-career. I'm gonna avoid leading the question, so if it's not clear\n> lemme know ;)\n>\n>\n> -Alex\n>\n> 📙  my book: tiny.mba\n> 🤝  my community: indyhall.org\n> 📈  my 10 year goal: 10k.city\n>\n>\n> On Wed, Jan 21, 2026 at 2:23 PM Matt Pocock <customer2@example.com>\n> wrote:\n>\n>> This quote encapsulates how I feel about software atm:\n>>\n>> https://x.com/cramforce/status/[PHONE]638986138\n>>\n>> > The job of the software engineer is changing. How we learn it is not.\n>> I'm more worried about mid-career engineers not adapting rather than the\n>> next generation. The AI-native devs learning engineering now will run leaps\n>> around us old farts\n>>\n>> Our job should be to help the mid-career engineers adapt. LOTS of useful\n>> content to be made there.\n>>\n>> To unsubscribe from this group and stop receiving emails from it, send an\n>> email to team@product.dev.\n>>\n> To unsubscribe from this group and stop receiving emails from it, send an\n> email to team@product.dev.\n>\n\n",
+          "timestamp": 1769092114000,
+          "subject": "[aih] Banger quote about career anxiety"
+        },
+        {
+          "direction": "in",
+          "body": "Yeah def stuff like that, trying to get a clearer picture of their pain\nthru this lens.\n\nSomeone mid career could be at FAANG, a large real estate tech company, or\na funded startup. Those folks have different appetites for risk, for new\nstuff (passing fad vs here to stay), etc.\n\nIf it's helpful to ramble into a camera and share what you're seeing out in\nthe field that would be super helpful for really dialing this in!\n\n\n\n\nOn Thu, Jan 22, 2026 at 9:28 AM Matt Pocock <customer1@example.com>\nwrote:\n\n> What kind of attributes do you mean? Like their personal circumstances or\n> their personality, or?\n>\n> On Wed, Jan 21, 2026 at 9:48 PM Alex Hillman <user2@company.com> wrote:\n>\n>> I like this insight a lot, great north star here.\n>>\n>> Curious if there are any specific attributes that you think come along\n>> with mid-career. I'm gonna avoid leading the question, so if it's not clear\n>> lemme know ;)\n>>\n>>\n>> -Alex\n>>\n>> 📙  my book: tiny.mba\n>> 🤝  my community: indyhall.org\n>> 📈  my 10 year goal: 10k.city\n>>\n>>\n>> On Wed, Jan 21, 2026 at 2:23 PM Matt Pocock <customer1@example.com>\n>> wrote:\n>>\n>>> This quote encapsulates how I feel about software atm:\n>>>\n>>> https://x.com/cramforce/status/[PHONE]638986138\n>>>\n>>> > The job of the software engineer is changing. How we learn it is not.\n>>> I'm more worried about mid-career engineers not adapting rather than the\n>>> next generation. The AI-native devs learning engineering now will run leaps\n>>> around us old farts\n>>>\n>>> Our job should be to help the mid-career engineers adapt. LOTS of useful\n>>> content to be made there.\n>>>\n>>> To unsubscribe from this group and stop receiving emails from it, send\n>>> an email to team@product.dev.\n>>>\n>> To unsubscribe from this group and stop receiving emails from it, send an\n>> email to team@product.dev.\n>>\n> To unsubscribe from this group and stop receiving emails from it, send an\n> email to team@product.dev.\n>\n\n",
+          "timestamp": 1769092503000,
+          "subject": "[aih] Banger quote about career anxiety"
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "Yeah def stuff like that, trying to get a clearer picture of their pain\nthru this lens.\n\nSomeone mid career could be at FAANG, a large real estate tech company, or\na funded startup. Those folks have different appetites for risk, for new\nstuff (passing fad vs here to stay), etc.\n\nIf it's helpful to ramble into a camera and share what you're seeing out in\nthe field that would be super helpful for really dialing this in!\n\n\n\n\nOn Thu, Jan 22, 2026 at 9:28 AM Matt Pocock <customer1@example.com>\nwrote:\n\n> What kind of attributes do you mean? Like their personal circumstances or\n> their personality, or?\n>\n> On Wed, Jan 21, 2026 at 9:48 PM Alex Hillman <user2@company.com> wrote:\n>\n>> I like this insight a lot, great north star here.\n>>\n>> Curious if there are any specific attributes that you think come along\n>> with mid-career. I'm gonna avoid leading the question, so if it's not clear\n>> lemme know ;)\n>>\n>>\n>> -Alex\n>>\n>> 📙  my book: tiny.mba\n>> 🤝  my community: indyhall.org\n>> 📈  my 10 year goal: 10k.city\n>>\n>>\n>> On Wed, Jan 21, 2026 at 2:23 PM Matt Pocock <customer1@example.com>\n>> wrote:\n>>\n>>> This quote encapsulates how I feel about software atm:\n>>>\n>>> https://x.com/cramforce/status/[PHONE]638986138\n>>>\n>>> > The job of the software engineer is changing. How we learn it is not.\n>>> I'm more worried about mid-career engineers not adapting rather than the\n>>> next generation. The AI-native devs learning engineering now will run leaps\n>>> around us old farts\n>>>\n>>> Our job should be to help the mid-career engineers adapt. LOTS of useful\n>>> content to be made there.\n>>>\n>>> To unsubscribe from this group and stop receiving emails from it, send\n>>> an email to team@product.dev.\n>>>\n>> To unsubscribe from this group and stop receiving emails from it, send an\n>> email to team@product.dev.\n>>\n> To unsubscribe from this group and stop receiving emails from it, send an\n> email to team@product.dev.\n>\n\n",
+        "timestamp": 1769092503000,
+        "subject": "[aih] Banger quote about career anxiety"
+      }
+    },
+    "expected": {
+      "category": "support_technical"
+    },
+    "tags": [
+      "support_technical",
+      "multi_turn",
+      "has_thanks"
+    ]
+  },
+  {
+    "id": "prod_dbc4c68d",
+    "name": "support_technical: Re: A quick question...",
+    "source": "cnv_1jdk7t5x",
+    "input": {
+      "conversationId": "cnv_1jdk7t5x",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "Hi Matt,\n\nI know nothing about TypeScript! I know JavaScript, Python, Java, SQL, C#,\nQlik Script, Basic, and a load of others, though I programme more in\nPowerPoint these days.\n\nI came across your work on Agentic coding, hence the follow.\n\nAfter a few AI coding projects, I am coming around to the realization that\nI may never need to code again.\n\nRegards,\n\nCustomer\n\n\nOn Wed 21 Jan 2026, 12:31 Total TypeScript, <team@product.dev>\nwrote:\n\n> Hey Customer,\n>\n> You might know me from the TypeScript community\n> <https://7751c435.click.convertkit-mail2.com/mvuedqrgnlu6ugqv0k6smhrk950qqb3h22448/8ghqh3uog0v3vrik/aHR0cDovL3RvdGFsdHlwZXNjcmlwdC5jb20v>\n> which I've been a part of for a long time, but the world of AI is pretty\n> new to me.\n>\n> I'd love to get to know you better.\n>\n> What interests you about AI? What do you most want to learn about?\n>\n> -Matt\n>\n> Unsubscribe from AI Hero Emails\n> <https://7751c435.click.convertkit-mail2.com/mvuedqrgnlu6ugqv0k6smhrk950qqb3h22448/3ohqegeridu3qolrlksr/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==>.\n> You can also unsubscribe\n> <https://7751c435.unsubscribe.convertkit-mail2.com/mvuedqrgnlu6ugqv0k6smhrk950qqb3h22448>\n> from all emails at any time.\n>\n> 12333 Sowden Rd, Ste. B\n> <https://www.google.com/maps/search/12333+Sowden+Rd,+Ste.+B>,\n> PMB #97429, Houston, TX 77080\n>\n> ​\n>\n",
+          "timestamp": 1769019314000,
+          "subject": "Re: A quick question..."
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "Hi Matt,\n\nI know nothing about TypeScript! I know JavaScript, Python, Java, SQL, C#,\nQlik Script, Basic, and a load of others, though I programme more in\nPowerPoint these days.\n\nI came across your work on Agentic coding, hence the follow.\n\nAfter a few AI coding projects, I am coming around to the realization that\nI may never need to code again.\n\nRegards,\n\nCustomer\n\n\nOn Wed 21 Jan 2026, 12:31 Total TypeScript, <team@product.dev>\nwrote:\n\n> Hey Customer,\n>\n> You might know me from the TypeScript community\n> <https://7751c435.click.convertkit-mail2.com/mvuedqrgnlu6ugqv0k6smhrk950qqb3h22448/8ghqh3uog0v3vrik/aHR0cDovL3RvdGFsdHlwZXNjcmlwdC5jb20v>\n> which I've been a part of for a long time, but the world of AI is pretty\n> new to me.\n>\n> I'd love to get to know you better.\n>\n> What interests you about AI? What do you most want to learn about?\n>\n> -Matt\n>\n> Unsubscribe from AI Hero Emails\n> <https://7751c435.click.convertkit-mail2.com/mvuedqrgnlu6ugqv0k6smhrk950qqb3h22448/3ohqegeridu3qolrlksr/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==>.\n> You can also unsubscribe\n> <https://7751c435.unsubscribe.convertkit-mail2.com/mvuedqrgnlu6ugqv0k6smhrk950qqb3h22448>\n> from all emails at any time.\n>\n> 12333 Sowden Rd, Ste. B\n> <https://www.google.com/maps/search/12333+Sowden+Rd,+Ste.+B>,\n> PMB #97429, Houston, TX 77080\n>\n> ​\n>\n",
+        "timestamp": 1769019314000,
+        "subject": "Re: A quick question..."
+      }
+    },
+    "expected": {
+      "category": "support_technical"
+    },
+    "tags": [
+      "support_technical",
+      "single"
+    ]
+  },
+  {
+    "id": "prod_516e2785",
+    "name": "fan_mail: Re: Welcome to AI Hero!",
+    "source": "cnv_1jdk7m91",
+    "input": {
+      "conversationId": "cnv_1jdk7m91",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "Hi Matt's AI email reader/summary tool,\n\nI binged the course in 2 days, loved it. I didn't fully code and run every\nexample but it was nice to be able to dive in if I wanted to. The only part\nI wish there was some more instruction was on the setup. Like how the\nfrontend communicates with the backend. If I was going to try to implement\nsome of these features in my project I'd like a clear understanding of the\ntypical setup. Specifically, it took some digging to find that `useChat`\ndefaults to calling `/api/chat`. I had assumed you had done some routing in\nthe setup of the project so my first investigation was misguided.\n\nIt's a nitpick at best, I love the course/content and all the thumbs up I\ngot along the way 👍\n\nThank you,\nDan\n\nOn Mon, Jan 19, 2026 at 3:35 PM AI Hero <team@product.dev> wrote:\n\n>\n>  ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿\n>\n> If you have any questions or feedback, please reply to this email and let\n> me know.\n>\n> Cheers,\n>\n> Matt Pocock\n> unsubscribe\n> <https://subscriptions.pstmrk.it/unsubscribe>\n> 12333 Sowden Rd, Ste. B, PMB #97429 Houston, TX 77080-2059\n>\n",
+          "timestamp": 1769019161000,
+          "subject": "Re: Welcome to AI Hero!"
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "Hi Matt's AI email reader/summary tool,\n\nI binged the course in 2 days, loved it. I didn't fully code and run every\nexample but it was nice to be able to dive in if I wanted to. The only part\nI wish there was some more instruction was on the setup. Like how the\nfrontend communicates with the backend. If I was going to try to implement\nsome of these features in my project I'd like a clear understanding of the\ntypical setup. Specifically, it took some digging to find that `useChat`\ndefaults to calling `/api/chat`. I had assumed you had done some routing in\nthe setup of the project so my first investigation was misguided.\n\nIt's a nitpick at best, I love the course/content and all the thumbs up I\ngot along the way 👍\n\nThank you,\nDan\n\nOn Mon, Jan 19, 2026 at 3:35 PM AI Hero <team@product.dev> wrote:\n\n>\n>  ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿\n>\n> If you have any questions or feedback, please reply to this email and let\n> me know.\n>\n> Cheers,\n>\n> Matt Pocock\n> unsubscribe\n> <https://subscriptions.pstmrk.it/unsubscribe>\n> 12333 Sowden Rd, Ste. B, PMB #97429 Houston, TX 77080-2059\n>\n",
+        "timestamp": 1769019161000,
+        "subject": "Re: Welcome to AI Hero!"
+      }
+    },
+    "expected": {
+      "category": "fan_mail"
+    },
+    "tags": [
+      "fan_mail",
+      "single",
+      "has_thanks"
+    ]
+  },
+  {
+    "id": "prod_b9c47568",
+    "name": "support_refund: 😭  Feedback from Dewin Pena about Total TypeScrip",
+    "source": "cnv_1jdk6usl",
+    "input": {
+      "conversationId": "cnv_1jdk6usl",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "I’m reaching out to request a refund for a recent purchase I made. After\nreviewing it, I realized it was an impulse purchase and not something I need at\nthis time.\n",
+          "timestamp": 1769018659000,
+          "subject": "😭  Feedback from Dewin Pena about Total TypeScript"
+        },
+        {
+          "direction": "out",
+          "body": "This is an automated reply to let you know that your email has been received and we will get back to you as quickly as possible. We work 9-5 Pacific Monday through Friday and take most \"bank holidays\" off. \n\n\nYou can find community support in the Total TypeScript Discord channel: \n\n\nhttps://www.totaltypescript.com/discord\n\n\nIf you've got code questions/comments/opinions, Discord is the best Customer!\n\n\n--\n\n\nIf you've purchased Total TypeScript and are looking for an invoice or receipt, you can find that here:\n\n\nhttps://www.totaltypescript.com/purchases\n\n\n--\n\n\nInvoices are customizable and you can enter company/tax information there. The generated PDFs are also fully editable so please feel free to adjust them to suit your specific needs.\n\n\nThe Total TypeScript FAQ has answers to many common questions:\n\n\nhttps://www.totaltypescript.com/faq\n\n\n--\n\n\nWill you take 15 seconds share Total TypeScript? It really helps us get the word out. 🙏\n\n\n👉 Send a tweet about Total TypeScript! \n\n\n--\n\n\nIf you've got more context to share, or if any of the above helps and you don't need a reply, please let us know. We are always here to help\n\n\n-Total TypeScript 🧙‍♀️​",
+          "timestamp": 1769018666048
+        },
+        {
+          "direction": "out",
+          "body": "I'm running into a technical issue pulling up your account. Can you provide:\n\nThe purchase date or approximate timeframe\n\nThe purchase/order ID if you have it\n\nThe amount or product name\n\nOnce I have those details, I can process the refund for you.",
+          "timestamp": 1769018678304,
+          "author": {
+            "type": "agent",
+            "email": "api_jwt_t4h1@2023e93b68555c138b47"
+          }
+        },
+        {
+          "direction": "in",
+          "body": "Hi,\n\nCustomer I get an update?\n\n\nOn Wed, Jan 21, 2026 at 1:04 PM team@product.dev <\nteam@product.dev> wrote:\n\n> This is an automated reply to let you know that your email has been\n> received and we will get back to you as quickly as possible. We work 9-5\n> Pacific Monday through Friday and take most \"bank holidays\" off.\n>\n> You can find community support in the *Total TypeScript Discord channel\n> <https://www.totaltypescript.com/discord>*:\n> <https://www.totaltypescript.com/discord>\n>\n> https://www.totaltypescript.com/discord\n>\n> If you've got code questions/comments/opinions, *Discord is the best\n> channel*!\n>\n> --\n>\n> If you've purchased Total TypeScript and are looking for an invoice or\n> receipt, you can find that here:\n>\n> https://www.totaltypescript.com/purchases\n>\n> --\n>\n> *Invoices are customizable* and you can enter company/tax information\n> there. The generated PDFs are also fully editable so please *feel free to\n> adjust them to suit your specific needs*.\n>\n> The *Total TypeScript FAQ <https://www.totaltypescript.com/faq>* has\n> answers to many common questions:\n>\n> https://www.totaltypescript.com/faq\n>\n> --\n>\n> Will you take 15 seconds share Total TypeScript? It really helps us get\n> the word out. [image: 🙏]\n>\n> *[image: 👉] Send a tweet about Total TypeScript!\n> <https://twitter.com/intent/tweet>*\n>\n> --\n>\n> If you've got more context to share, or if any of the above helps and you\n> don't need a reply, please let us know. We are always here to help\n>\n> -Total TypeScript [image: 🧙‍♀️]​\n>\n",
+          "timestamp": 1769152943000,
+          "subject": "😭  Feedback from Dewin Pena about Total TypeScript"
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "Hi,\n\nCustomer I get an update?\n\n\nOn Wed, Jan 21, 2026 at 1:04 PM team@product.dev <\nteam@product.dev> wrote:\n\n> This is an automated reply to let you know that your email has been\n> received and we will get back to you as quickly as possible. We work 9-5\n> Pacific Monday through Friday and take most \"bank holidays\" off.\n>\n> You can find community support in the *Total TypeScript Discord channel\n> <https://www.totaltypescript.com/discord>*:\n> <https://www.totaltypescript.com/discord>\n>\n> https://www.totaltypescript.com/discord\n>\n> If you've got code questions/comments/opinions, *Discord is the best\n> channel*!\n>\n> --\n>\n> If you've purchased Total TypeScript and are looking for an invoice or\n> receipt, you can find that here:\n>\n> https://www.totaltypescript.com/purchases\n>\n> --\n>\n> *Invoices are customizable* and you can enter company/tax information\n> there. The generated PDFs are also fully editable so please *feel free to\n> adjust them to suit your specific needs*.\n>\n> The *Total TypeScript FAQ <https://www.totaltypescript.com/faq>* has\n> answers to many common questions:\n>\n> https://www.totaltypescript.com/faq\n>\n> --\n>\n> Will you take 15 seconds share Total TypeScript? It really helps us get\n> the word out. [image: 🙏]\n>\n> *[image: 👉] Send a tweet about Total TypeScript!\n> <https://twitter.com/intent/tweet>*\n>\n> --\n>\n> If you've got more context to share, or if any of the above helps and you\n> don't need a reply, please let us know. We are always here to help\n>\n> -Total TypeScript [image: 🧙‍♀️]​\n>\n",
+        "timestamp": 1769152943000,
+        "subject": "😭  Feedback from Dewin Pena about Total TypeScript"
+      }
+    },
+    "expected": {
+      "category": "support_refund"
+    },
+    "tags": [
+      "support_refund",
+      "multi_turn"
+    ]
+  },
+  {
+    "id": "prod_aab261ec",
+    "name": "support_technical: Re: A quick question...",
+    "source": "cnv_1jdjgbl1",
+    "input": {
+      "conversationId": "cnv_1jdjgbl1",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "Hi, Matt.\n\nThe thing that interests me the most with AI is exactly how to harness what\nAI is supposed to be good at, while ensuring output is accurate,\ndeterministic, and consistently repeatable.\n\nBeing able to do this at scale from plans/tasks (from sprints) using\nsubagents, then validate and verify outputs still feels out of touch for me.\n\nI \"know\" the rough idea of what is needed, but actually getting a fully\nfleshed working example feels like a few obstacles too many.\n\nI've learned a lot from reading your tweets and articles, but it's gluing\nit all together that evades me.\n\n\nKind regards,\nCustomer Sparshott\n\n\n\nOn Tue, 20 Jan 2026 at 23:31, Total TypeScript <team@product.dev>\nwrote:\n\n> Hey Customer,\n>\n> You might know me from the TypeScript community\n> <https://7751c435.click.convertkit-mail2.com/0vuolw8nx9fguo9vw06flhvze4k55hnh77003/8ghqh3uog0v3vrik/aHR0cDovL3RvdGFsdHlwZXNjcmlwdC5jb20v>\n> which I've been a part of for a long time, but the world of AI is pretty\n> new to me.\n>\n> I'd love to get to know you better.\n>\n> What interests you about AI? What do you most want to learn about?\n>\n> -Matt\n>\n> Unsubscribe from AI Hero Emails\n> <https://7751c435.click.convertkit-mail2.com/0vuolw8nx9fguo9vw06flhvze4k55hnh77003/3ohqegeridu3qolrlksr/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==>.\n> You can also unsubscribe\n> <https://7751c435.unsubscribe.convertkit-mail2.com/0vuolw8nx9fguo9vw06flhvze4k55hnh77003>\n> from all emails at any time.\n>\n> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080\n>\n> ​\n>\n",
+          "timestamp": 1768993887000,
+          "subject": "Re: A quick question..."
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "Hi, Matt.\n\nThe thing that interests me the most with AI is exactly how to harness what\nAI is supposed to be good at, while ensuring output is accurate,\ndeterministic, and consistently repeatable.\n\nBeing able to do this at scale from plans/tasks (from sprints) using\nsubagents, then validate and verify outputs still feels out of touch for me.\n\nI \"know\" the rough idea of what is needed, but actually getting a fully\nfleshed working example feels like a few obstacles too many.\n\nI've learned a lot from reading your tweets and articles, but it's gluing\nit all together that evades me.\n\n\nKind regards,\nCustomer Sparshott\n\n\n\nOn Tue, 20 Jan 2026 at 23:31, Total TypeScript <team@product.dev>\nwrote:\n\n> Hey Customer,\n>\n> You might know me from the TypeScript community\n> <https://7751c435.click.convertkit-mail2.com/0vuolw8nx9fguo9vw06flhvze4k55hnh77003/8ghqh3uog0v3vrik/aHR0cDovL3RvdGFsdHlwZXNjcmlwdC5jb20v>\n> which I've been a part of for a long time, but the world of AI is pretty\n> new to me.\n>\n> I'd love to get to know you better.\n>\n> What interests you about AI? What do you most want to learn about?\n>\n> -Matt\n>\n> Unsubscribe from AI Hero Emails\n> <https://7751c435.click.convertkit-mail2.com/0vuolw8nx9fguo9vw06flhvze4k55hnh77003/3ohqegeridu3qolrlksr/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==>.\n> You can also unsubscribe\n> <https://7751c435.unsubscribe.convertkit-mail2.com/0vuolw8nx9fguo9vw06flhvze4k55hnh77003>\n> from all emails at any time.\n>\n> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080\n>\n> ​\n>\n",
+        "timestamp": 1768993887000,
+        "subject": "Re: A quick question..."
+      }
+    },
+    "expected": {
+      "category": "support_technical"
+    },
+    "tags": [
+      "support_technical",
+      "single"
+    ]
+  },
+  {
+    "id": "prod_69a48933",
+    "name": "support_technical: AI SDK Course Discount",
+    "source": "cnv_1jdjch5x",
+    "input": {
+      "conversationId": "cnv_1jdjch5x",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "Hi Matt,\nHope all is well with you. I was just wondering if you offer any discounts\nfor your AI SDK Course. I noticed the launch price is gone, so I thought\nmaybe you could offer me a discount to grab it.\n\nRegards,\nCustomer\n",
+          "timestamp": 1768981762000,
+          "subject": "AI SDK Course Discount"
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "Hi Matt,\nHope all is well with you. I was just wondering if you offer any discounts\nfor your AI SDK Course. I noticed the launch price is gone, so I thought\nmaybe you could offer me a discount to grab it.\n\nRegards,\nCustomer\n",
+        "timestamp": 1768981762000,
+        "subject": "AI SDK Course Discount"
+      }
+    },
+    "expected": {
+      "category": "support_technical"
+    },
+    "tags": [
+      "support_technical",
+      "single"
+    ]
+  },
+  {
+    "id": "prod_4970d724",
+    "name": "spam: YouTube Partnership || Open Claude CoWork",
+    "source": "cnv_1jdjawf9",
+    "input": {
+      "conversationId": "cnv_1jdjawf9",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "Hey Matt Pocock team,\n\nReally enjoyed your recent videos. Your breakdown of AI tools and how to\nuse them best Customer always spot on.\n\nI'm reaching out from Composio <https://composio.dev/> about a partnership\nopportunity around the Cowork launch.\n\nAs you know, Cowork is trending. We recently shipped *Open **Claude CoWork\n(*https://github.com/ComposioHQ/open-claude-cowork*)*, an open-source take\non Claude Code. Most existing implementations (including others in OSS) are\nessentially GUI or browser-based wrappers that automate tasks locally or\nrely on browser automation for SaaS apps — which gets slow and brittle.\n\nWhat makes Co-Work different is that it comes *natively integrated with\n800+ APIs* as composio manages the auth on backend. This means users can\nnot only automate desktop tasks, but actually complete real knowledge work\nacross tools like Linear, Slack, Jira, GitHub, etc. fast.\n\nWe’d love to collaborate on a dedicated video where you walk through\nCo-Work and, in the process, explore why deep, API-level integrations\nmatter for agentic workflows.\n\nThe project’s getting strong organic traction already — Julian Goldie and\nTom Doerr have both shared it recently — and momentum is picking up\nquickly. I have attached some example demos of its capabilities. Do you\nthink this will be a fit for your audience?\n\nWould love to do a dedicated video this week.\nBest,\nCustomer Graham\nComposio <https://composio.dev/>\n",
+          "timestamp": 1768974373000,
+          "subject": "YouTube Partnership || Open Claude CoWork"
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "Hey Matt Pocock team,\n\nReally enjoyed your recent videos. Your breakdown of AI tools and how to\nuse them best Customer always spot on.\n\nI'm reaching out from Composio <https://composio.dev/> about a partnership\nopportunity around the Cowork launch.\n\nAs you know, Cowork is trending. We recently shipped *Open **Claude CoWork\n(*https://github.com/ComposioHQ/open-claude-cowork*)*, an open-source take\non Claude Code. Most existing implementations (including others in OSS) are\nessentially GUI or browser-based wrappers that automate tasks locally or\nrely on browser automation for SaaS apps — which gets slow and brittle.\n\nWhat makes Co-Work different is that it comes *natively integrated with\n800+ APIs* as composio manages the auth on backend. This means users can\nnot only automate desktop tasks, but actually complete real knowledge work\nacross tools like Linear, Slack, Jira, GitHub, etc. fast.\n\nWe’d love to collaborate on a dedicated video where you walk through\nCo-Work and, in the process, explore why deep, API-level integrations\nmatter for agentic workflows.\n\nThe project’s getting strong organic traction already — Julian Goldie and\nTom Doerr have both shared it recently — and momentum is picking up\nquickly. I have attached some example demos of its capabilities. Do you\nthink this will be a fit for your audience?\n\nWould love to do a dedicated video this week.\nBest,\nCustomer Graham\nComposio <https://composio.dev/>\n",
+        "timestamp": 1768974373000,
+        "subject": "YouTube Partnership || Open Claude CoWork"
+      }
+    },
+    "expected": {
+      "category": "spam"
+    },
+    "tags": [
+      "spam",
+      "single"
+    ]
+  },
+  {
+    "id": "prod_fffa4b91",
+    "name": "support_technical: Re: A quick question...",
+    "source": "cnv_1jdj8qjp",
+    "input": {
+      "conversationId": "cnv_1jdj8qjp",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "I am on my journey about agentic coding.\n\nSo far I had a lot of fun with Claude Code, and old good code quality practices : clean code, linters, units tests done with TDD, integration tests, strict ts check, husky hooks, strong CI, etc...\n\nI came up with the term ‘backpressure’ today, I believe that’s the key to generate quality code with AI.\n\nAnd now I want to learn about Ralph Wiggum to loop the whole process. And more by the way.\n\nBut Ralph made me want to learn more from you.\n\nOn Wed, Jan 21, 2026, 01:32 Total TypeScript <team@product.dev> wrote:\n> Hey Customer,\n> You might know me from the TypeScript community which I've been a part of for a long time, but the world of AI is pretty new to me.\n> I'd love to get to know you better.\n> What interests you about AI? What do you most want to learn about?\n> -Matt\n> Unsubscribe from AI Hero Emails. You can also unsubscribe from all emails at any time.\n> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080\n>\n",
+          "timestamp": 1768965456000,
+          "subject": "Re: A quick question..."
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "I am on my journey about agentic coding.\n\nSo far I had a lot of fun with Claude Code, and old good code quality practices : clean code, linters, units tests done with TDD, integration tests, strict ts check, husky hooks, strong CI, etc...\n\nI came up with the term ‘backpressure’ today, I believe that’s the key to generate quality code with AI.\n\nAnd now I want to learn about Ralph Wiggum to loop the whole process. And more by the way.\n\nBut Ralph made me want to learn more from you.\n\nOn Wed, Jan 21, 2026, 01:32 Total TypeScript <team@product.dev> wrote:\n> Hey Customer,\n> You might know me from the TypeScript community which I've been a part of for a long time, but the world of AI is pretty new to me.\n> I'd love to get to know you better.\n> What interests you about AI? What do you most want to learn about?\n> -Matt\n> Unsubscribe from AI Hero Emails. You can also unsubscribe from all emails at any time.\n> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080\n>\n",
+        "timestamp": 1768965456000,
+        "subject": "Re: A quick question..."
+      }
+    },
+    "expected": {
+      "category": "support_technical"
+    },
+    "tags": [
+      "support_technical",
+      "single"
+    ]
+  },
+  {
+    "id": "prod_68900624",
+    "name": "support_technical: Hi Matt Pocock – Invite to Make a YouTube Video",
+    "source": "cnv_1jdj8ied",
+    "input": {
+      "conversationId": "cnv_1jdj8ied",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "Hi Matt Pocock,\n\nHope you’re having a great day!\n\nI’m Customer Yu from JellyOtter. I came across your YouTube channel and really enjoy the way you share insights and ideas in your field.\n\nWe’re working with Pippit, an AI tool that can generate images and videos, and we’d love to invite you to create a short YouTube video showing how you’d use it in your own style.\n\nIf\nthis sounds interesting, I can send a brief outline with the idea, timeline, and what the video would involve.\n\nLooking forward to hearing what you think!\n\nBest Customer,\nCustomer Yu\nJellyOtter - on behalf of Pippit",
+          "timestamp": 1768964580000,
+          "subject": "Hi Matt Pocock – Invite to Make a YouTube Video"
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "Hi Matt Pocock,\n\nHope you’re having a great day!\n\nI’m Customer Yu from JellyOtter. I came across your YouTube channel and really enjoy the way you share insights and ideas in your field.\n\nWe’re working with Pippit, an AI tool that can generate images and videos, and we’d love to invite you to create a short YouTube video showing how you’d use it in your own style.\n\nIf\nthis sounds interesting, I can send a brief outline with the idea, timeline, and what the video would involve.\n\nLooking forward to hearing what you think!\n\nBest Customer,\nCustomer Yu\nJellyOtter - on behalf of Pippit",
+        "timestamp": 1768964580000,
+        "subject": "Hi Matt Pocock – Invite to Make a YouTube Video"
+      }
+    },
+    "expected": {
+      "category": "support_technical"
+    },
+    "tags": [
+      "support_technical",
+      "single",
+      "has_thanks"
+    ]
+  },
+  {
+    "id": "prod_c4f9ab62",
+    "name": "support_technical: pro-essentials-workshop - Issue with lesson 011",
+    "source": "cnv_1jdiz1et",
+    "input": {
+      "conversationId": "cnv_1jdiz1et",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "Hello!\n\nI am just getting started and trying to understand what might be wrong, i'm\nin the first lesson in the directory\nsrc/010-typescript-in-the-build-process/011-compile-typescript-to-javascript.solution.\n\nHere are my versions:\n\npnpm 8.15.6\nnode 24.13.0\ntsc 5.9.3\n\nWhen I try to open the file in the browser, my console says:\nexample.js:5 Uncaught SyntaxError: Unexpected token 'export' example.js:5\n\nI'd like to make sure I get this working so I don't continue on with some\nweird version issue or tsconfig issue. I think I've followed along as the\nvideos indicate, so I'm not sure if I've missed a step?\n\nCorey\n",
+          "timestamp": 1768946996000,
+          "subject": "pro-essentials-workshop - Issue with lesson 011"
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "Hello!\n\nI am just getting started and trying to understand what might be wrong, i'm\nin the first lesson in the directory\nsrc/010-typescript-in-the-build-process/011-compile-typescript-to-javascript.solution.\n\nHere are my versions:\n\npnpm 8.15.6\nnode 24.13.0\ntsc 5.9.3\n\nWhen I try to open the file in the browser, my console says:\nexample.js:5 Uncaught SyntaxError: Unexpected token 'export' example.js:5\n\nI'd like to make sure I get this working so I don't continue on with some\nweird version issue or tsconfig issue. I think I've followed along as the\nvideos indicate, so I'm not sure if I've missed a step?\n\nCorey\n",
+        "timestamp": 1768946996000,
+        "subject": "pro-essentials-workshop - Issue with lesson 011"
+      }
+    },
+    "expected": {
+      "category": "support_technical"
+    },
+    "tags": [
+      "support_technical",
+      "single"
+    ]
+  },
+  {
+    "id": "prod_ec82b4fa",
+    "name": "support_technical: Re: A quick question...",
+    "source": "cnv_1jdiwoo5",
+    "input": {
+      "conversationId": "cnv_1jdiwoo5",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "Hey!\n\nI recently read these which were really helpful\n\nhttps://www.aihero.dev/my-agents-md-file-for-building-plans-you-actually-read\n\nhttps://www.aihero.dev/tips-for-ai-coding-with-ralph-wiggum\n\nI have been developing with Gen AI for 2 years now at Amazon and at home on side projects and always resonate with your content. Anything practical that enables the strengths of human in loop as we delegate more and more.\n\nJonathan\n\nSent from [Proton Mail](https://proton.me/mail/home) for iOS.\n\n-------- Original Message --------\nOn Tuesday, 01/20/26 at 09:32 Total TypeScript <team@product.dev> wrote:\n\n> Hey Customer,\n>\n> You might know me from the [TypeScript community](https://7751c435.click.convertkit-mail2.com/zluo6ll752t7u4knr92aphwokq500b6hkknn5/8ghqh3uog0v3vrik/aHR0cDovL3RvdGFsdHlwZXNjcmlwdC5jb20v) which I've been a part of for a long time, but the world of AI is pretty new to me.\n>\n> I'd love to get to know you better.\n>\n> What interests you about AI? What do you most want to learn about?\n>\n> -Matt\n>\n> [Unsubscribe from AI Hero Emails](https://7751c435.click.convertkit-mail2.com/zluo6ll752t7u4knr92aphwokq500b6hkknn5/3ohqegeridu3qolrlksr/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==). You can also [unsubscribe](https://7751c435.unsubscribe.convertkit-mail2.com/zluo6ll752t7u4knr92aphwokq500b6hkknn5) from all emails at any time.\n>\n> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080\n>\n> ​",
+          "timestamp": 1768944592000,
+          "subject": "Re: A quick question..."
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "Hey!\n\nI recently read these which were really helpful\n\nhttps://www.aihero.dev/my-agents-md-file-for-building-plans-you-actually-read\n\nhttps://www.aihero.dev/tips-for-ai-coding-with-ralph-wiggum\n\nI have been developing with Gen AI for 2 years now at Amazon and at home on side projects and always resonate with your content. Anything practical that enables the strengths of human in loop as we delegate more and more.\n\nJonathan\n\nSent from [Proton Mail](https://proton.me/mail/home) for iOS.\n\n-------- Original Message --------\nOn Tuesday, 01/20/26 at 09:32 Total TypeScript <team@product.dev> wrote:\n\n> Hey Customer,\n>\n> You might know me from the [TypeScript community](https://7751c435.click.convertkit-mail2.com/zluo6ll752t7u4knr92aphwokq500b6hkknn5/8ghqh3uog0v3vrik/aHR0cDovL3RvdGFsdHlwZXNjcmlwdC5jb20v) which I've been a part of for a long time, but the world of AI is pretty new to me.\n>\n> I'd love to get to know you better.\n>\n> What interests you about AI? What do you most want to learn about?\n>\n> -Matt\n>\n> [Unsubscribe from AI Hero Emails](https://7751c435.click.convertkit-mail2.com/zluo6ll752t7u4knr92aphwokq500b6hkknn5/3ohqegeridu3qolrlksr/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==). You can also [unsubscribe](https://7751c435.unsubscribe.convertkit-mail2.com/zluo6ll752t7u4knr92aphwokq500b6hkknn5) from all emails at any time.\n>\n> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080\n>\n> ​",
+        "timestamp": 1768944592000,
+        "subject": "Re: A quick question..."
+      }
+    },
+    "expected": {
+      "category": "support_technical"
+    },
+    "tags": [
+      "support_technical",
+      "single"
+    ]
+  },
+  {
+    "id": "prod_051e7622",
+    "name": "support_technical: Re: A quick question...",
+    "source": "cnv_1jdikox1",
+    "input": {
+      "conversationId": "cnv_1jdikox1",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "Basically everything about AI. How to integrate it into my workflow. I am a\ndeveloper\n\nOn Tue, 20 Jan 2026, 6:32 pm Total TypeScript, <team@product.dev>\nwrote:\n\n> Hey Customer Adotey,\n>\n> You might know me from the TypeScript community\n> <https://7751c435.click.convertkit-mail2.com/r8u9v2qk22a9u234v9la2hdovqm66h7h33ggk/8ghqh3uog0v3vrik/aHR0cDovL3RvdGFsdHlwZXNjcmlwdC5jb20v>\n> which I've been a part of for a long time, but the world of AI is pretty\n> new to me.\n>\n> I'd love to get to know you better.\n>\n> What interests you about AI? What do you most want to learn about?\n>\n> -Matt\n>\n> Unsubscribe from AI Hero Emails\n> <https://7751c435.click.convertkit-mail2.com/r8u9v2qk22a9u234v9la2hdovqm66h7h33ggk/3ohqegeridu3qolrlksr/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==>.\n> You can also unsubscribe\n> <https://7751c435.unsubscribe.convertkit-mail2.com/r8u9v2qk22a9u234v9la2hdovqm66h7h33ggk>\n> from all emails at any time.\n>\n> 12333 Sowden Rd, Ste. B\n> <https://www.google.com/maps/search/12333+Sowden+Rd,+Ste.+B>,\n> PMB #97429, Houston, TX 77080\n>\n> ​\n>\n",
+          "timestamp": 1768935050000,
+          "subject": "Re: A quick question..."
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "Basically everything about AI. How to integrate it into my workflow. I am a\ndeveloper\n\nOn Tue, 20 Jan 2026, 6:32 pm Total TypeScript, <team@product.dev>\nwrote:\n\n> Hey Customer Adotey,\n>\n> You might know me from the TypeScript community\n> <https://7751c435.click.convertkit-mail2.com/r8u9v2qk22a9u234v9la2hdovqm66h7h33ggk/8ghqh3uog0v3vrik/aHR0cDovL3RvdGFsdHlwZXNjcmlwdC5jb20v>\n> which I've been a part of for a long time, but the world of AI is pretty\n> new to me.\n>\n> I'd love to get to know you better.\n>\n> What interests you about AI? What do you most want to learn about?\n>\n> -Matt\n>\n> Unsubscribe from AI Hero Emails\n> <https://7751c435.click.convertkit-mail2.com/r8u9v2qk22a9u234v9la2hdovqm66h7h33ggk/3ohqegeridu3qolrlksr/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==>.\n> You can also unsubscribe\n> <https://7751c435.unsubscribe.convertkit-mail2.com/r8u9v2qk22a9u234v9la2hdovqm66h7h33ggk>\n> from all emails at any time.\n>\n> 12333 Sowden Rd, Ste. B\n> <https://www.google.com/maps/search/12333+Sowden+Rd,+Ste.+B>,\n> PMB #97429, Houston, TX 77080\n>\n> ​\n>\n",
+        "timestamp": 1768935050000,
+        "subject": "Re: A quick question..."
+      }
+    },
+    "expected": {
+      "category": "support_technical"
+    },
+    "tags": [
+      "support_technical",
+      "single"
+    ]
+  },
+  {
+    "id": "prod_8a0e171e",
+    "name": "support_technical: Re: A quick question...",
+    "source": "cnv_1jdifplx",
+    "input": {
+      "conversationId": "cnv_1jdifplx",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "Hi Matt,\n\nI am a Software Engineering Manager so I like to orchestrate and delegate\nto AI like I would a team of engineers. I treat AI less like a chatbot and\nmore like a programmable collaborator. Lately, I've been trying to build a\nsystem that produces reliable work on demand using specially designed\nprompts, workflows, phase gates, and verifiable iteration loops. Since I'm\na hands-on learner, I've been building small, custom CLI tools with Effect\nthat I can compose together into reusable systems I use daily.\n\nI'm interested in learning more about: controllability, repeatability, and\ncompounding leverage. What I want to learn the most: how to use Effect to\nmake AI outputs trustworthy enough to integrate into serious engineering\nworkflows without constant babysitting.\n\nThanks,\nCustomer\n\nOn Mon, Jan 19, 2026 at 7:00 PM Total TypeScript <team@product.dev>\nwrote:\n\n> Hey Customer,\n>\n> You might know me from the TypeScript community\n> <https://7751c435.click.convertkit-mail2.com/wvud6km87rt6u5knv92h7hnq2okxxs8h66ppm/8ghqh3uog0v3vrik/aHR0cDovL3RvdGFsdHlwZXNjcmlwdC5jb20v>\n> which I've been a part of for a long time, but the world of AI is pretty\n> new to me.\n>\n> I'd love to get to know you better.\n>\n> What interests you about AI? What do you most want to learn about?\n>\n> -Matt\n>\n> Unsubscribe from AI Hero Emails\n> <https://7751c435.click.convertkit-mail2.com/wvud6km87rt6u5knv92h7hnq2okxxs8h66ppm/3ohqegeridu3qolrlksr/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==>.\n> You can also unsubscribe\n> <https://7751c435.unsubscribe.convertkit-mail2.com/wvud6km87rt6u5knv92h7hnq2okxxs8h66ppm>\n> from all emails at any time.\n>\n> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080\n>\n> ​\n>\n",
+          "timestamp": 1768930972000,
+          "subject": "Re: A quick question..."
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "Hi Matt,\n\nI am a Software Engineering Manager so I like to orchestrate and delegate\nto AI like I would a team of engineers. I treat AI less like a chatbot and\nmore like a programmable collaborator. Lately, I've been trying to build a\nsystem that produces reliable work on demand using specially designed\nprompts, workflows, phase gates, and verifiable iteration loops. Since I'm\na hands-on learner, I've been building small, custom CLI tools with Effect\nthat I can compose together into reusable systems I use daily.\n\nI'm interested in learning more about: controllability, repeatability, and\ncompounding leverage. What I want to learn the most: how to use Effect to\nmake AI outputs trustworthy enough to integrate into serious engineering\nworkflows without constant babysitting.\n\nThanks,\nCustomer\n\nOn Mon, Jan 19, 2026 at 7:00 PM Total TypeScript <team@product.dev>\nwrote:\n\n> Hey Customer,\n>\n> You might know me from the TypeScript community\n> <https://7751c435.click.convertkit-mail2.com/wvud6km87rt6u5knv92h7hnq2okxxs8h66ppm/8ghqh3uog0v3vrik/aHR0cDovL3RvdGFsdHlwZXNjcmlwdC5jb20v>\n> which I've been a part of for a long time, but the world of AI is pretty\n> new to me.\n>\n> I'd love to get to know you better.\n>\n> What interests you about AI? What do you most want to learn about?\n>\n> -Matt\n>\n> Unsubscribe from AI Hero Emails\n> <https://7751c435.click.convertkit-mail2.com/wvud6km87rt6u5knv92h7hnq2okxxs8h66ppm/3ohqegeridu3qolrlksr/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==>.\n> You can also unsubscribe\n> <https://7751c435.unsubscribe.convertkit-mail2.com/wvud6km87rt6u5knv92h7hnq2okxxs8h66ppm>\n> from all emails at any time.\n>\n> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080\n>\n> ​\n>\n",
+        "timestamp": 1768930972000,
+        "subject": "Re: A quick question..."
+      }
+    },
+    "expected": {
+      "category": "support_technical"
+    },
+    "tags": [
+      "support_technical",
+      "single",
+      "has_thanks"
+    ]
+  },
+  {
+    "id": "prod_34beb268",
+    "name": "fan_mail: Reaching out from AI-Led Growth Community",
+    "source": "cnv_1jdiddlx",
+    "input": {
+      "conversationId": "cnv_1jdiddlx",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "Hey Matt,\n\nBig fan of your youtube channel.\n\nI run AI-Led Growth, a community for people working hands-on with AI in\ngrowth and marketing roles. We have 5500 members and hosted workshops with\nleaders from Lovable and Webflow, and other well-known growth operators.\n\nWould love to chat about sponsoring your channel or working on some content\ntogether if you're open to it.\n\nBest,\n\n-- \nCustomer Gong\nVP of GTM @ GrowthX.ai\n<https://growthx.ai/>\n",
+          "timestamp": 1768929553000,
+          "subject": "Reaching out from AI-Led Growth Community"
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "Hey Matt,\n\nBig fan of your youtube channel.\n\nI run AI-Led Growth, a community for people working hands-on with AI in\ngrowth and marketing roles. We have 5500 members and hosted workshops with\nleaders from Lovable and Webflow, and other well-known growth operators.\n\nWould love to chat about sponsoring your channel or working on some content\ntogether if you're open to it.\n\nBest,\n\n-- \nCustomer Gong\nVP of GTM @ GrowthX.ai\n<https://growthx.ai/>\n",
+        "timestamp": 1768929553000,
+        "subject": "Reaching out from AI-Led Growth Community"
+      }
+    },
+    "expected": {
+      "category": "fan_mail"
+    },
+    "tags": [
+      "fan_mail",
+      "single"
+    ]
+  },
+  {
+    "id": "prod_bf8fdabd",
+    "name": "support_technical: 👋  Feedback from customer1@example.com about Tota",
+    "source": "cnv_1jdhoyxx",
+    "input": {
+      "conversationId": "cnv_1jdhoyxx",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "Hi,\nCustomer Total Typescript course support light mode?\n",
+          "timestamp": 1768909523000,
+          "subject": "👋  Feedback from customer1@example.com about Total TypeScript"
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "Hi,\nCustomer Total Typescript course support light mode?\n",
+        "timestamp": 1768909523000,
+        "subject": "👋  Feedback from customer1@example.com about Total TypeScript"
+      }
+    },
+    "expected": {
+      "category": "support_technical"
+    },
+    "tags": [
+      "support_technical",
+      "single"
+    ]
+  },
+  {
+    "id": "prod_5ae9e967",
+    "name": "support_billing: Request for Invoice – POWS00000300",
+    "source": "cnv_1jdhn7l1",
+    "input": {
+      "conversationId": "cnv_1jdhn7l1",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "Good morning,\n\nI hope this message finds you well.\n\nI'm reaching out from *Everyday Software SL* to kindly request the invoice\ncorresponding to *Purchase Order No. POWS00000300*. The invoices refer to\nthe Learning budget Manfred Miravitllas.\n\nAs of today, we have not yet received the document, and we need it to\nproceed with our internal administrative process.\n\nWe would appreciate it if you could share the invoice at your earliest\nconvenience, or confirm if it has already been sent to\nuser1@company.com.\n\nAdditionally, please ensure that the PO number is included on the invoice\nand that each invoice is sent as a separate PDF file.\n\nThank you in advance for your support.\n\nBest Customer,\n*Finance Team*\nEveryday Software SL\n\n[image: Logo]\n\n-- \n\n\nThis message and any attachments are intended exclusively for its \naddressee and may contain confidential information. In accordance with GDPR \n(EU) No. 2016/679, you can exercise your rights of access, information, \nrectification, erasure and right to be forgotten, limitation of processing, \nopposition, portability and not to be subject to automated individual \ndecisions completely free of charge by sending an email to \nuser2@company.com <mailto:user2@company.com>.\n\nController: EVERYDAY \nSOFTWARE, S.L. | NIF: B-66854530 | Address: Carrer de Llacuna, 56 – \nEdificio C, 08005 Barcelona (Spain)\n",
+          "timestamp": 1768904412000,
+          "subject": "Request for Invoice – POWS00000300"
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "Good morning,\n\nI hope this message finds you well.\n\nI'm reaching out from *Everyday Software SL* to kindly request the invoice\ncorresponding to *Purchase Order No. POWS00000300*. The invoices refer to\nthe Learning budget Manfred Miravitllas.\n\nAs of today, we have not yet received the document, and we need it to\nproceed with our internal administrative process.\n\nWe would appreciate it if you could share the invoice at your earliest\nconvenience, or confirm if it has already been sent to\nuser1@company.com.\n\nAdditionally, please ensure that the PO number is included on the invoice\nand that each invoice is sent as a separate PDF file.\n\nThank you in advance for your support.\n\nBest Customer,\n*Finance Team*\nEveryday Software SL\n\n[image: Logo]\n\n-- \n\n\nThis message and any attachments are intended exclusively for its \naddressee and may contain confidential information. In accordance with GDPR \n(EU) No. 2016/679, you can exercise your rights of access, information, \nrectification, erasure and right to be forgotten, limitation of processing, \nopposition, portability and not to be subject to automated individual \ndecisions completely free of charge by sending an email to \nuser2@company.com <mailto:user2@company.com>.\n\nController: EVERYDAY \nSOFTWARE, S.L. | NIF: B-66854530 | Address: Carrer de Llacuna, 56 – \nEdificio C, 08005 Barcelona (Spain)\n",
+        "timestamp": 1768904412000,
+        "subject": "Request for Invoice – POWS00000300"
+      }
+    },
+    "expected": {
+      "category": "support_billing"
+    },
+    "tags": [
+      "support_billing",
+      "single",
+      "has_thanks"
+    ]
+  },
+  {
+    "id": "prod_9327fd9e",
+    "name": "support_technical: Re: A quick question...",
+    "source": "cnv_1jdhj90l",
+    "input": {
+      "conversationId": "cnv_1jdhj90l",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "Hey Matt,\n\nI’ve been following your work since the early days, so I feel like I\nalready know you, at least a little.\n\nI genuinely believe that developers, architects and DevOps engineers who\ndon’t find effective ways to use CC will eventually be left behind. Because\nof that, I’m very interested in staying up to date with the latest Claude\nbest Customer. Things are evolving so quickly that it’s honestly a bit\nintimidating.\n\nIn my team, I’m responsible for developer productivity, so I’m especially\ninterested in learning how to really get the most out of it. Using tools\nlike this well is a skill, and like any skill, it needs to be trained and\nrefined continuously.\n\nBest Customer,\nCustomer\n\nOn Tue, Jan 20, 2026 at 2:31 AM Total TypeScript <team@product.dev>\nwrote:\n\n> Hey tasos,\n>\n> You might know me from the TypeScript community\n> <https://7751c435.click.convertkit-mail2.com/e5u0l599mmi0upl6w93f8h8m3q022ilhpp88m/8ghqh3uog0v3vrik/aHR0cDovL3RvdGFsdHlwZXNjcmlwdC5jb20v>\n> which I've been a part of for a long time, but the world of AI is pretty\n> new to me.\n>\n> I'd love to get to know you better.\n>\n> What interests you about AI? What do you most want to learn about?\n>\n> -Matt\n>\n> Unsubscribe from AI Hero Emails\n> <https://7751c435.click.convertkit-mail2.com/e5u0l599mmi0upl6w93f8h8m3q022ilhpp88m/3ohqegeridu3qolrlksr/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==>.\n> You can also unsubscribe\n> <https://7751c435.unsubscribe.convertkit-mail2.com/e5u0l599mmi0upl6w93f8h8m3q022ilhpp88m>\n> from all emails at any time.\n>\n> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080\n>\n> ​\n>\n\n\n-- \n*Best Customer,*\n\nAnastasios Tsournos\n",
+          "timestamp": 1768887978000,
+          "subject": "Re: A quick question..."
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "Hey Matt,\n\nI’ve been following your work since the early days, so I feel like I\nalready know you, at least a little.\n\nI genuinely believe that developers, architects and DevOps engineers who\ndon’t find effective ways to use CC will eventually be left behind. Because\nof that, I’m very interested in staying up to date with the latest Claude\nbest Customer. Things are evolving so quickly that it’s honestly a bit\nintimidating.\n\nIn my team, I’m responsible for developer productivity, so I’m especially\ninterested in learning how to really get the most out of it. Using tools\nlike this well is a skill, and like any skill, it needs to be trained and\nrefined continuously.\n\nBest Customer,\nCustomer\n\nOn Tue, Jan 20, 2026 at 2:31 AM Total TypeScript <team@product.dev>\nwrote:\n\n> Hey tasos,\n>\n> You might know me from the TypeScript community\n> <https://7751c435.click.convertkit-mail2.com/e5u0l599mmi0upl6w93f8h8m3q022ilhpp88m/8ghqh3uog0v3vrik/aHR0cDovL3RvdGFsdHlwZXNjcmlwdC5jb20v>\n> which I've been a part of for a long time, but the world of AI is pretty\n> new to me.\n>\n> I'd love to get to know you better.\n>\n> What interests you about AI? What do you most want to learn about?\n>\n> -Matt\n>\n> Unsubscribe from AI Hero Emails\n> <https://7751c435.click.convertkit-mail2.com/e5u0l599mmi0upl6w93f8h8m3q022ilhpp88m/3ohqegeridu3qolrlksr/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==>.\n> You can also unsubscribe\n> <https://7751c435.unsubscribe.convertkit-mail2.com/e5u0l599mmi0upl6w93f8h8m3q022ilhpp88m>\n> from all emails at any time.\n>\n> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080\n>\n> ​\n>\n\n\n-- \n*Best Customer,*\n\nAnastasios Tsournos\n",
+        "timestamp": 1768887978000,
+        "subject": "Re: A quick question..."
+      }
+    },
+    "expected": {
+      "category": "support_technical"
+    },
+    "tags": [
+      "support_technical",
+      "single"
+    ]
+  },
+  {
+    "id": "prod_05c1fa3c",
+    "name": "support_technical: Re: A quick question...",
+    "source": "cnv_1jdhip0l",
+    "input": {
+      "conversationId": "cnv_1jdhip0l",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "\nFor me I’m here 🍿, learning along with you.\n\n\n\nMy field has been QA, focusing a lot on Playwright and Test Automation. Here to hear from those that are ahead of me.\n\n\n\nButch\n\n\nSent from my iPhone\n\n\n> On Jan 19, 2026, at 11:00 PM, Total TypeScript <team@product.dev> wrote:\n\n\n\n\n> Hey Customer,\n\n> You might know me from the TypeScript community which I've been a part of for a long time, but the world of AI is pretty new to me.\n\n> I'd love to get to know you better.\n\n> What interests you about AI? What do you most want to learn about?\n\n> -Matt\n\n\n\n> Unsubscribe from AI Hero Emails. You can also unsubscribe from all emails at any time.\n\n> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080\n\n\n\n> ​",
+          "timestamp": 1768885638000,
+          "subject": "Re: A quick question..."
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "\nFor me I’m here 🍿, learning along with you.\n\n\n\nMy field has been QA, focusing a lot on Playwright and Test Automation. Here to hear from those that are ahead of me.\n\n\n\nButch\n\n\nSent from my iPhone\n\n\n> On Jan 19, 2026, at 11:00 PM, Total TypeScript <team@product.dev> wrote:\n\n\n\n\n> Hey Customer,\n\n> You might know me from the TypeScript community which I've been a part of for a long time, but the world of AI is pretty new to me.\n\n> I'd love to get to know you better.\n\n> What interests you about AI? What do you most want to learn about?\n\n> -Matt\n\n\n\n> Unsubscribe from AI Hero Emails. You can also unsubscribe from all emails at any time.\n\n> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080\n\n\n\n> ​",
+        "timestamp": 1768885638000,
+        "subject": "Re: A quick question..."
+      }
+    },
+    "expected": {
+      "category": "support_technical"
+    },
+    "tags": [
+      "support_technical",
+      "single"
+    ]
+  },
+  {
+    "id": "prod_99a13dd1",
+    "name": "support_technical: Re: A quick question...",
+    "source": "cnv_1jdhffz9",
+    "input": {
+      "conversationId": "cnv_1jdhffz9",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "Hi Matt,\n\nThanks for reaching out. I'm like you also was a part of the TS world for a\nlong time. Now time has changed and I feel like I'm getting behind with all\nAI innovations.\nThere are a few areas that interest me about AI:\n\n   - Product development - how can AI models/agents/workflows enhance my\n   product, how can I make users life easier.\n   - Software development lifecycle - how can AI help me to write better\n   code and deliver better product features.\n\nI think, in more general terms, I'm interested in understanding how to\ndesign and build AI flows, be it agents or workflows. I'm also interested\nin learning how to assess different models to be able to choose one that\nsuits the use-case best.\n\nI hope it helps.\n\nCheers,\nAnton\n\n\n\nOn Mon, Jan 19, 2026 at 11:01 PM Total TypeScript <team@product.dev>\nwrote:\n\n> Hey Customer Klimenko,\n>\n> You might know me from the TypeScript community\n> <https://7751c435.click.convertkit-mail2.com/0vulzzp746sguo9vw06flhvze4k55hnh77003/8ghqh3uog0v3vrik/aHR0cDovL3RvdGFsdHlwZXNjcmlwdC5jb20v>\n> which I've been a part of for a long time, but the world of AI is pretty\n> new to me.\n>\n> I'd love to get to know you better.\n>\n> What interests you about AI? What do you most want to learn about?\n>\n> -Matt\n>\n> Unsubscribe from AI Hero Emails\n> <https://7751c435.click.convertkit-mail2.com/0vulzzp746sguo9vw06flhvze4k55hnh77003/3ohqegeridu3qolrlksr/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==>.\n> You can also unsubscribe\n> <https://7751c435.unsubscribe.convertkit-mail2.com/0vulzzp746sguo9vw06flhvze4k55hnh77003>\n> from all emails at any time.\n>\n> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080\n>\n> ​\n>\n",
+          "timestamp": 1768872675000,
+          "subject": "Re: A quick question..."
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "Hi Matt,\n\nThanks for reaching out. I'm like you also was a part of the TS world for a\nlong time. Now time has changed and I feel like I'm getting behind with all\nAI innovations.\nThere are a few areas that interest me about AI:\n\n   - Product development - how can AI models/agents/workflows enhance my\n   product, how can I make users life easier.\n   - Software development lifecycle - how can AI help me to write better\n   code and deliver better product features.\n\nI think, in more general terms, I'm interested in understanding how to\ndesign and build AI flows, be it agents or workflows. I'm also interested\nin learning how to assess different models to be able to choose one that\nsuits the use-case best.\n\nI hope it helps.\n\nCheers,\nAnton\n\n\n\nOn Mon, Jan 19, 2026 at 11:01 PM Total TypeScript <team@product.dev>\nwrote:\n\n> Hey Customer Klimenko,\n>\n> You might know me from the TypeScript community\n> <https://7751c435.click.convertkit-mail2.com/0vulzzp746sguo9vw06flhvze4k55hnh77003/8ghqh3uog0v3vrik/aHR0cDovL3RvdGFsdHlwZXNjcmlwdC5jb20v>\n> which I've been a part of for a long time, but the world of AI is pretty\n> new to me.\n>\n> I'd love to get to know you better.\n>\n> What interests you about AI? What do you most want to learn about?\n>\n> -Matt\n>\n> Unsubscribe from AI Hero Emails\n> <https://7751c435.click.convertkit-mail2.com/0vulzzp746sguo9vw06flhvze4k55hnh77003/3ohqegeridu3qolrlksr/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==>.\n> You can also unsubscribe\n> <https://7751c435.unsubscribe.convertkit-mail2.com/0vulzzp746sguo9vw06flhvze4k55hnh77003>\n> from all emails at any time.\n>\n> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080\n>\n> ​\n>\n",
+        "timestamp": 1768872675000,
+        "subject": "Re: A quick question..."
+      }
+    },
+    "expected": {
+      "category": "support_technical"
+    },
+    "tags": [
+      "support_technical",
+      "single",
+      "has_thanks"
+    ]
+  },
+  {
+    "id": "prod_a843e50b",
+    "name": "support_transfer: Re: Welcome to AI SDK v5 Crash Course!",
+    "source": "cnv_1jdhf739",
+    "input": {
+      "conversationId": "cnv_1jdhf739",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "why can’t I access the course? I think I transferred it to user1@company.com <mailto:user1@company.com>. When I login with that email it tells me to buy the course, which of course I already did.\n\n\n> On Oct 17, 2025, at 9:42 AM, AI Hero <team@product.dev> wrote:\n> \n> Welcome to AI SDK v5 Crash Course! 🎉\n> \n> Hi there,\n> \n> Get Started with AI SDK v5 Crash Course <https://www.aihero.dev/workshops/ai-sdk-v5-crash-course>\n> Need anything? We're here to help.\n> \n> You can access your invoice anytime on your invoices page <https://www.aihero.dev/invoices>.\n> \n> Questions? Reply to this email or reach out to team@product.dev <mailto:team@product.dev>.\n> \n> See you inside,\n> \n> The AI Hero Team\n> \n\n",
+          "timestamp": 1768871666000,
+          "subject": "Re: Welcome to AI SDK v5 Crash Course!"
+        },
+        {
+          "direction": "in",
+          "body": "why can’t I access the course? I think I transferred it to user1@company.com <mailto:user1@company.com>. When I login with that email it tells me to buy the course, which of course I already did.\n\n\n> On Oct 17, 2025, at 9:42 AM, AI Hero <team@product.dev> wrote:\n> \n> Welcome to AI SDK v5 Crash Course! 🎉\n> \n> Hi there,\n> \n> Get Started with AI SDK v5 Crash Course <https://www.aihero.dev/workshops/ai-sdk-v5-crash-course>\n> Need anything? We're here to help.\n> \n> You can access your invoice anytime on your invoices page <https://www.aihero.dev/invoices>.\n> \n> Questions? Reply to this email or reach out to team@product.dev <mailto:team@product.dev>.\n> \n> See you inside,\n> \n> The AI Hero Team\n> \n\n",
+          "timestamp": 1768871666000,
+          "subject": "Re: Welcome to AI SDK v5 Crash Course!"
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "why can’t I access the course? I think I transferred it to user1@company.com <mailto:user1@company.com>. When I login with that email it tells me to buy the course, which of course I already did.\n\n\n> On Oct 17, 2025, at 9:42 AM, AI Hero <team@product.dev> wrote:\n> \n> Welcome to AI SDK v5 Crash Course! 🎉\n> \n> Hi there,\n> \n> Get Started with AI SDK v5 Crash Course <https://www.aihero.dev/workshops/ai-sdk-v5-crash-course>\n> Need anything? We're here to help.\n> \n> You can access your invoice anytime on your invoices page <https://www.aihero.dev/invoices>.\n> \n> Questions? Reply to this email or reach out to team@product.dev <mailto:team@product.dev>.\n> \n> See you inside,\n> \n> The AI Hero Team\n> \n\n",
+        "timestamp": 1768871666000,
+        "subject": "Re: Welcome to AI SDK v5 Crash Course!"
+      }
+    },
+    "expected": {
+      "category": "support_transfer"
+    },
+    "tags": [
+      "support_transfer",
+      "multi_turn"
+    ]
+  },
+  {
+    "id": "prod_e773cbe1",
+    "name": "support_transfer: Re: Welcome to AI SDK v5 Crash Course!",
+    "source": "cnv_1jdhf739",
+    "input": {
+      "conversationId": "cnv_1jdhf739",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "why can’t I access the course? I think I transferred it to user1@company.com <mailto:user1@company.com>. When I login with that email it tells me to buy the course, which of course I already did.\n\n\n> On Oct 17, 2025, at 9:42 AM, AI Hero <team@product.dev> wrote:\n> \n> Welcome to AI SDK v5 Crash Course! 🎉\n> \n> Hi there,\n> \n> Get Started with AI SDK v5 Crash Course <https://www.aihero.dev/workshops/ai-sdk-v5-crash-course>\n> Need anything? We're here to help.\n> \n> You can access your invoice anytime on your invoices page <https://www.aihero.dev/invoices>.\n> \n> Questions? Reply to this email or reach out to team@product.dev <mailto:team@product.dev>.\n> \n> See you inside,\n> \n> The AI Hero Team\n> \n\n",
+          "timestamp": 1768871666000,
+          "subject": "Re: Welcome to AI SDK v5 Crash Course!"
+        },
+        {
+          "direction": "in",
+          "body": "why can’t I access the course? I think I transferred it to user1@company.com <mailto:user1@company.com>. When I login with that email it tells me to buy the course, which of course I already did.\n\n\n> On Oct 17, 2025, at 9:42 AM, AI Hero <team@product.dev> wrote:\n> \n> Welcome to AI SDK v5 Crash Course! 🎉\n> \n> Hi there,\n> \n> Get Started with AI SDK v5 Crash Course <https://www.aihero.dev/workshops/ai-sdk-v5-crash-course>\n> Need anything? We're here to help.\n> \n> You can access your invoice anytime on your invoices page <https://www.aihero.dev/invoices>.\n> \n> Questions? Reply to this email or reach out to team@product.dev <mailto:team@product.dev>.\n> \n> See you inside,\n> \n> The AI Hero Team\n> \n\n",
+          "timestamp": 1768871666000,
+          "subject": "Re: Welcome to AI SDK v5 Crash Course!"
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "why can’t I access the course? I think I transferred it to user1@company.com <mailto:user1@company.com>. When I login with that email it tells me to buy the course, which of course I already did.\n\n\n> On Oct 17, 2025, at 9:42 AM, AI Hero <team@product.dev> wrote:\n> \n> Welcome to AI SDK v5 Crash Course! 🎉\n> \n> Hi there,\n> \n> Get Started with AI SDK v5 Crash Course <https://www.aihero.dev/workshops/ai-sdk-v5-crash-course>\n> Need anything? We're here to help.\n> \n> You can access your invoice anytime on your invoices page <https://www.aihero.dev/invoices>.\n> \n> Questions? Reply to this email or reach out to team@product.dev <mailto:team@product.dev>.\n> \n> See you inside,\n> \n> The AI Hero Team\n> \n\n",
+        "timestamp": 1768871666000,
+        "subject": "Re: Welcome to AI SDK v5 Crash Course!"
+      }
+    },
+    "expected": {
+      "category": "support_transfer"
+    },
+    "tags": [
+      "support_transfer",
+      "multi_turn"
+    ]
+  },
+  {
+    "id": "prod_277eb8e7",
+    "name": "support_billing: Re: Paid \"Codebuff\" YouTube video opportunity!",
+    "source": "cnv_1jdfbi79",
+    "input": {
+      "conversationId": "cnv_1jdfbi79",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "Hey Matt Pocock,\n\nMy name is Zan and I am an influencer campaign manager with Beluga.\n\n\nI’m reaching out because I’m working with Codebuff, an open source alternative to Claude Code, to introduce it to creators like yourself who have an audience that may find it appealing. We would love to know if you would be interested in a paid YouTube video opportunity about Codebuff (we're open to other platforms as well).\n\nCodebuff recently released a new version which provides a 3x speedup and better performance as judged by GPT-5 and Gemini 3 when compared to the same task performed on Claude Code. See here for more details: https://x.com/jahooma/status/[PHONE]985185242.\n\n\nThe deliverables would entail:\n\n\n * 1 x Dedicated video or 1 x Integration in one of your YouTube videos \n * Published any day between January 26 - February 11\n * 1 tracking link in the description with a code giving your audience additional free credits\n   \n\nI'm currently scoping interest for this campaign, and would love to learn more about your rates if you are open to sharing that information. \n\n\nI would greatly appreciate if you could give me a reply by Tuesday (January 20). Thank you!\n\nBest,\nCustomer (discord: zan.zan.zan.zan)",
+          "timestamp": 1768620658000,
+          "subject": "Re: Paid \"Codebuff\" YouTube video opportunity!"
+        },
+        {
+          "direction": "out",
+          "body": "This is an automated reply to let you know that your email has been received and we will get back to you as quickly as possible. We work 9-5 Pacific Monday through Friday and take most \"bank holidays\" off. \n\n\nYou can find community support in the Total TypeScript Discord channel: \n\n\nhttps://www.totaltypescript.com/discord\n\n\nIf you've got code questions/comments/opinions, Discord is the best Customer!\n\n\n--\n\n\nIf you've purchased Total TypeScript and are looking for an invoice or receipt, you can find that here:\n\n\nhttps://www.totaltypescript.com/purchases\n\n\n--\n\n\nInvoices are customizable and you can enter company/tax information there. The generated PDFs are also fully editable so please feel free to adjust them to suit your specific needs.\n\n\nThe Total TypeScript FAQ has answers to many common questions:\n\n\nhttps://www.totaltypescript.com/faq\n\n\n--\n\n\nWill you take 15 seconds share Total TypeScript? It really helps us get the word out. 🙏\n\n\n👉 Send a tweet about Total TypeScript! \n\n\n--\n\n\nIf you've got more context to share, or if any of the above helps and you don't need a reply, please let us know. We are always here to help\n\n\n-Total TypeScript 🧙‍♀️​",
+          "timestamp": 1768620666729
+        },
+        {
+          "direction": "in",
+          "body": "Hi Matt Pocock! I'm sure things are busy but wanted to check in to see if you had a chance to check out the sponsored opportunity? We totally understand if you haven’t had a chance to check it out. Please don’t hesitate to drop an email on when would be the best Customer for us to contact you. If you have any questions regarding the opportunity, I’ll be happy to answer them to the best Customer my ability.\n\nOn Sat, January 17, 2026 3:30 AM, Zan Kateiva <user1@company.com>\n[user1@company.com]> wrote:\n\n> Hey Matt Pocock,\n> \n> My name is Zan and I am an influencer campaign manager with Beluga.\n> \n> \n> I’m reaching out because I’m working with Codebuff, an open source alternative to Claude Code, to introduce it to creators like yourself who have an audience that may find it appealing. We would love to know if you would be interested in a paid YouTube video opportunity about Codebuff (we're open to other platforms as well).\n> \n> Codebuff recently released a new version which provides a 3x speedup and better performance as judged by GPT-5 and Gemini 3 when compared to the same task performed on Claude Code. See here for more details: https://x.com/jahooma/status/[PHONE]985185242.\n> \n> \n> The deliverables would entail:\n> \n> \n>  * 1 x Dedicated video or 1 x Integration in one of your YouTube videos\n>  * Published any day between January 26 - February 11\n>  * 1 tracking link in the description with a code giving your audience additional free credits\n>    \n> \n> I'm currently scoping interest for this campaign, and would love to learn more about your rates if you are open to sharing that information.\n> \n> \n> I would greatly appreciate if you could give me a reply by Tuesday (January 20). Thank you!\n> \n> Best,\n> Zan (discord: zan.zan.zan.zan)\n>",
+          "timestamp": 1768866407000,
+          "subject": "Re: Paid \"Codebuff\" YouTube video opportunity!"
+        },
+        {
+          "direction": "out",
+          "body": "Hey Customer,\n\n\nThis email Is primarily to support any questions related to the course and platform functionality, but you can try to reach out to Matt directly on X/bluesky for this.\n\n\nhttps://x.com/mattpocockuk \nhttps://bsky.app/profile/mattpocock.com \nhttps://www.mattpocock.com/ \n\n\nBest,",
+          "timestamp": 1768872722225,
+          "author": {
+            "type": "agent",
+            "email": "team@product.dev"
+          }
+        },
+        {
+          "direction": "in",
+          "body": "Hey Customer,\n\nI DM'ed Matt on Discord (my discord is zan.zan.zan.zan). Is there any\nchance you could bump him to check it out? Would be really appreciated - we\nwant to work with Matt!\n\nBest,\n\nCustomer\n\nOn Tue, Jan 20, 2026 at 3:32 AM Haze Provinsal <team@product.dev>\nwrote:\n\n> Hey Customer,\n>\n> This email Is primarily to support any questions related to the course and\n> platform functionality, but you can try to reach out to Matt directly on\n> X/bluesky for this.\n>\n> https://x.com/mattpocockuk\n> https://bsky.app/profile/mattpocock.com\n> https://www.mattpocock.com/\n>\n> Best,\n>\n>\n> —\n> Haze\n> [image: Sent from Front]\n",
+          "timestamp": 1769102413000,
+          "subject": "Re: Paid \"Codebuff\" YouTube video opportunity!"
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "Hey Customer,\n\nI DM'ed Matt on Discord (my discord is zan.zan.zan.zan). Is there any\nchance you could bump him to check it out? Would be really appreciated - we\nwant to work with Matt!\n\nBest,\n\nCustomer\n\nOn Tue, Jan 20, 2026 at 3:32 AM Haze Provinsal <team@product.dev>\nwrote:\n\n> Hey Customer,\n>\n> This email Is primarily to support any questions related to the course and\n> platform functionality, but you can try to reach out to Matt directly on\n> X/bluesky for this.\n>\n> https://x.com/mattpocockuk\n> https://bsky.app/profile/mattpocock.com\n> https://www.mattpocock.com/\n>\n> Best,\n>\n>\n> —\n> Haze\n> [image: Sent from Front]\n",
+        "timestamp": 1769102413000,
+        "subject": "Re: Paid \"Codebuff\" YouTube video opportunity!"
+      }
+    },
+    "expected": {
+      "category": "support_billing"
+    },
+    "tags": [
+      "support_billing",
+      "multi_turn"
+    ]
+  },
+  {
+    "id": "prod_62737986",
+    "name": "support_technical: AI is so confusing, where do i start?",
+    "source": "cnv_1jdh5d0l",
+    "input": {
+      "conversationId": "cnv_1jdh5d0l",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "omg ai is so confusing, how do i get started?",
+          "timestamp": 1768854038802,
+          "subject": "AI is so confusing, where do i start?",
+          "author": {
+            "type": "customer",
+            "email": "team@product.dev"
+          }
+        },
+        {
+          "direction": "in",
+          "body": "The knowledge base isn't returning results, but here's what I'd suggest: Start with the fundamentals section in AI Hero. It covers core concepts like how AI models work, prompt engineering basics, and common use cases. Work through one module at a time rather than trying to absorb everything at once.\nWhat specific part of AI are you most interested in - the theory side, practical applications, or something else?",
+          "timestamp": 1768870951806,
+          "subject": "AI is so confusing, where do i start?",
+          "author": {
+            "type": "customer",
+            "email": "api_jwt_t4h1@2023e93b68555c138b47"
+          }
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "The knowledge base isn't returning results, but here's what I'd suggest: Start with the fundamentals section in AI Hero. It covers core concepts like how AI models work, prompt engineering basics, and common use cases. Work through one module at a time rather than trying to absorb everything at once.\nWhat specific part of AI are you most interested in - the theory side, practical applications, or something else?",
+        "timestamp": 1768870951806,
+        "subject": "AI is so confusing, where do i start?",
+        "author": {
+          "type": "customer",
+          "email": "api_jwt_t4h1@2023e93b68555c138b47"
+        }
+      }
+    },
+    "expected": {
+      "category": "support_technical"
+    },
+    "tags": [
+      "support_technical",
+      "multi_turn"
+    ]
+  },
+  {
+    "id": "prod_08c26c7e",
+    "name": "system: Re: A quick question...",
+    "source": "cnv_1jdgwpr9",
+    "input": {
+      "conversationId": "cnv_1jdgwpr9",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "\nHi Matt,\n\nI’m going to assume this is an automated email, but I’ll still reply anyways.\n\nI’m interested in both AI and Types to further improve my universal app starterkit.\n\nI’m even quoting one of your tweets<https://x.com/mattpocockuk/status/[PHONE]499168774> in my blog and explainer video 😄\n\nBasically, you’ve helped inspire one of the starterkit’s main USP’s: Using Zod as the Single Source of Truth to derive other data structured from + keep everything in sync and typesafe. (With nice side-effects like automatic docgen to further help teams and AI tools avoid hallucinations)\n\nI specifically liked your recent blogpost on better AGENTS.md and keeping that clean.\n\nI’ll likely end up applying those recommendations in the starter too.\n\nThanks again,\n\nThorr Stevens\nhttps://fullproduct.dev/\n\nOn 19 Jan 2026, at 14:32, Total TypeScript <team@product.dev> wrote:\n\n﻿\n\nHey Customer,\n\nYou might know me from the TypeScript community<https://7751c435.click.convertkit-mail2.com/5qulzg0plra8uvnqopdh6h92qw344bnhrreez/8ghqh3uog0v3vrik/aHR0cDovL3RvdGFsdHlwZXNjcmlwdC5jb20v> which I've been a part of for a long time, but the world of AI is pretty new to me.\n\nI'd love to get to know you better.\n\nWhat interests you about AI? What do you most want to learn about?\n\n-Matt\n\nUnsubscribe from AI Hero Emails<https://7751c435.click.convertkit-mail2.com/5qulzg0plra8uvnqopdh6h92qw344bnhrreez/3ohqegeridu3qolrlksr/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==>. You can also unsubscribe<https://7751c435.unsubscribe.convertkit-mail2.com/5qulzg0plra8uvnqopdh6h92qw344bnhrreez> from all emails at any time.\n\n12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080\n\n​\n\n[https://7751c435.open.convertkit-mail2.com/5qulzg0plra8uvnqopdh6h92qw344bnhrreez]\n",
+          "timestamp": 1768844080000,
+          "subject": "Re: A quick question..."
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "\nHi Matt,\n\nI’m going to assume this is an automated email, but I’ll still reply anyways.\n\nI’m interested in both AI and Types to further improve my universal app starterkit.\n\nI’m even quoting one of your tweets<https://x.com/mattpocockuk/status/[PHONE]499168774> in my blog and explainer video 😄\n\nBasically, you’ve helped inspire one of the starterkit’s main USP’s: Using Zod as the Single Source of Truth to derive other data structured from + keep everything in sync and typesafe. (With nice side-effects like automatic docgen to further help teams and AI tools avoid hallucinations)\n\nI specifically liked your recent blogpost on better AGENTS.md and keeping that clean.\n\nI’ll likely end up applying those recommendations in the starter too.\n\nThanks again,\n\nThorr Stevens\nhttps://fullproduct.dev/\n\nOn 19 Jan 2026, at 14:32, Total TypeScript <team@product.dev> wrote:\n\n﻿\n\nHey Customer,\n\nYou might know me from the TypeScript community<https://7751c435.click.convertkit-mail2.com/5qulzg0plra8uvnqopdh6h92qw344bnhrreez/8ghqh3uog0v3vrik/aHR0cDovL3RvdGFsdHlwZXNjcmlwdC5jb20v> which I've been a part of for a long time, but the world of AI is pretty new to me.\n\nI'd love to get to know you better.\n\nWhat interests you about AI? What do you most want to learn about?\n\n-Matt\n\nUnsubscribe from AI Hero Emails<https://7751c435.click.convertkit-mail2.com/5qulzg0plra8uvnqopdh6h92qw344bnhrreez/3ohqegeridu3qolrlksr/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==>. You can also unsubscribe<https://7751c435.unsubscribe.convertkit-mail2.com/5qulzg0plra8uvnqopdh6h92qw344bnhrreez> from all emails at any time.\n\n12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080\n\n​\n\n[https://7751c435.open.convertkit-mail2.com/5qulzg0plra8uvnqopdh6h92qw344bnhrreez]\n",
+        "timestamp": 1768844080000,
+        "subject": "Re: A quick question..."
+      }
+    },
+    "expected": {
+      "category": "system"
+    },
+    "tags": [
+      "system",
+      "single",
+      "has_thanks"
+    ]
+  },
+  {
+    "id": "prod_e42367e0",
+    "name": "support_technical: Re: A quick question...",
+    "source": "cnv_1jdgty91",
+    "input": {
+      "conversationId": "cnv_1jdgty91",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "Hi Matt,\n\nLongtime reader of your work on Twitter/X, but largely new to your more\norganized education materials. As a frontend/full-stack dev with ~9 years\nof professional experience in JS/TS/React/Node/Vercel/etc, I am always\nlooking for great sources to help me get better.\n\nYour work has really spoken to me on multiple levels\n\n   1. Your work around following and growing in this fast-paced era of AI\n   engineering - it's daunting to keep up with everything that is changing,\n   and not just use the ever-changing tools of the day, but *use them well*.\n   Looking for quality, tested, focused changes I can make to my day-to-day\n   workflow makes keeping up feel manageable, even exciting\n   2. Leveling up in my fundamentals - I was a bootcamp grad, I have no\n   formal CS training, and in my career in startups I've found that the focus\n   is almost always entirely on shipping and not on learning the fundamentals.\n   I often feel like I just sort of skipped past a lot of that, and now as I\n   look to become a contributor worthy of senior/staff level, missing those\n   foundations really matters. Typescript is an area where I know some\n   technical growth can pay major professional dividends.\n\nI'm really excited to dive more deeply into your work, as it seems like you\nstructure things in a very intentional way to have others learn.\n\nBest,\nCustomer\n\nOn Wed, Jan 7, 2026 at 10:01 PM Total TypeScript <team@product.dev>\nwrote:\n\n> Hey Customer,\n>\n> You might know me from the TypeScript community\n> <https://7751c435.click.convertkit-mail2.com/xmul2v4o90u3urpod8vh5h2q34zllfnhdd66q/8ghqh3uog0v3vrik/aHR0cDovL3RvdGFsdHlwZXNjcmlwdC5jb20v>\n> which I've been a part of for a long time, but the world of AI is pretty\n> new to me.\n>\n> I'd love to get to know you better.\n>\n> What interests you about AI? What do you most want to learn about?\n>\n> -Matt\n>\n> Unsubscribe from AI Hero Emails\n> <https://7751c435.click.convertkit-mail2.com/xmul2v4o90u3urpod8vh5h2q34zllfnhdd66q/3ohqegeridu3qolrlksr/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==>.\n> You can also unsubscribe\n> <https://7751c435.unsubscribe.convertkit-mail2.com/xmul2v4o90u3urpod8vh5h2q34zllfnhdd66q>\n> from all emails at any time.\n>\n> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080\n>\n> ​\n>\n",
+          "timestamp": 1768841318000,
+          "subject": "Re: A quick question..."
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "Hi Matt,\n\nLongtime reader of your work on Twitter/X, but largely new to your more\norganized education materials. As a frontend/full-stack dev with ~9 years\nof professional experience in JS/TS/React/Node/Vercel/etc, I am always\nlooking for great sources to help me get better.\n\nYour work has really spoken to me on multiple levels\n\n   1. Your work around following and growing in this fast-paced era of AI\n   engineering - it's daunting to keep up with everything that is changing,\n   and not just use the ever-changing tools of the day, but *use them well*.\n   Looking for quality, tested, focused changes I can make to my day-to-day\n   workflow makes keeping up feel manageable, even exciting\n   2. Leveling up in my fundamentals - I was a bootcamp grad, I have no\n   formal CS training, and in my career in startups I've found that the focus\n   is almost always entirely on shipping and not on learning the fundamentals.\n   I often feel like I just sort of skipped past a lot of that, and now as I\n   look to become a contributor worthy of senior/staff level, missing those\n   foundations really matters. Typescript is an area where I know some\n   technical growth can pay major professional dividends.\n\nI'm really excited to dive more deeply into your work, as it seems like you\nstructure things in a very intentional way to have others learn.\n\nBest,\nCustomer\n\nOn Wed, Jan 7, 2026 at 10:01 PM Total TypeScript <team@product.dev>\nwrote:\n\n> Hey Customer,\n>\n> You might know me from the TypeScript community\n> <https://7751c435.click.convertkit-mail2.com/xmul2v4o90u3urpod8vh5h2q34zllfnhdd66q/8ghqh3uog0v3vrik/aHR0cDovL3RvdGFsdHlwZXNjcmlwdC5jb20v>\n> which I've been a part of for a long time, but the world of AI is pretty\n> new to me.\n>\n> I'd love to get to know you better.\n>\n> What interests you about AI? What do you most want to learn about?\n>\n> -Matt\n>\n> Unsubscribe from AI Hero Emails\n> <https://7751c435.click.convertkit-mail2.com/xmul2v4o90u3urpod8vh5h2q34zllfnhdd66q/3ohqegeridu3qolrlksr/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==>.\n> You can also unsubscribe\n> <https://7751c435.unsubscribe.convertkit-mail2.com/xmul2v4o90u3urpod8vh5h2q34zllfnhdd66q>\n> from all emails at any time.\n>\n> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080\n>\n> ​\n>\n",
+        "timestamp": 1768841318000,
+        "subject": "Re: A quick question..."
+      }
+    },
+    "expected": {
+      "category": "support_technical"
+    },
+    "tags": [
+      "support_technical",
+      "single",
+      "has_thanks"
+    ]
+  },
+  {
+    "id": "prod_ff783555",
+    "name": "support_technical: TypeScript is so cool",
+    "source": "cnv_1jdg7tph",
+    "input": {
+      "conversationId": "cnv_1jdg7tph",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "I've learned so much! I am struggling with generics though and it feels like i'll never be a proper wizard 😭\n\n-joel",
+          "timestamp": 1768796212000,
+          "subject": "TypeScript is so cool"
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "I've learned so much! I am struggling with generics though and it feels like i'll never be a proper wizard 😭\n\n-joel",
+        "timestamp": 1768796212000,
+        "subject": "TypeScript is so cool"
+      }
+    },
+    "expected": {
+      "category": "support_technical"
+    },
+    "tags": [
+      "support_technical",
+      "single"
+    ]
+  },
+  {
+    "id": "prod_0f3b9d92",
+    "name": "support_technical: Please Help me",
+    "source": "cnv_1jdg7q79",
+    "input": {
+      "conversationId": "cnv_1jdg7q79",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "I'm trying to learn typescript and don't know where to start. Can you help?\n\n-joel",
+          "timestamp": 1768795655000,
+          "subject": "Please Help me"
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "I'm trying to learn typescript and don't know where to start. Can you help?\n\n-joel",
+        "timestamp": 1768795655000,
+        "subject": "Please Help me"
+      }
+    },
+    "expected": {
+      "category": "support_technical"
+    },
+    "tags": [
+      "support_technical",
+      "single"
+    ]
+  },
+  {
+    "id": "prod_a32b737a",
+    "name": "support_technical: This is Crazy",
+    "source": "cnv_1jdg7pd1",
+    "input": {
+      "conversationId": "cnv_1jdg7pd1",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "AI makes typescript so easy lol! Why even learn it? I'm a wizard because opus is! eat my shorts!\n\n-joel",
+          "timestamp": 1768795561000,
+          "subject": "This is Crazy"
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "AI makes typescript so easy lol! Why even learn it? I'm a wizard because opus is! eat my shorts!\n\n-joel",
+        "timestamp": 1768795561000,
+        "subject": "This is Crazy"
+      }
+    },
+    "expected": {
+      "category": "support_technical"
+    },
+    "tags": [
+      "support_technical",
+      "single"
+    ]
+  },
+  {
+    "id": "prod_9cd38d6b",
+    "name": "support_technical: I am lost.",
+    "source": "cnv_1jdg7fj9",
+    "input": {
+      "conversationId": "cnv_1jdg7fj9",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "I can't figure out TypeScript. AI has stolen my job. Now i sack groceries. Help!\n\n-joel",
+          "timestamp": 1768794046000,
+          "subject": "I am lost."
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "I can't figure out TypeScript. AI has stolen my job. Now i sack groceries. Help!\n\n-joel",
+        "timestamp": 1768794046000,
+        "subject": "I am lost."
+      }
+    },
+    "expected": {
+      "category": "support_technical"
+    },
+    "tags": [
+      "support_technical",
+      "single"
+    ]
+  },
+  {
+    "id": "prod_0c336520",
+    "name": "support_technical: I am lost.",
+    "source": "cnv_1jdg7fj9",
+    "input": {
+      "conversationId": "cnv_1jdg7fj9",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "I can't figure out TypeScript. AI has stolen my job. Now i sack groceries. Help!\n\n-joel",
+          "timestamp": 1768794046000,
+          "subject": "I am lost."
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "I can't figure out TypeScript. AI has stolen my job. Now i sack groceries. Help!\n\n-joel",
+        "timestamp": 1768794046000,
+        "subject": "I am lost."
+      }
+    },
+    "expected": {
+      "category": "support_technical"
+    },
+    "tags": [
+      "support_technical",
+      "single"
+    ]
+  },
+  {
+    "id": "prod_7599fe27",
+    "name": "support_technical: I am lost.",
+    "source": "cnv_1jdg7fj9",
+    "input": {
+      "conversationId": "cnv_1jdg7fj9",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "I can't figure out TypeScript. AI has stolen my job. Now i sack groceries. Help!\n\n-joel",
+          "timestamp": 1768794046000,
+          "subject": "I am lost."
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "I can't figure out TypeScript. AI has stolen my job. Now i sack groceries. Help!\n\n-joel",
+        "timestamp": 1768794046000,
+        "subject": "I am lost."
+      }
+    },
+    "expected": {
+      "category": "support_technical"
+    },
+    "tags": [
+      "support_technical",
+      "single"
+    ]
+  },
+  {
+    "id": "prod_d6e5cd99",
+    "name": "support_technical: Pleas help.",
+    "source": "cnv_1jdg7acl",
+    "input": {
+      "conversationId": "cnv_1jdg7acl",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "I can't figure out how to TypeScript. AI has stolen my job 😭\n\n-joel",
+          "timestamp": 1768793269000,
+          "subject": "Pleas help."
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "I can't figure out how to TypeScript. AI has stolen my job 😭\n\n-joel",
+        "timestamp": 1768793269000,
+        "subject": "Pleas help."
+      }
+    },
+    "expected": {
+      "category": "support_technical"
+    },
+    "tags": [
+      "support_technical",
+      "single"
+    ]
+  },
+  {
+    "id": "prod_dff3d45d",
+    "name": "support_technical: (Vercel Academy) Page has links to redirect: 33 UR",
+    "source": "cnv_1jdg75d1",
+    "input": {
+      "conversationId": "cnv_1jdg75d1",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "130 internal URLs were analyzed. Health Score 98 (+6) · Errors 3 (−7) · Warnings 130 · Notices 19 (+1)‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ Unsubscribe from this project \n\n\n\n18 January\n\n\n\n\nNew crawl for Vercel Academy\n\n130 internal URLs were analyzed.\nView crawl results \n\n\n\n\n\n\n\nHealth Score\n\n98 6\n\nHealth Score reflects the proportion of internal URLs on your site that don't have errors.\n\nIssues\nErrors 3 −7 \nWarnings 130 \nNotices 19 +1 \n\n\n\n\n\n\n\nWhat's new\n\nPage has links to redirect 33 +3 \nView\n\nSlow page 4 +1 \nView\n\nPages have high AI content levels New 1 +1 \nView\n\nExternal 3XX redirect 43 +5 \nView\n\nPages to submit to IndexNow 8 +1 \nView\n\n\n\nView all issues\n\n\n\n\n\n\n\n\n\nWish you knew about these issues right when they happened?\n\nAlways-on audit crawls your site 24/7 and alerts you about critical issues in near real-time. No more waiting for the next scheduled crawl.\nEnable Always-on audit \n\n\n\n\n\n\n\nUnsubscribe from this project ∙ Unsubscribe from all Site Audit notifications \n\n\nNeed some help? Hit reply to this email and our support team will get back to you. \n\n\n© 2026 Ahrefs Pte Ltd. 16 Raffles Quay, #33-03 Hong Leong Building, Singapore 048581 \nTerms of Service∙Privacy Policy ",
+          "timestamp": 1768792312000,
+          "subject": "(Vercel Academy) Page has links to redirect: 33 URLs"
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "130 internal URLs were analyzed. Health Score 98 (+6) · Errors 3 (−7) · Warnings 130 · Notices 19 (+1)‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ Unsubscribe from this project \n\n\n\n18 January\n\n\n\n\nNew crawl for Vercel Academy\n\n130 internal URLs were analyzed.\nView crawl results \n\n\n\n\n\n\n\nHealth Score\n\n98 6\n\nHealth Score reflects the proportion of internal URLs on your site that don't have errors.\n\nIssues\nErrors 3 −7 \nWarnings 130 \nNotices 19 +1 \n\n\n\n\n\n\n\nWhat's new\n\nPage has links to redirect 33 +3 \nView\n\nSlow page 4 +1 \nView\n\nPages have high AI content levels New 1 +1 \nView\n\nExternal 3XX redirect 43 +5 \nView\n\nPages to submit to IndexNow 8 +1 \nView\n\n\n\nView all issues\n\n\n\n\n\n\n\n\n\nWish you knew about these issues right when they happened?\n\nAlways-on audit crawls your site 24/7 and alerts you about critical issues in near real-time. No more waiting for the next scheduled crawl.\nEnable Always-on audit \n\n\n\n\n\n\n\nUnsubscribe from this project ∙ Unsubscribe from all Site Audit notifications \n\n\nNeed some help? Hit reply to this email and our support team will get back to you. \n\n\n© 2026 Ahrefs Pte Ltd. 16 Raffles Quay, #33-03 Hong Leong Building, Singapore 048581 \nTerms of Service∙Privacy Policy ",
+        "timestamp": 1768792312000,
+        "subject": "(Vercel Academy) Page has links to redirect: 33 URLs"
+      }
+    },
+    "expected": {
+      "category": "support_technical"
+    },
+    "tags": [
+      "support_technical",
+      "single"
+    ]
+  },
+  {
+    "id": "prod_1b7156d1",
+    "name": "support_transfer: Improved paid collab proposal for Pippit AI",
+    "source": "cnv_1jdg7351",
+    "input": {
+      "conversationId": "cnv_1jdg7351",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "Good to connect, Matt,\n\nI hope this message finds you well.\n\nMy name is Francis, and I'm reaching out from Aha (formerly Head AI) about our ongoing campaign for Pippit AI. We've been impressed by your content's creativity and believe your participation would bring great value.\n\nTo further support this partnership, we've enhanced the campaign budget to more accurately reflect your contribution to Pippit AI.\n\nProject details:\n• One Twitter Post: 1220 USD creator fee\nThese rates are the default guideline prices displayed on the Aha platform. You're welcome to adjust your rates directly on the platform if you prefer.\nIf this looks interesting, I can forward the complete brief — or you can access it in your Aha dashboard.\n\nWe're also aiming to develop ongoing partnerships with creators whose work truly resonates with us. If this collaboration feels like a strong match, we'd be excited to explore more campaigns together.\n\nFor a smoother process, please reply directly to this message. If you use a different email, include your account identifier (8bwABK3xvx) to help us connect your response to the right collaboration.\n\nBest,\nCustomer\nPartnerships @ Aha\nRepresenting Pippit AI Team\n\nAbout Aha (formerly Head AI):\nAha ©2025 Ahalab Inc. is an creator agency designed to make brand collaborations effortless. With over 60,000 creators and three rounds of funding, we ensure every partnership is trusted, efficient, and scalable. See creator success stories on YouTube: @aha_inc\n\nTo remove yourself from Aha invite emails, reply directly with \"Unsubscribe\"; do not use any email service unsubscribe link.\n",
+          "timestamp": 1768791951000,
+          "subject": "Improved paid collab proposal for Pippit AI"
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "Good to connect, Matt,\n\nI hope this message finds you well.\n\nMy name is Francis, and I'm reaching out from Aha (formerly Head AI) about our ongoing campaign for Pippit AI. We've been impressed by your content's creativity and believe your participation would bring great value.\n\nTo further support this partnership, we've enhanced the campaign budget to more accurately reflect your contribution to Pippit AI.\n\nProject details:\n• One Twitter Post: 1220 USD creator fee\nThese rates are the default guideline prices displayed on the Aha platform. You're welcome to adjust your rates directly on the platform if you prefer.\nIf this looks interesting, I can forward the complete brief — or you can access it in your Aha dashboard.\n\nWe're also aiming to develop ongoing partnerships with creators whose work truly resonates with us. If this collaboration feels like a strong match, we'd be excited to explore more campaigns together.\n\nFor a smoother process, please reply directly to this message. If you use a different email, include your account identifier (8bwABK3xvx) to help us connect your response to the right collaboration.\n\nBest,\nCustomer\nPartnerships @ Aha\nRepresenting Pippit AI Team\n\nAbout Aha (formerly Head AI):\nAha ©2025 Ahalab Inc. is an creator agency designed to make brand collaborations effortless. With over 60,000 creators and three rounds of funding, we ensure every partnership is trusted, efficient, and scalable. See creator success stories on YouTube: @aha_inc\n\nTo remove yourself from Aha invite emails, reply directly with \"Unsubscribe\"; do not use any email service unsubscribe link.\n",
+        "timestamp": 1768791951000,
+        "subject": "Improved paid collab proposal for Pippit AI"
+      }
+    },
+    "expected": {
+      "category": "support_transfer"
+    },
+    "tags": [
+      "support_transfer",
+      "single",
+      "has_thanks"
+    ]
+  },
+  {
+    "id": "prod_120ead92",
+    "name": "support_technical: Invitation to Explore SeaVerse.AI (Credits Provide",
+    "source": "cnv_1jdg6wit",
+    "input": {
+      "conversationId": "cnv_1jdg6wit",
+      "appId": "unknown",
+      "messages": [
+        {
+          "direction": "in",
+          "body": "Hello,\n\nMy name is Fiona from the SeaVerse.AI team, where I work on creator\necosystem operations.We are currently inviting some developers to explore\nSeaVerse, with the goal of gathering feedback from real-world usage\nscenarios.\n\nSeaVerse is a creation platform designed for building interactive demos and\nprototype experiences, suitable for idea validation, feature demonstrations,\nand early-stage project presentations.\n\nCommon use cases include:\n1. Turning a feature idea or concept into a hands-on, interactive demo\n2. Creating demo pages for side projects or early-stage products\n3. Presenting existing logic or workflows in a more intuitive, interactive\nformat\n\nTo help you quickly understand how the platform works, we’ve prepared a\nsample project for reference:\nProject overview: An AI dating simulation app that lets users swipe to match\ncharacters and chat through intelligent interactions.\nLive demo: https://seaverse.ai/apps/meta/share.html\nFork link: https://seaverse.ai/builder.html\n\nAfter forking, you can modify and refine the project to quickly create your\nown version.\n\nIf you’re interested in exploring SeaVerse further, you can register and get\nstarted here:\nProduct access: https://seaverse.ai/\n\nAfter registration, we provide new users with a certain amount of experience\ncredits to help test and explore the platform’s features.Since credits need\nto be issued to a specific account, please reply with your SeaVerse user ID\nonce you’ve registered, and I’ll arrange the credit allocation for you.\n\nIf you have any questions during your exploration, or would like to discuss\nspecific use cases, feel free to reach out through the channels below, or\nsimply reply to this email:\nDiscord: Fionanana\nFacebook Messenger: https://www.facebook.com/messages/t/[PHONE]16476\nTwitter / X: https://x.com/FionaRossii\n\nThank you for your time, and I look forward to hearing from you.\n\nBest Customer,\nCustomer.AI Team\n",
+          "timestamp": 1768790831000,
+          "subject": "Invitation to Explore SeaVerse.AI (Credits Provided)"
+        }
+      ],
+      "triggerMessage": {
+        "direction": "in",
+        "body": "Hello,\n\nMy name is Fiona from the SeaVerse.AI team, where I work on creator\necosystem operations.We are currently inviting some developers to explore\nSeaVerse, with the goal of gathering feedback from real-world usage\nscenarios.\n\nSeaVerse is a creation platform designed for building interactive demos and\nprototype experiences, suitable for idea validation, feature demonstrations,\nand early-stage project presentations.\n\nCommon use cases include:\n1. Turning a feature idea or concept into a hands-on, interactive demo\n2. Creating demo pages for side projects or early-stage products\n3. Presenting existing logic or workflows in a more intuitive, interactive\nformat\n\nTo help you quickly understand how the platform works, we’ve prepared a\nsample project for reference:\nProject overview: An AI dating simulation app that lets users swipe to match\ncharacters and chat through intelligent interactions.\nLive demo: https://seaverse.ai/apps/meta/share.html\nFork link: https://seaverse.ai/builder.html\n\nAfter forking, you can modify and refine the project to quickly create your\nown version.\n\nIf you’re interested in exploring SeaVerse further, you can register and get\nstarted here:\nProduct access: https://seaverse.ai/\n\nAfter registration, we provide new users with a certain amount of experience\ncredits to help test and explore the platform’s features.Since credits need\nto be issued to a specific account, please reply with your SeaVerse user ID\nonce you’ve registered, and I’ll arrange the credit allocation for you.\n\nIf you have any questions during your exploration, or would like to discuss\nspecific use cases, feel free to reach out through the channels below, or\nsimply reply to this email:\nDiscord: Fionanana\nFacebook Messenger: https://www.facebook.com/messages/t/[PHONE]16476\nTwitter / X: https://x.com/FionaRossii\n\nThank you for your time, and I look forward to hearing from you.\n\nBest Customer,\nCustomer.AI Team\n",
+        "timestamp": 1768790831000,
+        "subject": "Invitation to Explore SeaVerse.AI (Credits Provided)"
+      }
+    },
+    "expected": {
+      "category": "support_technical"
+    },
+    "tags": [
+      "support_technical",
+      "single",
+      "has_thanks"
+    ]
+  }
+]

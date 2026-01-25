@@ -1,0 +1,21 @@
+{
+  "id": "user_happy",
+  "email": "happy@example.com",
+  "name": "Happy Customer",
+  "purchases": [
+    {
+      "id": "purch_happy_1",
+      "product": "Total TypeScript Pro",
+      "product_id": "prod_tt_pro",
+      "stripe_charge_id": "ch_happy_1",
+      "amount_cents": 49900,
+      "purchased_at": "2025-01-10T10:00:00Z",
+      "status": "active"
+    }
+  ],
+  "traits": {
+    "sentiment": "positive",
+    "previous_tickets": 1,
+    "lifetime_value": 499
+  }
+}

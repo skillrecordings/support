@@ -1,0 +1,523 @@
+[
+  {
+    "threadId": "cnv_1jdleaxx",
+    "conversationId": "cnv_1jdleaxx",
+    "appId": "unknown",
+    "resolutionType": "customer_confirmed",
+    "resolutionConfidence": 0.85,
+    "signalExamples": [
+      {
+        "messageIndex": 0,
+        "inputMessage": "Hey Creator,\n\nThanks for reaching out to RØDE! We're excited to connect with you and\ncan’t wait to see the incredible content you’ll create using our\ntop-of-the-line microphones and audio gear. Trusted by professionals,\nartists, and creators around the world, we’re here to support your creative\njourney.\n\nWhether you decide to produce a full video about RØDE or include a brief\nbrand integration, the choice is entirely up to you. We value your creative\nfreedom and want you to make the content in y",
+        "expectedSignals": {
+          "hasEmailInBody": true,
+          "mentionsInstructor": true
+        }
+      },
+      {
+        "messageIndex": 2,
+        "inputMessage": "Hi happy day Rode would like to explore potential working opportunities.\nWe’d be glad to explore a partnership for presenting our products. If this\nworks, please advise. Excited to hear your input promptly. With gratitude\nsincerely, Rode Team\n",
+        "expectedSignals": {
+          "hasThankYou": true,
+          "hasResolutionPhrase": true
+        }
+      }
+    ],
+    "actionExample": {
+      "threadSummary": "2 customer msgs, 1 team msgs. Request: \"Hey Creator,\n\nThanks for reaching out to RØDE! We're excited to connect with you and\ncan’t wait to s...\"",
+      "signals": {
+        "threadLength": 3,
+        "hasThankYou": true,
+        "hasResolutionPhrase": true,
+        "hasTeammateMessage": false,
+        "lastMessageDirection": "in"
+      },
+      "correctAction": "respond",
+      "correctCategory": "support_billing",
+      "actionResult": "resolved"
+    },
+    "responseExample": {
+      "category": "support_billing",
+      "customerMessage": "Hey Creator,\n\nThanks for reaching out to RØDE! We're excited to connect with you and\ncan’t wait to see the incredible content you’ll create using our\ntop-of-the-line microphones and audio gear. Trusted by professionals,\nartists, and creators around the world, we’re here to support your creative\njourney.\n\nWhether you decide to produce a full video about RØDE or include a brief\nbrand integration, the choice is entirely up to you. We value your creative\nfreedom and want you to make the content in y",
+      "agentResponse": "This is an automated reply to let you know that your email has been received and we will get back to you as quickly as possible. We work 9-5 Pacific Monday through Friday and take most \"bank holidays\" off. \n\n\nYou can find community support in the Total TypeScript Discord channel: \n\n\nhttps://www.totaltypescript.com/discord\n\n\nIf you've got code questions/comments/opinions, Discord is the best channel!\n\n\n--\n\n\nIf you've purchased Total TypeScript and are looking for an invoice or receipt, you can find that here:\n\n\nhttps://www.totaltypescript.com/purchases\n\n\n--\n\n\nInvoices are customizable and you can enter company/tax information there. The generated PDFs are also fully editable so please feel free to adjust them to suit your specific needs.\n\n\nThe Total TypeScript FAQ has answers to many common questions:\n\n\nhttps://www.totaltypescript.com/faq\n\n\n--\n\n\nWill you take 15 seconds share Total TypeScript? It really helps us get the word out. 🙏\n\n\n👉 Send a tweet about Total TypeScript! \n\n\n--\n\n\nIf y",
+      "resolutionContext": "Hi happy day Rode would like to explore potential working opportunities.\nWe’d be glad to explore a partnership for presenting our products. If this\nworks, please advise. Excited to hear your input pro"
+    },
+    "messages": [
+      {
+        "direction": "in",
+        "body": "Hey Creator,\n\nThanks for reaching out to RØDE! We're excited to connect with you and\ncan’t wait to see the incredible content you’ll create using our\ntop-of-the-line microphones and audio gear. Trusted by professionals,\nartists, and creators around the world, we’re here to support your creative\njourney.\n\nWhether you decide to produce a full video about RØDE or include a brief\nbrand integration, the choice is entirely up to you. We value your creative\nfreedom and want you to make the content in your own unique style.\n\nJust a quick reminder: The gear is yours to keep at no cost, and we’ll also\ncompensate you for creating and sharing content that features our products.\n\nHere’s how to get started:\n\nVisit  https://rodecommunity.com , choose the gear that works best for your\nproject, and fill out the form with your shipping details.\n\nAfter reviewing your request, one of our campaign managers will contact you\nto confirm your gear selection, discuss your rates, and go over the\nspecifics of your video. You'll also have the opportunity to share your\nrate card and finalize the payment details.\n\nWe’re excited to see your creativity in action and are thrilled to be part\nof your content creation!\n\nLooking forward to collaborating,\nThe RØDE Team\n\nuser@example.com <user@example.com> 於 2026年1月22日週四 上午7:34寫道：\n\n> This is an automated reply to let you know that your email has been\n> received and we will get back to you as quickly as possible. We work 9-5\n> Pacific Monday through Friday and take most \"bank holidays\" off.\n>\n> You can find community support in the *Total TypeScript Discord channel\n> <https://www.totaltypescript.com/discord>*:\n> <https://www.totaltypescript.com/discord>\n>\n> https://www.totaltypescript.com/discord\n>\n> If you've got code questions/comments/opinions, *Discord is the best\n> channel*!\n>\n> --\n>\n> If you've purchased Total TypeScript and are looking for an invoice or\n> receipt, you can find that here:\n>\n> https://www.totaltypescript.com/purchases\n>\n> --\n>\n> *Invoices are customizable* and you can enter company/tax information\n> there. The generated PDFs are also fully editable so please *feel free to\n> adjust them to suit your specific needs*.\n>\n> The *Total TypeScript FAQ <https://www.totaltypescript.com/faq>* has\n> answers to many common questions:\n>\n> https://www.totaltypescript.com/faq\n>\n> --\n>\n> Will you take 15 seconds share Total TypeScript? It really helps us get\n> the word out. [image: 🙏]\n>\n> *[image: 👉] Send a tweet about Total TypeScript!\n> <https://twitter.com/intent/tweet?text=Total%20TypeScript%20from%20%40mattpocockuk%20is%20an%20excellent%20resource%20for%20learning%20advanced%20TypeScript.%20%F0%9F%A7%99%E2%80%8D%E2%99%80%EF%B8%8F&url=https%3A%2F%2Fwww.totaltypescript.com>*\n>\n> --\n>\n> If you've got more context to share, or if any of the above helps and you\n> don't need a reply, please let us know. We are always here to help\n>\n> -Total TypeScript [image: 🧙‍♀️]​\n>\n"
+      },
+      {
+        "direction": "out",
+        "body": "This is an automated reply to let you know that your email has been received and we will get back to you as quickly as possible. We work 9-5 Pacific Monday through Friday and take most \"bank holidays\" off. \n\n\nYou can find community support in the Total TypeScript Discord channel: \n\n\nhttps://www.totaltypescript.com/discord\n\n\nIf you've got code questions/comments/opinions, Discord is the best channel!\n\n\n--\n\n\nIf you've purchased Total TypeScript and are looking for an invoice or receipt, you can find that here:\n\n\nhttps://www.totaltypescript.com/purchases\n\n\n--\n\n\nInvoices are customizable and you can enter company/tax information there. The generated PDFs are also fully editable so please feel free to adjust them to suit your specific needs.\n\n\nThe Total TypeScript FAQ has answers to many common questions:\n\n\nhttps://www.totaltypescript.com/faq\n\n\n--\n\n\nWill you take 15 seconds share Total TypeScript? It really helps us get the word out. 🙏\n\n\n👉 Send a tweet about Total TypeScript! \n\n\n--\n\n\nIf you've got more context to share, or if any of the above helps and you don't need a reply, please let us know. We are always here to help\n\n\n-Total TypeScript 🧙‍♀️​"
+      },
+      {
+        "direction": "in",
+        "body": "Hi happy day Rode would like to explore potential working opportunities.\nWe’d be glad to explore a partnership for presenting our products. If this\nworks, please advise. Excited to hear your input promptly. With gratitude\nsincerely, Rode Team\n"
+      }
+    ],
+    "originalCategory": "support_billing",
+    "tags": [
+      "support_billing",
+      "customer_confirmed",
+      "short",
+      "thanked"
+    ]
+  },
+  {
+    "threadId": "cnv_1jdmi291",
+    "conversationId": "cnv_1jdmi291",
+    "appId": "unknown",
+    "resolutionType": "customer_confirmed",
+    "resolutionConfidence": 0.95,
+    "signalExamples": [
+      {
+        "messageIndex": 1,
+        "inputMessage": "Hey Matt,\n\nI hope this message finds you well.\n\nHope you're doing great! I'm Customer from Aha (formerly Head AI), an creator agency connecting creators with top campaigns worldwide. We're currently coordinating several collaboration opportunities that align well with your content, so I've combined them below for your convenience.\n\n1. Storm MCP\nStreamline your AI workflow with Storm MCP: a secure, enterprise-grade gateway that unifies LLMs, RAG data, and tools—seamless integration, real-time obs",
+        "expectedSignals": {
+          "hasPurchaseDate": true,
+          "mentionsInstructor": true
+        }
+      }
+    ],
+    "actionExample": {
+      "threadSummary": "1 customer msgs, 1 team msgs. Request: \"Hey Matt,\n\nI hope this message finds you well.\n\nHope you're doing great! I'm Customer from Aha (form...\"",
+      "signals": {
+        "threadLength": 2,
+        "hasThankYou": true,
+        "hasResolutionPhrase": true,
+        "hasTeammateMessage": false,
+        "lastMessageDirection": "out"
+      },
+      "correctAction": "respond",
+      "correctCategory": "support_technical",
+      "actionResult": "resolved"
+    },
+    "messages": [
+      {
+        "direction": "out",
+        "body": "This is an automated reply to let you know that your email has been received and we will get back to you as quickly as possible. We work 9-5 Pacific Monday through Friday and take most \"bank holidays\" off. \n\n\nYou can find community support in the Total TypeScript Discord channel: \n\n\nhttps://www.totaltypescript.com/discord\n\n\nIf you've got code questions/comments/opinions, Discord is the best channel!\n\n\n--\n\n\nIf you've purchased Total TypeScript and are looking for an invoice or receipt, you can find that here:\n\n\nhttps://www.totaltypescript.com/purchases\n\n\n--\n\n\nInvoices are customizable and you can enter company/tax information there. The generated PDFs are also fully editable so please feel free to adjust them to suit your specific needs.\n\n\nThe Total TypeScript FAQ has answers to many common questions:\n\n\nhttps://www.totaltypescript.com/faq\n\n\n--\n\n\nWill you take 15 seconds share Total TypeScript? It really helps us get the word out. 🙏\n\n\n👉 Send a tweet about Total TypeScript! \n\n\n--\n\n\nIf you've got more context to share, or if any of the above helps and you don't need a reply, please let us know. We are always here to help\n\n\n-Total TypeScript 🧙‍♀️​"
+      },
+      {
+        "direction": "in",
+        "body": "Hey Matt,\n\nI hope this message finds you well.\n\nHope you're doing great! I'm Customer from Aha (formerly Head AI), an creator agency connecting creators with top campaigns worldwide. We're currently coordinating several collaboration opportunities that align well with your content, so I've combined them below for your convenience.\n\n1. Storm MCP\nStreamline your AI workflow with Storm MCP: a secure, enterprise-grade gateway that unifies LLMs, RAG data, and tools—seamless integration, real-time observability, and robust security.\n• One TikTok Video: 105 USD creator fee\n\n2. YouArt\nYouArt.ai is the first agentic creative workflow platform that allows users to generate complex workflow and high-quality videos and visual content through simple natural-language prompts.\n• One TikTok Video: 43 USD creator fee\n\n3. Zoer\nBuild full-stack apps in minutes with Zoer—AI-powered, no-code, fully customizable, and ready for instant cloud deployment. Just describe your idea, and Zoer does the rest!\n• One TikTok Video: 58 USD creator fee\n\n4. VMEG: AI-Powered Video Localization Platform\nTrusted by over 1,000,000 users worldwide, VMEG offers an AI-powered video localization platform supporting translation and dubbing in over 170 languages with 7,000+ voices.\n• One TikTok Video: 105 USD creator fee\n\nThese rates are the default guideline prices displayed on the Aha platform. You're welcome to adjust your rates directly on the platform if you prefer.\n\nWe value long-term creator relationships and are expanding our roster of ongoing partners. If this collaboration works well, we'd welcome the chance to continue working together.\n\nTo speed things up, please reply directly to this email. If you're writing from another inbox, remember to include your account identifier (0RMoXN4Qwo) — it ensures we can verify your campaign quickly.\n\nKind regards,\nCustomer\nCreator Partnerships | Aha\n\nAbout Aha (formerly Head AI):\nAha ©2025 Ahalab Inc. is an creator agency trusted by over 60,000 creators around the world. Backed by three successful funding rounds, we simplify brand partnerships through a secure and scalable system. See how creators grow with us on YouTube: @aha_inc\n\nTo opt out of future collaboration invites from Aha, please reply directly to this email with \"Unsubscribe\" (please do not use the unsubscribe link provided by Gmail or other email services).\n"
+      }
+    ],
+    "originalCategory": "support_technical",
+    "tags": [
+      "support_technical",
+      "customer_confirmed",
+      "short",
+      "thanked"
+    ]
+  },
+  {
+    "threadId": "cnv_1jdhigmd",
+    "conversationId": "cnv_1jdhigmd",
+    "appId": "unknown",
+    "resolutionType": "refund_completed",
+    "resolutionConfidence": 0.8,
+    "signalExamples": [
+      {
+        "messageIndex": 2,
+        "inputMessage": "Dear Total typescript \n\nPlease help to proceed with my refund, attached the invoice.\n\n\n\n\nBest Regards,\nCustomer",
+        "expectedSignals": {
+          "hasEmailInBody": true
+        }
+      }
+    ],
+    "actionExample": {
+      "threadSummary": "3 customer msgs, 4 team msgs. Request: \"Dear Total typescript \n\nPlease help to proceed with my refund, attached the invoice.\n\n\n\n\nBest Regard...\"",
+      "signals": {
+        "threadLength": 7,
+        "hasThankYou": false,
+        "hasResolutionPhrase": false,
+        "hasTeammateMessage": false,
+        "lastMessageDirection": "out"
+      },
+      "correctAction": "respond",
+      "correctCategory": "support_refund",
+      "actionResult": "resolved"
+    },
+    "responseExample": {
+      "category": "support_refund",
+      "customerMessage": "Hi, I need a refund, my firm does not allow me to claim this\n\n\n\nThanks\n\nCustomer\n",
+      "agentResponse": "This is an automated reply to let you know that your email has been received and we will get back to you as quickly as possible. We work 9-5 Pacific Monday through Friday and take most \"bank holidays\" off. \n\n\nYou can find community support in the Total TypeScript Discord channel: \n\n\nhttps://www.totaltypescript.com/discord\n\n\nIf you've got code questions/comments/opinions, Discord is the best channel!\n\n\n--\n\n\nIf you've purchased Total TypeScript and are looking for an invoice or receipt, you can find that here:\n\n\nhttps://www.totaltypescript.com/purchases\n\n\n--\n\n\nInvoices are customizable and you can enter company/tax information there. The generated PDFs are also fully editable so please feel free to adjust them to suit your specific needs.\n\n\nThe Total TypeScript FAQ has answers to many common questions:\n\n\nhttps://www.totaltypescript.com/faq\n\n\n--\n\n\nWill you take 15 seconds share Total TypeScript? It really helps us get the word out. 🙏\n\n\n👉 Send a tweet about Total TypeScript! \n\n\n--\n\n\nIf y"
+    },
+    "messages": [
+      {
+        "direction": "out",
+        "body": "Hello, \n\n\nWe've initiated a refund. It can take 5-10 days for the banks to reconcile and return the money to your account."
+      },
+      {
+        "direction": "out",
+        "body": "This is an automated reply to let you know that your email has been received and we will get back to you as quickly as possible. We work 9-5 Pacific Monday through Friday and take most \"bank holidays\" off. \n\n\nYou can find community support in the Total TypeScript Discord channel: \n\n\nhttps://www.totaltypescript.com/discord\n\n\nIf you've got code questions/comments/opinions, Discord is the best channel!\n\n\n--\n\n\nIf you've purchased Total TypeScript and are looking for an invoice or receipt, you can find that here:\n\n\nhttps://www.totaltypescript.com/purchases\n\n\n--\n\n\nInvoices are customizable and you can enter company/tax information there. The generated PDFs are also fully editable so please feel free to adjust them to suit your specific needs.\n\n\nThe Total TypeScript FAQ has answers to many common questions:\n\n\nhttps://www.totaltypescript.com/faq\n\n\n--\n\n\nWill you take 15 seconds share Total TypeScript? It really helps us get the word out. 🙏\n\n\n👉 Send a tweet about Total TypeScript! \n\n\n--\n\n\nIf you've got more context to share, or if any of the above helps and you don't need a reply, please let us know. We are always here to help\n\n\n-Total TypeScript 🧙‍♀️​"
+      },
+      {
+        "direction": "in",
+        "body": "Dear Total typescript \n\nPlease help to proceed with my refund, attached the invoice.\n\n\n\n\nBest Regards,\nCustomer"
+      },
+      {
+        "direction": "out",
+        "body": "This is an automated reply to let you know that your email has been received and we will get back to you as quickly as possible. We work 9-5 Pacific Monday through Friday and take most \"bank holidays\" off. \n\n\nYou can find community support in the Total TypeScript Discord channel: \n\n\nhttps://www.totaltypescript.com/discord\n\n\nIf you've got code questions/comments/opinions, Discord is the best channel!\n\n\n--\n\n\nIf you've purchased Total TypeScript and are looking for an invoice or receipt, you can find that here:\n\n\nhttps://www.totaltypescript.com/purchases\n\n\n--\n\n\nInvoices are customizable and you can enter company/tax information there. The generated PDFs are also fully editable so please feel free to adjust them to suit your specific needs.\n\n\nThe Total TypeScript FAQ has answers to many common questions:\n\n\nhttps://www.totaltypescript.com/faq\n\n\n--\n\n\nWill you take 15 seconds share Total TypeScript? It really helps us get the word out. 🙏\n\n\n👉 Send a tweet about Total TypeScript! \n\n\n--\n\n\nIf you've got more context to share, or if any of the above helps and you don't need a reply, please let us know. We are always here to help\n\n\n-Total TypeScript 🧙‍♀️​"
+      },
+      {
+        "direction": "in",
+        "body": "Hi, I need a refund, my firm does not allow me to claim this\n\n\n\nThanks\n\nCustomer\n"
+      },
+      {
+        "direction": "out",
+        "body": "This is an automated reply to let you know that your email has been received and we will get back to you as quickly as possible. We work 9-5 Pacific Monday through Friday and take most \"bank holidays\" off. \n\n\nYou can find community support in the Total TypeScript Discord channel: \n\n\nhttps://www.totaltypescript.com/discord\n\n\nIf you've got code questions/comments/opinions, Discord is the best channel!\n\n\n--\n\n\nIf you've purchased Total TypeScript and are looking for an invoice or receipt, you can find that here:\n\n\nhttps://www.totaltypescript.com/purchases\n\n\n--\n\n\nInvoices are customizable and you can enter company/tax information there. The generated PDFs are also fully editable so please feel free to adjust them to suit your specific needs.\n\n\nThe Total TypeScript FAQ has answers to many common questions:\n\n\nhttps://www.totaltypescript.com/faq\n\n\n--\n\n\nWill you take 15 seconds share Total TypeScript? It really helps us get the word out. 🙏\n\n\n👉 Send a tweet about Total TypeScript! \n\n\n--\n\n\nIf you've got more context to share, or if any of the above helps and you don't need a reply, please let us know. We are always here to help\n\n\n-Total TypeScript 🧙‍♀️​"
+      },
+      {
+        "direction": "in",
+        "body": "Dear Total Typescript\n\nMy company did not approve my claim for this purchase, I want to\nrequire for the refund.\n\nAccount: user@example.com\n\nBest Regards\nCustomer\n"
+      }
+    ],
+    "originalCategory": "support_refund",
+    "tags": [
+      "support_refund",
+      "refund_completed",
+      "multi_turn"
+    ]
+  },
+  {
+    "threadId": "cnv_1jdftllx",
+    "conversationId": "cnv_1jdftllx",
+    "appId": "unknown",
+    "resolutionType": "refund_completed",
+    "resolutionConfidence": 0.8,
+    "signalExamples": [
+      {
+        "messageIndex": 1,
+        "inputMessage": "Dear Total TypeScript Team,\n\nI would like to request a refund for my purchase of the \"Total TypeScript\" course.\n\nI purchased the course less than 30 days ago, and I would like to make use of the 30-day money-back guarantee.\n\nHere are my purchase details:\n\nEmail used for purchase: user@example.com\nOrder ID: 9431a154-d257-4c4d-b[PHONE]1f13e\n\nThank you for your help.\n\nBest regards,\nAndreas Wirth\n￼\n\n________________________________\n\nTel.: 0[PHONE]\n\n\n> Am 18.01.2026 um 11:35 schrieb user@example.com:",
+        "expectedSignals": {
+          "hasEmailInBody": true
+        }
+      },
+      {
+        "messageIndex": 3,
+        "inputMessage": "I would like to return my purchase because I simply don't have the time to do\nthe shortcut.\n",
+        "expectedSignals": {
+          "hasThankYou": true
+        }
+      }
+    ],
+    "actionExample": {
+      "threadSummary": "2 customer msgs, 2 team msgs. Request: \"Dear Total TypeScript Team,\n\nI would like to request a refund for my purchase of the \"Total TypeScri...\"",
+      "signals": {
+        "threadLength": 4,
+        "hasThankYou": true,
+        "hasResolutionPhrase": false,
+        "hasTeammateMessage": false,
+        "lastMessageDirection": "out"
+      },
+      "correctAction": "respond",
+      "correctCategory": "support_refund",
+      "actionResult": "resolved"
+    },
+    "responseExample": {
+      "category": "support_refund",
+      "customerMessage": "Dear Total TypeScript Team,\n\nI would like to request a refund for my purchase of the \"Total TypeScript\" course.\n\nI purchased the course less than 30 days ago, and I would like to make use of the 30-day money-back guarantee.\n\nHere are my purchase details:\n\nEmail used for purchase: user@example.com\nOrder ID: 9431a154-d257-4c4d-b[PHONE]1f13e\n\nThank you for your help.\n\nBest regards,\nAndreas Wirth\n￼\n\n________________________________\n\nTel.: 0[PHONE]\n\n\n> Am 18.01.2026 um 11:35 schrieb user@example.com:",
+      "agentResponse": "This is an automated reply to let you know that your email has been received and we will get back to you as quickly as possible. We work 9-5 Pacific Monday through Friday and take most \"bank holidays\" off. \n\n\nYou can find community support in the Total TypeScript Discord channel: \n\n\nhttps://www.totaltypescript.com/discord\n\n\nIf you've got code questions/comments/opinions, Discord is the best channel!\n\n\n--\n\n\nIf you've purchased Total TypeScript and are looking for an invoice or receipt, you can find that here:\n\n\nhttps://www.totaltypescript.com/purchases\n\n\n--\n\n\nInvoices are customizable and you can enter company/tax information there. The generated PDFs are also fully editable so please feel free to adjust them to suit your specific needs.\n\n\nThe Total TypeScript FAQ has answers to many common questions:\n\n\nhttps://www.totaltypescript.com/faq\n\n\n--\n\n\nWill you take 15 seconds share Total TypeScript? It really helps us get the word out. 🙏\n\n\n👉 Send a tweet about Total TypeScript! \n\n\n--\n\n\nIf y"
+    },
+    "messages": [
+      {
+        "direction": "out",
+        "body": "Hey Andreas, \n\n\nWe've initiated a refund. It can take 5-10 days for the banks to reconcile and return the money to your account."
+      },
+      {
+        "direction": "in",
+        "body": "Dear Total TypeScript Team,\n\nI would like to request a refund for my purchase of the \"Total TypeScript\" course.\n\nI purchased the course less than 30 days ago, and I would like to make use of the 30-day money-back guarantee.\n\nHere are my purchase details:\n\nEmail used for purchase: user@example.com\nOrder ID: 9431a154-d257-4c4d-b[PHONE]1f13e\n\nThank you for your help.\n\nBest regards,\nAndreas Wirth\n￼\n\n________________________________\n\nTel.: 0[PHONE]\n\n\n> Am 18.01.2026 um 11:35 schrieb user@example.com:\n> \n> This is an automated reply to let you know that your email has been received and we will get back to you as quickly as possible. We work 9-5 Pacific Monday through Friday and take most \"bank holidays\" off. \n> \n> You can find community support in the Total TypeScript Discord channel <https://www.totaltypescript.com/discord>: <https://www.totaltypescript.com/discord>\n> \n> https://www.totaltypescript.com/discord\n> \n> If you've got code questions/comments/opinions, Discord is the best channel!\n> \n> --\n> \n> If you've purchased Total TypeScript and are looking for an invoice or receipt, you can find that here:\n> \n> https://www.totaltypescript.com/purchases\n> \n> --\n> \n> Invoices are customizable and you can enter company/tax information there. The generated PDFs are also fully editable so please feel free to adjust them to suit your specific needs.\n> \n> The Total TypeScript FAQ <https://www.totaltypescript.com/faq> has answers to many common questions:\n> \n> https://www.totaltypescript.com/faq\n> \n> --\n> \n> Will you take 15 seconds share Total TypeScript? It really helps us get the word out. \n> \n>  Send a tweet about Total TypeScript!  <https://twitter.com/intent/tweet?text=Total%20TypeScript%20from%20%40mattpocockuk%20is%20an%20excellent%20resource%20for%20learning%20advanced%20TypeScript.%20%F0%9F%A7%99%E2%80%8D%E2%99%80%EF%B8%8F&url=https%3A%2F%2Fwww.totaltypescript.com>\n> \n> --\n> \n> If you've got more context to share, or if any of the above helps and you don't need a reply, please let us know. We are always here to help\n> \n> -Total TypeScript ​\n\n"
+      },
+      {
+        "direction": "out",
+        "body": "This is an automated reply to let you know that your email has been received and we will get back to you as quickly as possible. We work 9-5 Pacific Monday through Friday and take most \"bank holidays\" off. \n\n\nYou can find community support in the Total TypeScript Discord channel: \n\n\nhttps://www.totaltypescript.com/discord\n\n\nIf you've got code questions/comments/opinions, Discord is the best channel!\n\n\n--\n\n\nIf you've purchased Total TypeScript and are looking for an invoice or receipt, you can find that here:\n\n\nhttps://www.totaltypescript.com/purchases\n\n\n--\n\n\nInvoices are customizable and you can enter company/tax information there. The generated PDFs are also fully editable so please feel free to adjust them to suit your specific needs.\n\n\nThe Total TypeScript FAQ has answers to many common questions:\n\n\nhttps://www.totaltypescript.com/faq\n\n\n--\n\n\nWill you take 15 seconds share Total TypeScript? It really helps us get the word out. 🙏\n\n\n👉 Send a tweet about Total TypeScript! \n\n\n--\n\n\nIf you've got more context to share, or if any of the above helps and you don't need a reply, please let us know. We are always here to help\n\n\n-Total TypeScript 🧙‍♀️​"
+      },
+      {
+        "direction": "in",
+        "body": "I would like to return my purchase because I simply don't have the time to do\nthe shortcut.\n"
+      }
+    ],
+    "originalCategory": "support_refund",
+    "tags": [
+      "support_refund",
+      "refund_completed",
+      "multi_turn",
+      "thanked"
+    ]
+  },
+  {
+    "threadId": "cnv_1jdd3j6t",
+    "conversationId": "cnv_1jdd3j6t",
+    "appId": "unknown",
+    "resolutionType": "refund_completed",
+    "resolutionConfidence": 0.8,
+    "signalExamples": [],
+    "actionExample": {
+      "threadSummary": "1 customer msgs, 2 team msgs. Request: \"I would like a refund on this purchase. Unfortunately, the type of training\nisn’t really for me wher...\"",
+      "signals": {
+        "threadLength": 3,
+        "hasThankYou": false,
+        "hasResolutionPhrase": false,
+        "hasTeammateMessage": false,
+        "lastMessageDirection": "out"
+      },
+      "correctAction": "respond",
+      "correctCategory": "support_refund",
+      "actionResult": "resolved"
+    },
+    "messages": [
+      {
+        "direction": "out",
+        "body": "Hello, \n\n\nWe've initiated a refund. It can take 5-10 days for the banks to reconcile and return the money to your account."
+      },
+      {
+        "direction": "out",
+        "body": "This is an automated reply to let you know that your email has been received and we will get back to you as quickly as possible. We work 9-5 Pacific Monday through Friday and take most \"bank holidays\" off. \n\n\nYou can find community support in the Total TypeScript Discord channel: \n\n\nhttps://www.totaltypescript.com/discord\n\n\nIf you've got code questions/comments/opinions, Discord is the best channel!\n\n\n--\n\n\nIf you've purchased Total TypeScript and are looking for an invoice or receipt, you can find that here:\n\n\nhttps://www.totaltypescript.com/purchases\n\n\n--\n\n\nInvoices are customizable and you can enter company/tax information there. The generated PDFs are also fully editable so please feel free to adjust them to suit your specific needs.\n\n\nThe Total TypeScript FAQ has answers to many common questions:\n\n\nhttps://www.totaltypescript.com/faq\n\n\n--\n\n\nWill you take 15 seconds share Total TypeScript? It really helps us get the word out. 🙏\n\n\n👉 Send a tweet about Total TypeScript! \n\n\n--\n\n\nIf you've got more context to share, or if any of the above helps and you don't need a reply, please let us know. We are always here to help\n\n\n-Total TypeScript 🧙‍♀️​"
+      },
+      {
+        "direction": "in",
+        "body": "I would like a refund on this purchase. Unfortunately, the type of training\nisn’t really for me where I research something and try and figure it out and\nthen look at the solution. I am more of a you teach me how to do something, and\nthen I try and do it myself.\n"
+      }
+    ],
+    "originalCategory": "support_refund",
+    "tags": [
+      "support_refund",
+      "refund_completed",
+      "short"
+    ]
+  },
+  {
+    "threadId": "cnv_1jdes9ph",
+    "conversationId": "cnv_1jdes9ph",
+    "appId": "unknown",
+    "resolutionType": "customer_confirmed",
+    "resolutionConfidence": 0.85,
+    "signalExamples": [
+      {
+        "messageIndex": 1,
+        "inputMessage": "Hello. I was able to get through maybe 10 of my courses but now when I attempt to load the video I get the below error. I’m using an up to date version of Chrome. Reloading does not help. I tried closing the webpage and reopening and that worked allowed me to play my next video but I again got this error. \nDylan Honeyman\n[PHONE]\n\n\n￼",
+        "expectedSignals": {
+          "hasErrorMessage": true
+        }
+      }
+    ],
+    "actionExample": {
+      "threadSummary": "1 customer msgs, 1 team msgs. Request: \"Hello. I was able to get through maybe 10 of my courses but now when I attempt to load the video I g...\"",
+      "signals": {
+        "threadLength": 2,
+        "hasThankYou": false,
+        "hasResolutionPhrase": true,
+        "hasTeammateMessage": false,
+        "lastMessageDirection": "out"
+      },
+      "correctAction": "respond",
+      "correctCategory": "support_technical",
+      "actionResult": "resolved"
+    },
+    "messages": [
+      {
+        "direction": "out",
+        "body": "This is an automated reply to let you know that your email has been received and we will get back to you as quickly as possible. We work 9-5 Pacific Monday through Friday and take most \"bank holidays\" off. \n\n\nYou can find community support in the Total TypeScript Discord channel: \n\n\nhttps://www.totaltypescript.com/discord\n\n\nIf you've got code questions/comments/opinions, Discord is the best channel!\n\n\n--\n\n\nIf you've purchased Total TypeScript and are looking for an invoice or receipt, you can find that here:\n\n\nhttps://www.totaltypescript.com/purchases\n\n\n--\n\n\nInvoices are customizable and you can enter company/tax information there. The generated PDFs are also fully editable so please feel free to adjust them to suit your specific needs.\n\n\nThe Total TypeScript FAQ has answers to many common questions:\n\n\nhttps://www.totaltypescript.com/faq\n\n\n--\n\n\nWill you take 15 seconds share Total TypeScript? It really helps us get the word out. 🙏\n\n\n👉 Send a tweet about Total TypeScript! \n\n\n--\n\n\nIf you've got more context to share, or if any of the above helps and you don't need a reply, please let us know. We are always here to help\n\n\n-Total TypeScript 🧙‍♀️​"
+      },
+      {
+        "direction": "in",
+        "body": "Hello. I was able to get through maybe 10 of my courses but now when I attempt to load the video I get the below error. I’m using an up to date version of Chrome. Reloading does not help. I tried closing the webpage and reopening and that worked allowed me to play my next video but I again got this error. \nDylan Honeyman\n[PHONE]\n\n\n￼"
+      }
+    ],
+    "originalCategory": "support_technical",
+    "tags": [
+      "support_technical",
+      "customer_confirmed",
+      "short"
+    ]
+  },
+  {
+    "threadId": "cnv_1jdd5y3p",
+    "conversationId": "cnv_1jdd5y3p",
+    "appId": "unknown",
+    "resolutionType": "customer_confirmed",
+    "resolutionConfidence": 0.95,
+    "signalExamples": [
+      {
+        "messageIndex": 1,
+        "inputMessage": "Hey Matt, I hope you’re well. I just watched your video titled “Ship working\ncode while you sleep with the Ralph Wiggum technique” on YouTube. Thank you for\nputting that together; it is fantastic. QQ: When you specify the number of\niterations, does that apply to a single item in your PRD or all items? In other\nwords, if your loop picks up a task and fails to implement that task, does the\nnext iteration in the loop pick up the failed task and try again, or does it\npotentially pick another task? P",
+        "expectedSignals": {
+          "hasErrorMessage": true,
+          "mentionsInstructor": true
+        }
+      }
+    ],
+    "actionExample": {
+      "threadSummary": "1 customer msgs, 1 team msgs. Request: \"Hey Matt, I hope you’re well. I just watched your video titled “Ship working\ncode while you sleep wi...\"",
+      "signals": {
+        "threadLength": 2,
+        "hasThankYou": true,
+        "hasResolutionPhrase": true,
+        "hasTeammateMessage": false,
+        "lastMessageDirection": "out"
+      },
+      "correctAction": "respond",
+      "correctCategory": "support_technical",
+      "actionResult": "resolved"
+    },
+    "messages": [
+      {
+        "direction": "out",
+        "body": "This is an automated reply to let you know that your email has been received and we will get back to you as quickly as possible. We work 9-5 Pacific Monday through Friday and take most \"bank holidays\" off. \n\n\nYou can find community support in the Total TypeScript Discord channel: \n\n\nhttps://www.totaltypescript.com/discord\n\n\nIf you've got code questions/comments/opinions, Discord is the best channel!\n\n\n--\n\n\nIf you've purchased Total TypeScript and are looking for an invoice or receipt, you can find that here:\n\n\nhttps://www.totaltypescript.com/purchases\n\n\n--\n\n\nInvoices are customizable and you can enter company/tax information there. The generated PDFs are also fully editable so please feel free to adjust them to suit your specific needs.\n\n\nThe Total TypeScript FAQ has answers to many common questions:\n\n\nhttps://www.totaltypescript.com/faq\n\n\n--\n\n\nWill you take 15 seconds share Total TypeScript? It really helps us get the word out. 🙏\n\n\n👉 Send a tweet about Total TypeScript! \n\n\n--\n\n\nIf you've got more context to share, or if any of the above helps and you don't need a reply, please let us know. We are always here to help\n\n\n-Total TypeScript 🧙‍♀️​"
+      },
+      {
+        "direction": "in",
+        "body": "Hey Matt, I hope you’re well. I just watched your video titled “Ship working\ncode while you sleep with the Ralph Wiggum technique” on YouTube. Thank you for\nputting that together; it is fantastic. QQ: When you specify the number of\niterations, does that apply to a single item in your PRD or all items? In other\nwords, if your loop picks up a task and fails to implement that task, does the\nnext iteration in the loop pick up the failed task and try again, or does it\npotentially pick another task? Perhaps another way to ask is: if you specify a\nmax-iterations of 10 but your PRD has 20 items, will your ralph loop stop after\nimplementing 10 items (assuming it implements each item successfully on its\nfirst attempt)?\n"
+      }
+    ],
+    "originalCategory": "support_technical",
+    "tags": [
+      "support_technical",
+      "customer_confirmed",
+      "short",
+      "thanked"
+    ]
+  },
+  {
+    "threadId": "cnv_1jdcdpb9",
+    "conversationId": "cnv_1jdcdpb9",
+    "appId": "unknown",
+    "resolutionType": "customer_confirmed",
+    "resolutionConfidence": 0.95,
+    "signalExamples": [
+      {
+        "messageIndex": 1,
+        "inputMessage": "Hey Matt,\n\nI really appreciate your content around developer workflows and tooling. We\nthink DevTools aligns well with those themes.\n\nI’m reaching out from DevTools — we built a Go-based API client that lets\nyou turn real browser traffic (HAR files) into replayable API flows. It’s\nway faster than Postman and Bruno, and you can export everything as\nreadable YAML for version control and Git review.\n\nDevTools is open source, works as both a CLI and a desktop app, and has a\nvisual builder for flow t",
+        "expectedSignals": {
+          "mentionsInstructor": true
+        }
+      }
+    ],
+    "actionExample": {
+      "threadSummary": "1 customer msgs, 1 team msgs. Request: \"Hey Matt,\n\nI really appreciate your content around developer workflows and tooling. We\nthink DevTool...\"",
+      "signals": {
+        "threadLength": 2,
+        "hasThankYou": true,
+        "hasResolutionPhrase": true,
+        "hasTeammateMessage": false,
+        "lastMessageDirection": "out"
+      },
+      "correctAction": "respond",
+      "correctCategory": "support_technical",
+      "actionResult": "resolved"
+    },
+    "messages": [
+      {
+        "direction": "out",
+        "body": "This is an automated reply to let you know that your email has been received and we will get back to you as quickly as possible. We work 9-5 Pacific Monday through Friday and take most \"bank holidays\" off. \n\n\nYou can find community support in the Total TypeScript Discord channel: \n\n\nhttps://www.totaltypescript.com/discord\n\n\nIf you've got code questions/comments/opinions, Discord is the best channel!\n\n\n--\n\n\nIf you've purchased Total TypeScript and are looking for an invoice or receipt, you can find that here:\n\n\nhttps://www.totaltypescript.com/purchases\n\n\n--\n\n\nInvoices are customizable and you can enter company/tax information there. The generated PDFs are also fully editable so please feel free to adjust them to suit your specific needs.\n\n\nThe Total TypeScript FAQ has answers to many common questions:\n\n\nhttps://www.totaltypescript.com/faq\n\n\n--\n\n\nWill you take 15 seconds share Total TypeScript? It really helps us get the word out. 🙏\n\n\n👉 Send a tweet about Total TypeScript! \n\n\n--\n\n\nIf you've got more context to share, or if any of the above helps and you don't need a reply, please let us know. We are always here to help\n\n\n-Total TypeScript 🧙‍♀️​"
+      },
+      {
+        "direction": "in",
+        "body": "Hey Matt,\n\nI really appreciate your content around developer workflows and tooling. We\nthink DevTools aligns well with those themes.\n\nI’m reaching out from DevTools — we built a Go-based API client that lets\nyou turn real browser traffic (HAR files) into replayable API flows. It’s\nway faster than Postman and Bruno, and you can export everything as\nreadable YAML for version control and Git review.\n\nDevTools is open source, works as both a CLI and a desktop app, and has a\nvisual builder for flow trees and reusable checks. It’s perfect for\ndevelopers and QA teams looking to speed up API testing and automate flows\nin CI.\n\nWe’re running a paid promo for creators — happy to discuss rates for a\nsponsored feature or demo.\n\nIf you’re interested, let me know and I’ll send over more details!\n\nThanks,\nMustafa\n"
+      }
+    ],
+    "originalCategory": "support_technical",
+    "tags": [
+      "support_technical",
+      "customer_confirmed",
+      "short",
+      "thanked"
+    ]
+  },
+  {
+    "threadId": "cnv_1jdlbzol",
+    "conversationId": "cnv_1jdlbzol",
+    "appId": "unknown",
+    "resolutionType": "customer_confirmed",
+    "resolutionConfidence": 0.95,
+    "signalExamples": [
+      {
+        "messageIndex": 1,
+        "inputMessage": "Hi Matt,\nSounds fantastic!\nPrice is on the edge what I can afford right now but trying to find a way next days.\nMost important thing is : not sure if I can attend the workshop live. \nWould there be a recording available I could watch later?\n\nThanks for the update and looking forward to a new self paced workshop in the future regarding this topic!\n\nCustomer\n\n> On 22. Jan 2026, at 15:20, Matt Pocock (AI Hero) <user@example.com> wrote:\n> \n> Hey ,\n> \n> The future of AI coding is a loop. It’s one of ",
+        "expectedSignals": {
+          "hasEmailInBody": true,
+          "mentionsInstructor": true
+        }
+      }
+    ],
+    "actionExample": {
+      "threadSummary": "1 customer msgs, 1 team msgs. Request: \"Hi Matt,\nSounds fantastic!\nPrice is on the edge what I can afford right now but trying to find a way...\"",
+      "signals": {
+        "threadLength": 2,
+        "hasThankYou": true,
+        "hasResolutionPhrase": true,
+        "hasTeammateMessage": false,
+        "lastMessageDirection": "out"
+      },
+      "correctAction": "respond",
+      "correctCategory": "support_billing",
+      "actionResult": "resolved"
+    },
+    "messages": [
+      {
+        "direction": "out",
+        "body": "Hey Customer,\nGood question on the recording. That's something Matt would need to confirm directly, since workshop setup details can vary. I'd suggest replying to this email chain to ask him directly, or reaching out through the workshop signup page if there's a contact option there.\nOn the pricing side, if cost is the main blocker, you could also wait to see if a self-paced version becomes available down the line, since you mentioned interest in that format anyway."
+      },
+      {
+        "direction": "in",
+        "body": "Hi Matt,\nSounds fantastic!\nPrice is on the edge what I can afford right now but trying to find a way next days.\nMost important thing is : not sure if I can attend the workshop live. \nWould there be a recording available I could watch later?\n\nThanks for the update and looking forward to a new self paced workshop in the future regarding this topic!\n\nCustomer\n\n> On 22. Jan 2026, at 15:20, Matt Pocock (AI Hero) <user@example.com> wrote:\n> \n> Hey ,\n> \n> The future of AI coding is a loop. It’s one of the simplest primitives available to developers, but we’ve been criminally underusing it in the AI coding world.\n> \n> Instead, we’re stuck in that frustrating cycle with AI coding assistants. You ask for Feature A, get half a solution, manually fix it, ask for Feature B, and it breaks Feature A. Rinse, repeat.\n> \n> But here’s what’s actually happening right now in production: developers are setting up agents that run in loops with structured feedback mechanisms. They point them at GitHub backlogs. Real PRs get created. Without constant babysitting.\n> \n> It’s called the Ralph Wiggum technique, and it’s not magic. It’s a simple, learnable pattern.\n> \n> I’m running a live workshop on February 11 at 9 AM PST <https://7751c435.click.convertkit-mail2.com/0vu3qe8zxzc9h9ne680hlhvze4k55hnh77003/dphehmued0v29ncm/aHR0cHM6Ly93d3cuYWloZXJvLmRldi9zL3JhbHBoLXdvcmtzaG9wLTAx> to teach you exactly how to build it. We’re capping at 40 developers because this is hands-on. You’ll be debugging YOUR code, not just watching me code.\n> \n> Here’s what you’ll leave with:\n> \n> Your own bash loop running\n> Feedback mechanisms that let agents catch their own mistakes\n> Your GitHub backlog wired up to actually execute tasks\n> The PRD structure that makes agents do what you actually want\n> By 1 PM, you’ll have real PRs being generated from your actual issues.\n> \n> Sign-ups are open now. Limited spots, and we’ve got a discount running through Feb 5th. Grab yours before they sell out.\n> \n> The full details are here, including what actually breaks, why this works now (and didn’t before), and exactly what you need to bring.\n> \n> Secure Your Seat <https://7751c435.click.convertkit-mail2.com/0vu3qe8zxzc9h9ne680hlhvze4k55hnh77003/dphehmued0v29ncm/aHR0cHM6Ly93d3cuYWloZXJvLmRldi9zL3JhbHBoLXdvcmtzaG9wLTAx>\n> See you on February 11.\n> \n> Unsubscribe from AI Hero Emails <https://7751c435.click.convertkit-mail2.com/0vu3qe8zxzc9h9ne680hlhvze4k55hnh77003/rehm5x5qf9umk04olri2/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==>. You can also unsubscribe <https://7751c435.unsubscribe.convertkit-mail2.com/0vu3qe8zxzc9h9ne680hlhvze4k55hnh77003> from all emails at any time.\n> \n> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080\n> \n> ​\n\n"
+      }
+    ],
+    "originalCategory": "support_billing",
+    "tags": [
+      "support_billing",
+      "customer_confirmed",
+      "short",
+      "thanked"
+    ]
+  },
+  {
+    "threadId": "cnv_1jdl99b9",
+    "conversationId": "cnv_1jdl99b9",
+    "appId": "unknown",
+    "resolutionType": "customer_confirmed",
+    "resolutionConfidence": 0.95,
+    "signalExamples": [
+      {
+        "messageIndex": 1,
+        "inputMessage": "Hi Matt,\n\nAny chance you offer non-profit discounts?\n\nWe’re a 125 year old conservation organization from North America (https://www.audubon.org/about)\n\nThanks for considering,\nScott\n\n---------- Forwarded message ---------\nFrom: Matt Pocock (AI Hero) <user@example.com<mailto:user@example.com>>\nDate: Thu, Jan 22, 2026 at 6:20 AM\nSubject: Live Autonomous AI Agents with Ralph Workshop (very limited seats)\nTo: Scott <user@example.com<mailto:user@example.com>>\n\n\n\nHey Scott,\n\nThe future of AI coding i",
+        "expectedSignals": {
+          "hasEmailInBody": true,
+          "mentionsInstructor": true
+        }
+      }
+    ],
+    "actionExample": {
+      "threadSummary": "1 customer msgs, 1 team msgs. Request: \"Hi Matt,\n\nAny chance you offer non-profit discounts?\n\nWe’re a 125 year old conservation organization...\"",
+      "signals": {
+        "threadLength": 2,
+        "hasThankYou": true,
+        "hasResolutionPhrase": true,
+        "hasTeammateMessage": false,
+        "lastMessageDirection": "out"
+      },
+      "correctAction": "respond",
+      "correctCategory": "support_billing",
+      "actionResult": "resolved"
+    },
+    "messages": [
+      {
+        "direction": "out",
+        "body": "It's currently 25% off!"
+      },
+      {
+        "direction": "in",
+        "body": "Hi Matt,\n\nAny chance you offer non-profit discounts?\n\nWe’re a 125 year old conservation organization from North America (https://www.audubon.org/about)\n\nThanks for considering,\nScott\n\n---------- Forwarded message ---------\nFrom: Matt Pocock (AI Hero) <user@example.com<mailto:user@example.com>>\nDate: Thu, Jan 22, 2026 at 6:20 AM\nSubject: Live Autonomous AI Agents with Ralph Workshop (very limited seats)\nTo: Scott <user@example.com<mailto:user@example.com>>\n\n\n\nHey Scott,\n\nThe future of AI coding is a loop. It’s one of the simplest primitives available to developers, but we’ve been criminally underusing it in the AI coding world.\n\nInstead, we’re stuck in that frustrating cycle with AI coding assistants. You ask for Feature A, get half a solution, manually fix it, ask for Feature B, and it breaks Feature A. Rinse, repeat.\n\nBut here’s what’s actually happening right now in production: developers are setting up agents that run in loops with structured feedback mechanisms. They point them at GitHub backlogs. Real PRs get created. Without constant babysitting.\n\nIt’s called the Ralph Wiggum technique, and it’s not magic. It’s a simple, learnable pattern.\n\nI’m running a live workshop on February 11 at 9 AM PST<https://7751c435.click.convertkit-mail2.com/o8u8mez84guqh6x9mz3hvhqzd58rraoh99mmp/dphehmued0v29ncm/aHR0cHM6Ly93d3cuYWloZXJvLmRldi9zL3JhbHBoLXdvcmtzaG9wLTAx> to teach you exactly how to build it. We’re capping at 40 developers because this is hands-on. You’ll be debugging YOUR code, not just watching me code.\n\nHere’s what you’ll leave with:\n\n  *   Your own bash loop running\n  *   Feedback mechanisms that let agents catch their own mistakes\n  *   Your GitHub backlog wired up to actually execute tasks\n  *   The PRD structure that makes agents do what you actually want\n\nBy 1 PM, you’ll have real PRs being generated from your actual issues.\n\nSign-ups are open now. Limited spots, and we’ve got a discount running through Feb 5th. Grab yours before they sell out.\n\nThe full details are here, including what actually breaks, why this works now (and didn’t before), and exactly what you need to bring.\n\nSecure Your Seat<https://7751c435.click.convertkit-mail2.com/o8u8mez84guqh6x9mz3hvhqzd58rraoh99mmp/dphehmued0v29ncm/aHR0cHM6Ly93d3cuYWloZXJvLmRldi9zL3JhbHBoLXdvcmtzaG9wLTAx>\n\nSee you on February 11.\n\nUnsubscribe from AI Hero Emails<https://7751c435.click.convertkit-mail2.com/o8u8mez84guqh6x9mz3hvhqzd58rraoh99mmp/rehm5x5qf9umk04olri2/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==>. You can also unsubscribe<https://7751c435.unsubscribe.convertkit-mail2.com/o8u8mez84guqh6x9mz3hvhqzd58rraoh99mmp> from all emails at any time.\n\n12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080\n\n[https://7751c435.open.convertkit-mail2.com/o8u8mez84guqh6x9mz3hvhqzd58rraoh99mmp]\n"
+      }
+    ],
+    "originalCategory": "support_billing",
+    "tags": [
+      "support_billing",
+      "customer_confirmed",
+      "short",
+      "thanked"
+    ]
+  }
+]

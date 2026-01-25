@@ -1,0 +1,23 @@
+{
+  "id": "routing_auto_reply",
+  "name": "Out of office auto-reply",
+  "description": "Auto-reply OOO message - should not respond",
+  "appId": "app_eval_tt",
+  "trigger": {
+    "subject": "Out of Office: Re: Your purchase confirmation",
+    "body": "Thank you for your email. I am currently out of the office with limited access to email.\n\nI will be returning on Monday, January 27th.\n\nFor urgent matters, please contact my colleague at backup@company.com.\n\nBest regards,\nJane Smith"
+  },
+  "context": {
+    "customer": null,
+    "conversation": null
+  },
+  "expectedBehavior": "no_response",
+  "notExpectedToolCalls": [
+    "draftResponse"
+  ],
+  "assertions": {
+    "noDraftResponse": true
+  },
+  "expectedCategory": "system",
+  "expectedAction": "silence"
+}

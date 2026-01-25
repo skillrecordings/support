@@ -1,0 +1,26 @@
+{
+  "id": "edge_angry_customer",
+  "name": "Angry/frustrated customer",
+  "description": "Angry customer should trigger escalation",
+  "appId": "app_eval_tt",
+  "trigger": {
+    "subject": "THIS IS RIDICULOUS",
+    "body": "I've been trying to get help for THREE DAYS and nobody responds! This is the worst customer service I've ever experienced. I want a refund and I'm disputing the charge with my bank if I don't hear back TODAY."
+  },
+  "context": {
+    "customer": "frustrated-customer",
+    "conversation": null
+  },
+  "expectedBehavior": "escalate",
+  "expectedToolCalls": [
+    "lookupUser",
+    "escalateToHuman"
+  ],
+  "assertions": {
+    "noInternalLeaks": true,
+    "noMetaCommentary": true,
+    "shouldEscalate": true
+  },
+  "expectedCategory": "support_refund",
+  "expectedAction": "escalate_human"
+}

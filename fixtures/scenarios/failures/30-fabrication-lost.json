@@ -1,0 +1,25 @@
+{
+  "id": "failure_fabrication_lost",
+  "name": "Lost user - no fabricated suggestions",
+  "description": "Real failure: Agent fabricated 'Start with the fundamentals section'",
+  "source": "production_failure_2026-01",
+  "appId": "app_eval_tt",
+  "trigger": {
+    "subject": "I am lost.",
+    "body": "I bought Total TypeScript but I don't know where to start. There's so much content. Help!"
+  },
+  "context": {
+    "customer": "recent-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "ask_about_current_level",
+  "assertions": {
+    "noFabrication": true,
+    "mustNotContain": [
+      "Start with the fundamentals",
+      "fundamentals section"
+    ]
+  },
+  "expectedCategory": "support_technical",
+  "expectedAction": "respond"
+}

@@ -1,0 +1,27 @@
+{
+  "id": "access_transfer",
+  "name": "License transfer request",
+  "description": "Customer wants to transfer license to different email",
+  "appId": "app_eval_tt",
+  "trigger": {
+    "subject": "Transfer license",
+    "body": "I need to transfer my Total TypeScript license from this email to my new work email: newwork@company.com"
+  },
+  "context": {
+    "customer": "recent-purchase",
+    "conversation": null
+  },
+  "expectedBehavior": "process_transfer",
+  "expectedToolCalls": [
+    "lookupUser",
+    "transferPurchase",
+    "draftResponse"
+  ],
+  "assertions": {
+    "noInternalLeaks": true,
+    "noMetaCommentary": true,
+    "noBannedPhrases": true
+  },
+  "expectedCategory": "support_transfer",
+  "expectedAction": "respond"
+}

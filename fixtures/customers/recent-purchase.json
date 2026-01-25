@@ -1,0 +1,22 @@
+{
+  "id": "user_recent",
+  "email": "recent@example.com",
+  "name": "Recent Purchaser",
+  "purchases": [
+    {
+      "id": "purch_recent_1",
+      "product": "Total TypeScript Core",
+      "product_id": "prod_tt_core",
+      "stripe_charge_id": "ch_recent_1",
+      "amount_cents": 29900,
+      "purchased_at": "2025-01-22T10:00:00Z",
+      "status": "active"
+    }
+  ],
+  "traits": {
+    "sentiment": "neutral",
+    "previous_tickets": 0,
+    "lifetime_value": 299,
+    "flags": ["new_customer"]
+  }
+}

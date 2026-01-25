@@ -1,0 +1,651 @@
+{
+  "summary": {
+    "total": 45,
+    "passed": 45,
+    "failed": 0,
+    "passRate": 1,
+    "durationMs": 123524,
+    "silenced": 4,
+    "escalated": 18,
+    "responded": 23,
+    "latency": {
+      "p50": 2564,
+      "p95": 5923,
+      "p99": 10037
+    }
+  },
+  "results": [
+    {
+      "id": "fbdce81a-808f-4221-8242-917b8f367320",
+      "subject": "👋  Feedback from girardier.thomas@gmail.com about Total Typ",
+      "action": "respond",
+      "response": "I don't see a purchase under girardier.thomas@gmail.com. A few possibilities:\n\n1. You might have purchased under a different email address. Do you remember which email you used?\n2. If you bought it with GitHub login, your account might be linked to a different email than the one you're contacting us from.\n\nWhich email did you use when you made the purchase on Oct 18?",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 1689,
+      "steps": [
+        "classify:✓",
+        "route:✓",
+        "gather:✓",
+        "draft:✓",
+        "validate:✓"
+      ]
+    },
+    {
+      "id": "fc87b6bd-7359-4450-8996-b61e48efaba4",
+      "subject": "Re: You're in! Get Ready for Autonomous AI Agents Live Works",
+      "action": "respond",
+      "response": "Hi Stojke,\n\nThe Zoom link should arrive separately from the calendar invite. Check your inbox (including spam/promotions folders) for an email from team@aihero.dev with the link. If you don't see it within the next few hours, let me know and I'll look into it.\n\nWhat email address do you have registered for the workshop?",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 1604,
+      "steps": [
+        "classify:✓",
+        "route:✓",
+        "gather:✓",
+        "draft:✓",
+        "validate:✓"
+      ]
+    },
+    {
+      "id": "d6f73028-33fc-4509-88b3-eb7ff378cad1",
+      "subject": "Re: Live Autonomous AI Agents with Ralph Workshop (very limi",
+      "action": "respond",
+      "response": "The buy button issue is likely because we don't have a purchase record under this email. Can you confirm which email address you used when you tried to buy the workshop ticket? Sometimes it's a different one than expected.\n\nOnce I know that, I can check if the purchase went through or if there's a technical issue blocking checkout.",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 3583,
+      "steps": [
+        "classify:✓",
+        "route:✓",
+        "gather:✓",
+        "draft:✓",
+        "validate:✓"
+      ]
+    },
+    {
+      "id": "ae91e693-ec8d-4862-adf7-6b8b99088a06",
+      "subject": "Re: You're in! Get Ready for Autonomous AI Agents Live Works",
+      "action": "respond",
+      "response": "Hi Christian,\n\nThe workshop materials email should be coming separately from the confirmation you received. Check your inbox and spam folder for an email from team@aihero.dev with the Zoom link and materials.\n\nIf you haven't received it within the next few hours, reply here with the email address you used to register and I'll track down what happened.",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 2249,
+      "steps": [
+        "classify:✓",
+        "route:✓",
+        "gather:✓",
+        "draft:✓",
+        "validate:✓"
+      ]
+    },
+    {
+      "id": "f63a54b3-89c5-4bf3-bb49-662b806c847e",
+      "subject": "Re: Live Autonomous AI Agents with Ralph Workshop (very limi",
+      "action": "respond",
+      "response": "Hey Kevin,\n\nI hear the price is steep right now, especially with currency conversion working against you. Since you're not currently working, I get why the timing feels off.\n\nA couple options: the discount Matt mentioned runs through February 5th, so if the price comes down at all, that would be when. Otherwise, there might be workshop recordings or other learning materials available after the live event. Want me to check what gets recorded and made available after February 11?",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 5923,
+      "steps": [
+        "classify:✓",
+        "route:✓",
+        "gather:✓",
+        "draft:✓",
+        "validate:✓"
+      ]
+    },
+    {
+      "id": "6dd81ba1-bff5-499b-9185-5f14a64d8186",
+      "subject": "Re: Live Autonomous AI Agents with Ralph Workshop (very limi",
+      "action": "respond",
+      "response": "Hey Martin,\n\nYes, we'll have a recording available. You'll get access to it whether you attend live or not, so you can watch it on your own schedule.\n\nSince you're interested in self-paced content on this topic as well, I'll pass that feedback along to Matt.",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 3749,
+      "steps": [
+        "classify:✓",
+        "route:✓",
+        "gather:✓",
+        "draft:✓",
+        "validate:✓"
+      ]
+    },
+    {
+      "id": "d4ab0d49-65e2-4758-b232-9f487852dddb",
+      "subject": "👋  Feedback from LI YUEN TAT about Total TypeScript",
+      "action": "respond",
+      "response": "I don't see an account or purchase associated with this email. Can you confirm the email address you used when you bought Total TypeScript? That way I can look up your order and process the refund.",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 1267,
+      "steps": [
+        "classify:✓",
+        "route:✓",
+        "gather:✓",
+        "draft:✓",
+        "validate:✓"
+      ]
+    },
+    {
+      "id": "53fcea14-1411-486c-b6bf-e97bf040e8a4",
+      "subject": "Re: A quick question...",
+      "action": "escalate_human",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 3292,
+      "steps": [
+        "classify:✓",
+        "route:✓"
+      ]
+    },
+    {
+      "id": "6c4bb6be-a632-4df8-be43-d94eec608c57",
+      "subject": "Re: Help access my account",
+      "action": "respond",
+      "response": "Hi Arvind,\n\nYou should be able to request a login link at aab@arvind.dk now that we've transferred your license over. If you're still seeing a 404 error, try going directly to our login page and entering that email address to request a fresh login link.\n\nIf that doesn't work, let me know and I'll check what's happening on our end.",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 2551,
+      "steps": [
+        "classify:✓",
+        "route:✓",
+        "gather:✓",
+        "draft:✓",
+        "validate:✓"
+      ]
+    },
+    {
+      "id": "7f4d9d30-49ab-4691-a739-e3db7d50c65d",
+      "subject": "Collaborate with Volter AI on Portable.dev!",
+      "action": "escalate_instructor",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 0,
+      "steps": [
+        "classify:✓",
+        "route:✓"
+      ]
+    },
+    {
+      "id": "736cd845-472a-4650-9873-2f04cccd7e3c",
+      "subject": "[aih] Banger quote about career anxiety",
+      "action": "escalate_instructor",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 2200,
+      "steps": [
+        "classify:✓",
+        "route:✓"
+      ]
+    },
+    {
+      "id": "dbc4c68d-ba1e-407f-a5e5-bae2fc261074",
+      "subject": "Re: A quick question...",
+      "action": "escalate_instructor",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 3335,
+      "steps": [
+        "classify:✓",
+        "route:✓"
+      ]
+    },
+    {
+      "id": "516e2785-6911-4911-bacd-d1f39289e586",
+      "subject": "Re: Welcome to AI Hero!",
+      "action": "escalate_instructor",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 2777,
+      "steps": [
+        "classify:✓",
+        "route:✓"
+      ]
+    },
+    {
+      "id": "b9c47568-9cf9-4f44-988d-0afb3dc5b856",
+      "subject": "😭  Feedback from Dewin Pena about Total TypeScript",
+      "action": "respond",
+      "response": "I don't have an account or purchase on file for this email address. Can you provide:\n\n1. The email address you used to purchase Total TypeScript\n2. The date you made the purchase\n\nOnce I have that, I can look up your order and process the refund.",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 10037,
+      "steps": [
+        "classify:✓",
+        "route:✓",
+        "gather:✓",
+        "draft:✓",
+        "validate:✓"
+      ]
+    },
+    {
+      "id": "aab261ec-5955-4b21-963e-c3c5fcc31b0d",
+      "subject": "Re: A quick question...",
+      "action": "escalate_instructor",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 2212,
+      "steps": [
+        "classify:✓",
+        "route:✓"
+      ]
+    },
+    {
+      "id": "69a48933-34d0-4c94-bc8d-204455b11b96",
+      "subject": "AI SDK Course Discount",
+      "action": "respond",
+      "response": "Hi Aminata,\n\nI don't have an account on file for this email address, so I can't look up any existing discount eligibility. Can you confirm if you've purchased anything from Total TypeScript before, or if there's a different email associated with your account?\n\nOnce I know more about your history with us, I can see what options might be available.",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 3621,
+      "steps": [
+        "classify:✓",
+        "route:✓",
+        "gather:✓",
+        "draft:✓",
+        "validate:✓"
+      ]
+    },
+    {
+      "id": "4970d724-5bde-47a6-8b62-fe1504092c54",
+      "subject": "YouTube Partnership || Open Claude CoWork",
+      "action": "silence",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 0,
+      "steps": [
+        "classify:✓",
+        "route:✓"
+      ]
+    },
+    {
+      "id": "fffa4b91-2f45-43cd-8df4-88cec04d1f7c",
+      "subject": "Re: A quick question...",
+      "action": "escalate_instructor",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 2268,
+      "steps": [
+        "classify:✓",
+        "route:✓"
+      ]
+    },
+    {
+      "id": "68900624-e22e-42d3-9a19-023ac122ff15",
+      "subject": "Hi Matt Pocock – Invite to Make a YouTube Video",
+      "action": "escalate_instructor",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 0,
+      "steps": [
+        "classify:✓",
+        "route:✓"
+      ]
+    },
+    {
+      "id": "c4f9ab62-ca97-4dc7-8904-e13b0784d7c7",
+      "subject": "pro-essentials-workshop - Issue with lesson 011",
+      "action": "respond",
+      "response": "Hi Corey,\n\nThe error suggests your JavaScript output isn't being bundled properly. The `export` keyword shouldn't appear in browser-executed code without a bundler processing it first.\n\nA few things to check:\n1. Is your build step actually running before you open the file in the browser? Make sure you've run the build command and are loading the bundled output, not the raw compiled JS.\n2. Check your tsconfig.json `module` setting - it should be something like `\"esnext\"` or `\"es2015\"`, not `\"commonjs\"`.\n3. Verify the HTML file is loading the correct output file from your build directory.\n\nCan you share what build command you're running and how you're loading the file in the browser?",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 7692,
+      "steps": [
+        "classify:✓",
+        "route:✓",
+        "gather:✓",
+        "draft:✓",
+        "validate:✓"
+      ]
+    },
+    {
+      "id": "ec82b4fa-6ca0-4832-9a2d-fbc1523bdf4d",
+      "subject": "Re: A quick question...",
+      "action": "escalate_instructor",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 2564,
+      "steps": [
+        "classify:✓",
+        "route:✓"
+      ]
+    },
+    {
+      "id": "051e7622-d4f2-466b-b39e-ab12f9c5643d",
+      "subject": "Re: A quick question...",
+      "action": "escalate_instructor",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 1,
+      "steps": [
+        "classify:✓",
+        "route:✓"
+      ]
+    },
+    {
+      "id": "8a0e171e-74c8-4988-bfa5-4830c5f2c30f",
+      "subject": "Re: A quick question...",
+      "action": "escalate_instructor",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 3170,
+      "steps": [
+        "classify:✓",
+        "route:✓"
+      ]
+    },
+    {
+      "id": "34beb268-1ad0-402b-abc2-645cb6046ebf",
+      "subject": "Reaching out from AI-Led Growth Community",
+      "action": "escalate_instructor",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 1,
+      "steps": [
+        "classify:✓",
+        "route:✓"
+      ]
+    },
+    {
+      "id": "bf8fdabd-4995-431d-afec-abb5f98547ad",
+      "subject": "👋  Feedback from mail.gcs06@gmail.com about Total TypeScrip",
+      "action": "respond",
+      "response": "I don't have an account on file for this email, so I can't check your dashboard settings directly. \n\nTo confirm: are you asking whether the Total TypeScript course platform itself has a light mode option? If so, what device or browser are you using when you access the course?",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 3046,
+      "steps": [
+        "classify:✓",
+        "route:✓",
+        "gather:✓",
+        "draft:✓",
+        "validate:✓"
+      ]
+    },
+    {
+      "id": "5ae9e967-8f3b-4b4f-b978-dcf66a71c751",
+      "subject": "Request for Invoice – POWS00000300",
+      "action": "respond",
+      "response": "I don't have an account or purchases linked to this email address. To locate the invoice for PO POWS00000300, I need you to either:\n\n1. Provide the email address associated with the Total TypeScript purchase, or\n2. Confirm the name the purchase was made under\n\nOnce I have that, I can pull up the invoice. You can also access all invoices directly at https://www.totaltypescript.com/invoices if you have login credentials for the account that made the purchase.",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 1828,
+      "steps": [
+        "classify:✓",
+        "route:✓",
+        "gather:✓",
+        "draft:✓",
+        "validate:✓"
+      ]
+    },
+    {
+      "id": "9327fd9e-2556-4c8b-af94-8f1a7e0e2af6",
+      "subject": "Re: A quick question...",
+      "action": "escalate_instructor",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 2584,
+      "steps": [
+        "classify:✓",
+        "route:✓"
+      ]
+    },
+    {
+      "id": "05c1fa3c-cf6a-4f3d-9df4-ba2c95a0d9a9",
+      "subject": "Re: A quick question...",
+      "action": "escalate_instructor",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 0,
+      "steps": [
+        "classify:✓",
+        "route:✓"
+      ]
+    },
+    {
+      "id": "99a13dd1-43fe-4343-8337-feadd99cc4af",
+      "subject": "Re: A quick question...",
+      "action": "escalate_instructor",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 2821,
+      "steps": [
+        "classify:✓",
+        "route:✓"
+      ]
+    },
+    {
+      "id": "a843e50b-d272-4ce0-a315-afd98ff3954a",
+      "subject": "Re: Welcome to AI SDK v5 Crash Course!",
+      "action": "respond",
+      "response": "The course is tied to the email address associated with your original purchase. If you bought it under a different email, you'll need to use that email to access it.\n\nLog in with whichever email you used when you purchased the course. If you're not sure which one, reply with both emails and I can check which one has the purchase on file.\n\nIf you need the course transferred to brennan@gopointtech.com, I can handle that once we confirm the original purchase email.",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 1718,
+      "steps": [
+        "classify:✓",
+        "route:✓",
+        "gather:✓",
+        "draft:✓",
+        "validate:✓"
+      ]
+    },
+    {
+      "id": "e773cbe1-a676-4934-88f4-c9afdafa1408",
+      "subject": "Re: Welcome to AI SDK v5 Crash Course!",
+      "action": "respond",
+      "response": "The course access is tied to the email you purchased it with. If you bought it with one email but are trying to log in with brennan@gopointtech.com, that's why it's asking you to buy again.\n\nLog in with the original email address you used for the purchase and you should have access. If you want to switch the course to brennan@gopointtech.com instead, reply with both email addresses and I can transfer it for you.",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 1897,
+      "steps": [
+        "classify:✓",
+        "route:✓",
+        "gather:✓",
+        "draft:✓",
+        "validate:✓"
+      ]
+    },
+    {
+      "id": "277eb8e7-c117-40b8-a083-c178e6bbc31d",
+      "subject": "Re: Paid \"Codebuff\" YouTube video opportunity!",
+      "action": "silence",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 2217,
+      "steps": [
+        "classify:✓",
+        "route:✓"
+      ]
+    },
+    {
+      "id": "62737986-7116-4c7f-acb7-25d2e45f2ae3",
+      "subject": "AI is so confusing, where do i start?",
+      "action": "respond",
+      "response": "Looks like you don't have an account with us yet. To get started with AI, you'll first need to sign up on our platform.\n\nOnce you're registered, what specific area interests you most? Machine learning basics, prompt engineering, neural networks, or something else? That'll help me point you to the right resources.",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 3243,
+      "steps": [
+        "classify:✓",
+        "route:✓",
+        "gather:✓",
+        "draft:✓",
+        "validate:✓"
+      ]
+    },
+    {
+      "id": "08c26c7e-7cc6-43c8-88ce-9462c1357770",
+      "subject": "Re: A quick question...",
+      "action": "escalate_instructor",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 3403,
+      "steps": [
+        "classify:✓",
+        "route:✓"
+      ]
+    },
+    {
+      "id": "e42367e0-5737-47eb-8062-4454481ea491",
+      "subject": "Re: A quick question...",
+      "action": "escalate_instructor",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 2402,
+      "steps": [
+        "classify:✓",
+        "route:✓"
+      ]
+    },
+    {
+      "id": "ff783555-f7a8-40e0-a7ac-f418f7c2180a",
+      "subject": "TypeScript is so cool",
+      "action": "respond",
+      "response": "Hi Joel,\n\nGenerics are tough at first, but they click once you see a few patterns. What specific part is tripping you up? Are you struggling with:\n\n- Writing your own generic functions/types\n- Understanding generic constraints\n- Reading generics in existing code\n\nOnce I know what's blocking you, I can point you toward the right resources or explain it differently.",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 3678,
+      "steps": [
+        "classify:✓",
+        "route:✓",
+        "gather:✓",
+        "draft:✓",
+        "validate:✓"
+      ]
+    },
+    {
+      "id": "0f3b9d92-235e-4c1b-8dc5-832e584bfd48",
+      "subject": "Please Help me",
+      "action": "respond",
+      "response": "Hi Joel,\n\nI don't have an account on file for your email, so I can't see what resources you currently have access to. What email address are you using to sign up or log in? That'll help me figure out what's available to you.\n\nIn the meantime, if you have specific TypeScript questions, our Discord community is a good resource for code help.",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 3720,
+      "steps": [
+        "classify:✓",
+        "route:✓",
+        "gather:✓",
+        "draft:✓",
+        "validate:✓"
+      ]
+    },
+    {
+      "id": "a32b737a-c01e-4a2b-b384-989fb3c7a352",
+      "subject": "This is Crazy",
+      "action": "escalate_instructor",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 2496,
+      "steps": [
+        "classify:✓",
+        "route:✓"
+      ]
+    },
+    {
+      "id": "9cd38d6b-a59e-4522-9b37-e261a753c286",
+      "subject": "I am lost.",
+      "action": "respond",
+      "response": "Joel,\n\nI don't have an account on file for you, so I can't pull up your access to our TypeScript materials. Do you remember which course or product you purchased, or the email you used to buy it?\n\nOnce we get that sorted, I can point you to the right resources. If you're working through TypeScript problems, our Discord community is also active with people who can debug code with you.",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 5203,
+      "steps": [
+        "classify:✓",
+        "route:✓",
+        "gather:✓",
+        "draft:✓",
+        "validate:✓"
+      ]
+    },
+    {
+      "id": "0c336520-3798-43b3-be0a-62b56fd9952b",
+      "subject": "I am lost.",
+      "action": "respond",
+      "response": "Hi Joel,\n\nI don't have an account on file for your email, so I can't pull up any course access or purchases. Can you confirm the email address you used when you signed up? That'll help me locate your account and see what resources you have access to.\n\nOnce we get that sorted, let me know which part of TypeScript is giving you trouble and I can point you to the right material or community resources to help you work through it.",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 3957,
+      "steps": [
+        "classify:✓",
+        "route:✓",
+        "gather:✓",
+        "draft:✓",
+        "validate:✓"
+      ]
+    },
+    {
+      "id": "7599fe27-c24d-4681-aea4-0f556ef1b206",
+      "subject": "I am lost.",
+      "action": "respond",
+      "response": "Hey Joel,\n\nThat's rough, but TypeScript is learnable. What specifically are you stuck on? Are you just getting started, or is there a particular concept (like types, interfaces, generics) that's causing problems?\n\nIf you're looking for structured learning, we have TypeScript content available. Let me know what level you're at and what you're trying to build, and I can point you in the right direction.",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 3553,
+      "steps": [
+        "classify:✓",
+        "route:✓",
+        "gather:✓",
+        "draft:✓",
+        "validate:✓"
+      ]
+    },
+    {
+      "id": "d6e5cd99-f842-4710-8dc9-41869d6da4e1",
+      "subject": "Pleas help.",
+      "action": "respond",
+      "response": "Hi Joel,\n\nI don't have an account on file for your email, so I can't pull up your purchase history. Do you have a different email associated with an account, or are you looking to get started with TypeScript training?\n\nIf you're interested in learning TypeScript, let me know and I can point you toward resources. For specific code questions, our Discord community is usually pretty active.",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 3088,
+      "steps": [
+        "classify:✓",
+        "route:✓",
+        "gather:✓",
+        "draft:✓",
+        "validate:✓"
+      ]
+    },
+    {
+      "id": "dff3d45d-22fb-413a-8463-cc6ee7566318",
+      "subject": "(Vercel Academy) Page has links to redirect: 33 URLs",
+      "action": "silence",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 2460,
+      "steps": [
+        "classify:✓",
+        "route:✓"
+      ]
+    },
+    {
+      "id": "1b7156d1-e705-43dc-9e4c-532ae29e3fb2",
+      "subject": "Improved paid collab proposal for Pippit AI",
+      "action": "respond",
+      "response": "You've reached a support account for a different service. This message is a partnership proposal from Aha (a creator agency), not a customer service issue with us.\n\nIf you're the intended recipient and want to respond to Francis about the Pippit AI collaboration, reply directly to their email. If you received this by mistake, forward it to the correct email address or let Aha know at the address they provided.",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 1749,
+      "steps": [
+        "classify:✓",
+        "route:✓",
+        "gather:✓",
+        "draft:✓",
+        "validate:✓"
+      ]
+    },
+    {
+      "id": "120ead92-90b6-401a-b1a7-1dcb0b403b35",
+      "subject": "Invitation to Explore SeaVerse.AI (Credits Provided)",
+      "action": "silence",
+      "passed": true,
+      "validationIssues": [],
+      "durationMs": 2673,
+      "steps": [
+        "classify:✓",
+        "route:✓"
+      ]
+    }
+  ]
+}

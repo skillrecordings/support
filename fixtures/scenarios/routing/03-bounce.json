@@ -1,0 +1,23 @@
+{
+  "id": "routing_bounce",
+  "name": "Bounce notification",
+  "description": "Mailer daemon bounce - should not respond",
+  "appId": "app_eval_tt",
+  "trigger": {
+    "subject": "Delivery Status Notification (Failure)",
+    "body": "This is an automatically generated Delivery Status Notification.\n\nDelivery to the following recipient failed permanently:\n\n     someone@invalid-domain.fake\n\nTechnical details of permanent failure:\nGoogle tried to deliver your message, but it was rejected by the server for the recipient domain invalid-domain.fake by mail.invalid-domain.fake.\n\nThe error that the other server returned was:\n550 5.1.1 The email account that you tried to reach does not exist."
+  },
+  "context": {
+    "customer": null,
+    "conversation": null
+  },
+  "expectedBehavior": "no_response",
+  "notExpectedToolCalls": [
+    "draftResponse"
+  ],
+  "assertions": {
+    "noDraftResponse": true
+  },
+  "expectedCategory": "system",
+  "expectedAction": "silence"
+}
