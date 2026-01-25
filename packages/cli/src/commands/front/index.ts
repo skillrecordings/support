@@ -15,6 +15,7 @@ import {
 import { createFrontClient as createSdkClient } from '@skillrecordings/front-sdk'
 import type { Command } from 'commander'
 import { registerPullCommand } from './pull-conversations'
+import { registerTagCommands } from './tags'
 
 type Message = FrontMessage
 
@@ -330,4 +331,7 @@ export function registerFrontCommands(program: Command): void {
 
   // Register pull command for building eval datasets
   registerPullCommand(front)
+
+  // Register tag management commands
+  registerTagCommands(front)
 }
