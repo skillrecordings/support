@@ -2,13 +2,10 @@
  * Gather Context Workflow
  *
  * Collects all context needed for drafting a response:
- * - Customer data from app integration (MySQL)
+ * - Customer data from app integration
  * - Knowledge from vector search
  * - Relevant memories
  * - Conversation history
- *
- * Triggered by: support/inbound.routed (only when route.action === 'respond')
- * Emits: support/context.gathered
  */
 
 import { MemoryService } from '@skillrecordings/memory/memory'
@@ -26,9 +23,6 @@ import { getApp } from '../../services/app-registry'
 import { inngest } from '../client'
 import { SUPPORT_CONTEXT_GATHERED, SUPPORT_ROUTED } from '../events'
 
-/**
- * Wire up gather tools with real service implementations.
- */
 async function createGatherTools(appId: string): Promise<GatherTools> {
   const app = await getApp(appId)
 
@@ -41,12 +35,35 @@ async function createGatherTools(appId: string): Promise<GatherTools> {
           })
 
           try {
+            await log('debug', 'looking up user', {
+              workflow: 'support-gather',
+              tool: 'lookupUser',
+              email,
+              appId,
+            })
+
             const user = await client.lookupUser(email)
             if (!user) {
+              await log('debug', 'user not found', {
+                workflow: 'support-gather',
+                tool: 'lookupUser',
+                email,
+                appId,
+              })
               return { user: null, purchases: [] }
             }
 
             const purchases = await client.getPurchases(user.id)
+
+            await log('info', 'user lookup complete', {
+              workflow: 'support-gather',
+              tool: 'lookupUser',
+              email,
+              appId,
+              userId: user.id,
+              purchaseCount: purchases.length,
+            })
+
             return {
               user: {
                 id: user.id,
@@ -65,28 +82,59 @@ async function createGatherTools(appId: string): Promise<GatherTools> {
                 status: p.status as 'active' | 'refunded' | 'transferred',
               })),
             }
-          } catch {
+          } catch (error) {
+            await log('error', 'user lookup failed', {
+              workflow: 'support-gather',
+              tool: 'lookupUser',
+              email,
+              appId,
+              error: error instanceof Error ? error.message : String(error),
+            })
             return { user: null, purchases: [] }
           }
         }
       : undefined,
 
     searchKnowledge: async (
-      _query: string,
-      _appId: string
+      query: string,
+      appId: string
     ): Promise<KnowledgeItem[]> => {
+      await log('debug', 'searching knowledge (not implemented)', {
+        workflow: 'support-gather',
+        tool: 'searchKnowledge',
+        queryLength: query.length,
+        appId,
+      })
       return []
     },
 
     getHistory: async (conversationId: string) => {
       const frontToken = process.env.FRONT_API_TOKEN
       if (!frontToken) {
+        await log('warn', 'FRONT_API_TOKEN not set, skipping history', {
+          workflow: 'support-gather',
+          tool: 'getHistory',
+          conversationId,
+        })
         return []
       }
 
       try {
+        await log('debug', 'fetching conversation history', {
+          workflow: 'support-gather',
+          tool: 'getHistory',
+          conversationId,
+        })
+
         const front = createFrontClient(frontToken)
         const messages = await front.getConversationMessages(conversationId)
+
+        await log('info', 'conversation history fetched', {
+          workflow: 'support-gather',
+          tool: 'getHistory',
+          conversationId,
+          messageCount: messages.length,
+        })
 
         return messages.map((msg: FrontMessage) => ({
           direction: msg.is_inbound ? ('in' as const) : ('out' as const),
@@ -94,18 +142,39 @@ async function createGatherTools(appId: string): Promise<GatherTools> {
           timestamp: msg.created_at,
           author: msg.author?.email,
         }))
-      } catch {
+      } catch (error) {
+        await log('error', 'conversation history fetch failed', {
+          workflow: 'support-gather',
+          tool: 'getHistory',
+          conversationId,
+          error: error instanceof Error ? error.message : String(error),
+        })
         return []
       }
     },
 
     searchMemory: async (query: string): Promise<MemoryItem[]> => {
       try {
+        await log('debug', 'searching memories', {
+          workflow: 'support-gather',
+          tool: 'searchMemory',
+          queryLength: query.length,
+          appId,
+        })
+
         const results = await MemoryService.find(query, {
           collection: 'support',
           limit: 5,
           threshold: 0.4,
           app_slug: appId,
+        })
+
+        await log('info', 'memory search complete', {
+          workflow: 'support-gather',
+          tool: 'searchMemory',
+          appId,
+          memoriesFound: results.length,
+          topScore: results[0]?.score ?? 0,
         })
 
         return results.map((r) => ({
@@ -114,7 +183,13 @@ async function createGatherTools(appId: string): Promise<GatherTools> {
           tags: (r.memory.metadata as { tags?: string[] }).tags || [],
           relevance: r.score,
         }))
-      } catch {
+      } catch (error) {
+        await log('error', 'memory search failed', {
+          workflow: 'support-gather',
+          tool: 'searchMemory',
+          appId,
+          error: error instanceof Error ? error.message : String(error),
+        })
         return []
       }
     },
@@ -147,6 +222,7 @@ export const gatherWorkflow = inngest.createFunction(
     initializeAxiom()
 
     await log('info', 'gather workflow started', {
+      workflow: 'support-gather',
       conversationId,
       messageId,
       appId,
@@ -154,10 +230,23 @@ export const gatherWorkflow = inngest.createFunction(
       category: classification.category,
     })
 
-    // Gather context from various sources
     const context = await step.run('gather-context', async () => {
       const stepStartTime = Date.now()
+
+      await log('debug', 'creating gather tools', {
+        workflow: 'support-gather',
+        step: 'gather-context',
+        appId,
+      })
+
       const tools = await createGatherTools(appId)
+
+      await log('debug', 'running gather step', {
+        workflow: 'support-gather',
+        step: 'gather-context',
+        conversationId,
+        hasUserLookup: !!tools.lookupUser,
+      })
 
       const result = await gather(
         {
@@ -184,7 +273,21 @@ export const gatherWorkflow = inngest.createFunction(
 
       const durationMs = Date.now() - stepStartTime
 
-      // Trace memory retrieval to Axiom
+      await log('info', 'context gathered', {
+        workflow: 'support-gather',
+        step: 'gather-context',
+        conversationId,
+        appId,
+        hasUser: !!result.user,
+        purchaseCount: result.purchases.length,
+        knowledgeCount: result.knowledge.length,
+        historyCount: result.history.length,
+        memoryCount: result.priorMemory.length,
+        errorCount: result.gatherErrors.length,
+        errors: result.gatherErrors,
+        durationMs,
+      })
+
       if (result.priorMemory.length > 0) {
         await traceMemoryRetrieval({
           conversationId,
@@ -196,7 +299,6 @@ export const gatherWorkflow = inngest.createFunction(
         })
       }
 
-      // Trace workflow step with high cardinality
       await traceWorkflowStep({
         workflowName: 'support-gather',
         conversationId,
@@ -211,14 +313,18 @@ export const gatherWorkflow = inngest.createFunction(
           historyCount: result.history.length,
           memoryCount: result.priorMemory.length,
           errorCount: result.gatherErrors.length,
-          errors: result.gatherErrors,
         },
       })
 
       return result
     })
 
-    // Emit context gathered event
+    await log('debug', 'emitting context gathered event', {
+      workflow: 'support-gather',
+      conversationId,
+      messageId,
+    })
+
     await step.sendEvent('emit-context-gathered', {
       name: SUPPORT_CONTEXT_GATHERED,
       data: {
@@ -235,10 +341,7 @@ export const gatherWorkflow = inngest.createFunction(
         },
         context: {
           customer: context.user
-            ? {
-                email: context.user.email,
-                purchases: context.purchases,
-              }
+            ? { email: context.user.email, purchases: context.purchases }
             : null,
           knowledge: context.knowledge,
           memories: context.priorMemory,
@@ -246,13 +349,25 @@ export const gatherWorkflow = inngest.createFunction(
       },
     })
 
-    // Final completion trace
+    const totalDurationMs = Date.now() - workflowStartTime
+
+    await log('info', 'gather workflow completed', {
+      workflow: 'support-gather',
+      conversationId,
+      messageId,
+      appId,
+      hasUser: !!context.user,
+      purchaseCount: context.purchases.length,
+      memoryCount: context.priorMemory.length,
+      totalDurationMs,
+    })
+
     await traceWorkflowStep({
       workflowName: 'support-gather',
       conversationId,
       appId,
       stepName: 'complete',
-      durationMs: Date.now() - workflowStartTime,
+      durationMs: totalDurationMs,
       success: true,
       metadata: {
         hasUser: !!context.user,

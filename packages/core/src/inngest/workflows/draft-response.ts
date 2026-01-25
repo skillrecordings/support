@@ -2,10 +2,7 @@
  * Draft Response Workflow
  *
  * Generates a draft response using the gathered context.
- * Listens for context.gathered events and emits draft.created.
- *
- * Part of the eval pipeline refactor - replacing monolithic runSupportAgent
- * with composable, testable steps.
+ * Uses LLM to create response based on classification and context.
  */
 
 import {
@@ -38,6 +35,7 @@ export const draftWorkflow = inngest.createFunction(
     initializeAxiom()
 
     await log('info', 'draft workflow started', {
+      workflow: 'support-draft',
       conversationId,
       messageId,
       appId,
@@ -47,9 +45,16 @@ export const draftWorkflow = inngest.createFunction(
       memoryCount: context.memories?.length ?? 0,
     })
 
-    // Generate draft response
     const draftResult = await step.run('draft-response', async () => {
       const stepStartTime = Date.now()
+
+      await log('debug', 'preparing draft input', {
+        workflow: 'support-draft',
+        step: 'draft-response',
+        conversationId,
+        category: classification.category,
+        purchaseCount: context.customer?.purchases?.length ?? 0,
+      })
 
       const classifyOutput: ClassifyOutput = {
         category: classification.category as MessageCategory,
@@ -133,8 +138,26 @@ export const draftWorkflow = inngest.createFunction(
         context: gatherOutput,
       }
 
+      await log('debug', 'calling LLM for draft', {
+        workflow: 'support-draft',
+        step: 'draft-response',
+        conversationId,
+        model: 'claude-haiku-4-5',
+      })
+
       const result = await draft(draftInput)
       const durationMs = Date.now() - stepStartTime
+
+      await log('info', 'draft generated', {
+        workflow: 'support-draft',
+        step: 'draft-response',
+        conversationId,
+        appId,
+        draftLength: result.draft.length,
+        toolsUsed: result.toolsUsed,
+        draftPreview: result.draft.slice(0, 200),
+        durationMs,
+      })
 
       await traceWorkflowStep({
         workflowName: 'support-draft',
@@ -157,7 +180,13 @@ export const draftWorkflow = inngest.createFunction(
       return result
     })
 
-    // Emit draft created event
+    await log('debug', 'emitting draft created event', {
+      workflow: 'support-draft',
+      conversationId,
+      messageId,
+      draftLength: draftResult.draft.length,
+    })
+
     await step.sendEvent('emit-draft-created', {
       name: SUPPORT_DRAFT_CREATED,
       data: {
@@ -172,23 +201,28 @@ export const draftWorkflow = inngest.createFunction(
       },
     })
 
-    // Final completion trace
+    const totalDurationMs = Date.now() - workflowStartTime
+
+    await log('info', 'draft workflow completed', {
+      workflow: 'support-draft',
+      conversationId,
+      messageId,
+      appId,
+      draftLength: draftResult.draft.length,
+      toolsUsed: draftResult.toolsUsed,
+      totalDurationMs,
+    })
+
     await traceWorkflowStep({
       workflowName: 'support-draft',
       conversationId,
       appId,
       stepName: 'complete',
-      durationMs: Date.now() - workflowStartTime,
+      durationMs: totalDurationMs,
       success: true,
-      metadata: {
-        draftLength: draftResult.draft.length,
-      },
+      metadata: { draftLength: draftResult.draft.length },
     })
 
-    return {
-      conversationId,
-      messageId,
-      draft: draftResult,
-    }
+    return { conversationId, messageId, draft: draftResult }
   }
 )

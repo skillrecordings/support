@@ -1,12 +1,8 @@
 /**
- * Route Workflow - Step 2 of the eval pipeline
+ * Route Workflow - Step 2 of the pipeline
  *
- * Triggered after classification, decides what action to take.
+ * Decides what action to take based on classification.
  * Routes to different handlers based on the action type.
- *
- * Listens: support/inbound.classified
- * Emits: support/inbound.routed (for respond action)
- *        support/inbound.escalated (for escalation actions)
  */
 
 import {
@@ -23,10 +19,6 @@ import {
   SUPPORT_ROUTED,
 } from '../events'
 
-/**
- * Converts partial signals from event data to full MessageSignals.
- * Missing signals default to false.
- */
 function toMessageSignals(signals: Record<string, boolean>): MessageSignals {
   return {
     hasEmailInBody: signals.hasEmailInBody ?? false,
@@ -67,6 +59,7 @@ export const routeWorkflow = inngest.createFunction(
     initializeAxiom()
 
     await log('info', 'route workflow started', {
+      workflow: 'support-route',
       conversationId,
       messageId,
       appId,
@@ -78,7 +71,13 @@ export const routeWorkflow = inngest.createFunction(
     const routeResult = await step.run('route', async () => {
       const stepStartTime = Date.now()
 
-      // Convert event classification to full ClassifyOutput
+      await log('debug', 'running routing step', {
+        workflow: 'support-route',
+        step: 'route',
+        conversationId,
+        category: classification.category,
+      })
+
       const fullClassification: ClassifyOutput = {
         category: classification.category as ClassifyOutput['category'],
         confidence: classification.confidence,
@@ -98,6 +97,17 @@ export const routeWorkflow = inngest.createFunction(
 
       const durationMs = Date.now() - stepStartTime
 
+      await log('info', 'routing decision made', {
+        workflow: 'support-route',
+        step: 'route',
+        conversationId,
+        appId,
+        action: result.action,
+        reason: result.reason,
+        category: classification.category,
+        durationMs,
+      })
+
       await traceWorkflowStep({
         workflowName: 'support-route',
         conversationId,
@@ -115,8 +125,16 @@ export const routeWorkflow = inngest.createFunction(
       return result
     })
 
-    // Handle terminal actions - no further events needed
+    // Handle terminal actions
     if (routeResult.action === 'silence') {
+      await log('info', 'route workflow completed - silence', {
+        workflow: 'support-route',
+        conversationId,
+        messageId,
+        action: 'silence',
+        reason: routeResult.reason,
+        totalDurationMs: Date.now() - workflowStartTime,
+      })
       await traceWorkflowStep({
         workflowName: 'support-route',
         conversationId,
@@ -126,65 +144,29 @@ export const routeWorkflow = inngest.createFunction(
         success: true,
         metadata: { action: 'silence', terminal: true },
       })
-      return {
-        conversationId,
-        messageId,
-        route: routeResult,
-        terminal: true,
-      }
+      return { conversationId, messageId, route: routeResult, terminal: true }
     }
 
     // Handle escalation actions
-    if (routeResult.action === 'escalate_urgent') {
-      await step.sendEvent('emit-urgent-escalation', {
-        name: SUPPORT_ESCALATED,
-        data: {
-          conversationId,
-          messageId,
-          appId,
-          subject,
-          body,
-          senderEmail,
-          classification,
-          route: routeResult,
-          priority: 'urgent' as const,
-        },
-      })
-      return {
-        conversationId,
-        messageId,
-        route: routeResult,
-        escalated: true,
-        priority: 'urgent',
-      }
-    }
+    const escalationActions = ['escalate_urgent', 'escalate_human', 'escalate_instructor', 'support_teammate', 'catalog_voc']
+    if (escalationActions.includes(routeResult.action)) {
+      const priority = routeResult.action === 'escalate_urgent' ? 'urgent' 
+        : routeResult.action === 'escalate_instructor' ? 'instructor'
+        : routeResult.action === 'support_teammate' ? 'teammate_support'
+        : routeResult.action === 'catalog_voc' ? 'voc'
+        : 'normal'
 
-    if (routeResult.action === 'escalate_human') {
-      await step.sendEvent('emit-human-escalation', {
-        name: SUPPORT_ESCALATED,
-        data: {
-          conversationId,
-          messageId,
-          appId,
-          subject,
-          body,
-          senderEmail,
-          classification,
-          route: routeResult,
-          priority: 'normal' as const,
-        },
-      })
-      return {
+      await log('info', 'route workflow completed - escalation', {
+        workflow: 'support-route',
         conversationId,
         messageId,
-        route: routeResult,
-        escalated: true,
-        priority: 'normal',
-      }
-    }
+        action: routeResult.action,
+        priority,
+        reason: routeResult.reason,
+        totalDurationMs: Date.now() - workflowStartTime,
+      })
 
-    if (routeResult.action === 'escalate_instructor') {
-      await step.sendEvent('emit-instructor-escalation', {
+      await step.sendEvent('emit-escalation', {
         name: SUPPORT_ESCALATED,
         data: {
           conversationId,
@@ -195,70 +177,23 @@ export const routeWorkflow = inngest.createFunction(
           senderEmail,
           classification,
           route: routeResult,
-          priority: 'instructor' as const,
+          priority: priority as 'urgent' | 'normal' | 'instructor' | 'teammate_support' | 'voc',
         },
       })
-      return {
-        conversationId,
-        messageId,
-        route: routeResult,
-        escalated: true,
-        priority: 'instructor',
-      }
-    }
-
-    // Handle support_teammate action (add context comment)
-    if (routeResult.action === 'support_teammate') {
-      await step.sendEvent('emit-support-teammate', {
-        name: SUPPORT_ESCALATED,
-        data: {
-          conversationId,
-          messageId,
-          appId,
-          subject,
-          body,
-          senderEmail,
-          classification,
-          route: routeResult,
-          priority: 'teammate_support' as const,
-        },
-      })
-      return {
-        conversationId,
-        messageId,
-        route: routeResult,
-        terminal: true,
-        teammateSupport: true,
-      }
-    }
-
-    // Handle catalog_voc action (voice of customer cataloging)
-    if (routeResult.action === 'catalog_voc') {
-      await step.sendEvent('emit-catalog-voc', {
-        name: SUPPORT_ESCALATED,
-        data: {
-          conversationId,
-          messageId,
-          appId,
-          subject,
-          body,
-          senderEmail,
-          classification,
-          route: routeResult,
-          priority: 'voc' as const,
-        },
-      })
-      return {
-        conversationId,
-        messageId,
-        route: routeResult,
-        terminal: true,
-        vocCataloged: true,
-      }
+      return { conversationId, messageId, route: routeResult, escalated: true, priority }
     }
 
     // Handle respond action - continue to gather step
     if (routeResult.action === 'respond') {
+      await log('info', 'route workflow completed - respond', {
+        workflow: 'support-route',
+        conversationId,
+        messageId,
+        action: 'respond',
+        reason: routeResult.reason,
+        totalDurationMs: Date.now() - workflowStartTime,
+      })
+
       await step.sendEvent('emit-routed', {
         name: SUPPORT_ROUTED,
         data: {
@@ -269,10 +204,7 @@ export const routeWorkflow = inngest.createFunction(
           body,
           senderEmail,
           classification,
-          route: {
-            action: routeResult.action,
-            reason: routeResult.reason,
-          },
+          route: { action: routeResult.action, reason: routeResult.reason },
         },
       })
 
@@ -286,14 +218,19 @@ export const routeWorkflow = inngest.createFunction(
         metadata: { action: 'respond' },
       })
 
-      return {
-        conversationId,
-        messageId,
-        route: routeResult,
-      }
+      return { conversationId, messageId, route: routeResult }
     }
 
-    // Fallback - unknown action, treat as escalation
+    // Fallback - unknown action
+    await log('warn', 'route workflow completed - unknown action', {
+      workflow: 'support-route',
+      conversationId,
+      messageId,
+      action: routeResult.action,
+      reason: routeResult.reason,
+      totalDurationMs: Date.now() - workflowStartTime,
+    })
+
     await step.sendEvent('emit-unknown-escalation', {
       name: SUPPORT_ESCALATED,
       data: {
@@ -308,12 +245,6 @@ export const routeWorkflow = inngest.createFunction(
         priority: 'normal' as const,
       },
     })
-    return {
-      conversationId,
-      messageId,
-      route: routeResult,
-      escalated: true,
-      priority: 'normal',
-    }
+    return { conversationId, messageId, route: routeResult, escalated: true, priority: 'normal' }
   }
 )
