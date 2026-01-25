@@ -36,22 +36,10 @@ export const handleValidatedDraft = inngest.createFunction(
     const workflowStartTime = Date.now()
     initializeAxiom()
 
-    console.log('[handle-validated] ========== STARTED ==========')
-    console.log('[handle-validated] conversationId:', conversationId)
-    console.log('[handle-validated] messageId:', messageId)
-    console.log('[handle-validated] appId:', appId)
-    console.log('[handle-validated] valid:', validation.valid)
-    console.log('[handle-validated] issueCount:', validation.issues?.length ?? 0)
-    console.log('[handle-validated] score:', validation.score)
-
     // Decide: auto-approve or request human approval
     const decision = await step.run('decide-approval', async () => {
       const stepStartTime = Date.now()
 
-      // Auto-approve if:
-      // 1. Validation passed
-      // 2. No critical issues
-      // 3. Score meets threshold (if available)
       const autoApproveThreshold = 0.8
       const score = validation.score ?? (validation.valid ? 1.0 : 0.0)
 
@@ -76,13 +64,6 @@ export const handleValidatedDraft = inngest.createFunction(
           validationPassed: validation.valid,
           issueCount: validation.issues?.length ?? 0,
         },
-      })
-
-      console.log('[handle-validated] decision:', {
-        autoApprove,
-        score,
-        reason,
-        durationMs,
       })
 
       return { autoApprove, reason, score }
@@ -110,8 +91,15 @@ export const handleValidatedDraft = inngest.createFunction(
           created_at: new Date(),
         })
 
-        const durationMs = Date.now() - stepStartTime
-        console.log('[handle-validated] action created:', { actionId: id, durationMs })
+        await traceWorkflowStep({
+          workflowName: 'support-handle-validated',
+          conversationId,
+          appId,
+          stepName: 'create-approved-action',
+          durationMs: Date.now() - stepStartTime,
+          success: true,
+          metadata: { actionId: id, autoApproved: true },
+        })
 
         return id
       })
@@ -126,11 +114,16 @@ export const handleValidatedDraft = inngest.createFunction(
         },
       })
 
-      const totalDurationMs = Date.now() - workflowStartTime
-
-      console.log('[handle-validated] ========== AUTO-APPROVED ==========')
-      console.log('[handle-validated] actionId:', actionId)
-      console.log('[handle-validated] totalDurationMs:', totalDurationMs)
+      // Final completion trace
+      await traceWorkflowStep({
+        workflowName: 'support-handle-validated',
+        conversationId,
+        appId,
+        stepName: 'complete',
+        durationMs: Date.now() - workflowStartTime,
+        success: true,
+        metadata: { outcome: 'auto-approved', actionId },
+      })
 
       return { conversationId, messageId, autoApproved: true, actionId }
     }
@@ -156,8 +149,15 @@ export const handleValidatedDraft = inngest.createFunction(
         created_at: new Date(),
       })
 
-      const durationMs = Date.now() - stepStartTime
-      console.log('[handle-validated] pending action created:', { actionId: id, durationMs })
+      await traceWorkflowStep({
+        workflowName: 'support-handle-validated',
+        conversationId,
+        appId,
+        stepName: 'create-pending-action',
+        durationMs: Date.now() - stepStartTime,
+        success: true,
+        metadata: { actionId: id, autoApproved: false },
+      })
 
       return id
     })
@@ -187,11 +187,16 @@ export const handleValidatedDraft = inngest.createFunction(
       actionType: 'send-draft',
     })
 
-    const totalDurationMs = Date.now() - workflowStartTime
-    console.log('[handle-validated] ========== APPROVAL REQUESTED ==========')
-    console.log('[handle-validated] actionId:', actionId)
-    console.log('[handle-validated] reason:', decision.reason)
-    console.log('[handle-validated] totalDurationMs:', totalDurationMs)
+    // Final completion trace
+    await traceWorkflowStep({
+      workflowName: 'support-handle-validated',
+      conversationId,
+      appId,
+      stepName: 'complete',
+      durationMs: Date.now() - workflowStartTime,
+      success: true,
+      metadata: { outcome: 'approval-requested', actionId },
+    })
 
     return { conversationId, messageId, autoApproved: false, actionId }
   }

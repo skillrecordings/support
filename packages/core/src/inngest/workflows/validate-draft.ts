@@ -30,17 +30,9 @@ export const validateWorkflow = inngest.createFunction(
     const workflowStartTime = Date.now()
     initializeAxiom()
 
-    console.log('[validate-workflow] ========== STARTED ==========')
-    console.log('[validate-workflow] conversationId:', conversationId)
-    console.log('[validate-workflow] messageId:', messageId)
-    console.log('[validate-workflow] appId:', appId)
-    console.log('[validate-workflow] draftLength:', draft.content.length)
-
     // Validate the draft
     const validation = await step.run('validate-draft', async () => {
       const stepStartTime = Date.now()
-
-      console.log('[validate-workflow] Running validation checks...')
 
       const result = validate({
         draft: draft.content,
@@ -66,19 +58,12 @@ export const validateWorkflow = inngest.createFunction(
           valid: result.valid,
           issueCount: result.issues.length,
           issueTypes: issuesByType,
-          hasLeaks: issuesByType['leak'] ?? 0 > 0,
-          hasMeta: issuesByType['meta'] ?? 0 > 0,
-          hasBanned: issuesByType['banned'] ?? 0 > 0,
-          hasFabrication: issuesByType['fabrication'] ?? 0 > 0,
+          hasLeaks: (issuesByType['leak'] ?? 0) > 0,
+          hasMeta: (issuesByType['meta'] ?? 0) > 0,
+          hasBanned: (issuesByType['banned'] ?? 0) > 0,
+          hasFabrication: (issuesByType['fabrication'] ?? 0) > 0,
           draftLength: draft.content.length,
         },
-      })
-
-      console.log('[validate-workflow] validation complete:', {
-        valid: result.valid,
-        issueCount: result.issues.length,
-        issueTypes: issuesByType,
-        durationMs,
       })
 
       return result
@@ -102,11 +87,19 @@ export const validateWorkflow = inngest.createFunction(
       },
     })
 
-    const totalDurationMs = Date.now() - workflowStartTime
-    console.log('[validate-workflow] ========== COMPLETED ==========')
-    console.log('[validate-workflow] totalDurationMs:', totalDurationMs)
-    console.log('[validate-workflow] valid:', validation.valid)
-    console.log('[validate-workflow] issueCount:', validation.issues.length)
+    // Final completion trace
+    await traceWorkflowStep({
+      workflowName: 'support-validate',
+      conversationId,
+      appId,
+      stepName: 'complete',
+      durationMs: Date.now() - workflowStartTime,
+      success: true,
+      metadata: {
+        valid: validation.valid,
+        issueCount: validation.issues.length,
+      },
+    })
 
     return { conversationId, messageId, validation }
   }

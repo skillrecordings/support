@@ -9,12 +9,12 @@
  *        support/inbound.escalated (for escalation actions)
  */
 
-import { route } from '../../pipeline/steps/route'
-import type { ClassifyOutput, MessageSignals } from '../../pipeline/types'
 import {
   initializeAxiom,
   traceWorkflowStep,
 } from '../../observability/axiom'
+import { route } from '../../pipeline/steps/route'
+import type { ClassifyOutput, MessageSignals } from '../../pipeline/types'
 import { inngest } from '../client'
 import {
   SUPPORT_CLASSIFIED,
@@ -65,13 +65,6 @@ export const routeWorkflow = inngest.createFunction(
     const workflowStartTime = Date.now()
     initializeAxiom()
 
-    console.log('[route-workflow] ========== STARTED ==========')
-    console.log('[route-workflow] conversationId:', conversationId)
-    console.log('[route-workflow] messageId:', messageId)
-    console.log('[route-workflow] appId:', appId)
-    console.log('[route-workflow] category:', classification.category)
-    console.log('[route-workflow] confidence:', classification.confidence)
-
     // Run routing logic
     const routeResult = await step.run('route', async () => {
       const stepStartTime = Date.now()
@@ -89,14 +82,12 @@ export const routeWorkflow = inngest.createFunction(
         classification: fullClassification,
         appConfig: {
           appId,
-          instructorConfigured: false, // TODO: Load from app registry
+          instructorConfigured: false,
           autoSendEnabled: false,
         },
       })
 
       const durationMs = Date.now() - stepStartTime
-
-      // Trace to Axiom with high cardinality
 
       await traceWorkflowStep({
         workflowName: 'support-route',
@@ -112,18 +103,20 @@ export const routeWorkflow = inngest.createFunction(
         },
       })
 
-      console.log('[route-workflow] routing complete:', {
-        action: result.action,
-        reason: result.reason,
-        durationMs,
-      })
-
       return result
     })
 
     // Handle terminal actions - no further events needed
     if (routeResult.action === 'silence') {
-      console.log(`[route-workflow] Action: silence - ${routeResult.reason}`)
+      await traceWorkflowStep({
+        workflowName: 'support-route',
+        conversationId,
+        appId,
+        stepName: 'complete',
+        durationMs: Date.now() - workflowStartTime,
+        success: true,
+        metadata: { action: 'silence', terminal: true },
+      })
       return {
         conversationId,
         messageId,
@@ -134,9 +127,6 @@ export const routeWorkflow = inngest.createFunction(
 
     // Handle escalation actions
     if (routeResult.action === 'escalate_urgent') {
-      console.log(
-        `[route-workflow] Action: escalate_urgent - ${routeResult.reason}`
-      )
       await step.sendEvent('emit-urgent-escalation', {
         name: SUPPORT_ESCALATED,
         data: {
@@ -161,9 +151,6 @@ export const routeWorkflow = inngest.createFunction(
     }
 
     if (routeResult.action === 'escalate_human') {
-      console.log(
-        `[route-workflow] Action: escalate_human - ${routeResult.reason}`
-      )
       await step.sendEvent('emit-human-escalation', {
         name: SUPPORT_ESCALATED,
         data: {
@@ -188,9 +175,6 @@ export const routeWorkflow = inngest.createFunction(
     }
 
     if (routeResult.action === 'escalate_instructor') {
-      console.log(
-        `[route-workflow] Action: escalate_instructor - ${routeResult.reason}`
-      )
       await step.sendEvent('emit-instructor-escalation', {
         name: SUPPORT_ESCALATED,
         data: {
@@ -216,9 +200,6 @@ export const routeWorkflow = inngest.createFunction(
 
     // Handle support_teammate action (add context comment)
     if (routeResult.action === 'support_teammate') {
-      console.log(
-        `[route-workflow] Action: support_teammate - ${routeResult.reason}`
-      )
       await step.sendEvent('emit-support-teammate', {
         name: SUPPORT_ESCALATED,
         data: {
@@ -244,9 +225,6 @@ export const routeWorkflow = inngest.createFunction(
 
     // Handle catalog_voc action (voice of customer cataloging)
     if (routeResult.action === 'catalog_voc') {
-      console.log(
-        `[route-workflow] Action: catalog_voc - ${routeResult.reason}`
-      )
       await step.sendEvent('emit-catalog-voc', {
         name: SUPPORT_ESCALATED,
         data: {
@@ -272,7 +250,6 @@ export const routeWorkflow = inngest.createFunction(
 
     // Handle respond action - continue to gather step
     if (routeResult.action === 'respond') {
-      console.log(`[route-workflow] Action: respond - ${routeResult.reason}`)
       await step.sendEvent('emit-routed', {
         name: SUPPORT_ROUTED,
         data: {
@@ -290,9 +267,15 @@ export const routeWorkflow = inngest.createFunction(
         },
       })
 
-      const totalDurationMs = Date.now() - workflowStartTime
-      console.log('[route-workflow] ========== COMPLETED ==========')
-      console.log('[route-workflow] totalDurationMs:', totalDurationMs)
+      await traceWorkflowStep({
+        workflowName: 'support-route',
+        conversationId,
+        appId,
+        stepName: 'complete',
+        durationMs: Date.now() - workflowStartTime,
+        success: true,
+        metadata: { action: 'respond' },
+      })
 
       return {
         conversationId,
@@ -302,9 +285,6 @@ export const routeWorkflow = inngest.createFunction(
     }
 
     // Fallback - unknown action, treat as escalation
-    console.warn(
-      `[route-workflow] Unknown action: ${routeResult.action} - escalating`
-    )
     await step.sendEvent('emit-unknown-escalation', {
       name: SUPPORT_ESCALATED,
       data: {
