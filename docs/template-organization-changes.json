@@ -1,0 +1,1256 @@
+{
+  "timestamp": "2026-01-25T17:30:34.175Z",
+  "created_folders": [
+    "Epic Web",
+    "Epic React",
+    "Testing JavaScript",
+    "AI Hero",
+    "Shared"
+  ],
+  "template_updates": [
+    {
+      "templateId": "rsp_rp1r9",
+      "templateName": "new content",
+      "oldFolder": null,
+      "newFolder": "AI Hero",
+      "newFolderId": "rsf_q605",
+      "reason": "AI Hero or Epic AI reference"
+    },
+    {
+      "templateId": "rsp_rp351",
+      "templateName": "Discord: AI Hero",
+      "oldFolder": null,
+      "newFolder": "AI Hero",
+      "newFolderId": "rsf_q605",
+      "reason": "AI Hero or Epic AI reference"
+    },
+    {
+      "templateId": "rsp_7il8n",
+      "templateName": "Partner Products Business Hours",
+      "oldFolder": null,
+      "newFolder": "Auto-responders",
+      "newFolderId": "rsf_4zev",
+      "reason": "Auto-responder pattern"
+    },
+    {
+      "templateId": "rsp_8pn0n",
+      "templateName": "Outside of Business Hours - egghead",
+      "oldFolder": null,
+      "newFolder": "egghead",
+      "newFolderId": "rsf_4ytj",
+      "reason": "egghead prefix or egghead.io reference"
+    },
+    {
+      "templateId": "rsp_8r7pj",
+      "templateName": "During Business Hours - egghead",
+      "oldFolder": null,
+      "newFolder": "egghead",
+      "newFolderId": "rsf_4ytj",
+      "reason": "egghead prefix or egghead.io reference"
+    },
+    {
+      "templateId": "rsp_9zabr",
+      "templateName": "eh: Custom Invoice w/ Link",
+      "oldFolder": null,
+      "newFolder": "egghead",
+      "newFolderId": "rsf_4ytj",
+      "reason": "egghead prefix or egghead.io reference"
+    },
+    {
+      "templateId": "rsp_9zadj",
+      "templateName": "eh: Delete Account FAQ",
+      "oldFolder": null,
+      "newFolder": "egghead",
+      "newFolderId": "rsf_4ytj",
+      "reason": "egghead prefix or egghead.io reference"
+    },
+    {
+      "templateId": "rsp_9zop3",
+      "templateName": "eh: Account Deletion",
+      "oldFolder": null,
+      "newFolder": "egghead",
+      "newFolderId": "rsf_4ytj",
+      "reason": "egghead prefix or egghead.io reference"
+    },
+    {
+      "templateId": "rsp_9zs5j",
+      "templateName": "eh: 10% Discount Coupon Link",
+      "oldFolder": null,
+      "newFolder": "egghead",
+      "newFolderId": "rsf_4ytj",
+      "reason": "egghead prefix or egghead.io reference"
+    },
+    {
+      "templateId": "rsp_a1umf",
+      "templateName": "egg: No Record of Membership",
+      "oldFolder": null,
+      "newFolder": "egghead",
+      "newFolderId": "rsf_4ytj",
+      "reason": "egghead prefix or egghead.io reference"
+    },
+    {
+      "templateId": "rsp_apvnr",
+      "templateName": "egghead delete account instructions",
+      "oldFolder": null,
+      "newFolder": "egghead",
+      "newFolderId": "rsf_4ytj",
+      "reason": "egghead prefix or egghead.io reference"
+    },
+    {
+      "templateId": "rsp_aw7ev",
+      "templateName": "update to team account",
+      "oldFolder": null,
+      "newFolder": "egghead",
+      "newFolderId": "rsf_4ytj",
+      "reason": "egghead prefix or egghead.io reference"
+    },
+    {
+      "templateId": "rsp_bo8hz",
+      "templateName": "instructor inquiry",
+      "oldFolder": null,
+      "newFolder": "egghead",
+      "newFolderId": "rsf_4ytj",
+      "reason": "egghead prefix or egghead.io reference"
+    },
+    {
+      "templateId": "rsp_c2fif",
+      "templateName": "Joel Collaboration",
+      "oldFolder": null,
+      "newFolder": "egghead",
+      "newFolderId": "rsf_4ytj",
+      "reason": "egghead prefix or egghead.io reference"
+    },
+    {
+      "templateId": "rsp_2293b",
+      "templateName": "Discount Request - egghead",
+      "oldFolder": null,
+      "newFolder": "egghead",
+      "newFolderId": "rsf_4ytj",
+      "reason": "egghead prefix or egghead.io reference"
+    },
+    {
+      "templateId": "rsp_2298n",
+      "templateName": "Request for Invoice or Receipt - egghead",
+      "oldFolder": null,
+      "newFolder": "egghead",
+      "newFolderId": "rsf_4ytj",
+      "reason": "egghead prefix or egghead.io reference"
+    },
+    {
+      "templateId": "rsp_3fxl3",
+      "templateName": "Free Trial",
+      "oldFolder": null,
+      "newFolder": "egghead",
+      "newFolderId": "rsf_4ytj",
+      "reason": "egghead prefix or egghead.io reference"
+    },
+    {
+      "templateId": "rsp_3iw3r",
+      "templateName": "Change Email Request - egghead",
+      "oldFolder": null,
+      "newFolder": "egghead",
+      "newFolderId": "rsf_4ytj",
+      "reason": "egghead prefix or egghead.io reference"
+    },
+    {
+      "templateId": "rsp_5zlxj",
+      "templateName": "Magic Link - egghead",
+      "oldFolder": null,
+      "newFolder": "egghead",
+      "newFolderId": "rsf_4ytj",
+      "reason": "egghead prefix or egghead.io reference"
+    },
+    {
+      "templateId": "rsp_6vqvb",
+      "templateName": "Free Resources - Epic React",
+      "oldFolder": null,
+      "newFolder": "Epic React",
+      "newFolderId": "rsf_q5wl",
+      "reason": "ER prefix or epicreact.dev reference"
+    },
+    {
+      "templateId": "rsp_6vttz",
+      "templateName": "Request for Invoice or Receipt - Epic React",
+      "oldFolder": null,
+      "newFolder": "Epic React",
+      "newFolderId": "rsf_q5wl",
+      "reason": "ER prefix or epicreact.dev reference"
+    },
+    {
+      "templateId": "rsp_b5eiv",
+      "templateName": "ER: v2 Free Upgrade",
+      "oldFolder": null,
+      "newFolder": "Epic React",
+      "newFolderId": "rsf_q5wl",
+      "reason": "ER prefix or epicreact.dev reference"
+    },
+    {
+      "templateId": "rsp_bic5j",
+      "templateName": "Epic React v2 Upgrade Cost",
+      "oldFolder": null,
+      "newFolder": "Epic React",
+      "newFolderId": "rsf_q5wl",
+      "reason": "ER prefix or epicreact.dev reference"
+    },
+    {
+      "templateId": "rsp_bo2br",
+      "templateName": "Epic React V2 Course length",
+      "oldFolder": null,
+      "newFolder": "Epic React",
+      "newFolderId": "rsf_q5wl",
+      "reason": "ER prefix or epicreact.dev reference"
+    },
+    {
+      "templateId": "rsp_bofnr",
+      "templateName": "er: free resources",
+      "oldFolder": null,
+      "newFolder": "Epic React",
+      "newFolderId": "rsf_q5wl",
+      "reason": "ER prefix or epicreact.dev reference"
+    },
+    {
+      "templateId": "rsp_bon47",
+      "templateName": "er: future updates",
+      "oldFolder": null,
+      "newFolder": "Epic React",
+      "newFolderId": "rsf_q5wl",
+      "reason": "ER prefix or epicreact.dev reference"
+    },
+    {
+      "templateId": "rsp_bon7r",
+      "templateName": "er: ppp stacking",
+      "oldFolder": null,
+      "newFolder": "Epic React",
+      "newFolderId": "rsf_q5wl",
+      "reason": "ER prefix or epicreact.dev reference"
+    },
+    {
+      "templateId": "rsp_ch3k7",
+      "templateName": "Course Length - ER",
+      "oldFolder": null,
+      "newFolder": "Epic React",
+      "newFolderId": "rsf_q5wl",
+      "reason": "ER prefix or epicreact.dev reference"
+    },
+    {
+      "templateId": "rsp_6xjd3",
+      "templateName": "Epic React Business Hours",
+      "oldFolder": null,
+      "newFolder": "Epic React",
+      "newFolderId": "rsf_q5wl",
+      "reason": "ER prefix or epicreact.dev reference"
+    },
+    {
+      "templateId": "rsp_6z05j",
+      "templateName": "Magic Link - Epic React",
+      "oldFolder": null,
+      "newFolder": "Epic React",
+      "newFolderId": "rsf_q5wl",
+      "reason": "ER prefix or epicreact.dev reference"
+    },
+    {
+      "templateId": "rsp_atp3b",
+      "templateName": "EWD Thanks Code",
+      "oldFolder": null,
+      "newFolder": "Epic Web",
+      "newFolderId": "rsf_q5ut",
+      "reason": "EW prefix or epicweb.dev reference"
+    },
+    {
+      "templateId": "rsp_atrev",
+      "templateName": "EW: Access Purchase",
+      "oldFolder": null,
+      "newFolder": "Epic Web",
+      "newFolderId": "rsf_q5ut",
+      "reason": "EW prefix or epicweb.dev reference"
+    },
+    {
+      "templateId": "rsp_atvuv",
+      "templateName": "Change name - Epic Web",
+      "oldFolder": null,
+      "newFolder": "Epic Web",
+      "newFolderId": "rsf_q5ut",
+      "reason": "EW prefix or epicweb.dev reference"
+    },
+    {
+      "templateId": "rsp_atvwn",
+      "templateName": "EW: Expires",
+      "oldFolder": null,
+      "newFolder": "Epic Web",
+      "newFolderId": "rsf_q5ut",
+      "reason": "EW prefix or epicweb.dev reference"
+    },
+    {
+      "templateId": "rsp_aua9z",
+      "templateName": "EW: Attach Github",
+      "oldFolder": null,
+      "newFolder": "Epic Web",
+      "newFolderId": "rsf_q5ut",
+      "reason": "EW prefix or epicweb.dev reference"
+    },
+    {
+      "templateId": "rsp_b2qyv",
+      "templateName": "epic web free material",
+      "oldFolder": null,
+      "newFolder": "Epic Web",
+      "newFolderId": "rsf_q5ut",
+      "reason": "EW prefix or epicweb.dev reference"
+    },
+    {
+      "templateId": "rsp_bacjr",
+      "templateName": "Future discounts",
+      "oldFolder": null,
+      "newFolder": "Epic Web",
+      "newFolderId": "rsf_q5ut",
+      "reason": "EW prefix or epicweb.dev reference"
+    },
+    {
+      "templateId": "rsp_bvmbr",
+      "templateName": "Epic Bundle already own products",
+      "oldFolder": null,
+      "newFolder": "Epic Web",
+      "newFolderId": "rsf_q5ut",
+      "reason": "EW prefix or epicweb.dev reference"
+    },
+    {
+      "templateId": "rsp_bw0uf",
+      "templateName": "ew: Megabundle",
+      "oldFolder": null,
+      "newFolder": "Epic Web",
+      "newFolderId": "rsf_q5ut",
+      "reason": "EW prefix or epicweb.dev reference"
+    },
+    {
+      "templateId": "rsp_rp8x1",
+      "templateName": "Epic Web Conf In the Future",
+      "oldFolder": null,
+      "newFolder": "Epic Web",
+      "newFolderId": "rsf_q5ut",
+      "reason": "EW prefix or epicweb.dev reference"
+    },
+    {
+      "templateId": "rsp_82tqf",
+      "templateName": "Course PDF",
+      "oldFolder": null,
+      "newFolder": "Just JavaScript",
+      "newFolderId": "rsf_4xhj",
+      "reason": "Just JavaScript reference"
+    },
+    {
+      "templateId": "rsp_81kzr",
+      "templateName": "Magic Link - Just JavaScript",
+      "oldFolder": null,
+      "newFolder": "Just JavaScript",
+      "newFolderId": "rsf_4xhj",
+      "reason": "Just JavaScript reference"
+    },
+    {
+      "templateId": "rsp_81l1j",
+      "templateName": "Request for Invoice or Receipt - Just JavaScript",
+      "oldFolder": null,
+      "newFolder": "Just JavaScript",
+      "newFolderId": "rsf_4xhj",
+      "reason": "Just JavaScript reference"
+    },
+    {
+      "templateId": "rsp_7hdc7",
+      "templateName": "KCD Uses",
+      "oldFolder": null,
+      "newFolder": "KCD",
+      "newFolderId": "rsf_4zk7",
+      "reason": "KCD reference or kentcdodds.com"
+    },
+    {
+      "templateId": "rsp_bz9vr",
+      "templateName": "Discord Misc Question",
+      "oldFolder": null,
+      "newFolder": "KCD",
+      "newFolderId": "rsf_4zk7",
+      "reason": "KCD reference or kentcdodds.com"
+    },
+    {
+      "templateId": "rsp_c18lj",
+      "templateName": "collaboration KCD",
+      "oldFolder": null,
+      "newFolder": "KCD",
+      "newFolderId": "rsf_4zk7",
+      "reason": "KCD reference or kentcdodds.com"
+    },
+    {
+      "templateId": "rsp_70don",
+      "templateName": "KCD Discord Question",
+      "oldFolder": null,
+      "newFolder": "KCD",
+      "newFolderId": "rsf_4zk7",
+      "reason": "KCD reference or kentcdodds.com"
+    },
+    {
+      "templateId": "rsp_5eosn",
+      "templateName": "Live Workshop Event Recording",
+      "oldFolder": null,
+      "newFolder": "Live Events",
+      "newFolderId": "rsf_4zgn",
+      "reason": "Live event/workshop reference"
+    },
+    {
+      "templateId": "rsp_c84uf",
+      "templateName": "Cursor Workshop recording?",
+      "oldFolder": null,
+      "newFolder": "Live Events",
+      "newFolderId": "rsf_4zgn",
+      "reason": "Live event/workshop reference"
+    },
+    {
+      "templateId": "rsp_5fds7",
+      "templateName": "Live Event Time Conflict",
+      "oldFolder": null,
+      "newFolder": "Live Events",
+      "newFolderId": "rsf_4zgn",
+      "reason": "Live event/workshop reference"
+    },
+    {
+      "templateId": "rsp_6dcg7",
+      "templateName": "Live Events - Workshop Recording and Upgrade Coupon Code Link",
+      "oldFolder": null,
+      "newFolder": "Live Events",
+      "newFolderId": "rsf_4zgn",
+      "reason": "Live event/workshop reference"
+    },
+    {
+      "templateId": "rsp_6dchz",
+      "templateName": "Live Events - Workshop Feedback Survey",
+      "oldFolder": null,
+      "newFolder": "Live Events",
+      "newFolderId": "rsf_4zgn",
+      "reason": "Live event/workshop reference"
+    },
+    {
+      "templateId": "rsp_9yc93",
+      "templateName": "Magic Link - Pure React",
+      "oldFolder": null,
+      "newFolder": "Pure React",
+      "newFolderId": "rsf_4zuv",
+      "reason": "Pure React reference"
+    },
+    {
+      "templateId": "rsp_78q9z",
+      "templateName": "Generic Thanks",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_7f9af",
+      "templateName": "Bug -- currently being worked on (e.g. outage)",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_82dzb",
+      "templateName": "Alternative Payment Options",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_8r1jb",
+      "templateName": "PPP Change Region Request - Partner Products",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_8r1qf",
+      "templateName": "Caching Issue - WBaaS Courses",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_8rlzb",
+      "templateName": "Pending Webhook Issue",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_9xqfb",
+      "templateName": "Custom Invoice Information",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_9y5zb",
+      "templateName": "PPP Discount Info",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_9y613",
+      "templateName": "License not Found - Partner Products",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_9ybuv",
+      "templateName": "Declined Transaction & Alternate Payment",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_9yc07",
+      "templateName": "Thanks for Response - We Will Be Here",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_9ycef",
+      "templateName": "Guarantee",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_9ychz",
+      "templateName": "Email Updated",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_9yg07",
+      "templateName": "Postmark Status",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_9yhdz",
+      "templateName": "Postmark Outage",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_a3pon",
+      "templateName": "Email Change",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_aa9tz",
+      "templateName": "Video Quality",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_aa9xj",
+      "templateName": "custom invoice",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_acbpj",
+      "templateName": "Regional Issues - PPP",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_af8av",
+      "templateName": "PPP Automated",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_agyx3",
+      "templateName": "partnership response",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_aozgn",
+      "templateName": "politely decline",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_ap0nb",
+      "templateName": "reproducing bug ",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_ap7d3",
+      "templateName": "not subscription found",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_aq4w7",
+      "templateName": "canceled subscription",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_atozr",
+      "templateName": "Discount Tomorrow",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_av0cn",
+      "templateName": "emails delivered correctly",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_awqh3",
+      "templateName": "Decline Refund - Over 30 Days",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_ayr0n",
+      "templateName": "contact directly creator",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_b0q13",
+      "templateName": "no special discounts",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_b18ef",
+      "templateName": "Can't Sign In - No Magic Link",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_b2r9j",
+      "templateName": "reset progress",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_b3ifb",
+      "templateName": "magic link sent correctly",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_b7upz",
+      "templateName": "Deny Sponsor request",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_b839j",
+      "templateName": "Deny collaboration",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_b83lz",
+      "templateName": "No Student Discount",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_b9z0n",
+      "templateName": "Basic Bug Report Questions",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_b9z2f",
+      "templateName": "No plans for additional content",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_bic93",
+      "templateName": "fixed",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_bichz",
+      "templateName": "email not found",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_bju2v",
+      "templateName": "Account sharing",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_bl24n",
+      "templateName": "translation request",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_bo51j",
+      "templateName": "Stack  Discounts",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_bt287",
+      "templateName": "Deny Guest Post Request",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_bupqf",
+      "templateName": "Free Chapter Paywall",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_bvmfb",
+      "templateName": "Why Isn't v2 Free",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_bxpjb",
+      "templateName": "No thanks",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_ccsjr",
+      "templateName": "Change email address",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_rph0l",
+      "templateName": "Bonus content PPP",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_rppyd",
+      "templateName": "No more discounts",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_21vnr",
+      "templateName": "Refund Request - Partner Products",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_21vpj",
+      "templateName": "Refund Request",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_21vuv",
+      "templateName": "Cancel Subscription",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_21w07",
+      "templateName": "Team Plan Inquiry",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_228w7",
+      "templateName": "Bug Report - fixed",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_228xz",
+      "templateName": "Subscription Not Found",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_229af",
+      "templateName": "Remove Credit Card Details",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_229c7",
+      "templateName": "Pro-rated Early Renewal During Sale",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_22npj",
+      "templateName": "Change Email Request - Partner Products",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_22nwn",
+      "templateName": "Upgrade Later",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_3hlqf",
+      "templateName": "Discord Code Support Question",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_3hls7",
+      "templateName": "Credit Card Issue",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_3nkxz",
+      "templateName": "Update Credit Card - Cancelation",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_3nkzr",
+      "templateName": "Update Credit Card - FYI",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_5icav",
+      "templateName": "Renewal Price",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_5mr7r",
+      "templateName": "Sale Price No Longer Available",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_6tzgn",
+      "templateName": "Publish Date",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_6z0av",
+      "templateName": "PPP Location-restricted Video Playback",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_7m7yf",
+      "templateName": "Hard Bounce Deactivated",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_82ds7",
+      "templateName": "Magic Link not Received",
+      "oldFolder": null,
+      "newFolder": "Shared",
+      "newFolderId": "rsf_q61x",
+      "reason": "Generic/cross-product template"
+    },
+    {
+      "templateId": "rsp_7rzpj",
+      "templateName": "Magic Link - Technical Interviews",
+      "oldFolder": null,
+      "newFolder": "Technical Interviews",
+      "newFolderId": "rsf_4zbb",
+      "reason": "Technical Interviews reference"
+    },
+    {
+      "templateId": "rsp_atoxz",
+      "templateName": "TJS and ER License",
+      "oldFolder": null,
+      "newFolder": "Testing JavaScript",
+      "newFolderId": "rsf_q5yd",
+      "reason": "Testing JavaScript reference"
+    },
+    {
+      "templateId": "rsp_rp8v9",
+      "templateName": "Testing Javascript Still Worth It",
+      "oldFolder": null,
+      "newFolder": "Testing JavaScript",
+      "newFolderId": "rsf_q5yd",
+      "reason": "Testing JavaScript reference"
+    },
+    {
+      "templateId": "rsp_22nt3",
+      "templateName": "Request for Invoice or Receipt - Testing JS",
+      "oldFolder": null,
+      "newFolder": "Testing JavaScript",
+      "newFolderId": "rsf_q5yd",
+      "reason": "Testing JavaScript reference"
+    },
+    {
+      "templateId": "rsp_22p1j",
+      "templateName": "Purchase Power Parity Limitations - Testing JS",
+      "oldFolder": null,
+      "newFolder": "Testing JavaScript",
+      "newFolderId": "rsf_q5yd",
+      "reason": "Testing JavaScript reference"
+    },
+    {
+      "templateId": "rsp_23bif",
+      "templateName": "Magic Link - Testing JS",
+      "oldFolder": null,
+      "newFolder": "Testing JavaScript",
+      "newFolderId": "rsf_q5yd",
+      "reason": "Testing JavaScript reference"
+    },
+    {
+      "templateId": "rsp_9xqkn",
+      "templateName": "Discount Request - Total TypeScript",
+      "oldFolder": null,
+      "newFolder": "Total TypeScript",
+      "newFolderId": "rsf_4z9j",
+      "reason": "TT prefix or totaltypescript.com reference"
+    },
+    {
+      "templateId": "rsp_9ybt3",
+      "templateName": "TT: PPP FAQ Link",
+      "oldFolder": null,
+      "newFolder": "Total TypeScript",
+      "newFolderId": "rsf_4z9j",
+      "reason": "TT prefix or totaltypescript.com reference"
+    },
+    {
+      "templateId": "rsp_9ymh3",
+      "templateName": "TT: Launch Estimate",
+      "oldFolder": null,
+      "newFolder": "Total TypeScript",
+      "newFolderId": "rsf_4z9j",
+      "reason": "TT prefix or totaltypescript.com reference"
+    },
+    {
+      "templateId": "rsp_9yw07",
+      "templateName": "TT: Lower Price Future",
+      "oldFolder": null,
+      "newFolder": "Total TypeScript",
+      "newFolderId": "rsf_4z9j",
+      "reason": "TT prefix or totaltypescript.com reference"
+    },
+    {
+      "templateId": "rsp_9yw1z",
+      "templateName": "TT Pre-Release Link/Access",
+      "oldFolder": null,
+      "newFolder": "Total TypeScript",
+      "newFolderId": "rsf_4z9j",
+      "reason": "TT prefix or totaltypescript.com reference"
+    },
+    {
+      "templateId": "rsp_9zk93",
+      "templateName": "TT: Custom Invoice",
+      "oldFolder": null,
+      "newFolder": "Total TypeScript",
+      "newFolderId": "rsf_4z9j",
+      "reason": "TT prefix or totaltypescript.com reference"
+    },
+    {
+      "templateId": "rsp_a3ksn",
+      "templateName": "TT: Buy Now",
+      "oldFolder": null,
+      "newFolder": "Total TypeScript",
+      "newFolderId": "rsf_4z9j",
+      "reason": "TT prefix or totaltypescript.com reference"
+    },
+    {
+      "templateId": "rsp_a6pc7",
+      "templateName": "TT: Stackblitz",
+      "oldFolder": null,
+      "newFolder": "Total TypeScript",
+      "newFolderId": "rsf_4z9j",
+      "reason": "TT prefix or totaltypescript.com reference"
+    },
+    {
+      "templateId": "rsp_a6vrb",
+      "templateName": "TT: Refund",
+      "oldFolder": null,
+      "newFolder": "Total TypeScript",
+      "newFolderId": "rsf_4z9j",
+      "reason": "TT prefix or totaltypescript.com reference"
+    },
+    {
+      "templateId": "rsp_a7w07",
+      "templateName": "TT Stackblitz2",
+      "oldFolder": null,
+      "newFolder": "Total TypeScript",
+      "newFolderId": "rsf_4z9j",
+      "reason": "TT prefix or totaltypescript.com reference"
+    },
+    {
+      "templateId": "rsp_ac1mv",
+      "templateName": "TT: Bonuses PPP",
+      "oldFolder": null,
+      "newFolder": "Total TypeScript",
+      "newFolderId": "rsf_4z9j",
+      "reason": "TT prefix or totaltypescript.com reference"
+    },
+    {
+      "templateId": "rsp_acvgn",
+      "templateName": "TT: Github Login",
+      "oldFolder": null,
+      "newFolder": "Total TypeScript",
+      "newFolderId": "rsf_4z9j",
+      "reason": "TT prefix or totaltypescript.com reference"
+    },
+    {
+      "templateId": "rsp_adgzr",
+      "templateName": "Total TypeScript Auto-Responder",
+      "oldFolder": null,
+      "newFolder": "Total TypeScript",
+      "newFolderId": "rsf_4z9j",
+      "reason": "TT prefix or totaltypescript.com reference"
+    },
+    {
+      "templateId": "rsp_ayzuv",
+      "templateName": "total typescript learning path",
+      "oldFolder": null,
+      "newFolder": "Total TypeScript",
+      "newFolderId": "rsf_4z9j",
+      "reason": "TT prefix or totaltypescript.com reference"
+    },
+    {
+      "templateId": "rsp_b2oef",
+      "templateName": "account set up payment by invoice",
+      "oldFolder": null,
+      "newFolder": "Total TypeScript",
+      "newFolderId": "rsf_4z9j",
+      "reason": "TT prefix or totaltypescript.com reference"
+    },
+    {
+      "templateId": "rsp_bj3if",
+      "templateName": "100% off Total TypeScript Essentials",
+      "oldFolder": null,
+      "newFolder": "Total TypeScript",
+      "newFolderId": "rsf_4z9j",
+      "reason": "TT prefix or totaltypescript.com reference"
+    },
+    {
+      "templateId": "rsp_brn9j",
+      "templateName": "future discount",
+      "oldFolder": null,
+      "newFolder": "Total TypeScript",
+      "newFolderId": "rsf_4z9j",
+      "reason": "TT prefix or totaltypescript.com reference"
+    },
+    {
+      "templateId": "rsp_bun0n",
+      "templateName": "TT Book Value",
+      "oldFolder": null,
+      "newFolder": "Total TypeScript",
+      "newFolderId": "rsf_4z9j",
+      "reason": "TT prefix or totaltypescript.com reference"
+    },
+    {
+      "templateId": "rsp_bxpfr",
+      "templateName": "additional discount",
+      "oldFolder": null,
+      "newFolder": "Total TypeScript",
+      "newFolderId": "rsf_4z9j",
+      "reason": "TT prefix or totaltypescript.com reference"
+    },
+    {
+      "templateId": "rsp_c18p3",
+      "templateName": "collaboration matt",
+      "oldFolder": null,
+      "newFolder": "Total TypeScript",
+      "newFolderId": "rsf_4z9j",
+      "reason": "TT prefix or totaltypescript.com reference"
+    },
+    {
+      "templateId": "rsp_c6pxj",
+      "templateName": "Matt Discord",
+      "oldFolder": null,
+      "newFolder": "Total TypeScript",
+      "newFolderId": "rsf_4z9j",
+      "reason": "TT prefix or totaltypescript.com reference"
+    },
+    {
+      "templateId": "rsp_rp1t1",
+      "templateName": "New content",
+      "oldFolder": null,
+      "newFolder": "Total TypeScript",
+      "newFolderId": "rsf_4z9j",
+      "reason": "TT prefix or totaltypescript.com reference"
+    },
+    {
+      "templateId": "rsp_rp1wl",
+      "templateName": "Future discount",
+      "oldFolder": null,
+      "newFolder": "Total TypeScript",
+      "newFolderId": "rsf_4z9j",
+      "reason": "TT prefix or totaltypescript.com reference"
+    },
+    {
+      "templateId": "rsp_rpbc5",
+      "templateName": "appreciate code feedback",
+      "oldFolder": null,
+      "newFolder": "Total TypeScript",
+      "newFolderId": "rsf_4z9j",
+      "reason": "TT prefix or totaltypescript.com reference"
+    }
+  ],
+  "summary": {
+    "total_templates": 153,
+    "templates_moved": 153,
+    "folders_created": 5,
+    "by_folder": {
+      "Live Events": 5,
+      "Epic React": 11,
+      "Shared": 70,
+      "KCD": 4,
+      "Just JavaScript": 3,
+      "egghead": 16,
+      "Total TypeScript": 24,
+      "Pure React": 1,
+      "Testing JavaScript": 5,
+      "Epic Web": 10,
+      "AI Hero": 2,
+      "Auto-responders": 1,
+      "Technical Interviews": 1
+    }
+  }
+}

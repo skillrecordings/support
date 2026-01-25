@@ -161,8 +161,12 @@ export async function POST(request: Request) {
           .from(ActionsTable)
           .where(eq(ActionsTable.id, recordId))
 
-        const params = actionRecord?.parameters as { category?: string } | null
-        const category = params?.category ?? 'unknown'
+        const params = actionRecord?.parameters as {
+          context?: { category?: string }
+          category?: string
+        } | null
+        const category =
+          params?.context?.category ?? params?.category ?? 'unknown'
 
         // Record the outcome for trust scoring
         await recordOutcome(db, appId, category, isGood)
