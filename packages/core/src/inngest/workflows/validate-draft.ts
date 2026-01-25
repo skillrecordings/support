@@ -2,10 +2,7 @@
  * Validate Draft Workflow
  *
  * Validates draft responses before sending for approval.
- * Checks for: internal leaks, meta-commentary, banned phrases, fabrication, length.
- *
- * Triggered by: support/draft.created
- * Emits: support/draft.validated
+ * Checks for: internal leaks, meta-commentary, banned phrases, fabrication.
  */
 
 import {
@@ -32,15 +29,22 @@ export const validateWorkflow = inngest.createFunction(
     initializeAxiom()
 
     await log('info', 'validate workflow started', {
+      workflow: 'support-validate',
       conversationId,
       messageId,
       appId,
       draftLength: draft.content.length,
     })
 
-    // Validate the draft
     const validation = await step.run('validate-draft', async () => {
       const stepStartTime = Date.now()
+
+      await log('debug', 'running validation checks', {
+        workflow: 'support-validate',
+        step: 'validate-draft',
+        conversationId,
+        draftLength: draft.content.length,
+      })
 
       const result = validate({
         draft: draft.content,
@@ -49,10 +53,32 @@ export const validateWorkflow = inngest.createFunction(
 
       const durationMs = Date.now() - stepStartTime
 
-      // Trace with high cardinality - include each issue type
       const issuesByType: Record<string, number> = {}
       for (const issue of result.issues) {
         issuesByType[issue.type] = (issuesByType[issue.type] ?? 0) + 1
+      }
+
+      await log('info', 'validation complete', {
+        workflow: 'support-validate',
+        step: 'validate-draft',
+        conversationId,
+        appId,
+        valid: result.valid,
+        issueCount: result.issues.length,
+        issueTypes: issuesByType,
+        issues: result.issues.map((i) => ({ type: i.type, message: i.message })),
+        durationMs,
+      })
+
+      if (!result.valid) {
+        await log('warn', 'draft validation failed', {
+          workflow: 'support-validate',
+          conversationId,
+          appId,
+          issueCount: result.issues.length,
+          issueTypes: issuesByType,
+          draftPreview: draft.content.slice(0, 200),
+        })
       }
 
       await traceWorkflowStep({
@@ -77,16 +103,20 @@ export const validateWorkflow = inngest.createFunction(
       return result
     })
 
-    // Emit validated event
+    await log('debug', 'emitting draft validated event', {
+      workflow: 'support-validate',
+      conversationId,
+      messageId,
+      valid: validation.valid,
+    })
+
     await step.sendEvent('emit-validated', {
       name: SUPPORT_DRAFT_VALIDATED,
       data: {
         conversationId,
         messageId,
         appId,
-        draft: {
-          content: draft.content,
-        },
+        draft: { content: draft.content },
         validation: {
           valid: validation.valid,
           issues: validation.issues.map((issue) => issue.message),
@@ -95,13 +125,24 @@ export const validateWorkflow = inngest.createFunction(
       },
     })
 
-    // Final completion trace
+    const totalDurationMs = Date.now() - workflowStartTime
+
+    await log('info', 'validate workflow completed', {
+      workflow: 'support-validate',
+      conversationId,
+      messageId,
+      appId,
+      valid: validation.valid,
+      issueCount: validation.issues.length,
+      totalDurationMs,
+    })
+
     await traceWorkflowStep({
       workflowName: 'support-validate',
       conversationId,
       appId,
       stepName: 'complete',
-      durationMs: Date.now() - workflowStartTime,
+      durationMs: totalDurationMs,
       success: true,
       metadata: {
         valid: validation.valid,

@@ -3,9 +3,6 @@
  *
  * Step 1 of the pipeline: Classifies inbound messages.
  * Triggered by SUPPORT_INBOUND_RECEIVED, emits SUPPORT_CLASSIFIED.
- *
- * Uses the classify step which combines deterministic signal extraction
- * with LLM-based classification for nuanced cases.
  */
 
 import {
@@ -33,6 +30,7 @@ export const classifyWorkflow = inngest.createFunction(
     initializeAxiom()
 
     await log('info', 'classify workflow started', {
+      workflow: 'support-classify',
       conversationId,
       messageId,
       appId,
@@ -45,6 +43,13 @@ export const classifyWorkflow = inngest.createFunction(
     const classification = await step.run('classify', async () => {
       const stepStartTime = Date.now()
 
+      await log('debug', 'running classification step', {
+        workflow: 'support-classify',
+        step: 'classify',
+        conversationId,
+        appId,
+      })
+
       const result = await classify({
         subject: subject || '',
         body,
@@ -54,7 +59,19 @@ export const classifyWorkflow = inngest.createFunction(
 
       const durationMs = Date.now() - stepStartTime
 
-      // Trace to Axiom with high cardinality
+      await log('info', 'classification complete', {
+        workflow: 'support-classify',
+        step: 'classify',
+        conversationId,
+        appId,
+        category: result.category,
+        confidence: result.confidence,
+        signalCount: Object.values(result.signals).filter(Boolean).length,
+        signals: result.signals,
+        reasoning: result.reasoning,
+        durationMs,
+      })
+
       await traceClassification({
         conversationId,
         appId,
@@ -84,7 +101,13 @@ export const classifyWorkflow = inngest.createFunction(
       return result
     })
 
-    // Emit classified event for next step in pipeline
+    await log('debug', 'emitting classified event', {
+      workflow: 'support-classify',
+      conversationId,
+      messageId,
+      category: classification.category,
+    })
+
     await step.sendEvent('emit-classified', {
       name: SUPPORT_CLASSIFIED,
       data: {
@@ -105,7 +128,16 @@ export const classifyWorkflow = inngest.createFunction(
 
     const totalDurationMs = Date.now() - workflowStartTime
 
-    // Final trace for workflow completion
+    await log('info', 'classify workflow completed', {
+      workflow: 'support-classify',
+      conversationId,
+      messageId,
+      appId,
+      category: classification.category,
+      confidence: classification.confidence,
+      totalDurationMs,
+    })
+
     await traceWorkflowStep({
       workflowName: 'support-classify',
       conversationId,
