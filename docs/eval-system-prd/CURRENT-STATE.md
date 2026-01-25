@@ -47,6 +47,16 @@
 
 ## Next Phase: Inngest Workflow Integration
 
+### Migration Strategy
+
+**Reference:** `packages/core/src/inngest/workflows/handle-inbound-message.ts` (1219 lines)
+
+This monolith has all steps inside one function. We will:
+1. **Use it as reference** for edge cases, observability patterns, error handling
+2. **Build new event-driven workflows** using the pipeline steps we built
+3. **Run both in parallel** during transition (feature flag)
+4. **Delete the monolith** as final step once new architecture is validated
+
 ### Architecture: Event-Driven Choreography
 
 **NOT** a single orchestrated workflow with steps. Each pipeline step becomes its own Inngest function, triggered by events:
@@ -187,6 +197,28 @@ export const classifyWorkflow = inngest.createFunction(
 )
 ```
 
+### Monolith Reference (what to replicate)
+
+The existing `handle-inbound-message.ts` handles:
+```
+step.run('get-conversation-context')  → Fetch from Front API
+step.run('check-system-rules')        → Spam/bounce filtering
+step.run('check-reply-loop')          → Prevent AI loops (max 3 consecutive)
+step.run('retrieve-memories')         → Qdrant semantic search
+step.run('classify-message')          → Haiku classification
+step.run('run-agent')                 → Full agent with tools
+step.run('route-action')              → Decide: draft, escalate, skip
+step.run('create-draft')              → Generate response
+step.sendEvent('request-approval')    → HITL approval flow
+```
+
+**Key patterns to preserve:**
+- Axiom + Langfuse + OTel tracing
+- Memory citation tracking (memory/cited event)
+- Loop detection (acknowledgments, consecutive AI responses)
+- Instructor routing (instructor_correspondence category)
+- Action records in database for approval flow
+
 ### Implementation Order
 
 1. **Define events** in `packages/core/src/inngest/events.ts`
@@ -194,6 +226,8 @@ export const classifyWorkflow = inngest.createFunction(
 3. **Wire to Front webhook** — emit `inbound.received` on new message
 4. **Add approval flow** — human review before sending
 5. **Execute action** — send via Front API or escalate
+6. **Feature flag** — run old/new in parallel for comparison
+7. **Delete monolith** — once new architecture is validated
 
 ---
 
