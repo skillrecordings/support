@@ -2,10 +2,23 @@
  * Step 4: DRAFT
  *
  * Generates response using gathered context.
- * Focused prompt - no routing logic, just writing.
+ * Before LLM generation, checks for high-confidence template matches.
+ *
+ * Flow:
+ * 1. Check for template match (>threshold confidence)
+ * 2. If match: Use template with variable interpolation
+ * 3. If no match: Generate fresh response with LLM
  */
 
 import { generateText } from 'ai'
+import {
+  type TemplateMatch,
+  buildTemplateVariables,
+  createTemplateUsageLog,
+  interpolateTemplate,
+  logTemplateUsage,
+  matchTemplate,
+} from '../../templates/match'
 import type { DraftInput, DraftOutput, MessageCategory } from '../types'
 import { formatContextForPrompt } from './gather'
 
@@ -87,16 +100,87 @@ const CATEGORY_PROMPTS: Partial<Record<MessageCategory, string>> = {
 export interface DraftOptions {
   model?: string
   promptOverride?: string
+  /** App ID for template matching (required for template lookup) */
+  appId?: string
+  /** Confidence threshold for template matching (default: 0.9) */
+  templateThreshold?: number
+  /** Skip template matching and always use LLM */
+  skipTemplateMatch?: boolean
+}
+
+export interface DraftResult extends DraftOutput {
+  /** Template used if matched, undefined if LLM generated */
+  templateUsed?: TemplateMatch
 }
 
 export async function draft(
   input: DraftInput,
   options: DraftOptions = {}
-): Promise<DraftOutput> {
-  const { model = 'anthropic/claude-haiku-4-5', promptOverride } = options
+): Promise<DraftResult> {
+  const {
+    model = 'anthropic/claude-haiku-4-5',
+    promptOverride,
+    appId,
+    templateThreshold = 0.9,
+    skipTemplateMatch = false,
+  } = options
   const { message, classification, context } = input
 
   const startTime = Date.now()
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Step 1: Try template matching first (if enabled)
+  // ─────────────────────────────────────────────────────────────────────────
+  if (!skipTemplateMatch && appId) {
+    try {
+      const query = `${message.subject} ${message.body}`.slice(0, 500)
+      const matchResult = await matchTemplate({
+        appId,
+        category: classification.category,
+        context,
+        query,
+        threshold: templateThreshold,
+      })
+
+      if (matchResult.match) {
+        // Found high-confidence template match!
+        const variables = buildTemplateVariables(context)
+        const interpolatedContent = interpolateTemplate(
+          matchResult.match.content,
+          variables
+        )
+
+        // Log usage for analytics
+        logTemplateUsage(
+          createTemplateUsageLog(
+            appId,
+            classification.category,
+            matchResult.match
+          )
+        )
+
+        return {
+          draft: interpolatedContent,
+          reasoning: `Template match: "${matchResult.match.name}" (confidence: ${matchResult.match.confidence.toFixed(3)})`,
+          toolsUsed: ['template_match'],
+          durationMs: Date.now() - startTime,
+          templateUsed: matchResult.match,
+        }
+      }
+
+      // Log that we're falling back to LLM
+      logTemplateUsage(
+        createTemplateUsageLog(appId, classification.category, null)
+      )
+    } catch (error) {
+      // Template matching failed, fall back to LLM silently
+      console.warn('[draft] Template matching failed, using LLM:', error)
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Step 2: No template match, generate with LLM
+  // ─────────────────────────────────────────────────────────────────────────
 
   // Build prompt
   const categoryPrompt =
@@ -129,6 +213,7 @@ Write your response:`
     reasoning: undefined,
     toolsUsed: [],
     durationMs: Date.now() - startTime,
+    templateUsed: undefined,
   }
 }
 
