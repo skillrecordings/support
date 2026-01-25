@@ -1,7 +1,7 @@
 {
   "id": "failure_meta_stop_here",
   "name": "Personal message - no 'I'm going to stop here'",
-  "description": "Real failure: Agent narrated 'I'm going to stop here'",
+  "description": "Real failure: Agent narrated 'I'm going to stop here'. Content is fan mail that should route to instructor without meta-commentary.",
   "source": "production_failure_2026-01",
   "appId": "app_eval_generic",
   "trigger": {
@@ -12,7 +12,7 @@
     "customer": "happy-customer",
     "conversation": null
   },
-  "expectedBehavior": "route_silently",
+  "expectedBehavior": "route_to_instructor_without_meta_commentary",
   "assertions": {
     "noMetaCommentary": true,
     "mustNotContain": [
@@ -22,6 +22,6 @@
       "I'll route this"
     ]
   },
-  "expectedCategory": "system",
-  "expectedAction": "silence"
+  "expectedCategory": "fan_mail",
+  "expectedAction": "escalate_instructor"
 }

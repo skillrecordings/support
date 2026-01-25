@@ -79,6 +79,11 @@ const VENDOR_PATTERNS = [
   /\d+\s*(?:USD|EUR|GBP)\s+(?:creator|fee|budget)/i,
   /partnerships?\s+@\s+\w+/i, // "Partnerships @ [Company]"
   /(?:vp|director)\s+of\s+(?:gtm|growth|marketing|partnerships)/i,
+  // Additional sponsor/collab patterns
+  /\bpaid\s+collab\b/i, // "paid collab"
+  /\bsponsor\b.{0,30}\b(?:content|channel|video|newsletter)\b/i, // "sponsor...content" with up to 30 chars between
+  /\b(?:we'?d?\s+)?love\s+to\s+sponsor\b/i, // "we'd love to sponsor", "love to sponsor"
+  /\bcollab\s+(?:proposal|opportunity)\b/i, // "collab proposal"
 ]
 
 // Legal threat patterns - escalate_urgent ONLY
@@ -115,9 +120,27 @@ const PERSONAL_MESSAGE_PATTERNS = [
   /\b(?:big\s+fan|huge\s+fan)\b/i,
 ]
 
+// Patterns that indicate genuine appreciation (not sign-offs like "Thanks,\nJohn" or business "we'd love to")
+// Must be in context of appreciation to the instructor, not polite closings
+const GENUINE_APPRECIATION_PATTERNS = [
+  /\bthank(?:s|ing)?\s+(?:you\s+)?(?:so\s+much|for\s+(?:your|the|everything|this))/i, // "thanks so much", "thank you for"
+  /\b(?:love|loving)\s+(?:your|the|what\s+you)/i, // "love your work", "loving the content"
+  /\b(?:amazing|awesome|incredible)\s+(?:work|content|course|stuff)/i, // "amazing work"
+  /\bchanged\s+(?:my|how\s+I)/i, // "changed my life"
+  /\b(?:big|huge)\s+fan\b/i, // "big fan"
+  /\breally\s+appreciate/i, // "really appreciate"
+  /\bkeep\s+(?:it\s+)?up\b/i, // "keep it up", "keep up"
+  /\b(?:love|loving)\s+what\s+you(?:'re|\s+are)\s+doing/i, // "love what you're doing"
+]
+
 export function extractSignals(input: ClassifyInput): MessageSignals {
   const text = `${input.subject} ${input.body}`.toLowerCase()
   const fullText = `${input.subject} ${input.body}` // preserve case for some patterns
+
+  // Check for genuine appreciation (not sign-offs like "Thanks,\nJohn")
+  const hasGenuineAppreciation = GENUINE_APPRECIATION_PATTERNS.some((p) =>
+    p.test(fullText)
+  )
 
   return {
     hasEmailInBody: EMAIL_REGEX.test(input.body),
@@ -135,10 +158,12 @@ export function extractSignals(input: ClassifyInput): MessageSignals {
     hasOutsidePolicyTimeframe: OUTSIDE_POLICY_PATTERNS.some((p) =>
       p.test(fullText)
     ),
+    // Personal message to instructor requires EITHER:
+    // 1. Obvious personal patterns (greeting only, lol, haha, etc.)
+    // 2. Mentions instructor AND has genuine appreciation (not just "Thanks," sign-off)
     isPersonalToInstructor:
       PERSONAL_MESSAGE_PATTERNS.some((p) => p.test(fullText)) ||
-      (INSTRUCTOR_NAMES.some((n) => text.includes(n)) &&
-        /(?:thank|love|amazing|big fan)/i.test(text)),
+      (INSTRUCTOR_NAMES.some((n) => text.includes(n)) && hasGenuineAppreciation),
   }
 }
 
@@ -456,6 +481,11 @@ const SPAM_PATTERNS = [
   /\bcreator\s+fee\b/i,
   /\bcampaign\s+budget\b/i,
   /\bworked\s+with\s+(?:a\s+)?(?:bunch|lot|many)\s+of\s+creators\b/i,
+  // Additional sponsor/collab patterns
+  /\bpaid\s+collab\b/i, // "paid collab"
+  /\bsponsor\b.{0,30}\b(?:content|channel|video|newsletter)\b/i, // "sponsor...content" with up to 30 chars between
+  /\b(?:we'?d?\s+)?love\s+to\s+sponsor\b/i, // "we'd love to sponsor", "love to sponsor"
+  /\bcollab\s+(?:proposal|opportunity)\b/i, // "collab proposal"
 
   // SEO/backlink spam
   /\bguest\s+post\b/i,
