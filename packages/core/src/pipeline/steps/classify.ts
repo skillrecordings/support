@@ -96,6 +96,13 @@ const VENDOR_PATTERNS = [
   /\bsponsor\b.{0,30}\b(?:content|channel|video|newsletter)\b/i, // "sponsor...content" with up to 30 chars between
   /\b(?:we'?d?\s+)?love\s+to\s+sponsor\b/i, // "we'd love to sponsor", "love to sponsor"
   /\bcollab\s+(?:proposal|opportunity)\b/i, // "collab proposal"
+  // Affiliate/referral outreach
+  /\baffiliate\s+(?:opportunity|commission|income|revenue|program)/i, // "affiliate Opportunity", "affiliate commission"
+  /\bearn\s+(?:a\s+)?commission\b/i, // "earn a commission", "earn commission"
+  /\breferral\s+(?:commission|income|fee|payout)/i, // "referral commission"
+  // Unsolicited product/beta promotion
+  /\bthought\s+of\s+you\s+for\s+(?:this|our|the)\b/i, // "thought of you for this release"
+  /\bproduction[- ]ready\s+(?:saas|app|template|boilerplate|platform|starter)/i, // cold SaaS pitch
 ]
 
 // Legal threat patterns - escalate_urgent ONLY
@@ -347,7 +354,7 @@ Categories:
 - presales_consult: Pre-purchase questions needing instructor judgment ("should I buy X or Y?", career advice tied to product, expressing interest in learning a topic)
 - presales_team: Enterprise/team inquiries (team of X, company license, procurement, PO, L&D budget, volume/bulk pricing)
 - fan_mail: UNSOLICITED, PURE appreciation with NO questions, NO asks, NO purchase intent. Only genuine "thank you, you changed my life" messages with zero requests.
-- spam: Vendor outreach, partnership proposals, marketing, SEO services
+- spam: Vendor outreach, partnership proposals, marketing, SEO services, affiliate programs/commissions, product promotions, beta program invites from external companies, unsolicited business proposals. Key signals: company representative pitching a product/service, affiliate commission language, "thought of you for [product]", beta invitations, SaaS/tool promotions directed at the instructor.
 - system: Automated replies, bounces, out-of-office, system notifications
 - unknown: Can't confidently categorize
 
@@ -364,8 +371,17 @@ Rules:
   - Must have NO response to outreach (no quoted emails, no "you asked me about")
   - Must be PURELY "thank you / you changed my life / amazing work" and nothing more
 - If it's someone trying to sell/partner → spam
+- If it's an affiliate opportunity, product promotion, or beta invite from an external company → spam (NOT support_billing)
 - If it's automated → system
 - Only use unknown if genuinely ambiguous
+
+Vendor outreach / spam signals (these are NOT billing):
+- "affiliate opportunity" or "affiliate commission" → spam (recruiting as affiliate)
+- "[Product] Beta Program by [Company]" → spam (unsolicited product pitch)
+- "Production-ready SaaS [anything]" with promotion → spam (cold product pitch)
+- "Thought of you for this release" → spam (targeted product promotion)
+- Company rep promoting their product TO the instructor → spam, not support_billing
+- Unsolicited business proposals with no existing customer relationship → spam
 
 Key disambiguation — fan_mail is RARE. When in doubt, choose presales_consult:
 - "I love your content" + ANY question about learning → presales_consult, NOT fan_mail
@@ -374,6 +390,12 @@ Key disambiguation — fan_mail is RARE. When in doubt, choose presales_consult:
 - "I'd love to learn about X" → presales_consult, NOT fan_mail
 - Sharing what interests them about a topic → presales_consult, NOT fan_mail
 - ONLY pure "thank you, you changed my life" with ZERO asks = fan_mail
+
+Vendor outreach examples (all → spam, NOT support_billing):
+- "Production-ready SaaS boilerplate — affiliate Opportunity" → spam (affiliate pitch)
+- "MuleRun AI Agent Builder Beta Program by Alibaba" → spam (product promotion)
+- "Paid collab idea: thought of you for this release" → spam (cold outreach)
+- "Earn 30% commission per sale" → spam (affiliate recruitment)
 
 Output your classification with confidence (0-1) and brief reasoning.`
 
@@ -593,7 +615,7 @@ const THREAD_CLASSIFY_PROMPT = `You are classifying a support THREAD. Analyze th
 **Non-Support Categories:**
 - voc_response: Reply to OUR automated email sequence (check-ins, surveys). Look for quoted text from our outreach.
 - fan_mail: UNSOLICITED, PURE appreciation with ZERO questions, ZERO asks, ZERO purchase/learning intent. Customer reached out entirely on their own ONLY to say thanks or praise — nothing more. This is RARE.
-- spam: Vendor/partnership pitch. Someone representing a COMPANY trying to sell TO us or partner.
+- spam: Vendor/partnership pitch, affiliate programs, product promotions, beta invites from external companies, unsolicited business proposals. Someone representing a COMPANY trying to sell TO us, partner, or recruit as affiliate. Key signals: affiliate opportunity/commission language, "thought of you for [product]", beta program invitations, SaaS promotions.
 - system: Automated notifications, bounces, password resets. No human intent.
 - instructor_strategy: Instructor discussing business/content strategy (internal)
 - resolved: Issue was FULLY HANDLED + customer EXPLICITLY confirmed resolution
@@ -623,6 +645,8 @@ const THREAD_CLASSIFY_PROMPT = `You are classifying a support THREAD. Analyze th
 
 ### spam vs fan_mail
 - spam: "I'm [Name] from [Company]", "partnership opportunity", trying to SELL something
+- spam: "affiliate opportunity", "affiliate commission", beta program invite from external company
+- spam: Product promotion ("Production-ready SaaS boilerplate"), "thought of you for this release"
 - fan_mail: Individual (not company), expressing ONLY pure gratitude — no asks, no questions
 - "Big fan" + business pitch → spam (the "fan" is a hook)
 - "Big fan" + pure personal thanks, no asks → fan_mail
@@ -709,9 +733,21 @@ Message: "Hi Matt, I'm a big fan of your TypeScript content. I'd love to learn a
 Message: "Love what you're doing with Total TypeScript! How do I get access to the pro bundle? Is there a student discount?"
 → presales_faq (appreciation + explicit purchase question = presales, not fan mail)
 
-### Example 6: spam
+### Example 6: spam (partnership pitch)
 Message: "Hi, I'm Sarah from ContentBoost Agency. I'd love to discuss a partnership opportunity to help grow your newsletter..."
 → spam (company representative, commercial intent)
+
+### Example 6b: spam (affiliate outreach — NOT support_billing)
+Message: "Production-ready SaaS boilerplate — affiliate Opportunity. Earn 30% commission per sale..."
+→ spam (affiliate recruitment pitch, NOT a billing question despite "opportunity" language)
+
+### Example 6c: spam (product promotion — NOT support_billing)
+Message: "MuleRun AI Agent Builder Beta Program by Alibaba. We'd love to invite you to try our new platform..."
+→ spam (unsolicited product pitch / beta invite from external company)
+
+### Example 6d: spam (targeted product promotion)
+Message: "Paid collab idea: thought of you for this release. We're launching a new dev tool and would love your involvement..."
+→ spam (cold outreach using "thought of you" hook — commercial intent)
 
 ### Example 7: NOT resolved
 Thread: [Customer: "I need a refund because..."] → [Us: "Sure, processing now"]
@@ -783,6 +819,19 @@ const SPAM_PATTERNS = [
   /\bwe(?:'re|\s+are)\s+launching\s+\d+\+?\s+(?:ai\s+)?products?\b/i,
   /\bkeep\s+you\s+on\s+(?:the\s+)?(?:priority|prio)\s+list\b/i,
   /\bfuture\s+campaigns?\b/i,
+
+  // Affiliate/referral outreach
+  /\baffiliate\s+(?:opportunity|commission|income|revenue|program|partnership|link)\b/i,
+  /\bearn\s+(?:a\s+)?(?:commission|income|revenue)\s+(?:by|from|for|with|per)\b/i,
+  /\breferral\s+(?:commission|income|fee|payout)\b/i,
+
+  // Product/beta pitches from external companies
+  /\bbeta\s+(?:program|invite|invitation)\b/i,
+  /\bthought\s+of\s+you\s+for\b/i,
+  /\binvite\s+you\s+to\s+(?:try|join|test|check\s+out|explore|use)\b/i,
+
+  // Cold product promotion
+  /\bproduction[- ]ready\s+(?:saas|app|template|boilerplate|platform|starter)/i,
 ]
 
 /**
