@@ -12,6 +12,9 @@ import { telemetryConfig } from '../observability/otel'
 import { classifyMessage } from '../router/classifier'
 import { getApp } from '../services/app-registry'
 import { checkProductAvailability } from '../tools/check-product-availability'
+import { getActivePromotions } from '../tools/get-active-promotions'
+import { getCouponInfo } from '../tools/get-coupon-info'
+import { getRefundPolicy } from '../tools/get-refund-policy'
 import {
   memoryCite,
   memorySearch,
@@ -489,6 +492,70 @@ export const agentTools = {
     },
   }),
 
+  updateEmail: tool({
+    description:
+      "Update a user's email address. Use when a customer needs to change the email on their account. Requires human approval since email changes are sensitive.",
+    inputSchema: z.object({
+      userId: z.string().describe('User ID to update'),
+      appId: z.string().describe('App identifier (e.g., total-typescript)'),
+      newEmail: z.string().email().describe('New email address'),
+    }),
+    execute: async ({ userId, appId, newEmail }) => {
+      // Tool execution is deferred to approval flow (HITL)
+      // Email changes are sensitive — same pattern as transferPurchase
+      return {
+        status: 'pending_approval',
+        userId,
+        appId,
+        newEmail,
+        message: 'Email update request submitted for approval',
+      }
+    },
+  }),
+
+  updateName: tool({
+    description:
+      "Update a user's name. Use when a customer needs to change the name on their account. Low risk — executes immediately without approval.",
+    inputSchema: z.object({
+      userId: z.string().describe('User ID to update'),
+      appId: z.string().describe('App identifier (e.g., total-typescript)'),
+      newName: z.string().describe('New name for the user'),
+    }),
+    execute: async ({ userId, appId, newName }) => {
+      try {
+        // Look up app configuration from registry
+        const app = await getApp(appId)
+        if (!app) {
+          return {
+            success: false,
+            error: `App not found: ${appId}`,
+          }
+        }
+
+        // Create IntegrationClient with app's webhook config
+        const client = new IntegrationClient({
+          baseUrl: app.integration_base_url,
+          webhookSecret: app.webhook_secret,
+        })
+
+        // Execute name update via SDK — auto-approved (low risk)
+        const result = await client.updateName({ userId, newName })
+        return {
+          success: result.success,
+          userId,
+          appId,
+          newName,
+          error: result.error,
+        }
+      } catch (error) {
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        }
+      }
+    },
+  }),
+
   assignToInstructor: tool({
     description:
       'Assign conversation to the instructor/creator for personal correspondence. Use when the message is fan mail, personal feedback, or directed at the instructor personally rather than being a support request. Requires human approval before execution.',
@@ -632,6 +699,42 @@ export const agentTools = {
     inputSchema: checkProductAvailability.parameters,
     execute: async (params, { experimental_context }) => {
       const result = await checkProductAvailability.execute(
+        params,
+        experimental_context as any
+      )
+      return result.success ? result.data : { error: result.error.message }
+    },
+  }),
+
+  get_coupon_info: tool({
+    description: getCouponInfo.description,
+    inputSchema: getCouponInfo.parameters,
+    execute: async (params, { experimental_context }) => {
+      const result = await getCouponInfo.execute(
+        params,
+        experimental_context as any
+      )
+      return result.success ? result.data : { error: result.error.message }
+    },
+  }),
+
+  get_active_promotions: tool({
+    description: getActivePromotions.description,
+    inputSchema: getActivePromotions.parameters,
+    execute: async (params, { experimental_context }) => {
+      const result = await getActivePromotions.execute(
+        params,
+        experimental_context as any
+      )
+      return result.success ? result.data : { error: result.error.message }
+    },
+  }),
+
+  get_refund_policy: tool({
+    description: getRefundPolicy.description,
+    inputSchema: getRefundPolicy.parameters,
+    execute: async (params, { experimental_context }) => {
+      const result = await getRefundPolicy.execute(
         params,
         experimental_context as any
       )
@@ -837,6 +940,7 @@ INSTEAD:
     (tc) =>
       tc.name === 'processRefund' ||
       tc.name === 'transferPurchase' ||
+      tc.name === 'updateEmail' ||
       tc.name === 'assignToInstructor'
   )
 
