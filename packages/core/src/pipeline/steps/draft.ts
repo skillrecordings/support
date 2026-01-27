@@ -32,78 +32,24 @@ import type {
   GatherOutput,
   MessageCategory,
 } from '../types'
+import { buildCategoryPrompt } from './draft-prompts'
 import { formatContextForPrompt } from './gather'
 
 // ============================================================================
-// Draft prompts (per category, can be customized)
+// Draft prompts
 // ============================================================================
+// Category-specific prompts are now in ./draft-prompts.ts which builds them
+// dynamically from gathered context (refund policy, invoice URLs, promotions,
+// license info, etc.). See buildCategoryPrompt() for the implementation.
+//
+// The old hardcoded prompts (with "30 days", "totaltypescript.com/invoices")
+// are replaced by dynamic versions that read from context with fallback defaults.
+//
+// The PROMPT_OVERRIDES map below allows runtime overrides via setPromptForCategory().
+// When set, the override takes precedence over the dynamic prompt.
 
-const BASE_DRAFT_PROMPT = `You are a support agent. Write a helpful response to the customer.
-
-## Style Guide
-- Be direct and concise
-- No corporate speak
-- No enthusiasm performance ("Great!", "Happy to help!")
-- Get to the point immediately
-- If you need info, just ask - no softening
-- 2-3 short paragraphs max
-
-## NEVER Use These Phrases
-- "Great!" or exclamatory openers
-- "I'd recommend" or "I'd suggest"
-- "Let me know if you have any other questions"
-- "I hope this helps"
-- "Happy to help"
-- "I understand" or "I hear you"
-- "Thanks for reaching out"
-- Em dashes (—)
-
-## If You Don't Have Info
-Don't make things up. If knowledge base has no answer:
-- Ask a clarifying question
-- Or say you'll look into it and follow up
-
-Write your response now. Just the response text, nothing else.`
-
-const CATEGORY_PROMPTS: Partial<Record<MessageCategory, string>> = {
-  support_access: `${BASE_DRAFT_PROMPT}
-
-## Access Issues
-- First check if we found their purchase
-- If no purchase found: ask which email they used to buy
-- If purchase found: offer magic link or check their login method
-- GitHub login issues: they may have multiple GitHub accounts`,
-
-  support_refund: `${BASE_DRAFT_PROMPT}
-
-## Refund Requests
-- If within 30 days: process it, say it's done
-- If 30-45 days: say you'll submit for approval
-- If over 45 days: explain policy but offer to escalate
-- Be matter-of-fact, not apologetic`,
-
-  support_transfer: `${BASE_DRAFT_PROMPT}
-
-## Transfer Requests
-- Need: current email, new email, reason
-- If we have all info: say you'll process it
-- If missing info: ask for what's missing`,
-
-  support_billing: `${BASE_DRAFT_PROMPT}
-
-## Billing/Invoice
-- Point them to the invoices page: https://www.totaltypescript.com/invoices
-- Invoices are customizable - they can add company/tax info
-- PDFs are editable if they need adjustments`,
-
-  support_technical: `${BASE_DRAFT_PROMPT}
-
-## Technical Questions
-- Only reference content from the knowledge base
-- Don't invent course modules or sections
-- If no knowledge found: ask what specific topic they need help with
-- Can point to Discord for code questions`,
-}
+/** Runtime prompt overrides set via setPromptForCategory() */
+const PROMPT_OVERRIDES: Partial<Record<MessageCategory, string>> = {}
 
 // ============================================================================
 // Main draft function
@@ -299,9 +245,12 @@ export async function draft(
   // Step 3: Generate with LLM (with memory context if available)
   // ─────────────────────────────────────────────────────────────────────────
 
-  // Build prompt
+  // Build prompt — check runtime overrides first, then use dynamic
+  // context-aware prompts that inject refund policy, invoice URLs,
+  // promotions, license info, etc.
   const categoryPrompt =
-    CATEGORY_PROMPTS[classification.category] || BASE_DRAFT_PROMPT
+    PROMPT_OVERRIDES[classification.category] ||
+    buildCategoryPrompt(classification.category, context)
   const systemPrompt = promptOverride || categoryPrompt
 
   // Format context
@@ -359,15 +308,35 @@ Write your response:`
 // Helpers
 // ============================================================================
 
+/**
+ * Get the prompt for a category. Returns any runtime override first,
+ * then falls back to the dynamic context-aware prompt (with empty context
+ * for the static fallback case).
+ */
 export function getPromptForCategory(category: MessageCategory): string {
-  return CATEGORY_PROMPTS[category] || BASE_DRAFT_PROMPT
+  return (
+    PROMPT_OVERRIDES[category] ||
+    buildCategoryPrompt(category, {
+      user: null,
+      purchases: [],
+      knowledge: [],
+      history: [],
+      priorMemory: [],
+      priorConversations: [],
+      gatherErrors: [],
+    })
+  )
 }
 
+/**
+ * Override the prompt for a specific category at runtime.
+ * Overrides take precedence over dynamic prompts.
+ */
 export function setPromptForCategory(
   category: MessageCategory,
   prompt: string
 ): void {
-  CATEGORY_PROMPTS[category] = prompt
+  PROMPT_OVERRIDES[category] = prompt
 }
 
 /**
