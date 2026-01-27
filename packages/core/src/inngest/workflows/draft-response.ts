@@ -39,6 +39,7 @@ export const draftWorkflow = inngest.createFunction(
       classification,
       route,
       context,
+      inboxId,
       traceId,
     } = event.data
 
@@ -287,6 +288,7 @@ export const draftWorkflow = inngest.createFunction(
           toolsUsed: draftResult.toolsUsed,
         },
         context,
+        inboxId,
         traceId,
       },
     })
