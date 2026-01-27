@@ -7,6 +7,7 @@
  * Front webhook docs: https://dev.frontapp.com/docs/webhooks-1
  */
 
+import { randomUUID } from 'crypto'
 import {
   SUPPORT_INBOUND_RECEIVED,
   inngest,
@@ -216,6 +217,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ received: true })
     }
 
+    // Generate unique traceId for end-to-end pipeline correlation
+    const traceId = randomUUID()
+
     const inngestPayload = {
       conversationId,
       messageId,
@@ -232,6 +236,8 @@ export async function POST(request: NextRequest) {
         conversation: event.payload?.conversation?._links?.self,
         message: event.payload?.target?.data?._links?.self,
       },
+      // Correlation ID for full pipeline tracing
+      traceId,
     }
 
     console.log(

@@ -373,6 +373,108 @@ export async function traceWorkflowStep(data: {
 }
 
 /**
+ * Wrap an Inngest step.run() callback with automatic structured logging.
+ *
+ * Records start/end timing, success/failure, and emits both a `log()` entry
+ * and a `traceWorkflowStep()` trace. Errors are re-thrown after logging.
+ *
+ * Usage:
+ *   const result = await step.run('my-step', traceStepBoundary({
+ *     workflowName: 'support-foo',
+ *     stepName: 'my-step',
+ *     conversationId,
+ *     appId,
+ *   }, async () => {
+ *     // ... step logic ...
+ *     return { someResult: true }
+ *   }))
+ */
+export function traceStepBoundary<T>(
+  context: {
+    workflowName: string
+    stepName: string
+    conversationId?: string
+    appId?: string
+    messageId?: string
+    /** Unique trace ID for end-to-end pipeline correlation */
+    traceId?: string
+    /** Extra metadata to include in the trace on success */
+    metadata?: Record<string, unknown>
+  },
+  fn: () => Promise<T>
+): () => Promise<T> {
+  return async () => {
+    const stepStartTime = Date.now()
+
+    await log('debug', `${context.stepName} step started`, {
+      workflow: context.workflowName,
+      step: context.stepName,
+      conversationId: context.conversationId,
+      appId: context.appId,
+      messageId: context.messageId,
+      traceId: context.traceId,
+    })
+
+    try {
+      const result = await fn()
+      const durationMs = Date.now() - stepStartTime
+
+      await log('info', `${context.stepName} step completed`, {
+        workflow: context.workflowName,
+        step: context.stepName,
+        conversationId: context.conversationId,
+        appId: context.appId,
+        messageId: context.messageId,
+        traceId: context.traceId,
+        durationMs,
+        success: true,
+        ...context.metadata,
+      })
+
+      await traceWorkflowStep({
+        workflowName: context.workflowName,
+        conversationId: context.conversationId,
+        appId: context.appId,
+        stepName: context.stepName,
+        durationMs,
+        success: true,
+        metadata: { traceId: context.traceId, ...context.metadata },
+      })
+
+      return result
+    } catch (error) {
+      const durationMs = Date.now() - stepStartTime
+      const errorMsg = error instanceof Error ? error.message : String(error)
+
+      await log('error', `${context.stepName} step failed`, {
+        workflow: context.workflowName,
+        step: context.stepName,
+        conversationId: context.conversationId,
+        appId: context.appId,
+        messageId: context.messageId,
+        traceId: context.traceId,
+        durationMs,
+        success: false,
+        error: errorMsg,
+      })
+
+      await traceWorkflowStep({
+        workflowName: context.workflowName,
+        conversationId: context.conversationId,
+        appId: context.appId,
+        stepName: context.stepName,
+        durationMs,
+        success: false,
+        error: errorMsg,
+        metadata: { traceId: context.traceId, ...context.metadata },
+      })
+
+      throw error
+    }
+  }
+}
+
+/**
  * Trace workflow completion
  */
 export async function traceWorkflowComplete(data: {

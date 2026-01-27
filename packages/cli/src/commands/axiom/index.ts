@@ -10,6 +10,7 @@
 
 import { Axiom } from '@axiomhq/js'
 import type { Command } from 'commander'
+import { registerForensicCommands } from './forensic'
 
 /**
  * Get dataset name from env or default
@@ -686,4 +687,7 @@ export function registerAxiomCommands(program: Command): void {
     .option('-s, --since <time>', 'Time range (e.g., 1h, 24h, 7d)', '24h')
     .option('--json', 'Output as JSON')
     .action(listApprovals)
+
+  // Register forensic / self-diagnosis queries
+  registerForensicCommands(axiom)
 }

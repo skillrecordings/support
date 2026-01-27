@@ -8,7 +8,8 @@
  * are logged but don't block the pipeline).
  */
 
-import { createFrontClient } from '@skillrecordings/front-sdk'
+import { FrontApiError, createFrontClient } from '@skillrecordings/front-sdk'
+import { log } from '../../observability/axiom'
 import { type TagRegistry, createTagRegistry } from '../../tags/registry'
 import type { MessageCategory, TagInput, TagOutput } from '../types'
 
@@ -55,14 +56,59 @@ export async function applyTag(
 
   try {
     // Get or create tag registry
-    const registry =
-      options.tagRegistry ?? createTagRegistry({ frontApiToken, debug })
+    let registry: TagRegistry
+    try {
+      registry =
+        options.tagRegistry ?? createTagRegistry({ frontApiToken, debug })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      await log('error', 'tag registry creation failed', {
+        step: 'apply-tag',
+        conversationId,
+        category,
+        error: message,
+        errorType: error instanceof Error ? error.constructor.name : 'unknown',
+      })
+      return {
+        tagged: false,
+        error: `Registry creation failed: ${message}`,
+        durationMs: Date.now() - startTime,
+      }
+    }
 
     // Get tag ID for this category
-    const tagId = await registry.getTagIdForCategory(category)
+    let tagId: string | undefined
+    try {
+      tagId = await registry.getTagIdForCategory(category)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      const isFrontError = error instanceof FrontApiError
+      await log('error', 'tag ID lookup failed', {
+        step: 'apply-tag',
+        conversationId,
+        category,
+        error: message,
+        errorType: error instanceof Error ? error.constructor.name : 'unknown',
+        frontApiStatus: isFrontError ? error.status : undefined,
+        frontApiTitle: isFrontError ? error.title : undefined,
+      })
+      return {
+        tagged: false,
+        error: `Tag lookup failed: ${message}`,
+        durationMs: Date.now() - startTime,
+      }
+    }
+
     const tagName = registry.getTagNameForCategory(category)
 
     if (!tagId) {
+      await log('error', 'tag ID not found for category', {
+        step: 'apply-tag',
+        conversationId,
+        category,
+        tagName,
+        error: `Could not get/create tag for category: ${category}`,
+      })
       return {
         tagged: false,
         tagName,
@@ -71,9 +117,32 @@ export async function applyTag(
       }
     }
 
-    // Apply tag to conversation
-    const front = createFrontClient({ apiToken: frontApiToken })
-    await front.conversations.addTag(conversationId, tagId)
+    // Apply tag to conversation via Front API
+    try {
+      const front = createFrontClient({ apiToken: frontApiToken })
+      await front.conversations.addTag(conversationId, tagId)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      const isFrontError = error instanceof FrontApiError
+      await log('error', 'Front API addTag call failed', {
+        step: 'apply-tag',
+        conversationId,
+        category,
+        tagId,
+        tagName,
+        error: message,
+        errorType: error instanceof Error ? error.constructor.name : 'unknown',
+        frontApiStatus: isFrontError ? error.status : undefined,
+        frontApiTitle: isFrontError ? error.title : undefined,
+      })
+      return {
+        tagged: false,
+        tagId,
+        tagName,
+        error: `Front API addTag failed: ${message}`,
+        durationMs: Date.now() - startTime,
+      }
+    }
 
     if (debug) {
       console.log(
@@ -88,12 +157,20 @@ export async function applyTag(
       durationMs: Date.now() - startTime,
     }
   } catch (error) {
+    // Unexpected error — something outside the specific try/catches above
     const message = error instanceof Error ? error.message : String(error)
-    console.error(`[TagStep] Failed to tag ${conversationId}:`, message)
+    await log('error', 'tag step unexpected error', {
+      step: 'apply-tag',
+      conversationId,
+      category,
+      error: message,
+      errorType: error instanceof Error ? error.constructor.name : 'unknown',
+      stack: error instanceof Error ? error.stack : undefined,
+    })
 
     return {
       tagged: false,
-      error: message,
+      error: `Unexpected: ${message}`,
       durationMs: Date.now() - startTime,
     }
   }

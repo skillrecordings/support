@@ -37,6 +37,7 @@ export const validateWorkflow = inngest.createFunction(
       body,
       senderEmail,
       classification,
+      traceId,
     } = event.data
 
     const workflowStartTime = Date.now()
@@ -48,6 +49,7 @@ export const validateWorkflow = inngest.createFunction(
       conversationId,
       messageId,
       appId,
+      traceId,
       draftLength: draft.content.length,
       ...buildDataFlowCheck('support-validate', 'receiving', {
         subject,
@@ -220,6 +222,7 @@ export const validateWorkflow = inngest.createFunction(
             memoryCount: ctx.memories?.length ?? 0,
           }
         })(),
+        traceId,
       },
     })
 
@@ -230,6 +233,7 @@ export const validateWorkflow = inngest.createFunction(
       conversationId,
       messageId,
       appId,
+      traceId,
       valid: validation.valid,
       issueCount: validation.issues.length,
       totalDurationMs,
