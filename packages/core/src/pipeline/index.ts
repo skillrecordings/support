@@ -16,7 +16,6 @@ import type {
   RouteOutput,
   ThreadClassifyInput,
   ThreadClassifyOutput,
-  ValidateOutput,
 } from './types'
 
 import { classify, classifyThread } from './steps/classify'
@@ -24,7 +23,7 @@ import { addSupportComment } from './steps/comment'
 import { draft } from './steps/draft'
 import { formatContextForPrompt, gather } from './steps/gather'
 import { route, routeThread, shouldRespond, shouldSilence } from './steps/route'
-import { validate } from './steps/validate'
+import { type ValidateResult, validate } from './steps/validate'
 
 // Re-export types and steps
 export * from './types'
@@ -146,7 +145,7 @@ export async function runPipeline(
   let routing: RouteOutput | null = null
   let context: GatherOutput | null = null
   let draftResult: DraftOutput | null = null
-  let validation: ValidateOutput | null = null
+  let validation: ValidateResult | null = null
 
   // -------------------------------------------------------------------------
   // Step 1: Classify
@@ -322,6 +321,10 @@ export async function runPipeline(
         draft: draftResult.draft,
         context,
         strictMode: options.validateStrictMode,
+        customerMessage: {
+          subject: input.message.subject,
+          body: input.message.body,
+        },
       },
       {
         appId: input.appConfig.appId,
@@ -339,6 +342,8 @@ export async function runPipeline(
           type: i.type,
           severity: i.severity,
         })),
+        relevanceCheckPerformed: validation.relevanceCheckPerformed,
+        relevanceScore: validation.relevance,
       },
     })
   } catch (error) {
@@ -467,7 +472,7 @@ export async function runThreadPipeline(
   let routing: RouteOutput | null = null
   let context: GatherOutput | null = null
   let draftResult: DraftOutput | null = null
-  let validation: ValidateOutput | null = null
+  let validation: ValidateResult | null = null
   let commentResult: CommentOutput | null = null
 
   // -------------------------------------------------------------------------
@@ -714,11 +719,17 @@ export async function runThreadPipeline(
   // -------------------------------------------------------------------------
   const validateStart = Date.now()
   try {
+    // Extract customer message from thread's trigger message for relevance check
+    const triggerMsg = input.thread.triggerMessage
     validation = await validate(
       {
         draft: draftResult.draft,
         context,
         strictMode: options.validateStrictMode,
+        customerMessage: {
+          subject: triggerMsg.subject ?? '',
+          body: triggerMsg.body,
+        },
       },
       {
         appId: input.appConfig.appId,
@@ -736,6 +747,8 @@ export async function runThreadPipeline(
           type: i.type,
           severity: i.severity,
         })),
+        relevanceCheckPerformed: validation.relevanceCheckPerformed,
+        relevanceScore: validation.relevance,
       },
     })
   } catch (error) {

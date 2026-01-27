@@ -207,7 +207,31 @@ export interface GatherOutput {
   knowledge: KnowledgeItem[]
   history: ConversationMessage[]
   priorMemory: MemoryItem[]
+  priorConversations: PriorConversation[]
   gatherErrors: GatherError[] // Track failures internally, never expose
+}
+
+// ============================================================================
+// Prior Conversations (cross-conversation awareness)
+// ============================================================================
+
+/**
+ * Summary of a prior conversation by the same customer.
+ * Used to give the agent awareness of customer history.
+ */
+export interface PriorConversation {
+  /** Front conversation ID (cnv_xxx) */
+  conversationId: string
+  /** Conversation subject line */
+  subject: string
+  /** Current status (archived, assigned, etc.) */
+  status: string
+  /** ISO timestamp of last message in conversation */
+  lastMessageAt: string
+  /** Total message count */
+  messageCount: number
+  /** Tags applied to this conversation */
+  tags: string[]
 }
 
 export interface User {
@@ -249,7 +273,13 @@ export interface MemoryItem {
 }
 
 export interface GatherError {
-  step: 'user' | 'purchases' | 'knowledge' | 'history' | 'memory'
+  step:
+    | 'user'
+    | 'purchases'
+    | 'knowledge'
+    | 'history'
+    | 'memory'
+    | 'priorConversations'
   error: string
   // Never exposed to draft - just for debugging
 }
