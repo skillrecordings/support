@@ -56,6 +56,22 @@ export interface GatherTools {
     email: string,
     options?: { currentConversationId?: string; days?: number; limit?: number }
   ) => Promise<PriorConversation[]>
+
+  // Category-aware SDK tools (optional, provided when app integration exists)
+  getRefundPolicy?: (appId: string) => Promise<RefundPolicy | null>
+  getContentAccess?: (
+    userId: string,
+    appId: string
+  ) => Promise<ContentAccess | null>
+  getRecentActivity?: (
+    userId: string,
+    appId: string
+  ) => Promise<UserActivity | null>
+  getActivePromotions?: (appId: string) => Promise<Promotion[]>
+  getLicenseInfo?: (
+    purchaseId: string,
+    appId: string
+  ) => Promise<LicenseInfo | null>
 }
 
 // ============================================================================
