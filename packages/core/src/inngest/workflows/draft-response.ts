@@ -111,9 +111,13 @@ export const draftWorkflow = inngest.createFunction(
       const gatherOutput: GatherOutput = {
         user: context.customer
           ? {
-              id: context.customer.email,
+              id: (context.customer as Record<string, unknown>).id
+                ? String((context.customer as Record<string, unknown>).id)
+                : context.customer.email,
               email: context.customer.email,
-              name: undefined,
+              name: (context.customer as Record<string, unknown>).name
+                ? String((context.customer as Record<string, unknown>).name)
+                : undefined,
             }
           : null,
         purchases: (context.customer?.purchases ?? []).map((p: unknown) => {
@@ -147,10 +151,16 @@ export const draftWorkflow = inngest.createFunction(
         history: (context.history ?? []).map((h: unknown) => {
           const entry = h as Record<string, unknown>
           const dateVal = entry.date ?? entry.timestamp ?? 0
+          // Use preserved direction from gather-context; fall back to
+          // email comparison only for history items that predate this fix.
+          const dir =
+            entry.direction === 'in' || entry.direction === 'out'
+              ? entry.direction
+              : entry.from === event.data.senderEmail
+                ? 'in'
+                : 'out'
           return {
-            direction: (entry.from && entry.from === event.data.senderEmail
-              ? 'in'
-              : 'out') as 'in' | 'out',
+            direction: dir as 'in' | 'out',
             body: String(entry.body ?? ''),
             timestamp:
               typeof dateVal === 'number'
