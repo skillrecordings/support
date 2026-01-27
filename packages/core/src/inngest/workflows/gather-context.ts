@@ -220,6 +220,7 @@ export const gatherWorkflow = inngest.createFunction(
       senderEmail,
       classification,
       route,
+      traceId,
     } = event.data
 
     const workflowStartTime = Date.now()
@@ -230,6 +231,7 @@ export const gatherWorkflow = inngest.createFunction(
       conversationId,
       messageId,
       appId,
+      traceId,
       senderEmail,
       category: classification.category,
       ...buildDataFlowCheck('support-gather', 'receiving', {
@@ -401,6 +403,7 @@ export const gatherWorkflow = inngest.createFunction(
                 : String(h.timestamp ?? ''),
           })),
         },
+        traceId,
       },
     })
 
@@ -411,6 +414,7 @@ export const gatherWorkflow = inngest.createFunction(
       conversationId,
       messageId,
       appId,
+      traceId,
       hasUser: !!context.user,
       purchaseCount: context.purchases.length,
       memoryCount: context.priorMemory.length,

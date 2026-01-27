@@ -357,14 +357,26 @@ export const executeApprovedAction = inngest.createFunction(
       (action.type === 'send-draft' || action.type === 'draft-response')
     ) {
       await step.run('add-audit-comment', async () => {
+        const stepStartTime = Date.now()
         const frontToken = process.env.FRONT_API_TOKEN
         if (!frontToken) {
+          await log('warn', 'FRONT_API_TOKEN not set, skipping audit comment', {
+            workflow: 'execute-approved-action',
+            step: 'add-audit-comment',
+            actionId,
+            conversationId: action.conversation_id,
+          })
           // Non-fatal - skip audit comment if token not configured
           return { added: false, error: 'FRONT_API_TOKEN not configured' }
         }
 
         const conversationId = action.conversation_id
         if (!conversationId) {
+          await log('warn', 'no conversation_id for audit comment', {
+            workflow: 'execute-approved-action',
+            step: 'add-audit-comment',
+            actionId,
+          })
           return { added: false, error: 'No conversation_id' }
         }
 
@@ -396,12 +408,57 @@ export const executeApprovedAction = inngest.createFunction(
 
           await front.conversations.addComment(conversationId, auditComment)
 
+          const durationMs = Date.now() - stepStartTime
+
+          await log('info', 'audit comment added', {
+            workflow: 'execute-approved-action',
+            step: 'add-audit-comment',
+            actionId,
+            conversationId,
+            category,
+            confidence,
+            durationMs,
+          })
+
+          await traceWorkflowStep({
+            workflowName: 'execute-approved-action',
+            conversationId,
+            appId: action.app_id ?? undefined,
+            stepName: 'add-audit-comment',
+            durationMs,
+            success: true,
+            metadata: { category, confidence },
+          })
+
           return { added: true }
         } catch (error) {
+          const durationMs = Date.now() - stepStartTime
+          const errorMsg =
+            error instanceof Error ? error.message : 'Unknown error'
+
+          await log('error', 'audit comment failed', {
+            workflow: 'execute-approved-action',
+            step: 'add-audit-comment',
+            actionId,
+            conversationId,
+            error: errorMsg,
+            durationMs,
+          })
+
+          await traceWorkflowStep({
+            workflowName: 'execute-approved-action',
+            conversationId,
+            appId: action.app_id ?? undefined,
+            stepName: 'add-audit-comment',
+            durationMs,
+            success: false,
+            error: errorMsg,
+          })
+
           // Non-fatal - continue even if audit comment fails
           return {
             added: false,
-            error: error instanceof Error ? error.message : 'Unknown error',
+            error: errorMsg,
           }
         }
       })
