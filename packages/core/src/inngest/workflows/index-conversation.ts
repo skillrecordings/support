@@ -22,13 +22,13 @@ function generateDocumentId(conversationId: string): string {
  * 3. Upsert to vector index
  * 4. Update trust score if auto-sent
  *
- * TODO(Epic 4 — Comment-Based Learning): The SUPPORT_CONVERSATION_RESOLVED
- * event has no emitter yet. Nothing in the codebase currently sends this event.
- * This workflow is future infrastructure for the correction/learning loop:
- * once Epic 4 implements comment-based learning, conversation resolution
- * detection will emit this event to index resolved conversations into the
- * vector store for KB enrichment. Do NOT delete this workflow — it is
- * intentionally pre-built for Epic 4.
+ * SUPPORT_CONVERSATION_RESOLVED is emitted by execute-approved-action workflow
+ * after a draft is successfully created in Front. The payload includes the full
+ * conversation message history, customer email, and resolution metadata.
+ *
+ * This workflow indexes resolved conversations into the vector store for
+ * knowledge base enrichment and future RAG retrieval.
+ *
  * See: docs/epic-chain-prd.md (Epic 4), memory/epic1-data-flow-audit.md (Boundary 10)
  */
 export const indexConversation = inngest.createFunction(
