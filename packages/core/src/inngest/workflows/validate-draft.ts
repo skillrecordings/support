@@ -37,6 +37,7 @@ export const validateWorkflow = inngest.createFunction(
       body,
       senderEmail,
       classification,
+      inboxId,
       traceId,
     } = event.data
 
@@ -222,6 +223,7 @@ export const validateWorkflow = inngest.createFunction(
             memoryCount: ctx.memories?.length ?? 0,
           }
         })(),
+        inboxId,
         traceId,
       },
     })

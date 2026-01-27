@@ -337,6 +337,7 @@ export const gatherWorkflow = inngest.createFunction(
       senderEmail,
       classification,
       route,
+      inboxId,
       traceId,
     } = event.data
 
@@ -523,6 +524,7 @@ export const gatherWorkflow = inngest.createFunction(
           })),
           priorConversations: context.priorConversations,
         },
+        inboxId,
         traceId,
       },
     })

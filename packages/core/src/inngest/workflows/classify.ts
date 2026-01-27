@@ -33,6 +33,7 @@ export const classifyWorkflow = inngest.createFunction(
       subject,
       body,
       senderEmail,
+      inboxId,
       traceId,
     } = event.data
 
@@ -263,6 +264,7 @@ export const classifyWorkflow = inngest.createFunction(
           signals: classification.signals as Record<string, boolean>,
           reasoning: classification.reasoning,
         },
+        inboxId,
         traceId,
       },
     })

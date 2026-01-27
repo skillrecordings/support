@@ -276,6 +276,8 @@ export type SupportClassifiedEvent = {
       signals: Record<string, boolean>
       reasoning?: string
     }
+    /** Optional: inbox ID from webhook (pass-through) */
+    inboxId?: string
     /** Unique trace ID for end-to-end pipeline correlation */
     traceId?: string
   }
@@ -308,6 +310,8 @@ export type SupportRoutedEvent = {
         | 'silence'
       reason: string
     }
+    /** Optional: inbox ID from webhook (pass-through) */
+    inboxId?: string
     /** Unique trace ID for end-to-end pipeline correlation */
     traceId?: string
   }
@@ -360,6 +364,8 @@ export type SupportContextGatheredEvent = {
         tags: string[]
       }>
     }
+    /** Optional: inbox ID from webhook (pass-through) */
+    inboxId?: string
     /** Unique trace ID for end-to-end pipeline correlation */
     traceId?: string
   }
@@ -391,6 +397,8 @@ export type SupportDraftCreatedEvent = {
       toolsUsed: string[]
     }
     context: unknown
+    /** Optional: inbox ID from webhook (pass-through) */
+    inboxId?: string
     /** Unique trace ID for end-to-end pipeline correlation */
     traceId?: string
   }
@@ -436,6 +444,8 @@ export type SupportDraftValidatedEvent = {
       confidence?: number
       reasoning?: string
     }
+    /** Optional: inbox ID from webhook (pass-through) */
+    inboxId?: string
     /** Unique trace ID for end-to-end pipeline correlation */
     traceId?: string
   }
@@ -528,6 +538,8 @@ export type SupportEscalatedEvent = {
       reason: string
     }
     priority: EscalationPriority
+    /** Optional: inbox ID from webhook (pass-through) */
+    inboxId?: string
     /** Unique trace ID for end-to-end pipeline correlation */
     traceId?: string
   }
