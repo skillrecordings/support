@@ -274,6 +274,114 @@ async function createGatherTools(appId: string): Promise<GatherTools> {
       }
     },
 
+
+    // ── Category-aware SDK tools ─────────────────────────────────────────
+    // These are conditionally called by the gather step based on classification.
+    // Each wraps the SDK client and handles errors gracefully.
+
+    getRefundPolicy: app
+      ? async (_appId: string) => {
+          const client = new IntegrationClient({
+            baseUrl: app.integration_base_url,
+            webhookSecret: app.webhook_secret,
+          })
+          try {
+            return await client.getRefundPolicy()
+          } catch (error) {
+            await log('warn', 'getRefundPolicy failed', {
+              workflow: 'support-gather',
+              tool: 'getRefundPolicy',
+              appId,
+              error: error instanceof Error ? error.message : String(error),
+            })
+            return null
+          }
+        }
+      : undefined,
+
+    getContentAccess: app
+      ? async (userId: string, _appId: string) => {
+          const client = new IntegrationClient({
+            baseUrl: app.integration_base_url,
+            webhookSecret: app.webhook_secret,
+          })
+          try {
+            return await client.getContentAccess(userId)
+          } catch (error) {
+            await log('warn', 'getContentAccess failed', {
+              workflow: 'support-gather',
+              tool: 'getContentAccess',
+              appId,
+              userId,
+              error: error instanceof Error ? error.message : String(error),
+            })
+            return null
+          }
+        }
+      : undefined,
+
+    getRecentActivity: app
+      ? async (userId: string, _appId: string) => {
+          const client = new IntegrationClient({
+            baseUrl: app.integration_base_url,
+            webhookSecret: app.webhook_secret,
+          })
+          try {
+            return await client.getRecentActivity(userId)
+          } catch (error) {
+            await log('warn', 'getRecentActivity failed', {
+              workflow: 'support-gather',
+              tool: 'getRecentActivity',
+              appId,
+              userId,
+              error: error instanceof Error ? error.message : String(error),
+            })
+            return null
+          }
+        }
+      : undefined,
+
+    getActivePromotions: app
+      ? async (_appId: string) => {
+          const client = new IntegrationClient({
+            baseUrl: app.integration_base_url,
+            webhookSecret: app.webhook_secret,
+          })
+          try {
+            return await client.getActivePromotions()
+          } catch (error) {
+            await log('warn', 'getActivePromotions failed', {
+              workflow: 'support-gather',
+              tool: 'getActivePromotions',
+              appId,
+              error: error instanceof Error ? error.message : String(error),
+            })
+            return []
+          }
+        }
+      : undefined,
+
+    getLicenseInfo: app
+      ? async (purchaseId: string, _appId: string) => {
+          const client = new IntegrationClient({
+            baseUrl: app.integration_base_url,
+            webhookSecret: app.webhook_secret,
+          })
+          try {
+            return await client.getLicenseInfo(purchaseId)
+          } catch (error) {
+            await log('warn', 'getLicenseInfo failed', {
+              workflow: 'support-gather',
+              tool: 'getLicenseInfo',
+              appId,
+              purchaseId,
+              error: error instanceof Error ? error.message : String(error),
+            })
+            return null
+          }
+        }
+      : undefined,
+
     searchMemory: async (query: string): Promise<MemoryItem[]> => {
       try {
         await log('debug', 'searching memories', {
@@ -438,6 +546,12 @@ export const gatherWorkflow = inngest.createFunction(
         errorCount: result.gatherErrors.length,
         errors: result.gatherErrors,
         durationMs,
+        // Category-aware data
+        hasRefundPolicy: !!result.refundPolicy,
+        hasContentAccess: !!result.contentAccess,
+        hasRecentActivity: !!result.recentActivity,
+        activePromotionCount: result.activePromotions?.length ?? 0,
+        licenseInfoCount: result.licenseInfo?.length ?? 0,
       })
 
       if (result.priorMemory.length > 0) {
@@ -529,6 +643,12 @@ export const gatherWorkflow = inngest.createFunction(
             direction: h.direction,
           })),
           priorConversations: context.priorConversations,
+          // Category-aware SDK data
+          refundPolicy: context.refundPolicy ?? undefined,
+          contentAccess: context.contentAccess ?? undefined,
+          recentActivity: context.recentActivity ?? undefined,
+          activePromotions: context.activePromotions ?? undefined,
+          licenseInfo: context.licenseInfo ?? undefined,
         },
         inboxId,
         traceId,
