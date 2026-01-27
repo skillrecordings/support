@@ -1,17 +1,31 @@
 import { describe, expect, expectTypeOf, it } from 'vitest'
 import type {
   ActionResult,
+  AppInfo,
   ClaimedSeat,
+  ContentAccess,
+  CouponInfo,
+  LicenseInfo,
+  Promotion,
   Purchase,
+  RefundPolicy,
   Subscription,
   SupportIntegration,
   User,
+  UserActivity,
 } from '../integration'
 import type { ProductState, ProductStatus, ProductType } from '../types'
 import {
+  AppInfoSchema,
+  ContentAccessSchema,
+  CouponInfoSchema,
+  LicenseInfoSchema,
   ProductStateSchema,
   ProductStatusSchema,
   ProductTypeSchema,
+  PromotionSchema,
+  RefundPolicySchema,
+  UserActivitySchema,
 } from '../types'
 
 describe('SDK Types', () => {
@@ -61,6 +75,63 @@ describe('SDK Types', () => {
     }
     if (integration.getProductStatus) {
       expectTypeOf(integration.getProductStatus).toBeFunction()
+    }
+  })
+
+  it('SupportIntegration has agent intelligence optional methods', () => {
+    const integration: SupportIntegration = {
+      lookupUser: async (email: string) => null as User | null,
+      getPurchases: async (userId: string) => [] as Purchase[],
+      revokeAccess: async (params) => ({ success: true }),
+      transferPurchase: async (params) => ({ success: true }),
+      generateMagicLink: async (params) => ({ url: '' }),
+      // Agent intelligence optional methods
+      getActivePromotions: async () => [] as Promotion[],
+      getCouponInfo: async (code: string) => null as CouponInfo | null,
+      getRefundPolicy: async () => ({
+        autoApproveWindowDays: 30,
+        manualApproveWindowDays: 45,
+      }),
+      getContentAccess: async (userId: string) => ({
+        userId,
+        products: [],
+      }),
+      getRecentActivity: async (userId: string) => ({
+        userId,
+        lessonsCompleted: 0,
+        totalLessons: 0,
+        completionPercent: 0,
+        recentItems: [],
+      }),
+      getLicenseInfo: async (purchaseId: string) => null as LicenseInfo | null,
+      getAppInfo: async () => ({
+        name: 'Test App',
+        instructorName: 'Test Instructor',
+        supportEmail: 'support@test.com',
+        websiteUrl: 'https://test.com',
+      }),
+    }
+
+    if (integration.getActivePromotions) {
+      expectTypeOf(integration.getActivePromotions).toBeFunction()
+    }
+    if (integration.getCouponInfo) {
+      expectTypeOf(integration.getCouponInfo).toBeFunction()
+    }
+    if (integration.getRefundPolicy) {
+      expectTypeOf(integration.getRefundPolicy).toBeFunction()
+    }
+    if (integration.getContentAccess) {
+      expectTypeOf(integration.getContentAccess).toBeFunction()
+    }
+    if (integration.getRecentActivity) {
+      expectTypeOf(integration.getRecentActivity).toBeFunction()
+    }
+    if (integration.getLicenseInfo) {
+      expectTypeOf(integration.getLicenseInfo).toBeFunction()
+    }
+    if (integration.getAppInfo) {
+      expectTypeOf(integration.getAppInfo).toBeFunction()
     }
   })
 
@@ -263,5 +334,342 @@ describe('ProductStatus Zod Schemas', () => {
     expect(ProductStateSchema.safeParse('unavailable').success).toBe(true)
     expect(ProductStateSchema.safeParse('archived').success).toBe(true)
     expect(ProductStateSchema.safeParse('deleted').success).toBe(false)
+  })
+})
+
+// ── Agent Intelligence Type Tests ─────────────────────────────────────
+
+describe('Agent Intelligence Types', () => {
+  it('Promotion type has required fields', () => {
+    const promo: Promotion = {
+      id: 'promo_123',
+      name: 'Summer Sale',
+      code: 'SUMMER2025',
+      discountType: 'percent',
+      discountAmount: 30,
+      validFrom: '2025-06-01T00:00:00Z',
+      validUntil: '2025-08-31T23:59:59Z',
+      active: true,
+      conditions: 'Available to all customers',
+    }
+
+    expectTypeOf(promo).toMatchTypeOf<Promotion>()
+    expectTypeOf(promo.discountType).toMatchTypeOf<'percent' | 'fixed'>()
+  })
+
+  it('CouponInfo type has required fields', () => {
+    const coupon: CouponInfo = {
+      code: 'SAVE20',
+      valid: true,
+      discountType: 'percent',
+      discountAmount: 20,
+      restrictionType: 'ppp',
+      usageCount: 150,
+      maxUses: 1000,
+      expiresAt: '2025-12-31T23:59:59Z',
+    }
+
+    expectTypeOf(coupon).toMatchTypeOf<CouponInfo>()
+    expectTypeOf(coupon.restrictionType).toMatchTypeOf<
+      'ppp' | 'student' | 'bulk' | 'general' | undefined
+    >()
+  })
+
+  it('RefundPolicy type has required fields', () => {
+    const policy: RefundPolicy = {
+      autoApproveWindowDays: 30,
+      manualApproveWindowDays: 45,
+      noRefundAfterDays: 60,
+      specialConditions: ['Lifetime access: 60 day window'],
+      policyUrl: 'https://example.com/refund-policy',
+    }
+
+    expectTypeOf(policy).toMatchTypeOf<RefundPolicy>()
+  })
+
+  it('ContentAccess type has products and optional team membership', () => {
+    const access: ContentAccess = {
+      userId: 'usr_123',
+      products: [
+        {
+          productId: 'prod_123',
+          productName: 'TypeScript Pro',
+          accessLevel: 'full',
+          modules: [
+            { id: 'mod_1', title: 'Basics', accessible: true },
+            { id: 'mod_2', title: 'Advanced', accessible: true },
+          ],
+        },
+      ],
+      teamMembership: {
+        teamId: 'team_123',
+        teamName: 'Acme Corp',
+        role: 'member',
+        seatClaimedAt: '2025-01-15T10:00:00Z',
+      },
+    }
+
+    expectTypeOf(access).toMatchTypeOf<ContentAccess>()
+    expectTypeOf(access.products[0]!.accessLevel).toMatchTypeOf<
+      'full' | 'partial' | 'preview' | 'expired'
+    >()
+  })
+
+  it('UserActivity type has progress data', () => {
+    const activity: UserActivity = {
+      userId: 'usr_123',
+      lastLoginAt: '2025-07-27T10:00:00Z',
+      lastActiveAt: '2025-07-27T11:30:00Z',
+      lessonsCompleted: 42,
+      totalLessons: 100,
+      completionPercent: 42,
+      recentItems: [
+        {
+          type: 'lesson_completed',
+          title: 'Type Guards Deep Dive',
+          timestamp: '2025-07-27T11:30:00Z',
+        },
+      ],
+    }
+
+    expectTypeOf(activity).toMatchTypeOf<UserActivity>()
+    expectTypeOf(activity.recentItems[0]!.type).toMatchTypeOf<
+      'lesson_completed' | 'exercise_submitted' | 'login' | 'download'
+    >()
+  })
+
+  it('LicenseInfo type has seat allocation data', () => {
+    const license: LicenseInfo = {
+      purchaseId: 'pur_123',
+      licenseType: 'team',
+      totalSeats: 10,
+      claimedSeats: 7,
+      availableSeats: 3,
+      expiresAt: '2026-01-15T00:00:00Z',
+      claimedBy: [
+        {
+          email: 'alice@acme.com',
+          claimedAt: '2025-01-15T10:00:00Z',
+          lastActiveAt: '2025-07-27T10:00:00Z',
+        },
+      ],
+      adminEmail: 'admin@acme.com',
+    }
+
+    expectTypeOf(license).toMatchTypeOf<LicenseInfo>()
+    expectTypeOf(license.licenseType).toMatchTypeOf<
+      'individual' | 'team' | 'enterprise' | 'site'
+    >()
+  })
+
+  it('AppInfo type has app metadata', () => {
+    const appInfo: AppInfo = {
+      name: 'Total TypeScript',
+      instructorName: 'Matt Pocock',
+      supportEmail: 'support@totaltypescript.com',
+      websiteUrl: 'https://totaltypescript.com',
+      invoicesUrl: 'https://totaltypescript.com/invoices',
+      discordUrl: 'https://discord.gg/totaltypescript',
+      refundPolicyUrl: 'https://totaltypescript.com/refund',
+    }
+
+    expectTypeOf(appInfo).toMatchTypeOf<AppInfo>()
+  })
+})
+
+describe('Agent Intelligence Zod Schemas', () => {
+  it('PromotionSchema validates valid promotion', () => {
+    const result = PromotionSchema.safeParse({
+      id: 'promo_123',
+      name: 'Summer Sale',
+      code: 'SUMMER2025',
+      discountType: 'percent',
+      discountAmount: 30,
+      active: true,
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('PromotionSchema rejects invalid discountType', () => {
+    const result = PromotionSchema.safeParse({
+      id: 'promo_123',
+      name: 'Bad Promo',
+      discountType: 'unknown',
+      discountAmount: 10,
+      active: true,
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('CouponInfoSchema validates valid coupon', () => {
+    const result = CouponInfoSchema.safeParse({
+      code: 'SAVE20',
+      valid: true,
+      discountType: 'percent',
+      discountAmount: 20,
+      restrictionType: 'ppp',
+      usageCount: 100,
+      maxUses: 500,
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('CouponInfoSchema handles optional fields', () => {
+    const result = CouponInfoSchema.safeParse({
+      code: 'BASIC',
+      valid: true,
+      discountType: 'fixed',
+      discountAmount: 1000,
+      usageCount: 0,
+    })
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.restrictionType).toBeUndefined()
+      expect(result.data.maxUses).toBeUndefined()
+    }
+  })
+
+  it('RefundPolicySchema validates valid policy', () => {
+    const result = RefundPolicySchema.safeParse({
+      autoApproveWindowDays: 30,
+      manualApproveWindowDays: 45,
+      noRefundAfterDays: 60,
+      specialConditions: ['Lifetime access: 60 day window'],
+      policyUrl: 'https://example.com/refund',
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('RefundPolicySchema handles minimal policy', () => {
+    const result = RefundPolicySchema.safeParse({
+      autoApproveWindowDays: 30,
+      manualApproveWindowDays: 45,
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('ContentAccessSchema validates full access data', () => {
+    const result = ContentAccessSchema.safeParse({
+      userId: 'usr_123',
+      products: [
+        {
+          productId: 'prod_123',
+          productName: 'TypeScript Pro',
+          accessLevel: 'full',
+          modules: [{ id: 'mod_1', title: 'Basics', accessible: true }],
+        },
+      ],
+      teamMembership: {
+        teamId: 'team_123',
+        teamName: 'Acme Corp',
+        role: 'admin',
+        seatClaimedAt: '2025-01-15T10:00:00Z',
+      },
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('ContentAccessSchema rejects invalid accessLevel', () => {
+    const result = ContentAccessSchema.safeParse({
+      userId: 'usr_123',
+      products: [
+        {
+          productId: 'prod_123',
+          productName: 'Test',
+          accessLevel: 'superadmin', // invalid
+        },
+      ],
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('UserActivitySchema validates activity data', () => {
+    const result = UserActivitySchema.safeParse({
+      userId: 'usr_123',
+      lastLoginAt: '2025-07-27T10:00:00Z',
+      lessonsCompleted: 42,
+      totalLessons: 100,
+      completionPercent: 42,
+      recentItems: [
+        {
+          type: 'lesson_completed',
+          title: 'Type Guards',
+          timestamp: '2025-07-27T11:30:00Z',
+        },
+      ],
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('UserActivitySchema rejects invalid item type', () => {
+    const result = UserActivitySchema.safeParse({
+      userId: 'usr_123',
+      lessonsCompleted: 0,
+      totalLessons: 0,
+      completionPercent: 0,
+      recentItems: [
+        {
+          type: 'video_watched', // invalid
+          title: 'Test',
+          timestamp: '2025-07-27T10:00:00Z',
+        },
+      ],
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('LicenseInfoSchema validates team license', () => {
+    const result = LicenseInfoSchema.safeParse({
+      purchaseId: 'pur_123',
+      licenseType: 'team',
+      totalSeats: 10,
+      claimedSeats: 7,
+      availableSeats: 3,
+      claimedBy: [
+        {
+          email: 'alice@acme.com',
+          claimedAt: '2025-01-15T10:00:00Z',
+        },
+      ],
+      adminEmail: 'admin@acme.com',
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('LicenseInfoSchema rejects invalid licenseType', () => {
+    const result = LicenseInfoSchema.safeParse({
+      purchaseId: 'pur_123',
+      licenseType: 'unlimited', // invalid
+      totalSeats: 1,
+      claimedSeats: 0,
+      availableSeats: 1,
+      claimedBy: [],
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('AppInfoSchema validates app metadata', () => {
+    const result = AppInfoSchema.safeParse({
+      name: 'Total TypeScript',
+      instructorName: 'Matt Pocock',
+      supportEmail: 'support@totaltypescript.com',
+      websiteUrl: 'https://totaltypescript.com',
+      invoicesUrl: 'https://totaltypescript.com/invoices',
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('AppInfoSchema handles minimal app info', () => {
+    const result = AppInfoSchema.safeParse({
+      name: 'Test App',
+      instructorName: 'Test',
+      supportEmail: 'test@test.com',
+      websiteUrl: 'https://test.com',
+    })
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.invoicesUrl).toBeUndefined()
+      expect(result.data.discordUrl).toBeUndefined()
+    }
   })
 })
