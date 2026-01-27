@@ -399,6 +399,11 @@ export const handleValidatedDraft = inngest.createFunction(
           parameters: { draft: draft.content },
         },
         agentReasoning: decision.reason,
+        customerEmail: senderEmail || undefined,
+        // inboxId is not available at this boundary — it exists in the original
+        // webhook event (INBOUND_RECEIVED) but is not threaded through the
+        // classify→route→gather→draft→validate chain. Needs pipeline-wide
+        // threading to populate here (tracked in Epic 1.5 data flow repairs).
         traceId,
       },
     })

@@ -384,7 +384,11 @@ export const executeApprovedAction = inngest.createFunction(
           const front = createFrontSdkClient({ apiToken: frontToken })
 
           // Extract classification data from action parameters
+          // handle-validated-draft stores category/confidence at the top level
+          // of parameters (canonical location), with context as a fallback
           const params = action.parameters as {
+            category?: string
+            confidence?: number
             validationScore?: number
             autoApproved?: boolean
             context?: {
@@ -394,10 +398,13 @@ export const executeApprovedAction = inngest.createFunction(
             }
           }
 
-          const category = params.context?.category ?? 'unknown'
-          // Use validation score as confidence proxy, or context confidence if available
+          const category =
+            params.category ?? params.context?.category ?? 'unknown'
           const confidence =
-            params.context?.confidence ?? params.validationScore ?? 0
+            params.confidence ??
+            params.context?.confidence ??
+            params.validationScore ??
+            0
 
           const auditComment = formatAuditComment({
             action: 'auto_sent',
