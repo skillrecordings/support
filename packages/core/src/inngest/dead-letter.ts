@@ -5,7 +5,10 @@ import {
   eq,
   getDb,
 } from '@skillrecordings/database'
-import type { InngestFunction } from 'inngest'
+
+import { initializeAxiom, log } from '../observability/axiom'
+import { inngest } from './client'
+import { SUPPORT_DEAD_LETTER } from './events'
 
 /**
  * Dead letter queue options for failed event processing.
@@ -65,7 +68,6 @@ export async function recordFailedEvent(
 ): Promise<{ id: string; consecutiveFailures: number }> {
   const db = getDb()
 
-  // Check if this event has failed before
   const existingFailures = await db
     .select()
     .from(DeadLetterQueueTable)
@@ -97,19 +99,145 @@ export async function recordFailedEvent(
 }
 
 /**
+ * Creates an `onFailure` handler for use in Inngest function config.
+ *
+ * This is the primary DLQ mechanism. When an Inngest function exhausts all
+ * retries, this handler:
+ *   1. Logs the failure to Axiom with structured metadata
+ *   2. Records the failure in the dead letter queue table
+ *   3. Emits a `support/dead-letter` event for downstream processing/alerting
+ *   4. Alerts on consecutive failures (via `alertOnFailure`)
+ *
+ * Usage:
+ * ```typescript
+ * inngest.createFunction(
+ *   {
+ *     id: 'my-function',
+ *     retries: 3,
+ *     onFailure: createDeadLetterHandler('my-function'),
+ *   },
+ *   { event: MY_EVENT },
+ *   async ({ event, step }) => { ... }
+ * )
+ * ```
+ *
+ * @param fnName - Name of the Inngest function (for logging/identification)
+ * @param options - Optional DLQ configuration overrides
+ * @returns An `onFailure` callback compatible with Inngest function config
+ */
+export function createDeadLetterHandler(
+  fnName: string,
+  options?: DeadLetterOptions
+) {
+  const opts = { ...DEFAULT_DLQ_OPTIONS, ...options }
+
+  return async ({ error, event }: { error: Error; event: any }) => {
+    initializeAxiom()
+
+    const failedAt = new Date().toISOString()
+    const originalEventName = event?.name ?? 'unknown'
+    const originalEventData =
+      event?.data && typeof event.data === 'object'
+        ? (event.data as Record<string, unknown>)
+        : {}
+
+    // 1. Log to Axiom
+    await log('error', '[DLQ] Function failed after retries exhausted', {
+      workflow: 'dead-letter-queue',
+      functionName: fnName,
+      error: error.message,
+      errorStack: error.stack,
+      originalEventName,
+      originalEventData,
+      failedAt,
+    })
+
+    // 2. Record in dead letter queue table
+    let dlqRecordId: string | undefined
+    let consecutiveFailures: number | undefined
+    try {
+      const failureEvent: FailureEvent = {
+        name: fnName,
+        data: originalEventData,
+        error,
+      }
+      const result = await recordFailedEvent(failureEvent, opts.maxRetries)
+      dlqRecordId = result.id
+      consecutiveFailures = result.consecutiveFailures
+    } catch (dbError) {
+      // DB write failure should not prevent event emission
+      await log('error', '[DLQ] Failed to record dead letter in database', {
+        workflow: 'dead-letter-queue',
+        functionName: fnName,
+        dbError: dbError instanceof Error ? dbError.message : String(dbError),
+      })
+    }
+
+    // 3. Emit support/dead-letter event
+    try {
+      await inngest.send({
+        name: SUPPORT_DEAD_LETTER,
+        data: {
+          functionName: fnName,
+          errorMessage: error.message,
+          errorStack: error.stack,
+          originalEventName,
+          originalEventData,
+          failedAt,
+          dlqRecordId,
+          consecutiveFailures,
+        },
+      })
+    } catch (sendError) {
+      // Event emission failure should not throw - log and continue
+      await log('error', '[DLQ] Failed to emit dead letter event', {
+        workflow: 'dead-letter-queue',
+        functionName: fnName,
+        sendError:
+          sendError instanceof Error ? sendError.message : String(sendError),
+      })
+    }
+
+    // 4. Alert on consecutive failures
+    if (consecutiveFailures !== undefined) {
+      await alertOnFailure(
+        { name: fnName, data: originalEventData, error },
+        consecutiveFailures
+      )
+    }
+  }
+}
+
+/**
  * Wraps an Inngest function with dead letter queue handling.
  *
- * Failed events are routed to DLQ table after max retries.
- * Retry backoff is configurable.
+ * @deprecated Use `createDeadLetterHandler()` in your function's `onFailure`
+ * config instead. This wrapper cannot retroactively add `onFailure` to an
+ * already-created Inngest function - Inngest v3 requires `onFailure` to be
+ * set at function definition time.
+ *
+ * Example migration:
+ * ```typescript
+ * // Before (no-op):
+ * export const myFn = withDeadLetter(inngest.createFunction(...))
+ *
+ * // After (real DLQ):
+ * export const myFn = inngest.createFunction(
+ *   { id: 'my-fn', onFailure: createDeadLetterHandler('my-fn') },
+ *   ...
+ * )
+ * ```
  *
  * @param fn - Inngest function to wrap
- * @param options - Dead letter configuration
- * @returns Wrapped function with DLQ handling
+ * @param _options - Dead letter configuration (unused - see deprecation note)
+ * @returns The function unchanged (pass-through)
  */
-export function withDeadLetter<T = any>(fn: T, options?: DeadLetterOptions): T {
-  // For now, return the function as-is
-  // Full wrapper implementation would require Inngest middleware
-  // which is better implemented at the function definition level
+export function withDeadLetter<T = any>(
+  fn: T,
+  _options?: DeadLetterOptions
+): T {
+  // Cannot retroactively add onFailure to a created Inngest function.
+  // Use createDeadLetterHandler() in your function config instead.
   return fn
 }
 

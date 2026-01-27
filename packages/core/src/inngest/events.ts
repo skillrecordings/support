@@ -441,6 +441,31 @@ export type SupportDraftValidatedEvent = {
   }
 }
 
+/** Event emitted when an Inngest function fails after all retries (dead letter) */
+export const SUPPORT_DEAD_LETTER = 'support/dead-letter' as const
+
+export type SupportDeadLetterEvent = {
+  name: typeof SUPPORT_DEAD_LETTER
+  data: {
+    /** Name of the failed Inngest function */
+    functionName: string
+    /** Error message from the final failure */
+    errorMessage: string
+    /** Error stack trace (if available) */
+    errorStack?: string
+    /** Original event name that triggered the function */
+    originalEventName?: string
+    /** Original event data (serializable subset) */
+    originalEventData?: Record<string, unknown>
+    /** Timestamp of failure */
+    failedAt: string
+    /** Dead letter queue record ID (if DB write succeeded) */
+    dlqRecordId?: string
+    /** Number of consecutive failures for this function */
+    consecutiveFailures?: number
+  }
+}
+
 /** Event emitted when routing decides to escalate */
 export const SUPPORT_ESCALATED = 'support/inbound.escalated' as const
 
@@ -563,4 +588,6 @@ export type Events = {
   // Tag gardening events
   [TAG_GARDENING_REQUESTED]: TagGardeningRequestedEvent
   [TAG_HEALTH_CHECK_REQUESTED]: TagHealthCheckRequestedEvent
+  // Dead letter queue
+  [SUPPORT_DEAD_LETTER]: SupportDeadLetterEvent
 }

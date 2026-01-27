@@ -19,8 +19,10 @@ export {
   SUPPORT_APPROVAL_DECIDED,
   SUPPORT_ACTION_APPROVED,
   SUPPORT_ACTION_REJECTED,
+  SUPPORT_DEAD_LETTER,
 } from './events'
 export {
+  createDeadLetterHandler,
   withDeadLetter,
   alertOnFailure,
   calculateBackoff,
