@@ -11,7 +11,7 @@ export { executeApprovedAction } from './execute-approved-action'
 export { handleStripeEvent } from './stripe-refund'
 export { indexConversation } from './index-conversation'
 export { retentionCleanup } from './retention-cleanup'
-export { handleMemoryVote } from './memory-vote'
+export { handleMemoryVote, handleMemoryCitation } from './memory-vote'
 export { routeWorkflow } from './route-message'
 export { classifyWorkflow } from './classify'
 export { gatherWorkflow } from './gather-context'
@@ -43,7 +43,7 @@ import { handleEscalation } from './handle-escalation'
 import { handleValidatedDraft } from './handle-validated-draft'
 // DELETED: import { handleInboundMessage } from './handle-inbound-message'
 import { indexConversation } from './index-conversation'
-import { handleMemoryVote } from './memory-vote'
+import { handleMemoryCitation, handleMemoryVote } from './memory-vote'
 import { requestApproval } from './request-approval'
 import { retentionCleanup } from './retention-cleanup'
 import { routeWorkflow } from './route-message'
@@ -80,6 +80,7 @@ export const allWorkflows: any[] = [
   handleStripeEvent,
   indexConversation,
   retentionCleanup,
+  handleMemoryCitation,
   handleMemoryVote,
   routeWorkflow,
   validateWorkflow,
