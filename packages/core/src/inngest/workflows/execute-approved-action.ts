@@ -16,7 +16,10 @@ import { formatAuditComment } from '../../pipeline/steps/comment'
 import { supportTools } from '../../tools'
 import type { ExecutionContext } from '../../tools/types'
 import { inngest } from '../client'
-import { SUPPORT_ACTION_APPROVED } from '../events'
+import {
+  SUPPORT_ACTION_APPROVED,
+  SUPPORT_CONVERSATION_RESOLVED,
+} from '../events'
 
 /**
  * Execute Approved Action Workflow
@@ -525,6 +528,119 @@ export const executeApprovedAction = inngest.createFunction(
         success: true,
       })
     })
+
+    // Step 5: Emit conversation resolved event for memory indexing (fire-and-forget)
+    // Only emit for successful draft actions — this feeds the index-conversation
+    // workflow which stores the conversation in vector search for future reference.
+    if (
+      result.success &&
+      (action.type === 'send-draft' || action.type === 'draft-response') &&
+      action.conversation_id
+    ) {
+      const resolvedEventPayload = await step.run(
+        'build-conversation-resolved-payload',
+        async () => {
+          try {
+            const frontToken = process.env.FRONT_API_TOKEN
+            if (!frontToken) {
+              await log(
+                'warn',
+                'FRONT_API_TOKEN not set, skipping conversation resolved event',
+                {
+                  workflow: 'execute-approved-action',
+                  step: 'build-conversation-resolved-payload',
+                  actionId,
+                  conversationId: action.conversation_id,
+                }
+              )
+              return null
+            }
+
+            const front = createFrontClient(frontToken)
+            const conversationId = action.conversation_id!
+
+            // Fetch conversation messages for indexing
+            const frontMessages =
+              await front.getConversationMessages(conversationId)
+
+            // Map Front messages to the event's expected format
+            const messages = frontMessages.map((msg) => ({
+              role: (msg.is_inbound ? 'customer' : 'agent') as
+                | 'customer'
+                | 'agent',
+              content: msg.body || '',
+              timestamp: msg.created_at
+                ? new Date(msg.created_at * 1000).toISOString()
+                : new Date().toISOString(),
+            }))
+
+            // Extract resolution metadata from action parameters
+            const params = action.parameters as {
+              category?: string
+              confidence?: number
+              autoApproved?: boolean
+              context?: {
+                category?: string
+                customerEmail?: string
+                confidence?: number
+              }
+            }
+
+            const category =
+              params.category ?? params.context?.category ?? 'unknown'
+            const customerEmail = params.context?.customerEmail ?? ''
+            const wasAutoSent = approvedBy === 'auto'
+            const trustScore = params.confidence ?? params.context?.confidence
+
+            await log('info', 'conversation resolved payload built', {
+              workflow: 'execute-approved-action',
+              step: 'build-conversation-resolved-payload',
+              actionId,
+              conversationId,
+              messageCount: messages.length,
+              category,
+              wasAutoSent,
+            })
+
+            return {
+              name: SUPPORT_CONVERSATION_RESOLVED as typeof SUPPORT_CONVERSATION_RESOLVED,
+              data: {
+                conversationId,
+                appId: action.app_id ?? 'unknown',
+                customerEmail,
+                messages,
+                resolution: {
+                  category,
+                  wasAutoSent,
+                  agentDraftUsed: true,
+                  trustScore,
+                },
+              },
+            }
+          } catch (error) {
+            // Non-fatal — don't block the main pipeline if payload build fails
+            const errorMsg =
+              error instanceof Error ? error.message : 'Unknown error'
+            await log(
+              'error',
+              'failed to build conversation resolved payload',
+              {
+                workflow: 'execute-approved-action',
+                step: 'build-conversation-resolved-payload',
+                actionId,
+                conversationId: action.conversation_id,
+                error: errorMsg,
+              }
+            )
+            return null
+          }
+        }
+      )
+
+      if (resolvedEventPayload) {
+        await step.sendEvent('emit-conversation-resolved', resolvedEventPayload)
+      }
+    }
 
     const totalDurationMs = Date.now() - workflowStartTime
 
