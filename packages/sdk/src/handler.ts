@@ -269,6 +269,90 @@ async function routeAction(
         return { data: result, status: 200 }
       }
 
+      // ── Agent Intelligence Methods ─────────────────────────────────
+
+      case 'getActivePromotions': {
+        if (!integration.getActivePromotions) {
+          return {
+            data: { error: 'Method not implemented: getActivePromotions' },
+            status: 501,
+          }
+        }
+        const result = await integration.getActivePromotions()
+        return { data: result, status: 200 }
+      }
+
+      case 'getCouponInfo': {
+        if (!integration.getCouponInfo) {
+          return {
+            data: { error: 'Method not implemented: getCouponInfo' },
+            status: 501,
+          }
+        }
+        const code = (body as unknown as { code: string }).code
+        const result = await integration.getCouponInfo(code)
+        return { data: result, status: 200 }
+      }
+
+      case 'getRefundPolicy': {
+        if (!integration.getRefundPolicy) {
+          return {
+            data: { error: 'Method not implemented: getRefundPolicy' },
+            status: 501,
+          }
+        }
+        const result = await integration.getRefundPolicy()
+        return { data: result, status: 200 }
+      }
+
+      case 'getContentAccess': {
+        if (!integration.getContentAccess) {
+          return {
+            data: { error: 'Method not implemented: getContentAccess' },
+            status: 501,
+          }
+        }
+        const userId = (body as unknown as { userId: string }).userId
+        const result = await integration.getContentAccess(userId)
+        return { data: result, status: 200 }
+      }
+
+      case 'getRecentActivity': {
+        if (!integration.getRecentActivity) {
+          return {
+            data: { error: 'Method not implemented: getRecentActivity' },
+            status: 501,
+          }
+        }
+        const userId = (body as unknown as { userId: string }).userId
+        const result = await integration.getRecentActivity(userId)
+        return { data: result, status: 200 }
+      }
+
+      case 'getLicenseInfo': {
+        if (!integration.getLicenseInfo) {
+          return {
+            data: { error: 'Method not implemented: getLicenseInfo' },
+            status: 501,
+          }
+        }
+        const purchaseId = (body as unknown as { purchaseId: string })
+          .purchaseId
+        const result = await integration.getLicenseInfo(purchaseId)
+        return { data: result, status: 200 }
+      }
+
+      case 'getAppInfo': {
+        if (!integration.getAppInfo) {
+          return {
+            data: { error: 'Method not implemented: getAppInfo' },
+            status: 501,
+          }
+        }
+        const result = await integration.getAppInfo()
+        return { data: result, status: 200 }
+      }
+
       default:
         return {
           data: { error: `Unknown action: ${action}` },

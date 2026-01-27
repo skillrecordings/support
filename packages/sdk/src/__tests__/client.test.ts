@@ -1,9 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type {
   ActionResult,
+  AppInfo,
+  ContentAccess,
+  CouponInfo,
+  LicenseInfo,
   ProductStatus,
+  Promotion,
   Purchase,
+  RefundPolicy,
   User,
+  UserActivity,
 } from '../integration'
 
 // Import will fail until we create the client
@@ -60,11 +67,12 @@ describe('IntegrationClient', () => {
       await client.lookupUser('[EMAIL]')
 
       expect(fetchMock).toHaveBeenCalledWith(
-        `${baseUrl}/api/support/lookup-user`,
+        baseUrl,
         expect.objectContaining({
           headers: expect.objectContaining({
-            'X-Support-Signature':
-              expect.stringMatching(/^t=\d+,v1=[a-f0-9]+$/),
+            'X-Support-Signature': expect.stringMatching(
+              /^timestamp=\d+,v1=[a-f0-9]+$/
+            ),
           }),
         })
       )
@@ -82,7 +90,9 @@ describe('IntegrationClient', () => {
       const call = fetchMock.mock.calls[0]
       const signature = call?.[1]?.headers?.['X-Support-Signature']
       expect(signature).toBeDefined()
-      const timestampPart = (signature as string).split('t=')[1]?.split(',')[0]
+      const timestampPart = (signature as string)
+        .split('timestamp=')[1]
+        ?.split(',')[0]
       expect(timestampPart).toBeDefined()
       const timestamp = parseInt(timestampPart as string)
 
@@ -92,7 +102,7 @@ describe('IntegrationClient', () => {
   })
 
   describe('lookupUser', () => {
-    it('calls /api/support/lookup-user endpoint', async () => {
+    it('calls baseUrl with lookupUser action', async () => {
       const user: User = {
         id: 'usr_123',
         email: '[EMAIL]',
@@ -109,10 +119,13 @@ describe('IntegrationClient', () => {
 
       expect(result).toEqual(user)
       expect(fetchMock).toHaveBeenCalledWith(
-        `${baseUrl}/api/support/lookup-user`,
+        baseUrl,
         expect.objectContaining({
           method: 'POST',
-          body: JSON.stringify({ email: '[EMAIL]' }),
+          body: JSON.stringify({
+            action: 'lookupUser',
+            email: '[EMAIL]',
+          }),
         })
       )
     })
@@ -129,7 +142,7 @@ describe('IntegrationClient', () => {
   })
 
   describe('getPurchases', () => {
-    it('calls /api/support/get-purchases endpoint', async () => {
+    it('calls baseUrl with getPurchases action', async () => {
       const purchases: Purchase[] = [
         {
           id: 'pur_123',
@@ -151,10 +164,10 @@ describe('IntegrationClient', () => {
 
       expect(result).toEqual(purchases)
       expect(fetchMock).toHaveBeenCalledWith(
-        `${baseUrl}/api/support/get-purchases`,
+        baseUrl,
         expect.objectContaining({
           method: 'POST',
-          body: JSON.stringify({ userId: 'usr_123' }),
+          body: JSON.stringify({ action: 'getPurchases', userId: 'usr_123' }),
         })
       )
     })
@@ -171,7 +184,7 @@ describe('IntegrationClient', () => {
   })
 
   describe('revokeAccess', () => {
-    it('calls /api/support/revoke-access endpoint', async () => {
+    it('calls baseUrl with revokeAccess action', async () => {
       const actionResult: ActionResult = { success: true }
 
       fetchMock.mockResolvedValueOnce({
@@ -187,10 +200,11 @@ describe('IntegrationClient', () => {
 
       expect(result).toEqual(actionResult)
       expect(fetchMock).toHaveBeenCalledWith(
-        `${baseUrl}/api/support/revoke-access`,
+        baseUrl,
         expect.objectContaining({
           method: 'POST',
           body: JSON.stringify({
+            action: 'revokeAccess',
             purchaseId: 'pur_123',
             reason: 'Customer requested refund',
             refundId: 're_123',
@@ -201,7 +215,7 @@ describe('IntegrationClient', () => {
   })
 
   describe('transferPurchase', () => {
-    it('calls /api/support/transfer-purchase endpoint', async () => {
+    it('calls baseUrl with transferPurchase action', async () => {
       const actionResult: ActionResult = { success: true }
 
       fetchMock.mockResolvedValueOnce({
@@ -217,10 +231,11 @@ describe('IntegrationClient', () => {
 
       expect(result).toEqual(actionResult)
       expect(fetchMock).toHaveBeenCalledWith(
-        `${baseUrl}/api/support/transfer-purchase`,
+        baseUrl,
         expect.objectContaining({
           method: 'POST',
           body: JSON.stringify({
+            action: 'transferPurchase',
             purchaseId: 'pur_123',
             fromUserId: 'usr_123',
             toEmail: '[EMAIL]',
@@ -231,7 +246,7 @@ describe('IntegrationClient', () => {
   })
 
   describe('generateMagicLink', () => {
-    it('calls /api/support/generate-magic-link endpoint', async () => {
+    it('calls baseUrl with generateMagicLink action', async () => {
       const magicLink = {
         url: 'https://app.example.com/auth/magic?token=abc123',
       }
@@ -248,10 +263,11 @@ describe('IntegrationClient', () => {
 
       expect(result).toEqual(magicLink)
       expect(fetchMock).toHaveBeenCalledWith(
-        `${baseUrl}/api/support/generate-magic-link`,
+        baseUrl,
         expect.objectContaining({
           method: 'POST',
           body: JSON.stringify({
+            action: 'generateMagicLink',
             email: '[EMAIL]',
             expiresIn: 3600,
           }),
@@ -305,8 +321,11 @@ describe('IntegrationClient', () => {
       const result = await client.getSubscriptions?.('usr_123')
       expect(result).toEqual([])
       expect(fetchMock).toHaveBeenCalledWith(
-        `${baseUrl}/api/support/get-subscriptions`,
-        expect.any(Object)
+        baseUrl,
+        expect.objectContaining({
+          method: 'POST',
+          body: expect.stringContaining('getSubscriptions'),
+        })
       )
     })
 
@@ -323,8 +342,11 @@ describe('IntegrationClient', () => {
 
       expect(result).toEqual({ success: true })
       expect(fetchMock).toHaveBeenCalledWith(
-        `${baseUrl}/api/support/update-email`,
-        expect.any(Object)
+        baseUrl,
+        expect.objectContaining({
+          method: 'POST',
+          body: expect.stringContaining('updateEmail'),
+        })
       )
     })
 
@@ -341,8 +363,11 @@ describe('IntegrationClient', () => {
 
       expect(result).toEqual({ success: true })
       expect(fetchMock).toHaveBeenCalledWith(
-        `${baseUrl}/api/support/update-name`,
-        expect.any(Object)
+        baseUrl,
+        expect.objectContaining({
+          method: 'POST',
+          body: expect.stringContaining('updateName'),
+        })
       )
     })
 
@@ -355,8 +380,11 @@ describe('IntegrationClient', () => {
       const result = await client.getClaimedSeats?.('bulk_123')
       expect(result).toEqual([])
       expect(fetchMock).toHaveBeenCalledWith(
-        `${baseUrl}/api/support/get-claimed-seats`,
-        expect.any(Object)
+        baseUrl,
+        expect.objectContaining({
+          method: 'POST',
+          body: expect.stringContaining('getClaimedSeats'),
+        })
       )
     })
 
@@ -397,6 +425,250 @@ describe('IntegrationClient', () => {
 
       const result = await client.getProductStatus('non-existent')
       expect(result).toBeNull()
+    })
+  })
+
+  describe('agent intelligence methods', () => {
+    it('calls getActivePromotions', async () => {
+      const promotions: Promotion[] = [
+        {
+          id: 'promo_123',
+          name: 'Summer Sale',
+          code: 'SUMMER2025',
+          discountType: 'percent',
+          discountAmount: 30,
+          active: true,
+        },
+      ]
+
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => promotions,
+      })
+
+      const result = await client.getActivePromotions()
+
+      expect(result).toEqual(promotions)
+      expect(fetchMock).toHaveBeenCalledWith(
+        baseUrl,
+        expect.objectContaining({
+          method: 'POST',
+          body: expect.stringContaining('getActivePromotions'),
+        })
+      )
+    })
+
+    it('getActivePromotions returns empty array on 501', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: false,
+        status: 501,
+        json: async () => ({
+          error: 'Method not implemented: getActivePromotions',
+        }),
+      })
+
+      const result = await client.getActivePromotions()
+      expect(result).toEqual([])
+    })
+
+    it('calls getCouponInfo with code', async () => {
+      const coupon: CouponInfo = {
+        code: 'SAVE20',
+        valid: true,
+        discountType: 'percent',
+        discountAmount: 20,
+        usageCount: 100,
+      }
+
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => coupon,
+      })
+
+      const result = await client.getCouponInfo('SAVE20')
+
+      expect(result).toEqual(coupon)
+      expect(fetchMock).toHaveBeenCalledWith(
+        baseUrl,
+        expect.objectContaining({
+          method: 'POST',
+          body: expect.stringContaining('"code":"SAVE20"'),
+        })
+      )
+    })
+
+    it('getCouponInfo returns null on 501', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: false,
+        status: 501,
+        json: async () => ({
+          error: 'Method not implemented: getCouponInfo',
+        }),
+      })
+
+      const result = await client.getCouponInfo('INVALID')
+      expect(result).toBeNull()
+    })
+
+    it('calls getRefundPolicy', async () => {
+      const policy: RefundPolicy = {
+        autoApproveWindowDays: 30,
+        manualApproveWindowDays: 45,
+        noRefundAfterDays: 60,
+        policyUrl: 'https://example.com/refund',
+      }
+
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => policy,
+      })
+
+      const result = await client.getRefundPolicy()
+
+      expect(result).toEqual(policy)
+      expect(fetchMock).toHaveBeenCalledWith(
+        baseUrl,
+        expect.objectContaining({
+          method: 'POST',
+          body: expect.stringContaining('getRefundPolicy'),
+        })
+      )
+    })
+
+    it('calls getContentAccess with userId', async () => {
+      const access: ContentAccess = {
+        userId: 'usr_123',
+        products: [
+          {
+            productId: 'prod_123',
+            productName: 'TypeScript Pro',
+            accessLevel: 'full',
+          },
+        ],
+      }
+
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => access,
+      })
+
+      const result = await client.getContentAccess('usr_123')
+
+      expect(result).toEqual(access)
+      expect(fetchMock).toHaveBeenCalledWith(
+        baseUrl,
+        expect.objectContaining({
+          method: 'POST',
+          body: expect.stringContaining('"userId":"usr_123"'),
+        })
+      )
+    })
+
+    it('calls getRecentActivity with userId', async () => {
+      const activity: UserActivity = {
+        userId: 'usr_123',
+        lessonsCompleted: 42,
+        totalLessons: 100,
+        completionPercent: 42,
+        recentItems: [],
+      }
+
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => activity,
+      })
+
+      const result = await client.getRecentActivity('usr_123')
+
+      expect(result).toEqual(activity)
+      expect(fetchMock).toHaveBeenCalledWith(
+        baseUrl,
+        expect.objectContaining({
+          method: 'POST',
+          body: expect.stringContaining('"userId":"usr_123"'),
+        })
+      )
+    })
+
+    it('calls getLicenseInfo with purchaseId', async () => {
+      const license: LicenseInfo = {
+        purchaseId: 'pur_123',
+        licenseType: 'team',
+        totalSeats: 10,
+        claimedSeats: 7,
+        availableSeats: 3,
+        claimedBy: [
+          { email: '[EMAIL]', claimedAt: '2025-01-15T10:00:00Z' },
+        ],
+      }
+
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => license,
+      })
+
+      const result = await client.getLicenseInfo('pur_123')
+
+      expect(result).toEqual(license)
+      expect(fetchMock).toHaveBeenCalledWith(
+        baseUrl,
+        expect.objectContaining({
+          method: 'POST',
+          body: expect.stringContaining('"purchaseId":"pur_123"'),
+        })
+      )
+    })
+
+    it('getLicenseInfo returns null on 501', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: false,
+        status: 501,
+        json: async () => ({
+          error: 'Method not implemented: getLicenseInfo',
+        }),
+      })
+
+      const result = await client.getLicenseInfo('pur_123')
+      expect(result).toBeNull()
+    })
+
+    it('calls getAppInfo', async () => {
+      const appInfo: AppInfo = {
+        name: 'Total TypeScript',
+        instructorName: 'Matt Pocock',
+        supportEmail: '[EMAIL]',
+        websiteUrl: 'https://totaltypescript.com',
+        invoicesUrl: 'https://totaltypescript.com/invoices',
+      }
+
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => appInfo,
+      })
+
+      const result = await client.getAppInfo()
+
+      expect(result).toEqual(appInfo)
+      expect(fetchMock).toHaveBeenCalledWith(
+        baseUrl,
+        expect.objectContaining({
+          method: 'POST',
+          body: expect.stringContaining('getAppInfo'),
+        })
+      )
+    })
+
+    it('optional methods throw on non-501 errors', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        statusText: 'Internal Server Error',
+        json: async () => ({ error: 'Database down' }),
+      })
+
+      await expect(client.getActivePromotions()).rejects.toThrow(
+        'Database down'
+      )
     })
   })
 })
