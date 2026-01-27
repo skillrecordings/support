@@ -26,11 +26,38 @@ async function seed() {
         'update_email',
         'update_name',
         'get_claimed_seats',
+        'get_product_status',
+        'search_content',
+        'get_active_promotions',
+        'get_coupon_info',
+        'get_refund_policy',
+        'get_content_access',
+        'get_recent_activity',
+        'get_license_info',
+        'get_app_info',
       ],
     })
     .onDuplicateKeyUpdate({
       set: {
-        name: 'Total TypeScript', // no-op update for upsert behavior
+        capabilities: [
+          'lookup_user',
+          'get_purchases',
+          'revoke_access',
+          'transfer_purchase',
+          'generate_magic_link',
+          'update_email',
+          'update_name',
+          'get_claimed_seats',
+          'get_product_status',
+          'search_content',
+          'get_active_promotions',
+          'get_coupon_info',
+          'get_refund_policy',
+          'get_content_access',
+          'get_recent_activity',
+          'get_license_info',
+          'get_app_info',
+        ],
       },
     })
 
