@@ -3,11 +3,11 @@
 import { Command } from 'commander'
 import { registerAxiomCommands } from './commands/axiom/index'
 import { registerDatasetCommands } from './commands/build-dataset'
-import { registerEvalPromptCommands } from './commands/eval-prompt'
+import { registerDeployCommands } from './commands/deploys'
 import { runEval } from './commands/eval'
 import { registerEvalLocalCommands } from './commands/eval-local/index'
 import { registerEvalPipelineCommands } from './commands/eval-pipeline/index'
-import { registerPipelineCommands } from './commands/pipeline'
+import { registerEvalPromptCommands } from './commands/eval-prompt'
 import { registerFrontCommands } from './commands/front/index'
 import { health } from './commands/health'
 import { init } from './commands/init'
@@ -15,6 +15,7 @@ import { registerEventsCommands } from './commands/inngest/events'
 import { registerRunsCommands } from './commands/inngest/runs'
 import { registerSignalCommand } from './commands/inngest/signal'
 import { registerMemoryCommands } from './commands/memory/index'
+import { registerPipelineCommands } from './commands/pipeline'
 import { registerResponseCommands } from './commands/responses'
 import { registerToolsCommands } from './commands/tools'
 import { wizard } from './commands/wizard'
@@ -130,5 +131,8 @@ registerEvalPipelineCommands(program)
 
 // Register pipeline commands (new step-based architecture)
 registerPipelineCommands(program)
+
+// Register deploy commands (Vercel status/logs/inspect)
+registerDeployCommands(program)
 
 program.parse()
