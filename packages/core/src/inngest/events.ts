@@ -419,14 +419,26 @@ export type SupportDraftValidatedEvent = {
     }
     draft: {
       content: string
+      /** Tools used during drafting (e.g. lookup-user, search-knowledge) */
+      toolsUsed?: string[]
     }
     validation: {
       valid: boolean
+      /** Flattened issue messages (backward compat) */
       issues: string[]
+      /** Full structured validation issues with type/severity/match/position */
+      structuredIssues?: Array<{
+        type: string
+        severity: 'error' | 'warning'
+        message: string
+        match?: string
+        position?: number
+      }>
       score?: number
       /** Relevance score from LLM check (0-1) */
       relevance?: number
     }
+    /** Summary context (backward compat - flattened counts + classification) */
     context?: {
       customerEmail?: string
       purchaseCount?: number
@@ -436,8 +448,55 @@ export type SupportDraftValidatedEvent = {
       confidence?: number
       reasoning?: string
     }
+    /** Full gathered context from CONTEXT_GATHERED event (rich data for downstream) */
+    gatheredContext?: {
+      customer: {
+        email: string
+        purchases: unknown[]
+        trustScore?: number
+      } | null
+      knowledge: unknown[]
+      memories: unknown[]
+      history: Array<{
+        body: string
+        from: string
+        date: string
+      }>
+      priorConversations?: Array<{
+        conversationId: string
+        subject: string
+        status: string
+        lastMessageAt: string
+        messageCount: number
+        tags: string[]
+      }>
+    }
     /** Unique trace ID for end-to-end pipeline correlation */
     traceId?: string
+  }
+}
+/** Event emitted when an Inngest function fails after all retries (dead letter) */
+export const SUPPORT_DEAD_LETTER = 'support/dead-letter' as const
+
+export type SupportDeadLetterEvent = {
+  name: typeof SUPPORT_DEAD_LETTER
+  data: {
+    /** Name of the failed Inngest function */
+    functionName: string
+    /** Error message from the final failure */
+    errorMessage: string
+    /** Error stack trace (if available) */
+    errorStack?: string
+    /** Original event name that triggered the function */
+    originalEventName?: string
+    /** Original event data (serializable subset) */
+    originalEventData?: Record<string, unknown>
+    /** Timestamp of failure */
+    failedAt: string
+    /** Dead letter queue record ID (if DB write succeeded) */
+    dlqRecordId?: string
+    /** Number of consecutive failures for this function */
+    consecutiveFailures?: number
   }
 }
 
@@ -563,4 +622,6 @@ export type Events = {
   // Tag gardening events
   [TAG_GARDENING_REQUESTED]: TagGardeningRequestedEvent
   [TAG_HEALTH_CHECK_REQUESTED]: TagHealthCheckRequestedEvent
+  // Dead letter queue
+  [SUPPORT_DEAD_LETTER]: SupportDeadLetterEvent
 }
