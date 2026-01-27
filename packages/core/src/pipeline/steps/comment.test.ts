@@ -59,6 +59,7 @@ const mockGatherOutput: GatherOutput = {
       relevance: 0.8,
     },
   ],
+  priorConversations: [],
   gatherErrors: [],
 }
 

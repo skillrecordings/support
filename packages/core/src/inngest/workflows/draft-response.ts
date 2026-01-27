@@ -168,6 +168,21 @@ export const draftWorkflow = inngest.createFunction(
             relevance: (mem.relevance as number) ?? 0,
           }
         }),
+        priorConversations: (
+          ((context as Record<string, unknown>).priorConversations as
+            | unknown[]
+            | undefined) ?? []
+        ).map((c: unknown) => {
+          const conv = c as Record<string, unknown>
+          return {
+            conversationId: String(conv.conversationId ?? ''),
+            subject: String(conv.subject ?? ''),
+            status: String(conv.status ?? ''),
+            lastMessageAt: String(conv.lastMessageAt ?? ''),
+            messageCount: (conv.messageCount as number) ?? 0,
+            tags: (conv.tags as string[]) ?? [],
+          }
+        }),
         gatherErrors: [],
       }
 

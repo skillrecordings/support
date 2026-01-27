@@ -45,6 +45,28 @@ const INTERNAL_LEAK_PATTERNS = [
   /falls? outside (?:my |the )?scope/i,
   /outside the scope/i,
   /You'll want to reach out through/i,
+
+  // ── Added from forensic audit (Epic 1A) ──────────────────────────────
+  // Instructor/routing system disclosure
+  /(?:don't|do not) have (?:a |an )?instructor/i,
+  /no instructor (?:assignment|configuration)/i,
+  /(?:can't|cannot) (?:forward|assign|transfer) (?:this |it )?(?:to |directly)/i,
+
+  // System tool/capability disclosure
+  /(?:can't|cannot|unable to) use \w+(?:Tool|Instructor|Function)/i,
+  /(?:in|within) (?:the|our|my) system/i,
+  /internal (?:process|routing|configuration|pipeline|workflow|team|tool)/i,
+
+  // System limitation disclosure
+  /(?:not |un)?(?:configured|equipped|set up) to (?:forward|route|assign|escalate|transfer)/i,
+  /(?:my|the|our) (?:tools?|capabilities|functions?|features?|system) (?:don't|do not|can't|cannot|won't|doesn't|does not)/i,
+
+  // Business-team routing disclosure
+  /(?:forwarded|routed|sent|assigned) to (?:\w+(?:'s)? )?(?:business|development|sales|marketing)[\w\s]*(?:team|department|group)/i,
+  /(?:business development|dev) team or equivalent/i,
+
+  // Routing inability disclosure
+  /(?:don't|do not) have (?:a |the )?(?:way|means|method|mechanism) to (?:route|forward|send|assign)/i,
 ]
 
 // Meta-commentary - agent explaining itself instead of acting
@@ -58,8 +80,39 @@ const META_COMMENTARY_PATTERNS = [
   /is clearly meant for/i,
   /is clearly personal/i,
   /I should not draft/i,
-  /This (?:should|needs to) be (?:handled|routed)/i,
+  /This (?:should|needs to) be (?:handled|routed|forwarded|escalated|sent|assigned)/i,
   /I'll note that/i,
+
+  // ── Added from forensic audit (Epic 1A) ──────────────────────────────
+  // Agent explaining what it's going to do instead of doing it
+  /I(?:'ll| will| am going to) (?:draft|compose|write|prepare|craft|put together) (?:a |an |the )?(?:response|reply|email|message)/i,
+  /^(?:Here(?:'s| is)) (?:a |my |the )?(?:draft|proposed|suggested) (?:response|reply|email|message)/i,
+  /^Let me (?:draft|compose|write|prepare|craft)/i,
+
+  // Agent describing/categorizing the email instead of responding
+  /^This (?:appears|seems|looks) to be (?:a |an )/i,
+  /^This (?:email|message|inquiry|conversation|thread) (?:is|appears|seems|involves|contains|relates)/i,
+
+  // Agent referencing its own decision-making about the conversation
+  /I(?:'ve| have) (?:determined|assessed|classified|categorized|evaluated|identified) (?:this|that|the (?:conversation|email|message|request))/i,
+  /(?:The |This )?conversation has been (?:classified|categorized|flagged|tagged|marked)/i,
+
+  // Agent refusing to act (expanded — existing covers "I won't respond" but not "doesn't need")
+  /(?:doesn't|does not|don't|do not) (?:need|require|warrant) (?:a |my |any )?(?:response|reply|action|draft)/i,
+  /I (?:don't|do not) need to (?:respond|reply|act|draft)/i,
+  /This (?:isn't|is not) (?:something|a (?:case|situation|matter)) I/i,
+
+  // Agent talking about the customer in third person instead of TO them
+  /^The (?:customer|user|sender|person|individual) (?:is |has |needs |wants |seems |appears |asked |wrote |sent |mentioned |requested )/i,
+  /(?:the customer(?:'s)?|the user(?:'s)?|the sender(?:'s)?) (?:question|request|inquiry|issue|concern|email|message|problem) /i,
+
+  // Agent narrating its routing/escalation process
+  /^(?:I(?:'m| am) )?(?:Flagging|Routing|Escalating|Forwarding|Sending|Passing) (?:this|it) (?:to |for |along)/i,
+  /I(?:'ll| will) (?:flag|route|escalate|forward|pass) (?:this|it) (?:to |for |along)/i,
+
+  // Categorization language — labeling the email type (not customer-facing)
+  /This is (?:a |an )?(?:business|vendor|partnership|sales|marketing|outreach|fan[\s-]?mail|personal|promotional) (?:email|message|inquiry|pitch|request|outreach)/i,
+  /not (?:a |an? )?(?:customer )?support (?:request|issue|ticket|question|inquiry)/i,
 ]
 
 // Banned phrases - corporate speak the prompt explicitly forbids
@@ -474,9 +527,38 @@ export async function validate(
   const hasCustomerBody =
     customerMessage?.body && customerMessage.body.trim().length > 0
 
+  if (skipRelevanceCheck) {
+    await log('debug', 'relevance check skipped (skipRelevanceCheck=true)', {
+      workflow: 'pipeline',
+      step: 'validate',
+      appId,
+      category,
+    })
+  } else if (!customerMessage) {
+    await log(
+      'warn',
+      'relevance check skipped (customerMessage not provided)',
+      {
+        workflow: 'pipeline',
+        step: 'validate',
+        appId,
+        category,
+      }
+    )
+  } else if (!hasCustomerBody) {
+    await log('debug', 'relevance check skipped (empty customer body)', {
+      workflow: 'pipeline',
+      step: 'validate',
+      appId,
+      category,
+      customerSubjectLength: customerMessage.subject?.length ?? 0,
+      customerBodyLength: customerMessage.body?.length ?? 0,
+    })
+  }
+
   if (!skipRelevanceCheck && hasCustomerBody && customerMessage) {
     try {
-      await log('debug', 'running relevance check', {
+      await log('info', 'relevance check starting', {
         workflow: 'pipeline',
         step: 'validate',
         appId,
@@ -485,6 +567,7 @@ export async function validate(
           (customerMessage.subject?.length ?? 0) +
           (customerMessage.body?.length ?? 0),
         draftLength: draft.length,
+        relevanceModel,
       })
 
       const relevanceResult = await checkRelevance(
@@ -496,13 +579,14 @@ export async function validate(
       relevanceScore = relevanceResult.score
       allIssues.push(...relevanceResult.issues)
 
-      await log('debug', 'relevance check completed', {
+      await log('info', 'relevance check completed', {
         workflow: 'pipeline',
         step: 'validate',
         appId,
         category,
         relevanceScore: relevanceResult.score,
         relevanceIssues: relevanceResult.issues.length,
+        relevant: relevanceResult.score >= 0.5,
       })
     } catch (error) {
       // Relevance check failed - log but don't fail validation
@@ -512,6 +596,8 @@ export async function validate(
         appId,
         category,
         error: error instanceof Error ? error.message : String(error),
+        errorStack: error instanceof Error ? error.stack : undefined,
+        relevanceModel,
       })
       relevanceCheckPerformed = false
     }

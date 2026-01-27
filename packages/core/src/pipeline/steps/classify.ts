@@ -303,19 +303,11 @@ export function fastClassify(
     }
   }
 
-  // Fan mail - personal message to instructor
-  if (
-    signals.mentionsInstructor &&
-    /(?:thank|love|amazing|changed my|big fan|appreciate)/i.test(text) &&
-    !signals.hasEmailInBody
-  ) {
-    return {
-      category: 'fan_mail',
-      confidence: 0.75,
-      signals,
-      reasoning: 'Personal appreciation message to instructor',
-    }
-  }
+  // Fan mail - REMOVED from fast-path.
+  // Fan mail vs presales is too nuanced for regex. Messages like "I'd love to
+  // learn about X" or responses to instructor outreach were over-classified as
+  // fan_mail when they should be presales_consult or voc_response.
+  // All potential fan_mail now goes through LLM for proper disambiguation.
 
   return null // Need LLM for nuanced classification
 }
@@ -352,9 +344,9 @@ Categories:
 - support_technical: Questions about course content, code help, how to use product
 - support_billing: Invoice request, receipt needed, tax documents, payment questions
 - presales_faq: Pre-purchase questions answerable with KB (pricing, what's included, curriculum, tech requirements, discounts, PPP)
-- presales_consult: Pre-purchase questions needing instructor judgment ("should I buy X or Y?", career advice tied to product)
+- presales_consult: Pre-purchase questions needing instructor judgment ("should I buy X or Y?", career advice tied to product, expressing interest in learning a topic)
 - presales_team: Enterprise/team inquiries (team of X, company license, procurement, PO, L&D budget, volume/bulk pricing)
-- fan_mail: Personal thank you, appreciation, feedback directed at instructor personally
+- fan_mail: UNSOLICITED, PURE appreciation with NO questions, NO asks, NO purchase intent. Only genuine "thank you, you changed my life" messages with zero requests.
 - spam: Vendor outreach, partnership proposals, marketing, SEO services
 - system: Automated replies, bounces, out-of-office, system notifications
 - unknown: Can't confidently categorize
@@ -364,11 +356,24 @@ Rules:
 - If asking about product BEFORE purchasing → presales_*
   - Simple factual questions (price, curriculum, requirements) → presales_faq
   - "Which course should I buy?" or career advice → presales_consult
+  - Expressing interest in a topic or responding to outreach → presales_consult
   - Team/enterprise/bulk inquiries → presales_team
-- If it's addressed personally to the instructor with appreciation → fan_mail
+- fan_mail is ONLY for unsolicited, pure appreciation with NOTHING else:
+  - Must have NO questions (no "?", no "how do I", no "can you")
+  - Must have NO purchase/learning intent (no "I want to learn", "interested in buying")
+  - Must have NO response to outreach (no quoted emails, no "you asked me about")
+  - Must be PURELY "thank you / you changed my life / amazing work" and nothing more
 - If it's someone trying to sell/partner → spam
 - If it's automated → system
 - Only use unknown if genuinely ambiguous
+
+Key disambiguation — fan_mail is RARE. When in doubt, choose presales_consult:
+- "I love your content" + ANY question about learning → presales_consult, NOT fan_mail
+- Response to instructor outreach email → presales_consult, NOT fan_mail
+- Appreciation + "how do I buy/access/start" → presales_faq, NOT fan_mail
+- "I'd love to learn about X" → presales_consult, NOT fan_mail
+- Sharing what interests them about a topic → presales_consult, NOT fan_mail
+- ONLY pure "thank you, you changed my life" with ZERO asks = fan_mail
 
 Output your classification with confidence (0-1) and brief reasoning.`
 
@@ -587,7 +592,7 @@ const THREAD_CLASSIFY_PROMPT = `You are classifying a support THREAD. Analyze th
 
 **Non-Support Categories:**
 - voc_response: Reply to OUR automated email sequence (check-ins, surveys). Look for quoted text from our outreach.
-- fan_mail: UNSOLICITED appreciation. Customer reached out on their own to say thanks or praise.
+- fan_mail: UNSOLICITED, PURE appreciation with ZERO questions, ZERO asks, ZERO purchase/learning intent. Customer reached out entirely on their own ONLY to say thanks or praise — nothing more. This is RARE.
 - spam: Vendor/partnership pitch. Someone representing a COMPANY trying to sell TO us or partner.
 - system: Automated notifications, bounces, password resets. No human intent.
 - instructor_strategy: Instructor discussing business/content strategy (internal)
@@ -618,9 +623,38 @@ const THREAD_CLASSIFY_PROMPT = `You are classifying a support THREAD. Analyze th
 
 ### spam vs fan_mail
 - spam: "I'm [Name] from [Company]", "partnership opportunity", trying to SELL something
-- fan_mail: Individual (not company), expressing gratitude or asking to BUY from us
+- fan_mail: Individual (not company), expressing ONLY pure gratitude — no asks, no questions
 - "Big fan" + business pitch → spam (the "fan" is a hook)
-- "Big fan" + personal journey → fan_mail
+- "Big fan" + pure personal thanks, no asks → fan_mail
+
+### fan_mail vs presales_consult (CRITICAL — fan_mail is over-classified)
+fan_mail is RARE. Default to presales_consult when appreciation is mixed with ANY of these:
+- ANY question ("?", "how do I", "can you", "where do I")
+- Interest in learning ("I'd love to learn about X", "interested in AI/TypeScript/etc.")
+- Response to instructor outreach (quoted email, "you asked about", "your email")
+- Career/learning journey sharing ("I've been exploring", "I want to get into")
+- Purchase intent ("how do I buy", "how to access", "sign up", "enroll")
+- Topic engagement ("what interests me is...", "I'm excited about...")
+
+ONLY classify as fan_mail when the message is:
+1. UNSOLICITED (not replying to our outreach/survey)
+2. PURE appreciation ("thank you", "you changed my life", "amazing work")
+3. Contains ZERO questions or requests
+4. Contains ZERO purchase/learning intent
+5. The person wants NOTHING — they just want to say thanks
+
+Examples of what is NOT fan_mail:
+- "Love your content! I'd love to learn more about TypeScript" → presales_consult
+- "Thanks for the email! I'm really interested in AI agents" → presales_consult (responding to outreach + topic interest)
+- "Big fan of your work. How do I get started?" → presales_faq
+- "Your course changed my life! Do you have anything on React?" → presales_consult
+- Replying to Matt's "What interests you about AI?" email → presales_consult (response to outreach)
+
+### fan_mail vs voc_response (outreach replies)
+- If the message is replying to an automated outreach/survey email → voc_response
+- If the thread contains quoted text from our email sequences → voc_response
+- Even if the reply is positive/appreciative, it's voc_response if it's replying to us
+- fan_mail is ONLY unsolicited — the customer initiated contact purely to give thanks
 
 ### presales_* vs support_billing
 - Key question: Does the person ALREADY OWN the product?
@@ -655,9 +689,25 @@ Thread: [Customer: "Can't access my course"] → [Us: "Reset your access"] → [
 Message: "> What interests you about AI?\n\nI've been exploring AI tools for my workflow and really excited about the possibilities..."
 → voc_response (replying to our survey/check-in email)
 
-### Example 5: fan_mail
+### Example 5: fan_mail (PURE appreciation, no asks)
 Message: "Just wanted to say your TypeScript course completely changed how I think about types. Thank you so much!"
-→ fan_mail (unsolicited, no quoted automation)
+→ fan_mail (unsolicited, PURE appreciation, no questions, no asks, no purchase intent)
+
+### Example 5b: presales_consult (NOT fan_mail — has topic interest)
+Message: "Love your work Matt! I've been getting into AI lately and would love to learn more about building agents. What interests me most is the practical side."
+→ presales_consult (appreciation is present BUT combined with topic interest and learning intent — this is a potential customer, not just a thank-you)
+
+### Example 5c: presales_consult (NOT fan_mail — response to outreach)
+Message: "> What interests you about AI?\n\nHey Matt, great question! I've been exploring AI tools for my dev workflow. Really excited about agentic coding and how it changes everything."
+→ presales_consult (replying to instructor outreach with topic interest — NOT fan_mail even though positive. Could also be voc_response if the outreach was automated.)
+
+### Example 5d: presales_consult (NOT fan_mail — appreciation + learning interest)
+Message: "Hi Matt, I'm a big fan of your TypeScript content. I'd love to learn about AI development. After a few AI coding projects, I'm realizing the field is changing fast."
+→ presales_consult (starts with appreciation but the substance is about learning interest — this person is a potential customer)
+
+### Example 5e: presales_faq (NOT fan_mail — appreciation + purchase question)
+Message: "Love what you're doing with Total TypeScript! How do I get access to the pro bundle? Is there a student discount?"
+→ presales_faq (appreciation + explicit purchase question = presales, not fan mail)
 
 ### Example 6: spam
 Message: "Hi, I'm Sarah from ContentBoost Agency. I'd love to discuss a partnership opportunity to help grow your newsletter..."
