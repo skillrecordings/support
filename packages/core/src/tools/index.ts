@@ -21,7 +21,13 @@ export {
 export { initializeToolAuditLogging } from './audit-integration'
 
 import { checkProductAvailability } from './check-product-availability'
+import { getActivePromotions } from './get-active-promotions'
+import { getContentAccess } from './get-content-access'
 import { getConversationContext } from './get-conversation-context'
+import { getCouponInfo } from './get-coupon-info'
+import { getLicenseInfo } from './get-license-info'
+import { getRecentActivity } from './get-recent-activity'
+import { getRefundPolicy } from './get-refund-policy'
 // Import all tool implementations
 import { lookupUser } from './lookup-user'
 import { memoryCite, memorySearch, memoryStore, memoryVote } from './memory'
@@ -40,6 +46,12 @@ export { lookupCharge } from './stripe-lookup-charge'
 export { getSubscriptionStatus } from './stripe-subscription-status'
 export { verifyRefund } from './stripe-verify-refund'
 export { checkProductAvailability } from './check-product-availability'
+export { getCouponInfo } from './get-coupon-info'
+export { getActivePromotions } from './get-active-promotions'
+export { getRefundPolicy } from './get-refund-policy'
+export { getContentAccess } from './get-content-access'
+export { getRecentActivity } from './get-recent-activity'
+export { getLicenseInfo } from './get-license-info'
 
 /**
  * Aggregated support tools object
@@ -59,4 +71,10 @@ export const supportTools = {
   memoryVote,
   memoryCite,
   checkProductAvailability,
+  getCouponInfo,
+  getActivePromotions,
+  getRefundPolicy,
+  getContentAccess,
+  getRecentActivity,
+  getLicenseInfo,
 }

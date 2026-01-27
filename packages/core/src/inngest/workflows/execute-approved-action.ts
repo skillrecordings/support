@@ -6,6 +6,7 @@ import {
   getDb,
 } from '@skillrecordings/database'
 import { createFrontClient as createFrontSdkClient } from '@skillrecordings/front-sdk'
+import { IntegrationClient } from '@skillrecordings/sdk/client'
 import { createFrontClient } from '../../front'
 import {
   initializeAxiom,
@@ -13,6 +14,7 @@ import {
   traceWorkflowStep,
 } from '../../observability/axiom'
 import { formatAuditComment } from '../../pipeline/steps/comment'
+import { getApp } from '../../services/app-registry'
 import { supportTools } from '../../tools'
 import type { ExecutionContext } from '../../tools/types'
 import { inngest } from '../client'
@@ -319,6 +321,67 @@ export const executeApprovedAction = inngest.createFunction(
                 success: false,
                 error: {
                   code: 'FRONT_API_ERROR',
+                  message:
+                    error instanceof Error ? error.message : 'Unknown error',
+                },
+              },
+            })
+          }
+        } else if (toolName === 'updateEmail') {
+          // Execute email update via IntegrationClient
+          const args = toolCall.args as {
+            userId: string
+            appId: string
+            newEmail: string
+          }
+
+          try {
+            const app = await getApp(args.appId)
+            if (!app) {
+              results.push({
+                tool: toolName,
+                result: {
+                  success: false,
+                  error: {
+                    code: 'APP_NOT_FOUND',
+                    message: `App not found: ${args.appId}`,
+                  },
+                },
+              })
+              continue
+            }
+
+            const client = new IntegrationClient({
+              baseUrl: app.integration_base_url,
+              webhookSecret: app.webhook_secret,
+            })
+
+            const updateResult = await client.updateEmail({
+              userId: args.userId,
+              newEmail: args.newEmail,
+            })
+
+            results.push({
+              tool: toolName,
+              result: {
+                success: updateResult.success,
+                data: {
+                  userId: args.userId,
+                  newEmail: args.newEmail,
+                  appId: args.appId,
+                },
+                error: updateResult.error
+                  ? { code: 'UPDATE_FAILED', message: updateResult.error }
+                  : undefined,
+              },
+            })
+          } catch (error) {
+            results.push({
+              tool: toolName,
+              result: {
+                success: false,
+                error: {
+                  code: 'INTEGRATION_ERROR',
                   message:
                     error instanceof Error ? error.message : 'Unknown error',
                 },

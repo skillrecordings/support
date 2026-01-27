@@ -186,6 +186,152 @@ export type ProductType =
  */
 export type ProductState = 'draft' | 'active' | 'unavailable' | 'archived'
 
+// ── Agent Intelligence Types ─────────────────────────────────────────
+// These types support optional SDK methods that give the agent
+// data to answer presales, access, refund, and team questions.
+
+/**
+ * Active promotion or sale for a product.
+ * Used by agent to answer presales questions about current discounts.
+ */
+export interface Promotion {
+  id: string
+  name: string
+  /** Coupon code if applicable */
+  code?: string
+  discountType: 'percent' | 'fixed'
+  /** Percentage (0-100) or fixed amount in cents */
+  discountAmount: number
+  /** ISO date — when the promotion starts */
+  validFrom?: string
+  /** ISO date — when the promotion ends */
+  validUntil?: string
+  active: boolean
+  /** Human-readable conditions (e.g., "PPP — purchasing power parity") */
+  conditions?: string
+}
+
+/**
+ * Coupon/discount code details.
+ * Used by agent to validate coupon codes customers ask about.
+ */
+export interface CouponInfo {
+  code: string
+  valid: boolean
+  discountType: 'percent' | 'fixed'
+  /** Percentage (0-100) or fixed amount in cents */
+  discountAmount: number
+  /** Restriction category for the coupon */
+  restrictionType?: 'ppp' | 'student' | 'bulk' | 'general'
+  usageCount: number
+  maxUses?: number
+  /** ISO date — when the coupon expires */
+  expiresAt?: string
+}
+
+/**
+ * App-specific refund policy configuration.
+ * Used by agent to give accurate refund window information
+ * instead of hardcoded defaults.
+ */
+export interface RefundPolicy {
+  /** Days within which refunds are auto-approved */
+  autoApproveWindowDays: number
+  /** Days within which refunds can be manually approved */
+  manualApproveWindowDays: number
+  /** Days after which no refund is possible */
+  noRefundAfterDays?: number
+  /** Special conditions (e.g., "Lifetime access: 60 day window") */
+  specialConditions?: string[]
+  /** URL to the full refund policy page */
+  policyUrl?: string
+}
+
+/**
+ * Granular content access information for a user.
+ * Used by agent to debug access issues — goes beyond just "has a purchase".
+ */
+export interface ContentAccess {
+  userId: string
+  products: Array<{
+    productId: string
+    productName: string
+    accessLevel: 'full' | 'partial' | 'preview' | 'expired'
+    modules?: Array<{ id: string; title: string; accessible: boolean }>
+    /** ISO date — when access expires (null = lifetime) */
+    expiresAt?: string
+  }>
+  /** Team membership info if user is part of a team */
+  teamMembership?: {
+    teamId: string
+    teamName: string
+    role: 'member' | 'admin' | 'owner'
+    /** ISO date — when the seat was claimed */
+    seatClaimedAt: string
+  }
+}
+
+/**
+ * Recent user activity and progress data.
+ * Used by agent to debug access issues and assess product usage.
+ */
+export interface UserActivity {
+  userId: string
+  /** ISO date — last login timestamp */
+  lastLoginAt?: string
+  /** ISO date — last meaningful activity */
+  lastActiveAt?: string
+  lessonsCompleted: number
+  totalLessons: number
+  /** 0-100 completion percentage */
+  completionPercent: number
+  recentItems: Array<{
+    type: 'lesson_completed' | 'exercise_submitted' | 'login' | 'download'
+    title: string
+    /** ISO date */
+    timestamp: string
+  }>
+}
+
+/**
+ * Team license and seat management information.
+ * Used by agent to answer team/enterprise questions about seat allocation.
+ */
+export interface LicenseInfo {
+  purchaseId: string
+  licenseType: 'individual' | 'team' | 'enterprise' | 'site'
+  totalSeats: number
+  claimedSeats: number
+  availableSeats: number
+  /** ISO date — when the license expires */
+  expiresAt?: string
+  claimedBy: Array<{
+    email: string
+    /** ISO date */
+    claimedAt: string
+    /** ISO date */
+    lastActiveAt?: string
+  }>
+  /** Email of the license administrator */
+  adminEmail?: string
+}
+
+/**
+ * App metadata for multi-app support.
+ * Eliminates hardcoded URLs and product names in agent prompts.
+ */
+export interface AppInfo {
+  name: string
+  instructorName: string
+  supportEmail: string
+  websiteUrl: string
+  invoicesUrl?: string
+  discordUrl?: string
+  refundPolicyUrl?: string
+  privacyPolicyUrl?: string
+  termsUrl?: string
+}
+
 /**
  * Zod schema for ProductType validation
  */
@@ -223,6 +369,139 @@ export const ProductStatusSchema = z.object({
   endsAt: z.string().optional(),
   enrollmentOpen: z.string().optional(),
   enrollmentClose: z.string().optional(),
+})
+
+// ── Zod Schemas for Agent Intelligence Types ─────────────────────────
+
+/**
+ * Zod schema for Promotion validation
+ */
+export const PromotionSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  code: z.string().optional(),
+  discountType: z.enum(['percent', 'fixed']),
+  discountAmount: z.number(),
+  validFrom: z.string().optional(),
+  validUntil: z.string().optional(),
+  active: z.boolean(),
+  conditions: z.string().optional(),
+})
+
+/**
+ * Zod schema for CouponInfo validation
+ */
+export const CouponInfoSchema = z.object({
+  code: z.string(),
+  valid: z.boolean(),
+  discountType: z.enum(['percent', 'fixed']),
+  discountAmount: z.number(),
+  restrictionType: z.enum(['ppp', 'student', 'bulk', 'general']).optional(),
+  usageCount: z.number(),
+  maxUses: z.number().optional(),
+  expiresAt: z.string().optional(),
+})
+
+/**
+ * Zod schema for RefundPolicy validation
+ */
+export const RefundPolicySchema = z.object({
+  autoApproveWindowDays: z.number(),
+  manualApproveWindowDays: z.number(),
+  noRefundAfterDays: z.number().optional(),
+  specialConditions: z.array(z.string()).optional(),
+  policyUrl: z.string().optional(),
+})
+
+/**
+ * Zod schema for ContentAccess validation
+ */
+export const ContentAccessSchema = z.object({
+  userId: z.string(),
+  products: z.array(
+    z.object({
+      productId: z.string(),
+      productName: z.string(),
+      accessLevel: z.enum(['full', 'partial', 'preview', 'expired']),
+      modules: z
+        .array(
+          z.object({
+            id: z.string(),
+            title: z.string(),
+            accessible: z.boolean(),
+          })
+        )
+        .optional(),
+      expiresAt: z.string().optional(),
+    })
+  ),
+  teamMembership: z
+    .object({
+      teamId: z.string(),
+      teamName: z.string(),
+      role: z.enum(['member', 'admin', 'owner']),
+      seatClaimedAt: z.string(),
+    })
+    .optional(),
+})
+
+/**
+ * Zod schema for UserActivity validation
+ */
+export const UserActivitySchema = z.object({
+  userId: z.string(),
+  lastLoginAt: z.string().optional(),
+  lastActiveAt: z.string().optional(),
+  lessonsCompleted: z.number(),
+  totalLessons: z.number(),
+  completionPercent: z.number(),
+  recentItems: z.array(
+    z.object({
+      type: z.enum([
+        'lesson_completed',
+        'exercise_submitted',
+        'login',
+        'download',
+      ]),
+      title: z.string(),
+      timestamp: z.string(),
+    })
+  ),
+})
+
+/**
+ * Zod schema for LicenseInfo validation
+ */
+export const LicenseInfoSchema = z.object({
+  purchaseId: z.string(),
+  licenseType: z.enum(['individual', 'team', 'enterprise', 'site']),
+  totalSeats: z.number(),
+  claimedSeats: z.number(),
+  availableSeats: z.number(),
+  expiresAt: z.string().optional(),
+  claimedBy: z.array(
+    z.object({
+      email: z.string(),
+      claimedAt: z.string(),
+      lastActiveAt: z.string().optional(),
+    })
+  ),
+  adminEmail: z.string().optional(),
+})
+
+/**
+ * Zod schema for AppInfo validation
+ */
+export const AppInfoSchema = z.object({
+  name: z.string(),
+  instructorName: z.string(),
+  supportEmail: z.string(),
+  websiteUrl: z.string(),
+  invoicesUrl: z.string().optional(),
+  discordUrl: z.string().optional(),
+  refundPolicyUrl: z.string().optional(),
+  privacyPolicyUrl: z.string().optional(),
+  termsUrl: z.string().optional(),
 })
 
 /**

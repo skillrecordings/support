@@ -468,6 +468,345 @@ describe('createSupportHandler', () => {
       const data = await response.json()
       expect(data).toBeNull()
     })
+
+    // ── Agent Intelligence Methods ─────────────────────────────────
+
+    it('routes getActivePromotions when implemented', async () => {
+      const promotions = [
+        {
+          id: 'promo_123',
+          name: 'Summer Sale',
+          discountType: 'percent' as const,
+          discountAmount: 30,
+          active: true,
+        },
+      ]
+
+      const integrationWithPromos: SupportIntegration = {
+        ...mockIntegration,
+        getActivePromotions: vi.fn(async () => promotions),
+      }
+
+      const handler = createSupportHandler({
+        integration: integrationWithPromos,
+        webhookSecret,
+      })
+
+      const request = createRequest({ action: 'getActivePromotions' })
+      const response = await handler(request)
+
+      expect(response.status).toBe(200)
+      expect(integrationWithPromos.getActivePromotions).toHaveBeenCalled()
+
+      const data = await response.json()
+      expect(data).toEqual(promotions)
+    })
+
+    it('returns 501 for getActivePromotions when not implemented', async () => {
+      const handler = createSupportHandler({
+        integration: mockIntegration,
+        webhookSecret,
+      })
+
+      const request = createRequest({ action: 'getActivePromotions' })
+      const response = await handler(request)
+
+      expect(response.status).toBe(501)
+      const data = (await response.json()) as Record<string, unknown>
+      expect(data.error).toBe('Method not implemented: getActivePromotions')
+    })
+
+    it('routes getCouponInfo when implemented', async () => {
+      const coupon = {
+        code: 'SAVE20',
+        valid: true,
+        discountType: 'percent' as const,
+        discountAmount: 20,
+        usageCount: 100,
+      }
+
+      const integrationWithCoupons: SupportIntegration = {
+        ...mockIntegration,
+        getCouponInfo: vi.fn(async (code: string) => coupon),
+      }
+
+      const handler = createSupportHandler({
+        integration: integrationWithCoupons,
+        webhookSecret,
+      })
+
+      const request = createRequest({
+        action: 'getCouponInfo',
+        code: 'SAVE20',
+      })
+      const response = await handler(request)
+
+      expect(response.status).toBe(200)
+      expect(integrationWithCoupons.getCouponInfo).toHaveBeenCalledWith(
+        'SAVE20'
+      )
+
+      const data = await response.json()
+      expect(data).toEqual(coupon)
+    })
+
+    it('returns 501 for getCouponInfo when not implemented', async () => {
+      const handler = createSupportHandler({
+        integration: mockIntegration,
+        webhookSecret,
+      })
+
+      const request = createRequest({
+        action: 'getCouponInfo',
+        code: 'SAVE20',
+      })
+      const response = await handler(request)
+
+      expect(response.status).toBe(501)
+      const data = (await response.json()) as Record<string, unknown>
+      expect(data.error).toBe('Method not implemented: getCouponInfo')
+    })
+
+    it('routes getRefundPolicy when implemented', async () => {
+      const policy = {
+        autoApproveWindowDays: 30,
+        manualApproveWindowDays: 45,
+      }
+
+      const integrationWithPolicy: SupportIntegration = {
+        ...mockIntegration,
+        getRefundPolicy: vi.fn(async () => policy),
+      }
+
+      const handler = createSupportHandler({
+        integration: integrationWithPolicy,
+        webhookSecret,
+      })
+
+      const request = createRequest({ action: 'getRefundPolicy' })
+      const response = await handler(request)
+
+      expect(response.status).toBe(200)
+      expect(integrationWithPolicy.getRefundPolicy).toHaveBeenCalled()
+
+      const data = await response.json()
+      expect(data).toEqual(policy)
+    })
+
+    it('returns 501 for getRefundPolicy when not implemented', async () => {
+      const handler = createSupportHandler({
+        integration: mockIntegration,
+        webhookSecret,
+      })
+
+      const request = createRequest({ action: 'getRefundPolicy' })
+      const response = await handler(request)
+
+      expect(response.status).toBe(501)
+      const data = (await response.json()) as Record<string, unknown>
+      expect(data.error).toBe('Method not implemented: getRefundPolicy')
+    })
+
+    it('routes getContentAccess when implemented', async () => {
+      const access = {
+        userId: 'usr_123',
+        products: [
+          {
+            productId: 'prod_123',
+            productName: 'TypeScript Pro',
+            accessLevel: 'full' as const,
+          },
+        ],
+      }
+
+      const integrationWithAccess: SupportIntegration = {
+        ...mockIntegration,
+        getContentAccess: vi.fn(async (userId: string) => access),
+      }
+
+      const handler = createSupportHandler({
+        integration: integrationWithAccess,
+        webhookSecret,
+      })
+
+      const request = createRequest({
+        action: 'getContentAccess',
+        userId: 'usr_123',
+      })
+      const response = await handler(request)
+
+      expect(response.status).toBe(200)
+      expect(integrationWithAccess.getContentAccess).toHaveBeenCalledWith(
+        'usr_123'
+      )
+
+      const data = await response.json()
+      expect(data).toEqual(access)
+    })
+
+    it('returns 501 for getContentAccess when not implemented', async () => {
+      const handler = createSupportHandler({
+        integration: mockIntegration,
+        webhookSecret,
+      })
+
+      const request = createRequest({
+        action: 'getContentAccess',
+        userId: 'usr_123',
+      })
+      const response = await handler(request)
+
+      expect(response.status).toBe(501)
+      const data = (await response.json()) as Record<string, unknown>
+      expect(data.error).toBe('Method not implemented: getContentAccess')
+    })
+
+    it('routes getRecentActivity when implemented', async () => {
+      const activity = {
+        userId: 'usr_123',
+        lessonsCompleted: 42,
+        totalLessons: 100,
+        completionPercent: 42,
+        recentItems: [],
+      }
+
+      const integrationWithActivity: SupportIntegration = {
+        ...mockIntegration,
+        getRecentActivity: vi.fn(async (userId: string) => activity),
+      }
+
+      const handler = createSupportHandler({
+        integration: integrationWithActivity,
+        webhookSecret,
+      })
+
+      const request = createRequest({
+        action: 'getRecentActivity',
+        userId: 'usr_123',
+      })
+      const response = await handler(request)
+
+      expect(response.status).toBe(200)
+      expect(integrationWithActivity.getRecentActivity).toHaveBeenCalledWith(
+        'usr_123'
+      )
+
+      const data = await response.json()
+      expect(data).toEqual(activity)
+    })
+
+    it('returns 501 for getRecentActivity when not implemented', async () => {
+      const handler = createSupportHandler({
+        integration: mockIntegration,
+        webhookSecret,
+      })
+
+      const request = createRequest({
+        action: 'getRecentActivity',
+        userId: 'usr_123',
+      })
+      const response = await handler(request)
+
+      expect(response.status).toBe(501)
+      const data = (await response.json()) as Record<string, unknown>
+      expect(data.error).toBe('Method not implemented: getRecentActivity')
+    })
+
+    it('routes getLicenseInfo when implemented', async () => {
+      const license = {
+        purchaseId: 'pur_123',
+        licenseType: 'team' as const,
+        totalSeats: 10,
+        claimedSeats: 7,
+        availableSeats: 3,
+        claimedBy: [
+          { email: 'alice@acme.com', claimedAt: '2025-01-15T10:00:00Z' },
+        ],
+      }
+
+      const integrationWithLicense: SupportIntegration = {
+        ...mockIntegration,
+        getLicenseInfo: vi.fn(async (purchaseId: string) => license),
+      }
+
+      const handler = createSupportHandler({
+        integration: integrationWithLicense,
+        webhookSecret,
+      })
+
+      const request = createRequest({
+        action: 'getLicenseInfo',
+        purchaseId: 'pur_123',
+      })
+      const response = await handler(request)
+
+      expect(response.status).toBe(200)
+      expect(integrationWithLicense.getLicenseInfo).toHaveBeenCalledWith(
+        'pur_123'
+      )
+
+      const data = await response.json()
+      expect(data).toEqual(license)
+    })
+
+    it('returns 501 for getLicenseInfo when not implemented', async () => {
+      const handler = createSupportHandler({
+        integration: mockIntegration,
+        webhookSecret,
+      })
+
+      const request = createRequest({
+        action: 'getLicenseInfo',
+        purchaseId: 'pur_123',
+      })
+      const response = await handler(request)
+
+      expect(response.status).toBe(501)
+      const data = (await response.json()) as Record<string, unknown>
+      expect(data.error).toBe('Method not implemented: getLicenseInfo')
+    })
+
+    it('routes getAppInfo when implemented', async () => {
+      const appInfo = {
+        name: 'Total TypeScript',
+        instructorName: 'Matt Pocock',
+        supportEmail: 'support@totaltypescript.com',
+        websiteUrl: 'https://totaltypescript.com',
+      }
+
+      const integrationWithAppInfo: SupportIntegration = {
+        ...mockIntegration,
+        getAppInfo: vi.fn(async () => appInfo),
+      }
+
+      const handler = createSupportHandler({
+        integration: integrationWithAppInfo,
+        webhookSecret,
+      })
+
+      const request = createRequest({ action: 'getAppInfo' })
+      const response = await handler(request)
+
+      expect(response.status).toBe(200)
+      expect(integrationWithAppInfo.getAppInfo).toHaveBeenCalled()
+
+      const data = await response.json()
+      expect(data).toEqual(appInfo)
+    })
+
+    it('returns 501 for getAppInfo when not implemented', async () => {
+      const handler = createSupportHandler({
+        integration: mockIntegration,
+        webhookSecret,
+      })
+
+      const request = createRequest({ action: 'getAppInfo' })
+      const response = await handler(request)
+
+      expect(response.status).toBe(501)
+      const data = (await response.json()) as Record<string, unknown>
+      expect(data.error).toBe('Method not implemented: getAppInfo')
+    })
   })
 
   describe('error handling', () => {
