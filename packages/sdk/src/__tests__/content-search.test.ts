@@ -60,16 +60,16 @@ describe('IntegrationClient.searchContent', () => {
 
     expect(mockFetch).toHaveBeenCalledTimes(1)
     expect(mockFetch).toHaveBeenCalledWith(
-      'https://totaltypescript.com/api/support/search-content',
+      'https://totaltypescript.com',
       expect.objectContaining({
         method: 'POST',
         headers: expect.objectContaining({
           'Content-Type': 'application/json',
           'X-Support-Signature': expect.stringMatching(
-            /^t=\d+,v1=[a-f0-9]{64}$/
+            /^timestamp=\d+,v1=[a-f0-9]{64}$/
           ),
         }),
-        body: JSON.stringify(request),
+        body: JSON.stringify({ action: 'searchContent', ...request }),
       })
     )
 
