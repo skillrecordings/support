@@ -75,6 +75,42 @@ const SLACK_ESCALATION_CHANNEL = process.env.SLACK_ESCALATION_CHANNEL
 const SLACK_INSTRUCTOR_CHANNEL = process.env.SLACK_INSTRUCTOR_CHANNEL
 
 // ============================================================================
+// Helpers
+// ============================================================================
+
+/** Strip HTML tags and decode common entities, collapse whitespace */
+function stripHtml(html: string): string {
+  return html
+    .replace(/<br\s*\/?>/gi, '\n') // <br> → newline
+    .replace(/<\/p>/gi, '\n') // </p> → newline
+    .replace(/<\/div>/gi, '\n') // </div> → newline
+    .replace(/<[^>]*>/g, '') // strip remaining tags
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, ' ')
+    .replace(/\n{3,}/g, '\n\n') // collapse excessive newlines
+    .trim()
+}
+
+/** Map known classification signal keys to specific emoji tags */
+const SIGNAL_EMOJI_MAP: Record<string, string> = {
+  hasLegalThreat: '⚖️ Legal Threat',
+  hasAngrySentiment: '😤 Angry Sentiment',
+  hasErrorMessage: '🐛 Error Message',
+  hasRefundRequest: '💰 Refund Request',
+  hasUrgentLanguage: '⏰ Urgent',
+  hasProfanity: '🤬 Profanity',
+  hasChurnRisk: '🚪 Churn Risk',
+  hasAccessIssue: '🔒 Access Issue',
+  hasBillingIssue: '💳 Billing Issue',
+  hasTechnicalIssue: '🔧 Technical Issue',
+  hasPraiseFeedback: '🌟 Praise',
+}
+
+// ============================================================================
 // Slack Notification Blocks
 // ============================================================================
 
@@ -156,12 +192,15 @@ function buildEscalationBlocks(input: SlackEscalationInput): KnownBlock[] {
     },
   ]
 
-  // Include classification signals if any are flagged
+  // Surface active classification signals with specific emoji tags
   if (signals) {
     const flagged = Object.entries(signals)
       .filter(([, value]) => value)
       .map(([key]) => {
-        // Pretty-print signal names: hasLegalThreat → Legal Threat
+        if (SIGNAL_EMOJI_MAP[key]) {
+          return SIGNAL_EMOJI_MAP[key]
+        }
+        // Fallback: pretty-print unknown signal names
         const label = key
           .replace(/^has/, '')
           .replace(/([A-Z])/g, ' $1')
@@ -180,16 +219,18 @@ function buildEscalationBlocks(input: SlackEscalationInput): KnownBlock[] {
     }
   }
 
-  // Include message body so reviewers don't have to click through to Front
+  // Include message body preview so reviewers can triage without clicking to Front
   if (body) {
-    const truncatedBody = body.length > 500 ? body.slice(0, 500) + '…' : body
+    const plainBody = stripHtml(body)
+    const truncatedBody =
+      plainBody.length > 500 ? plainBody.slice(0, 500) + '…' : plainBody
     blocks.push(
       { type: 'divider' },
       {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: `*Message:*\n>${truncatedBody.replace(/\n/g, '\n>')}`,
+          text: `*Customer Message:*\n>${truncatedBody.replace(/\n/g, '\n>')}`,
         },
       }
     )
