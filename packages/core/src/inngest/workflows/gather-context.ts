@@ -509,7 +509,12 @@ export const gatherWorkflow = inngest.createFunction(
         },
         context: {
           customer: context.user
-            ? { email: context.user.email, purchases: context.purchases }
+            ? {
+                id: context.user.id,
+                email: context.user.email,
+                name: context.user.name,
+                purchases: context.purchases,
+              }
             : null,
           knowledge: context.knowledge,
           memories: context.priorMemory,
@@ -520,6 +525,7 @@ export const gatherWorkflow = inngest.createFunction(
               typeof h.timestamp === 'number'
                 ? String(h.timestamp)
                 : String(h.timestamp ?? ''),
+            direction: h.direction,
           })),
           priorConversations: context.priorConversations,
         },
