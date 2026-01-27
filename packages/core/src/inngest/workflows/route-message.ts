@@ -66,6 +66,7 @@ export const routeWorkflow = inngest.createFunction(
       body,
       senderEmail,
       classification,
+      inboxId,
       traceId,
     } = event.data
 
@@ -568,6 +569,7 @@ export const routeWorkflow = inngest.createFunction(
             | 'instructor'
             | 'teammate_support'
             | 'voc',
+          inboxId,
           traceId,
         },
       })
@@ -607,6 +609,7 @@ export const routeWorkflow = inngest.createFunction(
           senderEmail,
           classification,
           route: { action: routeResult.action, reason: routeResult.reason },
+          inboxId,
           traceId,
         },
       })
@@ -651,6 +654,7 @@ export const routeWorkflow = inngest.createFunction(
         classification,
         route: routeResult,
         priority: 'normal' as const,
+        inboxId,
         traceId,
       },
     })

@@ -3,6 +3,11 @@
  *
  * Validates draft responses before sending for approval.
  * Checks for: internal leaks, meta-commentary, banned phrases, fabrication.
+ *
+ * Epic 1.5 fixes (Boundary 6 from data flow audit):
+ * - Forward draft.toolsUsed (was dropped)
+ * - Emit structured ValidationIssue objects alongside string[] (was flattened)
+ * - Forward full gathered context alongside flattened counts (was counts-only)
  */
 
 import {
@@ -37,6 +42,7 @@ export const validateWorkflow = inngest.createFunction(
       body,
       senderEmail,
       classification,
+      inboxId,
       traceId,
     } = event.data
 
@@ -192,14 +198,26 @@ export const validateWorkflow = inngest.createFunction(
           confidence: 0,
           signals: {},
         },
-        draft: { content: draft.content },
+        // Forward full draft object including toolsUsed (was previously dropped)
+        draft: {
+          content: draft.content,
+          toolsUsed: draft.toolsUsed,
+        },
         validation: {
           valid: validation.valid,
+          // Backward compat: flattened string[] of issue messages
           issues: validation.issues.map((issue) => issue.message),
+          // Structured issues with type/severity/match/position for analytics
+          structuredIssues: validation.issues.map((issue) => ({
+            type: issue.type,
+            severity: issue.severity,
+            message: issue.message,
+            ...(issue.match !== undefined && { match: issue.match }),
+            ...(issue.position !== undefined && { position: issue.position }),
+          })),
           score: validation.valid ? 1.0 : 0.0,
         },
-        // Pass enriched context through for downstream audit trail + approval comments
-        // Includes category/confidence/reasoning for audit + counts for display
+        // Backward compat: flattened summary context with counts
         context: (() => {
           const ctx = (context ?? {}) as {
             customer?: { email?: string; purchases?: unknown[] }
@@ -222,6 +240,39 @@ export const validateWorkflow = inngest.createFunction(
             memoryCount: ctx.memories?.length ?? 0,
           }
         })(),
+        // Full gathered context for downstream (handle-validated-draft, execute)
+        // Preserves customer details, knowledge items, memories, history
+        gatheredContext: (() => {
+          if (!context) return undefined
+          const ctx = context as {
+            customer?: {
+              email: string
+              purchases: unknown[]
+              trustScore?: number
+            } | null
+            knowledge?: unknown[]
+            memories?: unknown[]
+            history?: Array<{ body: string; from: string; date: string }>
+            priorConversations?: Array<{
+              conversationId: string
+              subject: string
+              status: string
+              lastMessageAt: string
+              messageCount: number
+              tags: string[]
+            }>
+          }
+          return {
+            customer: ctx.customer ?? null,
+            knowledge: ctx.knowledge ?? [],
+            memories: ctx.memories ?? [],
+            history: ctx.history ?? [],
+            ...(ctx.priorConversations && {
+              priorConversations: ctx.priorConversations,
+            }),
+          }
+        })(),
+        inboxId,
         traceId,
       },
     })
