@@ -25,6 +25,7 @@ import type {
   KnowledgeItem,
   MemoryItem,
   MessageCategory,
+  PriorConversation,
   Purchase,
   User,
 } from '../types'
@@ -44,6 +45,10 @@ export interface GatherTools {
   searchKnowledge?: (query: string, appId: string) => Promise<KnowledgeItem[]>
   getHistory?: (conversationId: string) => Promise<ConversationMessage[]>
   searchMemory?: (query: string) => Promise<MemoryItem[]>
+  getPriorConversations?: (
+    email: string,
+    options?: { currentConversationId?: string; days?: number; limit?: number }
+  ) => Promise<PriorConversation[]>
 }
 
 // ============================================================================
@@ -381,6 +386,7 @@ export async function gather(
     knowledge: [],
     history: [],
     priorMemory: [],
+    priorConversations: [],
     gatherErrors: [],
     gatheredSources: [],
   }
@@ -548,6 +554,38 @@ export async function gather(
     )
   }
 
+  // Lookup prior conversations by same customer
+  if (tools.getPriorConversations && customerEmail) {
+    gatherPromises.push(
+      withTimeout(
+        (async () => {
+          try {
+            result.priorConversations = await tools.getPriorConversations!(
+              customerEmail,
+              {
+                currentConversationId: message.conversationId,
+                days: 90,
+                limit: 10,
+              }
+            )
+          } catch (error) {
+            result.gatherErrors.push({
+              step: 'priorConversations',
+              error: error instanceof Error ? error.message : 'Unknown error',
+            })
+          }
+        })(),
+        timeout,
+        'prior conversations lookup'
+      ).catch((err) => {
+        result.gatherErrors.push({
+          step: 'priorConversations',
+          error: err.message,
+        })
+      })
+    )
+  }
+
   // Wait for all to complete
   await Promise.all(gatherPromises)
 
@@ -561,6 +599,8 @@ export async function gather(
   if (result.knowledge.length > 0) result.gatheredSources.push('knowledge')
   if (result.history.length > 0) result.gatheredSources.push('history')
   if (result.priorMemory.length > 0) result.gatheredSources.push('memory')
+  if (result.priorConversations.length > 0)
+    result.gatheredSources.push('priorConversations')
 
   const durationMs = Date.now() - startTime
 
@@ -575,6 +615,7 @@ export async function gather(
     knowledgeCount: result.knowledge.length,
     historyCount: result.history.length,
     memoryCount: result.priorMemory.length,
+    priorConversationCount: result.priorConversations.length,
     errorCount: result.gatherErrors.length,
     emailSource: result.emailResolution?.source,
     durationMs,
@@ -713,6 +754,31 @@ ${knowledgeList}`)
       .join('\n')
     sections.push(`## Recent History
 ${historyList}`)
+  }
+
+  // Prior conversations
+  if (context.priorConversations && context.priorConversations.length > 0) {
+    const convos = context.priorConversations
+    const uniqueProducts = new Set<string>()
+    for (const c of convos) {
+      for (const tag of c.tags) {
+        // Tags that look like product names (not system tags)
+        if (!tag.startsWith('sr/') && !tag.startsWith('agent/')) {
+          uniqueProducts.add(tag)
+        }
+      }
+    }
+
+    const isMultiProduct = uniqueProducts.size > 1
+    const convoList = convos
+      .map((c) => {
+        const tagsStr = c.tags.length > 0 ? ` [${c.tags.join(', ')}]` : ''
+        return `- "${c.subject}" (${c.status}, ${c.lastMessageAt})${tagsStr}`
+      })
+      .join('\n')
+
+    sections.push(`## Prior Conversations (${convos.length} in last 90 days)
+${isMultiProduct ? '⭐ **Multi-product customer (VIP)**\n' : ''}${convoList}`)
   }
 
   // Note: gatherErrors are NEVER included - that's the whole point

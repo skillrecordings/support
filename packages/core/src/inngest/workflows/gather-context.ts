@@ -8,6 +8,11 @@
  * - Conversation history
  */
 
+import {
+  type Conversation,
+  type ConversationList,
+  createFrontClient as createSdkFrontClient,
+} from '@skillrecordings/front-sdk'
 import { MemoryService } from '@skillrecordings/memory/memory'
 import { IntegrationClient } from '@skillrecordings/sdk/client'
 import { type FrontMessage, createFrontClient } from '../../front/client'
@@ -22,7 +27,11 @@ import {
   buildDataFlowCheck,
 } from '../../pipeline/assert-data-integrity'
 import { type GatherTools, gather } from '../../pipeline/steps/gather'
-import type { KnowledgeItem, MemoryItem } from '../../pipeline/types'
+import type {
+  KnowledgeItem,
+  MemoryItem,
+  PriorConversation,
+} from '../../pipeline/types'
 import { getApp } from '../../services/app-registry'
 import { inngest } from '../client'
 import { SUPPORT_CONTEXT_GATHERED, SUPPORT_ROUTED } from '../events'
@@ -151,6 +160,114 @@ async function createGatherTools(appId: string): Promise<GatherTools> {
           workflow: 'support-gather',
           tool: 'getHistory',
           conversationId,
+          error: error instanceof Error ? error.message : String(error),
+        })
+        return []
+      }
+    },
+
+    getPriorConversations: async (
+      email: string,
+      options?: {
+        currentConversationId?: string
+        days?: number
+        limit?: number
+      }
+    ): Promise<PriorConversation[]> => {
+      const frontToken = process.env.FRONT_API_TOKEN
+      if (!frontToken) {
+        await log(
+          'warn',
+          'FRONT_API_TOKEN not set, skipping prior conversations',
+          {
+            workflow: 'support-gather',
+            tool: 'getPriorConversations',
+            email,
+          }
+        )
+        return []
+      }
+
+      try {
+        const { days = 90, limit = 10, currentConversationId } = options ?? {}
+
+        await log('debug', 'looking up prior conversations', {
+          workflow: 'support-gather',
+          tool: 'getPriorConversations',
+          email,
+          days,
+          limit,
+        })
+
+        const sdk = createSdkFrontClient({ apiToken: frontToken })
+
+        // Use Front's alt:email: alias to look up contact by email
+        const contactId = `alt:email:${email}`
+        let conversationList: ConversationList
+
+        try {
+          conversationList = (await sdk.contacts.listConversations(
+            contactId
+          )) as ConversationList
+        } catch (contactError: unknown) {
+          // Contact not found — customer has no prior conversations
+          const errMessage =
+            contactError instanceof Error
+              ? contactError.message
+              : String(contactError)
+          if (errMessage.includes('404') || errMessage.includes('not_found')) {
+            await log('debug', 'no contact found for email', {
+              workflow: 'support-gather',
+              tool: 'getPriorConversations',
+              email,
+            })
+            return []
+          }
+          throw contactError
+        }
+
+        const conversations: Conversation[] = conversationList._results ?? []
+
+        // Filter: exclude current conversation, apply date window
+        const cutoffMs = Date.now() - days * 24 * 60 * 60 * 1000
+        const filtered = conversations
+          .filter((c) => {
+            // Exclude current conversation
+            if (currentConversationId && c.id === currentConversationId)
+              return false
+            // Apply date window (created_at is unix timestamp in seconds)
+            if (c.created_at * 1000 < cutoffMs) return false
+            return true
+          })
+          // Already sorted newest-first by Front API, but ensure it
+          .sort((a, b) => b.created_at - a.created_at)
+          .slice(0, limit)
+
+        // Map to PriorConversation shape
+        const priorConversations: PriorConversation[] = filtered.map((c) => ({
+          conversationId: c.id,
+          subject: c.subject,
+          status: c.status,
+          lastMessageAt: new Date(c.created_at * 1000).toISOString(),
+          messageCount: 0, // Front list endpoint doesn't include message count
+          tags: c.tags.map((t) => t.name),
+        }))
+
+        await log('info', 'prior conversations fetched', {
+          workflow: 'support-gather',
+          tool: 'getPriorConversations',
+          email,
+          totalFound: conversations.length,
+          afterFilter: priorConversations.length,
+          days,
+        })
+
+        return priorConversations
+      } catch (error) {
+        await log('error', 'prior conversations lookup failed', {
+          workflow: 'support-gather',
+          tool: 'getPriorConversations',
+          email,
           error: error instanceof Error ? error.message : String(error),
         })
         return []
@@ -316,6 +433,7 @@ export const gatherWorkflow = inngest.createFunction(
         knowledgeCount: result.knowledge.length,
         historyCount: result.history.length,
         memoryCount: result.priorMemory.length,
+        priorConversationCount: result.priorConversations.length,
         errorCount: result.gatherErrors.length,
         errors: result.gatherErrors,
         durationMs,
@@ -345,6 +463,7 @@ export const gatherWorkflow = inngest.createFunction(
           knowledgeCount: result.knowledge.length,
           historyCount: result.history.length,
           memoryCount: result.priorMemory.length,
+          priorConversationCount: result.priorConversations.length,
           errorCount: result.gatherErrors.length,
         },
       })
@@ -402,6 +521,7 @@ export const gatherWorkflow = inngest.createFunction(
                 ? String(h.timestamp)
                 : String(h.timestamp ?? ''),
           })),
+          priorConversations: context.priorConversations,
         },
         traceId,
       },
@@ -418,6 +538,7 @@ export const gatherWorkflow = inngest.createFunction(
       hasUser: !!context.user,
       purchaseCount: context.purchases.length,
       memoryCount: context.priorMemory.length,
+      priorConversationCount: context.priorConversations.length,
       totalDurationMs,
     })
 
@@ -446,6 +567,7 @@ export const gatherWorkflow = inngest.createFunction(
         knowledgeCount: context.knowledge.length,
         historyCount: context.history.length,
         memoryCount: context.priorMemory.length,
+        priorConversationCount: context.priorConversations.length,
       },
     }
   }

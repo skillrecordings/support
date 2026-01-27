@@ -928,6 +928,7 @@ async function runValidateEval(
         : [],
       history: [],
       priorMemory: [],
+      priorConversations: [],
       gatherErrors: [],
     }
 

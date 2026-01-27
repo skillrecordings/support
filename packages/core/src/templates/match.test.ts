@@ -44,6 +44,7 @@ describe('matchTemplate', () => {
     knowledge: [],
     history: [],
     priorMemory: [],
+    priorConversations: [],
     gatherErrors: [],
   }
 
@@ -208,6 +209,7 @@ describe('buildTemplateVariables', () => {
       knowledge: [],
       history: [],
       priorMemory: [],
+      priorConversations: [],
       gatherErrors: [],
     }
 
@@ -225,6 +227,7 @@ describe('buildTemplateVariables', () => {
       knowledge: [],
       history: [],
       priorMemory: [],
+      priorConversations: [],
       gatherErrors: [],
     }
 
@@ -242,6 +245,7 @@ describe('buildTemplateVariables', () => {
       knowledge: [],
       history: [],
       priorMemory: [],
+      priorConversations: [],
       gatherErrors: [],
     }
 

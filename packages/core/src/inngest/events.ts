@@ -351,6 +351,14 @@ export type SupportContextGatheredEvent = {
         from: string
         date: string
       }>
+      priorConversations?: Array<{
+        conversationId: string
+        subject: string
+        status: string
+        lastMessageAt: string
+        messageCount: number
+        tags: string[]
+      }>
     }
     /** Unique trace ID for end-to-end pipeline correlation */
     traceId?: string

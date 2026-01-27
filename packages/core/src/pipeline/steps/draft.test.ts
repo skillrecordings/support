@@ -31,6 +31,7 @@ describe('draft step', () => {
     knowledge: [],
     history: [],
     priorMemory: [],
+    priorConversations: [],
     gatherErrors: [],
   }
 
