@@ -1,11 +1,13 @@
+import { ApprovalRequestsTable, eq, getDb } from '@skillrecordings/database'
 import {
+  initializeAxiom,
+  log,
   traceApprovalRequested,
   traceSlackNotification,
   traceWorkflowStep,
 } from '../../observability/axiom'
 import { buildApprovalBlocks } from '../../slack/approval-blocks'
 import { postApprovalMessage } from '../../slack/client'
-import { ApprovalRequestsTable, eq, getDb } from '@skillrecordings/database'
 import { inngest } from '../client'
 import {
   SUPPORT_APPROVAL_DECIDED,
@@ -37,11 +39,19 @@ export const requestApproval = inngest.createFunction(
       inboxId,
     } = event.data
 
-    console.log('[request-approval] ========== WORKFLOW STARTED ==========')
-    console.log('[request-approval] Action ID:', actionId)
-    console.log('[request-approval] Conversation:', conversationId)
-    console.log('[request-approval] App:', appId)
-    console.log('[request-approval] Action type:', action.type)
+    const workflowStartTime = Date.now()
+    initializeAxiom()
+
+    await log('info', 'request-approval workflow started', {
+      workflow: 'request-approval',
+      actionId,
+      conversationId,
+      appId,
+      actionType: action.type,
+      hasCustomerEmail: !!customerEmail,
+      hasInboxId: !!inboxId,
+      agentReasoningLength: agentReasoning?.length ?? 0,
+    })
 
     // Trace that we received the approval request
     await traceApprovalRequested({
@@ -55,7 +65,14 @@ export const requestApproval = inngest.createFunction(
     // Step 1: Create approval request record in DB
     await step.run('create-approval-request', async () => {
       const startTime = Date.now()
-      console.log('[request-approval] Creating approval record...')
+
+      await log('debug', 'creating approval record in database', {
+        workflow: 'request-approval',
+        step: 'create-approval-request',
+        actionId,
+        conversationId,
+      })
+
       const db = getDb()
 
       await db.insert(ApprovalRequestsTable).values({
@@ -66,23 +83,40 @@ export const requestApproval = inngest.createFunction(
         expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from now
       })
 
+      const durationMs = Date.now() - startTime
+
+      await log('info', 'approval record created', {
+        workflow: 'request-approval',
+        step: 'create-approval-request',
+        actionId,
+        conversationId,
+        durationMs,
+      })
+
       await traceWorkflowStep({
         conversationId,
         appId,
         workflowName: 'request-approval',
         stepName: 'create-approval-request',
-        durationMs: Date.now() - startTime,
+        durationMs,
         success: true,
+        metadata: { actionId },
       })
 
-      console.log('[request-approval] Approval record created')
       return { created: true, actionId }
     })
 
     // Step 2: Send Slack notification for HITL approval
     const slackMessage = await step.run('send-slack-notification', async () => {
       const startTime = Date.now()
-      console.log('[request-approval] Building Slack approval blocks...')
+
+      await log('debug', 'building Slack approval blocks', {
+        workflow: 'request-approval',
+        step: 'send-slack-notification',
+        actionId,
+        actionType: action.type,
+        conversationId,
+      })
 
       const blocks = buildApprovalBlocks({
         actionId,
@@ -98,6 +132,14 @@ export const requestApproval = inngest.createFunction(
       const channel = process.env.SLACK_APPROVAL_CHANNEL
       if (!channel) {
         const error = 'SLACK_APPROVAL_CHANNEL not configured'
+
+        await log('error', error, {
+          workflow: 'request-approval',
+          step: 'send-slack-notification',
+          actionId,
+          conversationId,
+        })
+
         await traceSlackNotification({
           conversationId,
           appId,
@@ -116,7 +158,13 @@ export const requestApproval = inngest.createFunction(
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ')
 
-      console.log('[request-approval] Posting to Slack channel:', channel)
+      await log('debug', 'posting approval message to Slack', {
+        workflow: 'request-approval',
+        step: 'send-slack-notification',
+        actionId,
+        channel,
+        actionTypeDisplay,
+      })
 
       try {
         const { ts, channel: slackChannel } = await postApprovalMessage(
@@ -125,7 +173,15 @@ export const requestApproval = inngest.createFunction(
           `Approval needed for ${actionTypeDisplay}`
         )
 
-        console.log('[request-approval] Slack message posted:', ts)
+        await log('info', 'Slack approval message posted', {
+          workflow: 'request-approval',
+          step: 'send-slack-notification',
+          actionId,
+          conversationId,
+          slackChannel,
+          messageTs: ts,
+          durationMs: Date.now() - startTime,
+        })
 
         // Update approval request with Slack message timestamp
         const db = getDb()
@@ -137,6 +193,8 @@ export const requestApproval = inngest.createFunction(
           })
           .where(eq(ApprovalRequestsTable.id, actionId))
 
+        const durationMs = Date.now() - startTime
+
         await traceSlackNotification({
           conversationId,
           appId,
@@ -144,13 +202,33 @@ export const requestApproval = inngest.createFunction(
           success: true,
           channel: slackChannel,
           messageTs: ts,
-          durationMs: Date.now() - startTime,
+          durationMs,
+        })
+
+        await traceWorkflowStep({
+          conversationId,
+          appId,
+          workflowName: 'request-approval',
+          stepName: 'send-slack-notification',
+          durationMs,
+          success: true,
+          metadata: { slackChannel, messageTs: ts },
         })
 
         return { notified: true, actionId, ts, channel: slackChannel }
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : String(error)
-        console.error('[request-approval] Slack post failed:', errorMsg)
+        const durationMs = Date.now() - startTime
+
+        await log('error', 'Slack approval post failed', {
+          workflow: 'request-approval',
+          step: 'send-slack-notification',
+          actionId,
+          conversationId,
+          channel,
+          error: errorMsg,
+          durationMs,
+        })
 
         await traceSlackNotification({
           conversationId,
@@ -158,7 +236,17 @@ export const requestApproval = inngest.createFunction(
           actionId,
           success: false,
           channel,
-          durationMs: Date.now() - startTime,
+          durationMs,
+          error: errorMsg,
+        })
+
+        await traceWorkflowStep({
+          conversationId,
+          appId,
+          workflowName: 'request-approval',
+          stepName: 'send-slack-notification',
+          durationMs,
+          success: false,
           error: errorMsg,
         })
 
@@ -167,10 +255,13 @@ export const requestApproval = inngest.createFunction(
     })
 
     // Step 3: Wait for human decision event
-    console.log(
-      '[request-approval] Waiting for approval decision (24h timeout)...'
-    )
-    console.log('[request-approval] Matching on actionId:', actionId)
+    await log('info', 'waiting for approval decision', {
+      workflow: 'request-approval',
+      actionId,
+      conversationId,
+      timeout: '24h',
+      matchField: 'data.actionId',
+    })
 
     const decision = await step.waitForEvent('wait-for-approval-decision', {
       event: SUPPORT_APPROVAL_DECIDED,
@@ -180,36 +271,97 @@ export const requestApproval = inngest.createFunction(
 
     // Step 4: Handle timeout or decision
     if (!decision) {
-      console.log('[request-approval] Approval timed out after 24h')
+      await log('warn', 'approval timed out after 24h', {
+        workflow: 'request-approval',
+        actionId,
+        conversationId,
+        appId,
+      })
+
       // Timeout - mark as expired
       await step.run('handle-timeout', async () => {
         const startTime = Date.now()
+
+        await log('debug', 'marking approval as expired', {
+          workflow: 'request-approval',
+          step: 'handle-timeout',
+          actionId,
+          conversationId,
+        })
+
         const db = getDb()
         await db
           .update(ApprovalRequestsTable)
           .set({ status: 'expired' })
           .where(eq(ApprovalRequestsTable.id, actionId))
 
+        const durationMs = Date.now() - startTime
+
+        await log('info', 'approval marked as expired', {
+          workflow: 'request-approval',
+          step: 'handle-timeout',
+          actionId,
+          conversationId,
+          durationMs,
+        })
+
         await traceWorkflowStep({
           conversationId,
           appId,
           workflowName: 'request-approval',
           stepName: 'handle-timeout',
-          durationMs: Date.now() - startTime,
+          durationMs,
           success: true,
           metadata: { actionId, result: 'expired' },
         })
 
         return { status: 'expired', actionId }
       })
+
+      const totalDurationMs = Date.now() - workflowStartTime
+
+      await log('info', 'request-approval workflow completed - timeout', {
+        workflow: 'request-approval',
+        actionId,
+        conversationId,
+        appId,
+        outcome: 'timeout',
+        totalDurationMs,
+      })
+
+      await traceWorkflowStep({
+        conversationId,
+        appId,
+        workflowName: 'request-approval',
+        stepName: 'complete',
+        durationMs: totalDurationMs,
+        success: true,
+        metadata: { outcome: 'timeout', actionId },
+      })
+
       return { result: 'timeout', actionId }
     }
 
-    console.log('[request-approval] Decision received:', decision.data.decision)
+    await log('info', 'approval decision received', {
+      workflow: 'request-approval',
+      actionId,
+      conversationId,
+      appId,
+      decision: decision.data.decision,
+      decidedBy: decision.data.decidedBy,
+    })
 
     // Step 5: Process approval decision
     await step.run('update-approval-status', async () => {
       const startTime = Date.now()
+
+      await log('debug', 'updating approval status', {
+        workflow: 'request-approval',
+        step: 'update-approval-status',
+        actionId,
+        decision: decision.data.decision,
+      })
+
       const db = getDb()
       await db
         .update(ApprovalRequestsTable)
@@ -218,12 +370,23 @@ export const requestApproval = inngest.createFunction(
         })
         .where(eq(ApprovalRequestsTable.id, actionId))
 
+      const durationMs = Date.now() - startTime
+
+      await log('info', 'approval status updated', {
+        workflow: 'request-approval',
+        step: 'update-approval-status',
+        actionId,
+        conversationId,
+        decision: decision.data.decision,
+        durationMs,
+      })
+
       await traceWorkflowStep({
         conversationId,
         appId,
         workflowName: 'request-approval',
         stepName: 'update-approval-status',
-        durationMs: Date.now() - startTime,
+        durationMs,
         success: true,
         metadata: { actionId, decision: decision.data.decision },
       })
@@ -231,8 +394,29 @@ export const requestApproval = inngest.createFunction(
       return { status: decision.data.decision, actionId }
     })
 
-    console.log('[request-approval] ========== WORKFLOW COMPLETED ==========')
-    console.log('[request-approval] Final result:', decision.data.decision)
+    const totalDurationMs = Date.now() - workflowStartTime
+
+    await log('info', 'request-approval workflow completed', {
+      workflow: 'request-approval',
+      actionId,
+      conversationId,
+      appId,
+      outcome: decision.data.decision,
+      totalDurationMs,
+    })
+
+    await traceWorkflowStep({
+      conversationId,
+      appId,
+      workflowName: 'request-approval',
+      stepName: 'complete',
+      durationMs: totalDurationMs,
+      success: true,
+      metadata: {
+        outcome: decision.data.decision,
+        actionId,
+      },
+    })
 
     return {
       result: decision.data.decision,

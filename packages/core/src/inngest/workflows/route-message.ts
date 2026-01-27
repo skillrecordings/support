@@ -19,12 +19,12 @@ import { archiveConversation } from '../../pipeline/steps/archive'
 import { addDecisionComment } from '../../pipeline/steps/comment'
 import { route } from '../../pipeline/steps/route'
 import { applyTag } from '../../pipeline/steps/tag'
-import { createTagRegistry, type TagRegistry } from '../../tags/registry'
 import type {
   ClassifyOutput,
   MessageCategory,
   MessageSignals,
 } from '../../pipeline/types'
+import { type TagRegistry, createTagRegistry } from '../../tags/registry'
 import { inngest } from '../client'
 import {
   SUPPORT_CLASSIFIED,
@@ -66,6 +66,7 @@ export const routeWorkflow = inngest.createFunction(
       body,
       senderEmail,
       classification,
+      traceId,
     } = event.data
 
     const workflowStartTime = Date.now()
@@ -76,6 +77,7 @@ export const routeWorkflow = inngest.createFunction(
       conversationId,
       messageId,
       appId,
+      traceId,
       category: classification.category,
       confidence: classification.confidence,
     })
@@ -88,6 +90,7 @@ export const routeWorkflow = inngest.createFunction(
         workflow: 'support-route',
         step: 'route',
         conversationId,
+        traceId,
         category: classification.category,
       })
 
@@ -115,6 +118,7 @@ export const routeWorkflow = inngest.createFunction(
         step: 'route',
         conversationId,
         appId,
+        traceId,
         action: result.action,
         reason: result.reason,
         category: classification.category,
@@ -144,12 +148,16 @@ export const routeWorkflow = inngest.createFunction(
       const frontApiToken = process.env.FRONT_API_TOKEN
 
       if (!frontApiToken) {
-        await log('warn', 'FRONT_API_TOKEN not set, skipping tag', {
+        await log('error', 'FRONT_API_TOKEN not set, cannot apply tag', {
           workflow: 'support-route',
           step: 'apply-tag',
           conversationId,
+          category: classification.category,
         })
-        return { tagged: false, error: 'No API token' }
+        return {
+          tagged: false,
+          error: 'FRONT_API_TOKEN not set in environment',
+        }
       }
 
       try {
@@ -166,24 +174,38 @@ export const routeWorkflow = inngest.createFunction(
           { frontApiToken }
         )
 
-        await log('info', 'tag applied', {
-          workflow: 'support-route',
-          step: 'apply-tag',
-          conversationId,
-          category: classification.category,
-          tagId: result.tagId,
-          tagName: result.tagName,
-          tagged: result.tagged,
-          durationMs: Date.now() - stepStartTime,
-        })
+        const durationMs = Date.now() - stepStartTime
+
+        if (result.tagged) {
+          await log('info', 'tag applied successfully', {
+            workflow: 'support-route',
+            step: 'apply-tag',
+            conversationId,
+            category: classification.category,
+            tagId: result.tagId,
+            tagName: result.tagName,
+            durationMs,
+          })
+        } else {
+          await log('error', 'tag application returned failure', {
+            workflow: 'support-route',
+            step: 'apply-tag',
+            conversationId,
+            category: classification.category,
+            tagName: result.tagName,
+            error: result.error,
+            durationMs,
+          })
+        }
 
         await traceWorkflowStep({
           workflowName: 'support-route',
           conversationId,
           appId,
           stepName: 'apply-tag',
-          durationMs: Date.now() - stepStartTime,
+          durationMs,
           success: result.tagged,
+          error: result.tagged ? undefined : result.error,
           metadata: {
             tagId: result.tagId,
             tagName: result.tagName,
@@ -193,15 +215,19 @@ export const routeWorkflow = inngest.createFunction(
 
         return result
       } catch (error) {
-        await log('error', 'tag application failed', {
+        const errorMsg = error instanceof Error ? error.message : String(error)
+        await log('error', 'tag step threw unexpected exception', {
           workflow: 'support-route',
           step: 'apply-tag',
           conversationId,
-          error: error instanceof Error ? error.message : String(error),
+          category: classification.category,
+          error: errorMsg,
+          errorType:
+            error instanceof Error ? error.constructor.name : 'unknown',
         })
         return {
           tagged: false,
-          error: error instanceof Error ? error.message : String(error),
+          error: errorMsg,
         }
       }
     })
@@ -210,8 +236,20 @@ export const routeWorkflow = inngest.createFunction(
     if (routeResult.action === 'silence') {
       // Add decision comment (fire-and-forget)
       await step.run('add-decision-comment-silence', async () => {
+        const stepStartTime = Date.now()
         const frontApiToken = process.env.FRONT_API_TOKEN
-        if (!frontApiToken) return { added: false, error: 'No API token' }
+        if (!frontApiToken) {
+          await log(
+            'warn',
+            'FRONT_API_TOKEN not set, skipping decision comment',
+            {
+              workflow: 'support-route',
+              step: 'add-decision-comment-silence',
+              conversationId,
+            }
+          )
+          return { added: false, error: 'No API token' }
+        }
 
         try {
           const result = await addDecisionComment(
@@ -227,25 +265,57 @@ export const routeWorkflow = inngest.createFunction(
             { frontApiToken }
           )
 
+          const durationMs = Date.now() - stepStartTime
+
           await log('info', 'decision comment added', {
             workflow: 'support-route',
-            step: 'add-decision-comment',
+            step: 'add-decision-comment-silence',
             conversationId,
             action: routeResult.action,
             added: result.added,
+            durationMs,
+          })
+
+          await traceWorkflowStep({
+            workflowName: 'support-route',
+            conversationId,
+            appId,
+            stepName: 'add-decision-comment-silence',
+            durationMs,
+            success: result.added,
+            metadata: {
+              action: routeResult.action,
+              category: classification.category,
+            },
           })
 
           return result
         } catch (error) {
+          const durationMs = Date.now() - stepStartTime
+          const errorMsg =
+            error instanceof Error ? error.message : String(error)
+
           await log('error', 'decision comment failed', {
             workflow: 'support-route',
-            step: 'add-decision-comment',
+            step: 'add-decision-comment-silence',
             conversationId,
-            error: error instanceof Error ? error.message : String(error),
+            error: errorMsg,
+            durationMs,
           })
+
+          await traceWorkflowStep({
+            workflowName: 'support-route',
+            conversationId,
+            appId,
+            stepName: 'add-decision-comment-silence',
+            durationMs,
+            success: false,
+            error: errorMsg,
+          })
+
           return {
             added: false,
-            error: error instanceof Error ? error.message : String(error),
+            error: errorMsg,
           }
         }
       })
@@ -369,8 +439,20 @@ export const routeWorkflow = inngest.createFunction(
 
       // Add decision comment for escalation (fire-and-forget)
       await step.run('add-decision-comment-escalation', async () => {
+        const stepStartTime = Date.now()
         const frontApiToken = process.env.FRONT_API_TOKEN
-        if (!frontApiToken) return { added: false, error: 'No API token' }
+        if (!frontApiToken) {
+          await log(
+            'warn',
+            'FRONT_API_TOKEN not set, skipping decision comment',
+            {
+              workflow: 'support-route',
+              step: 'add-decision-comment-escalation',
+              conversationId,
+            }
+          )
+          return { added: false, error: 'No API token' }
+        }
 
         try {
           const result = await addDecisionComment(
@@ -386,25 +468,59 @@ export const routeWorkflow = inngest.createFunction(
             { frontApiToken }
           )
 
+          const durationMs = Date.now() - stepStartTime
+
           await log('info', 'decision comment added', {
             workflow: 'support-route',
-            step: 'add-decision-comment',
+            step: 'add-decision-comment-escalation',
             conversationId,
             action: routeResult.action,
             added: result.added,
+            priority,
+            durationMs,
+          })
+
+          await traceWorkflowStep({
+            workflowName: 'support-route',
+            conversationId,
+            appId,
+            stepName: 'add-decision-comment-escalation',
+            durationMs,
+            success: result.added,
+            metadata: {
+              action: routeResult.action,
+              priority,
+              category: classification.category,
+            },
           })
 
           return result
         } catch (error) {
+          const durationMs = Date.now() - stepStartTime
+          const errorMsg =
+            error instanceof Error ? error.message : String(error)
+
           await log('error', 'decision comment failed', {
             workflow: 'support-route',
-            step: 'add-decision-comment',
+            step: 'add-decision-comment-escalation',
             conversationId,
-            error: error instanceof Error ? error.message : String(error),
+            error: errorMsg,
+            durationMs,
           })
+
+          await traceWorkflowStep({
+            workflowName: 'support-route',
+            conversationId,
+            appId,
+            stepName: 'add-decision-comment-escalation',
+            durationMs,
+            success: false,
+            error: errorMsg,
+          })
+
           return {
             added: false,
-            error: error instanceof Error ? error.message : String(error),
+            error: errorMsg,
           }
         }
       })
@@ -418,6 +534,21 @@ export const routeWorkflow = inngest.createFunction(
         reason: routeResult.reason,
         tagged: tagResult?.tagged,
         totalDurationMs: Date.now() - workflowStartTime,
+      })
+
+      await traceWorkflowStep({
+        workflowName: 'support-route',
+        conversationId,
+        appId,
+        stepName: 'complete',
+        durationMs: Date.now() - workflowStartTime,
+        success: true,
+        metadata: {
+          action: routeResult.action,
+          priority,
+          escalated: true,
+          tagged: tagResult?.tagged,
+        },
       })
 
       await step.sendEvent('emit-escalation', {
@@ -437,6 +568,7 @@ export const routeWorkflow = inngest.createFunction(
             | 'instructor'
             | 'teammate_support'
             | 'voc',
+          traceId,
         },
       })
       return {
@@ -475,6 +607,7 @@ export const routeWorkflow = inngest.createFunction(
           senderEmail,
           classification,
           route: { action: routeResult.action, reason: routeResult.reason },
+          traceId,
         },
       })
 
@@ -488,7 +621,12 @@ export const routeWorkflow = inngest.createFunction(
         metadata: { action: 'respond', tagged: tagResult?.tagged },
       })
 
-      return { conversationId, messageId, route: routeResult, tagged: tagResult?.tagged }
+      return {
+        conversationId,
+        messageId,
+        route: routeResult,
+        tagged: tagResult?.tagged,
+      }
     }
 
     // Fallback - unknown action
@@ -513,8 +651,15 @@ export const routeWorkflow = inngest.createFunction(
         classification,
         route: routeResult,
         priority: 'normal' as const,
+        traceId,
       },
     })
-    return { conversationId, messageId, route: routeResult, escalated: true, priority: 'normal' }
+    return {
+      conversationId,
+      messageId,
+      route: routeResult,
+      escalated: true,
+      priority: 'normal',
+    }
   }
 )

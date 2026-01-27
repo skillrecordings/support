@@ -7,7 +7,8 @@
  * @see https://dev.frontapp.com/reference/tags
  */
 
-import { createFrontClient } from '@skillrecordings/front-sdk'
+import { FrontApiError, createFrontClient } from '@skillrecordings/front-sdk'
+import { log } from '../observability/axiom'
 import type {
   CategoryTagConfig,
   CategoryTagMapping,
@@ -172,12 +173,30 @@ export class TagRegistry {
         this.tagIdCache.set(tag.name.toLowerCase(), tag.id)
       }
       this.initialized = true
+
+      await log('debug', 'tag registry initialized', {
+        component: 'TagRegistry',
+        tagCount: tags._results.length,
+        tagNames: tags._results.map((t) => t.name).slice(0, 20),
+      })
+
       if (this.debug) {
         console.log(
           `[TagRegistry] Initialized with ${tags._results.length} tags`
         )
       }
     } catch (error) {
+      const isFrontError = error instanceof FrontApiError
+      const message = error instanceof Error ? error.message : String(error)
+
+      await log('error', 'tag registry initialization failed', {
+        component: 'TagRegistry',
+        error: message,
+        errorType: error instanceof Error ? error.constructor.name : 'unknown',
+        frontApiStatus: isFrontError ? error.status : undefined,
+        frontApiTitle: isFrontError ? error.title : undefined,
+      })
+
       console.error('[TagRegistry] Failed to initialize:', error)
       throw error
     }
@@ -226,7 +245,14 @@ export class TagRegistry {
       return this.tagIdCache.get(tagName)
     }
 
-    // Try to create the tag
+    // Tag not in cache — try to create it
+    await log('info', 'tag not in cache, attempting creation', {
+      component: 'TagRegistry',
+      category,
+      tagName: config.tagName,
+      cachedTagCount: this.tagIdCache.size,
+    })
+
     try {
       if (this.debug) {
         console.log(`[TagRegistry] Creating tag: ${config.tagName}`)
@@ -237,8 +263,28 @@ export class TagRegistry {
         highlight: config.highlight,
       })
       this.tagIdCache.set(tagName, newTag.id)
+
+      await log('info', 'tag created successfully', {
+        component: 'TagRegistry',
+        category,
+        tagName: config.tagName,
+        tagId: newTag.id,
+      })
+
       return newTag.id
     } catch (error) {
+      const isFrontError = error instanceof FrontApiError
+      const message = error instanceof Error ? error.message : String(error)
+
+      await log('warn', 'tag creation failed, attempting re-fetch', {
+        component: 'TagRegistry',
+        category,
+        tagName: config.tagName,
+        error: message,
+        errorType: error instanceof Error ? error.constructor.name : 'unknown',
+        frontApiStatus: isFrontError ? error.status : undefined,
+      })
+
       // Tag might already exist (race condition) - try to find it
       if (this.debug) {
         console.log(`[TagRegistry] Create failed, re-fetching tags:`, error)
@@ -250,10 +296,35 @@ export class TagRegistry {
         )
         if (existing) {
           this.tagIdCache.set(tagName, existing.id)
+
+          await log('info', 'found existing tag on re-fetch', {
+            component: 'TagRegistry',
+            category,
+            tagName: config.tagName,
+            tagId: existing.id,
+          })
+
           return existing.id
         }
-      } catch {
-        // Ignore secondary error
+
+        await log('error', 'tag not found on re-fetch either', {
+          component: 'TagRegistry',
+          category,
+          tagName: config.tagName,
+          availableTags: tags._results.map((t) => t.name).slice(0, 30),
+        })
+      } catch (refetchError) {
+        const refetchMsg =
+          refetchError instanceof Error
+            ? refetchError.message
+            : String(refetchError)
+        await log('error', 'tag re-fetch also failed', {
+          component: 'TagRegistry',
+          category,
+          tagName: config.tagName,
+          originalError: message,
+          refetchError: refetchMsg,
+        })
       }
 
       console.error(

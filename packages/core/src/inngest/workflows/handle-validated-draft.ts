@@ -43,6 +43,7 @@ export const handleValidatedDraft = inngest.createFunction(
       draft,
       validation,
       context,
+      traceId,
     } = event.data
 
     // Read classification metadata: prefer top-level classification, fallback to context
@@ -61,6 +62,7 @@ export const handleValidatedDraft = inngest.createFunction(
       conversationId,
       messageId,
       appId,
+      traceId,
       valid: validation.valid,
       issueCount: validation.issues?.length ?? 0,
       score: validation.score,
@@ -208,6 +210,7 @@ export const handleValidatedDraft = inngest.createFunction(
           actionId,
           approvedBy: 'auto',
           approvedAt: new Date().toISOString(),
+          traceId,
         },
       })
 
@@ -218,6 +221,7 @@ export const handleValidatedDraft = inngest.createFunction(
         conversationId,
         messageId,
         appId,
+        traceId,
         actionId,
         outcome: 'auto-approved',
         totalDurationMs,
@@ -395,6 +399,7 @@ export const handleValidatedDraft = inngest.createFunction(
           parameters: { draft: draft.content },
         },
         agentReasoning: decision.reason,
+        traceId,
       },
     })
 
@@ -415,6 +420,7 @@ export const handleValidatedDraft = inngest.createFunction(
         conversationId,
         messageId,
         appId,
+        traceId,
         actionId,
         outcome: 'approval-requested',
         reason: decision.reason,

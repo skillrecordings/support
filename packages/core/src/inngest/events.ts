@@ -36,6 +36,8 @@ export type SupportInboundReceivedEvent = {
     customerEmail?: string
     /** Optional: inbox ID from webhook */
     inboxId?: string
+    /** Unique trace ID for end-to-end pipeline correlation */
+    traceId?: string
   }
 }
 
@@ -62,6 +64,8 @@ export type SupportApprovalRequestedEvent = {
     customerEmail?: string
     /** Inbox ID (for Slack context) */
     inboxId?: string
+    /** Unique trace ID for end-to-end pipeline correlation */
+    traceId?: string
   }
 }
 
@@ -77,6 +81,8 @@ export type SupportActionApprovedEvent = {
     approvedBy: string
     /** Approval timestamp */
     approvedAt: string
+    /** Unique trace ID for end-to-end pipeline correlation */
+    traceId?: string
   }
 }
 
@@ -270,6 +276,8 @@ export type SupportClassifiedEvent = {
       signals: Record<string, boolean>
       reasoning?: string
     }
+    /** Unique trace ID for end-to-end pipeline correlation */
+    traceId?: string
   }
 }
 
@@ -300,6 +308,8 @@ export type SupportRoutedEvent = {
         | 'silence'
       reason: string
     }
+    /** Unique trace ID for end-to-end pipeline correlation */
+    traceId?: string
   }
 }
 
@@ -342,6 +352,8 @@ export type SupportContextGatheredEvent = {
         date: string
       }>
     }
+    /** Unique trace ID for end-to-end pipeline correlation */
+    traceId?: string
   }
 }
 
@@ -371,6 +383,8 @@ export type SupportDraftCreatedEvent = {
       toolsUsed: string[]
     }
     context: unknown
+    /** Unique trace ID for end-to-end pipeline correlation */
+    traceId?: string
   }
 }
 
@@ -414,6 +428,8 @@ export type SupportDraftValidatedEvent = {
       confidence?: number
       reasoning?: string
     }
+    /** Unique trace ID for end-to-end pipeline correlation */
+    traceId?: string
   }
 }
 
@@ -504,6 +520,8 @@ export type SupportEscalatedEvent = {
       reason: string
     }
     priority: EscalationPriority
+    /** Unique trace ID for end-to-end pipeline correlation */
+    traceId?: string
   }
 }
 
