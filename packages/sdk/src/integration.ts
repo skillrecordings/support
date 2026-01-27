@@ -1,13 +1,20 @@
 import type {
   ActionResult,
+  AppInfo,
   ClaimedSeat,
+  ContentAccess,
   ContentSearchRequest,
   ContentSearchResponse,
   ContentSearchResult,
+  CouponInfo,
+  LicenseInfo,
   ProductStatus,
+  Promotion,
   Purchase,
+  RefundPolicy,
   Subscription,
   User,
+  UserActivity,
 } from './types'
 
 // Re-export types for convenience
@@ -21,6 +28,13 @@ export type {
   ContentSearchRequest,
   ContentSearchResponse,
   ProductStatus,
+  Promotion,
+  CouponInfo,
+  RefundPolicy,
+  ContentAccess,
+  UserActivity,
+  LicenseInfo,
+  AppInfo,
 }
 
 /**
@@ -220,4 +234,90 @@ export interface SupportIntegration {
    * ```
    */
   getProductStatus?(productId: string): Promise<ProductStatus | null>
+
+  // ── Agent Intelligence Methods ─────────────────────────────────────
+
+  /**
+   * Get currently active promotions and sales.
+   * Optional method - implement to let the agent answer presales pricing questions.
+   *
+   * @returns Array of active promotions, empty if none
+   *
+   * @example
+   * ```typescript
+   * // Customer asks: "Do you have any discounts?"
+   * const promos = await integration.getActivePromotions()
+   * // Agent: "Yes! We have a 30% off summer sale running until August 1st."
+   * ```
+   */
+  getActivePromotions?(): Promise<Promotion[]>
+
+  /**
+   * Look up a coupon or discount code.
+   * Optional method - implement to let the agent validate coupon codes.
+   *
+   * @param code - Coupon code to look up
+   * @returns CouponInfo if found, null if code doesn't exist
+   *
+   * @example
+   * ```typescript
+   * // Customer asks: "Is the code SUMMER2025 still valid?"
+   * const coupon = await integration.getCouponInfo('SUMMER2025')
+   * if (coupon?.valid) {
+   *   // Agent: "Yes, SUMMER2025 gives you 30% off!"
+   * }
+   * ```
+   */
+  getCouponInfo?(code: string): Promise<CouponInfo | null>
+
+  /**
+   * Get the app's refund policy configuration.
+   * Optional method - implement to give the agent accurate refund window info.
+   *
+   * Without this, the agent falls back to hardcoded defaults which may be wrong.
+   *
+   * @returns RefundPolicy with window sizes and conditions
+   */
+  getRefundPolicy?(): Promise<RefundPolicy>
+
+  /**
+   * Get granular content access for a user.
+   * Optional method - implement to let the agent debug access issues precisely.
+   *
+   * Goes beyond purchase data to show what content a user can actually access,
+   * including module-level access and team membership.
+   *
+   * @param userId - User's unique identifier
+   * @returns ContentAccess with per-product and per-module access levels
+   */
+  getContentAccess?(userId: string): Promise<ContentAccess>
+
+  /**
+   * Get recent user activity and progress.
+   * Optional method - implement to let the agent assess product usage.
+   *
+   * Useful for debugging access issues ("when did they last log in?")
+   * and refund triage ("have they used the product?").
+   *
+   * @param userId - User's unique identifier
+   * @returns UserActivity with login, completion, and recent action data
+   */
+  getRecentActivity?(userId: string): Promise<UserActivity>
+
+  /**
+   * Get team license and seat information for a purchase.
+   * Optional method - implement to let the agent answer team/enterprise questions.
+   *
+   * @param purchaseId - Purchase identifier for the team license
+   * @returns LicenseInfo with seat allocation, or null if not a team purchase
+   */
+  getLicenseInfo?(purchaseId: string): Promise<LicenseInfo | null>
+
+  /**
+   * Get app metadata (name, URLs, instructor info).
+   * Optional method - eliminates hardcoded product names and URLs in agent prompts.
+   *
+   * @returns AppInfo with app name, instructor, and relevant URLs
+   */
+  getAppInfo?(): Promise<AppInfo>
 }
