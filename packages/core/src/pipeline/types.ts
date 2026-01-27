@@ -5,6 +5,15 @@
  * See ARCHITECTURE.md for design details.
  */
 
+import type {
+  AppInfo,
+  ContentAccess,
+  LicenseInfo,
+  Promotion,
+  RefundPolicy,
+  UserActivity,
+} from '@skillrecordings/sdk/types'
+
 // ============================================================================
 // Categories
 // ============================================================================
@@ -209,6 +218,23 @@ export interface GatherOutput {
   priorMemory: MemoryItem[]
   priorConversations: PriorConversation[]
   gatherErrors: GatherError[] // Track failures internally, never expose
+
+  // ── Category-aware SDK data ──────────────────────────────────────────
+  // These fields are populated conditionally based on classification category.
+  // All are optional — null means "not fetched" or "fetch failed gracefully".
+
+  /** App metadata — URLs, names, etc. (fetched once per conversation) */
+  appInfo?: AppInfo | null
+  /** Refund policy from app (fetched for support_refund) */
+  refundPolicy?: RefundPolicy | null
+  /** Content access details (fetched for support_access) */
+  contentAccess?: ContentAccess | null
+  /** Recent user activity (fetched for support_access) */
+  recentActivity?: UserActivity | null
+  /** Active promotions (fetched for presales_faq) */
+  activePromotions?: Promotion[] | null
+  /** License info per purchase (fetched for presales_team) */
+  licenseInfo?: LicenseInfo[] | null
 }
 
 // ============================================================================
@@ -280,6 +306,11 @@ export interface GatherError {
     | 'history'
     | 'memory'
     | 'priorConversations'
+    | 'refundPolicy'
+    | 'contentAccess'
+    | 'recentActivity'
+    | 'activePromotions'
+    | 'licenseInfo'
   error: string
   // Never exposed to draft - just for debugging
 }

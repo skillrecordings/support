@@ -66,6 +66,7 @@ export {
   type DraftResult,
   type StoreDraftCorrectionInput,
 } from './steps/draft'
+export { buildCategoryPrompt, BASE_DRAFT_PROMPT } from './steps/draft-prompts'
 export {
   validate,
   validateSync,

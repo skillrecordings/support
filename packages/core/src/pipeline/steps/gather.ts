@@ -11,6 +11,13 @@
  */
 
 import { SupportMemoryService } from '@skillrecordings/memory/support-memory'
+import type {
+  ContentAccess,
+  LicenseInfo,
+  Promotion,
+  RefundPolicy,
+  UserActivity,
+} from '@skillrecordings/sdk/types'
 import {
   type RelevantMemory,
   formatMemoriesCompact,
@@ -779,6 +786,102 @@ ${historyList}`)
 
     sections.push(`## Prior Conversations (${convos.length} in last 90 days)
 ${isMultiProduct ? '⭐ **Multi-product customer (VIP)**\n' : ''}${convoList}`)
+  }
+
+  // ── Category-aware SDK data (populated by gather step when available) ──
+
+  // App info
+  if (context.appInfo) {
+    const ai = context.appInfo
+    const urls: string[] = []
+    if (ai.invoicesUrl) urls.push(`Invoices: ${ai.invoicesUrl}`)
+    if (ai.discordUrl) urls.push(`Discord: ${ai.discordUrl}`)
+    if (ai.refundPolicyUrl) urls.push(`Refund Policy: ${ai.refundPolicyUrl}`)
+    sections.push(`## App Info
+- Product: ${ai.name}
+- Instructor: ${ai.instructorName}
+- Support Email: ${ai.supportEmail}${urls.length > 0 ? `\n${urls.map((u) => `- ${u}`).join('\n')}` : ''}`)
+  }
+
+  // Refund policy
+  if (context.refundPolicy) {
+    const rp = context.refundPolicy
+    const conditions = rp.specialConditions?.length
+      ? `\n${rp.specialConditions.map((c) => `- ${c}`).join('\n')}`
+      : ''
+    sections.push(`## Refund Policy
+- Auto-approve window: ${rp.autoApproveWindowDays} days
+- Manual approve window: ${rp.manualApproveWindowDays} days${rp.noRefundAfterDays ? `\n- No refund after: ${rp.noRefundAfterDays} days` : ''}${rp.policyUrl ? `\n- Policy URL: ${rp.policyUrl}` : ''}${conditions}`)
+  }
+
+  // Content access
+  if (context.contentAccess) {
+    const ca = context.contentAccess
+    const productList = ca.products
+      .map((p) => {
+        const modules = p.modules
+          ? ` (${p.modules.filter((m) => m.accessible).length}/${p.modules.length} modules accessible)`
+          : ''
+        const expires = p.expiresAt
+          ? ` — expires ${p.expiresAt}`
+          : ' — lifetime'
+        return `- ${p.productName}: ${p.accessLevel}${modules}${expires}`
+      })
+      .join('\n')
+    const team = ca.teamMembership
+      ? `\n- Team: ${ca.teamMembership.teamName} (${ca.teamMembership.role})`
+      : ''
+    sections.push(`## Content Access
+${productList}${team}`)
+  }
+
+  // Recent activity
+  if (context.recentActivity) {
+    const ra = context.recentActivity
+    const recentList = ra.recentItems
+      .slice(0, 5)
+      .map((item) => `- [${item.type}] ${item.title} (${item.timestamp})`)
+      .join('\n')
+    sections.push(`## Recent Activity
+- Last login: ${ra.lastLoginAt ?? 'Unknown'}
+- Progress: ${ra.lessonsCompleted}/${ra.totalLessons} lessons (${ra.completionPercent}%)${recentList ? `\n${recentList}` : ''}`)
+  }
+
+  // Active promotions
+  if (context.activePromotions && context.activePromotions.length > 0) {
+    const promoList = context.activePromotions
+      .map((p) => {
+        const discount =
+          p.discountType === 'percent'
+            ? `${p.discountAmount}% off`
+            : `$${(p.discountAmount / 100).toFixed(2)} off`
+        const code = p.code ? ` (code: ${p.code})` : ''
+        const until = p.validUntil ? ` — until ${p.validUntil}` : ''
+        const conditions = p.conditions ? ` [${p.conditions}]` : ''
+        return `- ${p.name}: ${discount}${code}${until}${conditions}`
+      })
+      .join('\n')
+    sections.push(`## Active Promotions
+${promoList}`)
+  }
+
+  // Team license info
+  if (context.licenseInfo && context.licenseInfo.length > 0) {
+    const licenseList = context.licenseInfo
+      .map((li) => {
+        const claimed = li.claimedBy
+          .slice(0, 5)
+          .map((c) => `  - ${c.email} (claimed ${c.claimedAt})`)
+          .join('\n')
+        const more =
+          li.claimedBy.length > 5
+            ? `\n  - ... and ${li.claimedBy.length - 5} more`
+            : ''
+        return `- License: ${li.licenseType} — ${li.claimedSeats}/${li.totalSeats} seats claimed (${li.availableSeats} available)${li.expiresAt ? ` — expires ${li.expiresAt}` : ''}${li.adminEmail ? `\n  - Admin: ${li.adminEmail}` : ''}${claimed ? `\n${claimed}${more}` : ''}`
+      })
+      .join('\n')
+    sections.push(`## Team Licenses
+${licenseList}`)
   }
 
   // Note: gatherErrors are NEVER included - that's the whole point
