@@ -131,6 +131,7 @@ export async function runE2EEval(
           knowledge: [],
           history: [],
           priorMemory: [],
+          priorConversations: [],
           gatherErrors: [],
         }
 

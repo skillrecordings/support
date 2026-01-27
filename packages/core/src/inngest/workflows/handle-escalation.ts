@@ -6,7 +6,7 @@
  * 2. Generating a magic link for customer access
  * 3. Formatting and adding an escalation comment to Front
  * 4. Adding appropriate tags to the conversation
- * 5. Notifying Slack for urgent/instructor escalations
+ * 5. Notifying Slack for all escalations (with priority-specific formatting)
  */
 
 import type { App } from '@skillrecordings/database'
@@ -86,11 +86,19 @@ interface SlackEscalationInput {
   reason: string
   category: string
   subject: string
+  body?: string
+  signals?: Record<string, boolean>
 }
 
-/**
- * Build Slack blocks for escalation notification.
- */
+/** Priority emoji prefix mapping */
+const PRIORITY_DISPLAY: Record<EscalationPriority, string> = {
+  urgent: '🚨 URGENT',
+  instructor: '👨‍🏫 Instructor',
+  normal: '📋 Escalation',
+  teammate_support: '🤝 Teammate Support',
+  voc: '📊 Voice of Customer',
+}
+
 function buildEscalationBlocks(input: SlackEscalationInput): KnownBlock[] {
   const {
     conversationId,
@@ -100,24 +108,16 @@ function buildEscalationBlocks(input: SlackEscalationInput): KnownBlock[] {
     reason,
     category,
     subject,
+    body,
+    signals,
   } = input
 
   // Front conversation URL
   const frontUrl = `https://app.frontapp.com/open/${conversationId}`
 
-  // Priority display
-  const priorityDisplay =
-    priority === 'urgent'
-      ? '🚨 URGENT'
-      : priority === 'instructor'
-        ? '👨‍🏫 Instructor'
-        : priority === 'teammate_support'
-          ? '🤝 Teammate Support'
-          : priority === 'voc'
-            ? '📣 Voice of Customer'
-            : '⚠️ Escalated'
+  const priorityDisplay = PRIORITY_DISPLAY[priority] ?? '⚠️ Escalated'
 
-  return [
+  const blocks: KnownBlock[] = [
     {
       type: 'header',
       text: {
@@ -154,22 +154,64 @@ function buildEscalationBlocks(input: SlackEscalationInput): KnownBlock[] {
         text: `*Reason:* ${reason}`,
       },
     },
-    {
-      type: 'actions',
-      elements: [
-        {
-          type: 'button',
-          text: {
-            type: 'plain_text',
-            text: 'Open in Front',
-            emoji: true,
-          },
-          url: frontUrl,
-          style: 'primary',
-        },
-      ],
-    },
   ]
+
+  // Include classification signals if any are flagged
+  if (signals) {
+    const flagged = Object.entries(signals)
+      .filter(([, value]) => value)
+      .map(([key]) => {
+        // Pretty-print signal names: hasLegalThreat → Legal Threat
+        const label = key
+          .replace(/^has/, '')
+          .replace(/([A-Z])/g, ' $1')
+          .trim()
+        return `⚠️ ${label}`
+      })
+
+    if (flagged.length > 0) {
+      blocks.push({
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: `*Signals:* ${flagged.join(' · ')}`,
+        },
+      })
+    }
+  }
+
+  // Include message body so reviewers don't have to click through to Front
+  if (body) {
+    const truncatedBody = body.length > 500 ? body.slice(0, 500) + '…' : body
+    blocks.push(
+      { type: 'divider' },
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: `*Message:*\n>${truncatedBody.replace(/\n/g, '\n>')}`,
+        },
+      }
+    )
+  }
+
+  blocks.push({
+    type: 'actions',
+    elements: [
+      {
+        type: 'button',
+        text: {
+          type: 'plain_text',
+          text: 'Open in Front',
+          emoji: true,
+        },
+        url: frontUrl,
+        style: 'primary',
+      },
+    ],
+  })
+
+  return blocks
 }
 
 // ============================================================================
@@ -472,29 +514,15 @@ export const handleEscalation = inngest.createFunction(
       }
     )) as TagResult
 
-    // Step 4: Notify Slack for urgent/instructor escalations
+    // Step 4: Notify Slack for ALL escalations
     const slackResult = (await step.run(
       'notify-slack',
       async (): Promise<SlackResult> => {
         const stepStartTime = Date.now()
 
-        // Only notify Slack for urgent and instructor escalations
-        const shouldNotify = priority === 'urgent' || priority === 'instructor'
-
-        if (!shouldNotify) {
-          await log('debug', 'skipping slack notification for priority', {
-            workflow: 'support-handle-escalation',
-            step: 'notify-slack',
-            conversationId,
-            priority,
-          })
-          return {
-            notified: false,
-            reason: 'Priority does not require notification',
-          }
-        }
-
         // Determine which channel to use
+        // instructor → dedicated instructor channel (with fallback)
+        // everything else → general escalation channel
         const channel =
           priority === 'instructor'
             ? (SLACK_INSTRUCTOR_CHANNEL ?? SLACK_ESCALATION_CHANNEL)
@@ -519,10 +547,16 @@ export const handleEscalation = inngest.createFunction(
             reason: route.reason,
             category: classification.category,
             subject: subject || '(no subject)',
+            body,
+            signals: classification.signals,
           })
 
+          const priorityLabel = PRIORITY_DISPLAY[priority] ?? 'Escalated'
+          // Urgent escalations mention @here to ensure immediate attention
+          const mentionPrefix = priority === 'urgent' ? '<!here> ' : ''
+
           const { ts, channel: slackChannel } = await postMessage(channel, {
-            text: `${priority === 'urgent' ? '🚨 URGENT' : '👨‍🏫 Instructor'} escalation from ${appId}: ${route.reason}`,
+            text: `${mentionPrefix}${priorityLabel} escalation from ${appId}: ${route.reason}`,
             blocks,
           })
 
