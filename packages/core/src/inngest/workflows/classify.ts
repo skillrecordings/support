@@ -26,8 +26,15 @@ export const classifyWorkflow = inngest.createFunction(
   },
   { event: SUPPORT_INBOUND_RECEIVED },
   async ({ event, step }) => {
-    const { conversationId, messageId, appId, subject, body, senderEmail } =
-      event.data
+    const {
+      conversationId,
+      messageId,
+      appId,
+      subject,
+      body,
+      senderEmail,
+      traceId,
+    } = event.data
 
     const workflowStartTime = Date.now()
     initializeAxiom()
@@ -37,6 +44,7 @@ export const classifyWorkflow = inngest.createFunction(
       conversationId,
       messageId,
       appId,
+      traceId,
       senderEmail,
       subjectPreview: subject?.slice(0, 100),
       bodyLength: body?.length ?? 0,
@@ -51,6 +59,7 @@ export const classifyWorkflow = inngest.createFunction(
         step: 'fetch-message',
         messageId,
         conversationId,
+        traceId,
       })
 
       try {
@@ -64,6 +73,7 @@ export const classifyWorkflow = inngest.createFunction(
               step: 'fetch-message',
               messageId,
               conversationId,
+              traceId,
             }
           )
           return {
@@ -80,6 +90,7 @@ export const classifyWorkflow = inngest.createFunction(
           workflow: 'support-classify',
           step: 'fetch-message',
           messageId,
+          traceId,
           recipients: message.recipients,
         })
 
@@ -95,6 +106,7 @@ export const classifyWorkflow = inngest.createFunction(
           step: 'fetch-message',
           messageId,
           conversationId,
+          traceId,
           fetchedSenderEmail,
           bodyLength: fetchedBody?.length,
           recipientCount: message.recipients?.length ?? 0,
@@ -109,6 +121,7 @@ export const classifyWorkflow = inngest.createFunction(
           durationMs,
           success: true,
           metadata: {
+            traceId,
             fetchedSenderEmail,
             bodyLength: fetchedBody?.length,
             recipientCount: message.recipients?.length ?? 0,
@@ -124,6 +137,7 @@ export const classifyWorkflow = inngest.createFunction(
           step: 'fetch-message',
           messageId,
           conversationId,
+          traceId,
           error: error instanceof Error ? error.message : String(error),
           durationMs,
         })
@@ -156,6 +170,7 @@ export const classifyWorkflow = inngest.createFunction(
       workflow: 'support-classify',
       conversationId,
       messageId,
+      traceId,
       effectiveSenderEmail,
       effectiveBodyLength: effectiveBody.length,
       usedFetchedValues: fetchedMessage.fetched,
@@ -170,6 +185,7 @@ export const classifyWorkflow = inngest.createFunction(
         step: 'classify',
         conversationId,
         appId,
+        traceId,
       })
 
       const result = await classify({
@@ -186,6 +202,7 @@ export const classifyWorkflow = inngest.createFunction(
         step: 'classify',
         conversationId,
         appId,
+        traceId,
         category: result.category,
         confidence: result.confidence,
         signalCount: Object.values(result.signals).filter(Boolean).length,
@@ -227,6 +244,7 @@ export const classifyWorkflow = inngest.createFunction(
       workflow: 'support-classify',
       conversationId,
       messageId,
+      traceId,
       category: classification.category,
     })
 
@@ -245,6 +263,7 @@ export const classifyWorkflow = inngest.createFunction(
           signals: classification.signals as Record<string, boolean>,
           reasoning: classification.reasoning,
         },
+        traceId,
       },
     })
 
@@ -255,6 +274,7 @@ export const classifyWorkflow = inngest.createFunction(
       conversationId,
       messageId,
       appId,
+      traceId,
       category: classification.category,
       confidence: classification.confidence,
       totalDurationMs,

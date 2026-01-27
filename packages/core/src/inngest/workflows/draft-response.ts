@@ -32,8 +32,15 @@ export const draftWorkflow = inngest.createFunction(
   },
   { event: SUPPORT_CONTEXT_GATHERED },
   async ({ event, step }) => {
-    const { conversationId, messageId, appId, classification, route, context } =
-      event.data
+    const {
+      conversationId,
+      messageId,
+      appId,
+      classification,
+      route,
+      context,
+      traceId,
+    } = event.data
 
     const workflowStartTime = Date.now()
     initializeAxiom()
@@ -44,6 +51,7 @@ export const draftWorkflow = inngest.createFunction(
       conversationId,
       messageId,
       appId,
+      traceId,
       category: classification.category,
       hasCustomer: !!context.customer,
       knowledgeCount: context.knowledge?.length ?? 0,
@@ -254,6 +262,7 @@ export const draftWorkflow = inngest.createFunction(
           toolsUsed: draftResult.toolsUsed,
         },
         context,
+        traceId,
       },
     })
 
@@ -264,6 +273,7 @@ export const draftWorkflow = inngest.createFunction(
       conversationId,
       messageId,
       appId,
+      traceId,
       draftLength: draftResult.draft.length,
       toolsUsed: draftResult.toolsUsed,
       totalDurationMs,

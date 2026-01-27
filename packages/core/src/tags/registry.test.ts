@@ -9,6 +9,11 @@ import {
   createTagRegistry,
 } from './registry'
 
+// Mock Axiom logging
+vi.mock('../observability/axiom', () => ({
+  log: vi.fn().mockResolvedValue(undefined),
+}))
+
 // Mock Front SDK
 vi.mock('@skillrecordings/front-sdk', () => ({
   createFrontClient: vi.fn(() => ({
@@ -21,6 +26,16 @@ vi.mock('@skillrecordings/front-sdk', () => ({
       addTag: vi.fn(),
     },
   })),
+  FrontApiError: class FrontApiError extends Error {
+    status: number
+    title: string
+    constructor(status: number, title: string, message: string) {
+      super(message)
+      this.name = 'FrontApiError'
+      this.status = status
+      this.title = title
+    }
+  },
 }))
 
 import { createFrontClient } from '@skillrecordings/front-sdk'
