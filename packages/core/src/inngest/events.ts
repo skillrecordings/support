@@ -13,15 +13,7 @@ export const SUPPORT_INBOUND_RECEIVED = 'support/inbound.received' as const
 /** Event emitted when a comment is added to a Front conversation */
 export const SUPPORT_COMMENT_RECEIVED = 'support/comment.received' as const
 
-/** Event emitted when an outbound message is sent (for RL feedback loop) */
-export const SUPPORT_OUTBOUND_MESSAGE = 'support/outbound.message' as const
-
-/** Draft diff category for RL signal classification */
-export type DraftDiffCategory =
-  | 'unchanged'
-  | 'minor_edit'
-  | 'major_rewrite'
-  | 'no_draft'
+// SUPPORT_OUTBOUND_MESSAGE and DraftDiffCategory are defined below with other outbound events
 
 export type SupportInboundReceivedEvent = {
   name: typeof SUPPORT_INBOUND_RECEIVED
@@ -88,37 +80,7 @@ export type SupportCommentReceivedEvent = {
   }
 }
 
-export type SupportOutboundMessageEvent = {
-  name: typeof SUPPORT_OUTBOUND_MESSAGE
-  data: {
-    /** Front conversation ID */
-    conversationId: string
-    /** Front message ID */
-    messageId: string
-    /** Skill Recordings app identifier */
-    appId: string
-    /** Inbox ID */
-    inboxId?: string
-    /** Author information (teammate who sent the message) */
-    author?: {
-      /** Teammate ID (tea_xxx) */
-      id?: string
-      /** Teammate email */
-      email?: string
-      /** Teammate name */
-      name?: string
-    }
-    /** Timestamp when message was sent (Unix timestamp) */
-    sentAt?: number
-    /** Front API links for fetching full data */
-    _links?: {
-      conversation?: string
-      message?: string
-    }
-    /** Unique trace ID for end-to-end pipeline correlation */
-    traceId?: string
-  }
-}
+// SupportOutboundMessageEvent is defined below with other outbound events
 
 /** Event emitted when an agent action requires human approval */
 export const SUPPORT_APPROVAL_REQUESTED = 'support/approval.requested' as const
@@ -720,16 +682,16 @@ export type SupportOutboundMessageEvent = {
     inboxId?: string
     /** Author who sent the message */
     author?: {
-      id: string
+      id?: string
       email?: string
       name?: string
     }
-    /** Message body text (fetched from Front API) */
-    body: string
+    /** Message body text (fetched from Front API - may be empty from webhook) */
+    body?: string
     /** Message subject */
     subject?: string
-    /** When the message was sent (Unix timestamp) */
-    sentAt: number
+    /** When the message was sent (Unix timestamp - may be undefined from webhook) */
+    sentAt?: number
     /** Front API links for fetching full data */
     _links?: {
       conversation?: string
