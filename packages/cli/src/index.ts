@@ -14,6 +14,7 @@ import { init } from './commands/init'
 import { registerEventsCommands } from './commands/inngest/events'
 import { registerRunsCommands } from './commands/inngest/runs'
 import { registerSignalCommand } from './commands/inngest/signal'
+import { registerKbCommands } from './commands/kb-sync'
 import { registerMemoryCommands } from './commands/memory/index'
 import { registerPipelineCommands } from './commands/pipeline'
 import { registerResponseCommands } from './commands/responses'
@@ -134,5 +135,8 @@ registerPipelineCommands(program)
 
 // Register deploy commands (Vercel status/logs/inspect)
 registerDeployCommands(program)
+
+// Register knowledge base commands (sync/stats)
+registerKbCommands(program)
 
 program.parse()
