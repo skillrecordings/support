@@ -550,6 +550,13 @@ export type SupportDeadLetterEvent = {
 /** Event emitted when routing decides to escalate */
 export const SUPPORT_ESCALATED = 'support/inbound.escalated' as const
 
+/** Event emitted when a conversation is snoozed (put on hold) */
+export const SUPPORT_CONVERSATION_SNOOZED =
+  'support/conversation.snoozed' as const
+
+/** Event emitted when a snooze period expires */
+export const SUPPORT_SNOOZE_EXPIRED = 'support/snooze.expired' as const
+
 /** Event emitted to trigger manual template sync */
 export const TEMPLATES_SYNC_REQUESTED = 'templates/sync.requested' as const
 
@@ -604,6 +611,46 @@ export type TagHealthCheckRequestedEvent = {
   data: {
     /** Optional: requestor info for audit */
     requestedBy?: string
+  }
+}
+
+export type SupportConversationSnoozedEvent = {
+  name: typeof SUPPORT_CONVERSATION_SNOOZED
+  data: {
+    /** Front conversation ID */
+    conversationId: string
+    /** Skill Recordings app identifier */
+    appId: string
+    /** Inbox ID */
+    inboxId?: string
+    /** When the snooze was set (Unix timestamp) */
+    snoozedAt: number
+    /** When the snooze expires (Unix timestamp) */
+    snoozedUntil?: number
+    /** User who snoozed the conversation */
+    snoozedBy?: {
+      id: string
+      email?: string
+      name?: string
+    }
+    /** Unique trace ID for end-to-end pipeline correlation */
+    traceId?: string
+  }
+}
+
+export type SupportSnoozeExpiredEvent = {
+  name: typeof SUPPORT_SNOOZE_EXPIRED
+  data: {
+    /** Front conversation ID */
+    conversationId: string
+    /** Skill Recordings app identifier */
+    appId: string
+    /** Inbox ID */
+    inboxId?: string
+    /** When the snooze expired (Unix timestamp) */
+    expiredAt: number
+    /** Unique trace ID for end-to-end pipeline correlation */
+    traceId?: string
   }
 }
 
@@ -665,6 +712,9 @@ export type Events = {
   [SUPPORT_DRAFT_CREATED]: SupportDraftCreatedEvent
   [SUPPORT_DRAFT_VALIDATED]: SupportDraftValidatedEvent
   [SUPPORT_ESCALATED]: SupportEscalatedEvent
+  // Snooze/hold events
+  [SUPPORT_CONVERSATION_SNOOZED]: SupportConversationSnoozedEvent
+  [SUPPORT_SNOOZE_EXPIRED]: SupportSnoozeExpiredEvent
   // Template sync events
   [TEMPLATES_SYNC_REQUESTED]: TemplatesSyncRequestedEvent
   // Stale template check events
