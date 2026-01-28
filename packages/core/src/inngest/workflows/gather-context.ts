@@ -16,6 +16,8 @@ import {
 import { MemoryService } from '@skillrecordings/memory/memory'
 import { IntegrationClient } from '@skillrecordings/sdk/client'
 import { type FrontMessage, createFrontClient } from '../../front/client'
+import { searchKnowledge as searchKnowledgeDB } from '../../knowledge/search'
+import type { KnowledgeSource } from '../../knowledge/types'
 import {
   initializeAxiom,
   log,
@@ -35,6 +37,26 @@ import type {
 import { getApp } from '../../services/app-registry'
 import { inngest } from '../client'
 import { SUPPORT_CONTEXT_GATHERED, SUPPORT_ROUTED } from '../events'
+
+/**
+ * Map knowledge source to KnowledgeItem type.
+ */
+function mapSourceToType(
+  source: KnowledgeSource
+): 'faq' | 'article' | 'similar_ticket' | 'good_response' {
+  switch (source) {
+    case 'faq':
+      return 'faq'
+    case 'canned-response':
+      return 'good_response'
+    case 'docs':
+    case 'policy':
+    case 'manual':
+    case 'generated':
+    default:
+      return 'article'
+  }
+}
 
 async function createGatherTools(appId: string): Promise<GatherTools> {
   const app = await getApp(appId)
@@ -112,13 +134,45 @@ async function createGatherTools(appId: string): Promise<GatherTools> {
       query: string,
       appId: string
     ): Promise<KnowledgeItem[]> => {
-      await log('debug', 'searching knowledge (not implemented)', {
-        workflow: 'support-gather',
-        tool: 'searchKnowledge',
-        queryLength: query.length,
-        appId,
-      })
-      return []
+      try {
+        await log('debug', 'searching knowledge base', {
+          workflow: 'support-gather',
+          tool: 'searchKnowledge',
+          queryLength: query.length,
+          appId,
+        })
+
+        const results = await searchKnowledgeDB(query, {
+          appId,
+          limit: 5,
+          minScore: 0.65,
+          includeShared: true,
+        })
+
+        await log('info', 'knowledge search complete', {
+          workflow: 'support-gather',
+          tool: 'searchKnowledge',
+          appId,
+          resultsFound: results.length,
+          topScore: results[0]?.score ?? 0,
+        })
+
+        return results.map((r) => ({
+          id: r.id,
+          type: mapSourceToType(r.metadata.source),
+          content: r.text,
+          relevance: r.score,
+          source: r.metadata.title,
+        }))
+      } catch (error) {
+        await log('error', 'knowledge search failed', {
+          workflow: 'support-gather',
+          tool: 'searchKnowledge',
+          appId,
+          error: error instanceof Error ? error.message : String(error),
+        })
+        return []
+      }
     },
 
     getHistory: async (conversationId: string) => {
@@ -273,7 +327,6 @@ async function createGatherTools(appId: string): Promise<GatherTools> {
         return []
       }
     },
-
 
     // ── Category-aware SDK tools ─────────────────────────────────────────
     // These are conditionally called by the gather step based on classification.

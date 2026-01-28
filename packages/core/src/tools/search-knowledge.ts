@@ -1,4 +1,6 @@
 import { z } from 'zod'
+import { searchKnowledge as searchKnowledgeDB } from '../knowledge/search'
+import type { KnowledgeSearchResult as KBSearchResult } from '../knowledge/types'
 import { createTool } from './create-tool'
 import type { ExecutionContext } from './types'
 
@@ -47,6 +49,26 @@ export interface KnowledgeSearchResult {
 }
 
 /**
+ * Map knowledge module results to tool result format.
+ */
+function mapToToolResult(result: KBSearchResult): KnowledgeSearchResult {
+  return {
+    id: result.id,
+    text: result.text,
+    score: result.score,
+    metadata: {
+      title: result.metadata.title,
+      question: result.metadata.question,
+      appId: result.metadata.appId,
+      source: result.metadata.source,
+      category: result.metadata.category,
+      tags: result.metadata.tags,
+      trust_score: result.metadata.trust_score,
+    },
+  }
+}
+
+/**
  * Search knowledge base using hybrid semantic and keyword search.
  *
  * Performs vector similarity search combined with BM25 keyword matching
@@ -69,15 +91,17 @@ export const searchKnowledge = createTool({
   parameters: searchKnowledgeParams,
   execute: async (
     params,
-    context: ExecutionContext,
+    _context: ExecutionContext
   ): Promise<KnowledgeSearchResult[]> => {
-    // TODO: Integrate with Upstash Vector for hybrid search
-    // 1. Initialize Upstash Vector client with app-specific index
-    // 2. Perform hybrid search (semantic + BM25)
-    // 3. Filter by minScore threshold
-    // 4. Return top N results up to limit
-    // 5. Include metadata for context (source, timestamp, etc.)
+    const { query, appId, limit, minScore } = params
 
-    throw new Error('searchKnowledge: Upstash Vector integration not yet implemented')
+    const results = await searchKnowledgeDB(query, {
+      appId,
+      limit,
+      minScore,
+      includeShared: true,
+    })
+
+    return results.map(mapToToolResult)
   },
 })
