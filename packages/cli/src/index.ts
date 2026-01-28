@@ -9,6 +9,7 @@ import { registerEvalLocalCommands } from './commands/eval-local/index'
 import { registerEvalPipelineCommands } from './commands/eval-pipeline/index'
 import { registerEvalPromptCommands } from './commands/eval-prompt'
 import { registerFaqMineCommands } from './commands/faq-mine'
+import { registerFaqReviewCommands } from './commands/faq-review'
 import { registerFrontCommands } from './commands/front/index'
 import { health } from './commands/health'
 import { init } from './commands/init'
@@ -142,5 +143,8 @@ registerKbCommands(program)
 
 // Register FAQ mining commands (mine FAQ candidates from conversations)
 registerFaqMineCommands(program)
+
+// Register FAQ review commands (human curation of FAQ candidates)
+registerFaqReviewCommands(program)
 
 program.parse()
