@@ -278,7 +278,11 @@ async function listErrors(options: {
       const d = match.data as Record<string, unknown>
       const time = formatTime(match._time)
       const name = d.name ?? 'unknown'
-      const error = d.error ?? d.errorStack ?? 'no message'
+      const error =
+        d.error ??
+        d.errorStack ??
+        d.message ??
+        `[${d.level ?? 'error'}] ${d.name ?? 'unknown event'}`
 
       console.log(`\n[${time}] ${name}`)
       console.log(`  Error: ${String(error).slice(0, 200)}`)
