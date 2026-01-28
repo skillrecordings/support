@@ -491,7 +491,7 @@ export async function POST(request: NextRequest) {
 
   // Handle outbound message events (message sent from Front)
   // This is THE core signal for the RL loop - comparing draft vs sent
-  if (event.type === 'outbound') {
+  if (event.type === 'outbound_sent') {
     const messageId = event.payload?.target?.data?.id
     if (!messageId) {
       console.log('[front-webhook] Missing message ID in outbound event')
