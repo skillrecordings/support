@@ -662,6 +662,7 @@ export type DraftDiffCategory =
   | 'unchanged' // Draft sent as-is → positive signal
   | 'minor_edit' // Small edits (typos, minor wording) → weak positive
   | 'major_rewrite' // Significant changes → correction signal
+  | 'deleted' // Draft not used within timeout → negative signal
   | 'no_draft' // No agent draft existed → manual response
 
 export type SupportOutboundMessageEvent = {
