@@ -10,7 +10,9 @@
 import { randomUUID } from 'crypto'
 import {
   SUPPORT_COMMENT_RECEIVED,
+  SUPPORT_CONVERSATION_SNOOZED,
   SUPPORT_INBOUND_RECEIVED,
+  SUPPORT_SNOOZE_EXPIRED,
   inngest,
 } from '@skillrecordings/core/inngest'
 import { getAppByInboxId } from '@skillrecordings/core/services/app-registry'
@@ -353,6 +355,136 @@ export async function POST(request: NextRequest) {
     const elapsed = Date.now() - startTime
     console.log(
       `[front-webhook] ========== COMMENT DISPATCHED TO INNGEST (${elapsed}ms) ==========`
+    )
+  }
+
+  // Handle conversation_snoozed events (conversation put on hold by human)
+  if (event.type === 'conversation_snoozed') {
+    // source.data can be an ARRAY of inboxes - find one that matches a registered app
+    const sourceData = event.payload?.source?.data
+    const inboxes = Array.isArray(sourceData) ? sourceData : []
+
+    console.log('[front-webhook] Snooze event extracted:', {
+      conversationId,
+      inboxCount: inboxes.length,
+      inboxIds: inboxes.map((i: { id?: string }) => i?.id).filter(Boolean),
+    })
+
+    // Find the first inbox that matches a registered app
+    let appSlug = 'unknown'
+    let inboxId: string | undefined
+    for (const inbox of inboxes) {
+      if (inbox?.id) {
+        const app = await getAppByInboxId(inbox.id)
+        if (app) {
+          appSlug = app.slug
+          inboxId = inbox.id
+          console.log(
+            `[front-webhook] Matched inbox ${inbox.id} to app ${app.slug}`
+          )
+          break
+        }
+      }
+    }
+
+    // Bail if no registered app found - don't waste resources on unknown inboxes
+    if (!inboxId || appSlug === 'unknown') {
+      console.warn(
+        `[front-webhook] No registered app for snooze inboxes: ${inboxes.map((i: { id?: string }) => i?.id).join(', ')}`
+      )
+      return NextResponse.json({ received: true })
+    }
+
+    // Generate unique traceId for end-to-end pipeline correlation
+    const traceId = randomUUID()
+
+    const inngestPayload = {
+      conversationId,
+      appId: appSlug,
+      inboxId,
+      snoozedAt: event.payload?.emitted_at ?? Math.floor(Date.now() / 1000),
+      // Front may include snooze_until in the payload for scheduled snoozes
+      snoozedUntil: (event.payload as { snooze_until?: number })?.snooze_until,
+      traceId,
+    }
+
+    console.log(
+      '[front-webhook] Sending snooze event to Inngest:',
+      JSON.stringify(inngestPayload, null, 2)
+    )
+
+    await inngest.send({
+      name: SUPPORT_CONVERSATION_SNOOZED,
+      data: inngestPayload,
+    })
+
+    const elapsed = Date.now() - startTime
+    console.log(
+      `[front-webhook] ========== SNOOZE DISPATCHED TO INNGEST (${elapsed}ms) ==========`
+    )
+  }
+
+  // Handle snooze_expired events (snooze period ended, needs attention)
+  if (event.type === 'snooze_expired') {
+    // source.data can be an ARRAY of inboxes - find one that matches a registered app
+    const sourceData = event.payload?.source?.data
+    const inboxes = Array.isArray(sourceData) ? sourceData : []
+
+    console.log('[front-webhook] Snooze expired event extracted:', {
+      conversationId,
+      inboxCount: inboxes.length,
+      inboxIds: inboxes.map((i: { id?: string }) => i?.id).filter(Boolean),
+    })
+
+    // Find the first inbox that matches a registered app
+    let appSlug = 'unknown'
+    let inboxId: string | undefined
+    for (const inbox of inboxes) {
+      if (inbox?.id) {
+        const app = await getAppByInboxId(inbox.id)
+        if (app) {
+          appSlug = app.slug
+          inboxId = inbox.id
+          console.log(
+            `[front-webhook] Matched inbox ${inbox.id} to app ${app.slug}`
+          )
+          break
+        }
+      }
+    }
+
+    // Bail if no registered app found - don't waste resources on unknown inboxes
+    if (!inboxId || appSlug === 'unknown') {
+      console.warn(
+        `[front-webhook] No registered app for snooze expired inboxes: ${inboxes.map((i: { id?: string }) => i?.id).join(', ')}`
+      )
+      return NextResponse.json({ received: true })
+    }
+
+    // Generate unique traceId for end-to-end pipeline correlation
+    const traceId = randomUUID()
+
+    const inngestPayload = {
+      conversationId,
+      appId: appSlug,
+      inboxId,
+      expiredAt: event.payload?.emitted_at ?? Math.floor(Date.now() / 1000),
+      traceId,
+    }
+
+    console.log(
+      '[front-webhook] Sending snooze expired event to Inngest:',
+      JSON.stringify(inngestPayload, null, 2)
+    )
+
+    await inngest.send({
+      name: SUPPORT_SNOOZE_EXPIRED,
+      data: inngestPayload,
+    })
+
+    const elapsed = Date.now() - startTime
+    console.log(
+      `[front-webhook] ========== SNOOZE EXPIRED DISPATCHED TO INNGEST (${elapsed}ms) ==========`
     )
   }
 

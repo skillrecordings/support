@@ -8,6 +8,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 vi.mock('@skillrecordings/core/inngest', () => ({
   SUPPORT_INBOUND_RECEIVED: 'support/inbound.received',
   SUPPORT_COMMENT_RECEIVED: 'support/comment.received',
+  SUPPORT_CONVERSATION_SNOOZED: 'support/conversation.snoozed',
+  SUPPORT_SNOOZE_EXPIRED: 'support/snooze.expired',
   inngest: {
     send: vi.fn().mockResolvedValue(undefined),
   },
@@ -313,6 +315,206 @@ describe('Front Webhook Handler', () => {
 
       expect(response.status).toBe(200)
       expect(json).toEqual({ challenge: 'test-challenge-value' })
+    })
+  })
+
+  describe('conversation_snoozed events', () => {
+    it('handles conversation_snoozed event and dispatches to Inngest', async () => {
+      const snoozePayload = {
+        type: 'conversation_snoozed',
+        authorization: { id: 'cmp_test' },
+        payload: {
+          id: 'evt_snooze123',
+          type: 'conversation_snoozed',
+          emitted_at: [PHONE],
+          snooze_until: [PHONE], // 24 hours later
+          conversation: {
+            id: 'cnv_abc123',
+            subject: 'Snoozed conversation',
+            _links: {
+              self: 'https://api.frontapp.com/conversations/cnv_abc123',
+            },
+          },
+          source: {
+            _meta: { type: 'inboxes' },
+            data: [{ id: 'inb_test123' }],
+          },
+        },
+      }
+
+      const response = await POST(createMockRequest(snoozePayload) as any)
+      const json = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(json).toEqual({ received: true })
+
+      // Verify Inngest was called with snooze event
+      expect(inngest.send).toHaveBeenCalledTimes(1)
+      expect(inngest.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'support/conversation.snoozed',
+          data: expect.objectContaining({
+            conversationId: 'cnv_abc123',
+            appId: 'test-app',
+            inboxId: 'inb_test123',
+            snoozedAt: [PHONE],
+            snoozedUntil: [PHONE],
+          }),
+        })
+      )
+    })
+
+    it('skips conversation_snoozed events with no matching app', async () => {
+      vi.mocked(getAppByInboxId).mockResolvedValue(null)
+
+      const snoozePayload = {
+        type: 'conversation_snoozed',
+        payload: {
+          emitted_at: [PHONE],
+          conversation: { id: 'cnv_abc123' },
+          source: {
+            data: [{ id: 'inb_unknown' }],
+          },
+        },
+      }
+
+      const response = await POST(createMockRequest(snoozePayload) as any)
+      const json = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(json).toEqual({ received: true })
+
+      // Inngest should NOT be called for unknown inboxes
+      expect(inngest.send).not.toHaveBeenCalled()
+    })
+
+    it('handles conversation_snoozed without snooze_until', async () => {
+      const snoozePayload = {
+        type: 'conversation_snoozed',
+        payload: {
+          emitted_at: [PHONE],
+          conversation: { id: 'cnv_abc123' },
+          source: {
+            data: [{ id: 'inb_test123' }],
+          },
+        },
+      }
+
+      const response = await POST(createMockRequest(snoozePayload) as any)
+      expect(response.status).toBe(200)
+
+      expect(inngest.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'support/conversation.snoozed',
+          data: expect.objectContaining({
+            conversationId: 'cnv_abc123',
+            snoozedAt: [PHONE],
+            snoozedUntil: undefined,
+          }),
+        })
+      )
+    })
+  })
+
+  describe('snooze_expired events', () => {
+    it('handles snooze_expired event and dispatches to Inngest', async () => {
+      const expiredPayload = {
+        type: 'snooze_expired',
+        authorization: { id: 'cmp_test' },
+        payload: {
+          id: 'evt_expired123',
+          type: 'snooze_expired',
+          emitted_at: [PHONE],
+          conversation: {
+            id: 'cnv_abc123',
+            subject: 'Snooze expired conversation',
+            _links: {
+              self: 'https://api.frontapp.com/conversations/cnv_abc123',
+            },
+          },
+          source: {
+            _meta: { type: 'inboxes' },
+            data: [{ id: 'inb_test123' }],
+          },
+        },
+      }
+
+      const response = await POST(createMockRequest(expiredPayload) as any)
+      const json = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(json).toEqual({ received: true })
+
+      // Verify Inngest was called with snooze expired event
+      expect(inngest.send).toHaveBeenCalledTimes(1)
+      expect(inngest.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'support/snooze.expired',
+          data: expect.objectContaining({
+            conversationId: 'cnv_abc123',
+            appId: 'test-app',
+            inboxId: 'inb_test123',
+            expiredAt: [PHONE],
+          }),
+        })
+      )
+    })
+
+    it('skips snooze_expired events with no matching app', async () => {
+      vi.mocked(getAppByInboxId).mockResolvedValue(null)
+
+      const expiredPayload = {
+        type: 'snooze_expired',
+        payload: {
+          emitted_at: [PHONE],
+          conversation: { id: 'cnv_abc123' },
+          source: {
+            data: [{ id: 'inb_unknown' }],
+          },
+        },
+      }
+
+      const response = await POST(createMockRequest(expiredPayload) as any)
+      const json = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(json).toEqual({ received: true })
+
+      // Inngest should NOT be called for unknown inboxes
+      expect(inngest.send).not.toHaveBeenCalled()
+    })
+
+    it('handles snooze_expired without emitted_at (uses current time)', async () => {
+      const expiredPayload = {
+        type: 'snooze_expired',
+        payload: {
+          conversation: { id: 'cnv_abc123' },
+          source: {
+            data: [{ id: 'inb_test123' }],
+          },
+        },
+      }
+
+      const beforeTime = Math.floor(Date.now() / 1000)
+      const response = await POST(createMockRequest(expiredPayload) as any)
+      const afterTime = Math.floor(Date.now() / 1000)
+
+      expect(response.status).toBe(200)
+
+      expect(inngest.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'support/snooze.expired',
+          data: expect.objectContaining({
+            conversationId: 'cnv_abc123',
+            expiredAt: expect.any(Number),
+          }),
+        })
+      )
+
+      // Verify the expiredAt is a reasonable timestamp
+      const sentData = (inngest.send as any).mock.calls[0][0].data
+      expect(sentData.expiredAt).toBeGreaterThanOrEqual(beforeTime)
+      expect(sentData.expiredAt).toBeLessThanOrEqual(afterTime)
     })
   })
 })
