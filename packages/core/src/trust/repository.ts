@@ -3,15 +3,27 @@
  */
 
 import { getRedis } from '../redis/client'
+import type { DraftOutcome } from '../rl/types'
 import { calculateTrustScore } from './score'
 import { TRUST_THRESHOLDS, type TrustScore } from './types'
 
 /** Redis key pattern for trust scores */
 const TRUST_KEY_PREFIX = 'trust'
 
+/** Redis key pattern for outcome history */
+const OUTCOME_HISTORY_PREFIX = 'outcome-history'
+
+/** Maximum number of outcomes to store per category */
+const MAX_OUTCOME_HISTORY = 200
+
 /** Build Redis key for trust score */
 function trustKey(appId: string, category: string): string {
   return `${TRUST_KEY_PREFIX}:${appId}:${category}`
+}
+
+/** Build Redis key for outcome history */
+function outcomeHistoryKey(appId: string, category: string): string {
+  return `${OUTCOME_HISTORY_PREFIX}:${appId}:${category}`
 }
 
 /** Stored trust score data in Redis */
@@ -221,4 +233,134 @@ export async function listTrustScores(appId: string): Promise<TrustScore[]> {
         decayHalfLifeDays: halfLifeDays,
       }
     })
+}
+
+// =============================================================================
+// Outcome History Storage (for confidence calculation)
+// =============================================================================
+
+/**
+ * Outcome record with timestamp for confidence calculation.
+ */
+export interface OutcomeRecord {
+  /** Draft outcome type */
+  outcome: DraftOutcome
+  /** When the outcome was recorded */
+  recordedAt: Date
+  /** Optional: original similarity score */
+  similarity?: number
+}
+
+/** Stored outcome record in Redis (ISO strings for dates) */
+interface StoredOutcomeRecord {
+  outcome: DraftOutcome
+  recordedAt: string
+  similarity?: number
+}
+
+/**
+ * Record a draft outcome for confidence tracking.
+ *
+ * Stores outcome in a list, trimmed to MAX_OUTCOME_HISTORY entries.
+ * Uses Redis list with LPUSH + LTRIM for efficient storage.
+ *
+ * @param appId - Application identifier
+ * @param category - Message category
+ * @param outcome - Draft outcome type
+ * @param similarity - Optional similarity score
+ *
+ * @example
+ * await recordOutcomeHistory('total-typescript', 'refund-simple', 'unchanged', 0.98)
+ */
+export async function recordOutcomeHistory(
+  appId: string,
+  category: string,
+  outcome: DraftOutcome,
+  similarity?: number
+): Promise<void> {
+  // Don't record no_draft - it's not a learning signal
+  if (outcome === 'no_draft') {
+    return
+  }
+
+  const redis = getRedis()
+  const key = outcomeHistoryKey(appId, category)
+
+  const record: StoredOutcomeRecord = {
+    outcome,
+    recordedAt: new Date().toISOString(),
+    similarity,
+  }
+
+  // LPUSH adds to front, LTRIM keeps list bounded
+  await redis.lpush(key, JSON.stringify(record))
+  await redis.ltrim(key, 0, MAX_OUTCOME_HISTORY - 1)
+}
+
+/**
+ * Get outcome history for an app/category pair.
+ *
+ * Returns outcomes sorted newest-first (as stored).
+ *
+ * @param appId - Application identifier
+ * @param category - Message category
+ * @param limit - Optional limit on results (default: all)
+ * @returns Array of outcome records
+ *
+ * @example
+ * const history = await getOutcomeHistory('total-typescript', 'refund-simple')
+ * console.log(`${history.length} outcomes recorded`)
+ */
+export async function getOutcomeHistory(
+  appId: string,
+  category: string,
+  limit?: number
+): Promise<OutcomeRecord[]> {
+  const redis = getRedis()
+  const key = outcomeHistoryKey(appId, category)
+
+  const end = limit ? limit - 1 : -1
+  const stored = await redis.lrange(key, 0, end)
+
+  return stored.map((item) => {
+    // Redis returns strings, need to parse
+    const parsed: StoredOutcomeRecord =
+      typeof item === 'string' ? JSON.parse(item) : item
+    return {
+      outcome: parsed.outcome,
+      recordedAt: new Date(parsed.recordedAt),
+      similarity: parsed.similarity,
+    }
+  })
+}
+
+/**
+ * Delete outcome history for an app/category pair.
+ *
+ * @param appId - Application identifier
+ * @param category - Message category
+ */
+export async function deleteOutcomeHistory(
+  appId: string,
+  category: string
+): Promise<void> {
+  const redis = getRedis()
+  const key = outcomeHistoryKey(appId, category)
+  await redis.del(key)
+}
+
+/**
+ * Get count of recorded outcomes for an app/category pair.
+ *
+ * @param appId - Application identifier
+ * @param category - Message category
+ * @returns Number of outcomes recorded
+ */
+export async function getOutcomeHistoryCount(
+  appId: string,
+  category: string
+): Promise<number> {
+  const redis = getRedis()
+  const key = outcomeHistoryKey(appId, category)
+  return redis.llen(key)
 }
