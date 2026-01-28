@@ -266,7 +266,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Handle comment events (internal notes/comments on conversations)
-  if (event.type === 'comment') {
+  if (event.type === 'new_comment_added') {
     const commentId = event.payload?.target?.data?.id
     if (!commentId) {
       console.log('[front-webhook] Missing comment ID in comment event')
@@ -426,7 +426,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Handle snooze_expired events (snooze period ended, needs attention)
-  if (event.type === 'snooze_expired') {
+  if (event.type === 'conversation_snooze_expired') {
     // source.data can be an ARRAY of inboxes - find one that matches a registered app
     const sourceData = event.payload?.source?.data
     const inboxes = Array.isArray(sourceData) ? sourceData : []
