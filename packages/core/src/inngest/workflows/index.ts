@@ -110,7 +110,6 @@ export const allWorkflows: any[] = [
   tagGardeningOnDemand,
   tagHealthCheckWorkflow,
   tagHealthCheckOnDemand,
-  outboundTrackerWorkflow,
 ]
 
 // Re-export draftDeletionCheckWorkflow (imported above for allWorkflows array)

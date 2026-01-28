@@ -118,12 +118,106 @@ export async function applyTag(
     }
 
     // Apply tag to conversation via Front API
+    const front = createFrontClient({ apiToken: frontApiToken })
     try {
-      const front = createFrontClient({ apiToken: frontApiToken })
       await front.conversations.addTag(conversationId, tagId)
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
       const isFrontError = error instanceof FrontApiError
+
+      // Check for archived tag error - attempt recovery by recreating the tag
+      const isArchivedError =
+        message.toLowerCase().includes('archived') ||
+        (isFrontError && error.title?.toLowerCase().includes('archived'))
+
+      if (isArchivedError) {
+        await log('warn', 'Tag is archived, attempting recovery', {
+          step: 'apply-tag',
+          conversationId,
+          category,
+          tagId,
+          tagName,
+          originalError: message,
+        })
+
+        // Clear the stale tag from cache
+        registry.clearCache()
+
+        // Get the tag config to recreate it
+        const config = registry.getTagConfigForCategory(category)
+
+        try {
+          // Try to delete the archived tag first (if allowed)
+          try {
+            await front.tags.delete(tagId)
+            await log('info', 'Deleted archived tag', {
+              step: 'apply-tag',
+              tagId,
+              tagName,
+            })
+          } catch (deleteErr) {
+            // Ignore delete errors - tag might not be deletable
+            await log('debug', 'Could not delete archived tag (continuing)', {
+              step: 'apply-tag',
+              tagId,
+              error:
+                deleteErr instanceof Error
+                  ? deleteErr.message
+                  : String(deleteErr),
+            })
+          }
+
+          // Create a fresh tag with the same name
+          const newTag = await front.tags.create({
+            name: config.tagName,
+            description: config.description,
+            highlight: config.highlight,
+          })
+
+          await log('info', 'Recreated tag after archive recovery', {
+            step: 'apply-tag',
+            conversationId,
+            category,
+            oldTagId: tagId,
+            newTagId: newTag.id,
+            tagName: config.tagName,
+          })
+
+          // Retry applying with the new tag ID
+          await front.conversations.addTag(conversationId, newTag.id)
+
+          return {
+            tagged: true,
+            tagId: newTag.id,
+            tagName,
+            recovered: true,
+            durationMs: Date.now() - startTime,
+          }
+        } catch (recoveryError) {
+          const recoveryMsg =
+            recoveryError instanceof Error
+              ? recoveryError.message
+              : String(recoveryError)
+          await log('error', 'Tag recovery failed', {
+            step: 'apply-tag',
+            conversationId,
+            category,
+            tagId,
+            tagName,
+            originalError: message,
+            recoveryError: recoveryMsg,
+          })
+          return {
+            tagged: false,
+            tagId,
+            tagName,
+            error: `Tag archived and recovery failed: ${recoveryMsg}`,
+            durationMs: Date.now() - startTime,
+          }
+        }
+      }
+
+      // Non-archived error - log and fail
       await log('error', 'Front API addTag call failed', {
         step: 'apply-tag',
         conversationId,
