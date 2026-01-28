@@ -9,6 +9,7 @@
 
 import { randomUUID } from 'crypto'
 import {
+  SUPPORT_COMMENT_RECEIVED,
   SUPPORT_INBOUND_RECEIVED,
   inngest,
 } from '@skillrecordings/core/inngest'
@@ -61,10 +62,10 @@ interface FrontWebhookEvent {
         }
       }
     }
-    /** Target preview (message for inbound/outbound events) */
+    /** Target preview (message for inbound/outbound, comment for comment events) */
     target?: {
       _meta?: {
-        type: string // "message" for inbound
+        type: string // "message" for inbound, "comment" for comments
       }
       data?: {
         id: string
@@ -75,8 +76,13 @@ interface FrontWebhookEvent {
         subject?: string
         body?: string
         author?: {
+          id?: string
           email?: string
+          first_name?: string
+          last_name?: string
         }
+        /** Unix timestamp for comment posted_at */
+        posted_at?: number
       }
     }
     /** Source preview */
@@ -253,6 +259,100 @@ export async function POST(request: NextRequest) {
     const elapsed = Date.now() - startTime
     console.log(
       `[front-webhook] ========== DISPATCHED TO INNGEST (${elapsed}ms) ==========`
+    )
+  }
+
+  // Handle comment events (internal notes/comments on conversations)
+  if (event.type === 'comment') {
+    const commentId = event.payload?.target?.data?.id
+    if (!commentId) {
+      console.log('[front-webhook] Missing comment ID in comment event')
+      return NextResponse.json({ received: true }) // Ack anyway, don't fail
+    }
+
+    // Extract comment data from the payload
+    const commentBody = event.payload?.target?.data?.body || ''
+    const author = event.payload?.target?.data?.author
+    const postedAt = event.payload?.target?.data?.posted_at
+
+    // source.data can be an ARRAY of inboxes - find one that matches a registered app
+    const sourceData = event.payload?.source?.data
+    const inboxes = Array.isArray(sourceData) ? sourceData : []
+
+    console.log('[front-webhook] Comment event extracted:', {
+      commentId,
+      hasBody: !!commentBody,
+      authorId: author?.id,
+      authorEmail: author?.email,
+      inboxCount: inboxes.length,
+      inboxIds: inboxes.map((i: { id?: string }) => i?.id).filter(Boolean),
+    })
+
+    // Find the first inbox that matches a registered app
+    let appSlug = 'unknown'
+    let inboxId: string | undefined
+    for (const inbox of inboxes) {
+      if (inbox?.id) {
+        const app = await getAppByInboxId(inbox.id)
+        if (app) {
+          appSlug = app.slug
+          inboxId = inbox.id
+          console.log(
+            `[front-webhook] Matched inbox ${inbox.id} to app ${app.slug}`
+          )
+          break
+        }
+      }
+    }
+
+    // Bail if no registered app found - don't waste resources on unknown inboxes
+    if (!inboxId || appSlug === 'unknown') {
+      console.warn(
+        `[front-webhook] No registered app for comment inboxes: ${inboxes.map((i: { id?: string }) => i?.id).join(', ')}`
+      )
+      return NextResponse.json({ received: true })
+    }
+
+    // Generate unique traceId for end-to-end pipeline correlation
+    const traceId = randomUUID()
+
+    // Build author name from first + last name if available
+    const authorName =
+      [author?.first_name, author?.last_name].filter(Boolean).join(' ') ||
+      undefined
+
+    const inngestPayload = {
+      conversationId,
+      commentId,
+      body: commentBody,
+      author: {
+        id: author?.id || 'unknown',
+        email: author?.email,
+        name: authorName,
+      },
+      appId: appSlug,
+      inboxId,
+      _links: {
+        conversation: event.payload?.conversation?._links?.self,
+        comment: event.payload?.target?.data?._links?.self,
+      },
+      traceId,
+      postedAt,
+    }
+
+    console.log(
+      '[front-webhook] Sending comment to Inngest:',
+      JSON.stringify(inngestPayload, null, 2)
+    )
+
+    await inngest.send({
+      name: SUPPORT_COMMENT_RECEIVED,
+      data: inngestPayload,
+    })
+
+    const elapsed = Date.now() - startTime
+    console.log(
+      `[front-webhook] ========== COMMENT DISPATCHED TO INNGEST (${elapsed}ms) ==========`
     )
   }
 
