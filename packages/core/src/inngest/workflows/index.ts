@@ -37,7 +37,6 @@ export {
 } from './hold-state'
 export { commentEscalationWorkflow } from './comment-escalation'
 export { outboundTrackerWorkflow } from './outbound-tracker'
-export { draftDeletionCheckWorkflow } from './draft-deletion-check'
 
 import { classifyWorkflow } from './classify'
 import { commentCorrectionWorkflow } from './comment-correction'
@@ -112,3 +111,6 @@ export const allWorkflows: any[] = [
   tagHealthCheckOnDemand,
   outboundTrackerWorkflow,
 ]
+
+// Re-export draftDeletionCheckWorkflow (imported above for allWorkflows array)
+export { draftDeletionCheckWorkflow }
