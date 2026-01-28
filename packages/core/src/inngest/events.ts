@@ -13,6 +13,16 @@ export const SUPPORT_INBOUND_RECEIVED = 'support/inbound.received' as const
 /** Event emitted when a comment is added to a Front conversation */
 export const SUPPORT_COMMENT_RECEIVED = 'support/comment.received' as const
 
+/** Event emitted when an outbound message is sent (for RL feedback loop) */
+export const SUPPORT_OUTBOUND_MESSAGE = 'support/outbound.message' as const
+
+/** Draft diff category for RL signal classification */
+export type DraftDiffCategory =
+  | 'unchanged'
+  | 'minor_edit'
+  | 'major_rewrite'
+  | 'no_draft'
+
 export type SupportInboundReceivedEvent = {
   name: typeof SUPPORT_INBOUND_RECEIVED
   data: {
@@ -75,6 +85,38 @@ export type SupportCommentReceivedEvent = {
     traceId?: string
     /** Timestamp when comment was created (Unix timestamp) */
     postedAt?: number
+  }
+}
+
+export type SupportOutboundMessageEvent = {
+  name: typeof SUPPORT_OUTBOUND_MESSAGE
+  data: {
+    /** Front conversation ID */
+    conversationId: string
+    /** Front message ID */
+    messageId: string
+    /** Skill Recordings app identifier */
+    appId: string
+    /** Inbox ID */
+    inboxId?: string
+    /** Author information (teammate who sent the message) */
+    author?: {
+      /** Teammate ID (tea_xxx) */
+      id?: string
+      /** Teammate email */
+      email?: string
+      /** Teammate name */
+      name?: string
+    }
+    /** Timestamp when message was sent (Unix timestamp) */
+    sentAt?: number
+    /** Front API links for fetching full data */
+    _links?: {
+      conversation?: string
+      message?: string
+    }
+    /** Unique trace ID for end-to-end pipeline correlation */
+    traceId?: string
   }
 }
 
@@ -739,6 +781,7 @@ export type SupportEscalatedEvent = {
 export type Events = {
   [SUPPORT_INBOUND_RECEIVED]: SupportInboundReceivedEvent
   [SUPPORT_COMMENT_RECEIVED]: SupportCommentReceivedEvent
+  [SUPPORT_OUTBOUND_MESSAGE]: SupportOutboundMessageEvent
   [SUPPORT_APPROVAL_REQUESTED]: SupportApprovalRequestedEvent
   [SUPPORT_ACTION_APPROVED]: SupportActionApprovedEvent
   [SUPPORT_ACTION_REJECTED]: SupportActionRejectedEvent
