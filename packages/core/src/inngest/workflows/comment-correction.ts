@@ -104,8 +104,9 @@ export const commentCorrectionWorkflow = inngest.createFunction(
   },
   { event: SUPPORT_COMMENT_RECEIVED },
   async ({ event, step }) => {
-    const { conversationId, appId, commentId, body, authorEmail, traceId } =
+    const { conversationId, appId, commentId, body, author, traceId } =
       event.data
+    const authorEmail = author?.email ?? 'unknown'
 
     const workflowStartTime = Date.now()
     initializeAxiom()

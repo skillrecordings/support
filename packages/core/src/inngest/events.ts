@@ -550,29 +550,6 @@ export type SupportDeadLetterEvent = {
 /** Event emitted when routing decides to escalate */
 export const SUPPORT_ESCALATED = 'support/inbound.escalated' as const
 
-/** Event emitted when a teammate comment is received on a conversation */
-export const SUPPORT_COMMENT_RECEIVED = 'support/comment.received' as const
-
-export type SupportCommentReceivedEvent = {
-  name: typeof SUPPORT_COMMENT_RECEIVED
-  data: {
-    /** Front conversation ID */
-    conversationId: string
-    /** App identifier */
-    appId: string
-    /** Comment ID from Front */
-    commentId: string
-    /** Comment body text */
-    body: string
-    /** Author email (teammate who made the comment) */
-    authorEmail: string
-    /** Author ID (Front teammate ID) */
-    authorId?: string
-    /** Unique trace ID for end-to-end pipeline correlation */
-    traceId?: string
-  }
-}
-
 /** Event emitted to trigger manual template sync */
 export const TEMPLATES_SYNC_REQUESTED = 'templates/sync.requested' as const
 
@@ -688,8 +665,6 @@ export type Events = {
   [SUPPORT_DRAFT_CREATED]: SupportDraftCreatedEvent
   [SUPPORT_DRAFT_VALIDATED]: SupportDraftValidatedEvent
   [SUPPORT_ESCALATED]: SupportEscalatedEvent
-  // Comment correction events
-  [SUPPORT_COMMENT_RECEIVED]: SupportCommentReceivedEvent
   // Template sync events
   [TEMPLATES_SYNC_REQUESTED]: TemplatesSyncRequestedEvent
   // Stale template check events
