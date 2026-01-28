@@ -93,7 +93,8 @@
     "./faq": "./src/faq/index.ts",
     "./faq/miner": "./src/faq/miner.ts",
     "./faq/clusterer": "./src/faq/clusterer.ts",
-    "./faq/types": "./src/faq/types.ts"
+    "./faq/types": "./src/faq/types.ts",
+    "./faq/review": "./src/faq/review.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit",
