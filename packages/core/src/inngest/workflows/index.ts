@@ -30,8 +30,10 @@ export {
   tagHealthCheckWorkflow,
   tagHealthCheckOnDemand,
 } from './tag-gardening'
+export { commentCorrectionWorkflow } from './comment-correction'
 
 import { classifyWorkflow } from './classify'
+import { commentCorrectionWorkflow } from './comment-correction'
 import { draftWorkflow } from './draft-response'
 import { executeApprovedAction } from './execute-approved-action'
 import {
@@ -70,6 +72,7 @@ import { validateWorkflow } from './validate-draft'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const allWorkflows: any[] = [
   classifyWorkflow,
+  commentCorrectionWorkflow,
   draftWorkflow,
   gatherWorkflow,
   handleEscalation,
