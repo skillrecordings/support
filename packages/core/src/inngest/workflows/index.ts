@@ -37,12 +37,13 @@ export {
 } from './hold-state'
 export { commentEscalationWorkflow } from './comment-escalation'
 export { outboundTrackerWorkflow } from './outbound-tracker'
+export { draftDeletionCheckWorkflow } from './draft-deletion-check'
 
 import { classifyWorkflow } from './classify'
 import { commentCorrectionWorkflow } from './comment-correction'
 import { commentEscalationWorkflow } from './comment-escalation'
+import { draftDeletionCheckWorkflow } from './draft-deletion-check'
 import { draftWorkflow } from './draft-response'
-import { handleConversationSnoozed, handleSnoozeExpired } from './hold-state'
 import { executeApprovedAction } from './execute-approved-action'
 import {
   findStaleTemplatesOnDemand,
@@ -51,6 +52,7 @@ import {
 import { gatherWorkflow } from './gather-context'
 import { handleEscalation } from './handle-escalation'
 import { handleValidatedDraft } from './handle-validated-draft'
+import { handleConversationSnoozed, handleSnoozeExpired } from './hold-state'
 // DELETED: import { handleInboundMessage } from './handle-inbound-message'
 import { indexConversation } from './index-conversation'
 import { handleMemoryCitation, handleMemoryVote } from './memory-vote'
@@ -84,6 +86,7 @@ export const allWorkflows: any[] = [
   commentCorrectionWorkflow,
   commentEscalationWorkflow,
   draftWorkflow,
+  draftDeletionCheckWorkflow,
   gatherWorkflow,
   handleConversationSnoozed,
   handleEscalation,
