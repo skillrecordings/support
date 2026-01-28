@@ -10,6 +10,9 @@ import type Stripe from 'stripe'
 /** Event emitted when an inbound support message is received from Front */
 export const SUPPORT_INBOUND_RECEIVED = 'support/inbound.received' as const
 
+/** Event emitted when a comment is added to a Front conversation */
+export const SUPPORT_COMMENT_RECEIVED = 'support/comment.received' as const
+
 export type SupportInboundReceivedEvent = {
   name: typeof SUPPORT_INBOUND_RECEIVED
   data: {
@@ -38,6 +41,40 @@ export type SupportInboundReceivedEvent = {
     inboxId?: string
     /** Unique trace ID for end-to-end pipeline correlation */
     traceId?: string
+  }
+}
+
+export type SupportCommentReceivedEvent = {
+  name: typeof SUPPORT_COMMENT_RECEIVED
+  data: {
+    /** Front conversation ID */
+    conversationId: string
+    /** Front comment ID */
+    commentId: string
+    /** Comment body text (may be HTML from webhook preview) */
+    body: string
+    /** Author information (teammate who wrote the comment) */
+    author: {
+      /** Teammate ID (tea_xxx) */
+      id: string
+      /** Teammate email */
+      email?: string
+      /** Teammate name (combined first + last) */
+      name?: string
+    }
+    /** Skill Recordings app identifier */
+    appId: string
+    /** Inbox ID */
+    inboxId?: string
+    /** Front API links for fetching full data */
+    _links?: {
+      conversation?: string
+      comment?: string
+    }
+    /** Unique trace ID for end-to-end pipeline correlation */
+    traceId?: string
+    /** Timestamp when comment was created (Unix timestamp) */
+    postedAt?: number
   }
 }
 
@@ -610,6 +647,7 @@ export type SupportEscalatedEvent = {
  */
 export type Events = {
   [SUPPORT_INBOUND_RECEIVED]: SupportInboundReceivedEvent
+  [SUPPORT_COMMENT_RECEIVED]: SupportCommentReceivedEvent
   [SUPPORT_APPROVAL_REQUESTED]: SupportApprovalRequestedEvent
   [SUPPORT_ACTION_APPROVED]: SupportActionApprovedEvent
   [SUPPORT_ACTION_REJECTED]: SupportActionRejectedEvent
