@@ -1,5 +1,12 @@
 # @skillrecordings/cli
 
+## 0.0.4
+
+### Patch Changes
+
+- Updated dependencies [7ae3e99]
+  - @skillrecordings/sdk@0.6.0
+
 ## 0.0.3
 
 ### Patch Changes
