@@ -555,6 +555,9 @@ export const SUPPORT_CONVERSATION_SNOOZED =
 /** Event emitted when a snooze period expires */
 export const SUPPORT_SNOOZE_EXPIRED = 'support/snooze.expired' as const
 
+/** Event emitted when an outbound message is sent from Front */
+export const SUPPORT_OUTBOUND_MESSAGE = 'support/outbound.message' as const
+
 /** Event emitted to trigger manual template sync */
 export const TEMPLATES_SYNC_REQUESTED = 'templates/sync.requested' as const
 
@@ -652,6 +655,48 @@ export type SupportSnoozeExpiredEvent = {
   }
 }
 
+/**
+ * Diff category for comparing draft vs sent message
+ */
+export type DraftDiffCategory =
+  | 'unchanged' // Draft sent as-is → positive signal
+  | 'minor_edit' // Small edits (typos, minor wording) → weak positive
+  | 'major_rewrite' // Significant changes → correction signal
+  | 'no_draft' // No agent draft existed → manual response
+
+export type SupportOutboundMessageEvent = {
+  name: typeof SUPPORT_OUTBOUND_MESSAGE
+  data: {
+    /** Front conversation ID */
+    conversationId: string
+    /** Front message ID of the sent message */
+    messageId: string
+    /** Skill Recordings app identifier */
+    appId: string
+    /** Inbox ID */
+    inboxId?: string
+    /** Author who sent the message */
+    author?: {
+      id: string
+      email?: string
+      name?: string
+    }
+    /** Message body text (fetched from Front API) */
+    body: string
+    /** Message subject */
+    subject?: string
+    /** When the message was sent (Unix timestamp) */
+    sentAt: number
+    /** Front API links for fetching full data */
+    _links?: {
+      conversation?: string
+      message?: string
+    }
+    /** Unique trace ID for end-to-end pipeline correlation */
+    traceId?: string
+  }
+}
+
 export type EscalationPriority =
   | 'urgent'
   | 'normal'
@@ -713,6 +758,8 @@ export type Events = {
   // Snooze/hold events
   [SUPPORT_CONVERSATION_SNOOZED]: SupportConversationSnoozedEvent
   [SUPPORT_SNOOZE_EXPIRED]: SupportSnoozeExpiredEvent
+  // Outbound message for RL loop
+  [SUPPORT_OUTBOUND_MESSAGE]: SupportOutboundMessageEvent
   // Template sync events
   [TEMPLATES_SYNC_REQUESTED]: TemplatesSyncRequestedEvent
   // Stale template check events
