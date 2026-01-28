@@ -69,7 +69,9 @@
     "./tags": "./src/tags/index.ts",
     "./tags/registry": "./src/tags/registry.ts",
     "./tags/audit": "./src/tags/audit.ts",
-    "./tags/ai-suggestions": "./src/tags/ai-suggestions.ts"
+    "./tags/ai-suggestions": "./src/tags/ai-suggestions.ts",
+    "./conversation": "./src/conversation/index.ts",
+    "./conversation/hold-state": "./src/conversation/hold-state.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit",
