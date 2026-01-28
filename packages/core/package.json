@@ -71,7 +71,9 @@
     "./tags/audit": "./src/tags/audit.ts",
     "./tags/ai-suggestions": "./src/tags/ai-suggestions.ts",
     "./conversation": "./src/conversation/index.ts",
-    "./conversation/hold-state": "./src/conversation/hold-state.ts"
+    "./conversation/hold-state": "./src/conversation/hold-state.ts",
+    "./knowledge/types": "./src/knowledge/types.ts",
+    "./knowledge/search": "./src/knowledge/search.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit",
