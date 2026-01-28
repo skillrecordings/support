@@ -36,6 +36,7 @@ export {
   handleSnoozeExpired,
 } from './hold-state'
 export { commentEscalationWorkflow } from './comment-escalation'
+export { outboundTrackerWorkflow } from './outbound-tracker'
 
 import { classifyWorkflow } from './classify'
 import { commentCorrectionWorkflow } from './comment-correction'
@@ -53,6 +54,7 @@ import { handleValidatedDraft } from './handle-validated-draft'
 // DELETED: import { handleInboundMessage } from './handle-inbound-message'
 import { indexConversation } from './index-conversation'
 import { handleMemoryCitation, handleMemoryVote } from './memory-vote'
+import { outboundTrackerWorkflow } from './outbound-tracker'
 import { requestApproval } from './request-approval'
 import { retentionCleanup } from './retention-cleanup'
 import { routeWorkflow } from './route-message'
@@ -105,4 +107,5 @@ export const allWorkflows: any[] = [
   tagGardeningOnDemand,
   tagHealthCheckWorkflow,
   tagHealthCheckOnDemand,
+  outboundTrackerWorkflow,
 ]

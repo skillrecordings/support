@@ -10,6 +10,7 @@ vi.mock('@skillrecordings/core/inngest', () => ({
   SUPPORT_COMMENT_RECEIVED: 'support/comment.received',
   SUPPORT_CONVERSATION_SNOOZED: 'support/conversation.snoozed',
   SUPPORT_SNOOZE_EXPIRED: 'support/snooze.expired',
+  SUPPORT_OUTBOUND_MESSAGE: 'support/outbound.message',
   inngest: {
     send: vi.fn().mockResolvedValue(undefined),
   },
@@ -515,6 +516,199 @@ describe('Front Webhook Handler', () => {
       const sentData = (inngest.send as any).mock.calls[0][0].data
       expect(sentData.expiredAt).toBeGreaterThanOrEqual(beforeTime)
       expect(sentData.expiredAt).toBeLessThanOrEqual(afterTime)
+    })
+  })
+
+  describe('outbound events', () => {
+    it('handles outbound event and dispatches to Inngest', async () => {
+      const outboundPayload = {
+        type: 'outbound',
+        authorization: { id: 'cmp_test' },
+        payload: {
+          id: 'evt_outbound123',
+          type: 'outbound',
+          emitted_at: [PHONE],
+          conversation: {
+            id: 'cnv_abc123',
+            subject: 'Re: Refund request',
+            _links: {
+              self: 'https://api.frontapp.com/conversations/cnv_abc123',
+            },
+          },
+          target: {
+            _meta: { type: 'message' },
+            data: {
+              id: 'msg_xyz789',
+              author: {
+                id: 'tea_author1',
+                email: '[EMAIL]',
+                first_name: 'Support',
+                last_name: 'Agent',
+              },
+              _links: {
+                self: 'https://api.frontapp.com/messages/msg_xyz789',
+              },
+            },
+          },
+          source: {
+            _meta: { type: 'inboxes' },
+            data: [{ id: 'inb_test123' }],
+          },
+        },
+      }
+
+      const response = await POST(createMockRequest(outboundPayload) as any)
+      const json = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(json).toEqual({ received: true })
+
+      // Verify Inngest was called with outbound event
+      expect(inngest.send).toHaveBeenCalledTimes(1)
+      expect(inngest.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'support/outbound.message',
+          data: expect.objectContaining({
+            conversationId: 'cnv_abc123',
+            messageId: 'msg_xyz789',
+            appId: 'test-app',
+            inboxId: 'inb_test123',
+            author: {
+              id: 'tea_author1',
+              email: '[EMAIL]',
+              name: 'Support Agent',
+            },
+            subject: 'Re: Refund request',
+            sentAt: [PHONE],
+          }),
+        })
+      )
+    })
+
+    it('skips outbound events with no matching app', async () => {
+      vi.mocked(getAppByInboxId).mockResolvedValue(null)
+
+      const outboundPayload = {
+        type: 'outbound',
+        payload: {
+          emitted_at: [PHONE],
+          conversation: { id: 'cnv_abc123' },
+          target: {
+            data: {
+              id: 'msg_xyz789',
+            },
+          },
+          source: {
+            data: [{ id: 'inb_unknown' }],
+          },
+        },
+      }
+
+      const response = await POST(createMockRequest(outboundPayload) as any)
+      const json = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(json).toEqual({ received: true })
+
+      // Inngest should NOT be called for unknown inboxes
+      expect(inngest.send).not.toHaveBeenCalled()
+    })
+
+    it('handles outbound events without message ID', async () => {
+      const outboundPayload = {
+        type: 'outbound',
+        payload: {
+          conversation: { id: 'cnv_abc123' },
+          target: {
+            data: {
+              // Missing id
+            },
+          },
+          source: {
+            data: [{ id: 'inb_test123' }],
+          },
+        },
+      }
+
+      const response = await POST(createMockRequest(outboundPayload) as any)
+      const json = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(json).toEqual({ received: true })
+
+      // Should not send to Inngest when message ID is missing
+      expect(inngest.send).not.toHaveBeenCalled()
+    })
+
+    it('handles outbound events without author info', async () => {
+      const outboundPayload = {
+        type: 'outbound',
+        payload: {
+          emitted_at: [PHONE],
+          conversation: { id: 'cnv_abc123' },
+          target: {
+            data: {
+              id: 'msg_xyz789',
+              // No author field
+            },
+          },
+          source: {
+            data: [{ id: 'inb_test123' }],
+          },
+        },
+      }
+
+      const response = await POST(createMockRequest(outboundPayload) as any)
+      expect(response.status).toBe(200)
+
+      expect(inngest.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'support/outbound.message',
+          data: expect.objectContaining({
+            conversationId: 'cnv_abc123',
+            messageId: 'msg_xyz789',
+            author: undefined,
+          }),
+        })
+      )
+    })
+
+    it('handles outbound events without emitted_at (uses current time)', async () => {
+      const outboundPayload = {
+        type: 'outbound',
+        payload: {
+          conversation: { id: 'cnv_abc123' },
+          target: {
+            data: {
+              id: 'msg_xyz789',
+            },
+          },
+          source: {
+            data: [{ id: 'inb_test123' }],
+          },
+        },
+      }
+
+      const beforeTime = Math.floor(Date.now() / 1000)
+      const response = await POST(createMockRequest(outboundPayload) as any)
+      const afterTime = Math.floor(Date.now() / 1000)
+
+      expect(response.status).toBe(200)
+
+      expect(inngest.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'support/outbound.message',
+          data: expect.objectContaining({
+            conversationId: 'cnv_abc123',
+            sentAt: expect.any(Number),
+          }),
+        })
+      )
+
+      // Verify the sentAt is a reasonable timestamp
+      const sentData = (inngest.send as any).mock.calls[0][0].data
+      expect(sentData.sentAt).toBeGreaterThanOrEqual(beforeTime)
+      expect(sentData.sentAt).toBeLessThanOrEqual(afterTime)
     })
   })
 })
