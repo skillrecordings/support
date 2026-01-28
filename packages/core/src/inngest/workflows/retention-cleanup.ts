@@ -1,8 +1,7 @@
 /**
  * Retention cleanup workflow
  *
- * Runs daily at 3am to clean up expired data according to retention policies.
- * Handles soft deletion with grace period before hard deletion.
+ * Runs daily at 3am to hard-delete data older than the configured retention period.
  */
 
 import { cleanupExpiredData } from '../../services/retention'
@@ -15,9 +14,9 @@ import { inngest } from '../client'
  * Schedule: 0 3 * * * (daily at 3am UTC)
  *
  * Process:
- * 1. Soft delete records past retention period
- * 2. Hard delete soft-deleted records past grace period
- * 3. Delete expired vectors from vector index
+ * 1. Hard delete conversations older than 90 days
+ * 2. Delete expired vectors older than 180 days
+ * 3. Hard delete audit logs older than 365 days
  *
  * Note: Database connection is lazy-initialized inside the step function
  * to avoid serverless/Turbopack build issues.
