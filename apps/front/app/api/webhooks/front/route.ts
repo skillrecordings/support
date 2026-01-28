@@ -12,6 +12,7 @@ import {
   SUPPORT_COMMENT_RECEIVED,
   SUPPORT_CONVERSATION_SNOOZED,
   SUPPORT_INBOUND_RECEIVED,
+  SUPPORT_OUTBOUND_MESSAGE,
   SUPPORT_SNOOZE_EXPIRED,
   inngest,
 } from '@skillrecordings/core/inngest'
@@ -485,6 +486,103 @@ export async function POST(request: NextRequest) {
     const elapsed = Date.now() - startTime
     console.log(
       `[front-webhook] ========== SNOOZE EXPIRED DISPATCHED TO INNGEST (${elapsed}ms) ==========`
+    )
+  }
+
+  // Handle outbound message events (message sent from Front)
+  // This is THE core signal for the RL loop - comparing draft vs sent
+  if (event.type === 'outbound') {
+    const messageId = event.payload?.target?.data?.id
+    if (!messageId) {
+      console.log('[front-webhook] Missing message ID in outbound event')
+      return NextResponse.json({ received: true }) // Ack anyway, don't fail
+    }
+
+    // Extract author info from the payload (teammate who sent)
+    const author = event.payload?.target?.data?.author
+
+    // source.data can be an ARRAY of inboxes - find one that matches a registered app
+    const sourceData = event.payload?.source?.data
+    const inboxes = Array.isArray(sourceData) ? sourceData : []
+
+    console.log('[front-webhook] Outbound event extracted:', {
+      conversationId,
+      messageId,
+      authorId: author?.id,
+      authorEmail: author?.email,
+      inboxCount: inboxes.length,
+      inboxIds: inboxes.map((i: { id?: string }) => i?.id).filter(Boolean),
+    })
+
+    // Find the first inbox that matches a registered app
+    let appSlug = 'unknown'
+    let inboxId: string | undefined
+    for (const inbox of inboxes) {
+      if (inbox?.id) {
+        const app = await getAppByInboxId(inbox.id)
+        if (app) {
+          appSlug = app.slug
+          inboxId = inbox.id
+          console.log(
+            `[front-webhook] Matched inbox ${inbox.id} to app ${app.slug}`
+          )
+          break
+        }
+      }
+    }
+
+    // Bail if no registered app found - don't waste resources on unknown inboxes
+    if (!inboxId || appSlug === 'unknown') {
+      console.warn(
+        `[front-webhook] No registered app for outbound inboxes: ${inboxes.map((i: { id?: string }) => i?.id).join(', ')}`
+      )
+      return NextResponse.json({ received: true })
+    }
+
+    // Generate unique traceId for end-to-end pipeline correlation
+    const traceId = randomUUID()
+
+    // Build author name from first + last name if available
+    const authorName =
+      [author?.first_name, author?.last_name].filter(Boolean).join(' ') ||
+      undefined
+
+    const inngestPayload = {
+      conversationId,
+      messageId,
+      appId: appSlug,
+      inboxId,
+      author: author
+        ? {
+            id: author.id || 'unknown',
+            email: author.email,
+            name: authorName,
+          }
+        : undefined,
+      // Body will be fetched via Front API in the workflow (webhook sends preview only)
+      body: '',
+      subject: event.payload?.conversation?.subject,
+      sentAt: event.payload?.emitted_at ?? Math.floor(Date.now() / 1000),
+      _links: {
+        conversation: event.payload?.conversation?._links?.self,
+        message: event.payload?.target?.data?._links?.self,
+      },
+      traceId,
+    }
+
+    console.log(
+      '[front-webhook] Sending outbound message to Inngest:',
+      JSON.stringify(inngestPayload, null, 2)
+    )
+
+    await inngest.send({
+      name: SUPPORT_OUTBOUND_MESSAGE,
+      data: inngestPayload,
+    })
+
+    const elapsed = Date.now() - startTime
+    console.log(
+      `[front-webhook] ========== OUTBOUND DISPATCHED TO INNGEST (${elapsed}ms) ==========`
     )
   }
 
