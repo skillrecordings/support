@@ -17,73 +17,13 @@
 import { desc, eq } from 'drizzle-orm'
 import { ActionsTable, getDb } from '@skillrecordings/database'
 import { createFrontClient } from '@skillrecordings/front-sdk'
+import { categorizeDiff } from '../../draft/detection'
 import { initializeAxiom, log, traceWorkflowStep } from '../../observability/axiom'
 import { inngest } from '../client'
-import { SUPPORT_OUTBOUND_MESSAGE, type DraftDiffCategory } from '../events'
+import { SUPPORT_OUTBOUND_MESSAGE } from '../events'
 
-/**
- * Compute text similarity using Levenshtein distance normalized to [0,1]
- * 1.0 = identical, 0.0 = completely different
- */
-function computeSimilarity(a: string, b: string): number {
-  const textA = normalizeText(a)
-  const textB = normalizeText(b)
-
-  if (textA === textB) return 1.0
-  if (textA.length === 0 || textB.length === 0) return 0.0
-
-  // Use a simpler approach for long texts: compare word overlap
-  const wordsA = new Set(textA.split(/\s+/).filter(Boolean))
-  const wordsB = new Set(textB.split(/\s+/).filter(Boolean))
-
-  if (wordsA.size === 0 || wordsB.size === 0) return 0.0
-
-  // Jaccard similarity
-  const intersection = [...wordsA].filter((w) => wordsB.has(w)).length
-  const union = new Set([...wordsA, ...wordsB]).size
-
-  return intersection / union
-}
-
-/**
- * Normalize text for comparison: strip HTML, lowercase, collapse whitespace
- */
-function normalizeText(text: string): string {
-  return text
-    .replace(/<[^>]*>/g, ' ') // Strip HTML tags
-    .replace(/&nbsp;/g, ' ') // Replace HTML entities
-    .replace(/&[a-z]+;/gi, ' ') // Other HTML entities
-    .replace(/\s+/g, ' ') // Collapse whitespace
-    .toLowerCase()
-    .trim()
-}
-
-/**
- * Categorize the diff between draft and sent message
- */
-export function categorizeDiff(
-  draftText: string | null | undefined,
-  sentText: string
-): { category: DraftDiffCategory; similarity: number } {
-  // No draft → manual response
-  if (!draftText) {
-    return { category: 'no_draft', similarity: 0 }
-  }
-
-  const similarity = computeSimilarity(draftText, sentText)
-
-  // Thresholds for categorization
-  // >= 0.95: unchanged (very minor formatting differences allowed)
-  // >= 0.70: minor_edit (small wording changes, typo fixes)
-  // < 0.70: major_rewrite (substantial changes = correction signal)
-  if (similarity >= 0.95) {
-    return { category: 'unchanged', similarity }
-  } else if (similarity >= 0.70) {
-    return { category: 'minor_edit', similarity }
-  } else {
-    return { category: 'major_rewrite', similarity }
-  }
-}
+// Re-export categorizeDiff for backward compatibility with existing imports
+export { categorizeDiff } from '../../draft/detection'
 
 /**
  * RL Signal record stored for feedback loop

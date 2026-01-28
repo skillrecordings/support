@@ -20,3 +20,13 @@ export {
   getDraftTracking,
   removeDraftTracking,
 } from './tracking'
+
+// Edit detection for RL signals
+export type { EditDetectionResult } from './detection'
+export {
+  detectEditCategory,
+  categorizeDiff,
+  computeJaccardSimilarity,
+  normalizeText,
+  EDIT_THRESHOLDS,
+} from './detection'
