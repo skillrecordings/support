@@ -92,6 +92,7 @@ export const allWorkflows: any[] = [
   // DELETED: handleInboundMessage - replaced by event-driven workflows
   handleSnoozeExpired,
   handleValidatedDraft,
+  outboundTrackerWorkflow,
   requestApproval,
   executeApprovedAction,
   handleStripeEvent,

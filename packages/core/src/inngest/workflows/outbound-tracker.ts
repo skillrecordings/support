@@ -14,12 +14,16 @@
  * - no_draft: No agent draft existed → manual response (baseline)
  */
 
-import { desc, eq } from 'drizzle-orm'
 import { ActionsTable, getDb } from '@skillrecordings/database'
 import { createFrontClient } from '@skillrecordings/front-sdk'
-import { initializeAxiom, log, traceWorkflowStep } from '../../observability/axiom'
+import { desc, eq } from 'drizzle-orm'
+import {
+  initializeAxiom,
+  log,
+  traceWorkflowStep,
+} from '../../observability/axiom'
 import { inngest } from '../client'
-import { SUPPORT_OUTBOUND_MESSAGE, type DraftDiffCategory } from '../events'
+import { type DraftDiffCategory, SUPPORT_OUTBOUND_MESSAGE } from '../events'
 
 /**
  * Compute text similarity using Levenshtein distance normalized to [0,1]
@@ -78,7 +82,7 @@ export function categorizeDiff(
   // < 0.70: major_rewrite (substantial changes = correction signal)
   if (similarity >= 0.95) {
     return { category: 'unchanged', similarity }
-  } else if (similarity >= 0.70) {
+  } else if (similarity >= 0.7) {
     return { category: 'minor_edit', similarity }
   } else {
     return { category: 'major_rewrite', similarity }
@@ -228,7 +232,12 @@ export const outboundTrackerWorkflow = inngest.createFunction(
         conversationId,
         messageId,
       })
-      return { conversationId, messageId, status: 'skipped', reason: 'fetch_failed' }
+      return {
+        conversationId,
+        messageId,
+        status: 'skipped',
+        reason: 'fetch_failed',
+      }
     }
 
     // Step 2: Find most recent draft for this conversation
@@ -252,7 +261,8 @@ export const outboundTrackerWorkflow = inngest.createFunction(
         const durationMs = Date.now() - stepStartTime
 
         if (draft) {
-          const draftText = (draft.parameters as Record<string, unknown>)?.draft as string | undefined
+          const draftText = (draft.parameters as Record<string, unknown>)
+            ?.draft as string | undefined
 
           await log('info', 'found draft for correlation', {
             workflow: 'support-outbound-tracker',
