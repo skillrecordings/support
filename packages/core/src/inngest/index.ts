@@ -18,12 +18,14 @@ export {
   SUPPORT_COMMENT_RECEIVED,
   SUPPORT_CONVERSATION_SNOOZED,
   SUPPORT_SNOOZE_EXPIRED,
+  SUPPORT_OUTBOUND_MESSAGE,
   SUPPORT_APPROVAL_REQUESTED,
   SUPPORT_APPROVAL_DECIDED,
   SUPPORT_ACTION_APPROVED,
   SUPPORT_ACTION_REJECTED,
   SUPPORT_DEAD_LETTER,
 } from './events'
+export type { DraftDiffCategory, SupportOutboundMessageEvent } from './events'
 export {
   createDeadLetterHandler,
   withDeadLetter,
