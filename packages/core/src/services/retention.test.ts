@@ -10,7 +10,10 @@ describe('RETENTION_DEFAULTS', () => {
     expect(RETENTION_DEFAULTS.conversations).toBe(90)
     expect(RETENTION_DEFAULTS.vectors).toBe(180)
     expect(RETENTION_DEFAULTS.auditLogs).toBe(365)
-    expect(RETENTION_DEFAULTS.gracePeriod).toBe(7)
+  })
+
+  it('should not have gracePeriod (no soft-delete support)', () => {
+    expect('gracePeriod' in RETENTION_DEFAULTS).toBe(false)
   })
 })
 
@@ -19,9 +22,12 @@ describe('cleanupExpiredData', () => {
   let mockVectorIndex: any
 
   beforeEach(() => {
+    // Drizzle delete() returns a chainable that resolves to [ResultSetHeader]
+    const mockDeleteChain = {
+      where: vi.fn().mockResolvedValue([{ affectedRows: 0 }]),
+    }
     mockDb = {
-      query: vi.fn(),
-      execute: vi.fn(),
+      delete: vi.fn().mockReturnValue(mockDeleteChain),
     }
     mockVectorIndex = {
       delete: vi.fn(),
@@ -29,8 +35,7 @@ describe('cleanupExpiredData', () => {
     }
   })
 
-  it('should return a cleanup report', async () => {
-    mockDb.query.mockResolvedValue([])
+  it('should return a cleanup report with zero counts when nothing to delete', async () => {
     mockVectorIndex.query.mockResolvedValue([])
 
     const report = await cleanupExpiredData(mockDb, mockVectorIndex)
@@ -43,70 +48,53 @@ describe('cleanupExpiredData', () => {
     })
   })
 
-  it('should mark conversations for soft deletion when past retention period', async () => {
-    const expiredDate = new Date()
-    expiredDate.setDate(
-      expiredDate.getDate() - (RETENTION_DEFAULTS.conversations + 1)
-    )
-
-    // Mock finding expired conversations, then soft-deleted, then audit logs
-    mockDb.query
-      .mockResolvedValueOnce([
-        { id: 'conv-1', createdAt: expiredDate },
-        { id: 'conv-2', createdAt: expiredDate },
-      ]) // expired conversations
-      .mockResolvedValueOnce([]) // soft-deleted conversations
-      .mockResolvedValueOnce([]) // audit logs
-
-    mockDb.execute.mockResolvedValue({ rowsAffected: 2 })
+  it('should call db.delete for conversations with correct cutoff', async () => {
     mockVectorIndex.query.mockResolvedValue([])
 
-    const report = await cleanupExpiredData(mockDb, mockVectorIndex)
+    await cleanupExpiredData(mockDb, mockVectorIndex)
 
-    // Should have marked conversations for soft deletion
-    expect(mockDb.execute).toHaveBeenCalledWith(
-      expect.objectContaining({
-        sql: expect.stringContaining('deletedAt'),
-      })
-    )
+    // Should have called delete twice: once for conversations, once for audit logs
+    expect(mockDb.delete).toHaveBeenCalledTimes(2)
   })
 
-  it('should hard delete soft-deleted records after grace period', async () => {
-    const gracePeriodDate = new Date()
-    gracePeriodDate.setDate(
-      gracePeriodDate.getDate() - (RETENTION_DEFAULTS.gracePeriod + 1)
-    )
-
-    // Mock finding soft-deleted conversations past grace period
-    mockDb.query
-      .mockResolvedValueOnce([]) // expired conversations
-      .mockResolvedValueOnce([{ id: 'conv-1', deletedAt: gracePeriodDate }]) // soft-deleted
-      .mockResolvedValueOnce([]) // audit logs
-
-    mockDb.execute.mockResolvedValue({ rowsAffected: 1 })
+  it('should report deleted conversation count from affectedRows', async () => {
+    const deleteConversations = {
+      where: vi.fn().mockResolvedValue([{ affectedRows: 5 }]),
+    }
+    const deleteAuditLogs = {
+      where: vi.fn().mockResolvedValue([{ affectedRows: 0 }]),
+    }
+    mockDb.delete
+      .mockReturnValueOnce(deleteConversations)
+      .mockReturnValueOnce(deleteAuditLogs)
     mockVectorIndex.query.mockResolvedValue([])
 
     const report = await cleanupExpiredData(mockDb, mockVectorIndex)
 
-    // Should have hard deleted
-    expect(mockDb.execute).toHaveBeenCalledWith(
-      expect.objectContaining({
-        sql: expect.stringContaining('DELETE FROM'),
-      })
-    )
-    expect(report.conversationsDeleted).toBe(1)
+    expect(report.conversationsDeleted).toBe(5)
+  })
+
+  it('should report deleted audit log count from affectedRows', async () => {
+    const deleteConversations = {
+      where: vi.fn().mockResolvedValue([{ affectedRows: 0 }]),
+    }
+    const deleteAuditLogs = {
+      where: vi.fn().mockResolvedValue([{ affectedRows: 12 }]),
+    }
+    mockDb.delete
+      .mockReturnValueOnce(deleteConversations)
+      .mockReturnValueOnce(deleteAuditLogs)
+    mockVectorIndex.query.mockResolvedValue([])
+
+    const report = await cleanupExpiredData(mockDb, mockVectorIndex)
+
+    expect(report.auditLogsDeleted).toBe(12)
   })
 
   it('should delete expired vectors from vector index', async () => {
-    const expiredDate = new Date()
-    expiredDate.setDate(
-      expiredDate.getDate() - (RETENTION_DEFAULTS.vectors + 1)
-    )
-
-    mockDb.query.mockResolvedValue([])
-    mockVectorIndex.query.mockResolvedValueOnce([
-      { id: 'vec-1', metadata: { createdAt: expiredDate.toISOString() } },
-      { id: 'vec-2', metadata: { createdAt: expiredDate.toISOString() } },
+    mockVectorIndex.query.mockResolvedValue([
+      { id: 'vec-1', metadata: { createdAt: '2020-01-01T00:00:00Z' } },
+      { id: 'vec-2', metadata: { createdAt: '2020-01-01T00:00:00Z' } },
     ])
     mockVectorIndex.delete.mockResolvedValue({ deleted: 2 })
 
@@ -116,25 +104,29 @@ describe('cleanupExpiredData', () => {
     expect(report.vectorsDeleted).toBe(2)
   })
 
-  it('should delete expired audit logs', async () => {
-    const expiredDate = new Date()
-    expiredDate.setDate(
-      expiredDate.getDate() - (RETENTION_DEFAULTS.auditLogs + 1)
-    )
+  it('should not call vectorIndex.delete when no expired vectors', async () => {
+    mockVectorIndex.query.mockResolvedValue([])
 
-    mockDb.query
-      .mockResolvedValueOnce([]) // expired conversations
-      .mockResolvedValueOnce([]) // soft-deleted conversations
-      .mockResolvedValueOnce([
-        { id: 'log-1', createdAt: expiredDate },
-        { id: 'log-2', createdAt: expiredDate },
-      ]) // audit logs
+    await cleanupExpiredData(mockDb, mockVectorIndex)
 
-    mockDb.execute.mockResolvedValue({ rowsAffected: 2 })
+    expect(mockVectorIndex.delete).not.toHaveBeenCalled()
+  })
+
+  it('should handle missing affectedRows gracefully', async () => {
+    const deleteConversations = {
+      where: vi.fn().mockResolvedValue([{}]),
+    }
+    const deleteAuditLogs = {
+      where: vi.fn().mockResolvedValue([{}]),
+    }
+    mockDb.delete
+      .mockReturnValueOnce(deleteConversations)
+      .mockReturnValueOnce(deleteAuditLogs)
     mockVectorIndex.query.mockResolvedValue([])
 
     const report = await cleanupExpiredData(mockDb, mockVectorIndex)
 
-    expect(report.auditLogsDeleted).toBe(2)
+    expect(report.conversationsDeleted).toBe(0)
+    expect(report.auditLogsDeleted).toBe(0)
   })
 })
