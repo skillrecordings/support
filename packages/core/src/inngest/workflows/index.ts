@@ -35,9 +35,11 @@ export {
   handleConversationSnoozed,
   handleSnoozeExpired,
 } from './hold-state'
+export { commentEscalationWorkflow } from './comment-escalation'
 
 import { classifyWorkflow } from './classify'
 import { commentCorrectionWorkflow } from './comment-correction'
+import { commentEscalationWorkflow } from './comment-escalation'
 import { draftWorkflow } from './draft-response'
 import { handleConversationSnoozed, handleSnoozeExpired } from './hold-state'
 import { executeApprovedAction } from './execute-approved-action'
@@ -78,6 +80,7 @@ import { validateWorkflow } from './validate-draft'
 export const allWorkflows: any[] = [
   classifyWorkflow,
   commentCorrectionWorkflow,
+  commentEscalationWorkflow,
   draftWorkflow,
   gatherWorkflow,
   handleConversationSnoozed,
