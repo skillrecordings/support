@@ -31,10 +31,15 @@ export {
   tagHealthCheckOnDemand,
 } from './tag-gardening'
 export { commentCorrectionWorkflow } from './comment-correction'
+export {
+  handleConversationSnoozed,
+  handleSnoozeExpired,
+} from './hold-state'
 
 import { classifyWorkflow } from './classify'
 import { commentCorrectionWorkflow } from './comment-correction'
 import { draftWorkflow } from './draft-response'
+import { handleConversationSnoozed, handleSnoozeExpired } from './hold-state'
 import { executeApprovedAction } from './execute-approved-action'
 import {
   findStaleTemplatesOnDemand,
@@ -75,8 +80,10 @@ export const allWorkflows: any[] = [
   commentCorrectionWorkflow,
   draftWorkflow,
   gatherWorkflow,
+  handleConversationSnoozed,
   handleEscalation,
   // DELETED: handleInboundMessage - replaced by event-driven workflows
+  handleSnoozeExpired,
   handleValidatedDraft,
   requestApproval,
   executeApprovedAction,
