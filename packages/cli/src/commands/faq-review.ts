@@ -20,7 +20,7 @@ import {
   getPendingCandidates,
   getQueueStats,
   rejectCandidate,
-} from '@skillrecordings/core/faq'
+} from '@skillrecordings/core/faq/review'
 import type { Command } from 'commander'
 
 /**
