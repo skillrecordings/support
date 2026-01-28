@@ -291,9 +291,7 @@ export type MemoryOutcomeRecordedEvent = {
   }
 }
 
-// ============================================================================
 // Pipeline Events (event-driven workflow chain)
-// ============================================================================
 
 /** Event emitted after message classification */
 export const SUPPORT_CLASSIFIED = 'support/inbound.classified' as const
