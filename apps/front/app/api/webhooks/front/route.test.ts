@@ -65,11 +65,11 @@ describe('Front Webhook Handler', () => {
   describe('comment events', () => {
     it('handles conversation.comment.created event and dispatches to Inngest', async () => {
       const commentPayload = {
-        type: 'comment',
+        type: 'new_comment_added',
         authorization: { id: 'cmp_test' },
         payload: {
           id: 'evt_comment123',
-          type: 'comment',
+          type: 'new_comment_added',
           emitted_at: 1700000000,
           conversation: {
             id: 'cnv_abc123',
@@ -79,7 +79,7 @@ describe('Front Webhook Handler', () => {
             },
           },
           target: {
-            _meta: { type: 'comment' },
+            _meta: { type: 'new_comment_added' },
             data: {
               id: 'com_xyz789',
               body: '<p>This is a test comment</p>',
@@ -135,11 +135,11 @@ describe('Front Webhook Handler', () => {
       vi.mocked(getAppByInboxId).mockResolvedValue(null)
 
       const commentPayload = {
-        type: 'comment',
+        type: 'new_comment_added',
         payload: {
           conversation: { id: 'cnv_abc123' },
           target: {
-            _meta: { type: 'comment' },
+            _meta: { type: 'new_comment_added' },
             data: {
               id: 'com_xyz789',
               body: 'Test comment',
@@ -164,11 +164,11 @@ describe('Front Webhook Handler', () => {
 
     it('handles comment events without author info gracefully', async () => {
       const commentPayload = {
-        type: 'comment',
+        type: 'new_comment_added',
         payload: {
           conversation: { id: 'cnv_abc123' },
           target: {
-            _meta: { type: 'comment' },
+            _meta: { type: 'new_comment_added' },
             data: {
               id: 'com_xyz789',
               body: 'Anonymous comment',
@@ -200,11 +200,11 @@ describe('Front Webhook Handler', () => {
 
     it('handles comment events without comment ID', async () => {
       const commentPayload = {
-        type: 'comment',
+        type: 'new_comment_added',
         payload: {
           conversation: { id: 'cnv_abc123' },
           target: {
-            _meta: { type: 'comment' },
+            _meta: { type: 'new_comment_added' },
             data: {
               // Missing id
               body: 'Test comment',
@@ -296,7 +296,7 @@ describe('Front Webhook Handler', () => {
         error: 'Invalid signature',
       })
 
-      const payload = { type: 'comment', payload: {} }
+      const payload = { type: 'new_comment_added', payload: {} }
       const response = await POST(createMockRequest(payload) as any)
       const json = await response.json()
 
@@ -420,11 +420,11 @@ describe('Front Webhook Handler', () => {
   describe('snooze_expired events', () => {
     it('handles snooze_expired event and dispatches to Inngest', async () => {
       const expiredPayload = {
-        type: 'snooze_expired',
+        type: 'conversation_snooze_expired',
         authorization: { id: 'cmp_test' },
         payload: {
           id: 'evt_expired123',
-          type: 'snooze_expired',
+          type: 'conversation_snooze_expired',
           emitted_at: 1700086400,
           conversation: {
             id: 'cnv_abc123',
@@ -465,7 +465,7 @@ describe('Front Webhook Handler', () => {
       vi.mocked(getAppByInboxId).mockResolvedValue(null)
 
       const expiredPayload = {
-        type: 'snooze_expired',
+        type: 'conversation_snooze_expired',
         payload: {
           emitted_at: 1700086400,
           conversation: { id: 'cnv_abc123' },
@@ -487,7 +487,7 @@ describe('Front Webhook Handler', () => {
 
     it('handles snooze_expired without emitted_at (uses current time)', async () => {
       const expiredPayload = {
-        type: 'snooze_expired',
+        type: 'conversation_snooze_expired',
         payload: {
           conversation: { id: 'cnv_abc123' },
           source: {
