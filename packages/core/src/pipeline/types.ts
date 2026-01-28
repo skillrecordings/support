@@ -526,6 +526,8 @@ export interface TagOutput {
   error?: string
   /** Duration of the operation in ms */
   durationMs?: number
+  /** Whether the tag was recovered from archived state */
+  recovered?: boolean
 }
 
 /**
