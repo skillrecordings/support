@@ -27,10 +27,20 @@ export interface ProductSource {
   format: IngestFormat
   defaultSource?: KnowledgeSource
   defaultCategory?: KnowledgeCategory
+  /** URLs to fetch FAQ content from */
+  sourceUrls?: string[]
+  /** File paths for local content (relative to project root) */
+  sourcePaths?: string[]
+  /** Whether this source is enabled for sync */
+  enabled?: boolean
 }
 
 /**
  * Known product source configurations
+ *
+ * Source URLs point to raw FAQ content endpoints or pages.
+ * For MDX/TSX: expects raw file content or GitHub raw URLs
+ * For HTML: expects rendered FAQ pages to scrape
  */
 export const PRODUCT_SOURCES: Record<string, ProductSource> = {
   'total-typescript': {
@@ -38,30 +48,46 @@ export const PRODUCT_SOURCES: Record<string, ProductSource> = {
     format: 'mdx',
     defaultSource: 'faq',
     defaultCategory: 'content',
+    sourceUrls: [
+      'https://raw.githubusercontent.com/skillrecordings/products/main/apps/total-typescript/src/content/faq.mdx',
+    ],
+    enabled: true,
   },
   'epic-react': {
     appId: 'epic-react',
     format: 'tsx',
     defaultSource: 'faq',
     defaultCategory: 'content',
+    sourceUrls: [
+      'https://raw.githubusercontent.com/skillrecordings/products/main/apps/epic-react/src/pages/faq.tsx',
+    ],
+    enabled: true,
   },
   'epic-web': {
     appId: 'epic-web',
     format: 'tsx',
     defaultSource: 'faq',
     defaultCategory: 'content',
+    sourceUrls: [
+      'https://raw.githubusercontent.com/skillrecordings/products/main/apps/epic-web/src/pages/faq.tsx',
+    ],
+    enabled: true,
   },
   'ai-hero': {
     appId: 'ai-hero',
     format: 'database',
     defaultSource: 'faq',
     defaultCategory: 'content',
+    // AI Hero uses database-backed FAQs, fetched via API
+    enabled: false,
   },
   'testing-accessibility': {
     appId: 'testing-accessibility',
     format: 'html',
     defaultSource: 'docs',
     defaultCategory: 'technical',
+    sourceUrls: ['https://testingaccessibility.com/faq'],
+    enabled: true,
   },
 }
 
