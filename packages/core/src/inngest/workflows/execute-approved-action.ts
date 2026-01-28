@@ -7,6 +7,11 @@ import {
 } from '@skillrecordings/database'
 import { createFrontClient as createFrontSdkClient } from '@skillrecordings/front-sdk'
 import { IntegrationClient } from '@skillrecordings/sdk/client'
+import {
+  type DraftTrackingData,
+  embedDraftId,
+  storeDraftTracking,
+} from '../../draft'
 import { createFrontClient } from '../../front'
 import {
   initializeAxiom,
@@ -176,9 +181,12 @@ export const executeApprovedAction = inngest.createFunction(
           }
         }
 
+        // Embed action ID in draft content for RL loop correlation
+        const contentWithTracking = embedDraftId(response, actionId)
+
         const draft = await front.createDraft(
           conversationId,
-          response,
+          contentWithTracking,
           channelId
         )
 
@@ -200,6 +208,57 @@ export const executeApprovedAction = inngest.createFunction(
           } catch {
             // Non-fatal - continue even if comment fails
           }
+        }
+
+        // Store draft tracking data for RL loop correlation
+        // Extract classification metadata for tracking
+        const trackingParams = action.parameters as {
+          category?: string
+          confidence?: number
+          autoApproved?: boolean
+          context?: {
+            category?: string
+            customerEmail?: string
+            confidence?: number
+          }
+        }
+        const trackingData: DraftTrackingData = {
+          actionId,
+          conversationId,
+          draftId: draft.id,
+          appId: action.app_id ?? 'unknown',
+          category:
+            trackingParams.category ??
+            trackingParams.context?.category ??
+            'unknown',
+          confidence:
+            trackingParams.confidence ??
+            trackingParams.context?.confidence ??
+            0,
+          autoApproved: approvedBy === 'auto',
+          customerEmail: trackingParams.context?.customerEmail,
+          createdAt: new Date().toISOString(),
+        }
+
+        try {
+          await storeDraftTracking(actionId, trackingData)
+          await log('debug', 'draft tracking stored', {
+            workflow: 'execute-approved-action',
+            step: 'execute-action',
+            actionId,
+            draftId: draft.id,
+          })
+        } catch (trackingError) {
+          // Non-fatal - don't fail draft creation if tracking storage fails
+          await log('warn', 'failed to store draft tracking', {
+            workflow: 'execute-approved-action',
+            step: 'execute-action',
+            actionId,
+            error:
+              trackingError instanceof Error
+                ? trackingError.message
+                : 'Unknown error',
+          })
         }
 
         const durationMs = Date.now() - stepStartTime
