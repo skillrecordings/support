@@ -3,9 +3,9 @@ import { PaginatedResponseSchema } from './common'
 
 /**
  * Tag highlight color options
- * Used to visually distinguish tags in Front UI
+ * Known colors in Front UI (not exhaustive - Front may add more)
  */
-export const TagHighlightSchema = z.enum([
+export const KnownTagHighlights = [
   'black',
   'grey',
   'pink',
@@ -16,7 +16,12 @@ export const TagHighlightSchema = z.enum([
   'teal',
   'blue',
   'purple',
-])
+] as const
+
+/**
+ * Tag highlight schema - accepts any string since Front may add new colors
+ */
+export const TagHighlightSchema = z.string()
 
 /**
  * Tag schema for Front API
@@ -28,7 +33,7 @@ export const TagSchema = z.object({
     related: z.object({
       conversations: z.string(),
       owner: z.string(),
-      children: z.string().optional(),
+      children: z.string().nullish(),
     }),
   }),
   id: z.string(),
