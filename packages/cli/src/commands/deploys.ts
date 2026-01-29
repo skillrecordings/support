@@ -10,7 +10,7 @@ const APPS: Record<string, { vercel: string; description: string }> = {
     description: 'Front webhook handler (main support pipeline)',
   },
   slack: {
-    vercel: 'slack',
+    vercel: 'skill-support-agent-slack',
     description: 'Slack interactions (approvals, notifications)',
   },
 }
