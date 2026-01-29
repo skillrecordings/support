@@ -49,7 +49,8 @@ export const PRODUCT_SOURCES: Record<string, ProductSource> = {
     defaultSource: 'faq',
     defaultCategory: 'content',
     sourceUrls: [
-      'https://raw.githubusercontent.com/skillrecordings/products/main/apps/total-typescript/src/content/faq.mdx',
+      // Local file path - faster and always available
+      'file:///home/joel/Code/skillrecordings/products/apps/total-typescript/src/pages/faq.mdx',
     ],
     enabled: true,
   },
@@ -75,11 +76,14 @@ export const PRODUCT_SOURCES: Record<string, ProductSource> = {
   },
   'ai-hero': {
     appId: 'ai-hero',
-    format: 'database',
+    format: 'mdx',
     defaultSource: 'faq',
     defaultCategory: 'content',
-    // AI Hero uses database-backed FAQs, fetched via API
-    enabled: false,
+    sourceUrls: [
+      // Local file extracted from AI Hero database
+      'file:///home/joel/Code/skillrecordings/support/data/kb/ai-hero-faq.mdx',
+    ],
+    enabled: true,
   },
   'testing-accessibility': {
     appId: 'testing-accessibility',

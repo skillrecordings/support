@@ -35,6 +35,13 @@ function hashContent(content: string): string {
  * Fetch content from a URL
  */
 async function fetchContent(url: string): Promise<string> {
+  // Handle local file:// URLs
+  if (url.startsWith('file://')) {
+    const fs = await import('node:fs/promises')
+    const filePath = url.replace('file://', '')
+    return fs.readFile(filePath, 'utf-8')
+  }
+  
   const response = await fetch(url)
   if (!response.ok) {
     throw new Error(
