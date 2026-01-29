@@ -23,20 +23,24 @@ import * as duckdb from 'duckdb'
 
 const DB_PATH = path.join(process.env.HOME || '~', 'skill/data/front-cache.db')
 const FRONT_API_BASE = 'https://api2.frontapp.com'
-const REQUEST_DELAY_MS = 1000 // Base delay between requests (conservative for rate limits)
+const REQUEST_DELAY_MS = 1000 // Base delay between sequential requests
 const MAX_RETRIES = 5
 
-// Rate limiting configuration (Front limit: 120 req/min, we're conservative)
-const MAX_CONCURRENT_REQUESTS = 2 // Conservative for Front rate limits
-const MIN_REQUEST_INTERVAL_MS = 1000 // Minimum 1s between any two requests
+// Rate limiting configuration - VERY CONSERVATIVE
+// Front limit: 120 req/min, but we target ~40 req/min to be safe
+const MAX_CONCURRENT_REQUESTS = 1 // Sequential to avoid burst rate limits
+const MIN_REQUEST_INTERVAL_MS = 700 // ~85 rpm, safely under 100 rpm Pro limit
+const MIN_429_BACKOFF_MS = 60000 // 60 second minimum backoff on rate limit
+const REQUESTS_PER_MINUTE_LIMIT = 40 // Stay well under 120
 
 // ============================================================================
-// Rate Limiter - Conservative Parallel Request Management
+// Rate Limiter - VERY Conservative Parallel Request Management
 // ============================================================================
 
 class RateLimiter {
   private activeRequests = 0
   private lastRequestTime = 0
+  private requestTimestamps: number[] = [] // Track requests in last minute
   private readonly queue: Array<{
     resolve: () => void
     reject: (error: Error) => void
@@ -44,7 +48,8 @@ class RateLimiter {
 
   constructor(
     private maxConcurrent: number = MAX_CONCURRENT_REQUESTS,
-    private minInterval: number = MIN_REQUEST_INTERVAL_MS
+    private minInterval: number = MIN_REQUEST_INTERVAL_MS,
+    private maxPerMinute: number = REQUESTS_PER_MINUTE_LIMIT
   ) {}
 
   /**
@@ -52,6 +57,17 @@ class RateLimiter {
    */
   getActiveCount(): number {
     return this.activeRequests
+  }
+
+  /**
+   * Get requests made in the last minute
+   */
+  getRequestsLastMinute(): number {
+    const oneMinuteAgo = Date.now() - 60000
+    this.requestTimestamps = this.requestTimestamps.filter(
+      (t) => t > oneMinuteAgo
+    )
+    return this.requestTimestamps.length
   }
 
   /**
@@ -65,6 +81,19 @@ class RateLimiter {
       })
     }
 
+    // Check requests per minute limit
+    while (this.getRequestsLastMinute() >= this.maxPerMinute) {
+      const oldestInWindow = this.requestTimestamps[0]
+      if (oldestInWindow === undefined) break // No timestamps to wait on
+      const waitTime = oldestInWindow + 60000 - Date.now() + 100 // Wait until oldest expires + buffer
+      if (waitTime > 0) {
+        console.log(
+          `[${new Date().toISOString()}] ⏸️  Rate limit: ${this.getRequestsLastMinute()}/${this.maxPerMinute} req/min. Waiting ${(waitTime / 1000).toFixed(1)}s...`
+        )
+        await sleep(waitTime)
+      }
+    }
+
     // Enforce minimum interval between requests
     const now = Date.now()
     const elapsed = now - this.lastRequestTime
@@ -74,6 +103,7 @@ class RateLimiter {
 
     this.activeRequests++
     this.lastRequestTime = Date.now()
+    this.requestTimestamps.push(Date.now())
   }
 
   /**
@@ -199,8 +229,9 @@ function logRateLimit(waitMs: number, attempt: number): void {
 }
 
 function logConcurrent(action: string, count: number): void {
+  const rpm = rateLimiter.getRequestsLastMinute()
   console.log(
-    `[${timestamp()}] 🔄 ${action} [concurrent: ${count}/${MAX_CONCURRENT_REQUESTS}]`
+    `[${timestamp()}] 🔄 ${action} [concurrent: ${count}/${MAX_CONCURRENT_REQUESTS}] [rpm: ${rpm}/${REQUESTS_PER_MINUTE_LIMIT}]`
   )
 }
 
@@ -307,10 +338,10 @@ async function fetchWithRetry<T>(
         throw new Error(`Rate limited after ${MAX_RETRIES} attempts`)
       }
       const retryAfter = response.headers.get('Retry-After')
-      // More aggressive backoff for 429s
-      const waitMs = retryAfter
-        ? parseInt(retryAfter, 10) * 1000
-        : Math.min(2000 * Math.pow(2, attempt), 120000) // Start at 2s, max 2min
+      // VERY conservative backoff: 60s minimum, respect Retry-After if higher
+      const retryAfterMs = retryAfter ? parseInt(retryAfter, 10) * 1000 : 0
+      const exponentialMs = MIN_429_BACKOFF_MS * Math.pow(1.5, attempt - 1) // 60s, 90s, 135s...
+      const waitMs = Math.max(MIN_429_BACKOFF_MS, retryAfterMs, exponentialMs)
 
       logRateLimit(waitMs, attempt)
       await sleep(waitMs)
