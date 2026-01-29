@@ -14,6 +14,7 @@ import {
 } from '@skillrecordings/core/front'
 import { createFrontClient as createSdkClient } from '@skillrecordings/front-sdk'
 import type { Command } from 'commander'
+import { registerCacheCommand } from '../front-cache'
 import { registerPullCommand } from './pull-conversations'
 import { registerTagCommands } from './tags'
 
@@ -334,4 +335,7 @@ export function registerFrontCommands(program: Command): void {
 
   // Register tag management commands
   registerTagCommands(front)
+
+  // Register cache command for DuckDB sync
+  registerCacheCommand(front)
 }
