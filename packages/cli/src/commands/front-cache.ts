@@ -15,7 +15,23 @@
 
 import * as path from 'path'
 import type { Command } from 'commander'
-import * as duckdb from 'duckdb'
+
+// DuckDB types - dynamically imported at runtime
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type DuckDB = typeof import('duckdb')
+let duckdb: DuckDB | null = null
+
+async function loadDuckDB(): Promise<DuckDB> {
+  if (duckdb) return duckdb
+  try {
+    duckdb = await import('duckdb')
+    return duckdb
+  } catch {
+    throw new Error(
+      'DuckDB is not installed. Run: bun add duckdb (native module, requires compilation)'
+    )
+  }
+}
 
 // ============================================================================
 // Configuration
@@ -245,17 +261,22 @@ function logThread(convId: string, parentId: string, depth: number): void {
 // Database Helper
 // ============================================================================
 
-function createDb(): duckdb.Database {
-  return new duckdb.Database(DB_PATH)
+// Type alias for DuckDB database instance
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type DatabaseInstance = any
+
+async function createDb(): Promise<DatabaseInstance> {
+  const duck = await loadDuckDB()
+  return new duck.Database(DB_PATH)
 }
 
 function runQuery(
-  db: duckdb.Database,
+  db: DatabaseInstance,
   sql: string,
   params: unknown[] = []
 ): Promise<void> {
   return new Promise((resolve, reject) => {
-    db.run(sql, ...params, (err) => {
+    db.run(sql, ...params, (err: Error | null) => {
       if (err) reject(err)
       else resolve()
     })
@@ -263,12 +284,12 @@ function runQuery(
 }
 
 function allQuery<T>(
-  db: duckdb.Database,
+  db: DatabaseInstance,
   sql: string,
   params: unknown[] = []
 ): Promise<T[]> {
   return new Promise((resolve, reject) => {
-    db.all(sql, ...params, (err, rows) => {
+    db.all(sql, ...params, (err: Error | null, rows: T[]) => {
       if (err) reject(err)
       else resolve(rows as T[])
     })
@@ -279,7 +300,7 @@ function allQuery<T>(
  * Run schema migrations for thread tracking
  * Adds parent_id and thread_depth columns if they don't exist
  */
-async function runMigrations(db: duckdb.Database): Promise<void> {
+async function runMigrations(db: DatabaseInstance): Promise<void> {
   log('🔧 Running schema migrations...')
 
   // Check if parent_id column exists
@@ -395,7 +416,7 @@ async function fetchAllInboxes(
 }
 
 async function syncInboxes(
-  db: duckdb.Database,
+  db: DatabaseInstance,
   inboxes: FrontInbox[]
 ): Promise<void> {
   log('💾 Syncing inboxes to database...')
@@ -449,7 +470,7 @@ function stripHtml(html: string): string {
 }
 
 async function insertConversation(
-  db: duckdb.Database,
+  db: DatabaseInstance,
   conv: FrontConversation,
   inboxId: string
 ): Promise<{ parentId: string | null; threadDepth: number }> {
@@ -515,7 +536,7 @@ async function insertConversation(
 }
 
 async function insertMessage(
-  db: duckdb.Database,
+  db: DatabaseInstance,
   msg: FrontMessage,
   conversationId: string
 ): Promise<void> {
@@ -543,7 +564,7 @@ async function insertMessage(
 }
 
 async function updateSyncState(
-  db: duckdb.Database,
+  db: DatabaseInstance,
   inboxId: string,
   totalSynced: number,
   lastConversationAt?: number
@@ -566,7 +587,7 @@ async function updateSyncState(
 }
 
 async function getSyncState(
-  db: duckdb.Database,
+  db: DatabaseInstance,
   inboxId: string
 ): Promise<SyncState | null> {
   const rows = await allQuery<SyncState>(
@@ -582,7 +603,7 @@ async function getSyncState(
 }
 
 async function updateInboxCount(
-  db: duckdb.Database,
+  db: DatabaseInstance,
   inboxId: string
 ): Promise<void> {
   const now = new Date().toISOString()
@@ -601,7 +622,7 @@ async function updateInboxCount(
 // ============================================================================
 
 async function syncInbox(
-  db: duckdb.Database,
+  db: DatabaseInstance,
   inbox: FrontInbox,
   headers: Record<string, string>,
   inboxIndex: number,
@@ -782,7 +803,7 @@ async function handleInit(options: CacheOptions): Promise<void> {
   log(`   Database: ${DB_PATH}`)
   log(`   Limit per inbox: ${options.limit || 'unlimited'}`)
 
-  const db = createDb()
+  const db = await createDb()
   const headers = getHeaders()
 
   try {
@@ -842,7 +863,7 @@ async function handleInit(options: CacheOptions): Promise<void> {
     log(`   DB Size:       ${dbStats[0]?.database_size || 'unknown'}`)
     log('='.repeat(60))
   } finally {
-    db.close()
+    db.close?.() || db.terminate?.() || true
   }
 }
 
@@ -851,7 +872,7 @@ async function handleResume(options: CacheOptions): Promise<void> {
   log('🔄 Resuming interrupted import')
   log(`   Database: ${DB_PATH}`)
 
-  const db = createDb()
+  const db = await createDb()
   const headers = getHeaders()
 
   try {
@@ -909,7 +930,7 @@ async function handleResume(options: CacheOptions): Promise<void> {
     log(`   Threads:       ${totalThreads}`)
     log(`   Messages:      ${totalMessages}`)
   } finally {
-    db.close()
+    db.close?.() || db.terminate?.() || true
   }
 }
 
@@ -919,7 +940,7 @@ async function handleSync(options: CacheOptions): Promise<void> {
   log(`   Database: ${DB_PATH}`)
   log('   Fetching only conversations updated since last sync')
 
-  const db = createDb()
+  const db = await createDb()
   const headers = getHeaders()
 
   try {
@@ -1072,7 +1093,7 @@ async function handleSync(options: CacheOptions): Promise<void> {
     log(`   Messages:      ${totalMessages}`)
     log(`   Threads:       ${totalThreads}`)
   } finally {
-    db.close()
+    db.close?.() || db.terminate?.() || true
   }
 }
 
@@ -1081,7 +1102,7 @@ async function handleStats(options: CacheOptions): Promise<void> {
   log(`   Database: ${DB_PATH}`)
   log('')
 
-  const db = createDb()
+  const db = await createDb()
 
   try {
     // Get DB size
@@ -1204,7 +1225,7 @@ async function handleStats(options: CacheOptions): Promise<void> {
       )
     }
   } finally {
-    db.close()
+    db.close?.() || db.terminate?.() || true
   }
 }
 
