@@ -18,6 +18,7 @@ import {
   eq,
   getDb,
   gte,
+  or,
 } from '@skillrecordings/database'
 import type { Command } from 'commander'
 
@@ -85,7 +86,13 @@ async function listResponses(options: {
 
   try {
     // Build query conditions
-    const conditions = [eq(ActionsTable.type, 'draft-response')]
+    // Support both old 'draft-response' and new 'send-draft' action types
+    const conditions = [
+      or(
+        eq(ActionsTable.type, 'send-draft'),
+        eq(ActionsTable.type, 'draft-response')
+      ),
+    ]
 
     if (options.app) {
       // Lookup app by slug
@@ -406,7 +413,13 @@ async function exportResponses(options: {
 
   try {
     // Build query conditions
-    const conditions = [eq(ActionsTable.type, 'draft-response')]
+    // Support both old 'draft-response' and new 'send-draft' action types
+    const conditions = [
+      or(
+        eq(ActionsTable.type, 'send-draft'),
+        eq(ActionsTable.type, 'draft-response')
+      ),
+    ]
 
     if (options.app) {
       const appResults = await db
