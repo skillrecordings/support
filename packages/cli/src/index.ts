@@ -2,6 +2,7 @@
 // Note: env is loaded via preload.ts before this file runs
 import { Command } from 'commander'
 import { registerAxiomCommands } from './commands/axiom/index'
+import { registerDbStatusCommand } from './commands/db-status'
 import { registerDatasetCommands } from './commands/build-dataset'
 import { registerDeployCommands } from './commands/deploys'
 import { runEval } from './commands/eval'
@@ -143,6 +144,7 @@ registerKbCommands(program)
 
 // Register FAQ mining commands (mine FAQ candidates from conversations)
 registerFaqMineCommands(program)
+registerDbStatusCommand(program)
 
 // Register FAQ review commands (human curation of FAQ candidates)
 registerFaqReviewCommands(program)

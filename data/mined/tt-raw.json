@@ -1,0 +1,273 @@
+{
+  "generatedAt": "2026-01-29T15:54:20.843Z",
+  "options": {
+    "appId": "total-typescript",
+    "since": "90d",
+    "unchangedOnly": false
+  },
+  "stats": {
+    "total": 26
+  },
+  "conversations": [
+    {
+      "conversationId": "cnv_1jdu7nz9",
+      "question": "Hi\n\nPosted on Discord about this problem a couple of days ago. Would be great if it\ncould be fixed.\nhttps://discord.com/channels/997886693233393714/999591018380935198/1465670363001389079\n[https://discord.com/channels/997886693233393714/999591018380935198/1465670363001389079]\n\nRegards\nBonsak\n",
+      "answer": "I don't have access to Discord messages. Can you describe the problem you're experiencing? That way I can either help directly or point you to the right person to fix it.",
+      "subject": "Re: 👋  Feedback from bonsak@gmail.com about Total TypeScript",
+      "tags": [
+        "technical"
+      ],
+      "wasUnchanged": false,
+      "resolvedAt": "2026-01-29T15:54:07.841Z"
+    },
+    {
+      "conversationId": "cnv_1jdu79lx",
+      "question": "\nHello Matt,\n\nEarlier I was able to see the terminal and check the tests, but now the terminal isn't showing up at the bottom of the editor. I've tried switching browser from Brave to Chrome and resizing on laptop, monitors etc. but nothing worked.\nAttached screenshot above.\n\nCan you please help fix this or if it's only an issue on my end, let me know how to get this fixed.\n\nRegards,\nYatin\n",
+      "answer": "Hi Yatin,\nThe terminal not showing in the editor is usually a display issue. A few things to try:\n\nClear your browser cache and refresh the page\n\nCheck if the terminal panel is collapsed - look for a divider/handle at the bottom of the editor you can drag up to expand it\n\nTry incognito/private browsing mode to rule out browser extensions interfering\n\nIf none of that works, let me know which specific problem page you're on and I'll investigate further.",
+      "subject": "Re: Editor issue on Problems page",
+      "tags": [
+        "technical"
+      ],
+      "wasUnchanged": false,
+      "resolvedAt": "2026-01-29T15:54:08.147Z"
+    },
+    {
+      "conversationId": "cnv_1jdu5spx",
+      "question": "Hi Matt,\n\nI would like to transfer my Total Typescript account to a new email address: iamyatin@gmail.com.\n\nThanks,\nYatin\n",
+      "answer": "I can process that transfer for you. Just confirming the details:\nCurrent email: yatin@getstake.com\nNew email: iamyatin@gmail.com\nIs there a specific reason for the transfer, or can I go ahead and process this?",
+      "subject": "Re: Transfer of TS to another email",
+      "tags": [
+        "transfer"
+      ],
+      "wasUnchanged": false,
+      "resolvedAt": "2026-01-29T15:54:08.437Z"
+    },
+    {
+      "conversationId": "cnv_1jds42jp",
+      "question": "Hi Matt and team,\n\nI purchased the TypeScript Pro Essentials course yesterday and wanted to\nrequest a refund.\n\nI’m a fan of Matt’s YouTube content and guides, so I was hoping this course\nwould be a great supplement. However, after completing the first section, I\nrealized the material isn't quite the right fit for what I need at the\nmoment.\n\nThank you very much for your consideration.\n\nBest,\nAlex Zelinsky\n",
+      "answer": "Hi Alex,\nYour purchase was on January 27th, so you're well within the 30-day refund window. I'll process this refund for you now. You should see it back in your account within 3-5 business days depending on your bank.\nYou'll get a confirmation email once it's processed. No problem at all on the course not being the right fit.",
+      "subject": "Re: Refund Request for TypeScript Pro Essentials",
+      "tags": [
+        "refund"
+      ],
+      "wasUnchanged": false,
+      "resolvedAt": "2026-01-29T15:54:09.117Z"
+    },
+    {
+      "conversationId": "cnv_1jds7zvp",
+      "question": "Hi team,\n\nThe terminal disappeared on the browser and I can't run the exercises. Can\nyou please help here?\n\nRegards,\nArpan\n",
+      "answer": "Hi Arpan,\nThe browser terminal issue usually clears with a hard refresh. Try Ctrl+Shift+R (or Cmd+Shift+R on Mac) to clear your cache and reload the page.\nIf that doesn't work, let me know which exercise you're trying to run and I'll dig into what might be blocking it.",
+      "subject": "Fwd: Can't run the exercises on browser",
+      "tags": [
+        "technical"
+      ],
+      "wasUnchanged": false,
+      "resolvedAt": "2026-01-29T15:54:09.446Z"
+    },
+    {
+      "conversationId": "cnv_1jdnbxd1",
+      "question": "Hi, I bought total typescript on Oct 18 2025 and I don’t have access to it\nanymore after logging in with GitHub. Could you please restore the access?\nThanks!\n",
+      "answer": "Your license is currently under girardierthomas@gmail.com. I can transfer it to girardier.thomas@gmail.com for you.\nJust confirm that's what you want and I'll process it.",
+      "subject": "Re: 👋 Feedback from girardier.thomas@gmail.com about Total TypeScript",
+      "tags": [
+        "transfer"
+      ],
+      "wasUnchanged": false,
+      "resolvedAt": "2026-01-29T15:54:09.999Z"
+    },
+    {
+      "conversationId": "cnv_1jdiz1et",
+      "question": "Hello!\n\nI am just getting started and trying to understand what might be wrong, i'm\nin the first lesson in the directory\nsrc/010-typescript-in-the-build-process/011-compile-typescript-to-javascript.solution.\n\nHere are my versions:\n\npnpm 8.15.6\nnode 24.13.0\ntsc 5.9.3\n\nWhen I try to open the file in the browser, my console says:\nexample.js:5 Uncaught SyntaxError: Unexpected token 'export' example.js:5\n\nI'd like to make sure I get this working so I don't continue on with some\nweird version issue or tsconfig issue. I think I've followed along as the\nvideos indicate, so I'm not sure if I've missed a step?\n\nCorey\n",
+      "answer": "You're right that we should be monitoring Discord more closely. I apologize for the slow response on your question.\nGlad you got past the module system issue. To help us improve: what ended up fixing it for you? That way we can either update the lesson or catch this sooner for other students.",
+      "subject": "Re: pro-essentials-workshop - Issue with lesson 011",
+      "tags": [],
+      "wasUnchanged": false,
+      "resolvedAt": "2026-01-29T15:54:10.407Z"
+    },
+    {
+      "conversationId": "cnv_1jdn7nhh",
+      "question": "Hi Matt,\nI think I do not need this course right now, can I get refund of this and could\nyou please unenroll me from this course.\n",
+      "answer": "Hey,\n\n\nI've gone ahead with this refund. It can take 5-10 days for the funds to return.\n\n\nBest,",
+      "subject": "Re: 😭  Feedback from Nishant Kumar Mohapatra about Total TypeScript",
+      "tags": [],
+      "wasUnchanged": false,
+      "resolvedAt": "2026-01-29T15:54:10.885Z"
+    },
+    {
+      "conversationId": "cnv_1jdk6usl",
+      "question": "I’m reaching out to request a refund for a recent purchase I made. After\nreviewing it, I realized it was an impulse purchase and not something I need at\nthis time.\n",
+      "answer": "Hello, \n\n\nSorry about the wait! We've initiated a refund. It can take 5-10 days for the banks to reconcile and return the money to your account.\n\n\nBest,",
+      "subject": "Re: 😭  Feedback from Dewin Pena about Total TypeScript",
+      "tags": [],
+      "wasUnchanged": false,
+      "resolvedAt": "2026-01-29T15:54:11.280Z"
+    },
+    {
+      "conversationId": "cnv_1jdezmlh",
+      "question": "Hi there\nI have purchased a while back and I am trying to access the course. Though the email I used to purchase the course is no longer available. \n\nI could find the email I got at the time that shows I purchased the course which I will attach a screenshot for.\n\nCan you guys please change the email address to aab@arvind.dk <mailto:aab@arvind.dk>? \nI’d appreciate it.\n\nBest regards,\nArvind\n\n￼\n\n",
+      "answer": "Hey,\n\n\nCould you request a new login link and let me know if the issue Is still on going?",
+      "subject": "Re: Help access my account",
+      "tags": [],
+      "wasUnchanged": false,
+      "resolvedAt": "2026-01-29T15:54:11.632Z"
+    },
+    {
+      "conversationId": "cnv_1jdixwrp",
+      "question": "Hi!\n\nI was planning to take the Total Typescript Pro course using my company's\nlearning and development budget. Is it true that the price increased from\n$397.50 to $750 in the past few days? I got the former amount approved from\nthe company budget and was wondering if there's any promo code I could use.\n\nThanks!\n\n-- \n\nAmy Li (she/they)\n\nSoftware Engineer\n*amy.li@everlaw.com <amy.li@everlaw.com>*\n",
+      "answer": "Hey Amy,\n\n\nThe price has been $750, but we recently had a long winter/holiday sale. \n\n\nSorry, I don't any discount codes to give out.\n\n\nBest,",
+      "subject": "Re: Was there a price increase recently?",
+      "tags": [],
+      "wasUnchanged": false,
+      "resolvedAt": "2026-01-29T15:54:11.988Z"
+    },
+    {
+      "conversationId": "cnv_1jdirqud",
+      "question": "Hello,\n\nI got my company to approve buying the course, when it was discounted a few days\nago. Unfortunately, they won’t accept to refund me for the full price. Could it\nbe possible to have a special coupon that could cut the price back to the\ndiscounted one ? They approved the 500€ formation but not 800€ :(\n\nWould be much appreciated\n\nLéo\n",
+      "answer": "Hey Léo,\n\n\nSorry, I don't have any discount codes to give. \n\n\nLet me know If you need help with anything else.\n\n\nBest,",
+      "subject": "Re: 👋  Feedback from ljayame@gmail.com about Total TypeScript",
+      "tags": [
+        "discount request"
+      ],
+      "wasUnchanged": false,
+      "resolvedAt": "2026-01-29T15:54:12.330Z"
+    },
+    {
+      "conversationId": "cnv_1jcyx1wl",
+      "question": "Please delete my account as I dont see such options thank you in advance\n",
+      "answer": "This is an automated reply to let you know that your email has been received and we will get back to you as quickly as possible. We work 9-5 Pacific Monday through Friday and take most \"bank holidays\" off. \n\n\nYou can find community support in the Total TypeScript Discord channel: \n\n\nhttps://www.totaltypescript.com/discord\n\n\nIf you've got code questions/comments/opinions, Discord is the best channel!\n\n\n--\n\n\nIf you've purchased Total TypeScript and are looking for an invoice or receipt, you can find that here:\n\n\nhttps://www.totaltypescript.com/purchases\n\n\n--\n\n\nInvoices are customizable and you can enter company/tax information there. The generated PDFs are also fully editable so please feel free to adjust them to suit your specific needs.\n\n\nThe Total TypeScript FAQ has answers to many common questions:\n\n\nhttps://www.totaltypescript.com/faq\n\n\n--\n\n\nWill you take 15 seconds share Total TypeScript? It really helps us get the word out. 🙏\n\n\n👉 Send a tweet about Total TypeScript! \n\n\n--\n\n\nIf you've got more context to share, or if any of the above helps and you don't need a reply, please let us know. We are always here to help\n\n\n-Total TypeScript 🧙‍♀️​",
+      "subject": "Re: 👋  Feedback from Jakub about Total TypeScript",
+      "tags": [
+        "delete account"
+      ],
+      "wasUnchanged": false,
+      "resolvedAt": "2026-01-29T15:54:12.650Z"
+    },
+    {
+      "conversationId": "cnv_1japkwrp",
+      "question": "I request for my account permanent deletion.\n",
+      "answer": "This is an automated reply to let you know that your email has been received and we will get back to you as quickly as possible. We work 9-5 Pacific Monday through Friday and take most \"bank holidays\" off. \n\n\nYou can find community support in the Total TypeScript Discord channel: \n\n\nhttps://www.totaltypescript.com/discord\n\n\nIf you've got code questions/comments/opinions, Discord is the best channel!\n\n\n--\n\n\nIf you've purchased Total TypeScript and are looking for an invoice or receipt, you can find that here:\n\n\nhttps://www.totaltypescript.com/purchases\n\n\n--\n\n\nInvoices are customizable and you can enter company/tax information there. The generated PDFs are also fully editable so please feel free to adjust them to suit your specific needs.\n\n\nThe Total TypeScript FAQ has answers to many common questions:\n\n\nhttps://www.totaltypescript.com/faq\n\n\n--\n\n\nWill you take 15 seconds share Total TypeScript? It really helps us get the word out. 🙏\n\n\n👉 Send a tweet about Total TypeScript! \n\n\n--\n\n\nIf you've got more context to share, or if any of the above helps and you don't need a reply, please let us know. We are always here to help\n\n\n-Total TypeScript 🧙‍♀️​",
+      "subject": "Re: 👋  Feedback from saipori@pm.me about Total TypeScript",
+      "tags": [
+        "delete account"
+      ],
+      "wasUnchanged": false,
+      "resolvedAt": "2026-01-29T15:54:13.908Z"
+    },
+    {
+      "conversationId": "cnv_qznbtjb",
+      "question": "Please delete my account and my data. I cannot find an option to do it myself\nfrom the account panel.\n",
+      "answer": "This is an automated reply to let you know that your email has been received and we will get back to you as quickly as possible. We work 9-5 Pacific Monday through Friday and take most \"bank holidays\" off. \n\n\nYou can find community support in the Total TypeScript Discord channel: \n\n\nhttps://www.totaltypescript.com/discord\n\n\nIf you've got code questions/comments/opinions, Discord is the best channel!\n\n\n--\n\n\nIf you've purchased Total TypeScript and are looking for an invoice or receipt, you can find that here:\n\n\nhttps://www.totaltypescript.com/purchases\n\n\n--\n\n\nInvoices are customizable and you can enter company/tax information there. The generated PDFs are also fully editable so please feel free to adjust them to suit your specific needs.\n\n\nThe Total TypeScript FAQ has answers to many common questions:\n\n\nhttps://www.totaltypescript.com/faq\n\n\n--\n\n\nWill you take 15 seconds share Total TypeScript? It really helps us get the word out. 🙏\n\n\n👉 Send a tweet about Total TypeScript! \n\n\n--\n\n\nIf you've got more context to share, or if any of the above helps and you don't need a reply, please let us know. We are always here to help\n\n\n-Total TypeScript 🧙‍♀️​",
+      "subject": "Re: 👋  Feedback from florian.kuc@gmail.com about Total TypeScript",
+      "tags": [
+        "delete account"
+      ],
+      "wasUnchanged": false,
+      "resolvedAt": "2026-01-29T15:54:14.204Z"
+    },
+    {
+      "conversationId": "cnv_1ja38yzp",
+      "question": "Please delete the account associated with my email: darrenctruong@gmail.com,\nas I no longer use this product.\n\nBest regards,\nDarren Truong\n",
+      "answer": "This is an automated reply to let you know that your email has been received and we will get back to you as quickly as possible. We work 9-5 Pacific Monday through Friday and take most \"bank holidays\" off. \n\n\nYou can find community support in the Total TypeScript Discord channel: \n\n\nhttps://www.totaltypescript.com/discord\n\n\nIf you've got code questions/comments/opinions, Discord is the best channel!\n\n\n--\n\n\nIf you've purchased Total TypeScript and are looking for an invoice or receipt, you can find that here:\n\n\nhttps://www.totaltypescript.com/purchases\n\n\n--\n\n\nInvoices are customizable and you can enter company/tax information there. The generated PDFs are also fully editable so please feel free to adjust them to suit your specific needs.\n\n\nThe Total TypeScript FAQ has answers to many common questions:\n\n\nhttps://www.totaltypescript.com/faq\n\n\n--\n\n\nWill you take 15 seconds share Total TypeScript? It really helps us get the word out. 🙏\n\n\n👉 Send a tweet about Total TypeScript! \n\n\n--\n\n\nIf you've got more context to share, or if any of the above helps and you don't need a reply, please let us know. We are always here to help\n\n\n-Total TypeScript 🧙‍♀️​",
+      "subject": "Re: Account Deletion Request",
+      "tags": [
+        "delete account"
+      ],
+      "wasUnchanged": false,
+      "resolvedAt": "2026-01-29T15:54:14.500Z"
+    },
+    {
+      "conversationId": "cnv_1jc744f9",
+      "question": "Hey,\n\nI would like to request my account be deactivated!\n",
+      "answer": "This is an automated reply to let you know that your email has been received and we will get back to you as quickly as possible. We work 9-5 Pacific Monday through Friday and take most \"bank holidays\" off. \n\n\nYou can find community support in the Total TypeScript Discord channel: \n\n\nhttps://www.totaltypescript.com/discord\n\n\nIf you've got code questions/comments/opinions, Discord is the best channel!\n\n\n--\n\n\nIf you've purchased Total TypeScript and are looking for an invoice or receipt, you can find that here:\n\n\nhttps://www.totaltypescript.com/purchases\n\n\n--\n\n\nInvoices are customizable and you can enter company/tax information there. The generated PDFs are also fully editable so please feel free to adjust them to suit your specific needs.\n\n\nThe Total TypeScript FAQ has answers to many common questions:\n\n\nhttps://www.totaltypescript.com/faq\n\n\n--\n\n\nWill you take 15 seconds share Total TypeScript? It really helps us get the word out. 🙏\n\n\n👉 Send a tweet about Total TypeScript! \n\n\n--\n\n\nIf you've got more context to share, or if any of the above helps and you don't need a reply, please let us know. We are always here to help\n\n\n-Total TypeScript 🧙‍♀️​",
+      "subject": "Re: Account Termination",
+      "tags": [
+        "delete account"
+      ],
+      "wasUnchanged": false,
+      "resolvedAt": "2026-01-29T15:54:14.812Z"
+    },
+    {
+      "conversationId": "cnv_1jdhoyxx",
+      "question": "Hi,\nDoes Total Typescript course support light mode?\n",
+      "answer": "Hello,\n\n\nThe site doesn't have any different light modes.\n\n\nLet me know if you have anymore questions!\n\n\nBest,",
+      "subject": "Re: 👋  Feedback from mail.gcs06@gmail.com about Total TypeScript",
+      "tags": [],
+      "wasUnchanged": false,
+      "resolvedAt": "2026-01-29T15:54:15.191Z"
+    },
+    {
+      "conversationId": "cnv_1jdes9ph",
+      "question": "Hello. I was able to get through maybe 10 of my courses but now when I attempt to load the video I get the below error. I’m using an up to date version of Chrome. Reloading does not help. I tried closing the webpage and reopening and that worked allowed me to play my next video but I again got this error. \nDylan Honeyman\n813-610-4591\n\n\n￼",
+      "answer": "Hey Dylan,\n\n\nIs this still an on going issue? Let us know. Sorry about the late response.\n\n\nBest,",
+      "subject": "Re: Total TypeScript: Email Question",
+      "tags": [
+        "playback issues"
+      ],
+      "wasUnchanged": false,
+      "resolvedAt": "2026-01-29T15:54:15.511Z"
+    },
+    {
+      "conversationId": "cnv_1jdsptid",
+      "question": "Hello\n\nWould it be possible to change the email on my account (this email address - michael.scott@zelim.com) to michaellaidlawscott96@gmail.com\n\nThank you\n\nMichael Scott\nSoftware Engineer\n\ne: michael.scott@zelim.co\nw: https://www.zelim.co<https://www.zelim.co/>\na: Codebase, Castle Terrace, Edinburgh, EH1 2EL\n\n[cid:e7d959ab-72a6-4677-a292-2bda97b560bd]<https://www.zelim.co>\n",
+      "answer": "I can process that email transfer for you. Just need one more thing: what's your reason for changing the email address? (This helps us keep our records accurate.)\nOnce you confirm, I'll update your account from michael.scott@zelim.com to michaellaidlawscott96@gmail.com.",
+      "subject": "Re: email transfer",
+      "tags": [],
+      "wasUnchanged": false,
+      "resolvedAt": "2026-01-29T15:54:16.183Z"
+    },
+    {
+      "conversationId": "cnv_1jdsks4l",
+      "question": "Hi Matt, do you have options for anyone who wants to be coached by you?\n",
+      "answer": "This is an automated reply to let you know that your email has been received and we will get back to you as quickly as possible. We work 9-5 Pacific Monday through Friday and take most \"bank holidays\" off. \n\n\nYou can find community support in the Total TypeScript Discord channel: \n\n\nhttps://www.totaltypescript.com/discord\n\n\nIf you've got code questions/comments/opinions, Discord is the best channel!\n\n\n--\n\n\nIf you've purchased Total TypeScript and are looking for an invoice or receipt, you can find that here:\n\n\nhttps://www.totaltypescript.com/purchases\n\n\n--\n\n\nInvoices are customizable and you can enter company/tax information there. The generated PDFs are also fully editable so please feel free to adjust them to suit your specific needs.\n\n\nThe Total TypeScript FAQ has answers to many common questions:\n\n\nhttps://www.totaltypescript.com/faq\n\n\n--\n\n\nWill you take 15 seconds share Total TypeScript? It really helps us get the word out. 🙏\n\n\n👉 Send a tweet about Total TypeScript! \n\n\n--\n\n\nIf you've got more context to share, or if any of the above helps and you don't need a reply, please let us know. We are always here to help\n\n\n-Total TypeScript 🧙‍♀️​",
+      "subject": "Re: Matt, enquiry",
+      "tags": [],
+      "wasUnchanged": false,
+      "resolvedAt": "2026-01-29T15:54:16.501Z"
+    },
+    {
+      "conversationId": "cnv_1jdshjl1",
+      "question": "Hello,\n\nI hope you’re doing well.\n\nI have an active Total TypeScript account that I personally no longer use.\nI understand from your policy that accounts and licenses normally aren’t\ntransferable, and I completely respect that.\n\nBefore letting it go unused, I just wanted to ask whether there’s *any*\npossibility of transferring the account to another person as a one-off\nexception, potentially for a small administrative fee if that helps.\n\nIf this isn’t something you support under any circumstances, no worries at\nall. I just wanted to check before giving up on it entirely.\n\nThanks for your time, and for the great TypeScript content you put out.\n\nBest regards,\n\nPontus Abrahamsson\n",
+      "answer": "Hi Pontus,\nThanks for asking. Account transfers aren't something we support, even as a one-off exception. The license is tied to your account and email.\nHowever, you have a couple of alternatives: you could gift the account by changing the email address to theirs (we'd process that as an email change), or they could purchase their own license. If cost is a concern for them, we occasionally run promotions.\nWhich option works better for your situation?",
+      "subject": "Re: Question about possible account transfer",
+      "tags": [],
+      "wasUnchanged": false,
+      "resolvedAt": "2026-01-29T15:54:17.109Z"
+    },
+    {
+      "conversationId": "cnv_1jdsgb8l",
+      "question": "Matt, you get early access to a new AI safety course for 2026.\n\n* Note: You are receiving this product update email because you have an active Educative account. If you wish to unsubscribe from product updates, you can do so anytime.\n\nMatt,\n\nA new AI course has been added to the catalog:\n\n- Responsible AI Engineering: Alignment, Safety, and Governance (https://learn.educative.io/e3t/Ctc/RG+113/cz5H404/VWrPtr2flplbW1XYMrH4sKtQ9W4sKGqD5JRVSJN4FBQMv3prCCW7Y8-PT6lZ3q0W62Nt393tC6jZW1xTD9D7L2tPpW719Gp72jvYJQW23fV7_6MKBSCW4vvB803Y8K5SW6kRQPG3713gnW7JKN7L3rZnwvW5n1p5H4BSSGZW4tr7sG4Gn0XsW4GCp4C7zCdVmW73019X9h6wGKW7JVPkQ3fLV_2W24fCRB2PvYlMW4xrlzH63c66hW3zdR-Y5_MmT5W3Vfj428jjFXlW3cdt8T2HWdPqVp-3653GtGC4W6CKTkM5KM2HXW7fT48C6_wvRTW3mJ7wS62GFrXW32wxkc2c_qJqVgfXrR3wfLP7N3S5FJmNLNgWW4_VrQ72LS5YzW59JFKW2Yf_4mddxSK804 )\n\nThis course was developed for learners hoping to understand the nuances of AI safety in 2026. Please enjoy and share your feedback.\n\n– The Educative Team\n\nApp Store (https://learn.educative.io/e3t/Ctc/RG+113/cz5H404/VWrPtr2flplbW1XYMrH4sKtQ9W4sKGqD5JRVSJN4FBQMv3prCCW7Y8-PT6lZ3nkN6qwtGVx5mlRW2n8_FX1JsWPTW18xN-X87fBYRW5HJytV31M3kTW2lgt6R41K-KFW6J-sx35ZRG74W29YVJr1rR4-yW8TSzNw4fQkNdW1vTKVh1FkSzPW5bzcD88Y7_NFW4vBJJF4pp3c2W58xWsf66t9nwW5tDhq418PcKMV9nfdf15_nqKW2_lYHk269N6wW5LGrf65Fdb_sW2YtS781mqyybW6DDmsM7X_6MXW16k3nM1pprCCW4Rzmg42C8r4jW8ybrdF4W33D0W6x4CXC8tlSm_N46CQh3C0KfHW3JQRNN8bgTcmVJh06P2QQpZZV2SP7z1Gw0-Gf3G7Gcb04 )\n\nGoogle Play (https://learn.educative.io/e3t/Ctc/RG+113/cz5H404/VWrPtr2flplbW1XYMrH4sKtQ9W4sKGqD5JRVSJN4FBQMP3prCCW8wLKSR6lZ3l7W8-Z1x63bvD5lW4jcxHQ3V4B64W2yw7vy2HQDbsW3XlZ0R1y2HM5W2W8rPM2MQypdW95Q2vx2PbP74W6DHNLS38lHPVW1-GTkR4Pz19ZW8K8q8492WqYfW3B_zNv2WLDlyW5dz8nB5lt19wW88G61B7DkmTDW87dDG1736FJkW4Q1z6n8YnZDVW94SW-j2YWR2gW3D2KD_7Tj3ZSMgCyYjKBnWRW6p_-WF8FmSbwW3tvD1Y2GLrcnVkm3k84LXGYCW82rQ_Z6q_YTnW2NFf1m21rFBfN48Ymf5JDn2HW6CvfxZ3GPGSMW7k5Ph110pXBqW7yBpWM47__f9W5Slzdg4l4PmYW1KcntV6FX1CRf5bHvg404 )\n\nEducative, 12280 NE District Way, Bellevue,WA, 98005 United States\n\nEmail Preferences (https://learn.educative.io/hs/preferences-center/en/page?data=W2nXS-N30h-MhW1NfWbT4fh5d3W3_GPF03BLFFtW4tlsgV1_5BQhW2TGwxn4r8j1NW256KPr2vPcBNW2qNjWp1V9x6qW2-sySD3z4c87W38rx7v3V_19rW24_-Qb3z8lpwW1QlF_G3BWQPSW3jpW6p3_XvQ-W4mtq7-38wJ3LW41yMcq3j7klwW3BYsgw2qC9f7W2RC1_J49P85mW2-rcJk3HbH4RW2Rtkr42YsGzcW2HH-GC3jsNZYW1LwQh83jfzQqW3R0KRX2YJHgtW4hvGTt2RLxQQW2zWV3W1SghwLW24TxF52CWCYqW4rfh-V3SB5tJW3b3Kcq3P4G7gW2zz5qP45FlyDW1Vtpjf2qNjF1W4thF3h2PwF-MW2FtWtZ348wNyW2HFttk2zYXPxW4cyWHH47RW2fW4rGNgL3yXrqHW49zXck2sJPszW3SyRYm1VqSjtW1XptLd49Dww8W23n8p54hdWDLW3W147k4fGD3sW3jx69Z2Tr49MW3C61L44rhPS_W4pFjQ52PnxFcW2WwR3L23p3DTW2HDdjY4hcDfrW30GyHn4rkTTlW3CfZV721ccs2W1Z8K5H2xytc6W1Sf1Sz3Y0wRYW2xws961Sh7xKW3d0D2n3H387CW2x-ksz36mvwLW3P0s6k3g2tjkW2PylRc382LhQW4tvqKv1L8kDrW3P7zmM41QrH6W2MDK5-2FLj7jf4mCVht04&_hsenc=p2ANqtz--QtU94Usi860Qp2NlykJu3S3qtEWcVDVtxdxyAmH-nq-9oCoAKjQcuhrSjvq90Ln2N07a5AGXJoTfZKyHSUNxuea1WSg&_hsmi=400733308 )",
+      "answer": "This is an automated reply to let you know that your email has been received and we will get back to you as quickly as possible. We work 9-5 Pacific Monday through Friday and take most \"bank holidays\" off. \n\n\nYou can find community support in the Total TypeScript Discord channel: \n\n\nhttps://www.totaltypescript.com/discord\n\n\nIf you've got code questions/comments/opinions, Discord is the best channel!\n\n\n--\n\n\nIf you've purchased Total TypeScript and are looking for an invoice or receipt, you can find that here:\n\n\nhttps://www.totaltypescript.com/purchases\n\n\n--\n\n\nInvoices are customizable and you can enter company/tax information there. The generated PDFs are also fully editable so please feel free to adjust them to suit your specific needs.\n\n\nThe Total TypeScript FAQ has answers to many common questions:\n\n\nhttps://www.totaltypescript.com/faq\n\n\n--\n\n\nWill you take 15 seconds share Total TypeScript? It really helps us get the word out. 🙏\n\n\n👉 Send a tweet about Total TypeScript! \n\n\n--\n\n\nIf you've got more context to share, or if any of the above helps and you don't need a reply, please let us know. We are always here to help\n\n\n-Total TypeScript 🧙‍♀️​",
+      "subject": "Re: New Course: Responsible AI Engineering",
+      "tags": [],
+      "wasUnchanged": false,
+      "resolvedAt": "2026-01-29T15:54:17.592Z"
+    },
+    {
+      "conversationId": "cnv_1jdsdv8l",
+      "question": "Hi Total TypeScript team 👋\n\nI’ve been using the course on your website for months now and something odd popped up a couple of days ago.\n\nFor some reason, I no longer see the console/output section under the exercises — the part where you normally see whether tests are passing or failing, logs, etc. It used to be there automatically and I didn’t change anything (at least not intentionally 😅).\n\nI’ve tried looking around for a setting or toggle to bring it back, but no luck so far. So before I blame myself entirely, I thought I’d ask: could this be a bug on your side, or am I just missing something obvious?\n\nHappy to provide more details if needed.\nThanks a lot — I’m really enjoying the course otherwise!\n\nBest,\nBarnabas\n",
+      "answer": "Hi Barnabas,\nThe console panel should be visible by default in the exercise interface. A few things to try:\n\nHard refresh your browser (Ctrl+Shift+R on Windows/Linux, or Cmd+Shift+R on Mac) to clear any cached UI state\n\nCheck if you're using a different browser or device than usual\n\nIf you're on a smaller screen, the console might be collapsed at the bottom - look for a toggle or resize handle\n\nIf none of that works, let me know which exercise you're seeing this on and I'll investigate further.",
+      "subject": "Re: Console panel missing in exercises",
+      "tags": [],
+      "wasUnchanged": false,
+      "resolvedAt": "2026-01-29T15:54:18.070Z"
+    },
+    {
+      "conversationId": "cnv_1jds1zol",
+      "question": "Hey there,\n\nI have a potential bug report below:\n\nI don't know if something changed in StackBlitz embedding API, but it's not\nshowing errors in the code any more and I am getting errors in the console\nthat may be relevant\n\n[image: image.png]\n\n[image: image.png]\nI seem to be noticing double scroll bars as well - i think the stackblitz\nwindow was limited to viewport height before.\n\nI don't recall if the bottom bar was there before, but it shows up now,\nand...\n[image: image.png]\n\n...when I click on the \"Fork on StackBlitz\" button at the bottom, the file\nshows up properly and shows all the TS errors.\nNot a blocker since I can still work on files locally and use the \"fork on\nStackBlitz\" function, but it does make it more clunky.\n\nThanks in advance for looking into it!\n\nGreg\n",
+      "answer": "Hi Greg,\nThanks for the detailed report with screenshots. This sounds like a StackBlitz embedding issue on our end. A few questions to help us track this down:\n\nWhich lesson/module in Total TypeScript Pro Essentials are you seeing this in?\n\nWhat browser and OS are you using?\n\nDid this start happening recently, or has it been like this since you started the course?\n\nOnce we have those details, we can investigate whether something changed with how we're embedding StackBlitz or if it's a StackBlitz API change on their side.",
+      "subject": "Re: Something changed in StackBlitz setup in TotalTypescript Pro Essentials?",
+      "tags": [],
+      "wasUnchanged": false,
+      "resolvedAt": "2026-01-29T15:54:18.891Z"
+    },
+    {
+      "conversationId": "cnv_1jdq6l5x",
+      "question": "I’d like to update my account email from freelancerscollectiveproject@gmail.com\n[darrelmendoza85@gmail.com] to admin@quicklaunchlabs.com\n[admin@quicklaunchlabs.com].\n",
+      "answer": "Hey,\n\n\nI've updated your license to admin@quicklaunchlabs.com. Let me know If you run into any issues.\n\n\nBest,",
+      "subject": "Re: 👋  Feedback from QuickLaunchLabs about Total TypeScript",
+      "tags": [],
+      "wasUnchanged": false,
+      "resolvedAt": "2026-01-29T15:54:19.219Z"
+    }
+  ]
+}
