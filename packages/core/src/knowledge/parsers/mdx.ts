@@ -203,7 +203,7 @@ export async function parseMdx(
         appId,
         metadata: {
           source: fm.source || defaultSource,
-          category: fm.category || defaultCategory || 'faq',
+          category: fm.category || defaultCategory || 'general',
           created_at: fm.created_at || now,
           updated_at: fm.updated_at || now,
           tags: fm.tags || [],
