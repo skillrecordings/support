@@ -16,6 +16,7 @@ import {
   desc,
   eq,
   gte,
+  or,
 } from '@skillrecordings/database'
 import {
   type Conversation,
@@ -122,13 +123,17 @@ async function checkIfUnchanged(
   appId: string
 ): Promise<{ wasUnchanged: boolean; similarity?: number }> {
   // Look up the action for this conversation
+  // Support both old 'draft-response' and new 'send-draft' action types
   const actions = await database
     .select()
     .from(ActionsTable)
     .where(
       and(
         eq(ActionsTable.conversation_id, conversationId),
-        eq(ActionsTable.type, 'draft-response')
+        or(
+          eq(ActionsTable.type, 'send-draft'),
+          eq(ActionsTable.type, 'draft-response')
+        )
       )
     )
     .orderBy(desc(ActionsTable.created_at))
