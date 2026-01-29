@@ -4,11 +4,14 @@
  * Clusters resolved conversations by semantic similarity using embeddings.
  * Uses simple cosine threshold clustering (not HDBSCAN - starting simple).
  *
+ * Uses local embeddings and similarity computation to avoid eventual consistency
+ * issues with persistent vector indexes.
+ *
  * @module faq/clusterer
  */
 
 import { randomUUID } from 'node:crypto'
-import { queryVectors, upsertVector } from '../vector/client'
+import OpenAI from 'openai'
 import type {
   ClusterOptions,
   ConversationCluster,
@@ -18,10 +21,34 @@ import type {
 import { FAQ_THRESHOLDS } from './types'
 
 /**
- * Temporary namespace for clustering embeddings.
- * These are transient and not stored long-term.
+ * OpenAI client for embeddings (lazy initialized)
  */
-const CLUSTER_NAMESPACE = 'faq-cluster-temp'
+let _openai: OpenAI | null = null
+
+function getOpenAI(): OpenAI {
+  if (!_openai) {
+    _openai = new OpenAI()
+  }
+  return _openai
+}
+
+/**
+ * Get embeddings for a batch of texts using OpenAI.
+ * Uses text-embedding-3-small for cost efficiency.
+ */
+async function getEmbeddings(texts: string[]): Promise<number[][]> {
+  if (texts.length === 0) return []
+
+  const openai = getOpenAI()
+  const response = await openai.embeddings.create({
+    model: 'text-embedding-3-small',
+    input: texts,
+  })
+
+  // Sort by index to ensure order matches input
+  const sorted = response.data.sort((a, b) => a.index - b.index)
+  return sorted.map((item) => item.embedding)
+}
 
 /**
  * Calculate cosine similarity between two vectors.
@@ -58,6 +85,9 @@ function cosineSimilarity(a: number[], b: number[]): number {
  *    - Otherwise, create new cluster
  * 3. Filter clusters by minimum size
  *
+ * Uses local embedding computation and similarity matching to avoid
+ * eventual consistency issues with persistent vector indexes.
+ *
  * @param conversations - Conversations to cluster
  * @param options - Clustering options
  * @returns Array of conversation clusters
@@ -75,22 +105,44 @@ export async function clusterBySimilarity(
     return []
   }
 
-  // Use vector index to get embeddings and find similarities
-  // Each conversation question gets embedded and we use the index for similarity search
-
   interface TempCluster {
     id: string
     conversations: ResolvedConversation[]
-    centroidText: string // The first question becomes the centroid
+    centroidText: string
+    centroidEmbedding: number[]
   }
 
   const clusters: TempCluster[] = []
 
+  // Pre-compute all embeddings in batches for efficiency
+  console.log(
+    `   Computing embeddings for ${conversations.length} questions...`
+  )
+  const questionTexts = conversations.map((c) => c.question.slice(0, 1000))
+
+  // Batch embeddings in chunks of 100 to avoid API limits
+  const BATCH_SIZE = 100
+  const allEmbeddings: number[][] = []
+
+  for (let i = 0; i < questionTexts.length; i += BATCH_SIZE) {
+    const batch = questionTexts.slice(i, i + BATCH_SIZE)
+    const batchEmbeddings = await getEmbeddings(batch)
+    allEmbeddings.push(...batchEmbeddings)
+
+    if (questionTexts.length > BATCH_SIZE) {
+      console.log(
+        `   Embedded ${Math.min(i + BATCH_SIZE, questionTexts.length)}/${questionTexts.length}...`
+      )
+    }
+  }
+
   // Process conversations one by one
   let processed = 0
-  for (const convo of conversations) {
+  for (let idx = 0; idx < conversations.length; idx++) {
+    const convo = conversations[idx]!
+    const questionEmbedding = allEmbeddings[idx]!
+    const questionText = questionTexts[idx]!
     processed++
-    const questionText = convo.question.slice(0, 1000) // Truncate for embedding
 
     if (clusters.length === 0) {
       // First conversation starts first cluster
@@ -99,92 +151,47 @@ export async function clusterBySimilarity(
         id: clusterId,
         conversations: [convo],
         centroidText: questionText,
+        centroidEmbedding: questionEmbedding,
       })
-      // Store centroid in vector index
-      try {
-        const upsertResult = await upsertVector({
-          id: `cluster-${clusterId}`,
-          data: questionText,
-          metadata: {
-            type: 'knowledge',
-            clusterId: clusterId,
-            appId: convo.appId,
-          },
-        })
-        console.log(`   [${processed}/${conversations.length}] Created first cluster ${clusterId.slice(0, 8)} (upsert: ${JSON.stringify(upsertResult)})`)
-      } catch (error) {
-        console.warn(`   Failed to upsert first cluster vector:`, error)
-      }
+      console.log(
+        `   [${processed}/${conversations.length}] Created first cluster ${clusterId.slice(0, 8)}`
+      )
       continue
     }
 
-    // Find most similar existing cluster using vector search
-    // Query all cluster centroids and find the best match
+    // Find most similar existing cluster using local similarity computation
     let bestCluster: TempCluster | null = null
     let bestScore = 0
 
-    try {
-      // Query the top N clusters to find similar ones
-      const results = await queryVectors({
-        data: questionText,
-        topK: Math.max(clusters.length, 10),
-        includeMetadata: true,
-      })
-
-      if (processed <= 5) {
-        console.log(`   DEBUG: Query returned ${results.length} results`)
-        if (results.length > 0) {
-          console.log(`   DEBUG: First result score=${results[0]?.score}, id=${results[0]?.id}, meta=${JSON.stringify(results[0]?.metadata)}`)
-        }
+    for (const cluster of clusters) {
+      const similarity = cosineSimilarity(
+        questionEmbedding,
+        cluster.centroidEmbedding
+      )
+      if (similarity > bestScore) {
+        bestScore = similarity
+        bestCluster = cluster
       }
-
-      // Find the best match among our current clusters
-      for (const result of results) {
-        // Check if this result belongs to one of our clusters
-        const clusterId = result.metadata?.clusterId as string | undefined
-        if (!clusterId) continue
-        
-        const matchingCluster = clusters.find(c => c.id === clusterId)
-        if (matchingCluster && result.score > bestScore) {
-          bestScore = result.score
-          bestCluster = matchingCluster
-        }
-      }
-    } catch (error) {
-      console.warn(`   Query failed:`, error)
     }
 
     if (bestCluster && bestScore >= threshold) {
       // Add to existing cluster
       bestCluster.conversations.push(convo)
-      console.log(`   [${processed}/${conversations.length}] Added to cluster ${bestCluster.id.slice(0, 8)} (score: ${bestScore.toFixed(3)})`)
+      console.log(
+        `   [${processed}/${conversations.length}] Added to cluster ${bestCluster.id.slice(0, 8)} (score: ${bestScore.toFixed(3)})`
+      )
     } else {
       // Create new cluster
       const newCluster: TempCluster = {
         id: randomUUID(),
         conversations: [convo],
         centroidText: questionText,
+        centroidEmbedding: questionEmbedding,
       }
       clusters.push(newCluster)
-      console.log(`   [${processed}/${conversations.length}] New cluster ${newCluster.id.slice(0, 8)} (best: ${bestScore.toFixed(3)} < ${threshold})`)
-
-      // Store centroid in vector index for future comparisons
-      try {
-        const upsertResult = await upsertVector({
-          id: `cluster-${newCluster.id}`,
-          data: questionText,
-          metadata: {
-            type: 'knowledge',
-            clusterId: newCluster.id,
-            appId: convo.appId,
-          },
-        })
-        if (processed <= 5) {
-          console.log(`   DEBUG: Upserted cluster-${newCluster.id.slice(0, 8)} result=${JSON.stringify(upsertResult)}`)
-        }
-      } catch (error) {
-        console.warn(`   Failed to upsert cluster vector:`, error)
-      }
+      console.log(
+        `   [${processed}/${conversations.length}] New cluster ${newCluster.id.slice(0, 8)} (best: ${bestScore.toFixed(3)} < ${threshold})`
+      )
     }
   }
 
