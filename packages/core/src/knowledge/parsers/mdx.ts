@@ -92,6 +92,53 @@ function extractFirstParagraph(content: string): string | null {
 }
 
 /**
+ * Split content by <div> blocks (FAQ format)
+ * Returns array of content blocks, or null if no div blocks found
+ */
+function splitByDivBlocks(content: string): string[] | null {
+  // Match <div>...</div> blocks (non-greedy, multiline)
+  const divPattern = /<div>\s*([\s\S]*?)\s*<\/div>/gi
+  const matches = [...content.matchAll(divPattern)]
+  
+  if (matches.length === 0) {
+    return null
+  }
+  
+  return matches.map(m => m[1]!.trim()).filter(block => block.length > 0)
+}
+
+/**
+ * Split content by ## headings (alternative FAQ format)
+ * Returns array of Q&A blocks, or null if not enough headings found
+ */
+function splitByH2Headings(content: string): string[] | null {
+  // Split by ## headings, keeping the heading with each block
+  const blocks = content.split(/(?=^## )/m).filter(block => block.trim().length > 0)
+  
+  // Only use this format if we have multiple H2 sections
+  if (blocks.length < 2) {
+    return null
+  }
+  
+  return blocks.map(block => block.trim())
+}
+
+/**
+ * Extract H2 heading as question from a block
+ */
+function extractH2Question(content: string): string | null {
+  const h2Match = content.match(/^##\s+(.+)$/m)
+  return h2Match ? h2Match[1]!.trim() : null
+}
+
+/**
+ * Remove H2 heading from content to get answer
+ */
+function removeH2Heading(content: string): string {
+  return content.replace(/^##\s+.+$/m, '').trim()
+}
+
+/**
  * Generate article ID from appId and slug/title
  */
 function generateId(
@@ -109,7 +156,7 @@ function generateId(
  * @param content - MDX content with optional frontmatter
  * @param appId - Application identifier
  * @param options - Parser options
- * @returns Array of knowledge articles (usually 1 per file)
+ * @returns Array of knowledge articles (usually 1 per file, but multiple for FAQ format)
  */
 export async function parseMdx(
   content: string,
@@ -126,6 +173,49 @@ export async function parseMdx(
   const { data: frontmatter, content: mdxBody } = matter(content)
   const fm = frontmatter as MdxFrontmatter
 
+  // Check if content has <div> blocks or ## headings (FAQ formats)
+  const divBlocks = splitByDivBlocks(mdxBody)
+  const h2Blocks = !divBlocks ? splitByH2Headings(mdxBody) : null
+  const faqBlocks = divBlocks || h2Blocks
+  
+  if (faqBlocks && faqBlocks.length > 1) {
+    // FAQ format: each <div> block is a separate Q&A
+    const articles: KnowledgeArticle[] = []
+    const now = new Date().toISOString()
+    
+    for (const block of faqBlocks) {
+      // Extract question from H2 heading
+      const question = extractH2Question(block)
+      if (!question) continue
+      
+      // Answer is everything after the H2
+      const answer = removeH2Heading(block)
+      if (answer.length < 10) continue
+      
+      // Generate ID from question
+      const id = generateId(appId, undefined, question)
+      
+      articles.push({
+        id,
+        title: question,
+        question,
+        answer,
+        appId,
+        metadata: {
+          source: fm.source || defaultSource,
+          category: fm.category || defaultCategory || 'faq',
+          created_at: fm.created_at || now,
+          updated_at: fm.updated_at || now,
+          tags: fm.tags || [],
+          trust_score: fm.trust_score ?? defaultTrustScore,
+        },
+      })
+    }
+    
+    return articles
+  }
+
+  // Standard format: single article per file
   // Extract title (frontmatter > H1 > fallback)
   const title = fm.title || extractTitleFromContent(mdxBody) || 'Untitled'
 
