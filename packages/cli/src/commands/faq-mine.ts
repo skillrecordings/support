@@ -17,6 +17,7 @@ import {
   type MineResult,
   filterAutoSurfaceCandidates,
   mineFaqCandidates,
+  mineConversations,
 } from '@skillrecordings/core/faq'
 import { closeDb } from '@skillrecordings/database'
 import type { Command } from 'commander'
@@ -163,6 +164,7 @@ async function faqMine(options: {
   clusterThreshold?: number
   json?: boolean
   export?: string
+  raw?: boolean
 }): Promise<void> {
   if (!options.app) {
     console.error('Error: --app is required')
@@ -175,6 +177,50 @@ async function faqMine(options: {
   }
 
   try {
+    // Raw mode: just export Q&A pairs without clustering
+    if (options.raw) {
+      console.log(`📚 Mining raw Q&A pairs for ${options.app}...`)
+      console.log(`   Since: ${options.since}`)
+      console.log(`   Unchanged only: ${options.unchangedOnly ?? false}`)
+      
+      const conversations = await mineConversations({
+        appId: options.app,
+        since: options.since,
+        limit: options.limit ?? 500,
+        unchangedOnly: options.unchangedOnly ?? false,
+      })
+      
+      const rawData = {
+        generatedAt: new Date().toISOString(),
+        options: {
+          appId: options.app,
+          since: options.since,
+          unchangedOnly: options.unchangedOnly ?? false,
+        },
+        stats: {
+          total: conversations.length,
+        },
+        conversations: conversations.map((c) => ({
+          conversationId: c.conversationId,
+          question: c.question,
+          answer: c.answer,
+          subject: c.subject,
+          tags: c.tags,
+          wasUnchanged: c.wasUnchanged,
+          resolvedAt: c.resolvedAt.toISOString(),
+        })),
+      }
+      
+      if (options.export) {
+        writeFileSync(options.export, JSON.stringify(rawData, null, 2), 'utf-8')
+        console.log(`\n✅ Exported ${conversations.length} raw Q&A pairs to ${options.export}`)
+      } else {
+        console.log(JSON.stringify(rawData, null, 2))
+      }
+      
+      return
+    }
+    
     const result = await mineFaqCandidates({
       appId: options.app,
       since: options.since,
@@ -286,5 +332,6 @@ export function registerFaqMineCommands(program: Command): void {
     )
     .option('--json', 'Output as JSON')
     .option('-e, --export <file>', 'Export candidates to file')
+    .option('-r, --raw', 'Export raw Q&A pairs without clustering (faster)')
     .action(faqMine)
 }

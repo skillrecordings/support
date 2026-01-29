@@ -87,50 +87,77 @@ export async function clusterBySimilarity(
   const clusters: TempCluster[] = []
 
   // Process conversations one by one
+  let processed = 0
   for (const convo of conversations) {
+    processed++
     const questionText = convo.question.slice(0, 1000) // Truncate for embedding
 
     if (clusters.length === 0) {
       // First conversation starts first cluster
+      const clusterId = randomUUID()
       clusters.push({
-        id: randomUUID(),
+        id: clusterId,
         conversations: [convo],
         centroidText: questionText,
       })
+      // Store centroid in vector index
+      try {
+        const upsertResult = await upsertVector({
+          id: `cluster-${clusterId}`,
+          data: questionText,
+          metadata: {
+            type: 'knowledge',
+            clusterId: clusterId,
+            appId: convo.appId,
+          },
+        })
+        console.log(`   [${processed}/${conversations.length}] Created first cluster ${clusterId.slice(0, 8)} (upsert: ${JSON.stringify(upsertResult)})`)
+      } catch (error) {
+        console.warn(`   Failed to upsert first cluster vector:`, error)
+      }
       continue
     }
 
     // Find most similar existing cluster using vector search
+    // Query all cluster centroids and find the best match
     let bestCluster: TempCluster | null = null
     let bestScore = 0
 
-    // Query against each cluster's centroid
-    for (const cluster of clusters) {
-      try {
-        // Use vector index to compute similarity
-        // We query with the new question and check similarity to centroid
-        const results = await queryVectors({
-          data: questionText,
-          topK: 1,
-          includeMetadata: false,
-          // Filter to this specific cluster's temporary embedding
-          filter: `clusterId = "${cluster.id}"`,
-        })
+    try {
+      // Query the top N clusters to find similar ones
+      const results = await queryVectors({
+        data: questionText,
+        topK: Math.max(clusters.length, 10),
+        includeMetadata: true,
+      })
 
-        const topResult = results[0]
-        if (topResult && topResult.score > bestScore) {
-          bestScore = topResult.score
-          bestCluster = cluster
+      if (processed <= 5) {
+        console.log(`   DEBUG: Query returned ${results.length} results`)
+        if (results.length > 0) {
+          console.log(`   DEBUG: First result score=${results[0]?.score}, id=${results[0]?.id}, meta=${JSON.stringify(results[0]?.metadata)}`)
         }
-      } catch {
-        // If vector query fails, skip this comparison
-        continue
       }
+
+      // Find the best match among our current clusters
+      for (const result of results) {
+        // Check if this result belongs to one of our clusters
+        const clusterId = result.metadata?.clusterId as string | undefined
+        if (!clusterId) continue
+        
+        const matchingCluster = clusters.find(c => c.id === clusterId)
+        if (matchingCluster && result.score > bestScore) {
+          bestScore = result.score
+          bestCluster = matchingCluster
+        }
+      }
+    } catch (error) {
+      console.warn(`   Query failed:`, error)
     }
 
     if (bestCluster && bestScore >= threshold) {
       // Add to existing cluster
       bestCluster.conversations.push(convo)
+      console.log(`   [${processed}/${conversations.length}] Added to cluster ${bestCluster.id.slice(0, 8)} (score: ${bestScore.toFixed(3)})`)
     } else {
       // Create new cluster
       const newCluster: TempCluster = {
@@ -139,20 +166,24 @@ export async function clusterBySimilarity(
         centroidText: questionText,
       }
       clusters.push(newCluster)
+      console.log(`   [${processed}/${conversations.length}] New cluster ${newCluster.id.slice(0, 8)} (best: ${bestScore.toFixed(3)} < ${threshold})`)
 
       // Store centroid in vector index for future comparisons
       try {
-        await upsertVector({
+        const upsertResult = await upsertVector({
           id: `cluster-${newCluster.id}`,
           data: questionText,
           metadata: {
-            type: 'faq-cluster' as 'knowledge', // Type coercion for index
+            type: 'knowledge',
             clusterId: newCluster.id,
             appId: convo.appId,
           },
         })
+        if (processed <= 5) {
+          console.log(`   DEBUG: Upserted cluster-${newCluster.id.slice(0, 8)} result=${JSON.stringify(upsertResult)}`)
+        }
       } catch (error) {
-        console.warn(`Failed to upsert cluster vector:`, error)
+        console.warn(`   Failed to upsert cluster vector:`, error)
       }
     }
   }

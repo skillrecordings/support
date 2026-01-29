@@ -66,6 +66,33 @@ function parseSince(since: string): Date {
 }
 
 /**
+ * Spam/noise patterns to filter out
+ */
+const SPAM_PATTERNS = [
+  /collaboration|partnership|sponsored|affiliate/i,
+  /would you be interested/i,
+  /Oxylabs|Fiverr|Upwork/i,
+  /SEO services|backlink/i,
+  /^(hi|hello|hey)[\s,]*$/i, // Just greetings
+  /^[\s]*$/, // Empty
+]
+
+/**
+ * Check if a question looks like spam or noise
+ */
+function isSpamOrNoise(text: string): boolean {
+  // Too short
+  if (text.trim().length < 20) return true
+  
+  // Matches spam patterns
+  for (const pattern of SPAM_PATTERNS) {
+    if (pattern.test(text)) return true
+  }
+  
+  return false
+}
+
+/**
  * Extract the customer's question from conversation messages.
  * Returns the first inbound message text.
  */
@@ -80,7 +107,7 @@ function extractQuestion(messages: Message[]): string {
   }
 
   // Prefer text, fall back to stripped HTML
-  return (
+  const text = (
     firstInbound.text ??
     firstInbound.body
       ?.replace(/<[^>]*>/g, ' ')
@@ -88,6 +115,8 @@ function extractQuestion(messages: Message[]): string {
       .trim() ??
     ''
   )
+  
+  return text
 }
 
 /**
@@ -223,6 +252,14 @@ export async function mineConversations(
   console.log(
     `Found ${dbConversations.length} resolved conversations in database`
   )
+
+  // If DB is empty, fall back to pulling directly from Front
+  if (dbConversations.length === 0) {
+    console.log(
+      `No DB records found, pulling resolved conversations directly from Front...`
+    )
+    return mineFromFrontDirect(front, app, sinceDate, limit, unchangedOnly)
+  }
 
   const results: ResolvedConversation[] = []
   let processed = 0
@@ -391,5 +428,126 @@ export async function mineFaqCandidates(
     clusters,
     candidates,
     stats,
+  }
+}
+
+/**
+ * Mine conversations directly from Front API when database is empty.
+ * Uses inbox search to find archived/resolved conversations.
+ */
+async function mineFromFrontDirect(
+  front: ReturnType<typeof createFrontClient>,
+  app: NonNullable<Awaited<ReturnType<typeof getApp>>>,
+  sinceDate: Date,
+  limit: number,
+  unchangedOnly: boolean
+): Promise<ResolvedConversation[]> {
+  const results: ResolvedConversation[] = []
+
+  // Get the app's inbox ID
+  const inboxId = app.front_inbox_id
+  if (!inboxId) {
+    throw new Error(`App ${app.id} has no Front inbox configured`)
+  }
+
+  console.log(`Fetching archived conversations from inbox ${inboxId}...`)
+
+  try {
+    // List conversations from the inbox with archived status
+    // Front API: GET /inboxes/{inbox_id}/conversations
+    let page = 1
+    let hasMore = true
+    const pageSize = Math.min(limit, 100)
+
+    while (hasMore && results.length < limit) {
+      // Use inbox conversations endpoint with status filter
+      const response = await front.inboxes.listConversations(inboxId, {
+        q: `[{"field":"statuses","value":"archived"}]`,
+        limit: pageSize,
+      })
+
+      const conversations = (response as any)?._results ?? []
+      console.log(
+        `   Page ${page}: ${conversations.length} conversations (total: ${results.length + conversations.length})`
+      )
+
+      for (const conv of conversations) {
+        if (results.length >= limit) break
+
+        // Check if within time range
+        const lastMessageAt = conv.last_message_at
+          ? new Date(conv.last_message_at * 1000)
+          : null
+        if (lastMessageAt && lastMessageAt < sinceDate) {
+          // Older than our window, skip
+          continue
+        }
+
+        try {
+          // Fetch messages for this conversation
+          const messageList = await front.conversations.listMessages(conv.id)
+          const messages = (messageList as any)?._results ?? []
+
+          // Extract Q&A
+          const question = extractQuestion(messages)
+          const answer = extractAnswer(messages)
+
+          if (!question || !answer) continue
+          
+          // Filter out spam and noise
+          if (isSpamOrNoise(question)) {
+            continue
+          }
+          
+          // Filter out conversations tagged as spam
+          const tagNames = conv.tags?.map((t: any) => (t.name ?? '').toLowerCase()) ?? []
+          if (tagNames.includes('spam') || tagNames.includes('collaboration')) {
+            continue
+          }
+
+          // For now, we can't check unchanged status without DB records
+          // Include all conversations when mining directly from Front
+          const wasUnchanged = false // Unknown
+
+          if (unchangedOnly && !wasUnchanged) {
+            continue
+          }
+
+          const tags = conv.tags?.map((t: any) => t.name ?? t.id) ?? []
+
+          results.push({
+            conversationId: conv.id,
+            question,
+            answer,
+            subject: conv.subject ?? '',
+            resolvedAt: lastMessageAt ?? new Date(),
+            appId: app.id,
+            wasUnchanged,
+            draftSimilarity: undefined,
+            tags,
+            _raw: {
+              conversation: conv,
+              messages,
+            },
+          })
+        } catch (err) {
+          console.warn(`   Failed to fetch messages for ${conv.id}:`, err)
+          continue
+        }
+
+        // Rate limit: 150ms between requests
+        await new Promise((r) => setTimeout(r, 150))
+      }
+
+      // Check for more pages
+      hasMore = conversations.length === pageSize && results.length < limit
+      page++
+    }
+
+    console.log(`Mined ${results.length} conversations with Q&A pairs`)
+    return results
+  } catch (error) {
+    console.error('Error fetching from Front:', error)
+    throw error
   }
 }
