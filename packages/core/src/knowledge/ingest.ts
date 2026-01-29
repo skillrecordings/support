@@ -85,6 +85,17 @@ export const PRODUCT_SOURCES: Record<string, ProductSource> = {
     ],
     enabled: true,
   },
+  'shared': {
+    appId: 'shared',
+    format: 'mdx',
+    defaultSource: 'faq',
+    defaultCategory: 'content',
+    sourceUrls: [
+      // Cross-product FAQ content (PPP, team seats, gifting, etc.)
+      'file:///home/joel/Code/skillrecordings/support/data/kb/shared-faq.mdx',
+    ],
+    enabled: true,
+  },
   'testing-accessibility': {
     appId: 'testing-accessibility',
     format: 'html',
