@@ -37,8 +37,18 @@ export function createInboxesClient(client: BaseClient) {
      * List conversations for an inbox
      * @see https://dev.frontapp.com/reference/list-inbox-conversations
      */
-    listConversations: (id: string) =>
-      client.get(`/inboxes/${id}/conversations`),
+    listConversations: (
+      id: string,
+      params?: { q?: string; limit?: number }
+    ) => {
+      const searchParams = new URLSearchParams()
+      if (params?.q) searchParams.set('q', params.q)
+      if (params?.limit) searchParams.set('limit', String(params.limit))
+      const query = searchParams.toString()
+      return client.get(
+        `/inboxes/${id}/conversations${query ? `?${query}` : ''}`
+      )
+    },
 
     /**
      * List teammates for an inbox
