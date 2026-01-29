@@ -49,8 +49,8 @@ export const PRODUCT_SOURCES: Record<string, ProductSource> = {
     defaultSource: 'faq',
     defaultCategory: 'content',
     sourceUrls: [
-      // Local file path - faster and always available
-      'file:///home/joel/Code/skillrecordings/products/apps/total-typescript/src/pages/faq.mdx',
+      // Product-specific FAQs only (shared content in 'shared' namespace)
+      'file:///home/joel/Code/skillrecordings/support/data/kb/total-typescript-faq.mdx',
     ],
     enabled: true,
   },
