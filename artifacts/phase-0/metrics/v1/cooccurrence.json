@@ -1,0 +1,256 @@
+{
+  "generated_at": "2026-01-30T12:00:00Z",
+  "total_archived_conversations": 26801,
+  "methodology": {
+    "lift_formula": "P(A∩B) / (P(A) × P(B)) = (co_occurrence × total) / (count_a × count_b)",
+    "minimum_co_occurrence": 10,
+    "interpretation": "lift > 1 means tags appear together more than random chance"
+  },
+  "pairs": [
+    {
+      "tag_a": "refund request",
+      "tag_b": "refunded and canceled",
+      "co_occurrence": 719,
+      "lift": 25.8,
+      "count_a": 965,
+      "count_b": 774,
+      "interpretation": "Almost all refund requests result in cancellation - natural workflow"
+    },
+    {
+      "tag_a": "ER",
+      "tag_b": "Email Transfer",
+      "co_occurrence": 1314,
+      "lift": 2.25,
+      "count_a": 7978,
+      "count_b": 1960,
+      "interpretation": "Email transfers often happen with ER product"
+    },
+    {
+      "tag_a": "ER",
+      "tag_b": "refund request",
+      "co_occurrence": 550,
+      "lift": 1.91,
+      "count_a": 7978,
+      "count_b": 965,
+      "interpretation": "ER has higher-than-average refund rate"
+    },
+    {
+      "tag_a": "india",
+      "tag_b": "parity purchase power",
+      "co_occurrence": 77,
+      "lift": 46.29,
+      "count_a": 77,
+      "count_b": 579,
+      "interpretation": "India tag always co-occurs with PPP - perfect association"
+    },
+    {
+      "tag_a": "brazil",
+      "tag_b": "parity purchase power",
+      "co_occurrence": 34,
+      "lift": 46.29,
+      "count_a": 34,
+      "count_b": 579,
+      "interpretation": "Brazil tag always co-occurs with PPP - perfect association"
+    },
+    {
+      "tag_a": "argentina",
+      "tag_b": "parity purchase power",
+      "co_occurrence": 17,
+      "lift": 46.29,
+      "count_a": 17,
+      "count_b": 579,
+      "interpretation": "Argentina tag always co-occurs with PPP - perfect association"
+    },
+    {
+      "tag_a": "colombia",
+      "tag_b": "parity purchase power",
+      "co_occurrence": 11,
+      "lift": 46.29,
+      "count_a": 11,
+      "count_b": 579,
+      "interpretation": "Colombia tag always co-occurs with PPP - perfect association"
+    },
+    {
+      "tag_a": "download materials",
+      "tag_b": "🐛 bug",
+      "co_occurrence": 12,
+      "lift": 30.85,
+      "count_a": 15,
+      "count_b": 695,
+      "interpretation": "Download issues almost always reported as bugs"
+    },
+    {
+      "tag_a": "video download",
+      "tag_b": "🐛 bug",
+      "co_occurrence": 18,
+      "lift": 26.7,
+      "count_a": 26,
+      "count_b": 695,
+      "interpretation": "Video download issues almost always bugs"
+    },
+    {
+      "tag_a": "404s-while-logged-in",
+      "tag_b": "🐛 bug",
+      "co_occurrence": 12,
+      "lift": 19.28,
+      "count_a": 24,
+      "count_b": 695,
+      "interpretation": "404 errors are high-correlation bug reports"
+    },
+    {
+      "tag_a": "invoice or receipt",
+      "tag_b": "pending webhook",
+      "co_occurrence": 13,
+      "lift": 11.58,
+      "count_a": 654,
+      "count_b": 46,
+      "interpretation": "Webhook delays often surface via invoice requests"
+    },
+    {
+      "tag_a": "certificate of completion help",
+      "tag_b": "🐛 bug",
+      "co_occurrence": 33,
+      "lift": 8.6,
+      "count_a": 148,
+      "count_b": 695,
+      "interpretation": "Certificate issues often involve bugs"
+    },
+    {
+      "tag_a": "parity purchase power",
+      "tag_b": "upgrade later",
+      "co_occurrence": 16,
+      "lift": 8.32,
+      "count_a": 579,
+      "count_b": 89,
+      "interpretation": "PPP buyers often ask about upgrading"
+    },
+    {
+      "tag_a": "parity purchase power",
+      "tag_b": "🐛 bug",
+      "co_occurrence": 100,
+      "lift": 6.66,
+      "count_a": 579,
+      "count_b": 695,
+      "interpretation": "PPP has notable bug correlation - possibly geo-detection issues"
+    },
+    {
+      "tag_a": "video player",
+      "tag_b": "🐛 bug",
+      "co_occurrence": 22,
+      "lift": 6.48,
+      "count_a": 131,
+      "count_b": 695,
+      "interpretation": "Video player issues mostly reported as bugs"
+    },
+    {
+      "tag_a": "Testing JavaScript",
+      "tag_b": "magic link",
+      "co_occurrence": 214,
+      "lift": 3.56,
+      "count_a": 2605,
+      "count_b": 619,
+      "interpretation": "Testing JS has high magic link issue rate"
+    },
+    {
+      "tag_a": "magic link",
+      "tag_b": "🐛 bug",
+      "co_occurrence": 48,
+      "lift": 2.99,
+      "count_a": 619,
+      "count_b": 695,
+      "interpretation": "Magic link problems often bugs"
+    },
+    {
+      "tag_a": "parity purchase power",
+      "tag_b": "refunded and canceled",
+      "co_occurrence": 44,
+      "lift": 2.63,
+      "count_a": 579,
+      "count_b": 774,
+      "interpretation": "PPP buyers have elevated refund rate"
+    },
+    {
+      "tag_a": "Testing JavaScript",
+      "tag_b": "refund request",
+      "co_occurrence": 227,
+      "lift": 2.42,
+      "count_a": 2605,
+      "count_b": 965,
+      "interpretation": "Testing JS has above-average refund rate"
+    },
+    {
+      "tag_a": "Testing JavaScript",
+      "tag_b": "🐛 bug",
+      "co_occurrence": 149,
+      "lift": 2.21,
+      "count_a": 2605,
+      "count_b": 695,
+      "interpretation": "Testing JS has elevated bug reports"
+    }
+  ],
+  "problem_bundles": [
+    {
+      "name": "Download/Video Bugs",
+      "tags": ["video download", "download materials", "🐛 bug"],
+      "total_occurrences": 30,
+      "severity": "high",
+      "lift_range": "26-31x",
+      "recommendation": "Create comprehensive troubleshooting FAQ for download issues - nearly all support requests are bugs that may have known workarounds"
+    },
+    {
+      "name": "PPP + Bug Correlation",
+      "tags": ["parity purchase power", "🐛 bug"],
+      "total_occurrences": 100,
+      "severity": "high",
+      "lift": 6.66,
+      "recommendation": "Investigate PPP detection/application bugs - users from PPP countries hitting more technical issues. FAQ should address geo-detection troubleshooting"
+    },
+    {
+      "name": "PPP + Refunds",
+      "tags": ["parity purchase power", "refund request", "refunded and canceled"],
+      "total_occurrences": 68,
+      "severity": "medium",
+      "lift_range": "1.15-2.63x",
+      "recommendation": "PPP customers have elevated refund rate - ensure PPP terms are clear upfront; FAQ should address upgrade paths from PPP purchases"
+    },
+    {
+      "name": "Magic Link Issues",
+      "tags": ["magic link", "🐛 bug", "Testing JavaScript"],
+      "total_occurrences": 262,
+      "severity": "high",
+      "lift_range": "2.99-3.56x",
+      "recommendation": "Magic link delivery is a recurring pain point. FAQ needs comprehensive magic link troubleshooting (spam folders, email providers, alternative login)"
+    },
+    {
+      "name": "Testing JavaScript + Refunds",
+      "tags": ["Testing JavaScript", "refund request", "🐛 bug"],
+      "total_occurrences": 376,
+      "severity": "high",
+      "lift_range": "2.2-2.4x",
+      "recommendation": "Testing JavaScript course has higher-than-average issues and refunds - investigate course content/quality; FAQ should address common testing setup problems"
+    },
+    {
+      "name": "Video Player Bugs",
+      "tags": ["video player", "🐛 bug"],
+      "total_occurrences": 22,
+      "severity": "medium",
+      "lift": 6.48,
+      "recommendation": "Video playback issues almost always bugs - FAQ should include browser compatibility, buffering fixes, and known player issues"
+    },
+    {
+      "name": "Certificate + Bug Reports",
+      "tags": ["certificate of completion help", "🐛 bug"],
+      "total_occurrences": 33,
+      "severity": "medium",
+      "lift": 8.6,
+      "recommendation": "Certificate generation has technical issues - FAQ should explain how completion is tracked and common certificate problems"
+    }
+  ],
+  "insights": {
+    "country_ppp_perfect_association": "Country tags (india, brazil, argentina, colombia) have lift ~46x with PPP - they are redundant signals. Consider consolidating tagging.",
+    "refund_workflow_expected": "refund request → refunded and canceled (lift 25.8x) is expected workflow, not a problem.",
+    "testing_javascript_quality_concern": "Testing JavaScript course appears multiple times with elevated refund rates and bug reports - potential content/UX issue",
+    "download_features_broken": "Download-related features (video download, download materials) have extremely high bug correlation - these features need stability work",
+    "magic_link_reliability": "Magic link issues correlate with both bugs and specific courses - authentication system reliability concern"
+  }
+}

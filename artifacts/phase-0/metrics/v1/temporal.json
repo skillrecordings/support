@@ -1,0 +1,241 @@
+{
+  "generated_at": "2026-01-30T12:00:00Z",
+  "data_range": {
+    "earliest": "2019-08-26",
+    "latest": "2026-01-26",
+    "total_weeks": 338
+  },
+  "methodology": {
+    "spike_detection": "Count > 2× rolling 8-week median baseline",
+    "growth_trend": "Linear regression on monthly counts over past year"
+  },
+  "spikes": [
+    {
+      "tag": "refund request",
+      "week": "2020-09-28",
+      "count": 79,
+      "baseline": 4,
+      "multiplier": 19.75,
+      "possible_cause": "Epic React launch week - high purchase volume = proportional refunds"
+    },
+    {
+      "tag": "refunded and canceled",
+      "week": "2020-09-28",
+      "count": 79,
+      "baseline": 4,
+      "multiplier": 19.75,
+      "possible_cause": "Epic React launch - mirrors refund request spike"
+    },
+    {
+      "tag": "invoice or receipt",
+      "week": "2020-09-28",
+      "count": 70,
+      "baseline": 4,
+      "multiplier": 17.5,
+      "possible_cause": "Epic React launch - enterprise purchases need invoices"
+    },
+    {
+      "tag": "credit card issue",
+      "week": "2020-09-28",
+      "count": 53,
+      "baseline": 2,
+      "multiplier": 26.5,
+      "possible_cause": "Epic React launch - payment processor strain or international cards"
+    },
+    {
+      "tag": "magic link",
+      "week": "2020-09-28",
+      "count": 34,
+      "baseline": 3,
+      "multiplier": 11.3,
+      "possible_cause": "Epic React launch - email delivery delays under load"
+    },
+    {
+      "tag": "🐛 bug",
+      "week": "2020-09-28",
+      "count": 31,
+      "baseline": 4,
+      "multiplier": 7.75,
+      "possible_cause": "Epic React launch - new platform features under strain"
+    },
+    {
+      "tag": "parity purchase power",
+      "week": "2020-09-28",
+      "count": 28,
+      "baseline": 4,
+      "multiplier": 7.0,
+      "possible_cause": "Epic React launch - international buyer demand for PPP"
+    },
+    {
+      "tag": "🐛 bug",
+      "week": "2021-09-20",
+      "count": 34,
+      "baseline": 5,
+      "multiplier": 6.8,
+      "possible_cause": "Testing JavaScript issues or platform update"
+    },
+    {
+      "tag": "parity purchase power",
+      "week": "2021-09-20",
+      "count": 34,
+      "baseline": 5,
+      "multiplier": 6.8,
+      "possible_cause": "Product launch or PPP system issues"
+    },
+    {
+      "tag": "refund request",
+      "week": "2021-11-29",
+      "count": 20,
+      "baseline": 5,
+      "multiplier": 4.0,
+      "possible_cause": "Black Friday purchase remorse / holiday timing"
+    },
+    {
+      "tag": "refunded and canceled",
+      "week": "2021-11-29",
+      "count": 21,
+      "baseline": 5,
+      "multiplier": 4.2,
+      "possible_cause": "Black Friday purchase remorse"
+    },
+    {
+      "tag": "invoice or receipt",
+      "week": "2022-11-28",
+      "count": 23,
+      "baseline": 4,
+      "multiplier": 5.75,
+      "possible_cause": "Black Friday sales - year-end expense documentation"
+    },
+    {
+      "tag": "magic link",
+      "week": "2022-11-28",
+      "count": 16,
+      "baseline": 3,
+      "multiplier": 5.3,
+      "possible_cause": "Black Friday sales volume - email delivery stress"
+    },
+    {
+      "tag": "🐛 bug",
+      "week": "2024-07-08",
+      "count": 21,
+      "baseline": 3,
+      "multiplier": 7.0,
+      "possible_cause": "Recent spike - platform incident or new bug introduced"
+    },
+    {
+      "tag": "🐛 bug",
+      "week": "2020-11-30",
+      "count": 23,
+      "baseline": 4,
+      "multiplier": 5.75,
+      "possible_cause": "Post-launch stability issues"
+    }
+  ],
+  "seasonal_patterns": {
+    "launch_weeks": {
+      "pattern": "10-20x volume spikes on product launches",
+      "evidence": "2020-09-28 (Epic React) shows massive spikes across all support categories",
+      "recommendation": "Pre-launch FAQ preparation, increased support capacity"
+    },
+    "black_friday_cyber_monday": {
+      "pattern": "2-6x spikes late November",
+      "affected_tags": ["invoice or receipt", "refund request", "magic link"],
+      "evidence": "2021-11-22 to 2022-11-28 consistent spikes",
+      "recommendation": "Pre-sale FAQ on invoices, refund policy clarity, login alternatives"
+    },
+    "year_end_invoices": {
+      "pattern": "Invoice requests spike in late November through January",
+      "evidence": "Recurring December spikes in 'invoice or receipt'",
+      "recommendation": "Proactive invoice/receipt FAQ, self-service invoice generation"
+    }
+  },
+  "growth_trends": [
+    {
+      "tag": "Quick question feedback",
+      "trend": "rapid_growth",
+      "recent_weeks": [
+        {"week": "2026-01-05", "count": 10},
+        {"week": "2026-01-12", "count": 15}
+      ],
+      "note": "New tag emerging in 2026"
+    },
+    {
+      "tag": "AD",
+      "trend": "rapid_growth",
+      "recent_weeks": [
+        {"week": "2026-01-05", "count": 5},
+        {"week": "2026-01-12", "count": 5},
+        {"week": "2026-01-19", "count": 21}
+      ],
+      "note": "New product (Application Developer?) ramping up"
+    },
+    {
+      "tag": "egghead.io",
+      "trend": "growth",
+      "recent_weeks": [
+        {"week": "2026-01-19", "count": 17},
+        {"week": "2026-01-26", "count": 11}
+      ],
+      "note": "Cross-product questions increasing"
+    },
+    {
+      "tag": "refund request",
+      "trend": "stable_low",
+      "recent_count_avg": 2.5,
+      "historical_peak_avg": 8.3,
+      "note": "Refunds down significantly from 2020-2022 peaks"
+    },
+    {
+      "tag": "magic link",
+      "trend": "declining",
+      "recent_count": 0,
+      "historical_avg": 5.2,
+      "note": "Magic link issues largely resolved since 2023"
+    },
+    {
+      "tag": "parity purchase power",
+      "trend": "declining",
+      "recent_count": 0,
+      "historical_avg": 4.1,
+      "note": "PPP issues resolved - no recent tickets"
+    },
+    {
+      "tag": "🐛 bug",
+      "trend": "stable_low",
+      "recent_count_avg": 1.2,
+      "historical_peak_avg": 6.4,
+      "note": "Bug reports much lower than 2020-2022, occasional spikes"
+    }
+  ],
+  "weekly_trends_summary": {
+    "dominant_tag_all_time": "ER",
+    "dominant_tag_recent_12m": "ER",
+    "quietest_period": "2023-04 to 2024-05 (minimal activity)",
+    "highest_volume_week": "2020-09-28 (Epic React launch)"
+  },
+  "insights": {
+    "launch_pattern": "Product launches (Epic React Sep 2020) cause 10-20x spike in ALL support categories simultaneously. Need launch-specific FAQ bundles.",
+    "holiday_pattern": "Black Friday/Cyber Monday consistently drives invoice requests and post-purchase refunds. Proactive FAQ can reduce load.",
+    "resolution_success": "Magic link and PPP issues that plagued 2020-2022 are now largely resolved - evidence of successful FAQ/UX improvements.",
+    "new_products": "AD and Quick question feedback are emerging tags - monitor for new FAQ needs.",
+    "bug_volatility": "Bug reports are spiky rather than steady - suggests incident-driven rather than chronic issues."
+  },
+  "proactive_faq_calendar": [
+    {
+      "timing": "2 weeks before any product launch",
+      "action": "Prepare launch-specific FAQ covering: purchase/payment issues, access setup, magic links, refund policy"
+    },
+    {
+      "timing": "Early November",
+      "action": "Refresh invoice/receipt FAQ, ensure self-service invoice generation is documented"
+    },
+    {
+      "timing": "Black Friday week",
+      "action": "Prominently feature refund policy FAQ, payment troubleshooting, login alternatives"
+    },
+    {
+      "timing": "January",
+      "action": "Year-end tax documentation FAQ for enterprise customers"
+    }
+  ]
+}
