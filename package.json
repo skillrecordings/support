@@ -18,16 +18,19 @@
     "db:generate": "drizzle-kit generate --config=packages/database/drizzle.config.ts",
     "db:migrate": "drizzle-kit migrate --config=packages/database/drizzle.config.ts",
     "db:studio": "drizzle-kit studio --config=packages/database/drizzle.config.ts",
-    "prepare": "husky"
+    "prepare": "husky",
+    "review-tui": "cd packages/review-tui && bun run src/index.tsx"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.0",
     "@changesets/cli": "^2.29.8",
     "@total-typescript/tsconfig": "^1.0.4",
     "autoevals": "^0.0.131",
+    "duckdb": "^1.4.3",
     "evalite": "^0.19.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
+    "openai": "^6.17.0",
     "oxlint": "^0.15.0",
     "prettier": "^3.7.4",
     "turbo": "^2.7.5",
