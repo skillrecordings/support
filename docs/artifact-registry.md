@@ -13,9 +13,10 @@ Central index of all outputs from the FAQ Mining epic (#94).
 | Artifact | Location | Format | Producer | Consumers | Status |
 |----------|----------|--------|----------|-----------|--------|
 | Conversation embeddings | `artifacts/phase-0/embeddings/` | Parquet | #95 | #96, #102 | ✅ Complete |
-| Cluster assignments | `artifacts/phase-0/clusters/assignments.json` | JSON | #96 | #97, #100, #102 | ⬜ Pending |
-| Cluster labels | `artifacts/phase-0/clusters/labels.json` | JSON | #96 | #100, #102 | ⬜ Pending |
-| Cluster metrics | `artifacts/phase-0/clusters/metrics.json` | JSON | #96 | #100 | ⬜ Pending |
+| Cluster assignments | `artifacts/phase-0/clusters/v1/assignments.json` | JSON | #96 | #97, #100, #102 | ✅ Complete |
+| Cluster labels | `artifacts/phase-0/clusters/v1/labels.json` | JSON | #96 | #100, #102 | ✅ Complete |
+| Cluster metrics | `artifacts/phase-0/clusters/v1/metrics.json` | JSON | #96 | #100 | ✅ Complete |
+| Cluster iterations | `artifacts/phase-0/clusters/v1/iterations.json` | JSON | #96 | #100 | ✅ Complete |
 | Golden responses | `artifacts/phase-0/golden/v1/responses.json` | JSON | #97 | #100, #103 | ✅ Complete |
 | Response templates | `artifacts/phase-0/golden/v1/templates.json` | JSON | #97 | #100, #103 | ✅ Complete |
 | Golden stats | `artifacts/phase-0/golden/v1/stats.json` | JSON | #97 | #100 | ✅ Complete |
