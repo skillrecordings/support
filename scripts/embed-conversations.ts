@@ -49,7 +49,7 @@ const COST_PER_MILLION_TOKENS = 0.02
 interface ConversationRow {
   conversation_id: string
   inbox_id: string
-  tags: string | null
+  tags: string[] | null  // DuckDB returns VARCHAR[] as native array
   first_message: string | null
 }
 
@@ -397,9 +397,12 @@ async function main() {
         const embedding = embeddings[j]!
         const tokenCount = tokenCounts[j]!
 
-        // Parse tags (stored as JSON array string in DuckDB)
+        // Tags come as native array from DuckDB VARCHAR[]
         let tags: string[] = []
-        if (row.tags) {
+        if (row.tags && Array.isArray(row.tags)) {
+          tags = row.tags
+        } else if (typeof row.tags === 'string') {
+          // Fallback: try JSON parse if somehow stringified
           try {
             tags = JSON.parse(row.tags)
           } catch {
