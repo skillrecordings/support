@@ -1,0 +1,3 @@
+# Bun configuration for OpenTUI solid-js transform
+
+preload = ["@opentui/solid/preload"]
