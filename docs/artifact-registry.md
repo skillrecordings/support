@@ -12,7 +12,7 @@ Central index of all outputs from the FAQ Mining epic (#94).
 
 | Artifact | Location | Format | Producer | Consumers | Status |
 |----------|----------|--------|----------|-----------|--------|
-| Conversation embeddings | `artifacts/phase-0/embeddings/` | Parquet | #95 | #96, #102 | ⬜ Pending |
+| Conversation embeddings | `artifacts/phase-0/embeddings/` | Parquet | #95 | #96, #102 | ✅ Complete |
 | Cluster assignments | `artifacts/phase-0/clusters/assignments.json` | JSON | #96 | #97, #100, #102 | ⬜ Pending |
 | Cluster labels | `artifacts/phase-0/clusters/labels.json` | JSON | #96 | #100, #102 | ⬜ Pending |
 | Cluster metrics | `artifacts/phase-0/clusters/metrics.json` | JSON | #96 | #100 | ⬜ Pending |
