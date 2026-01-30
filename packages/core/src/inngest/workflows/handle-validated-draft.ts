@@ -8,7 +8,8 @@
 
 import { randomUUID } from 'crypto'
 import { ActionsTable, getDb } from '@skillrecordings/database'
-import { createFrontClient } from '@skillrecordings/front-sdk'
+import { createFrontClient as createFrontSdkClient } from '@skillrecordings/front-sdk'
+import { createFrontClient } from '../../front'
 import {
   initializeAxiom,
   log,
@@ -307,6 +308,94 @@ export const handleValidatedDraft = inngest.createFunction(
       return id
     })
 
+    // Create Front draft for human review/editing
+    const draftResult = await step.run('create-front-draft', async () => {
+      const stepStartTime = Date.now()
+
+      const frontToken = process.env.FRONT_API_TOKEN
+      if (!frontToken) {
+        await log('warn', 'FRONT_API_TOKEN not set, skipping Front draft', {
+          workflow: 'support-handle-validated',
+          step: 'create-front-draft',
+          conversationId,
+        })
+        return { created: false, error: 'FRONT_API_TOKEN not configured' }
+      }
+
+      try {
+        const front = createFrontClient(frontToken)
+
+        // Get channel ID for creating draft
+        let channelId: string | null = null
+
+        // Try to get channel from conversation's inbox
+        const inboxId = await front.getConversationInbox(conversationId)
+        if (inboxId) {
+          channelId = await front.getInboxChannel(inboxId)
+        }
+
+        if (!channelId) {
+          await log('warn', 'no channel found for draft creation', {
+            workflow: 'support-handle-validated',
+            step: 'create-front-draft',
+            conversationId,
+          })
+          return { created: false, error: 'Could not determine channel' }
+        }
+
+        // Create draft in Front
+        const frontDraft = await front.createDraft(
+          conversationId,
+          draft.content,
+          channelId
+        )
+
+        const durationMs = Date.now() - stepStartTime
+
+        await log('info', 'Front draft created for review', {
+          workflow: 'support-handle-validated',
+          step: 'create-front-draft',
+          conversationId,
+          appId,
+          draftId: frontDraft.id,
+          durationMs,
+        })
+
+        await traceWorkflowStep({
+          workflowName: 'support-handle-validated',
+          conversationId,
+          appId,
+          stepName: 'create-front-draft',
+          durationMs,
+          success: true,
+          metadata: { draftId: frontDraft.id },
+        })
+
+        return { created: true, draftId: frontDraft.id }
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : String(error)
+
+        await log('error', 'failed to create Front draft', {
+          workflow: 'support-handle-validated',
+          step: 'create-front-draft',
+          conversationId,
+          error: errorMsg,
+        })
+
+        await traceWorkflowStep({
+          workflowName: 'support-handle-validated',
+          conversationId,
+          appId,
+          stepName: 'create-front-draft',
+          durationMs: Date.now() - stepStartTime,
+          success: false,
+          metadata: { error: errorMsg },
+        })
+
+        return { created: false, error: errorMsg }
+      }
+    })
+
     // Add approval comment to Front conversation
     await step.run('add-approval-comment', async () => {
       const stepStartTime = Date.now()
@@ -326,7 +415,7 @@ export const handleValidatedDraft = inngest.createFunction(
       }
 
       try {
-        const front = createFrontClient({ apiToken: frontToken })
+        const front = createFrontSdkClient({ apiToken: frontToken })
 
         const commentBody = formatApprovalComment({
           draft: draft.content,
