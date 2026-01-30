@@ -132,6 +132,7 @@
         "@babel/parser": "^7.28.6",
         "@babel/traverse": "^7.28.6",
         "@babel/types": "^7.28.6",
+        "@duckdb/node-api": "^1.4.4-r.1",
         "@langfuse/otel": "^4.5.1",
         "@opentelemetry/sdk-node": "^0.211.0",
         "@skillrecordings/database": "*",
@@ -408,6 +409,20 @@
     "@dimforge/rapier2d-simd-compat": ["@dimforge/rapier2d-simd-compat@0.17.3", "", {}, "sha512-bijvwWz6NHsNj5e5i1vtd3dU2pDhthSaTUZSh14DUGGKJfw8eMnlWZsxwHBxB/a3AXVNDjL9abuHw1k9FGR+jg=="],
 
     "@drizzle-team/brocli": ["@drizzle-team/brocli@0.10.2", "", {}, "sha512-z33Il7l5dKjUgGULTqBsQBQwckHh5AbIuxhdsIxDDiZAzBOrZO6q9ogcWC65kU382AfynTfgNumVcNIjuIua6w=="],
+
+    "@duckdb/node-api": ["@duckdb/node-api@1.4.4-r.1", "", { "dependencies": { "@duckdb/node-bindings": "1.4.4-r.1" } }, "sha512-oqaH9DXTJNwyLkd2FgJwmSnWVqjB5irbESeTeNVMBnM03iRaNY545BhfBDumu1TnOV2koIdG1mNsmjgq/ZTIkA=="],
+
+    "@duckdb/node-bindings": ["@duckdb/node-bindings@1.4.4-r.1", "", { "optionalDependencies": { "@duckdb/node-bindings-darwin-arm64": "1.4.4-r.1", "@duckdb/node-bindings-darwin-x64": "1.4.4-r.1", "@duckdb/node-bindings-linux-arm64": "1.4.4-r.1", "@duckdb/node-bindings-linux-x64": "1.4.4-r.1", "@duckdb/node-bindings-win32-x64": "1.4.4-r.1" } }, "sha512-NFm0AMrK3kiVLQhgnGUEjX5c8Elm93dYePZ9BUCvvd0AVVTKEBeRhBp9afziuzP3Sl5+7XQ1TyaBLsZJKKBDBQ=="],
+
+    "@duckdb/node-bindings-darwin-arm64": ["@duckdb/node-bindings-darwin-arm64@1.4.4-r.1", "", { "os": "darwin", "cpu": "arm64" }, "sha512-/NtbkCgCAOJDxw41XvSGV/mxQAlsx+2xUvhIVUj6fxoOfTG4jTttRhuphwE3EXNoWzJOjZxCZ5LwhC/qb6ZwLg=="],
+
+    "@duckdb/node-bindings-darwin-x64": ["@duckdb/node-bindings-darwin-x64@1.4.4-r.1", "", { "os": "darwin", "cpu": "x64" }, "sha512-lzFRDrZwc1EoV513vmKufasiAQ2WlhEb0O6guRBarbvOKKVhRb8tQ5H7LPVTrIewjTI3XDgHrnK+vfh9L+xQcA=="],
+
+    "@duckdb/node-bindings-linux-arm64": ["@duckdb/node-bindings-linux-arm64@1.4.4-r.1", "", { "os": "linux", "cpu": "arm64" }, "sha512-wq92/EcTiOTRW1RSDOwjeLyMMXWwNVNwU21TQdfu3sgS86+Ih3raaK68leDgY5cWgf72We3J2W7HYz8GwxcMYw=="],
+
+    "@duckdb/node-bindings-linux-x64": ["@duckdb/node-bindings-linux-x64@1.4.4-r.1", "", { "os": "linux", "cpu": "x64" }, "sha512-fjYNc+t4/T7mhzZ57oJoIQaWvbYVvxhidcNNansQFiWnd6/JMLCULd4qnt8XI3Tt2BrZsraH690KSBIS3QPt0w=="],
+
+    "@duckdb/node-bindings-win32-x64": ["@duckdb/node-bindings-win32-x64@1.4.4-r.1", "", { "os": "win32", "cpu": "x64" }, "sha512-+J+MUYGvYWfX0balWToDIy3CBYg7hHI0KQUQ39+SniinXlMF8+puRW6ebyQ+AXrcrKkwuj4wzJuEBD0AdhHGtw=="],
 
     "@emnapi/runtime": ["@emnapi/runtime@1.8.1", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-mehfKSMWjjNol8659Z8KxEMrdSJDDot5SXMq00dM8BN4o+CLNXQ0xH2V7EchNHV4RmbZLmmPdEaXZc5H2FXmDg=="],
 

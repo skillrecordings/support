@@ -91,6 +91,41 @@ export interface FaqCandidate {
 }
 
 /**
+ * Query options for data sources.
+ */
+export interface QueryOptions {
+  /** App ID to filter by */
+  appId?: string
+  /** Filter conversations since this date */
+  since?: Date
+  /** Maximum conversations to return */
+  limit?: number
+}
+
+/**
+ * Abstract data source for FAQ mining.
+ * Implementations include Front API and DuckDB cache.
+ */
+export interface DataSource {
+  /** Data source name for logging */
+  name: string
+  /** Get conversations matching filters */
+  getConversations(options: QueryOptions): Promise<ResolvedConversation[]>
+  /** Get messages for a specific conversation */
+  getMessages(conversationId: string): Promise<Message[]>
+  /** Get statistics about the data source */
+  getStats?(): Promise<{
+    totalConversations: number
+    filteredConversations: number
+    totalMessages: number
+    inboxCount: number
+    dateRange: { oldest: Date | null; newest: Date | null }
+  }>
+  /** Clean up resources (close connections) */
+  close?(): Promise<void>
+}
+
+/**
  * Options for mining conversations.
  */
 export interface MineOptions {
@@ -104,6 +139,8 @@ export interface MineOptions {
   unchangedOnly?: boolean
   /** Minimum similarity threshold for clustering */
   clusterThreshold?: number
+  /** Data source to use (default: front) */
+  source?: DataSource
 }
 
 /**
