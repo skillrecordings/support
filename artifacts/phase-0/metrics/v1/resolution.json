@@ -1,0 +1,146 @@
+{
+  "generated_at": "2025-07-20T20:00:00Z",
+  "description": "Resolution efficiency metrics for FAQ mining - identifies high-friction topics",
+  "data_source": "~/skill/data/front-cache.db",
+  
+  "summary": {
+    "total_archived": 26463,
+    "avg_thread_length": 2.77,
+    "median_length": 2,
+    "p90_length": 5,
+    "quick_resolution_rate": 0.788,
+    "long_thread_count": 1939,
+    "insight": "78.8% of conversations resolve in 3 or fewer messages. Focus FAQ efforts on the 7.3% (1939) of conversations with 6+ messages."
+  },
+  
+  "by_tag": [
+    {"tag": "quote", "conversation_count": 29, "avg_thread_length": 6.62, "median_length": 6, "p90_length": 11, "quick_resolution_rate": 0.172, "long_thread_count": 15, "priority": "critical"},
+    {"tag": "404s-while-logged-in", "conversation_count": 24, "avg_thread_length": 6.13, "median_length": 6, "p90_length": 10, "quick_resolution_rate": 0.292, "long_thread_count": 13, "priority": "critical"},
+    {"tag": "Invoice Request", "conversation_count": 23, "avg_thread_length": 5.09, "median_length": 3, "p90_length": 7, "quick_resolution_rate": 0.522, "long_thread_count": 7, "priority": "high"},
+    {"tag": "pending webhook", "conversation_count": 44, "avg_thread_length": 5.07, "median_length": 5, "p90_length": 8, "quick_resolution_rate": 0.295, "long_thread_count": 13, "priority": "high"},
+    {"tag": "team plan question", "conversation_count": 163, "avg_thread_length": 4.93, "median_length": 4, "p90_length": 8, "quick_resolution_rate": 0.472, "long_thread_count": 48, "priority": "high"},
+    {"tag": "egghead.io", "conversation_count": 113, "avg_thread_length": 4.38, "median_length": 4, "p90_length": 7, "quick_resolution_rate": 0.442, "long_thread_count": 20, "priority": "high"},
+    {"tag": "PPP question", "conversation_count": 48, "avg_thread_length": 4.29, "median_length": 3, "p90_length": 9, "quick_resolution_rate": 0.583, "long_thread_count": 10, "priority": "medium"},
+    {"tag": "Lost License", "conversation_count": 39, "avg_thread_length": 4.23, "median_length": 4, "p90_length": 7, "quick_resolution_rate": 0.487, "long_thread_count": 12, "priority": "medium"},
+    {"tag": "invoice or receipt", "conversation_count": 649, "avg_thread_length": 4.18, "median_length": 3, "p90_length": 8, "quick_resolution_rate": 0.599, "long_thread_count": 128, "priority": "high"},
+    {"tag": "payment method", "conversation_count": 87, "avg_thread_length": 4.18, "median_length": 3, "p90_length": 7, "quick_resolution_rate": 0.667, "long_thread_count": 17, "priority": "medium"},
+    {"tag": "KCD Bundle", "conversation_count": 33, "avg_thread_length": 4.18, "median_length": 3, "p90_length": 8, "quick_resolution_rate": 0.515, "long_thread_count": 9, "priority": "medium"},
+    {"tag": "course access", "conversation_count": 215, "avg_thread_length": 4.17, "median_length": 3, "p90_length": 7, "quick_resolution_rate": 0.507, "long_thread_count": 58, "priority": "high"},
+    {"tag": "login fails report", "conversation_count": 44, "avg_thread_length": 4.09, "median_length": 4, "p90_length": 6, "quick_resolution_rate": 0.455, "long_thread_count": 11, "priority": "medium"},
+    {"tag": "credit card issue", "conversation_count": 180, "avg_thread_length": 4.09, "median_length": 3, "p90_length": 7, "quick_resolution_rate": 0.528, "long_thread_count": 37, "priority": "high"},
+    {"tag": "🐛 bug", "conversation_count": 693, "avg_thread_length": 4.04, "median_length": 3, "p90_length": 8, "quick_resolution_rate": 0.573, "long_thread_count": 135, "priority": "high"},
+    {"tag": "parity purchase power", "conversation_count": 579, "avg_thread_length": 3.97, "median_length": 3, "p90_length": 7, "quick_resolution_rate": 0.522, "long_thread_count": 96, "priority": "high"},
+    {"tag": "collaboration", "conversation_count": 53, "avg_thread_length": 3.91, "median_length": 3, "p90_length": 9, "quick_resolution_rate": 0.604, "long_thread_count": 10, "priority": "medium"},
+    {"tag": "sale question", "conversation_count": 133, "avg_thread_length": 3.88, "median_length": 3, "p90_length": 7, "quick_resolution_rate": 0.677, "long_thread_count": 19, "priority": "medium"},
+    {"tag": "magic link", "conversation_count": 616, "avg_thread_length": 3.82, "median_length": 3, "p90_length": 7, "quick_resolution_rate": 0.583, "long_thread_count": 112, "priority": "high"},
+    {"tag": "misc question", "conversation_count": 368, "avg_thread_length": 3.82, "median_length": 3, "p90_length": 6, "quick_resolution_rate": 0.696, "long_thread_count": 44, "priority": "medium"},
+    {"tag": "Email Transfer", "conversation_count": 1947, "avg_thread_length": 3.8, "median_length": 3, "p90_length": 6, "quick_resolution_rate": 0.595, "long_thread_count": 279, "priority": "high"},
+    {"tag": "discord", "conversation_count": 61, "avg_thread_length": 3.72, "median_length": 3, "p90_length": 7, "quick_resolution_rate": 0.656, "long_thread_count": 11, "priority": "medium"},
+    {"tag": "Total TypeScript", "conversation_count": 38, "avg_thread_length": 3.71, "median_length": 3, "p90_length": 6, "quick_resolution_rate": 0.684, "long_thread_count": 5, "priority": "medium"},
+    {"tag": "ER", "conversation_count": 7857, "avg_thread_length": 3.69, "median_length": 3, "p90_length": 6, "quick_resolution_rate": 0.629, "long_thread_count": 1026, "priority": "high"},
+    {"tag": "india", "conversation_count": 77, "avg_thread_length": 3.68, "median_length": 3, "p90_length": 6, "quick_resolution_rate": 0.61, "long_thread_count": 15, "priority": "medium"},
+    {"tag": "certificate of completion help", "conversation_count": 145, "avg_thread_length": 3.68, "median_length": 3, "p90_length": 7, "quick_resolution_rate": 0.6, "long_thread_count": 23, "priority": "medium"},
+    {"tag": "billing question", "conversation_count": 33, "avg_thread_length": 3.67, "median_length": 3, "p90_length": 7, "quick_resolution_rate": 0.697, "long_thread_count": 5, "priority": "low"},
+    {"tag": "W9 request", "conversation_count": 41, "avg_thread_length": 3.61, "median_length": 3, "p90_length": 7, "quick_resolution_rate": 0.78, "long_thread_count": 6, "priority": "low"},
+    {"tag": "video player", "conversation_count": 131, "avg_thread_length": 3.6, "median_length": 3, "p90_length": 7, "quick_resolution_rate": 0.634, "long_thread_count": 19, "priority": "medium"},
+    {"tag": "refunded and canceled", "conversation_count": 773, "avg_thread_length": 3.54, "median_length": 3, "p90_length": 6, "quick_resolution_rate": 0.646, "long_thread_count": 97, "priority": "medium"},
+    {"tag": "video download", "conversation_count": 26, "avg_thread_length": 3.5, "median_length": 3, "p90_length": 6, "quick_resolution_rate": 0.731, "long_thread_count": 3, "priority": "low"},
+    {"tag": "refund request", "conversation_count": 955, "avg_thread_length": 3.47, "median_length": 3, "p90_length": 6, "quick_resolution_rate": 0.671, "long_thread_count": 108, "priority": "medium"},
+    {"tag": "discount request", "conversation_count": 209, "avg_thread_length": 3.44, "median_length": 3, "p90_length": 6, "quick_resolution_rate": 0.675, "long_thread_count": 23, "priority": "medium"},
+    {"tag": "upgrade later", "conversation_count": 89, "avg_thread_length": 3.34, "median_length": 3, "p90_length": 6, "quick_resolution_rate": 0.64, "long_thread_count": 11, "priority": "low"},
+    {"tag": "Epic AI", "conversation_count": 24, "avg_thread_length": 3.33, "median_length": 2, "p90_length": 6, "quick_resolution_rate": 0.75, "long_thread_count": 4, "priority": "low"},
+    {"tag": "iran", "conversation_count": 61, "avg_thread_length": 3.28, "median_length": 3, "p90_length": 4, "quick_resolution_rate": 0.705, "long_thread_count": 4, "priority": "low"},
+    {"tag": "unclear", "conversation_count": 38, "avg_thread_length": 3.24, "median_length": 2, "p90_length": 5, "quick_resolution_rate": 0.789, "long_thread_count": 2, "priority": "low"},
+    {"tag": "course question", "conversation_count": 102, "avg_thread_length": 3.22, "median_length": 3, "p90_length": 5, "quick_resolution_rate": 0.716, "long_thread_count": 10, "priority": "low"},
+    {"tag": "postmark outage", "conversation_count": 29, "avg_thread_length": 3.03, "median_length": 3, "p90_length": 5, "quick_resolution_rate": 0.724, "long_thread_count": 2, "priority": "low"},
+    {"tag": "brazil", "conversation_count": 34, "avg_thread_length": 3.03, "median_length": 2, "p90_length": 5, "quick_resolution_rate": 0.735, "long_thread_count": 2, "priority": "low"},
+    {"tag": "Testing JavaScript", "conversation_count": 2570, "avg_thread_length": 3.01, "median_length": 2, "p90_length": 5, "quick_resolution_rate": 0.74, "long_thread_count": 256, "priority": "medium"},
+    {"tag": "Just JavaScript", "conversation_count": 476, "avg_thread_length": 2.94, "median_length": 3, "p90_length": 5, "quick_resolution_rate": 0.702, "long_thread_count": 42, "priority": "low"},
+    {"tag": "Typo", "conversation_count": 36, "avg_thread_length": 2.94, "median_length": 3, "p90_length": 5, "quick_resolution_rate": 0.833, "long_thread_count": 1, "priority": "low"},
+    {"tag": "⭐️ Praise", "conversation_count": 73, "avg_thread_length": 2.85, "median_length": 2, "p90_length": 5, "quick_resolution_rate": 0.822, "long_thread_count": 5, "priority": "none"},
+    {"tag": "good copy", "conversation_count": 35, "avg_thread_length": 2.83, "median_length": 2, "p90_length": 6, "quick_resolution_rate": 0.743, "long_thread_count": 4, "priority": "none"},
+    {"tag": "code question", "conversation_count": 75, "avg_thread_length": 2.81, "median_length": 2, "p90_length": 5, "quick_resolution_rate": 0.84, "long_thread_count": 4, "priority": "low"},
+    {"tag": "sale price extension", "conversation_count": 46, "avg_thread_length": 2.65, "median_length": 2, "p90_length": 4, "quick_resolution_rate": 0.87, "long_thread_count": 2, "priority": "none"},
+    {"tag": "student discount", "conversation_count": 53, "avg_thread_length": 2.55, "median_length": 2, "p90_length": 4, "quick_resolution_rate": 0.849, "long_thread_count": 1, "priority": "none"},
+    {"tag": "feature request", "conversation_count": 25, "avg_thread_length": 2.48, "median_length": 2, "p90_length": 3, "quick_resolution_rate": 0.92, "long_thread_count": 1, "priority": "none"},
+    {"tag": "feedback", "conversation_count": 249, "avg_thread_length": 2.41, "median_length": 2, "p90_length": 4, "quick_resolution_rate": 0.871, "long_thread_count": 8, "priority": "none"},
+    {"tag": "AD", "conversation_count": 38, "avg_thread_length": 2.29, "median_length": 2, "p90_length": 4, "quick_resolution_rate": 0.895, "long_thread_count": 0, "priority": "none"},
+    {"tag": "ux feedback", "conversation_count": 27, "avg_thread_length": 2.11, "median_length": 2, "p90_length": 3, "quick_resolution_rate": 0.963, "long_thread_count": 1, "priority": "none"},
+    {"tag": "objection: price", "conversation_count": 59, "avg_thread_length": 1.71, "median_length": 1, "p90_length": 2, "quick_resolution_rate": 0.949, "long_thread_count": 2, "priority": "none"},
+    {"tag": "bounce back", "conversation_count": 107, "avg_thread_length": 1.54, "median_length": 1, "p90_length": 3, "quick_resolution_rate": 0.916, "long_thread_count": 5, "priority": "none"},
+    {"tag": "Conf Sponsor", "conversation_count": 34, "avg_thread_length": 1.35, "median_length": 1, "p90_length": 2, "quick_resolution_rate": 0.971, "long_thread_count": 0, "priority": "none"},
+    {"tag": "out of office", "conversation_count": 45, "avg_thread_length": 1.31, "median_length": 1, "p90_length": 2, "quick_resolution_rate": 0.956, "long_thread_count": 1, "priority": "none"},
+    {"tag": "Quick question feedback", "conversation_count": 46, "avg_thread_length": 1.09, "median_length": 1, "p90_length": 1, "quick_resolution_rate": 1.0, "long_thread_count": 0, "priority": "none"}
+  ],
+  
+  "by_inbox": [
+    {"inbox_id": "inb_1bwzr", "inbox_name": "KCD Support", "conversation_count": 13888, "avg_thread_length": 3.25, "median_length": 3, "p90_length": 6, "quick_resolution_rate": 0.705, "long_thread_count": 1462},
+    {"inbox_id": "inb_3srbb", "inbox_name": "Total TypeScript", "conversation_count": 7173, "avg_thread_length": 2.66, "median_length": 2, "p90_length": 4, "quick_resolution_rate": 0.841, "long_thread_count": 347},
+    {"inbox_id": "inb_1c77r", "inbox_name": "egghead comments", "conversation_count": 2228, "avg_thread_length": 1.3, "median_length": 1, "p90_length": 2, "quick_resolution_rate": 0.978, "long_thread_count": 10},
+    {"inbox_id": "inb_jqs11", "inbox_name": "Epic AI", "conversation_count": 849, "avg_thread_length": 1.83, "median_length": 1, "p90_length": 3, "quick_resolution_rate": 0.901, "long_thread_count": 26},
+    {"inbox_id": "inb_3pqh3", "inbox_name": "Pro Tailwind", "conversation_count": 707, "avg_thread_length": 1.66, "median_length": 1, "p90_length": 3, "quick_resolution_rate": 0.942, "long_thread_count": 17},
+    {"inbox_id": "inb_2odqf", "inbox_name": "Just JavaScript", "conversation_count": 638, "avg_thread_length": 2.61, "median_length": 2, "p90_length": 5, "quick_resolution_rate": 0.782, "long_thread_count": 41},
+    {"inbox_id": "inb_3bkef", "inbox_name": "Testing Accessibility", "conversation_count": 443, "avg_thread_length": 1.64, "median_length": 1, "p90_length": 3, "quick_resolution_rate": 0.939, "long_thread_count": 9},
+    {"inbox_id": "inb_4bj7r", "inbox_name": "AI Hero", "conversation_count": 359, "avg_thread_length": 1.97, "median_length": 1, "p90_length": 3, "quick_resolution_rate": 0.922, "long_thread_count": 15},
+    {"inbox_id": "inb_jqs2t", "inbox_name": "Epic Web", "conversation_count": 142, "avg_thread_length": 1.99, "median_length": 1, "p90_length": 3, "quick_resolution_rate": 0.901, "long_thread_count": 9},
+    {"inbox_id": "inb_1zh3b", "inbox_name": "egghead support", "conversation_count": 36, "avg_thread_length": 3.25, "median_length": 2, "p90_length": 5, "quick_resolution_rate": 0.778, "long_thread_count": 3}
+  ],
+  
+  "long_thread_topics": [
+    {"tag": "ER", "long_thread_count": 1026, "avg_length_in_long_threads": 8.26, "max_thread_length": 44, "insight": "Highest volume of long threads - ER (Epic React?) needs deep FAQ coverage"},
+    {"tag": "Email Transfer", "long_thread_count": 279, "avg_length_in_long_threads": 7.81, "max_thread_length": 24, "insight": "Email changes are complex - needs clear self-service process"},
+    {"tag": "Testing JavaScript", "long_thread_count": 256, "avg_length_in_long_threads": 7.77, "max_thread_length": 26, "insight": "Product-specific issues need dedicated FAQ"},
+    {"tag": "🐛 bug", "long_thread_count": 135, "avg_length_in_long_threads": 8.3, "max_thread_length": 24, "insight": "Bugs require back-and-forth - consider triage templates"},
+    {"tag": "invoice or receipt", "long_thread_count": 128, "avg_length_in_long_threads": 9.16, "max_thread_length": 37, "insight": "High friction for common request - self-service opportunity"},
+    {"tag": "magic link", "long_thread_count": 112, "avg_length_in_long_threads": 7.46, "max_thread_length": 17, "insight": "Auth issues are painful - improve login flow FAQ"},
+    {"tag": "refund request", "long_thread_count": 108, "avg_length_in_long_threads": 7.58, "max_thread_length": 17, "insight": "Refunds could be streamlined with policy FAQ"},
+    {"tag": "refunded and canceled", "long_thread_count": 97, "avg_length_in_long_threads": 7.63, "max_thread_length": 17, "insight": "Post-refund questions - needs clearer process"},
+    {"tag": "parity purchase power", "long_thread_count": 96, "avg_length_in_long_threads": 7.91, "max_thread_length": 17, "insight": "PPP has volume but many need manual review"},
+    {"tag": "course access", "long_thread_count": 58, "avg_length_in_long_threads": 7.1, "max_thread_length": 11, "insight": "Access issues frustrate customers - needs troubleshooting FAQ"},
+    {"tag": "team plan question", "long_thread_count": 48, "avg_length_in_long_threads": 9.33, "max_thread_length": 42, "insight": "Team plans are complex - detailed FAQ needed"},
+    {"tag": "misc question", "long_thread_count": 44, "avg_length_in_long_threads": 10.3, "max_thread_length": 41, "insight": "Catch-all tag masks complexity"},
+    {"tag": "Just JavaScript", "long_thread_count": 42, "avg_length_in_long_threads": 7.02, "max_thread_length": 15, "insight": "Product-specific issues"},
+    {"tag": "credit card issue", "long_thread_count": 37, "avg_length_in_long_threads": 7.89, "max_thread_length": 20, "insight": "Payment issues need quick resolution path"}
+  ],
+  
+  "priority_recommendations": {
+    "critical": {
+      "description": "Topics with avg >5.5 messages or <30% quick resolution - immediate FAQ investment",
+      "tags": ["quote", "404s-while-logged-in", "pending webhook"]
+    },
+    "high": {
+      "description": "High volume topics with >40 long threads or avg >4.0 messages",
+      "tags": ["ER", "Email Transfer", "invoice or receipt", "🐛 bug", "magic link", "course access", "credit card issue", "parity purchase power", "team plan question"]
+    },
+    "working_well": {
+      "description": "Topics with >85% quick resolution - good FAQ coverage, maintain",
+      "tags": ["Quick question feedback", "Conf Sponsor", "out of office", "bounce back", "objection: price", "ux feedback", "feedback", "feature request", "student discount", "sale price extension"]
+    }
+  },
+  
+  "product_insights": {
+    "kcd_support": {
+      "conversation_count": 13888,
+      "avg_thread_length": 3.25,
+      "quick_resolution_rate": 0.705,
+      "insight": "Largest inbox, below-average resolution rate. Primary target for FAQ improvement."
+    },
+    "total_typescript": {
+      "conversation_count": 7173,
+      "avg_thread_length": 2.66,
+      "quick_resolution_rate": 0.841,
+      "insight": "Second largest, good resolution rate. Maintain current KB quality."
+    },
+    "egghead_comments": {
+      "conversation_count": 2228,
+      "avg_thread_length": 1.3,
+      "quick_resolution_rate": 0.978,
+      "insight": "Excellent resolution - mostly one-shot interactions."
+    }
+  },
+  
+  "queries_used": {
+    "thread_stats": "SELECT c.id, c.tags, c.inbox_id, c.status, COUNT(m.id) as msg_count FROM conversations c JOIN messages m ON m.conversation_id = c.id GROUP BY c.id",
+    "tag_efficiency": "SELECT tag, COUNT(*), AVG(msg_count), PERCENTILE_CONT(0.5/0.9), AVG(CASE WHEN msg_count <= 3 THEN 1.0 ELSE 0.0 END) FROM thread_stats GROUP BY tag HAVING COUNT(*) >= 20"
+  }
+}
