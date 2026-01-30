@@ -16,7 +16,9 @@ Central index of all outputs from the FAQ Mining epic (#94).
 | Cluster assignments | `artifacts/phase-0/clusters/assignments.json` | JSON | #96 | #97, #100, #102 | ⬜ Pending |
 | Cluster labels | `artifacts/phase-0/clusters/labels.json` | JSON | #96 | #100, #102 | ⬜ Pending |
 | Cluster metrics | `artifacts/phase-0/clusters/metrics.json` | JSON | #96 | #100 | ⬜ Pending |
-| Golden responses | `artifacts/phase-0/golden/responses.json` | JSON | #97 | #100, #103 | ⬜ Pending |
+| Golden responses | `artifacts/phase-0/golden/v1/responses.json` | JSON | #97 | #100, #103 | ✅ Complete |
+| Response templates | `artifacts/phase-0/golden/v1/templates.json` | JSON | #97 | #100, #103 | ✅ Complete |
+| Golden stats | `artifacts/phase-0/golden/v1/stats.json` | JSON | #97 | #100 | ✅ Complete |
 | Resolution efficiency | `artifacts/phase-0/metrics/v1/resolution.json` | JSON | #98 | #100, #102 | ✅ Complete |
 | Tag co-occurrence | `artifacts/phase-0/metrics/v1/cooccurrence.json` | JSON | #99 | #100, #102 | ✅ Complete |
 | Temporal patterns | `artifacts/phase-0/metrics/v1/temporal.json` | JSON | #99 | #100 | ✅ Complete |
