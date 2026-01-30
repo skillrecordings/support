@@ -23,8 +23,8 @@ Central index of all outputs from the FAQ Mining epic (#94).
 | Resolution efficiency | `artifacts/phase-0/metrics/v1/resolution.json` | JSON | #98 | #100, #102 | ✅ Complete |
 | Tag co-occurrence | `artifacts/phase-0/metrics/v1/cooccurrence.json` | JSON | #99 | #100, #102 | ✅ Complete |
 | Temporal patterns | `artifacts/phase-0/metrics/v1/temporal.json` | JSON | #99 | #100 | ✅ Complete |
-| Phase 0 synthesis | `docs/phase-0-synthesis.md` | Markdown | #100 | All Phase 1 | ⬜ Pending |
-| Phase 0 decisions | `docs/phase-0-decisions.md` | Markdown | #100 | All Phase 1 | ⬜ Pending |
+| Phase 0 synthesis | `docs/phase-0-synthesis.md` | Markdown | #100 | All Phase 1 | ✅ Complete |
+| Phase 0 decisions | `docs/phase-0-decisions.md` | Markdown | #100 | All Phase 1 | ✅ Complete |
 
 ## Phase 1: Implementation
 
