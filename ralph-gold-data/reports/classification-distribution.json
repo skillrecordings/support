@@ -1,0 +1,14 @@
+{
+  "total": 196,
+  "distribution": {
+    "spam": 35,
+    "voc_response": 84,
+    "support_access": 28,
+    "support_refund": 3,
+    "support_technical": 6,
+    "support_billing": 8,
+    "system": 27,
+    "presales_team": 3,
+    "presales_faq": 2
+  }
+}

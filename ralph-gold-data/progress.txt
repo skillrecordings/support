@@ -62,3 +62,21 @@ Gaps identified
 
 Learnings
 - The current dump already has product populated for every conversation (all 196 are `total-typescript` or `ai-hero`).
+
+---
+[2026-01-31T18:27:28.526Z]
+Completed: Classify using production taxonomy
+Files modified: none
+Tool calls: 0
+Validation: duckdb gold.duckdb -c "SELECT request_type, COUNT(*) FROM classifications GROUP BY request_type ORDER BY COUNT(*) DESC" | grep -v "^$"
+Summary: Classified all 196 conversations using a heuristic pass aligned to the production taxonomy and stored the results in `gold.duckdb`’s `classifications` table, plus generated a distribution report for quick review.
+
+- Added a repeatable classifier script that reads the merged JSON, applies taxonomy-aligned rules, and writes batch INSERT SQL to `scripts/classify-conversations.sql`.
+- Added a distribution report at `reports/classification-distribution.json` and regenerated `gold.duckdb` classifications (196 rows).
+- Classifier leans on category/tags/subject/body signals, with strict checks for system/spam/voc_response and conservative fan_mail detection.
+
+Files changed
+- `scripts/classify-conversations.mjs`
+- `scripts/classify-conversations.sql`
+- `reports/classification-distribution.json`
+- `
