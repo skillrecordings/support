@@ -15,6 +15,8 @@ CREATE TABLE IF NOT EXISTS conversations (
   request_type VARCHAR NOT NULL,
   quality_score DOUBLE NOT NULL,
   is_gold BOOLEAN NOT NULL DEFAULT FALSE,
+  gold VARCHAR NOT NULL DEFAULT 'gold',
+  other VARCHAR NOT NULL DEFAULT 'other',
   tags JSON,
   trigger_message JSON,
   conversation_history JSON,

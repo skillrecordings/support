@@ -106,6 +106,21 @@ const keywordSets = {
     'sign in',
   ],
   profanity: ['fuck', 'shit', 'bitch', 'asshole', 'dick', 'wtf', 'crap'],
+  questionPrompts: [
+    'how do i',
+    'how can i',
+    'can you',
+    'could you',
+    'please help',
+    'i need',
+    'i cannot',
+    "i can't",
+    'i am unable',
+    'issue with',
+    'problem with',
+    'trouble',
+    'help with',
+  ],
 }
 
 const receiptMonths = [
@@ -188,15 +203,6 @@ function classifyExclusion(item) {
 
   if (isSpam) return 'spam'
 
-  const isVocResponse =
-    /(^|\n)\s*>/.test(rawText) ||
-    hasAny(text, keywordSets.voc) ||
-    hasAny(subject, keywordSets.voc) ||
-    subject.includes('re: a quick question') ||
-    subject.includes('re: hey there')
-
-  if (isVocResponse) return 'voc_response'
-
   const isPurePraise = hasAny(text, keywordSets.praise) && !hasQuestion
   if (isPurePraise) return 'fan_mail'
 
@@ -222,11 +228,17 @@ function scoreConversation(item) {
     const body = normalize(stripQuoted(entry.body || ''))
     if (!body) return false
     if (hasAny(body, keywordSets.system)) return false
-    return body.length >= 80 || hasAny(body, keywordSets.reusableSupport)
+    return body.length >= 40 || hasAny(body, keywordSets.reusableSupport)
   })
 
   const cleanedInbound = inbound.map((entry) => normalize(stripQuoted(entry.body || '')))
   const cleanedOutbound = outbound.map((entry) => normalize(stripQuoted(entry.body || '')))
+  const totalInboundChars = cleanedInbound.join(' ').length
+  const totalOutboundChars = cleanedOutbound.join(' ').length
+  const hasQuestion = cleanedInbound.some(
+    (body) => body.includes('?') || hasAny(body, keywordSets.questionPrompts),
+  )
+  const clearQna = hasQuestion || totalInboundChars >= 80
 
   const hasResolution = (() => {
     let lastOutIndex = -1
@@ -251,25 +263,30 @@ function scoreConversation(item) {
 
   const hasReusablePattern = cleanedOutbound.some((body) => {
     if (!body) return false
-    return body.length >= 160 || hasAny(body, keywordSets.reusableSupport)
+    return body.length >= 120 || hasAny(body, keywordSets.reusableSupport)
   })
 
   const professionalTone = !hasAny(cleanedInbound.join(' '), keywordSets.profanity) &&
     !hasAny(cleanedOutbound.join(' '), keywordSets.profanity)
+  const helpfulResponse = hasResolution || hasReusablePattern || totalOutboundChars >= 120
 
   let score = 0
   score += hasBidirectional ? 2 : 0
   score += hasHumanOut ? 1 : 0
-  score += hasResolution ? 1 : 0
-  score += hasReusablePattern ? 1 : 0
+  score += clearQna ? 1 : 0
+  score += helpfulResponse ? 1 : 0
+  score += totalInboundChars + totalOutboundChars >= 200 ? 1 : 0
 
   if (!professionalTone) score = Math.max(0, score - 1)
-  if (awaitingCustomer && !hasResolution) score = Math.min(score, 2)
+  if (!hasHumanOut) score = Math.min(score, 2)
+  if (awaitingCustomer && !helpfulResponse) score = Math.min(score, 3)
 
   score = Math.max(0, Math.min(5, score))
 
-  const tier = score >= 5 ? 'gold' : score >= 3 ? 'silver' : 'noise'
-  return { score, tier }
+  const isGold = hasHumanOut && clearQna && helpfulResponse
+  const tier = isGold ? 'gold' : score >= 3 ? 'silver' : 'noise'
+  const finalScore = isGold ? 5 : Math.min(score, 4)
+  return { score: finalScore, tier }
 }
 
 const data = JSON.parse(fs.readFileSync(DATA_PATH, 'utf8'))

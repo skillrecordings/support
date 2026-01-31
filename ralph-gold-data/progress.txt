@@ -129,3 +129,63 @@ Summary: Added forwarded invoice noise detection to the quality scorer, regenera
 Details
 - Added forwarded-invoice detection and exclusion counting in `scripts/score-conversations.mjs`.
 - Regenerated `scripts/score-conversations.sql
+
+---
+[2026-01-31T19:16:50.198Z]
+Failed: Sync classifications to conversations table
+Validation: Binder Error: Referenced column "unknown" not found in FROM clause!
+Candidate bindings: "raw_json"
+
+LINE 1: SELECT COUNT(*) FROM conversations WHERE request_type != unknown
+                                                                 ^
+
+Codex: Synced `conversations.request_type` from `classifications.request_type` in `gold.duckdb`. All 196 conversations now have non-`unknown` request types.
+
+Validation
+- `duckdb gold.duckdb -c "SELECT COUNT(*) FROM conversations WHERE request_type != 'unknown'" | grep -E "[0-9]+"`
+
+Learnings
+- After sync,
+
+---
+[2026-01-31T19:16:59.407Z]
+Failed: Sync classifications to conversations table
+Validation: Binder Error: Referenced column "unknown" not found in FROM clause!
+Candidate bindings: "raw_json"
+
+LINE 1: SELECT COUNT(*) FROM conversations WHERE request_type != unknown
+                                                                 ^
+
+Codex: Updated `conversations.request_type` from `classifications.request_type` in `gold.duckdb`. The update matched 196 rows.
+
+Validation
+- `duckdb gold.duckdb -c "SELECT COUNT(*) FROM conversations WHERE request_type != 'unknown'" | grep -E "[0-9]+"` → 196
+
+Learnings
+- `conversations.request_type` is now
+
+---
+[2026-01-31T19:17:14.992Z]
+Failed: Sync classifications to conversations table
+Validation: Binder Error: Referenced column "unknown" not found in FROM clause!
+Candidate bindings: "raw_json"
+
+LINE 1: SELECT COUNT(*) FROM conversations WHERE request_type != unknown
+                                                                 ^
+
+Codex: Synced `conversations.request_type` from `classifications.request_type` in `gold.duckdb`.
+
+- Updated rows: 196 (from join count on `classifications`).
+- Validation: `duckdb gold.duckdb -c "SELECT COUNT(*) FROM conversations WHERE request_type != 'unknown'" | grep -E "[0-9]+"` → 196.
+
+No files change
+
+---
+[2026-01-31T19:20:23.848Z]
+Completed: Re-score with relaxed quality criteria
+Files: none
+Summary: Updated scoring to the relaxed criteria and re-ran it across all conversations, then applied the updates to `gold.duckdb`. Gold now exceeds the 10% target.
+
+Changes made
+- Relaxed scoring in `scripts/score-conversations.mjs` to align with the new rubric (human reply + clear Q&A + helpful/resolution), loosened “human” thresholds, and removed VOC auto-exclusion so those can qualify.
+- Ensured `is_go

@@ -1,16 +1,16 @@
 {
   "total": 196,
-  "averageScore": 0.26,
+  "averageScore": 1.49,
   "tiers": {
-    "gold": 6,
-    "silver": 2,
-    "noise": 188
+    "gold": 55,
+    "silver": 4,
+    "noise": 137
   },
   "exclusions": {
     "spam": 35,
-    "voc_response": 84,
+    "one_sided": 67,
     "forwarded_invoice": 4,
     "system": 27,
-    "one_sided": 32
+    "fan_mail": 3
   }
 }
