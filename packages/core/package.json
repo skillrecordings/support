@@ -96,7 +96,8 @@
     "./faq/production-clusterer": "./src/faq/production-clusterer.ts",
     "./faq/types": "./src/faq/types.ts",
     "./faq/review": "./src/faq/review.ts",
-    "./faq/duckdb-source": "./src/faq/duckdb-source.ts"
+    "./faq/duckdb-source": "./src/faq/duckdb-source.ts",
+    "./faq/filters": "./src/faq/filters.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit",
