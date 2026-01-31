@@ -69,12 +69,15 @@ async function faqExtract(options: {
   app?: string
   dryRun?: boolean
   json?: boolean
+  filters?: boolean
 }): Promise<void> {
   const clusteringPath = options.clusteringPath ?? DEFAULT_CLUSTERING_PATH
   const goldenPath = options.goldenPath ?? DEFAULT_GOLDEN_PATH
   const outputPath = options.outputPath ?? DEFAULT_OUTPUT_PATH
   const cachePath = options.cachePath ?? DEFAULT_CACHE_PATH
   const version = options.outputVersion ?? 'v1'
+
+  const applyFilters = options.filters ?? true
 
   console.log('🔬 FAQ Extraction Pipeline')
   console.log('='.repeat(60))
@@ -83,6 +86,7 @@ async function faqExtract(options: {
   console.log(`   Output:        ${outputPath}`)
   console.log(`   DuckDB cache:  ${cachePath}`)
   console.log(`   Version:       ${version}`)
+  console.log(`   Apply filters: ${applyFilters}`)
   console.log(`   Push to Redis: ${options.pushRedis ?? false}`)
   console.log(`   Dry run:       ${options.dryRun ?? false}`)
   console.log('')
@@ -126,6 +130,7 @@ async function faqExtract(options: {
       pushToRedis: options.pushRedis ?? false,
       appId: options.app,
       dryRun: options.dryRun ?? false,
+      applyFilters,
     }
 
     const result = await extractFaqCandidates(extractionOptions)
@@ -239,5 +244,6 @@ export function registerFaqExtractCommands(program: Command): void {
     )
     .option('-d, --dry-run', 'Show summary without writing artifacts')
     .option('--json', 'Output stats as JSON')
+    .option('--no-filters', 'Disable preprocessing filters (for comparison)')
     .action(faqExtract)
 }

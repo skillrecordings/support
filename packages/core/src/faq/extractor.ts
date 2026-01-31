@@ -11,6 +11,14 @@
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
+import {
+  type FilterResult,
+  type FilterStats,
+  createFilterStats,
+  formatFilterStats,
+  shouldFilter,
+  updateFilterStats,
+} from './filters'
 import { saveCandidatesToQueue } from './review'
 import type {
   ConversationAssignment,
@@ -83,8 +91,10 @@ export interface ExtractionStats {
   deduplicatedCount: number
   /** Clusters processed */
   clustersProcessed: number
-  /** Noise conversations skipped */
+  /** Noise conversations skipped (from Phase 0 clustering) */
   noiseSkipped: number
+  /** Filter statistics (from preprocessing filters) */
+  filterStats?: FilterStats
 }
 
 /**
@@ -113,6 +123,8 @@ export interface ExtractionOptions {
   appId?: string
   /** Dry run - don't write artifacts or push to Redis */
   dryRun?: boolean
+  /** Apply preprocessing filters to remove noise (default: true) */
+  applyFilters?: boolean
 }
 
 /**
@@ -418,26 +430,36 @@ interface ExtractedQA {
   question: string
   answer: string
   threadLength: number
+  senderEmail?: string
+}
+
+/**
+ * Result from Q&A extraction with filter status.
+ */
+interface ExtractedQAResult {
+  qa: ExtractedQA | null
+  filterResult?: FilterResult
 }
 
 async function extractQAFromConversation(
   conversationId: string,
-  source: DataSource
-): Promise<ExtractedQA | null> {
+  source: DataSource,
+  applyFilters = true
+): Promise<ExtractedQAResult> {
   try {
     const messages = await source.getMessages(conversationId)
-    if (messages.length === 0) return null
+    if (messages.length === 0) return { qa: null }
 
     // Sort by timestamp ascending
     const sorted = [...messages].sort((a, b) => a.created_at - b.created_at)
 
     // Find first inbound (customer) message
     const firstInbound = sorted.find((m) => m.is_inbound)
-    if (!firstInbound) return null
+    if (!firstInbound) return { qa: null }
 
     // Find last outbound (agent) message
     const lastOutbound = [...sorted].reverse().find((m) => !m.is_inbound)
-    if (!lastOutbound) return null
+    if (!lastOutbound) return { qa: null }
 
     const question =
       firstInbound.text ||
@@ -456,16 +478,41 @@ async function extractQAFromConversation(
       ''
 
     // Filter out very short or empty Q&A
-    if (question.length < 20 || answer.length < 20) return null
+    if (question.length < 20 || answer.length < 20) return { qa: null }
+
+    // Get sender email from first inbound message author
+    const senderEmail = firstInbound.author?.email
+
+    // Apply preprocessing filters if enabled
+    if (applyFilters) {
+      const filterResult = shouldFilter(question, senderEmail)
+      if (filterResult.filtered) {
+        return {
+          qa: null,
+          filterResult,
+        }
+      }
+    }
 
     return {
-      question,
-      answer,
-      threadLength: messages.length,
+      qa: {
+        question,
+        answer,
+        threadLength: messages.length,
+        senderEmail,
+      },
     }
   } catch {
-    return null
+    return { qa: null }
   }
+}
+
+/**
+ * Result from cluster extraction including filter statistics.
+ */
+interface ClusterExtractionResult {
+  candidate: ExtractedCandidate | null
+  filterStats: FilterStats
 }
 
 /**
@@ -477,8 +524,11 @@ async function extractFromCluster(
   source: DataSource,
   goldenResponses: GoldenResponse[],
   maxClusterSize: number,
-  topN: number
-): Promise<ExtractedCandidate | null> {
+  topN: number,
+  applyFilters: boolean
+): Promise<ClusterExtractionResult> {
+  const filterStats = createFilterStats()
+
   // Get representative conversations (closest to centroid)
   const clusterConvIds = Object.entries(assignments)
     .filter(([_, a]) => a.clusterId === cluster.id)
@@ -488,19 +538,31 @@ async function extractFromCluster(
     .slice(0, topN)
     .map(([id]) => id)
 
-  if (clusterConvIds.length === 0) return null
+  if (clusterConvIds.length === 0) {
+    return { candidate: null, filterStats }
+  }
 
   // Extract Q&A pairs from representative conversations
   const qaResults: Array<ExtractedQA & { conversationId: string }> = []
 
   for (const convId of clusterConvIds) {
-    const qa = await extractQAFromConversation(convId, source)
-    if (qa) {
-      qaResults.push({ ...qa, conversationId: convId })
+    const result = await extractQAFromConversation(convId, source, applyFilters)
+
+    // Track filter stats
+    if (result.filterResult) {
+      updateFilterStats(filterStats, result.filterResult)
+    } else if (result.qa) {
+      updateFilterStats(filterStats, { filtered: false })
+    }
+
+    if (result.qa) {
+      qaResults.push({ ...result.qa, conversationId: convId })
     }
   }
 
-  if (qaResults.length === 0) return null
+  if (qaResults.length === 0) {
+    return { candidate: null, filterStats }
+  }
 
   // Use the best Q&A (shortest thread, longest answer)
   qaResults.sort((a, b) => {
@@ -553,7 +615,7 @@ async function extractFromCluster(
     sourceConversations: qaResults.map((qa) => qa.conversationId),
   }
 
-  return candidate
+  return { candidate, filterStats }
 }
 
 /**
@@ -592,6 +654,7 @@ export async function extractFaqCandidates(
     pushToRedis = false,
     appId,
     dryRun = false,
+    applyFilters = true,
   } = options
 
   console.log('🔬 FAQ Extraction Pipeline')
@@ -602,6 +665,7 @@ export async function extractFaqCandidates(
   console.log(`   Top N per cluster: ${topN}`)
   console.log(`   Dedup threshold: ${dedupThreshold}`)
   console.log(`   Push to Redis: ${pushToRedis}`)
+  console.log(`   Apply filters: ${applyFilters}`)
   console.log(`   Dry run: ${dryRun}`)
   console.log('')
 
@@ -627,6 +691,9 @@ export async function extractFaqCandidates(
   // Find max cluster size for normalization
   const maxClusterSize = Math.max(...clustering.clusters.map((c) => c.size))
 
+  // Aggregate filter statistics
+  const aggregateFilterStats = createFilterStats()
+
   // Extract candidates from each cluster
   console.log('\n📝 Extracting candidates...')
   const candidates: ExtractedCandidate[] = []
@@ -640,21 +707,37 @@ export async function extractFaqCandidates(
       )
     }
 
-    const candidate = await extractFromCluster(
+    const result = await extractFromCluster(
       cluster,
       clustering.assignments,
       source,
       goldenResponses,
       maxClusterSize,
-      topN
+      topN,
+      applyFilters
     )
 
-    if (candidate) {
-      candidates.push(candidate)
+    // Aggregate filter stats
+    aggregateFilterStats.total += result.filterStats.total
+    aggregateFilterStats.filtered += result.filterStats.filtered
+    aggregateFilterStats.passed += result.filterStats.passed
+    for (const [reason, count] of Object.entries(result.filterStats.byReason)) {
+      aggregateFilterStats.byReason[reason] =
+        (aggregateFilterStats.byReason[reason] ?? 0) + count
+    }
+
+    if (result.candidate) {
+      candidates.push(result.candidate)
     }
   }
 
   console.log(`   Extracted ${candidates.length} raw candidates`)
+
+  // Log filter statistics if filters were applied
+  if (applyFilters && aggregateFilterStats.total > 0) {
+    console.log('\n🔍 Filter Statistics:')
+    console.log(formatFilterStats(aggregateFilterStats))
+  }
 
   // Deduplicate
   console.log('\n🔄 Deduplicating candidates...')
@@ -690,6 +773,7 @@ export async function extractFaqCandidates(
     deduplicatedCount: removedCount,
     clustersProcessed: eligibleClusters.length,
     noiseSkipped: clustering.stats.noiseConversations,
+    filterStats: applyFilters ? aggregateFilterStats : undefined,
   }
 
   const result: ExtractionResult = {
@@ -822,6 +906,12 @@ export function displayExtractionSummary(result: ExtractionResult): void {
   console.log(`   Deduplicated:            ${result.stats.deduplicatedCount}`)
   console.log(`   Clusters processed:      ${result.stats.clustersProcessed}`)
   console.log(`   Noise skipped:           ${result.stats.noiseSkipped}`)
+
+  // Show filter stats if available
+  if (result.stats.filterStats && result.stats.filterStats.total > 0) {
+    console.log('')
+    console.log(formatFilterStats(result.stats.filterStats))
+  }
 
   if (result.candidates.length > 0) {
     console.log('\n🏆 Top 10 Candidates:')
