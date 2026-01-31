@@ -190,3 +190,111 @@ export const FAQ_THRESHOLDS = {
   /** Minimum cluster size to keep */
   DEFAULT_MIN_CLUSTER_SIZE: 3,
 } as const
+
+// =============================================================================
+// Production Clustering Types (Phase 1.2)
+// =============================================================================
+
+/**
+ * Phase 0 cluster assignment from HDBSCAN
+ */
+export interface Phase0Assignment {
+  cluster_id: number // -1 for noise
+  distance_to_centroid: number | null
+}
+
+/**
+ * Phase 0 cluster label from LLM
+ */
+export interface Phase0ClusterLabel {
+  id: number
+  label: string
+  size: number
+  representative_messages: string[]
+  top_existing_tags: string[]
+  tag_coverage: number
+}
+
+/**
+ * Production cluster metadata
+ */
+export interface ProductionCluster {
+  /** Cluster ID (from Phase 0) */
+  id: number
+  /** LLM-generated label */
+  label: string
+  /** Human-readable description (optional, for refinement) */
+  description?: string
+  /** Number of conversations in this cluster */
+  size: number
+  /** Representative conversation IDs */
+  representativeIds: string[]
+  /** Top tags from conversations in this cluster */
+  topTags: string[]
+  /** Tag coverage (% of conversations with tags) */
+  tagCoverage: number
+  /** Average distance to centroid (cohesion metric) */
+  avgDistanceToCentroid: number
+  /** Priority tier from Phase 0 decisions (1-3) */
+  priorityTier?: number
+}
+
+/**
+ * Individual conversation cluster assignment
+ */
+export interface ConversationAssignment {
+  /** Conversation ID */
+  conversationId: string
+  /** Cluster ID (-1 for noise) */
+  clusterId: number
+  /** Distance to cluster centroid (null for noise) */
+  distanceToCentroid: number | null
+  /** Confidence score (1 - normalized distance) */
+  confidence: number
+}
+
+/**
+ * Production clustering result
+ */
+export interface ProductionClusteringResult {
+  /** Version identifier */
+  version: string
+  /** When clustering was generated */
+  generatedAt: string
+  /** Algorithm and parameters used */
+  config: {
+    algorithm: string
+    parameters: Record<string, unknown>
+    phase0ArtifactPath: string
+  }
+  /** Summary statistics */
+  stats: {
+    totalConversations: number
+    clusteredConversations: number
+    noiseConversations: number
+    clusterCount: number
+    noisePct: number
+    largestClusterSize: number
+    avgClusterSize: number
+  }
+  /** Cluster metadata */
+  clusters: ProductionCluster[]
+  /** Conversation assignments */
+  assignments: Record<string, ConversationAssignment>
+}
+
+/**
+ * Options for production clustering
+ */
+export interface ProductionClusterOptions {
+  /** Path to Phase 0 artifacts */
+  phase0Path: string
+  /** Output directory for production artifacts */
+  outputPath: string
+  /** Version tag (e.g., 'v1', 'v2') */
+  version?: string
+  /** Whether to enrich with DuckDB data */
+  enrichFromDuckDB?: boolean
+  /** DuckDB cache path */
+  duckdbPath?: string
+}
