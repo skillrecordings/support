@@ -189,3 +189,16 @@ Summary: Updated scoring to the relaxed criteria and re-ran it across all conver
 Changes made
 - Relaxed scoring in `scripts/score-conversations.mjs` to align with the new rubric (human reply + clear Q&A + helpful/resolution), loosened “human” thresholds, and removed VOC auto-exclusion so those can qualify.
 - Ensured `is_go
+
+---
+[2026-01-31T19:24:32.472Z]
+Completed: Validate gold quality with spot checks
+Files: none
+Summary: Generated the gold validation report with per-conversation checks and the final validated gold count.
+
+Details:
+- Wrote the validation table to `reports/gold-validation.md` with ✅/❌ for each criterion per gold conversation.
+- Final validated gold count is **3**, based on all three criteria passing.
+
+Learnings:
+- Most “gold” entries are either misclassified as `voc_response` or lack a substantive h
