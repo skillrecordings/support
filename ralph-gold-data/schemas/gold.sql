@@ -9,10 +9,15 @@ CREATE TABLE IF NOT EXISTS products (
 
 CREATE TABLE IF NOT EXISTS conversations (
   id VARCHAR PRIMARY KEY,
+  subject VARCHAR,
+  customer_email VARCHAR,
   product VARCHAR NOT NULL,
   request_type VARCHAR NOT NULL,
   quality_score DOUBLE NOT NULL,
   is_gold BOOLEAN NOT NULL DEFAULT FALSE,
+  tags JSON,
+  trigger_message JSON,
+  conversation_history JSON,
   raw_json JSON,
   FOREIGN KEY (product) REFERENCES products(id)
 );
