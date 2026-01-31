@@ -93,8 +93,10 @@
     "./faq": "./src/faq/index.ts",
     "./faq/miner": "./src/faq/miner.ts",
     "./faq/clusterer": "./src/faq/clusterer.ts",
+    "./faq/production-clusterer": "./src/faq/production-clusterer.ts",
     "./faq/types": "./src/faq/types.ts",
-    "./faq/review": "./src/faq/review.ts"
+    "./faq/review": "./src/faq/review.ts",
+    "./faq/duckdb-source": "./src/faq/duckdb-source.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit",
@@ -112,11 +114,11 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.15",
-    "openai": "^4.104.0",
     "@axiomhq/js": "^1.3.0",
     "@babel/parser": "^7.28.6",
     "@babel/traverse": "^7.28.6",
     "@babel/types": "^7.28.6",
+    "@duckdb/node-api": "^1.4.4-r.1",
     "@langfuse/otel": "^4.5.1",
     "@opentelemetry/sdk-node": "^0.211.0",
     "@skillrecordings/database": "*",
@@ -133,6 +135,7 @@
     "inngest": "^3.49.0",
     "langfuse": "^3.38.6",
     "marked": "^17.0.1",
+    "openai": "^4.104.0",
     "stripe": "^17.5.0",
     "zod": "^4.3.5"
   },
