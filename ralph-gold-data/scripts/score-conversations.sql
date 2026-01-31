@@ -2,7 +2,7 @@ BEGIN TRANSACTION;
 UPDATE conversations SET quality_score = 0, is_gold = FALSE WHERE id = 'cnv_1jdfxlet';
 UPDATE conversations SET quality_score = 0, is_gold = FALSE WHERE id = 'cnv_1jdmyld1';
 UPDATE conversations SET quality_score = 0, is_gold = FALSE WHERE id = 'cnv_1jdlcf6t';
-UPDATE conversations SET quality_score = 5, is_gold = TRUE WHERE id = 'cnv_1jdnp59h';
+UPDATE conversations SET quality_score = 0, is_gold = FALSE WHERE id = 'cnv_1jdnp59h';
 UPDATE conversations SET quality_score = 0, is_gold = FALSE WHERE id = 'cnv_1jdnno85';
 UPDATE conversations SET quality_score = 0, is_gold = FALSE WHERE id = 'cnv_1jdkvns5';
 UPDATE conversations SET quality_score = 0, is_gold = FALSE WHERE id = 'cnv_1jdnbxd1';
@@ -78,7 +78,7 @@ UPDATE conversations SET quality_score = 0, is_gold = FALSE WHERE id = 'cnv_1jdg
 UPDATE conversations SET quality_score = 0, is_gold = FALSE WHERE id = 'cnv_1jdftko5';
 UPDATE conversations SET quality_score = 0, is_gold = FALSE WHERE id = 'cnv_1jdf3zvp';
 UPDATE conversations SET quality_score = 0, is_gold = FALSE WHERE id = 'cnv_1jd93ip1';
-UPDATE conversations SET quality_score = 5, is_gold = TRUE WHERE id = 'cnv_1jdezulh';
+UPDATE conversations SET quality_score = 0, is_gold = FALSE WHERE id = 'cnv_1jdezulh';
 UPDATE conversations SET quality_score = 0, is_gold = FALSE WHERE id = 'cnv_1jd725gl';
 UPDATE conversations SET quality_score = 0, is_gold = FALSE WHERE id = 'cnv_1jdd3j6t';
 UPDATE conversations SET quality_score = 0, is_gold = FALSE WHERE id = 'cnv_1jddvyzp';

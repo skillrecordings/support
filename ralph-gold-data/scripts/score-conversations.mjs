@@ -108,6 +108,21 @@ const keywordSets = {
   profanity: ['fuck', 'shit', 'bitch', 'asshole', 'dick', 'wtf', 'crap'],
 }
 
+const receiptMonths = [
+  'january',
+  'february',
+  'march',
+  'april',
+  'may',
+  'june',
+  'july',
+  'august',
+  'september',
+  'october',
+  'november',
+  'december',
+]
+
 function normalize(text) {
   return (text || '').toLowerCase()
 }
@@ -144,6 +159,7 @@ function classifyExclusion(item) {
   const subject = normalize(item.subject || '')
   const tags = (item.tags || []).map((tag) => tag.toLowerCase())
   const hasQuestion = text.includes('?')
+  const receiptRegex = new RegExp(`\\byour\\s+(${receiptMonths.join('|')})\\s+receipt\\b`, 'i')
 
   const isSystem =
     hasAny(text, keywordSets.system) ||
@@ -152,6 +168,17 @@ function classifyExclusion(item) {
     subject.includes('dmarc digest')
 
   if (isSystem) return 'system'
+
+  const isForwardedInvoice =
+    text.includes('kit.com') ||
+    text.includes('[EMAIL]') ||
+    text.includes('convertkit.com') ||
+    /@kit\.com\b/.test(text) ||
+    /@convertkit\.com\b/.test(text) ||
+    /your .* invoice for .*/i.test(subject) ||
+    receiptRegex.test(text)
+
+  if (isForwardedInvoice) return 'forwarded_invoice'
 
   const isSpam =
     hasAny(text, keywordSets.spam) ||
@@ -246,8 +273,12 @@ function scoreConversation(item) {
 }
 
 const data = JSON.parse(fs.readFileSync(DATA_PATH, 'utf8'))
+const exclusionCounts = {}
 const scored = data.map((item) => {
   const result = scoreConversation(item)
+  if (result.exclusion) {
+    exclusionCounts[result.exclusion] = (exclusionCounts[result.exclusion] || 0) + 1
+  }
   return {
     conversation_id: item.id,
     score: result.score,
@@ -268,7 +299,16 @@ const avgScore = scored.reduce((sum, row) => sum + row.score, 0) / scored.length
 fs.mkdirSync(path.dirname(REPORT_PATH), { recursive: true })
 fs.writeFileSync(
   REPORT_PATH,
-  JSON.stringify({ total: scored.length, averageScore: Number(avgScore.toFixed(2)), tiers: tierCounts }, null, 2),
+  JSON.stringify(
+    {
+      total: scored.length,
+      averageScore: Number(avgScore.toFixed(2)),
+      tiers: tierCounts,
+      exclusions: exclusionCounts,
+    },
+    null,
+    2,
+  ),
 )
 
 const sqlLines = ['BEGIN TRANSACTION;']
@@ -289,3 +329,6 @@ fs.writeFileSync(OUTPUT_SQL, `${sqlLines.join('\n')}\n`)
 
 console.log(`Wrote ${scored.length} quality updates to ${OUTPUT_SQL}`)
 console.log(`Quality distribution saved to ${REPORT_PATH}`)
+if (exclusionCounts.forwarded_invoice) {
+  console.log(`Forwarded invoice noise filtered: ${exclusionCounts.forwarded_invoice}`)
+}

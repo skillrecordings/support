@@ -119,3 +119,13 @@ Validation
 
 Learnings
 - The `conversations.request_type` column is still `unknown`; the `classifications` table is the reliable source for request-type distribution.
+
+---
+[2026-01-31T19:16:36.802Z]
+Completed: Filter forwarded third-party emails
+Files: none
+Summary: Added forwarded invoice noise detection to the quality scorer, regenerated the score SQL/report, and re-applied it to `gold.duckdb` so these threads are now marked `quality_score = 0` / `is_gold = false`. The new exclusion counted 4 conversations.
+
+Details
+- Added forwarded-invoice detection and exclusion counting in `scripts/score-conversations.mjs`.
+- Regenerated `scripts/score-conversations.sql
