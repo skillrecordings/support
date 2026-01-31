@@ -1,0 +1,126 @@
+{
+  "generated_at": "2026-01-31T18:34:16.749815Z",
+  "gold_ratio_by_product": [
+    {
+      "gold": 6,
+      "gold_ratio": 0.06,
+      "product": "total-typescript",
+      "total": 100
+    },
+    {
+      "gold": 2,
+      "gold_ratio": 0.0208,
+      "product": "ai-hero",
+      "total": 96
+    }
+  ],
+  "request_type_distribution": {
+    "matrix": [
+      {
+        "counts": [
+          40,
+          4,
+          21,
+          19,
+          1,
+          4,
+          3,
+          2,
+          2
+        ],
+        "product": "ai-hero"
+      },
+      {
+        "counts": [
+          44,
+          31,
+          7,
+          8,
+          7,
+          2,
+          0,
+          1,
+          0
+        ],
+        "product": "total-typescript"
+      }
+    ],
+    "request_types": [
+      "voc_response",
+      "spam",
+      "support_access",
+      "system",
+      "support_billing",
+      "support_technical",
+      "presales_team",
+      "support_refund",
+      "presales_faq"
+    ]
+  },
+  "tier_breakdown_by_product": [
+    {
+      "gold": 2,
+      "gold_ratio": 0.0208,
+      "noise": 94,
+      "product": "ai-hero",
+      "silver": 0,
+      "total": 96
+    },
+    {
+      "gold": 6,
+      "gold_ratio": 0.06,
+      "noise": 92,
+      "product": "total-typescript",
+      "silver": 2,
+      "total": 100
+    }
+  ],
+  "top_request_types": [
+    {
+      "count": 84,
+      "request_type": "voc_response"
+    },
+    {
+      "count": 35,
+      "request_type": "spam"
+    },
+    {
+      "count": 28,
+      "request_type": "support_access"
+    },
+    {
+      "count": 27,
+      "request_type": "system"
+    },
+    {
+      "count": 8,
+      "request_type": "support_billing"
+    },
+    {
+      "count": 6,
+      "request_type": "support_technical"
+    },
+    {
+      "count": 3,
+      "request_type": "presales_team"
+    },
+    {
+      "count": 3,
+      "request_type": "support_refund"
+    },
+    {
+      "count": 2,
+      "request_type": "presales_faq"
+    }
+  ],
+  "totals_by_product": [
+    {
+      "product": "total-typescript",
+      "total": 100
+    },
+    {
+      "product": "ai-hero",
+      "total": 96
+    }
+  ]
+}
