@@ -40,3 +40,6 @@ yarn-error.log*
 
 # FAQ Mining artifacts (large files)
 artifacts/
+
+# Mined conversation data (contains PII)
+data/mined/
