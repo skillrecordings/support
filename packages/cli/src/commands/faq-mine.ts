@@ -16,9 +16,11 @@ import {
   type FaqCandidate,
   type MineResult,
   filterAutoSurfaceCandidates,
-  mineFaqCandidates,
   mineConversations,
+  mineFaqCandidates,
 } from '@skillrecordings/core/faq'
+import { createDuckDBSource } from '@skillrecordings/core/faq/duckdb-source'
+import type { DataSource } from '@skillrecordings/core/faq/types'
 import { closeDb } from '@skillrecordings/database'
 import type { Command } from 'commander'
 
@@ -153,6 +155,26 @@ function displayResults(result: MineResult): void {
   console.log('')
 }
 
+/** Default DuckDB cache path */
+const DEFAULT_CACHE_PATH = `${process.env.HOME}/skill/data/front-cache.db`
+
+/**
+ * Create data source based on --source flag.
+ */
+async function createSource(
+  sourceType: 'cache' | 'front' | undefined,
+  cachePath?: string
+): Promise<DataSource | undefined> {
+  if (sourceType === 'cache') {
+    const dbPath = cachePath ?? DEFAULT_CACHE_PATH
+    console.log(`📦 Using DuckDB cache: ${dbPath}`)
+    return createDuckDBSource({ dbPath })
+  }
+
+  // Default to Front API (undefined means use existing behavior)
+  return undefined
+}
+
 /**
  * Main command handler
  */
@@ -165,6 +187,9 @@ async function faqMine(options: {
   json?: boolean
   export?: string
   raw?: boolean
+  source?: 'cache' | 'front'
+  cachePath?: string
+  dryRun?: boolean
 }): Promise<void> {
   if (!options.app) {
     console.error('Error: --app is required')
@@ -176,20 +201,76 @@ async function faqMine(options: {
     process.exit(1)
   }
 
+  let source: DataSource | undefined
+
   try {
+    // Create data source
+    source = await createSource(options.source ?? 'cache', options.cachePath)
+    // Dry run mode: show stats and sample data
+    if (options.dryRun) {
+      console.log(`\n🧪 DRY RUN MODE - ${options.app}`)
+      console.log(`   Source: ${source?.name ?? 'front'}`)
+      console.log(`   Since: ${options.since}`)
+      console.log(`   Limit: ${options.limit ?? 500}`)
+
+      if (source?.getStats) {
+        const stats = await source.getStats()
+        console.log(`\n📊 Cache Statistics:`)
+        console.log(
+          `   Total conversations: ${stats.totalConversations.toLocaleString()}`
+        )
+        console.log(
+          `   Filtered (matching criteria): ${stats.filteredConversations.toLocaleString()}`
+        )
+        console.log(
+          `   Total messages: ${stats.totalMessages.toLocaleString()}`
+        )
+        console.log(`   Inboxes: ${stats.inboxCount}`)
+        if (stats.dateRange.oldest && stats.dateRange.newest) {
+          console.log(
+            `   Date range: ${stats.dateRange.oldest.toLocaleDateString()} - ${stats.dateRange.newest.toLocaleDateString()}`
+          )
+        }
+      }
+
+      // Fetch a small sample
+      console.log(`\n📝 Sample conversations (limit 5):`)
+      const sample = await mineConversations({
+        appId: options.app,
+        since: options.since,
+        limit: 5,
+        unchangedOnly: options.unchangedOnly ?? false,
+        source,
+      })
+
+      for (const conv of sample) {
+        console.log(`\n   [${conv.conversationId}]`)
+        console.log(`   Q: ${truncate(conv.question, 100)}`)
+        console.log(`   A: ${truncate(conv.answer, 100)}`)
+        console.log(`   Tags: ${conv.tags.slice(0, 5).join(', ')}`)
+      }
+
+      console.log(
+        `\n✅ Dry run complete. ${sample.length} sample conversations loaded.`
+      )
+      return
+    }
+
     // Raw mode: just export Q&A pairs without clustering
     if (options.raw) {
       console.log(`📚 Mining raw Q&A pairs for ${options.app}...`)
+      console.log(`   Source: ${source?.name ?? 'front'}`)
       console.log(`   Since: ${options.since}`)
       console.log(`   Unchanged only: ${options.unchangedOnly ?? false}`)
-      
+
       const conversations = await mineConversations({
         appId: options.app,
         since: options.since,
         limit: options.limit ?? 500,
         unchangedOnly: options.unchangedOnly ?? false,
+        source,
       })
-      
+
       const rawData = {
         generatedAt: new Date().toISOString(),
         options: {
@@ -210,23 +291,26 @@ async function faqMine(options: {
           resolvedAt: c.resolvedAt.toISOString(),
         })),
       }
-      
+
       if (options.export) {
         writeFileSync(options.export, JSON.stringify(rawData, null, 2), 'utf-8')
-        console.log(`\n✅ Exported ${conversations.length} raw Q&A pairs to ${options.export}`)
+        console.log(
+          `\n✅ Exported ${conversations.length} raw Q&A pairs to ${options.export}`
+        )
       } else {
         console.log(JSON.stringify(rawData, null, 2))
       }
-      
+
       return
     }
-    
+
     const result = await mineFaqCandidates({
       appId: options.app,
       since: options.since,
       limit: options.limit ?? 500,
       unchangedOnly: options.unchangedOnly ?? false,
       clusterThreshold: options.clusterThreshold,
+      source,
     })
 
     // JSON output
@@ -300,6 +384,10 @@ async function faqMine(options: {
     )
     process.exit(1)
   } finally {
+    // Close data source if needed
+    if (source?.close) {
+      await source.close()
+    }
     await closeDb()
   }
 }
@@ -333,5 +421,12 @@ export function registerFaqMineCommands(program: Command): void {
     .option('--json', 'Output as JSON')
     .option('-e, --export <file>', 'Export candidates to file')
     .option('-r, --raw', 'Export raw Q&A pairs without clustering (faster)')
+    .option(
+      '--source <type>',
+      'Data source: cache (DuckDB, default) or front (live API)',
+      'cache'
+    )
+    .option('--cache-path <path>', 'Path to DuckDB cache file')
+    .option('-d, --dry-run', 'Show stats and sample data without full mining')
     .action(faqMine)
 }

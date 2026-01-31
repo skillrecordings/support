@@ -30,8 +30,16 @@ import {
   clusterBySimilarity,
   generateCandidatesFromClusters,
 } from './clusterer'
-import type { MineOptions, MineResult, ResolvedConversation } from './types'
+import type {
+  DataSource,
+  MineOptions,
+  MineResult,
+  ResolvedConversation,
+} from './types'
 import { FAQ_THRESHOLDS } from './types'
+
+// Re-export DataSource for convenience
+export type { DataSource }
 
 /**
  * Parse duration string (e.g., '30d', '90d') to Date.
@@ -83,12 +91,12 @@ const SPAM_PATTERNS = [
 function isSpamOrNoise(text: string): boolean {
   // Too short
   if (text.trim().length < 20) return true
-  
+
   // Matches spam patterns
   for (const pattern of SPAM_PATTERNS) {
     if (pattern.test(text)) return true
   }
-  
+
   return false
 }
 
@@ -107,15 +115,14 @@ function extractQuestion(messages: Message[]): string {
   }
 
   // Prefer text, fall back to stripped HTML
-  const text = (
+  const text =
     firstInbound.text ??
     firstInbound.body
       ?.replace(/<[^>]*>/g, ' ')
       .replace(/\s+/g, ' ')
       .trim() ??
     ''
-  )
-  
+
   return text
 }
 
@@ -215,7 +222,28 @@ async function checkIfUnchanged(
 export async function mineConversations(
   options: MineOptions
 ): Promise<ResolvedConversation[]> {
-  const { appId, since, limit = 500, unchangedOnly = false } = options
+  const { appId, since, limit = 500, unchangedOnly = false, source } = options
+
+  const sinceDate = parseSince(since)
+
+  // If a data source is provided, use it directly
+  if (source) {
+    console.log(`Mining from ${source.name} data source...`)
+    const conversations = await source.getConversations({
+      appId,
+      since: sinceDate,
+      limit,
+    })
+
+    // Filter for unchanged only if requested
+    if (unchangedOnly) {
+      return conversations.filter((c) => c.wasUnchanged)
+    }
+
+    return conversations
+  }
+
+  // Fall back to Front API / database approach
 
   // Get app config
   const app = await getApp(appId)
@@ -229,7 +257,6 @@ export async function mineConversations(
   }
 
   const front = createFrontClient({ apiToken: frontToken })
-  const sinceDate = parseSince(since)
 
   // Get resolved conversations from our database first (more efficient)
   const dbConversations = await database
@@ -493,14 +520,15 @@ async function mineFromFrontDirect(
           const answer = extractAnswer(messages)
 
           if (!question || !answer) continue
-          
+
           // Filter out spam and noise
           if (isSpamOrNoise(question)) {
             continue
           }
-          
+
           // Filter out conversations tagged as spam
-          const tagNames = conv.tags?.map((t: any) => (t.name ?? '').toLowerCase()) ?? []
+          const tagNames =
+            conv.tags?.map((t: any) => (t.name ?? '').toLowerCase()) ?? []
           if (tagNames.includes('spam') || tagNames.includes('collaboration')) {
             continue
           }
