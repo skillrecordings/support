@@ -11,11 +11,19 @@
  *   bun scripts/embed-conversations.ts --dry-run # Count messages only
  *
  * Issue: https://github.com/skillrecordings/support/issues/95
+ * Filter integration: https://github.com/skillrecordings/support/issues/112
  */
 
 import * as path from 'path'
 import * as fs from 'fs'
 import OpenAI from 'openai'
+import {
+  shouldFilter,
+  createFilterStats,
+  updateFilterStats,
+  formatFilterStats,
+  type FilterStats,
+} from '../packages/core/src/faq/filters'
 
 // ============================================================================
 // Configuration
@@ -26,7 +34,7 @@ const OUTPUT_DIR = path.join(
   process.env.HOME || '~',
   'Code/skillrecordings/support/artifacts/phase-0/embeddings'
 )
-const VERSION = 'v1'
+const VERSION = 'v2'
 const OUTPUT_PATH = path.join(OUTPUT_DIR, VERSION)
 const PARQUET_FILE = path.join(OUTPUT_PATH, 'conversations.parquet')
 const STATS_FILE = path.join(OUTPUT_PATH, 'stats.json')
@@ -51,6 +59,7 @@ interface ConversationRow {
   inbox_id: string
   tags: string[] | null  // DuckDB returns VARCHAR[] as native array
   first_message: string | null
+  sender_email: string | null  // For domain-based filtering
 }
 
 interface EmbeddedConversation {
@@ -74,6 +83,7 @@ interface Stats {
   total_conversations: number
   embedded_count: number
   skipped_empty: number
+  skipped_filtered: number
   failed_count: number
   avg_token_count: number
   model: string
@@ -85,7 +95,9 @@ interface Stats {
     html_stripped: boolean
     whitespace_normalized: boolean
     min_length: number
+    filters_applied: boolean
   }
+  filter_stats: FilterStats
 }
 
 // ============================================================================
@@ -316,13 +328,14 @@ async function main() {
         c.tags,
         c.inbox_id,
         m.body_text as first_message,
+        m.author_email as sender_email,
         ROW_NUMBER() OVER (PARTITION BY c.id ORDER BY m.created_at) as rn
       FROM conversations c
       JOIN messages m ON m.conversation_id = c.id
       WHERE m.is_inbound = true
         AND c.status = 'archived'
     )
-    SELECT conversation_id, inbox_id, tags, first_message
+    SELECT conversation_id, inbox_id, tags, first_message, sender_email
     FROM first_messages WHERE rn = 1
     ORDER BY conversation_id
   `
@@ -334,13 +347,23 @@ async function main() {
     console.log('\n🏃 Dry run - counting only')
     let validCount = 0
     let emptyCount = 0
+    const dryRunFilterStats = createFilterStats()
     for (const row of rows) {
       const cleaned = cleanMessage(row.first_message)
-      if (cleaned) validCount++
-      else emptyCount++
+      if (!cleaned) {
+        emptyCount++
+        continue
+      }
+      // Apply noise filters
+      const filterResult = shouldFilter(cleaned, row.sender_email ?? undefined)
+      updateFilterStats(dryRunFilterStats, filterResult)
+      if (!filterResult.filtered) {
+        validCount++
+      }
     }
-    console.log(`  Valid messages: ${validCount}`)
+    console.log(`  Valid messages (after filtering): ${validCount}`)
     console.log(`  Empty/short: ${emptyCount}`)
+    console.log(`\n${formatFilterStats(dryRunFilterStats)}`)
     console.log(`  Estimated cost: $${((validCount * 100 * COST_PER_MILLION_TOKENS) / 1_000_000).toFixed(2)} - $${((validCount * 200 * COST_PER_MILLION_TOKENS) / 1_000_000).toFixed(2)}`)
     db.close()
     return
@@ -359,10 +382,12 @@ async function main() {
   // Process in batches
   const embedded: EmbeddedConversation[] = []
   let skippedEmpty = 0
+  let skippedFiltered = 0
   let failedCount = 0
   let totalTokens = 0
+  const filterStats = createFilterStats()
 
-  console.log('\n🚀 Starting embedding generation...')
+  console.log('\n🚀 Starting embedding generation (with noise filtering)...')
 
   for (let i = startIndex; i < rows.length; i += BATCH_SIZE) {
     const batch = rows.slice(i, i + BATCH_SIZE)
@@ -375,6 +400,15 @@ async function main() {
       const cleaned = cleanMessage(row.first_message)
       if (!cleaned) {
         skippedEmpty++
+        processedSet.add(row.conversation_id)
+        continue
+      }
+
+      // Apply noise filters BEFORE embedding (Issue #112)
+      const filterResult = shouldFilter(cleaned, row.sender_email ?? undefined)
+      updateFilterStats(filterStats, filterResult)
+      if (filterResult.filtered) {
+        skippedFiltered++
         processedSet.add(row.conversation_id)
         continue
       }
@@ -426,7 +460,7 @@ async function main() {
       const progress = Math.min(i + BATCH_SIZE, rows.length)
       const percent = ((progress / rows.length) * 100).toFixed(1)
       console.log(
-        `  [${progress}/${rows.length}] ${percent}% - Embedded ${embedded.length}, Skipped ${skippedEmpty}`
+        `  [${progress}/${rows.length}] ${percent}% - Embedded ${embedded.length}, Empty ${skippedEmpty}, Filtered ${skippedFiltered}`
       )
     } catch (error) {
       console.error(`  ❌ Failed batch at index ${i}:`, error)
@@ -454,8 +488,10 @@ async function main() {
   console.log('\n✅ Embedding generation complete!')
   console.log(`  Total embedded: ${embedded.length}`)
   console.log(`  Skipped (empty/short): ${skippedEmpty}`)
+  console.log(`  Skipped (filtered noise): ${skippedFiltered}`)
   console.log(`  Failed: ${failedCount}`)
   console.log(`  Runtime: ${runtimeSeconds.toFixed(1)}s`)
+  console.log(`\n${formatFilterStats(filterStats)}`)
 
   // Write to Parquet using DuckDB
   console.log('\n📦 Writing Parquet file...')
@@ -520,10 +556,11 @@ async function main() {
   const costUsd = (totalTokens * COST_PER_MILLION_TOKENS) / 1_000_000
 
   const stats: Stats = {
-    version: 1,
+    version: 2,
     total_conversations: rows.length,
     embedded_count: embedded.length,
     skipped_empty: skippedEmpty,
+    skipped_filtered: skippedFiltered,
     failed_count: failedCount,
     avg_token_count: avgTokenCount,
     model: EMBEDDING_MODEL,
@@ -535,7 +572,9 @@ async function main() {
       html_stripped: true,
       whitespace_normalized: true,
       min_length: 10,
+      filters_applied: true,
     },
+    filter_stats: filterStats,
   }
 
   fs.writeFileSync(STATS_FILE, JSON.stringify(stats, null, 2))
