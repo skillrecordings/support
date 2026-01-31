@@ -497,7 +497,7 @@ async function main() {
   console.log('\n📦 Writing Parquet file...')
 
   // Create a new DuckDB connection for writing
-  const writeDb = new ddb.Database(':memory:')
+  const writeDb = new ddb.Database(path.join(OUTPUT_PATH, 'temp.duckdb'))
 
   // Create table with proper schema
   await execQuery(

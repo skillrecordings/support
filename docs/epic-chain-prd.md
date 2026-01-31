@@ -386,6 +386,12 @@ This is the biggest and most important epic. Two major deliverables: populate th
 
 Chunk strategy: one chunk per Q&A pair (natural boundaries). Format: `"Q: {question}\nA: {answer}"`.
 
+**Taxonomy Structure:** Use [SKOS-compatible](https://www.w3.org/2004/02/skos/) structure for topic organization:
+- `prefLabel` / `altLabel` for primary name and synonyms (e.g., "refund" = "money back", "cancel purchase")
+- `broader` / `narrower` for hierarchy (e.g., refund_request → billing_support)
+- `scopeNote` for definitions
+- Enables future: hierarchical routing fallback, synonym matching, cross-product taxonomy sharing
+
 **KB files to create:**
 ```
 packages/core/src/knowledge/
