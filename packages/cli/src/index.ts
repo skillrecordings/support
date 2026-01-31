@@ -9,6 +9,7 @@ import { runEval } from './commands/eval'
 import { registerEvalLocalCommands } from './commands/eval-local/index'
 import { registerEvalPipelineCommands } from './commands/eval-pipeline/index'
 import { registerEvalPromptCommands } from './commands/eval-prompt'
+import { registerFaqClassifyCommands } from './commands/faq-classify'
 import { registerFaqClusterCommands } from './commands/faq-cluster'
 import { registerFaqExtractCommands } from './commands/faq-extract'
 import { registerFaqMineCommands } from './commands/faq-mine'
@@ -150,6 +151,9 @@ registerDbStatusCommand(program)
 
 // Register FAQ clustering commands (production clustering from Phase 0)
 registerFaqClusterCommands(program)
+
+// Register FAQ classification commands (LLM topic classification)
+registerFaqClassifyCommands(program)
 
 // Register FAQ extraction commands (extract candidates from clusters)
 registerFaqExtractCommands(program)
