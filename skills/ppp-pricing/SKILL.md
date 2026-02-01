@@ -4,6 +4,50 @@ description: |
   Purchasing Power Parity pricing questions. Triggers on "PPP", "regional discount",
   "country discount", "can't afford", scholarship requests, or discount stacking questions.
 sample_size: 715
+validation:
+  required_phrases:
+    - "parity"
+  forbidden_patterns:
+    - "(?i)coupon"
+    - "(?i)discount code"
+    - "(?i)custom discount"
+    - "(?i)special discount"
+    - "(?i)extended this discount"
+    - "(?i)free license"
+metrics:
+  sample_size: 715
+  avg_thread_length: 2.90
+  top_phrases:
+    - phrase: "for your interest in"
+      count: 147
+      percent: 20.6
+    - phrase: "thanks for your interest"
+      count: 146
+      percent: 20.4
+    - phrase: "your interest in the"
+      count: 136
+      percent: 19.0
+    - phrase: "interest in the course"
+      count: 135
+      percent: 18.9
+    - phrase: "on the pricing page"
+      count: 103
+      percent: 14.4
+    - phrase: "automatically show up on"
+      count: 102
+      percent: 14.3
+    - phrase: "show up on the"
+      count: 102
+      percent: 14.3
+    - phrase: "up on the pricing"
+      count: 102
+      percent: 14.3
+    - phrase: "we offer parity pricing"
+      count: 101
+      percent: 14.1
+    - phrase: "offer parity pricing in"
+      count: 101
+      percent: 14.1
 ---
 
 # PPP Pricing
@@ -16,6 +60,13 @@ You're handling a Purchasing Power Parity question.
 - Checkbox option on purchase page
 - Automated by location detection
 - PPP licenses have restrictions (region-locked, no bonus content)
+
+## Sub-categories
+
+- How to get PPP (checkbox on pricing page)
+- Discount stacking with sales/bundles
+- Scholarship/free enrollment requests
+- Restrictions (region-locked, core curriculum only)
 
 ## Common Questions & Answers
 
@@ -64,6 +115,6 @@ You're handling a Purchasing Power Parity question.
 ## Validation
 
 Draft must:
-- [ ] NOT offer or promise additional discounts
-- [ ] Mention free tutorials if declining discount request
+- [ ] NOT offer or promise additional/custom discounts
+- [ ] Mention free tutorials if declining a discount request
 - [ ] Be clear that discounts don't stack (if asked)

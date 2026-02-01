@@ -93,3 +93,13 @@ Summary: Updated the email-change skill frontmatter with validation + metrics fr
 Changes
 - Added validation + metrics (avg thread length + top 10 4-word phrases) in `skills/email-change/SKILL.md`
 - Added verbatim example sets in `skill
+
+---
+[2026-02-01T23:25:56.034Z]
+Completed: Enrich ppp-pricing skill with phrase frequency and validation
+Files: none
+Summary: Updated the PPP pricing skill with validation/metrics and added three verbatim example sets derived from the 715 real threads; logged the extraction details in the audit log with the computed top 4‑gram phrases and averages.
+
+Changes
+- Added `validation` + `metrics` frontmatter and a sub-categories section in `skills/ppp-pricing/SKILL.md`.
+- Added verbatim example sets in `skills/ppp-pricing/examp

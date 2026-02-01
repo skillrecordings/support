@@ -110,7 +110,7 @@
       "title": "Enrich ppp-pricing skill with phrase frequency and validation",
       "description": "Analyze all 715 ppp-pricing samples to:\n1. Extract top 10 phrases by frequency\n2. Identify sub-categories (how to get PPP, discount stacking, scholarship, restrictions)\n3. Add validation rules (no custom discounts, must mention free content if declining)\n4. Add metrics block\n5. Expand examples: canonical (5), edge-cases (5), variations (5)\n\nInput: artifacts/training-data/redacted-threads.jsonl (filter topicId=ppp_pricing_inquiry)\nOutput: Updated skills/ppp-pricing/SKILL.md and examples/*.md",
       "priority": 12,
-      "passes": false,
+      "passes": true,
       "validationCommand": "test -f skills/ppp-pricing/SKILL.md && grep -q \"validation:\" skills/ppp-pricing/SKILL.md && ls skills/ppp-pricing/examples/*.md | wc -l | grep -q \"[3-9]\""
     },
     {
@@ -140,7 +140,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-01T21:18:54.627Z",
-    "totalIterations": 6,
-    "lastIteration": "2026-02-01T22:55:59.631Z"
+    "totalIterations": 7,
+    "lastIteration": "2026-02-01T23:25:56.034Z"
   }
 }
