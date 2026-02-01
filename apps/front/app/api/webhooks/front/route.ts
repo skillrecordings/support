@@ -185,7 +185,7 @@ export async function POST(request: NextRequest) {
     subject: previewSubject ?? null,
     body: previewBody ?? null,
     senderEmail: previewSenderEmail ?? null,
-    payload: event as Record<string, unknown>,
+    payload: event as unknown as Record<string, unknown>,
     payloadRaw: payload,
   })
 
