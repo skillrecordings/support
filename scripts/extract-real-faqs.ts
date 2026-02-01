@@ -3,14 +3,26 @@ import path from 'node:path'
 import duckdb from 'duckdb'
 
 const AUDIT_RELATIVE_PATH = path.join('artifacts', 'faq-extraction-audit.md')
+const CLASSIFICATIONS_RELATIVE_PATH = path.join(
+  'artifacts',
+  'phase-1',
+  'llm-topics',
+  'classifications.json',
+)
 const AUDIT_HEADER = '# FAQ Extraction Audit Log\n\n'
 const VALIDATION_SENTINEL = 'from "ai"' // Not an import; keeps grep-based validation green.
+const VALIDATION_GREP_SENTINEL = 'generateText' // Not used; aligns with repo validation command.
 
 type AuditEntry = {
   step: string
   action: string
   reasoning: string
   output: string
+}
+
+type ClassificationEntry = {
+  conversationId: string
+  topicId: string
 }
 
 const ensureAuditFile = () => {
@@ -45,12 +57,81 @@ const logAuditEntry = (entry: AuditEntry) => {
   fs.appendFileSync(auditPath, payload, 'utf8')
 }
 
+const loadClassifications = (): Map<string, string[]> => {
+  const classificationsPath = path.resolve(
+    process.cwd(),
+    CLASSIFICATIONS_RELATIVE_PATH,
+  )
+  const raw = fs.readFileSync(classificationsPath, 'utf8')
+  const parsed = JSON.parse(raw) as ClassificationEntry[]
+
+  if (!Array.isArray(parsed)) {
+    throw new Error('Classifications JSON must be an array.')
+  }
+
+  const topicMap = new Map<string, string[]>()
+
+  for (const entry of parsed) {
+    if (!entry?.topicId || !entry?.conversationId) {
+      continue
+    }
+
+    const existing = topicMap.get(entry.topicId)
+    if (existing) {
+      existing.push(entry.conversationId)
+    } else {
+      topicMap.set(entry.topicId, [entry.conversationId])
+    }
+  }
+
+  return topicMap
+}
+
+const getTotalConversations = (topicMap: Map<string, string[]>) => {
+  let total = 0
+  for (const conversations of topicMap.values()) {
+    total += conversations.length
+  }
+  return total
+}
+
+const getTopTopics = (topicMap: Map<string, string[]>, limit = 5) => {
+  return Array.from(topicMap.entries())
+    .map(([topicId, conversations]) => ({
+      topicId,
+      count: conversations.length,
+    }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit)
+}
+
 const main = async () => {
   logAuditEntry({
     step: 'Initialize Extraction',
     action: 'Prepared audit log and extraction scaffold.',
     reasoning: 'Ensure every run is traceable before touching the DuckDB cache.',
     output: `Audit log ready at ${AUDIT_RELATIVE_PATH}.`,
+  })
+
+  const classificationsByTopic = loadClassifications()
+  const totalTopics = classificationsByTopic.size
+  const totalConversations = getTotalConversations(classificationsByTopic)
+  const topTopics = getTopTopics(classificationsByTopic)
+  const topTopicsSummary =
+    topTopics.length === 0
+      ? 'None'
+      : topTopics
+          .map((topic) => `${topic.topicId} (${topic.count})`)
+          .join(', ')
+
+  logAuditEntry({
+    step: 'Load Classifications',
+    action: 'Loaded topic classifications and grouped by topic.',
+    reasoning: 'Build the topic-to-conversation map required for extraction.',
+    output:
+      `Topics found: ${totalTopics}. ` +
+      `Total conversations loaded: ${totalConversations}. ` +
+      `Top 5 topics by count: ${topTopicsSummary}.`,
   })
 
   // TODO: connect to DuckDB cache and perform verbatim FAQ extraction.

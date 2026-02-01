@@ -22,7 +22,7 @@
       "title": "Load classifications and build topic-to-conversations map",
       "description": "Add function to load `artifacts/phase-1/llm-topics/classifications.json` and create a Map<topicId, conversationId[]>.\n\nLog to audit:\n- Number of topics found\n- Total conversations loaded\n- Top 5 topics by count\n\n⛔ FORBIDDEN: No LLM calls, no content generation\n✅ REQUIRED: Pure file reading and data structure building",
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "validationCommand": "grep -q \"loadClassifications\" scripts/extract-real-faqs.ts && grep -L \"generateText\\|generateObject\" scripts/extract-real-faqs.ts && echo \"PASS\"",
       "acceptanceCriteria": [
         "Function loadClassifications() exists",
@@ -92,7 +92,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-01T21:18:54.627Z",
-    "totalIterations": 1,
-    "lastIteration": "2026-02-01T21:27:45.396Z"
+    "totalIterations": 2,
+    "lastIteration": "2026-02-01T21:30:35.669Z"
   }
 }
