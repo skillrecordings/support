@@ -60,3 +60,26 @@ Files: none
 Summary: Added deterministic ranking and filter funnel logic to `scripts/extract-real-faqs.ts`, including DuckDB-based thread signals, status/tag checks, and `shouldFilter` screening, plus per-topic audit logging. Wired the script to open the DuckDB cache path and log the filter funnel counts per topic for traceability. Updated `artifacts/faq-extraction-audit.md` with a process entry.
 
 - Updated `scripts/e
+
+---
+[2026-02-01T21:38:11.452Z]
+Failed: Main extraction loop with JSONL output
+Validation: ============================================================
+Bun v1.3.6 (d530ed99) Linux x64
+Linux Kernel v6.8.0 | glibc v2.39
+CPU: sse42 popcnt avx avx2
+Args: "bun" "scripts/extract-real-faqs.ts"
+Features: Bun.stderr(2) Bun.stdout(2) dotenv jsc tsconfig(3) process_dlopen 
+Builtins: "bun:main" "node
+Codex: Implemented the full main extraction loop: load taxonomy + classifications, rank/filter per topic, extract verbatim Q&A, write JSONL output, and log final stats to the audit log. Updated the audit file with a process entry.
+
+- Updated `scripts/extract-real-faqs.ts` to load taxonomy topics, stream JS
+
+---
+[2026-02-01T22:51:13.608Z]
+Completed: Enrich refund-request skill with phrase frequency and validation
+Files: none
+Summary: Updated the refund-request skill with machine-checkable validation + metrics from the 1,433 real threads and added verbatim examples (canonical, variations, edge-cases), plus logged the extraction details in the audit file.
+
+- Added frontmatter `validation` and `metrics` (avg thread length + top 4‑word phrases) in `skills/refund-request/SKILL.md`.
+- Created three example sets with 5 verbatim Q/A p

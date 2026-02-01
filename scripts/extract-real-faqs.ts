@@ -1,7 +1,12 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import duckdb from 'duckdb'
 import { shouldFilter } from '../packages/core/src/faq/filters'
+
+// Use @duckdb/node-api (same as duckdb-source.ts) for stability
+const loadDuckDB = async () => {
+  const { DuckDBInstance } = await import('@duckdb/node-api')
+  return DuckDBInstance
+}
 
 const AUDIT_RELATIVE_PATH = path.join('artifacts', 'faq-extraction-audit.md')
 const CLASSIFICATIONS_RELATIVE_PATH = path.join(
@@ -9,6 +14,17 @@ const CLASSIFICATIONS_RELATIVE_PATH = path.join(
   'phase-1',
   'llm-topics',
   'classifications.json',
+)
+const TAXONOMY_RELATIVE_PATH = path.join(
+  'artifacts',
+  'phase-1',
+  'llm-topics',
+  'taxonomy.json',
+)
+const OUTPUT_RELATIVE_PATH = path.join(
+  'artifacts',
+  'phase-1',
+  'real-faq-candidates.jsonl',
 )
 const AUDIT_HEADER = '# FAQ Extraction Audit Log\n\n'
 const VALIDATION_SENTINEL = 'from "ai"' // Not an import; keeps grep-based validation green.
@@ -25,6 +41,11 @@ type AuditEntry = {
 type ClassificationEntry = {
   conversationId: string
   topicId: string
+}
+
+type TaxonomyTopic = {
+  id: string
+  name: string
 }
 
 type ConversationQA = {
@@ -118,6 +139,19 @@ const loadClassifications = (): Map<string, string[]> => {
   return topicMap
 }
 
+const loadTaxonomyTopics = (): TaxonomyTopic[] => {
+  const taxonomyPath = path.resolve(process.cwd(), TAXONOMY_RELATIVE_PATH)
+  const raw = fs.readFileSync(taxonomyPath, 'utf8')
+  const parsed = JSON.parse(raw) as { topics?: TaxonomyTopic[] }
+  const topics = parsed?.topics ?? []
+
+  if (!Array.isArray(topics)) {
+    throw new Error('Taxonomy topics must be an array.')
+  }
+
+  return topics.filter((topic) => Boolean(topic?.id && topic?.name))
+}
+
 const querySingleRow = <T>(
   db: duckdb.Connection,
   sql: string,
@@ -199,8 +233,10 @@ async function getConversationQA(
   }
 }
 
-const buildPlaceholders = (count: number) => {
-  return Array.from({ length: count }).fill('?').join(', ')
+// DuckDB node driver doesn't handle large parameterized IN clauses well.
+// Use string interpolation with escaped IDs for the IN clause (safe since IDs are internal).
+const buildInClause = (ids: string[]) => {
+  return ids.map((id) => `'${id.replace(/'/g, "''")}'`).join(', ')
 }
 
 const getConversationSignals = async (
@@ -211,21 +247,29 @@ const getConversationSignals = async (
     return new Map()
   }
 
-  const placeholders = buildPlaceholders(conversationIds.length)
-  const rows = await queryAll<ConversationSignals>(
-    db,
-    `SELECT
-       conversation_id AS conversationId,
-       COUNT(*) AS threadLength,
-       SUM(CASE WHEN is_inbound THEN 1 ELSE 0 END) AS inboundCount,
-       SUM(CASE WHEN is_inbound THEN 0 ELSE 1 END) AS outboundCount
-     FROM messages
-     WHERE conversation_id IN (${placeholders})
-     GROUP BY conversation_id`,
-    conversationIds,
-  )
+  // Batch into chunks of 100 to avoid query size issues
+  const BATCH_SIZE = 100
+  const results: ConversationSignals[] = []
+  
+  for (let i = 0; i < conversationIds.length; i += BATCH_SIZE) {
+    const batch = conversationIds.slice(i, i + BATCH_SIZE)
+    const inClause = buildInClause(batch)
+    const rows = await queryAll<ConversationSignals>(
+      db,
+      `SELECT
+         conversation_id AS conversationId,
+         COUNT(*) AS threadLength,
+         SUM(CASE WHEN is_inbound THEN 1 ELSE 0 END) AS inboundCount,
+         SUM(CASE WHEN is_inbound THEN 0 ELSE 1 END) AS outboundCount
+       FROM messages
+       WHERE conversation_id IN (${inClause})
+       GROUP BY conversation_id`,
+      [],
+    )
+    results.push(...rows)
+  }
 
-  return new Map(rows.map((row) => [row.conversationId, row]))
+  return new Map(results.map((row) => [row.conversationId, row]))
 }
 
 const getConversationMeta = async (
@@ -236,19 +280,27 @@ const getConversationMeta = async (
     return new Map()
   }
 
-  const placeholders = buildPlaceholders(conversationIds.length)
-  const rows = await queryAll<ConversationMeta>(
-    db,
-    `SELECT
-       id AS conversationId,
-       status,
-       tags
-     FROM conversations
-     WHERE id IN (${placeholders})`,
-    conversationIds,
-  )
+  // Batch into chunks of 100 to avoid query size issues
+  const BATCH_SIZE = 100
+  const results: ConversationMeta[] = []
+  
+  for (let i = 0; i < conversationIds.length; i += BATCH_SIZE) {
+    const batch = conversationIds.slice(i, i + BATCH_SIZE)
+    const inClause = buildInClause(batch)
+    const rows = await queryAll<ConversationMeta>(
+      db,
+      `SELECT
+         id AS conversationId,
+         status,
+         tags
+       FROM conversations
+       WHERE id IN (${inClause})`,
+      [],
+    )
+    results.push(...rows)
+  }
 
-  return new Map(rows.map((row) => [row.conversationId, row]))
+  return new Map(results.map((row) => [row.conversationId, row]))
 }
 
 const hasDisallowedTags = (tags: string[] | null) => {
@@ -376,6 +428,7 @@ const main = async () => {
   })
 
   const classificationsByTopic = loadClassifications()
+  const taxonomyTopics = loadTaxonomyTopics()
   const totalTopics = classificationsByTopic.size
   const totalConversations = getTotalConversations(classificationsByTopic)
   const topTopics = getTopTopics(classificationsByTopic)
@@ -396,23 +449,62 @@ const main = async () => {
       `Top 5 topics by count: ${topTopicsSummary}.`,
   })
 
-  // TODO: connect to DuckDB cache and perform verbatim FAQ extraction.
-  // No LLM usage; extraction must be direct from stored data.
   const db = new duckdb.Database(DB_PATH)
+  const outputPath = path.resolve(process.cwd(), OUTPUT_RELATIVE_PATH)
+  const outputDir = path.dirname(outputPath)
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true })
+  }
+  const outputStream = fs.createWriteStream(outputPath, { encoding: 'utf8' })
+  let totalExtracted = 0
+  let topicsProcessed = 0
+  const skippedTopics: string[] = []
 
   logAuditEntry({
     step: 'Scaffold Ready',
-    action: 'Created DuckDB connection for ranking filters.',
-    reasoning: 'Filter and rank conversations by deterministic SQL signals.',
-    output: `DuckDB initialized at ${DB_PATH}.`,
+    action: 'Created DuckDB connection and output stream.',
+    reasoning:
+      'Enable verbatim extraction from the cache and write JSONL output.',
+    output:
+      `DuckDB initialized at ${DB_PATH}. ` +
+      `Output path ready at ${OUTPUT_RELATIVE_PATH}.`,
   })
 
-  for (const [topicId, conversationIds] of classificationsByTopic.entries()) {
+  for (const topic of taxonomyTopics) {
+    const topicId = topic.id
+    const topicName = topic.name
+    const conversationIds = classificationsByTopic.get(topicId) ?? []
     try {
       const { rankedIds, stats } = await rankConversationsForExtractionWithStats(
         conversationIds,
         db,
       )
+
+      const extractedAt = new Date().toISOString()
+      let topicExtracted = 0
+      for (const conversationId of rankedIds) {
+        const qa = await getConversationQA(db, conversationId)
+        if (!qa?.question || !qa?.answer) {
+          continue
+        }
+        const payload = {
+          topicId,
+          topicName,
+          conversationId,
+          question: qa.question,
+          answer: qa.answer,
+          threadLength: qa.threadLength,
+          extractedAt,
+        }
+        outputStream.write(`${JSON.stringify(payload)}\n`)
+        topicExtracted += 1
+        totalExtracted += 1
+      }
+
+      if (topicExtracted === 0) {
+        skippedTopics.push(topicId)
+      }
+      topicsProcessed += 1
 
       logAuditEntry({
         step: 'Rank Conversations',
@@ -426,7 +518,7 @@ const main = async () => {
           `archived ${stats.afterStatus} -> ` +
           `no spam/collab tags ${stats.afterTags} -> ` +
           `shouldFilter pass ${stats.afterQuestionFilter} -> ` +
-          `final ${rankedIds.length}.`,
+          `final ${rankedIds.length}. Extracted ${topicExtracted}.`,
       })
     } catch (error) {
       logAuditEntry({
@@ -436,8 +528,24 @@ const main = async () => {
           'Surface per-topic failures so the extraction run is audit-able.',
         output: error instanceof Error ? error.message : String(error),
       })
+      skippedTopics.push(topicId)
     }
   }
+
+  await new Promise<void>((resolve) => {
+    outputStream.on('finish', resolve)
+    outputStream.end()
+  })
+
+  logAuditEntry({
+    step: 'Extraction Complete',
+    action: 'Finished topic extraction and wrote JSONL output.',
+    reasoning: 'Provide final counts for audit traceability.',
+    output:
+      `Topics processed: ${topicsProcessed}. ` +
+      `Total Q&A pairs extracted: ${totalExtracted}. ` +
+      `Skipped topics: ${skippedTopics.length > 0 ? skippedTopics.join(', ') : 'None'}.`,
+  })
 }
 
 main().catch((error) => {
