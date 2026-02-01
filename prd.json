@@ -47,7 +47,7 @@
       "title": "Fix retention-cleanup cron vector error",
       "description": "The `support-platform-retention-cleanup` cron fails with:\n\"Either data, vector or sparseVector should be provided\"\n\nThis is an Upstash Vector API error - the cleanup function is trying to upsert/delete without proper parameters.\n\nInvestigation:\n1. Find `retention-cleanup` function in `packages/core/src/inngest/`\n2. Check what vector operations it performs\n3. Look at Upstash Vector SDK usage - likely missing required field\n4. Fix the API call to include required parameters\n\nRun ID from failure: 01KGBJ95W0GQTTAAGX94H74FQY",
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "validationCommand": "cd packages/cli && bun src/index.ts inngest failures --after 24h 2>&1 | grep -c \"retention-cleanup\" || echo \"0\"",
       "acceptanceCriteria": [
         "retention-cleanup cron runs without vector error",
@@ -58,7 +58,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-01T16:40:33.309Z",
-    "totalIterations": 2,
-    "lastIteration": "2026-02-01T17:23:42.066Z"
+    "totalIterations": 3,
+    "lastIteration": "2026-02-01T17:30:55.815Z"
   }
 }
