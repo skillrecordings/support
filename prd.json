@@ -118,7 +118,7 @@
       "title": "Enrich corporate-invoice skill with phrase frequency and validation",
       "description": "Analyze all 720 corporate-invoice samples to:\n1. Extract top 10 phrases by frequency\n2. Identify sub-categories (post-purchase, pre-purchase, VAT, foreign tax)\n3. Add validation rules\n4. Add metrics block\n5. Expand examples: canonical (5), edge-cases (5), variations (5)\n\nInput: artifacts/training-data/redacted-threads.jsonl (filter topicId=corporate_invoice_request)\nOutput: Updated skills/corporate-invoice/SKILL.md and examples/*.md",
       "priority": 13,
-      "passes": false,
+      "passes": true,
       "validationCommand": "test -f skills/corporate-invoice/SKILL.md && grep -q \"validation:\" skills/corporate-invoice/SKILL.md && ls skills/corporate-invoice/examples/*.md | wc -l | grep -q \"[3-9]\""
     },
     {
@@ -140,7 +140,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-01T21:18:54.627Z",
-    "totalIterations": 7,
-    "lastIteration": "2026-02-01T23:25:56.034Z"
+    "totalIterations": 8,
+    "lastIteration": "2026-02-01T23:30:11.514Z"
   }
 }

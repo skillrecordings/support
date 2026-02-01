@@ -103,3 +103,13 @@ Summary: Updated the PPP pricing skill with validation/metrics and added three v
 Changes
 - Added `validation` + `metrics` frontmatter and a sub-categories section in `skills/ppp-pricing/SKILL.md`.
 - Added verbatim example sets in `skills/ppp-pricing/examp
+
+---
+[2026-02-01T23:30:11.515Z]
+Completed: Enrich corporate-invoice skill with phrase frequency and validation
+Files: none
+Summary: Updated corporate-invoice skill with validation/metrics + sub-categories, and added three verbatim example sets (canonical, edge-cases, variations) sourced from the 720 threads. Logged the extraction details in `artifacts/faq-extraction-audit.md`.
+
+Details
+- Updated frontmatter and sub-categories in `skills/corporate-invoice/SKILL.md`
+- Added verbatim examples in `skills/corporate-invoice/examples
