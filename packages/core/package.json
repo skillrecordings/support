@@ -41,6 +41,7 @@
     "./trust/repository": "./src/trust/repository.ts",
     "./middleware/rate-limit": "./src/middleware/rate-limit.ts",
     "./services/retention": "./src/services/retention.ts",
+    "./services/webhook-payloads": "./src/services/webhook-payloads.ts",
     "./inngest/dead-letter": "./src/inngest/dead-letter.ts",
     "./adapters": "./src/adapters/index.ts",
     "./adapters/qdrant": "./src/adapters/qdrant.ts",

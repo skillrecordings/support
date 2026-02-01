@@ -10,6 +10,7 @@ describe('RETENTION_DEFAULTS', () => {
     expect(RETENTION_DEFAULTS.conversations).toBe(90)
     expect(RETENTION_DEFAULTS.vectors).toBe(180)
     expect(RETENTION_DEFAULTS.auditLogs).toBe(365)
+    expect(RETENTION_DEFAULTS.webhookPayloads).toBe(7)
   })
 
   it('should not have gracePeriod (no soft-delete support)', () => {
@@ -44,6 +45,7 @@ describe('cleanupExpiredData', () => {
       conversationsDeleted: 0,
       vectorsDeleted: 0,
       auditLogsDeleted: 0,
+      webhookPayloadsDeleted: 0,
       timestamp: expect.any(String),
     })
   })
@@ -53,8 +55,8 @@ describe('cleanupExpiredData', () => {
 
     await cleanupExpiredData(mockDb, mockVectorIndex)
 
-    // Should have called delete twice: once for conversations, once for audit logs
-    expect(mockDb.delete).toHaveBeenCalledTimes(2)
+    // Should have called delete three times: conversations, audit logs, webhook payloads
+    expect(mockDb.delete).toHaveBeenCalledTimes(3)
   })
 
   it('should report deleted conversation count from affectedRows', async () => {
@@ -64,9 +66,13 @@ describe('cleanupExpiredData', () => {
     const deleteAuditLogs = {
       where: vi.fn().mockResolvedValue([{ affectedRows: 0 }]),
     }
+    const deleteWebhookPayloads = {
+      where: vi.fn().mockResolvedValue([{ affectedRows: 0 }]),
+    }
     mockDb.delete
       .mockReturnValueOnce(deleteConversations)
       .mockReturnValueOnce(deleteAuditLogs)
+      .mockReturnValueOnce(deleteWebhookPayloads)
     mockVectorIndex.query.mockResolvedValue([])
 
     const report = await cleanupExpiredData(mockDb, mockVectorIndex)
@@ -81,9 +87,13 @@ describe('cleanupExpiredData', () => {
     const deleteAuditLogs = {
       where: vi.fn().mockResolvedValue([{ affectedRows: 12 }]),
     }
+    const deleteWebhookPayloads = {
+      where: vi.fn().mockResolvedValue([{ affectedRows: 0 }]),
+    }
     mockDb.delete
       .mockReturnValueOnce(deleteConversations)
       .mockReturnValueOnce(deleteAuditLogs)
+      .mockReturnValueOnce(deleteWebhookPayloads)
     mockVectorIndex.query.mockResolvedValue([])
 
     const report = await cleanupExpiredData(mockDb, mockVectorIndex)
@@ -119,14 +129,19 @@ describe('cleanupExpiredData', () => {
     const deleteAuditLogs = {
       where: vi.fn().mockResolvedValue([{}]),
     }
+    const deleteWebhookPayloads = {
+      where: vi.fn().mockResolvedValue([{ affectedRows: 2 }]),
+    }
     mockDb.delete
       .mockReturnValueOnce(deleteConversations)
       .mockReturnValueOnce(deleteAuditLogs)
+      .mockReturnValueOnce(deleteWebhookPayloads)
     mockVectorIndex.query.mockResolvedValue([])
 
     const report = await cleanupExpiredData(mockDb, mockVectorIndex)
 
     expect(report.conversationsDeleted).toBe(0)
     expect(report.auditLogsDeleted).toBe(0)
+    expect(report.webhookPayloadsDeleted).toBe(2)
   })
 })

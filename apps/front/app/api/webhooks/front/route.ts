@@ -17,6 +17,7 @@ import {
   inngest,
 } from '@skillrecordings/core/inngest'
 import { getAppByInboxId } from '@skillrecordings/core/services/app-registry'
+import { recordWebhookPayloadSnapshot } from '@skillrecordings/core/services/webhook-payloads'
 import { verifyFrontWebhook } from '@skillrecordings/core/webhooks'
 import { type NextRequest, NextResponse } from 'next/server'
 
@@ -169,6 +170,25 @@ export async function POST(request: NextRequest) {
 
   // Extract conversation ID
   const conversationId = event.payload?.conversation?.id
+
+  const previewSubject =
+    event.payload?.conversation?.subject ?? event.payload?.target?.data?.subject
+  const previewBody = event.payload?.target?.data?.body
+  const previewSenderEmail = event.payload?.target?.data?.author?.email
+  const previewMessageId = event.payload?.target?.data?.id
+
+  await recordWebhookPayloadSnapshot({
+    source: 'webhook_preview',
+    eventType: event.type,
+    conversationId,
+    messageId: previewMessageId,
+    subject: previewSubject ?? null,
+    body: previewBody ?? null,
+    senderEmail: previewSenderEmail ?? null,
+    payload: event as Record<string, unknown>,
+    payloadRaw: payload,
+  })
+
   if (!conversationId) {
     console.log(
       '[front-webhook] No conversation ID in payload:',

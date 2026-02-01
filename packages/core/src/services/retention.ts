@@ -6,19 +6,25 @@
  */
 
 import type { Database } from '@skillrecordings/database'
-import { AuditLogTable, ConversationsTable } from '@skillrecordings/database'
+import {
+  AuditLogTable,
+  ConversationsTable,
+  WebhookPayloadSnapshotsTable,
+} from '@skillrecordings/database'
 import { lt, sql } from 'drizzle-orm'
 
 export const RETENTION_DEFAULTS = {
   conversations: 90, // days
   vectors: 180,
   auditLogs: 365,
+  webhookPayloads: 7,
 } as const
 
 export interface CleanupReport {
   conversationsDeleted: number
   vectorsDeleted: number
   auditLogsDeleted: number
+  webhookPayloadsDeleted: number
   timestamp: string
 }
 
@@ -29,6 +35,7 @@ export interface CleanupReport {
  * 1. Hard delete conversations older than retention period
  * 2. Delete expired vectors from vector index
  * 3. Hard delete audit logs older than retention period
+ * 4. Hard delete webhook payload snapshots older than retention period
  *
  * @param db - Drizzle database instance
  * @param vectorIndex - Vector index client
@@ -42,6 +49,7 @@ export async function cleanupExpiredData(
     conversationsDeleted: 0,
     vectorsDeleted: 0,
     auditLogsDeleted: 0,
+    webhookPayloadsDeleted: 0,
     timestamp: new Date().toISOString(),
   }
 
@@ -59,6 +67,11 @@ export async function cleanupExpiredData(
   const auditLogCutoff = new Date(now)
   auditLogCutoff.setDate(
     auditLogCutoff.getDate() - RETENTION_DEFAULTS.auditLogs
+  )
+
+  const webhookPayloadCutoff = new Date(now)
+  webhookPayloadCutoff.setDate(
+    webhookPayloadCutoff.getDate() - RETENTION_DEFAULTS.webhookPayloads
   )
 
   // Step 1: Hard delete conversations older than retention period
@@ -89,6 +102,13 @@ export async function cleanupExpiredData(
     .where(lt(AuditLogTable.created_at, auditLogCutoff))
 
   report.auditLogsDeleted = auditLogResult[0]?.affectedRows ?? 0
+
+  // Step 4: Hard delete webhook payload snapshots older than retention period
+  const webhookPayloadResult = await db
+    .delete(WebhookPayloadSnapshotsTable)
+    .where(lt(WebhookPayloadSnapshotsTable.created_at, webhookPayloadCutoff))
+
+  report.webhookPayloadsDeleted = webhookPayloadResult[0]?.affectedRows ?? 0
 
   return report
 }

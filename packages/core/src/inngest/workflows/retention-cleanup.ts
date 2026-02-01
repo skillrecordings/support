@@ -17,6 +17,7 @@ import { inngest } from '../client'
  * 1. Hard delete conversations older than 90 days
  * 2. Delete expired vectors older than 180 days
  * 3. Hard delete audit logs older than 365 days
+ * 4. Hard delete webhook payload snapshots older than 7 days
  *
  * Note: Database connection is lazy-initialized inside the step function
  * to avoid serverless/Turbopack build issues.

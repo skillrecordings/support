@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+import { closeDb } from '@skillrecordings/database'
 // Note: env is loaded via preload.ts before this file runs
 import { Command } from 'commander'
 import { registerAxiomCommands } from './commands/axiom/index'
@@ -161,4 +162,7 @@ registerFaqExtractCommands(program)
 // Register FAQ review commands (human curation of FAQ candidates)
 registerFaqReviewCommands(program)
 
-program.parse()
+// Parse and cleanup DB connections when done
+program.parseAsync().finally(async () => {
+  await closeDb()
+})

@@ -176,6 +176,46 @@ export type AuditLog = typeof AuditLogTable.$inferSelect
 export type NewAuditLog = typeof AuditLogTable.$inferInsert
 
 /**
+ * Raw webhook payload snapshots for debugging preview vs full message differences.
+ */
+export const WebhookPayloadSnapshotsTable = mysqlTable(
+  'SUPPORT_webhook_payload_snapshots',
+  {
+    id: varchar('id', { length: 255 }).primaryKey(),
+    source: varchar('source', { length: 50 }).notNull(),
+    event_type: varchar('event_type', { length: 100 }),
+    conversation_id: varchar('conversation_id', { length: 255 }),
+    message_id: varchar('message_id', { length: 255 }),
+    app_id: varchar('app_id', { length: 255 }),
+    inbox_id: varchar('inbox_id', { length: 255 }),
+
+    payload: json('payload').$type<Record<string, unknown>>(),
+    payload_raw: text('payload_raw'),
+
+    subject: text('subject'),
+    body: text('body'),
+    sender_email: varchar('sender_email', { length: 255 }),
+    body_length: int('body_length'),
+    has_body: boolean('has_body'),
+    has_subject: boolean('has_subject'),
+    has_sender_email: boolean('has_sender_email'),
+
+    preview_differs: boolean('preview_differs'),
+    diff_fields: json('diff_fields').$type<string[]>(),
+
+    created_at: datetime('created_at').default(sql`CURRENT_TIMESTAMP`),
+    updated_at: datetime('updated_at')
+      .default(sql`CURRENT_TIMESTAMP`)
+      .$onUpdateFn(() => new Date()),
+  }
+)
+
+export type WebhookPayloadSnapshot =
+  typeof WebhookPayloadSnapshotsTable.$inferSelect
+export type NewWebhookPayloadSnapshot =
+  typeof WebhookPayloadSnapshotsTable.$inferInsert
+
+/**
  * Trust scores for auto-send decision making
  * Tracks success rate of agent responses by app and category with exponential decay
  */

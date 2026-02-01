@@ -22,6 +22,7 @@ import {
   log,
   traceWorkflowStep,
 } from '../../observability/axiom'
+import { recordFullMessageSnapshot } from '../../services/webhook-payloads'
 import { inngest } from '../client'
 import { type DraftDiffCategory, SUPPORT_OUTBOUND_MESSAGE } from '../events'
 
@@ -189,6 +190,20 @@ export const outboundTrackerWorkflow = inngest.createFunction(
             bodyLength: msg.body?.length ?? 0,
             textLength: msg.text?.length ?? 0,
           },
+        })
+
+        const fullBody = msg.text || msg.body || ''
+
+        await recordFullMessageSnapshot({
+          eventType: 'front_api_message',
+          conversationId,
+          messageId,
+          appId,
+          inboxId,
+          subject: msg.subject ?? null,
+          body: fullBody,
+          senderEmail: msg.author?.email ?? null,
+          payload: msg as unknown as Record<string, unknown>,
         })
 
         return {

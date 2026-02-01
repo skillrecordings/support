@@ -15,6 +15,7 @@ import {
   traceWorkflowStep,
 } from '../../observability/axiom'
 import { classify } from '../../pipeline/steps/classify'
+import { recordFullMessageSnapshot } from '../../services/webhook-payloads'
 import { inngest } from '../client'
 import { SUPPORT_CLASSIFIED, SUPPORT_INBOUND_RECEIVED } from '../events'
 
@@ -99,6 +100,7 @@ export const classifyWorkflow = inngest.createFunction(
         const fetchedSenderEmail = extractCustomerEmail(message)
         // Use text field (plain text), not body (HTML)
         const fetchedBody = message.text || ''
+        const fetchedSubject = message.subject
 
         const durationMs = Date.now() - stepStartTime
 
@@ -127,6 +129,18 @@ export const classifyWorkflow = inngest.createFunction(
             bodyLength: fetchedBody?.length,
             recipientCount: message.recipients?.length ?? 0,
           },
+        })
+
+        await recordFullMessageSnapshot({
+          eventType: 'front_api_message',
+          conversationId,
+          messageId,
+          appId,
+          inboxId,
+          subject: fetchedSubject ?? null,
+          body: fetchedBody,
+          senderEmail: fetchedSenderEmail ?? null,
+          payload: message as unknown as Record<string, unknown>,
         })
 
         return { fetchedBody, fetchedSenderEmail, fetched: true }

@@ -133,3 +133,12 @@ Files: none
 Summary: Added explicit Axiom logging for Front SDK validation failures and fallback usage in `packages/agent/src/lib/front/instrumented-client.ts`, including endpoint/method/requestId and the error message so Axiom can query fallback frequency by `eventType` or `sdkFallbackUsed`. Validation grep now finds the new SDK fallback log marker.
 
 Learnings: Front SDK parse failures can be handled safely by loggin
+
+---
+[2026-02-01T19:18:24.187Z]
+Completed: Store webhook payload snapshots for debugging
+Files: none
+Summary: Added a webhook payload snapshot table plus recording hooks in the Front webhook handler and the inbound/outbound message fetch steps, then wired retention cleanup to purge snapshots after 7 days. This keeps raw preview payloads with metadata, writes a full-message snapshot when the API fetch happens, and stores diff flags for preview vs full comparisons.
+
+Details
+- Added `SUPPORT_webhook_payload_

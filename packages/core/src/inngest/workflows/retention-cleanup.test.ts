@@ -11,6 +11,7 @@ vi.mock('../../services/retention', () => ({
     conversations: 90,
     vectors: 180,
     auditLogs: 365,
+    webhookPayloads: 7,
     gracePeriod: 7,
   },
 }))
