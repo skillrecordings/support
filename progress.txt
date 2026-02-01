@@ -116,3 +116,12 @@ Validation
 
 Learnings
 - Upstash Vector `query` requires one of `data`, `vector`, or `sparseVector`; filters alone will error.
+
+---
+[2026-02-01T19:09:47.292Z]
+Completed: Create Front API wrapper with Axiom logging
+Files: none
+Summary: Created an instrumented Front client wrapper with Axiom logging, request timing, HTTP status tracking, request ID capture, and field presence checks for `_links.related.children` and `highlights`. It mirrors the Front SDK client surface so it can be used as a drop‑in replacement.
+
+Details:
+- Implemented `createInstrumentedBaseClient` + `createInstrumentedFrontClient` with logging and retries in `p

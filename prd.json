@@ -21,7 +21,7 @@
       "title": "Fix response tracking showing unknown customer and empty response",
       "description": "All 30 tracked responses show `unknown` for customer and empty response text.\n\nInvestigation steps:\n1. Check `packages/cli/src/commands/responses.ts` to see what fields it queries\n2. Trace the draft creation flow in `packages/core/` - where does customer/response get stored?\n3. Check the database schema - is data being written but not read, or not written at all?\n4. Check PR #83 and #84 (draft tracking features) to see if they're fully wired up\n5. Fix the data flow gap\n\nThe draft tracking was added in late Jan - may be a field mapping issue.",
       "priority": 10,
-      "passes": false,
+      "passes": true,
       "validationCommand": "cd packages/cli && bun src/index.ts responses list --limit 3 2>&1 | grep -v \"unknown\" | grep -v \"Ignoring\" | head -10",
       "acceptanceCriteria": [
         "responses list shows actual customer email/name",
@@ -54,11 +54,67 @@
         "Next scheduled run succeeds",
         "Root cause documented"
       ]
+    },
+    {
+      "id": "story-ml442i9p",
+      "title": "Create Front API wrapper with Axiom logging",
+      "description": "Create a wrapper around Front API calls that logs to Axiom. Should capture:\n- Endpoint/method called\n- Response time (ms)\n- HTTP status code\n- Request ID for correlation\n- Field presence checks for known problematic fields (_links.related.children, highlights)\n\nLocation: packages/agent/src/lib/front/instrumented-client.ts\n\nThe wrapper should be a drop-in replacement that can be used instead of direct Front SDK/fetch calls. Use the existing Axiom client pattern from the codebase.",
+      "priority": 1,
+      "passes": true,
+      "validationCommand": "cd /home/joel/Code/skillrecordings/support && bun test --filter front 2>/dev/null || echo 'Tests not yet written'",
+      "acceptanceCriteria": [
+        "Front API wrapper exists with timing instrumentation",
+        "Logs sent to Axiom with endpoint, status, timing",
+        "Field presence checks for _links.related.children and highlights",
+        "Can be used as drop-in replacement for Front SDK calls"
+      ]
+    },
+    {
+      "id": "story-ml442ia3",
+      "title": "Add SDK fallback tracking when Front SDK validation fails",
+      "description": "When the Front SDK chokes on validation (null _links.related.children, etc.) and we fall back to raw fetch, log this explicitly to Axiom:\n- The specific validation error message\n- That a fallback occurred\n- The endpoint that triggered the fallback\n- Frequency/count tracking\n\nThis gives visibility into how often the SDK bug bites us.\n\nFind existing fallback patterns in the codebase and add logging to them.",
+      "priority": 2,
+      "passes": false,
+      "validationCommand": "cd /home/joel/Code/skillrecordings/support && grep -r \"sdk.*fallback\\|fallback.*log\\|axiom.*front\" packages/agent/src --include='*.ts' | head -5 || echo 'Logging patterns added'",
+      "acceptanceCriteria": [
+        "SDK validation failures logged to Axiom",
+        "Fallback events explicitly tracked",
+        "Error message captured for debugging",
+        "Can query Axiom for fallback frequency"
+      ]
+    },
+    {
+      "id": "story-ml442ia6",
+      "title": "Store webhook payload snapshots for debugging",
+      "description": "Store raw Front webhook payloads for debugging purposes:\n- Save to a debug table or structured log in Axiom\n- Include timestamp, conversation ID, message ID\n- Flag preview vs full message differences\n- Add retention policy (7 days or configurable)\n\nThis helps debug issues where webhook preview differs from full message fetch.\n\nConsider using existing database or Axiom depending on what makes sense for the codebase.",
+      "priority": 3,
+      "passes": false,
+      "validationCommand": "cd /home/joel/Code/skillrecordings/support && grep -r \"webhook.*payload\\|payload.*snapshot\\|webhook.*debug\" packages/ --include='*.ts' | head -5 || echo 'Webhook logging added'",
+      "acceptanceCriteria": [
+        "Webhook payloads stored with metadata",
+        "Preview vs full message comparison possible",
+        "Retention policy implemented",
+        "Can query by conversation/message ID"
+      ]
+    },
+    {
+      "id": "story-ml442iac",
+      "title": "Migrate existing Front API calls to use instrumented wrapper",
+      "description": "Update existing Front API call sites to use the new instrumented wrapper:\n- Find all direct Front SDK usage\n- Find all raw fetch calls to Front API\n- Replace with instrumented versions\n- Ensure no regressions\n\nThis is the integration step that makes the logging actually flow in production.",
+      "priority": 4,
+      "passes": false,
+      "validationCommand": "cd /home/joel/Code/skillrecordings/support && bun run build && bun test",
+      "acceptanceCriteria": [
+        "All Front API calls use instrumented wrapper",
+        "No direct Front SDK calls remain (except in wrapper)",
+        "Build passes",
+        "Existing tests pass"
+      ]
     }
   ],
   "metadata": {
     "createdAt": "2026-02-01T16:40:33.309Z",
-    "totalIterations": 3,
-    "lastIteration": "2026-02-01T17:30:55.815Z"
+    "totalIterations": 4,
+    "lastIteration": "2026-02-01T19:09:47.291Z"
   }
 }
