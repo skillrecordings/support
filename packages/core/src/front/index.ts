@@ -7,3 +7,4 @@
 
 export { createFrontClient } from './client'
 export type { FrontClient, FrontMessage, FrontConversation } from './client'
+export { markdownToHtml } from './markdown'

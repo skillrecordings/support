@@ -12,6 +12,7 @@
     "./front": "./src/front/index.ts",
     "./front/client": "./src/front/client.ts",
     "./front/instrumented-client": "./src/front/instrumented-client.ts",
+    "./front/markdown": "./src/front/markdown.ts",
     "./slack": "./src/slack/index.ts",
     "./slack/client": "./src/slack/client.ts",
     "./slack/approval-blocks": "./src/slack/approval-blocks.ts",
