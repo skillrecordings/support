@@ -121,3 +121,12 @@ Files: none
 Summary: Updated the login-link skill with computed metrics/validation and added verbatim example sets drawn from the 999 login_link_not_received threads, plus logged the full extraction details in the audit log.
 
 - Updated frontmatter in `skills/login-link/SKILL.md` with validation + metrics (avg thread length and top 10 4‑gram phrases) and added a Sub-categories section for manual resend, wrong email, sp
+
+---
+[2026-02-01T23:39:46.020Z]
+Completed: Generate skills for remaining 36 topics
+Files: none
+Summary: Generated the remaining 36 topic skills from the JSONL data, each with extracted metrics, response-pattern snippets, and verbatim Q&A pairs, and logged the process in the audit file.
+
+- Created 36 new skill directories under `skills/*/` with `SKILL.md` + `examples/real-responses.md` from `artifacts/training-data/redacted-threads.jsonl`.
+- Each new `SKILL.md` includes sample_size, avg_thread_length

@@ -134,13 +134,13 @@
       "title": "Generate skills for remaining 36 topics",
       "description": "After enriching the 5 POC skills, generate SKILL.md files for all remaining topics in the taxonomy.\n\nFor each topic:\n1. Create skills/{topic-slug}/SKILL.md with:\n   - Frontmatter (name, description, sample_size, validation rules)\n   - Response patterns extracted from samples\n   - Phrases that work (with frequency)\n   - Tone guidance\n   - What NOT to do\n2. Create examples/real-responses.md with 8-10 real Q&A pairs\n\nInput: \n- artifacts/training-data/redacted-threads.jsonl\n- artifacts/phase-1/llm-topics/taxonomy.json (for topic list)\n- Existing 5 skills as template\n\nOutput: skills/ directory with 41 total skill directories\n\nValidation: ls skills/ | wc -l shows 41+ directories",
       "priority": 20,
-      "passes": false,
+      "passes": true,
       "validationCommand": "test $(ls -d skills/*/ | wc -l) -ge 20"
     }
   ],
   "metadata": {
     "createdAt": "2026-02-01T21:18:54.627Z",
-    "totalIterations": 9,
-    "lastIteration": "2026-02-01T23:34:34.028Z"
+    "totalIterations": 10,
+    "lastIteration": "2026-02-01T23:39:46.020Z"
   }
 }
