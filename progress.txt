@@ -113,3 +113,11 @@ Summary: Updated corporate-invoice skill with validation/metrics + sub-categorie
 Details
 - Updated frontmatter and sub-categories in `skills/corporate-invoice/SKILL.md`
 - Added verbatim examples in `skills/corporate-invoice/examples
+
+---
+[2026-02-01T23:34:34.029Z]
+Completed: Enrich login-link skill with phrase frequency and validation
+Files: none
+Summary: Updated the login-link skill with computed metrics/validation and added verbatim example sets drawn from the 999 login_link_not_received threads, plus logged the full extraction details in the audit log.
+
+- Updated frontmatter in `skills/login-link/SKILL.md` with validation + metrics (avg thread length and top 10 4‑gram phrases) and added a Sub-categories section for manual resend, wrong email, sp

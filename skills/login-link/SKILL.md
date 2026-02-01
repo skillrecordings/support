@@ -4,6 +4,46 @@ description: |
   Login link delivery issues. Triggers when customer can't access course,
   didn't receive login email, "magic link", "can't log in", or access problems.
 sample_size: 999
+validation:
+  required_phrases:
+    - "email"
+    - "spam"
+  forbidden_patterns:
+    - "(?i)why"
+metrics:
+  sample_size: 999
+  avg_thread_length: 3.59
+  top_phrases:
+    - phrase: "let me know if"
+      count: 295
+      percent: 29.5
+    - phrase: "me know if you"
+      count: 253
+      percent: 25.3
+    - phrase: "you ll need to"
+      count: 244
+      percent: 24.4
+    - phrase: "if you have any"
+      count: 238
+      percent: 23.8
+    - phrase: "to purchase the course"
+      count: 178
+      percent: 17.8
+    - phrase: "ll need to enter"
+      count: 172
+      percent: 17.2
+    - phrase: "enter the email address"
+      count: 169
+      percent: 16.9
+    - phrase: "need to enter the"
+      count: 168
+      percent: 16.8
+    - phrase: "to enter the email"
+      count: 168
+      percent: 16.8
+    - phrase: "at the top of"
+      count: 167
+      percent: 16.7
 ---
 
 # Login Link Issues
@@ -33,6 +73,13 @@ Tell them which email has the license, ask them to try that one.
 
 ### If link shows delivered on your end
 Confirm delivery status, suggest spam check, offer to try again.
+
+## Sub-categories
+
+- Manual resend request
+- License under the wrong email
+- Spam/junk folder filtering
+- Delivery confirmed on our side
 
 ## Phrases That Work
 
