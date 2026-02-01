@@ -8,8 +8,10 @@
 
 import { randomUUID } from 'crypto'
 import { ActionsTable, getDb } from '@skillrecordings/database'
-import { createFrontClient as createFrontSdkClient } from '@skillrecordings/front-sdk'
-import { createFrontClient } from '../../front'
+import { type ChannelList, type InboxList } from '@skillrecordings/front-sdk'
+import { eq, sql } from 'drizzle-orm'
+import { createInstrumentedFrontClient } from '../../front/instrumented-client'
+import { markdownToHtml } from '../../front/markdown'
 import {
   initializeAxiom,
   log,
@@ -24,6 +26,22 @@ import {
   SUPPORT_APPROVAL_REQUESTED,
   SUPPORT_DRAFT_VALIDATED,
 } from '../events'
+
+async function getConversationChannelId(
+  front: ReturnType<typeof createInstrumentedFrontClient>,
+  conversationId: string
+): Promise<string | null> {
+  const inboxes = await front.raw.get<InboxList>(
+    `/conversations/${conversationId}/inboxes`
+  )
+  const inboxId = inboxes._results?.[0]?.id
+  if (!inboxId) return null
+
+  const channels = await front.raw.get<ChannelList>(
+    `/inboxes/${inboxId}/channels`
+  )
+  return channels._results?.[0]?.id ?? null
+}
 
 export const handleValidatedDraft = inngest.createFunction(
   {
@@ -323,16 +341,10 @@ export const handleValidatedDraft = inngest.createFunction(
       }
 
       try {
-        const front = createFrontClient(frontToken)
+        const front = createInstrumentedFrontClient({ apiToken: frontToken })
 
         // Get channel ID for creating draft
-        let channelId: string | null = null
-
-        // Try to get channel from conversation's inbox
-        const inboxId = await front.getConversationInbox(conversationId)
-        if (inboxId) {
-          channelId = await front.getInboxChannel(inboxId)
-        }
+        const channelId = await getConversationChannelId(front, conversationId)
 
         if (!channelId) {
           await log('warn', 'no channel found for draft creation', {
@@ -344,11 +356,11 @@ export const handleValidatedDraft = inngest.createFunction(
         }
 
         // Create draft in Front
-        const frontDraft = await front.createDraft(
-          conversationId,
-          draft.content,
-          channelId
-        )
+        const frontDraft = await front.drafts.createReply(conversationId, {
+          body: markdownToHtml(draft.content),
+          channel_id: channelId,
+          mode: 'shared',
+        })
 
         const durationMs = Date.now() - stepStartTime
 
@@ -396,6 +408,19 @@ export const handleValidatedDraft = inngest.createFunction(
       }
     })
 
+    if (draftResult.created && 'draftId' in draftResult) {
+      const db = getDb()
+
+      await db
+        .update(ActionsTable)
+        .set({
+          parameters: sql`jsonb_set(parameters, '{draftId}', ${JSON.stringify(
+            draftResult.draftId
+          )}::jsonb)`,
+        })
+        .where(eq(ActionsTable.id, actionId))
+    }
+
     // Add approval comment to Front conversation
     await step.run('add-approval-comment', async () => {
       const stepStartTime = Date.now()
@@ -415,7 +440,7 @@ export const handleValidatedDraft = inngest.createFunction(
       }
 
       try {
-        const front = createFrontSdkClient({ apiToken: frontToken })
+        const front = createInstrumentedFrontClient({ apiToken: frontToken })
 
         const commentBody = formatApprovalComment({
           draft: draft.content,

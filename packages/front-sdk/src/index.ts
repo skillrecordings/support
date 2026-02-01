@@ -147,6 +147,17 @@ export {
   type BaseClient,
 } from './client/base.js'
 
+// Export individual client factories (for instrumented clients)
+export { createChannelsClient } from './client/channels.js'
+export { createContactsClient } from './client/contacts.js'
+export { createConversationsClient } from './client/conversations.js'
+export { createDraftsClient } from './client/drafts.js'
+export { createInboxesClient } from './client/inboxes.js'
+export { createMessagesClient } from './client/messages.js'
+export { createTagsClient } from './client/tags.js'
+export { createTeammatesClient } from './client/teammates.js'
+export { createTemplatesClient } from './client/templates.js'
+
 // Import client factories
 import { type FrontClientConfig, createBaseClient } from './client/base.js'
 import { createChannelsClient } from './client/channels.js'
