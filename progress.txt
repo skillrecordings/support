@@ -83,3 +83,13 @@ Summary: Updated the refund-request skill with machine-checkable validation + me
 
 - Added frontmatter `validation` and `metrics` (avg thread length + top 4‑word phrases) in `skills/refund-request/SKILL.md`.
 - Created three example sets with 5 verbatim Q/A p
+
+---
+[2026-02-01T22:55:59.631Z]
+Completed: Enrich email-change skill with phrase frequency and validation
+Files: none
+Summary: Updated the email-change skill frontmatter with validation + metrics from the 2,920 real samples, and added three new example sets (canonical, edge-cases, variations) with 5 verbatim Q/A pairs each. Logged the extraction work in the audit file.
+
+Changes
+- Added validation + metrics (avg thread length + top 10 4-word phrases) in `skills/email-change/SKILL.md`
+- Added verbatim example sets in `skill
