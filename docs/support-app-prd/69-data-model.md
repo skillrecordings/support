@@ -82,3 +82,8 @@ CREATE TABLE approval_requests (
 );
 ```
 
+## Response tracking data flow
+
+- Draft content is stored on the `actions` row under `parameters.draft` (legacy `parameters.response` for the older `draft-response` action type). Some records may nest the text under `parameters.draft.content` or `parameters.response.text`.
+- Customer identity comes from `conversations.customer_email`/`customer_name` when available, with fallbacks to `actions.parameters.senderEmail`, `actions.parameters.context.customerEmail`, or `actions.parameters.(context|gatheredContext).customer.email` for older records.
+- Classification metadata is available in `actions.category` (preferred) or `actions.parameters.category`/`actions.parameters.context.category` for older records.

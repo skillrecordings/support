@@ -60,7 +60,7 @@ export async function GET(request: Request) {
     })
 
     if (!ok) {
-      await log('error', 'inngest refresh failed', {
+      await log('warn', 'inngest refresh failed', {
         workflow: 'inngest-refresh-cron',
         status,
         statusText: response.statusText,

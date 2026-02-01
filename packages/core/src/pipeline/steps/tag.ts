@@ -8,7 +8,12 @@
  * are logged but don't block the pipeline).
  */
 
-import { FrontApiError, createFrontClient } from '@skillrecordings/front-sdk'
+import {
+  ErrorResponseSchema,
+  FRONT_API_BASE,
+  FrontApiError,
+  createFrontClient,
+} from '@skillrecordings/front-sdk'
 import { log } from '../../observability/axiom'
 import { type TagRegistry, createTagRegistry } from '../../tags/registry'
 import type { MessageCategory, TagInput, TagOutput } from '../types'
@@ -29,6 +34,41 @@ export interface TagStepOptions {
 // ============================================================================
 // Tag Step
 // ============================================================================
+
+async function addTagToConversation(
+  conversationId: string,
+  tagId: string,
+  frontApiToken: string
+): Promise<void> {
+  const response = await fetch(
+    `${FRONT_API_BASE}/conversations/${conversationId}/tags`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${frontApiToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ tag_ids: [tagId] }),
+    }
+  )
+
+  if (response.ok) return
+
+  let errorData: unknown = null
+  try {
+    errorData = await response.json()
+  } catch {
+    // Ignore JSON parse failures for empty error bodies.
+  }
+
+  const parsed = ErrorResponseSchema.safeParse(errorData)
+  if (parsed.success) {
+    const { status, title, message, details } = parsed.data._error
+    throw new FrontApiError(status, title, message, details)
+  }
+
+  throw new FrontApiError(response.status, 'Unknown Error', response.statusText)
+}
 
 /**
  * Apply a tag to a Front conversation based on category.
@@ -118,9 +158,8 @@ export async function applyTag(
     }
 
     // Apply tag to conversation via Front API
-    const front = createFrontClient({ apiToken: frontApiToken })
     try {
-      await front.conversations.addTag(conversationId, tagId)
+      await addTagToConversation(conversationId, tagId, frontApiToken)
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
       const isFrontError = error instanceof FrontApiError
@@ -147,6 +186,7 @@ export async function applyTag(
         const config = registry.getTagConfigForCategory(category)
 
         try {
+          const front = createFrontClient({ apiToken: frontApiToken })
           // Try to delete the archived tag first (if allowed)
           try {
             await front.tags.delete(tagId)
@@ -184,7 +224,7 @@ export async function applyTag(
           })
 
           // Retry applying with the new tag ID
-          await front.conversations.addTag(conversationId, newTag.id)
+          await addTagToConversation(conversationId, newTag.id, frontApiToken)
 
           return {
             tagged: true,
@@ -320,13 +360,12 @@ export async function applyMultipleTags(
   tagIds: string[],
   frontApiToken: string
 ): Promise<{ applied: string[]; failed: string[] }> {
-  const front = createFrontClient({ apiToken: frontApiToken })
   const applied: string[] = []
   const failed: string[] = []
 
   for (const tagId of tagIds) {
     try {
-      await front.conversations.addTag(conversationId, tagId)
+      await addTagToConversation(conversationId, tagId, frontApiToken)
       applied.push(tagId)
     } catch (error) {
       console.error(`[TagStep] Failed to apply tag ${tagId}:`, error)

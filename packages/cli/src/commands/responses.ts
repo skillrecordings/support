@@ -22,12 +22,16 @@ import {
 } from '@skillrecordings/database'
 import type { Command } from 'commander'
 
+type ActionRow = typeof ActionsTable.$inferSelect
+
 interface ResponseRecord {
   actionId: string
   appSlug: string
   appName: string
   conversationId: string
   customerEmail: string
+  customerName?: string
+  customerDisplay: string
   response: string
   category: string
   createdAt: Date
@@ -69,6 +73,173 @@ function truncate(str: string, len: number): string {
   if (!str) return ''
   if (str.length <= len) return str
   return str.slice(0, len - 3) + '...'
+}
+
+function normalizeParams(raw: unknown): Record<string, unknown> {
+  if (typeof raw === 'string') {
+    try {
+      let parsed: unknown = JSON.parse(raw)
+      if (typeof parsed === 'string') {
+        try {
+          parsed = JSON.parse(parsed)
+        } catch {
+          return {}
+        }
+      }
+      if (parsed && typeof parsed === 'object')
+        return parsed as Record<string, unknown>
+    } catch {
+      return {}
+    }
+  }
+
+  if (raw && typeof raw === 'object') {
+    if (raw instanceof Uint8Array) {
+      const text = Buffer.from(raw).toString('utf-8')
+      return normalizeParams(text)
+    }
+    return raw as Record<string, unknown>
+  }
+
+  return {}
+}
+
+function normalizeNested(value: unknown): Record<string, unknown> | undefined {
+  if (!value) return undefined
+  if (typeof value === 'string' || value instanceof Uint8Array) {
+    const normalized = normalizeParams(value)
+    return Object.keys(normalized).length ? normalized : undefined
+  }
+  if (typeof value === 'object') {
+    return value as Record<string, unknown>
+  }
+  return undefined
+}
+
+function extractText(value: unknown): string {
+  if (typeof value === 'string') return value
+  if (value && typeof value === 'object') {
+    const record = value as Record<string, unknown>
+    const content = record.content
+    if (typeof content === 'string') return content
+    const text = record.text
+    if (typeof text === 'string') return text
+    const body = record.body
+    if (typeof body === 'string') return body
+    const html = record.html
+    if (typeof html === 'string') return html
+  }
+  return ''
+}
+
+function getResponseText(params: Record<string, unknown>): string {
+  return (
+    extractText(params.response) ||
+    extractText(params.draft) ||
+    extractText(params.responseText) ||
+    extractText(params.draftText) ||
+    ''
+  )
+}
+
+function getCategory(
+  actionCategory: string | null,
+  params: Record<string, unknown>
+): string {
+  const context = normalizeNested(params.context)
+  const category = params.category ?? context?.category
+  return (
+    actionCategory ??
+    (typeof category === 'string' ? category : undefined) ??
+    'unknown'
+  )
+}
+
+function getCustomerEmail(
+  conversationEmail: string | null | undefined,
+  params: Record<string, unknown>
+): string {
+  const context = normalizeNested(params.context)
+  const gatheredContext = normalizeNested(params.gatheredContext)
+  const customer =
+    (context?.customer as Record<string, unknown> | undefined) ??
+    (gatheredContext?.customer as Record<string, unknown> | undefined) ??
+    (params.customer as Record<string, unknown> | undefined)
+
+  const candidate =
+    conversationEmail ??
+    (typeof context?.customerEmail === 'string'
+      ? context.customerEmail
+      : undefined) ??
+    (typeof params.customerEmail === 'string'
+      ? params.customerEmail
+      : undefined) ??
+    (typeof customer?.email === 'string' ? customer.email : undefined) ??
+    (typeof params.senderEmail === 'string' ? params.senderEmail : undefined) ??
+    (typeof (params as Record<string, unknown>).sender_email === 'string'
+      ? ((params as Record<string, unknown>).sender_email as string)
+      : undefined) ??
+    (typeof params.from === 'string' ? params.from : undefined)
+
+  return candidate ?? 'unknown'
+}
+
+function getCustomerName(
+  conversationName: string | null | undefined,
+  params: Record<string, unknown>
+): string | undefined {
+  const context = normalizeNested(params.context)
+  const gatheredContext = normalizeNested(params.gatheredContext)
+  const customer =
+    (context?.customer as Record<string, unknown> | undefined) ??
+    (gatheredContext?.customer as Record<string, unknown> | undefined) ??
+    (params.customer as Record<string, unknown> | undefined)
+
+  const candidate =
+    conversationName ??
+    (typeof params.customerName === 'string'
+      ? params.customerName
+      : undefined) ??
+    (typeof customer?.name === 'string' ? customer.name : undefined)
+
+  return candidate
+}
+
+function formatCustomerDisplay(email: string, name?: string): string {
+  if (name && email && email !== 'unknown') {
+    return `${name} <${email}>`
+  }
+  return name ?? email ?? 'unknown'
+}
+
+async function findResponseFallback(
+  db: ReturnType<typeof getDb>,
+  actionId: string,
+  conversationId: string
+): Promise<{ action: ActionRow; params: Record<string, unknown> } | null> {
+  const candidates = await db
+    .select()
+    .from(ActionsTable)
+    .where(eq(ActionsTable.conversation_id, conversationId))
+    .orderBy(desc(ActionsTable.created_at))
+    .limit(10)
+
+  for (const candidate of candidates) {
+    if (candidate.id === actionId) continue
+    if (
+      candidate.type !== 'send-draft' &&
+      candidate.type !== 'draft-response'
+    ) {
+      continue
+    }
+    const params = normalizeParams(candidate.parameters)
+    const responseText = getResponseText(params)
+    if (responseText) {
+      return { action: candidate, params }
+    }
+  }
+
+  return null
 }
 
 /**
@@ -136,10 +307,39 @@ async function listResponses(options: {
       .limit(limit)
 
     // Transform to response records
-    const responses: ResponseRecord[] = results.map((r) => {
-      const params = r.action.parameters as {
-        response?: string
-        category?: string
+    const responses: ResponseRecord[] = []
+
+    for (const r of results) {
+      let params = normalizeParams(r.action.parameters)
+      let responseText = getResponseText(params)
+      let customerName = getCustomerName(r.conversation?.customer_name, params)
+      let customerEmail = getCustomerEmail(
+        r.conversation?.customer_email,
+        params
+      )
+
+      if (
+        (!responseText || customerEmail === 'unknown') &&
+        r.action.conversation_id
+      ) {
+        const fallback = await findResponseFallback(
+          db,
+          r.action.id,
+          r.action.conversation_id
+        )
+        if (fallback) {
+          params = fallback.params
+          responseText = responseText || getResponseText(params)
+          customerName =
+            customerName ??
+            getCustomerName(r.conversation?.customer_name, params)
+          if (customerEmail === 'unknown') {
+            customerEmail = getCustomerEmail(
+              r.conversation?.customer_email,
+              params
+            )
+          }
+        }
       }
 
       // Determine rating from approved_by/rejected_by
@@ -157,20 +357,22 @@ async function listResponses(options: {
         ratedAt = r.action.rejected_at ?? undefined
       }
 
-      return {
+      responses.push({
         actionId: r.action.id,
         appSlug: r.app?.slug ?? 'unknown',
         appName: r.app?.name ?? 'Unknown App',
         conversationId: r.action.conversation_id ?? '',
-        customerEmail: r.conversation?.customer_email ?? 'unknown',
-        response: params.response ?? '',
-        category: params.category ?? 'unknown',
+        customerEmail,
+        customerName,
+        customerDisplay: formatCustomerDisplay(customerEmail, customerName),
+        response: responseText,
+        category: getCategory(r.action.category, params),
         createdAt: r.action.created_at ?? new Date(),
         rating,
         ratedBy,
         ratedAt,
-      }
-    })
+      })
+    }
 
     // Filter by rating if specified
     let filteredResponses = responses
@@ -195,7 +397,7 @@ async function listResponses(options: {
       const ratingIcon =
         r.rating === 'good' ? '👍' : r.rating === 'bad' ? '👎' : '⏳'
       console.log(`\n${ratingIcon} [${formatDate(r.createdAt)}] ${r.appSlug}`)
-      console.log(`   Customer: ${r.customerEmail}`)
+      console.log(`   Customer: ${r.customerDisplay}`)
       console.log(`   Category: ${r.category}`)
       console.log(
         `   Response: ${truncate(r.response.replace(/\n/g, ' '), 200)}`
@@ -262,9 +464,32 @@ async function getResponse(
       process.exit(1)
     }
 
-    const params = r.action.parameters as {
-      response?: string
-      category?: string
+    let params = normalizeParams(r.action.parameters)
+    let responseText = getResponseText(params)
+    let customerName = getCustomerName(r.conversation?.customer_name, params)
+    let customerEmail = getCustomerEmail(r.conversation?.customer_email, params)
+
+    if (
+      (!responseText || customerEmail === 'unknown') &&
+      r.action.conversation_id
+    ) {
+      const fallback = await findResponseFallback(
+        db,
+        r.action.id,
+        r.action.conversation_id
+      )
+      if (fallback) {
+        params = fallback.params
+        responseText = responseText || getResponseText(params)
+        customerName =
+          customerName ?? getCustomerName(r.conversation?.customer_name, params)
+        if (customerEmail === 'unknown') {
+          customerEmail = getCustomerEmail(
+            r.conversation?.customer_email,
+            params
+          )
+        }
+      }
     }
 
     let rating: 'good' | 'bad' | undefined
@@ -286,9 +511,11 @@ async function getResponse(
       appSlug: r.app?.slug ?? 'unknown',
       appName: r.app?.name ?? 'Unknown App',
       conversationId: r.action.conversation_id ?? '',
-      customerEmail: r.conversation?.customer_email ?? 'unknown',
-      response: params.response ?? '',
-      category: params.category ?? 'unknown',
+      customerEmail,
+      customerName,
+      customerDisplay: formatCustomerDisplay(customerEmail, customerName),
+      response: responseText,
+      category: getCategory(r.action.category, params),
       createdAt: r.action.created_at ?? new Date(),
       rating,
       ratedBy,
@@ -361,7 +588,7 @@ async function getResponse(
     console.log('='.repeat(80))
     console.log(`ID:         ${response.actionId}`)
     console.log(`App:        ${response.appName} (${response.appSlug})`)
-    console.log(`Customer:   ${response.customerEmail}`)
+    console.log(`Customer:   ${response.customerDisplay}`)
     console.log(`Category:   ${response.category}`)
     console.log(`Created:    ${formatDate(response.createdAt)}`)
     console.log(`Rating:     ${ratingIcon} ${response.rating ?? 'unrated'}`)
@@ -467,9 +694,36 @@ async function exportResponses(options: {
     const exportData: ResponseWithContext[] = []
 
     for (const r of results) {
-      const params = r.action.parameters as {
-        response?: string
-        category?: string
+      let params = normalizeParams(r.action.parameters)
+      let responseText = getResponseText(params)
+      let customerName = getCustomerName(r.conversation?.customer_name, params)
+      let customerEmail = getCustomerEmail(
+        r.conversation?.customer_email,
+        params
+      )
+
+      if (
+        (!responseText || customerEmail === 'unknown') &&
+        r.action.conversation_id
+      ) {
+        const fallback = await findResponseFallback(
+          db,
+          r.action.id,
+          r.action.conversation_id
+        )
+        if (fallback) {
+          params = fallback.params
+          responseText = responseText || getResponseText(params)
+          customerName =
+            customerName ??
+            getCustomerName(r.conversation?.customer_name, params)
+          if (customerEmail === 'unknown') {
+            customerEmail = getCustomerEmail(
+              r.conversation?.customer_email,
+              params
+            )
+          }
+        }
       }
 
       let rating: 'good' | 'bad' | undefined
@@ -485,9 +739,11 @@ async function exportResponses(options: {
         appSlug: r.app?.slug ?? 'unknown',
         appName: r.app?.name ?? 'Unknown App',
         conversationId: r.action.conversation_id ?? '',
-        customerEmail: r.conversation?.customer_email ?? 'unknown',
-        response: params.response ?? '',
-        category: params.category ?? 'unknown',
+        customerEmail,
+        customerName,
+        customerDisplay: formatCustomerDisplay(customerEmail, customerName),
+        response: responseText,
+        category: getCategory(r.action.category, params),
         createdAt: r.action.created_at ?? new Date(),
         rating,
         ratedBy: r.action.approved_by ?? r.action.rejected_by ?? undefined,

@@ -20,7 +20,7 @@
       "id": "story-ml3ywh2w",
       "title": "Fix response tracking showing unknown customer and empty response",
       "description": "All 30 tracked responses show `unknown` for customer and empty response text.\n\nInvestigation steps:\n1. Check `packages/cli/src/commands/responses.ts` to see what fields it queries\n2. Trace the draft creation flow in `packages/core/` - where does customer/response get stored?\n3. Check the database schema - is data being written but not read, or not written at all?\n4. Check PR #83 and #84 (draft tracking features) to see if they're fully wired up\n5. Fix the data flow gap\n\nThe draft tracking was added in late Jan - may be a field mapping issue.",
-      "priority": 2,
+      "priority": 10,
       "passes": false,
       "validationCommand": "cd packages/cli && bun src/index.ts responses list --limit 3 2>&1 | grep -v \"unknown\" | grep -v \"Ignoring\" | head -10",
       "acceptanceCriteria": [
@@ -34,7 +34,7 @@
       "title": "Reduce log noise inflating error metrics",
       "description": "1184 \"log\" level errors in 7 days are creating a false 7.36% error rate. The errors include:\n- \"inngest refresh failed\"\n- \"inngest refresh completed\" \n- \"cron using baseUrl\"\n- \"cron triggered\"\n\nThese are informational, not errors.\n\nInvestigation:\n1. Find where these logs are emitted (search for the log messages)\n2. Check Axiom logging configuration in `packages/core/src/observability/`\n3. Downgrade info logs that are incorrectly marked as errors\n4. Consider log level configuration (debug vs info vs error)\n\nGoal: Real errors should be visible, operational noise should not inflate error rate.",
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "validationCommand": "cd packages/cli && bun src/index.ts axiom errors 2>&1 | grep -c \"log\" || echo \"0\"",
       "acceptanceCriteria": [
         "Informational logs not marked as errors",
@@ -58,7 +58,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-01T16:40:33.309Z",
-    "totalIterations": 1,
-    "lastIteration": "2026-02-01T16:51:14.556Z"
+    "totalIterations": 2,
+    "lastIteration": "2026-02-01T17:21:30.012Z"
   }
 }

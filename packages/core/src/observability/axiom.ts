@@ -147,15 +147,23 @@ async function sendTrace(trace: Record<string, any>): Promise<void> {
 /**
  * Log a message to Axiom with optional metadata.
  * Use for debug/info logging that should go to Axiom instead of console.
+ *
+ * Levels map to success/status for error-rate calculations:
+ * - debug/info/warn => success=true, status='success'
+ * - error           => success=false, status='error'
  */
 export async function log(
   level: 'debug' | 'info' | 'warn' | 'error',
   message: string,
   metadata?: Record<string, unknown>
 ): Promise<void> {
+  const isError = level === 'error'
+
   await sendTrace({
     name: 'log',
     type: 'log',
+    status: isError ? 'error' : 'success',
+    success: !isError,
     level,
     message,
     ...metadata,

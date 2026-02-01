@@ -21,10 +21,15 @@ vi.mock('../../tags/registry', () => ({
 // Mock Front SDK
 vi.mock('@skillrecordings/front-sdk', () => ({
   createFrontClient: vi.fn(() => ({
-    conversations: {
-      addTag: vi.fn(),
+    tags: {
+      delete: vi.fn(),
+      create: vi.fn(),
     },
   })),
+  FRONT_API_BASE: 'https://api2.frontapp.com',
+  ErrorResponseSchema: {
+    safeParse: vi.fn(() => ({ success: false })),
+  },
   FrontApiError: class FrontApiError extends Error {
     status: number
     title: string
@@ -37,7 +42,7 @@ vi.mock('@skillrecordings/front-sdk', () => ({
   },
 }))
 
-import { FrontApiError, createFrontClient } from '@skillrecordings/front-sdk'
+import { ErrorResponseSchema } from '@skillrecordings/front-sdk'
 import { log } from '../../observability/axiom'
 import { createTagRegistry } from '../../tags/registry'
 
@@ -52,11 +57,7 @@ describe('applyTag', () => {
     getTagIdForCategory: Mock
     getTagNameForCategory: Mock
   }
-  let mockFront: {
-    conversations: {
-      addTag: Mock
-    }
-  }
+  let fetchMock: Mock
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -64,20 +65,19 @@ describe('applyTag', () => {
       getTagIdForCategory: vi.fn(),
       getTagNameForCategory: vi.fn(),
     }
-    mockFront = {
-      conversations: {
-        addTag: vi.fn(),
-      },
-    }
     ;(createTagRegistry as Mock).mockReturnValue(mockRegistry)
-    ;(createFrontClient as Mock).mockReturnValue(mockFront)
+    ;(ErrorResponseSchema.safeParse as Mock).mockReturnValue({ success: false })
+    fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 204,
+      statusText: 'No Content',
+    })
+    vi.stubGlobal('fetch', fetchMock)
   })
 
   it('applies tag successfully', async () => {
     mockRegistry.getTagIdForCategory.mockResolvedValue('tag_123')
     mockRegistry.getTagNameForCategory.mockReturnValue('access-issue')
-    mockFront.conversations.addTag.mockResolvedValue(undefined)
-
     const result = await applyTag(
       {
         conversationId: 'cnv_abc',
@@ -91,9 +91,12 @@ describe('applyTag', () => {
     expect(result.tagId).toBe('tag_123')
     expect(result.tagName).toBe('access-issue')
     expect(result.durationMs).toBeGreaterThanOrEqual(0)
-    expect(mockFront.conversations.addTag).toHaveBeenCalledWith(
-      'cnv_abc',
-      'tag_123'
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://api2.frontapp.com/conversations/cnv_abc/tags',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ tag_ids: ['tag_123'] }),
+      })
     )
   })
 
@@ -112,7 +115,7 @@ describe('applyTag', () => {
 
     expect(result.tagged).toBe(false)
     expect(result.error).toContain('Could not get/create tag')
-    expect(mockFront.conversations.addTag).not.toHaveBeenCalled()
+    expect(fetchMock).not.toHaveBeenCalled()
   })
 
   it('logs error to Axiom when tag ID cannot be resolved', async () => {
@@ -143,7 +146,12 @@ describe('applyTag', () => {
   it('handles Front API addTag errors gracefully', async () => {
     mockRegistry.getTagIdForCategory.mockResolvedValue('tag_123')
     mockRegistry.getTagNameForCategory.mockReturnValue('access-issue')
-    mockFront.conversations.addTag.mockRejectedValue(new Error('API Error'))
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 500,
+      statusText: 'API Error',
+      json: vi.fn().mockResolvedValue({}),
+    })
 
     const result = await applyTag(
       {
@@ -162,7 +170,12 @@ describe('applyTag', () => {
   it('logs Front API addTag errors to Axiom', async () => {
     mockRegistry.getTagIdForCategory.mockResolvedValue('tag_123')
     mockRegistry.getTagNameForCategory.mockReturnValue('access-issue')
-    mockFront.conversations.addTag.mockRejectedValue(new Error('403 Forbidden'))
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 403,
+      statusText: 'Forbidden',
+      json: vi.fn().mockResolvedValue({}),
+    })
 
     await applyTag(
       {
@@ -181,7 +194,7 @@ describe('applyTag', () => {
         conversationId: 'cnv_abc',
         tagId: 'tag_123',
         tagName: 'access-issue',
-        error: '403 Forbidden',
+        error: 'Forbidden',
       })
     )
   })
@@ -189,12 +202,30 @@ describe('applyTag', () => {
   it('handles FrontApiError with status details', async () => {
     mockRegistry.getTagIdForCategory.mockResolvedValue('tag_123')
     mockRegistry.getTagNameForCategory.mockReturnValue('access-issue')
-    const frontError = new FrontApiError(
-      404,
-      'Not Found',
-      'Conversation not found'
-    )
-    mockFront.conversations.addTag.mockRejectedValue(frontError)
+    ;(ErrorResponseSchema.safeParse as Mock).mockReturnValue({
+      success: true,
+      data: {
+        _error: {
+          status: 404,
+          title: 'Not Found',
+          message: 'Conversation not found',
+          details: [],
+        },
+      },
+    })
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 404,
+      statusText: 'Not Found',
+      json: vi.fn().mockResolvedValue({
+        _error: {
+          status: 404,
+          title: 'Not Found',
+          message: 'Conversation not found',
+          details: [],
+        },
+      }),
+    })
 
     const result = await applyTag(
       {
@@ -237,7 +268,7 @@ describe('applyTag', () => {
     expect(result.tagged).toBe(false)
     expect(result.error).toContain('Tag lookup failed')
     expect(result.error).toContain('Zod validation error')
-    expect(mockFront.conversations.addTag).not.toHaveBeenCalled()
+    expect(fetchMock).not.toHaveBeenCalled()
   })
 
   it('logs registry initialization failures to Axiom', async () => {
@@ -271,7 +302,6 @@ describe('applyTag', () => {
       getTagIdForCategory: vi.fn().mockResolvedValue('tag_custom'),
       getTagNameForCategory: vi.fn().mockReturnValue('custom-tag'),
     }
-    mockFront.conversations.addTag.mockResolvedValue(undefined)
 
     const result = await applyTag(
       {
@@ -289,13 +319,13 @@ describe('applyTag', () => {
     expect(result.tagId).toBe('tag_custom')
     expect(customRegistry.getTagIdForCategory).toHaveBeenCalledWith('spam')
     expect(createTagRegistry).not.toHaveBeenCalled()
+    expect(fetchMock).toHaveBeenCalled()
   })
 
   it('includes durationMs in all results', async () => {
     // Success case
     mockRegistry.getTagIdForCategory.mockResolvedValue('tag_123')
     mockRegistry.getTagNameForCategory.mockReturnValue('spam')
-    mockFront.conversations.addTag.mockResolvedValue(undefined)
 
     const successResult = await applyTag(
       {
@@ -309,6 +339,12 @@ describe('applyTag', () => {
 
     // Failure case — tag not found
     vi.clearAllMocks()
+    fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 204,
+      statusText: 'No Content',
+    })
+    vi.stubGlobal('fetch', fetchMock)
     ;(createTagRegistry as Mock).mockReturnValue({
       getTagIdForCategory: vi.fn().mockResolvedValue(undefined),
       getTagNameForCategory: vi.fn().mockReturnValue('spam'),
@@ -347,15 +383,17 @@ describe('applyTag', () => {
 
     for (const category of categories) {
       vi.clearAllMocks()
+      fetchMock = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 204,
+        statusText: 'No Content',
+      })
+      vi.stubGlobal('fetch', fetchMock)
       const mockReg = {
         getTagIdForCategory: vi.fn().mockResolvedValue(`tag_${category}`),
         getTagNameForCategory: vi.fn().mockReturnValue(`name_${category}`),
       }
-      const mockFr = {
-        conversations: { addTag: vi.fn().mockResolvedValue(undefined) },
-      }
       ;(createTagRegistry as Mock).mockReturnValue(mockReg)
-      ;(createFrontClient as Mock).mockReturnValue(mockFr)
 
       const result = await applyTag(
         { conversationId: 'cnv_test', category, appConfig: defaultAppConfig },
@@ -374,13 +412,7 @@ describe('createTagStep', () => {
       getTagIdForCategory: vi.fn().mockResolvedValue('tag_123'),
       getTagNameForCategory: vi.fn().mockReturnValue('spam'),
     }
-    const mockFront = {
-      conversations: {
-        addTag: vi.fn().mockResolvedValue(undefined),
-      },
-    }
     ;(createTagRegistry as Mock).mockReturnValue(mockRegistry)
-    ;(createFrontClient as Mock).mockReturnValue(mockFront)
 
     const tagStep = createTagStep({ frontApiToken: 'test-token' })
     const result = await tagStep({
