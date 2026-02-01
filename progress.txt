@@ -52,3 +52,11 @@ Summary: Added `getConversationQA` with a small query helper to pull the first i
 
 Files touched:
 - `scripts/extract-re
+
+---
+[2026-02-01T21:36:46.076Z]
+Completed: Filter and rank conversations for quality extraction
+Files: none
+Summary: Added deterministic ranking and filter funnel logic to `scripts/extract-real-faqs.ts`, including DuckDB-based thread signals, status/tag checks, and `shouldFilter` screening, plus per-topic audit logging. Wired the script to open the DuckDB cache path and log the filter funnel counts per topic for traceability. Updated `artifacts/faq-extraction-audit.md` with a process entry.
+
+- Updated `scripts/e

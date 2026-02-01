@@ -50,7 +50,7 @@
       "title": "Filter and rank conversations for quality extraction",
       "description": "Add function to filter conversations within each topic for extraction quality:\n\n```typescript\nfunction rankConversationsForExtraction(\n  conversationIds: string[], \n  db: Connection\n): Promise<string[]>  // Returns top 10 IDs\n```\n\nQuality signals (query from DuckDB):\n1. Thread length ≤ 4 messages (quick resolution)\n2. Has both inbound AND outbound messages\n3. Status = 'archived' (resolved)\n4. NOT tagged with 'spam' or 'collaboration'\n\nUse `packages/core/src/faq/filters.ts` shouldFilter() for additional spam detection on question text.\n\n⛔ FORBIDDEN: No LLM-based quality scoring\n✅ REQUIRED: Pure SQL + deterministic filters\n\nLog to audit: Filter stats per topic (total → after each filter → final)",
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "validationCommand": "grep -q \"rankConversationsForExtraction\" scripts/extract-real-faqs.ts && grep -q \"shouldFilter\" scripts/extract-real-faqs.ts && echo \"PASS\"",
       "acceptanceCriteria": [
         "Function rankConversationsForExtraction exists",
@@ -92,7 +92,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-01T21:18:54.627Z",
-    "totalIterations": 3,
-    "lastIteration": "2026-02-01T21:33:53.752Z"
+    "totalIterations": 4,
+    "lastIteration": "2026-02-01T21:36:46.076Z"
   }
 }

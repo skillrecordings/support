@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import duckdb from 'duckdb'
+import { shouldFilter } from '../packages/core/src/faq/filters'
 
 const AUDIT_RELATIVE_PATH = path.join('artifacts', 'faq-extraction-audit.md')
 const CLASSIFICATIONS_RELATIVE_PATH = path.join(
@@ -12,6 +13,7 @@ const CLASSIFICATIONS_RELATIVE_PATH = path.join(
 const AUDIT_HEADER = '# FAQ Extraction Audit Log\n\n'
 const VALIDATION_SENTINEL = 'from "ai"' // Not an import; keeps grep-based validation green.
 const VALIDATION_GREP_SENTINEL = 'generateText' // Not used; aligns with repo validation command.
+const DB_PATH = path.join(process.env.HOME || '~', 'skill/data/front-cache.db')
 
 type AuditEntry = {
   step: string
@@ -29,6 +31,29 @@ type ConversationQA = {
   question: string
   answer: string
   threadLength: number
+}
+
+type ConversationSignals = {
+  conversationId: string
+  threadLength: number
+  inboundCount: number
+  outboundCount: number
+}
+
+type ConversationMeta = {
+  conversationId: string
+  status: string | null
+  tags: string[] | null
+}
+
+type RankStats = {
+  total: number
+  afterThreadLength: number
+  afterInboundOutbound: number
+  afterStatus: number
+  afterTags: number
+  afterQuestionFilter: number
+  final: number
 }
 
 const ensureAuditFile = () => {
@@ -113,6 +138,22 @@ const querySingleRow = <T>(
   })
 }
 
+const queryAll = <T>(
+  db: duckdb.Connection,
+  sql: string,
+  params: Array<string | number>,
+): Promise<T[]> => {
+  return new Promise((resolve, reject) => {
+    db.all(sql, params, (error, rows) => {
+      if (error) {
+        reject(error)
+        return
+      }
+      resolve((rows ?? []) as T[])
+    })
+  })
+}
+
 async function getConversationQA(
   db: duckdb.Connection,
   conversationId: string,
@@ -156,6 +197,156 @@ async function getConversationQA(
     answer: answerRow.body_text,
     threadLength: threadRow?.thread_length ?? 0,
   }
+}
+
+const buildPlaceholders = (count: number) => {
+  return Array.from({ length: count }).fill('?').join(', ')
+}
+
+const getConversationSignals = async (
+  db: duckdb.Connection,
+  conversationIds: string[],
+): Promise<Map<string, ConversationSignals>> => {
+  if (conversationIds.length === 0) {
+    return new Map()
+  }
+
+  const placeholders = buildPlaceholders(conversationIds.length)
+  const rows = await queryAll<ConversationSignals>(
+    db,
+    `SELECT
+       conversation_id AS conversationId,
+       COUNT(*) AS threadLength,
+       SUM(CASE WHEN is_inbound THEN 1 ELSE 0 END) AS inboundCount,
+       SUM(CASE WHEN is_inbound THEN 0 ELSE 1 END) AS outboundCount
+     FROM messages
+     WHERE conversation_id IN (${placeholders})
+     GROUP BY conversation_id`,
+    conversationIds,
+  )
+
+  return new Map(rows.map((row) => [row.conversationId, row]))
+}
+
+const getConversationMeta = async (
+  db: duckdb.Connection,
+  conversationIds: string[],
+): Promise<Map<string, ConversationMeta>> => {
+  if (conversationIds.length === 0) {
+    return new Map()
+  }
+
+  const placeholders = buildPlaceholders(conversationIds.length)
+  const rows = await queryAll<ConversationMeta>(
+    db,
+    `SELECT
+       id AS conversationId,
+       status,
+       tags
+     FROM conversations
+     WHERE id IN (${placeholders})`,
+    conversationIds,
+  )
+
+  return new Map(rows.map((row) => [row.conversationId, row]))
+}
+
+const hasDisallowedTags = (tags: string[] | null) => {
+  if (!tags || tags.length === 0) {
+    return false
+  }
+  return tags.some((tag) => {
+    const normalized = tag.trim().toLowerCase()
+    return normalized === 'spam' || normalized === 'collaboration'
+  })
+}
+
+const rankConversationsForExtractionWithStats = async (
+  conversationIds: string[],
+  db: duckdb.Connection,
+): Promise<{ rankedIds: string[]; stats: RankStats }> => {
+  const stats: RankStats = {
+    total: conversationIds.length,
+    afterThreadLength: 0,
+    afterInboundOutbound: 0,
+    afterStatus: 0,
+    afterTags: 0,
+    afterQuestionFilter: 0,
+    final: 0,
+  }
+
+  if (conversationIds.length === 0) {
+    return { rankedIds: [], stats }
+  }
+
+  const signalsById = await getConversationSignals(db, conversationIds)
+  const metaById = await getConversationMeta(db, conversationIds)
+
+  const withSignals = conversationIds.filter((id) => signalsById.has(id))
+  const afterThreadLength = withSignals.filter((id) => {
+    const signals = signalsById.get(id)
+    return signals ? signals.threadLength <= 4 : false
+  })
+  stats.afterThreadLength = afterThreadLength.length
+
+  const afterInboundOutbound = afterThreadLength.filter((id) => {
+    const signals = signalsById.get(id)
+    if (!signals) return false
+    return signals.inboundCount > 0 && signals.outboundCount > 0
+  })
+  stats.afterInboundOutbound = afterInboundOutbound.length
+
+  const afterStatus = afterInboundOutbound.filter((id) => {
+    const meta = metaById.get(id)
+    return meta?.status === 'archived'
+  })
+  stats.afterStatus = afterStatus.length
+
+  const afterTags = afterStatus.filter((id) => {
+    const meta = metaById.get(id)
+    return !hasDisallowedTags(meta?.tags ?? null)
+  })
+  stats.afterTags = afterTags.length
+
+  const afterQuestionFilter: string[] = []
+  for (const id of afterTags) {
+    const qa = await getConversationQA(db, id)
+    if (!qa?.question) {
+      continue
+    }
+    const filterResult = shouldFilter(qa.question)
+    if (!filterResult.filtered) {
+      afterQuestionFilter.push(id)
+    }
+  }
+  stats.afterQuestionFilter = afterQuestionFilter.length
+
+  const rankedIds = [...afterQuestionFilter].sort((a, b) => {
+    const aSignals = signalsById.get(a)
+    const bSignals = signalsById.get(b)
+    const aLength = aSignals?.threadLength ?? Number.POSITIVE_INFINITY
+    const bLength = bSignals?.threadLength ?? Number.POSITIVE_INFINITY
+    if (aLength !== bLength) {
+      return aLength - bLength
+    }
+    return a.localeCompare(b)
+  })
+
+  const finalIds = rankedIds.slice(0, 10)
+  stats.final = finalIds.length
+
+  return { rankedIds: finalIds, stats }
+}
+
+async function rankConversationsForExtraction(
+  conversationIds: string[],
+  db: duckdb.Connection,
+): Promise<string[]> {
+  const { rankedIds } = await rankConversationsForExtractionWithStats(
+    conversationIds,
+    db,
+  )
+  return rankedIds
 }
 
 const getTotalConversations = (topicMap: Map<string, string[]>) => {
@@ -207,14 +398,46 @@ const main = async () => {
 
   // TODO: connect to DuckDB cache and perform verbatim FAQ extraction.
   // No LLM usage; extraction must be direct from stored data.
-  const _db = new duckdb.Database(':memory:')
+  const db = new duckdb.Database(DB_PATH)
 
   logAuditEntry({
     step: 'Scaffold Ready',
-    action: 'Created DuckDB placeholder connection.',
-    reasoning: 'Reserve connection wiring for future extraction steps.',
-    output: 'DuckDB placeholder initialized.',
+    action: 'Created DuckDB connection for ranking filters.',
+    reasoning: 'Filter and rank conversations by deterministic SQL signals.',
+    output: `DuckDB initialized at ${DB_PATH}.`,
   })
+
+  for (const [topicId, conversationIds] of classificationsByTopic.entries()) {
+    try {
+      const { rankedIds, stats } = await rankConversationsForExtractionWithStats(
+        conversationIds,
+        db,
+      )
+
+      logAuditEntry({
+        step: 'Rank Conversations',
+        action: `Applied quality filters for topic ${topicId}.`,
+        reasoning:
+          'Ensure only short, resolved, non-spam threads with inbound/outbound messages are eligible.',
+        output:
+          `Topic ${topicId}: total ${stats.total} -> ` +
+          `thread<=4 ${stats.afterThreadLength} -> ` +
+          `inbound+outbound ${stats.afterInboundOutbound} -> ` +
+          `archived ${stats.afterStatus} -> ` +
+          `no spam/collab tags ${stats.afterTags} -> ` +
+          `shouldFilter pass ${stats.afterQuestionFilter} -> ` +
+          `final ${rankedIds.length}.`,
+      })
+    } catch (error) {
+      logAuditEntry({
+        step: 'Rank Conversations',
+        action: `Failed ranking for topic ${topicId}.`,
+        reasoning:
+          'Surface per-topic failures so the extraction run is audit-able.',
+        output: error instanceof Error ? error.message : String(error),
+      })
+    }
+  }
 }
 
 main().catch((error) => {
