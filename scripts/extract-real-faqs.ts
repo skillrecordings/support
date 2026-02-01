@@ -25,6 +25,12 @@ type ClassificationEntry = {
   topicId: string
 }
 
+type ConversationQA = {
+  question: string
+  answer: string
+  threadLength: number
+}
+
 const ensureAuditFile = () => {
   const auditPath = path.resolve(process.cwd(), AUDIT_RELATIVE_PATH)
   const auditDir = path.dirname(auditPath)
@@ -85,6 +91,71 @@ const loadClassifications = (): Map<string, string[]> => {
   }
 
   return topicMap
+}
+
+const querySingleRow = <T>(
+  db: duckdb.Connection,
+  sql: string,
+  params: Array<string | number>,
+): Promise<T | null> => {
+  return new Promise((resolve, reject) => {
+    db.all(sql, params, (error, rows) => {
+      if (error) {
+        reject(error)
+        return
+      }
+      if (!rows || rows.length === 0) {
+        resolve(null)
+        return
+      }
+      resolve(rows[0] as T)
+    })
+  })
+}
+
+async function getConversationQA(
+  db: duckdb.Connection,
+  conversationId: string,
+): Promise<ConversationQA | null> {
+  const questionRow = await querySingleRow<{ body_text: string }>(
+    db,
+    `SELECT body_text
+     FROM messages
+     WHERE conversation_id = ?
+       AND is_inbound = true
+     ORDER BY created_at ASC
+     LIMIT 1`,
+    [conversationId],
+  )
+
+  const answerRow = await querySingleRow<{ body_text: string }>(
+    db,
+    `SELECT body_text
+     FROM messages
+     WHERE conversation_id = ?
+       AND is_inbound = false
+     ORDER BY created_at DESC
+     LIMIT 1`,
+    [conversationId],
+  )
+
+  if (!questionRow || !answerRow) {
+    return null
+  }
+
+  const threadRow = await querySingleRow<{ thread_length: number }>(
+    db,
+    `SELECT COUNT(*) AS thread_length
+     FROM messages
+     WHERE conversation_id = ?`,
+    [conversationId],
+  )
+
+  return {
+    question: questionRow.body_text,
+    answer: answerRow.body_text,
+    threadLength: threadRow?.thread_length ?? 0,
+  }
 }
 
 const getTotalConversations = (topicMap: Map<string, string[]>) => {

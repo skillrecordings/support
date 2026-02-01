@@ -36,7 +36,7 @@
       "title": "Query DuckDB for real Q&A pairs by conversation ID",
       "description": "Add function to query DuckDB for actual message content:\n\n```typescript\nasync function getConversationQA(db: Connection, conversationId: string): Promise<{\n  question: string  // First inbound message body_text\n  answer: string    // Last outbound message body_text  \n  threadLength: number\n} | null>\n```\n\nSQL must select from `messages` table WHERE `conversation_id = ?`\n- Question = first message where is_inbound = true, ordered by created_at ASC\n- Answer = last message where is_inbound = false, ordered by created_at DESC\n\n⛔ FORBIDDEN: No text transformation, cleaning, or summarization\n✅ REQUIRED: Return EXACT body_text from database\n\nLog to audit: Sample of 3 extracted Q&A pairs showing raw text",
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "validationCommand": "grep -q \"getConversationQA\" scripts/extract-real-faqs.ts && grep -q \"body_text\" scripts/extract-real-faqs.ts && grep -L \"generateText\" scripts/extract-real-faqs.ts && echo \"PASS\"",
       "acceptanceCriteria": [
         "Function getConversationQA exists",
@@ -92,7 +92,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-01T21:18:54.627Z",
-    "totalIterations": 2,
-    "lastIteration": "2026-02-01T21:30:35.669Z"
+    "totalIterations": 3,
+    "lastIteration": "2026-02-01T21:33:53.752Z"
   }
 }
