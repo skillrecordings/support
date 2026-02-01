@@ -70,6 +70,10 @@ export async function cleanupExpiredData(
 
   // Step 2: Delete expired vectors
   const expiredVectors = await vectorIndex.query({
+    // Upstash Vector requires a query payload with data/vector/sparseVector.
+    // Use a generic query to retrieve candidates for deletion.
+    data: 'retention cleanup',
+    topK: 1000,
     filter: `createdAt < "${vectorCutoff.toISOString()}"`,
   })
 
