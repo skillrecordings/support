@@ -1,147 +1,98 @@
 {
   "version": "1.0",
-  "projectName": "pipeline-health-cleanup",
-  "description": "Pipeline health cleanup - tag failures, response tracking, log noise, retention cron (GitHub #115)",
+  "projectName": "faq-real-extraction",
+  "description": "Extract REAL FAQ Q&A pairs from DuckDB cache using existing LLM topic classifications. CRITICAL: NO LLM SYNTHESIS - this is verbatim text extraction only. All work must be logged to artifacts/faq-extraction-audit.md with process notes.",
   "stories": [
     {
-      "id": "story-ml3ywh2k",
-      "title": "Diagnose and fix tag application 100% failure rate",
-      "description": "The `apply-tag` step fails 100% of the time (58 failures in 7 days). \n\nInvestigation steps:\n1. Check `packages/core/src/front/` for tag application code\n2. Check if using Front SDK vs raw fetch (SDK has known bug with null `_links.related.children`)\n3. Check if tags are archived or permissions issues\n4. Look at Axiom logs for specific error messages: `bun src/index.ts axiom tag-health`\n5. Fix the root cause - likely need raw fetch() instead of SDK\n\nThe fix from PR #85 was for \"archived tags\" - check if that's actually deployed and working.",
+      "id": "story-ml48u37t",
+      "title": "Create extraction script scaffold with audit logging",
+      "description": "Create `scripts/extract-real-faqs.ts` with:\n1. Audit logger that writes to `artifacts/faq-extraction-audit.md`\n2. Every major step logs: timestamp, action, reasoning\n3. Script skeleton with NO ai/LLM imports\n\n⛔ FORBIDDEN: Do not import from 'ai', '@ai-sdk/*', or any LLM library\n✅ REQUIRED: Use DuckDB, fs, path only\n\nThe audit file format:\n```\n# FAQ Extraction Audit Log\n\n## [timestamp] Step Name\n**Action:** What was done\n**Reasoning:** Why this approach\n**Output:** What was produced\n```",
       "priority": 1,
       "passes": true,
-      "validationCommand": "cd packages/cli && bun src/index.ts axiom tag-health 2>&1 | grep -E \"(success|Success)\" | head -5",
+      "validationCommand": "grep -L \"generateText\\|generateObject\\|from 'ai'\\|from \\\"ai\\\"\" scripts/extract-real-faqs.ts && test -f scripts/extract-real-faqs.ts && echo \"PASS\"",
       "acceptanceCriteria": [
-        "Tag application success rate >0% in axiom tag-health",
-        "Root cause identified and documented",
-        "Fix committed if code change needed"
+        "scripts/extract-real-faqs.ts exists",
+        "File does NOT contain: import.*from.*ai, generateText, generateObject",
+        "Audit logger function exists and writes to artifacts/faq-extraction-audit.md",
+        "Running script creates audit file with header"
       ]
     },
     {
-      "id": "story-ml3ywh2w",
-      "title": "Fix response tracking showing unknown customer and empty response",
-      "description": "All 30 tracked responses show `unknown` for customer and empty response text.\n\nInvestigation steps:\n1. Check `packages/cli/src/commands/responses.ts` to see what fields it queries\n2. Trace the draft creation flow in `packages/core/` - where does customer/response get stored?\n3. Check the database schema - is data being written but not read, or not written at all?\n4. Check PR #83 and #84 (draft tracking features) to see if they're fully wired up\n5. Fix the data flow gap\n\nThe draft tracking was added in late Jan - may be a field mapping issue.",
-      "priority": 10,
-      "passes": true,
-      "validationCommand": "cd packages/cli && bun src/index.ts responses list --limit 3 2>&1 | grep -v \"unknown\" | grep -v \"Ignoring\" | head -10",
-      "acceptanceCriteria": [
-        "responses list shows actual customer email/name",
-        "responses list shows actual response text",
-        "Data flow documented"
-      ]
-    },
-    {
-      "id": "story-ml3ywh2y",
-      "title": "Reduce log noise inflating error metrics",
-      "description": "1184 \"log\" level errors in 7 days are creating a false 7.36% error rate. The errors include:\n- \"inngest refresh failed\"\n- \"inngest refresh completed\" \n- \"cron using baseUrl\"\n- \"cron triggered\"\n\nThese are informational, not errors.\n\nInvestigation:\n1. Find where these logs are emitted (search for the log messages)\n2. Check Axiom logging configuration in `packages/core/src/observability/`\n3. Downgrade info logs that are incorrectly marked as errors\n4. Consider log level configuration (debug vs info vs error)\n\nGoal: Real errors should be visible, operational noise should not inflate error rate.",
-      "priority": 3,
-      "passes": true,
-      "validationCommand": "cd packages/cli && bun src/index.ts axiom errors 2>&1 | grep -c \"log\" || echo \"0\"",
-      "acceptanceCriteria": [
-        "Informational logs not marked as errors",
-        "Error rate reflects actual failures",
-        "Logging levels documented"
-      ]
-    },
-    {
-      "id": "story-ml3ywh33",
-      "title": "Fix retention-cleanup cron vector error",
-      "description": "The `support-platform-retention-cleanup` cron fails with:\n\"Either data, vector or sparseVector should be provided\"\n\nThis is an Upstash Vector API error - the cleanup function is trying to upsert/delete without proper parameters.\n\nInvestigation:\n1. Find `retention-cleanup` function in `packages/core/src/inngest/`\n2. Check what vector operations it performs\n3. Look at Upstash Vector SDK usage - likely missing required field\n4. Fix the API call to include required parameters\n\nRun ID from failure: 01KGBJ95W0GQTTAAGX94H74FQY",
-      "priority": 4,
-      "passes": true,
-      "validationCommand": "cd packages/cli && bun src/index.ts inngest failures --after 24h 2>&1 | grep -c \"retention-cleanup\" || echo \"0\"",
-      "acceptanceCriteria": [
-        "retention-cleanup cron runs without vector error",
-        "Next scheduled run succeeds",
-        "Root cause documented"
-      ]
-    },
-    {
-      "id": "story-ml442i9p",
-      "title": "Create Front API wrapper with Axiom logging",
-      "description": "Create a wrapper around Front API calls that logs to Axiom. Should capture:\n- Endpoint/method called\n- Response time (ms)\n- HTTP status code\n- Request ID for correlation\n- Field presence checks for known problematic fields (_links.related.children, highlights)\n\nLocation: packages/agent/src/lib/front/instrumented-client.ts\n\nThe wrapper should be a drop-in replacement that can be used instead of direct Front SDK/fetch calls. Use the existing Axiom client pattern from the codebase.",
-      "priority": 1,
-      "passes": true,
-      "validationCommand": "cd /home/joel/Code/skillrecordings/support && bun test --filter front 2>/dev/null || echo 'Tests not yet written'",
-      "acceptanceCriteria": [
-        "Front API wrapper exists with timing instrumentation",
-        "Logs sent to Axiom with endpoint, status, timing",
-        "Field presence checks for _links.related.children and highlights",
-        "Can be used as drop-in replacement for Front SDK calls"
-      ]
-    },
-    {
-      "id": "story-ml442ia3",
-      "title": "Add SDK fallback tracking when Front SDK validation fails",
-      "description": "When the Front SDK chokes on validation (null _links.related.children, etc.) and we fall back to raw fetch, log this explicitly to Axiom:\n- The specific validation error message\n- That a fallback occurred\n- The endpoint that triggered the fallback\n- Frequency/count tracking\n\nThis gives visibility into how often the SDK bug bites us.\n\nFind existing fallback patterns in the codebase and add logging to them.",
+      "id": "story-ml48u8hx",
+      "title": "Load classifications and build topic-to-conversations map",
+      "description": "Add function to load `artifacts/phase-1/llm-topics/classifications.json` and create a Map<topicId, conversationId[]>.\n\nLog to audit:\n- Number of topics found\n- Total conversations loaded\n- Top 5 topics by count\n\n⛔ FORBIDDEN: No LLM calls, no content generation\n✅ REQUIRED: Pure file reading and data structure building",
       "priority": 2,
-      "passes": true,
-      "validationCommand": "cd /home/joel/Code/skillrecordings/support && grep -r \"sdk.*fallback\\|fallback.*log\\|axiom.*front\" packages/agent/src --include='*.ts' | head -5 || echo 'Logging patterns added'",
+      "passes": false,
+      "validationCommand": "grep -q \"loadClassifications\" scripts/extract-real-faqs.ts && grep -L \"generateText\\|generateObject\" scripts/extract-real-faqs.ts && echo \"PASS\"",
       "acceptanceCriteria": [
-        "SDK validation failures logged to Axiom",
-        "Fallback events explicitly tracked",
-        "Error message captured for debugging",
-        "Can query Axiom for fallback frequency"
+        "Function loadClassifications() exists",
+        "Returns Map with topic IDs as keys",
+        "Audit log shows topic counts",
+        "No AI imports in file"
       ]
     },
     {
-      "id": "story-ml442ia6",
-      "title": "Store webhook payload snapshots for debugging",
-      "description": "Store raw Front webhook payloads for debugging purposes:\n- Save to a debug table or structured log in Axiom\n- Include timestamp, conversation ID, message ID\n- Flag preview vs full message differences\n- Add retention policy (7 days or configurable)\n\nThis helps debug issues where webhook preview differs from full message fetch.\n\nConsider using existing database or Axiom depending on what makes sense for the codebase.",
+      "id": "story-ml48ufoe",
+      "title": "Query DuckDB for real Q&A pairs by conversation ID",
+      "description": "Add function to query DuckDB for actual message content:\n\n```typescript\nasync function getConversationQA(db: Connection, conversationId: string): Promise<{\n  question: string  // First inbound message body_text\n  answer: string    // Last outbound message body_text  \n  threadLength: number\n} | null>\n```\n\nSQL must select from `messages` table WHERE `conversation_id = ?`\n- Question = first message where is_inbound = true, ordered by created_at ASC\n- Answer = last message where is_inbound = false, ordered by created_at DESC\n\n⛔ FORBIDDEN: No text transformation, cleaning, or summarization\n✅ REQUIRED: Return EXACT body_text from database\n\nLog to audit: Sample of 3 extracted Q&A pairs showing raw text",
       "priority": 3,
-      "passes": true,
-      "validationCommand": "cd /home/joel/Code/skillrecordings/support && grep -r \"webhook.*payload\\|payload.*snapshot\\|webhook.*debug\" packages/ --include='*.ts' | head -5 || echo 'Webhook logging added'",
+      "passes": false,
+      "validationCommand": "grep -q \"getConversationQA\" scripts/extract-real-faqs.ts && grep -q \"body_text\" scripts/extract-real-faqs.ts && grep -L \"generateText\" scripts/extract-real-faqs.ts && echo \"PASS\"",
       "acceptanceCriteria": [
-        "Webhook payloads stored with metadata",
-        "Preview vs full message comparison possible",
-        "Retention policy implemented",
-        "Can query by conversation/message ID"
+        "Function getConversationQA exists",
+        "Uses SQL SELECT from messages table",
+        "Returns raw body_text without modification",
+        "Audit shows sample extractions"
       ]
     },
     {
-      "id": "story-ml442iac",
-      "title": "Migrate existing Front API calls to use instrumented wrapper",
-      "description": "Update existing Front API call sites to use the new instrumented wrapper:\n- Find all direct Front SDK usage\n- Find all raw fetch calls to Front API\n- Replace with instrumented versions\n- Ensure no regressions\n\nThis is the integration step that makes the logging actually flow in production.",
+      "id": "story-ml48unht",
+      "title": "Filter and rank conversations for quality extraction",
+      "description": "Add function to filter conversations within each topic for extraction quality:\n\n```typescript\nfunction rankConversationsForExtraction(\n  conversationIds: string[], \n  db: Connection\n): Promise<string[]>  // Returns top 10 IDs\n```\n\nQuality signals (query from DuckDB):\n1. Thread length ≤ 4 messages (quick resolution)\n2. Has both inbound AND outbound messages\n3. Status = 'archived' (resolved)\n4. NOT tagged with 'spam' or 'collaboration'\n\nUse `packages/core/src/faq/filters.ts` shouldFilter() for additional spam detection on question text.\n\n⛔ FORBIDDEN: No LLM-based quality scoring\n✅ REQUIRED: Pure SQL + deterministic filters\n\nLog to audit: Filter stats per topic (total → after each filter → final)",
       "priority": 4,
-      "passes": true,
-      "validationCommand": "cd /home/joel/Code/skillrecordings/support && bun run build && bun test",
+      "passes": false,
+      "validationCommand": "grep -q \"rankConversationsForExtraction\" scripts/extract-real-faqs.ts && grep -q \"shouldFilter\" scripts/extract-real-faqs.ts && echo \"PASS\"",
       "acceptanceCriteria": [
-        "All Front API calls use instrumented wrapper",
-        "No direct Front SDK calls remain (except in wrapper)",
-        "Build passes",
-        "Existing tests pass"
+        "Function rankConversationsForExtraction exists",
+        "Filters by thread length, status, tags",
+        "Uses shouldFilter from filters.ts",
+        "Returns max 10 per topic",
+        "Audit shows filter funnel stats"
       ]
     },
     {
-      "id": "story-ml45bzuv",
-      "title": "Fix: Store draftId in action parameters after Front draft creation",
-      "description": "In handle-validated-draft.ts, after the 'create-front-draft' step creates the draft and gets draftId, update the action record to include the draftId in parameters.\n\nCurrent flow:\n1. create-pending-action → stores action WITHOUT draftId\n2. create-front-draft → creates draft, gets draftId, but doesn't store it\n\nFix:\nAfter create-front-draft succeeds, update the ActionsTable record to add draftId to the parameters JSON.\n\n```typescript\n// After line ~375 where frontDraft.id is logged\nif (draftResult.created && draftResult.draftId) {\n  await db.update(ActionsTable)\n    .set({\n      parameters: sql`jsonb_set(parameters, '{draftId}', '\"${draftResult.draftId}\"')`\n    })\n    .where(eq(ActionsTable.id, actionId))\n}\n```\n\nGitHub Issue: #117",
-      "priority": 1,
-      "passes": true,
-      "validationCommand": "cd /home/joel/Code/skillrecordings/support && bun test --filter handle-validated",
+      "id": "story-ml48uv8l",
+      "title": "Main extraction loop with JSONL output",
+      "description": "Implement main() that:\n1. Loads classifications\n2. For each of 41 topics:\n   - Get conversation IDs for topic\n   - Rank/filter to top 10\n   - Extract real Q&A for each\n   - Write to output\n3. Output: `artifacts/phase-1/real-faq-candidates.jsonl`\n\nOutput schema per line:\n```json\n{\n  \"topicId\": \"email_change_request\",\n  \"topicName\": \"Email Change Request\", \n  \"conversationId\": \"cnv_xxx\",\n  \"question\": \"<EXACT body_text from first inbound message>\",\n  \"answer\": \"<EXACT body_text from last outbound message>\",\n  \"threadLength\": 3,\n  \"extractedAt\": \"2026-02-01T...\"\n}\n```\n\n⛔ FORBIDDEN: No summarization, no cleaning, no LLM enhancement of text\n✅ REQUIRED: question and answer are VERBATIM from messages.body_text\n\nLog to audit: Final stats - topics processed, total Q&A pairs extracted, any skipped topics",
+      "priority": 5,
+      "passes": false,
+      "validationCommand": "bun scripts/extract-real-faqs.ts && test -f artifacts/phase-1/real-faq-candidates.jsonl && wc -l artifacts/phase-1/real-faq-candidates.jsonl | grep -E \"^[0-9]+\" && echo \"PASS\"",
       "acceptanceCriteria": [
-        "draftId is stored in action parameters after Front draft creation",
-        "Action record queryable by draftId",
-        "Existing tests pass"
+        "Main function orchestrates full extraction",
+        "Output file artifacts/phase-1/real-faq-candidates.jsonl created",
+        "Each line is valid JSON with required fields",
+        "Audit log shows completion stats"
       ]
     },
     {
-      "id": "story-ml45bzv7",
-      "title": "Fix: execute-approved-action should send reply, not create duplicate draft",
-      "description": "In execute-approved-action.ts, when handling approved send-draft actions:\n\nCurrent (BROKEN):\n- Calls front.createDraft() → creates DUPLICATE draft\n\nFixed flow:\n1. If draftId exists in parameters, delete the existing review draft\n2. Use front.messages.create() or front.conversations.reply() to SEND the message directly\n3. Don't create another draft\n\nKey changes in execute-approved-action.ts around line 123-200:\n```typescript\nif (action.type === 'send-draft' || action.type === 'draft-response') {\n  const params = action.parameters as {\n    response?: string\n    draft?: string\n    draftId?: string  // NEW: the Front draft ID to clean up\n    inboxId?: string\n  }\n  \n  const response = params?.draft || params?.response\n  const existingDraftId = params?.draftId\n  \n  // Delete the review draft if it exists\n  if (existingDraftId) {\n    try {\n      await front.drafts.delete(existingDraftId)\n    } catch (e) {\n      // Draft may already be deleted/sent - non-fatal\n    }\n  }\n  \n  // SEND the message directly (not create another draft)\n  const sent = await front.messages.create(conversationId, {\n    body: contentWithTracking,\n    channel_id: channelId,\n  })\n  \n  return { success: true, output: { messageId: sent.id, conversationId } }\n}\n```\n\nGitHub Issue: #117",
-      "priority": 2,
-      "passes": true,
-      "validationCommand": "cd /home/joel/Code/skillrecordings/support && bun test --filter execute-approved && bun run build",
+      "id": "story-ml48v2jl",
+      "title": "Validation: Verify extraction integrity (no LLM, data matches DB)",
+      "description": "Create validation script `scripts/validate-faq-extraction.ts` that:\n\n1. **Code audit**: Grep extract-real-faqs.ts for forbidden patterns\n   - FAIL if contains: generateText, generateObject, import.*ai\n   \n2. **Data integrity**: Sample 5 random entries from output\n   - Query DuckDB for same conversation_id\n   - Verify question matches first inbound body_text EXACTLY\n   - Verify answer matches last outbound body_text EXACTLY\n   \n3. **Output validation**:\n   - All 41 topics represented (or documented why skipped)\n   - Each entry has non-empty question and answer\n   - No entries where question === answer\n\nWrite results to `artifacts/faq-extraction-validation.md`\n\n⛔ This is the guardrail story - it catches if earlier stories cheated",
+      "priority": 6,
+      "passes": false,
+      "validationCommand": "bun scripts/validate-faq-extraction.ts && cat artifacts/faq-extraction-validation.md | grep -q \"PASS\" && echo \"PASS\"",
       "acceptanceCriteria": [
-        "Approving a draft sends message directly (no duplicate draft)",
-        "Existing review draft is cleaned up",
-        "Message appears in Front conversation as sent",
-        "Build and tests pass"
+        "scripts/validate-faq-extraction.ts exists",
+        "Checks for forbidden AI imports",
+        "Verifies sample data matches DuckDB exactly",
+        "Creates validation report",
+        "Script exits 0 only if ALL checks pass"
       ]
     }
   ],
   "metadata": {
-    "createdAt": "2026-02-01T16:40:33.309Z",
-    "totalIterations": 8,
-    "lastIteration": "2026-02-01T19:52:32.393Z"
+    "createdAt": "2026-02-01T21:18:54.627Z",
+    "totalIterations": 1,
+    "lastIteration": "2026-02-01T21:27:45.396Z"
   }
 }
