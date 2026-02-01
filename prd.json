@@ -74,7 +74,7 @@
       "title": "Add SDK fallback tracking when Front SDK validation fails",
       "description": "When the Front SDK chokes on validation (null _links.related.children, etc.) and we fall back to raw fetch, log this explicitly to Axiom:\n- The specific validation error message\n- That a fallback occurred\n- The endpoint that triggered the fallback\n- Frequency/count tracking\n\nThis gives visibility into how often the SDK bug bites us.\n\nFind existing fallback patterns in the codebase and add logging to them.",
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "validationCommand": "cd /home/joel/Code/skillrecordings/support && grep -r \"sdk.*fallback\\|fallback.*log\\|axiom.*front\" packages/agent/src --include='*.ts' | head -5 || echo 'Logging patterns added'",
       "acceptanceCriteria": [
         "SDK validation failures logged to Axiom",
@@ -114,7 +114,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-01T16:40:33.309Z",
-    "totalIterations": 4,
-    "lastIteration": "2026-02-01T19:09:47.291Z"
+    "totalIterations": 5,
+    "lastIteration": "2026-02-01T19:11:20.511Z"
   }
 }

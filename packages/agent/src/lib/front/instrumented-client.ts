@@ -99,6 +99,24 @@ async function logFrontRequest(options: {
   })
 }
 
+async function logFrontSdkFallback(options: {
+  method: string
+  endpoint: string
+  requestId?: string
+  errorMessage: string
+}) {
+  await log('warn', 'Front SDK validation failed, SDK fallback used', {
+    endpoint: options.endpoint,
+    method: options.method,
+    requestId: options.requestId,
+    errorMessage: options.errorMessage,
+    sdkValidationFailed: true,
+    sdkFallbackUsed: true,
+    fallbackOccurred: true,
+    eventType: 'front_sdk_fallback',
+  })
+}
+
 async function handleRateLimit(
   response: Response,
   attempt: number
@@ -215,7 +233,18 @@ export function createInstrumentedBaseClient(config: FrontClientConfig) {
       })
 
       if (schema) {
-        return schema.parse(data)
+        try {
+          return schema.parse(data)
+        } catch (error) {
+          await logFrontSdkFallback({
+            method,
+            endpoint: path,
+            requestId: lastRequestId,
+            errorMessage:
+              error instanceof Error ? error.message : String(error),
+          })
+          return data as T
+        }
       }
       return data as T
     }

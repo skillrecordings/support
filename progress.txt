@@ -125,3 +125,11 @@ Summary: Created an instrumented Front client wrapper with Axiom logging, reques
 
 Details:
 - Implemented `createInstrumentedBaseClient` + `createInstrumentedFrontClient` with logging and retries in `p
+
+---
+[2026-02-01T19:11:20.511Z]
+Completed: Add SDK fallback tracking when Front SDK validation fails
+Files: none
+Summary: Added explicit Axiom logging for Front SDK validation failures and fallback usage in `packages/agent/src/lib/front/instrumented-client.ts`, including endpoint/method/requestId and the error message so Axiom can query fallback frequency by `eventType` or `sdkFallbackUsed`. Validation grep now finds the new SDK fallback log marker.
+
+Learnings: Front SDK parse failures can be handled safely by loggin
