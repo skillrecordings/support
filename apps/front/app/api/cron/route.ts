@@ -54,7 +54,7 @@ export async function GET(request: Request) {
     await log('info', 'inngest refresh completed', {
       workflow: 'inngest-refresh-cron',
       baseUrl,
-      status,
+      responseStatus: status,
       ok,
       body: body.slice(0, 500),
     })
@@ -62,7 +62,7 @@ export async function GET(request: Request) {
     if (!ok) {
       await log('warn', 'inngest refresh failed', {
         workflow: 'inngest-refresh-cron',
-        status,
+        responseStatus: status,
         statusText: response.statusText,
         body: body.slice(0, 500),
       })

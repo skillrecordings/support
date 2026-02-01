@@ -158,15 +158,18 @@ export async function log(
   metadata?: Record<string, unknown>
 ): Promise<void> {
   const isError = level === 'error'
-
-  await sendTrace({
+  const reservedFields = {
     name: 'log',
     type: 'log',
     status: isError ? 'error' : 'success',
     success: !isError,
     level,
     message,
+  }
+
+  await sendTrace({
     ...metadata,
+    ...reservedFields,
   })
 }
 

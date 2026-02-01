@@ -92,3 +92,13 @@ Learnings: Upstash Vector `query` requires `data`/`vector`/`sparseVector`; a fil
 
 Next steps (optional):
 1. Monitor the next 3am UTC cron run in Inngest to confirm success.
+
+---
+[2026-02-01T17:23:42.067Z]
+Completed: Reduce log noise inflating error metrics
+Files: none
+Summary: Updated Axiom logging to prevent metadata from overriding core status fields, and preserved HTTP status under a safer key so info/warn cron logs no longer inflate error metrics. Also documented the log level mapping and reserved fields in the observability doc.
+
+Details
+- Prevent metadata from overriding reserved log fields in `packages/core/src/observability/axiom.ts`.
+- Renamed HTTP status metad

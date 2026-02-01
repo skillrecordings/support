@@ -1,5 +1,17 @@
 # Observability
 
+## Logging (Axiom)
+
+Use `log()` for structured events. Levels map to success/error for error-rate
+calculations:
+
+- debug/info/warn: `status = "success"`, `success = true`
+- error: `status = "error"`, `success = false`
+
+Reserved fields (`name`, `type`, `status`, `success`, `level`, `message`) are
+owned by the logger and should not be reused for application metadata. Prefer
+`httpStatus`/`responseStatus` for HTTP codes.
+
 ## Tracing (Axiom)
 
 ```typescript
@@ -55,4 +67,3 @@ export async function traceAgentRun(agentRun: AgentRun, context: ConversationCon
   return { traceId: trace.id, generationId: generation.id }
 }
 ```
-
