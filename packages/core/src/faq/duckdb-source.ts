@@ -9,6 +9,7 @@
  */
 
 import type { Conversation, Message } from '@skillrecordings/front-sdk'
+import { shouldFilter } from './filters'
 import type { DataSource, QueryOptions, ResolvedConversation } from './types'
 
 /**
@@ -257,30 +258,16 @@ function extractAnswer(messages: Message[]): string {
 }
 
 /**
- * Spam/noise patterns to filter out
+ * Check if a question looks like spam or noise.
+ * Uses the comprehensive filter module for consistency.
  */
-const SPAM_PATTERNS = [
-  /collaboration|partnership|sponsored|affiliate/i,
-  /would you be interested/i,
-  /Oxylabs|Fiverr|Upwork/i,
-  /SEO services|backlink/i,
-  /^(hi|hello|hey)[\s,]*$/i, // Just greetings
-  /^[\s]*$/, // Empty
-]
-
-/**
- * Check if a question looks like spam or noise
- */
-function isSpamOrNoise(text: string): boolean {
+function isSpamOrNoise(text: string, senderEmail?: string): boolean {
   // Too short
   if (text.trim().length < 20) return true
 
-  // Matches spam patterns
-  for (const pattern of SPAM_PATTERNS) {
-    if (pattern.test(text)) return true
-  }
-
-  return false
+  // Use the comprehensive filter module
+  const result = shouldFilter(text, senderEmail)
+  return result.filtered
 }
 
 // DuckDB connection interface
@@ -472,8 +459,18 @@ export async function createDuckDBSource(
           continue // Skip if we can't extract Q&A
         }
 
-        // Filter spam
-        if (isSpamOrNoise(question)) {
+        // Get sender email from first inbound message for filtering
+        const firstInbound = messages.find((m) => m.is_inbound)
+        const senderEmail = firstInbound?.author?.email
+
+        // Filter spam using comprehensive filter module
+        if (isSpamOrNoise(question, senderEmail)) {
+          continue
+        }
+
+        // Also filter answers that are just auto-replies
+        const answerFilter = shouldFilter(answer)
+        if (answerFilter.filtered && answerFilter.reason === 'auto_reply') {
           continue
         }
 

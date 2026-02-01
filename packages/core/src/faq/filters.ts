@@ -101,10 +101,17 @@ export const SPAM_PATTERNS = [
   /AI-powered influencer/i,
   /Partnerships at Head Creator/i,
 
-  // Generic cold outreach
+  // Generic cold outreach - broad patterns
+  /collaboration/i, // Catches: collab, collaboration, collaborations, etc.
+  /partnership/i, // Catches: partner, partnership, partnerships, etc.
+  /sponsored/i, // Sponsored content requests
+  /affiliate/i, // Affiliate program requests
+
+  // Generic cold outreach - specific patterns
   /I hope this email finds you well.*My name is/i,
-  /I'd like to discuss a partnership/i,
-  /collaboration opportunity/i,
+  /I'd like to discuss/i,
+  /brand collab/i,
+  /creator partnership/i,
 
   // SEO spam
   /increase your organic traffic/i,
