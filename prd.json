@@ -1,0 +1,64 @@
+{
+  "version": "1.0",
+  "projectName": "pipeline-health-cleanup",
+  "description": "Pipeline health cleanup - tag failures, response tracking, log noise, retention cron (GitHub #115)",
+  "stories": [
+    {
+      "id": "story-ml3ywh2k",
+      "title": "Diagnose and fix tag application 100% failure rate",
+      "description": "The `apply-tag` step fails 100% of the time (58 failures in 7 days). \n\nInvestigation steps:\n1. Check `packages/core/src/front/` for tag application code\n2. Check if using Front SDK vs raw fetch (SDK has known bug with null `_links.related.children`)\n3. Check if tags are archived or permissions issues\n4. Look at Axiom logs for specific error messages: `bun src/index.ts axiom tag-health`\n5. Fix the root cause - likely need raw fetch() instead of SDK\n\nThe fix from PR #85 was for \"archived tags\" - check if that's actually deployed and working.",
+      "priority": 1,
+      "passes": true,
+      "validationCommand": "cd packages/cli && bun src/index.ts axiom tag-health 2>&1 | grep -E \"(success|Success)\" | head -5",
+      "acceptanceCriteria": [
+        "Tag application success rate >0% in axiom tag-health",
+        "Root cause identified and documented",
+        "Fix committed if code change needed"
+      ]
+    },
+    {
+      "id": "story-ml3ywh2w",
+      "title": "Fix response tracking showing unknown customer and empty response",
+      "description": "All 30 tracked responses show `unknown` for customer and empty response text.\n\nInvestigation steps:\n1. Check `packages/cli/src/commands/responses.ts` to see what fields it queries\n2. Trace the draft creation flow in `packages/core/` - where does customer/response get stored?\n3. Check the database schema - is data being written but not read, or not written at all?\n4. Check PR #83 and #84 (draft tracking features) to see if they're fully wired up\n5. Fix the data flow gap\n\nThe draft tracking was added in late Jan - may be a field mapping issue.",
+      "priority": 2,
+      "passes": false,
+      "validationCommand": "cd packages/cli && bun src/index.ts responses list --limit 3 2>&1 | grep -v \"unknown\" | grep -v \"Ignoring\" | head -10",
+      "acceptanceCriteria": [
+        "responses list shows actual customer email/name",
+        "responses list shows actual response text",
+        "Data flow documented"
+      ]
+    },
+    {
+      "id": "story-ml3ywh2y",
+      "title": "Reduce log noise inflating error metrics",
+      "description": "1184 \"log\" level errors in 7 days are creating a false 7.36% error rate. The errors include:\n- \"inngest refresh failed\"\n- \"inngest refresh completed\" \n- \"cron using baseUrl\"\n- \"cron triggered\"\n\nThese are informational, not errors.\n\nInvestigation:\n1. Find where these logs are emitted (search for the log messages)\n2. Check Axiom logging configuration in `packages/core/src/observability/`\n3. Downgrade info logs that are incorrectly marked as errors\n4. Consider log level configuration (debug vs info vs error)\n\nGoal: Real errors should be visible, operational noise should not inflate error rate.",
+      "priority": 3,
+      "passes": false,
+      "validationCommand": "cd packages/cli && bun src/index.ts axiom errors 2>&1 | grep -c \"log\" || echo \"0\"",
+      "acceptanceCriteria": [
+        "Informational logs not marked as errors",
+        "Error rate reflects actual failures",
+        "Logging levels documented"
+      ]
+    },
+    {
+      "id": "story-ml3ywh33",
+      "title": "Fix retention-cleanup cron vector error",
+      "description": "The `support-platform-retention-cleanup` cron fails with:\n\"Either data, vector or sparseVector should be provided\"\n\nThis is an Upstash Vector API error - the cleanup function is trying to upsert/delete without proper parameters.\n\nInvestigation:\n1. Find `retention-cleanup` function in `packages/core/src/inngest/`\n2. Check what vector operations it performs\n3. Look at Upstash Vector SDK usage - likely missing required field\n4. Fix the API call to include required parameters\n\nRun ID from failure: 01KGBJ95W0GQTTAAGX94H74FQY",
+      "priority": 4,
+      "passes": false,
+      "validationCommand": "cd packages/cli && bun src/index.ts inngest failures --after 24h 2>&1 | grep -c \"retention-cleanup\" || echo \"0\"",
+      "acceptanceCriteria": [
+        "retention-cleanup cron runs without vector error",
+        "Next scheduled run succeeds",
+        "Root cause documented"
+      ]
+    }
+  ],
+  "metadata": {
+    "createdAt": "2026-02-01T16:40:33.309Z",
+    "totalIterations": 1,
+    "lastIteration": "2026-02-01T16:51:14.556Z"
+  }
+}

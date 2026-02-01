@@ -151,6 +151,25 @@ export class TagRegistry {
   private initialized = false
   private debug: boolean
 
+  // Use raw API to avoid SDK schema parsing issues and to handle pagination.
+  private async listTagsRaw(): Promise<Array<{ id: string; name: string }>> {
+    type RawTagList = {
+      _results: Array<{ id: string; name: string }>
+      _pagination?: { next?: string | null }
+    }
+
+    const results: RawTagList['_results'] = []
+    let page = await this.front.raw.get<RawTagList>('/tags')
+    results.push(...page._results)
+
+    while (page._pagination?.next) {
+      page = await this.front.raw.get<RawTagList>(page._pagination.next)
+      results.push(...page._results)
+    }
+
+    return results
+  }
+
   constructor(options: TagRegistryOptions) {
     this.front = createFrontClient({ apiToken: options.frontApiToken })
     this.categoryMapping = {
@@ -168,22 +187,20 @@ export class TagRegistry {
     if (this.initialized) return
 
     try {
-      const tags = await this.front.tags.list()
-      for (const tag of tags._results) {
+      const tags = await this.listTagsRaw()
+      for (const tag of tags) {
         this.tagIdCache.set(tag.name.toLowerCase(), tag.id)
       }
       this.initialized = true
 
       await log('debug', 'tag registry initialized', {
         component: 'TagRegistry',
-        tagCount: tags._results.length,
-        tagNames: tags._results.map((t) => t.name).slice(0, 20),
+        tagCount: tags.length,
+        tagNames: tags.map((t) => t.name).slice(0, 20),
       })
 
       if (this.debug) {
-        console.log(
-          `[TagRegistry] Initialized with ${tags._results.length} tags`
-        )
+        console.log(`[TagRegistry] Initialized with ${tags.length} tags`)
       }
     } catch (error) {
       const isFrontError = error instanceof FrontApiError
@@ -290,10 +307,8 @@ export class TagRegistry {
         console.log(`[TagRegistry] Create failed, re-fetching tags:`, error)
       }
       try {
-        const tags = await this.front.tags.list()
-        const existing = tags._results.find(
-          (t) => t.name.toLowerCase() === tagName
-        )
+        const tags = await this.listTagsRaw()
+        const existing = tags.find((t) => t.name.toLowerCase() === tagName)
         if (existing) {
           this.tagIdCache.set(tagName, existing.id)
 
@@ -311,7 +326,7 @@ export class TagRegistry {
           component: 'TagRegistry',
           category,
           tagName: config.tagName,
-          availableTags: tags._results.map((t) => t.name).slice(0, 30),
+          availableTags: tags.map((t) => t.name).slice(0, 30),
         })
       } catch (refetchError) {
         const refetchMsg =

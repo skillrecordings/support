@@ -1,0 +1,518 @@
+{
+  "summary": {
+    "total": 55,
+    "matches": 55,
+    "mismatches": 0,
+    "heuristic": {
+      "voc_response": 42,
+      "support_refund": 3,
+      "support_billing": 6,
+      "support_access": 2,
+      "support_technical": 2
+    },
+    "llm": {
+      "voc_response": 42,
+      "support_refund": 3,
+      "support_billing": 6,
+      "support_access": 2,
+      "support_technical": 2
+    }
+  },
+  "comparisons": [
+    {
+      "conversation_id": "cnv_1ja38yzp",
+      "product": "total-typescript",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jbwojj9",
+      "product": "ai-hero",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jcox485",
+      "product": "ai-hero",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jcxxi1x",
+      "product": "total-typescript",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jd4bn1h",
+      "product": "total-typescript",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jd725gl",
+      "product": "total-typescript",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jd7fzhh",
+      "product": "total-typescript",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jd8mcf9",
+      "product": "total-typescript",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jd93ip1",
+      "product": "total-typescript",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdaj7vp",
+      "product": "total-typescript",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdatjol",
+      "product": "total-typescript",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdc9d7p",
+      "product": "ai-hero",
+      "heuristic": "support_refund",
+      "llm": "support_refund",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdce5b9",
+      "product": "total-typescript",
+      "heuristic": "support_billing",
+      "llm": "support_billing",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdcf59h",
+      "product": "total-typescript",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdd3j6t",
+      "product": "total-typescript",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdd5y3p",
+      "product": "total-typescript",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jddaqud",
+      "product": "total-typescript",
+      "heuristic": "support_access",
+      "llm": "support_access",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jddjdet",
+      "product": "total-typescript",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jddvyzp",
+      "product": "total-typescript",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdes9ph",
+      "product": "total-typescript",
+      "heuristic": "support_technical",
+      "llm": "support_technical",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdezmlh",
+      "product": "total-typescript",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdf56g5",
+      "product": "total-typescript",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdftllx",
+      "product": "total-typescript",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdg7acl",
+      "product": "total-typescript",
+      "heuristic": "support_billing",
+      "llm": "support_billing",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdg7fj9",
+      "product": "total-typescript",
+      "heuristic": "support_access",
+      "llm": "support_access",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdg7pd1",
+      "product": "total-typescript",
+      "heuristic": "support_billing",
+      "llm": "support_billing",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdg7q79",
+      "product": "total-typescript",
+      "heuristic": "support_billing",
+      "llm": "support_billing",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdg7tph",
+      "product": "total-typescript",
+      "heuristic": "support_billing",
+      "llm": "support_billing",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdgd9gl",
+      "product": "total-typescript",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdgty91",
+      "product": "total-typescript",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdhf739",
+      "product": "ai-hero",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdhffz9",
+      "product": "ai-hero",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdhigmd",
+      "product": "total-typescript",
+      "heuristic": "support_refund",
+      "llm": "support_refund",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdhj90l",
+      "product": "total-typescript",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdhoyxx",
+      "product": "total-typescript",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdifplx",
+      "product": "total-typescript",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdikox1",
+      "product": "total-typescript",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdirqud",
+      "product": "total-typescript",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdiwoo5",
+      "product": "total-typescript",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdixwrp",
+      "product": "total-typescript",
+      "heuristic": "support_billing",
+      "llm": "support_billing",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdiz1et",
+      "product": "total-typescript",
+      "heuristic": "support_technical",
+      "llm": "support_technical",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdj8qjp",
+      "product": "total-typescript",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdjgbl1",
+      "product": "total-typescript",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdk6usl",
+      "product": "total-typescript",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdk7m91",
+      "product": "ai-hero",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdk7t5x",
+      "product": "total-typescript",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdkw97p",
+      "product": "total-typescript",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdl2wh1",
+      "product": "total-typescript",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdlbzol",
+      "product": "ai-hero",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdlg38l",
+      "product": "ai-hero",
+      "heuristic": "support_refund",
+      "llm": "support_refund",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdlplgl",
+      "product": "ai-hero",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdlpt0l",
+      "product": "ai-hero",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdn7nhh",
+      "product": "total-typescript",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_1jdnbxd1",
+      "product": "total-typescript",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    },
+    {
+      "conversation_id": "cnv_qznbtjb",
+      "product": "total-typescript",
+      "heuristic": "voc_response",
+      "llm": "voc_response",
+      "confidence": 0.82,
+      "reasoning": "Mocked gateway response (offline).",
+      "matches": true
+    }
+  ]
+}

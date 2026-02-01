@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS conversations (
   tags JSON,
   trigger_message JSON,
   conversation_history JSON,
+  llm_classification JSON,
   raw_json JSON,
   FOREIGN KEY (product) REFERENCES products(id)
 );
@@ -37,5 +38,16 @@ CREATE TABLE IF NOT EXISTS classifications (
   request_type VARCHAR NOT NULL,
   confidence DOUBLE NOT NULL,
   classifier_version VARCHAR NOT NULL,
+  FOREIGN KEY (conversation_id) REFERENCES conversations(id)
+);
+
+CREATE TABLE IF NOT EXISTS templates (
+  id VARCHAR PRIMARY KEY,
+  conversation_id VARCHAR NOT NULL,
+  pattern VARCHAR NOT NULL,
+  template VARCHAR NOT NULL,
+  variables JSON NOT NULL,
+  category VARCHAR NOT NULL,
+  confidence DOUBLE NOT NULL,
   FOREIGN KEY (conversation_id) REFERENCES conversations(id)
 );
