@@ -14,6 +14,8 @@
  */
 
 import * as path from 'path'
+import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
+import { FrontApiError } from '@skillrecordings/front-sdk'
 import type { Command } from 'commander'
 
 // DuckDB types - dynamically imported at runtime
@@ -38,7 +40,6 @@ async function loadDuckDB(): Promise<DuckDB> {
 // ============================================================================
 
 const DB_PATH = path.join(process.env.HOME || '~', 'skill/data/front-cache.db')
-const FRONT_API_BASE = 'https://api2.frontapp.com'
 const REQUEST_DELAY_MS = 1000 // Base delay between sequential requests
 const MAX_RETRIES = 5
 
@@ -346,35 +347,31 @@ function extractConversationIdFromUrl(url: string): string | null {
 // ============================================================================
 
 async function fetchWithRetry<T>(
+  front: ReturnType<typeof createInstrumentedFrontClient>,
   url: string,
-  headers: Record<string, string>,
   attempt = 1,
   useRateLimiter = true
 ): Promise<T> {
   const doFetch = async (): Promise<T> => {
-    const response = await fetch(url, { headers })
+    try {
+      return await front.raw.get<T>(url)
+    } catch (error) {
+      if (error instanceof FrontApiError && error.status === 429) {
+        if (attempt >= MAX_RETRIES) {
+          throw new Error(`Rate limited after ${MAX_RETRIES} attempts`)
+        }
 
-    if (response.status === 429) {
-      if (attempt >= MAX_RETRIES) {
-        throw new Error(`Rate limited after ${MAX_RETRIES} attempts`)
+        const exponentialMs = MIN_429_BACKOFF_MS * Math.pow(1.5, attempt - 1) // 60s, 90s, 135s...
+        const waitMs = Math.max(MIN_429_BACKOFF_MS, exponentialMs)
+
+        logRateLimit(waitMs, attempt)
+        await sleep(waitMs)
+        // Recursive call outside rate limiter for retry
+        return fetchWithRetry(front, url, attempt + 1, false)
       }
-      const retryAfter = response.headers.get('Retry-After')
-      // VERY conservative backoff: 60s minimum, respect Retry-After if higher
-      const retryAfterMs = retryAfter ? parseInt(retryAfter, 10) * 1000 : 0
-      const exponentialMs = MIN_429_BACKOFF_MS * Math.pow(1.5, attempt - 1) // 60s, 90s, 135s...
-      const waitMs = Math.max(MIN_429_BACKOFF_MS, retryAfterMs, exponentialMs)
 
-      logRateLimit(waitMs, attempt)
-      await sleep(waitMs)
-      // Recursive call outside rate limiter for retry
-      return fetchWithRetry(url, headers, attempt + 1, false)
+      throw error
     }
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`)
-    }
-
-    return response.json() as Promise<T>
   }
 
   if (useRateLimiter) {
@@ -387,15 +384,12 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-function getHeaders(): Record<string, string> {
-  const token = process.env.FRONT_API_TOKEN
-  if (!token) {
+function getFrontClient(): ReturnType<typeof createInstrumentedFrontClient> {
+  const apiToken = process.env.FRONT_API_TOKEN
+  if (!apiToken) {
     throw new Error('FRONT_API_TOKEN environment variable required')
   }
-  return {
-    Authorization: `Bearer ${token}`,
-    'Content-Type': 'application/json',
-  }
+  return createInstrumentedFrontClient({ apiToken })
 }
 
 // ============================================================================
@@ -403,12 +397,12 @@ function getHeaders(): Record<string, string> {
 // ============================================================================
 
 async function fetchAllInboxes(
-  headers: Record<string, string>
+  front: ReturnType<typeof createInstrumentedFrontClient>
 ): Promise<FrontInbox[]> {
   log('📥 Fetching inboxes...')
   const data = await fetchWithRetry<{ _results: FrontInbox[] }>(
-    `${FRONT_API_BASE}/inboxes`,
-    headers
+    front,
+    '/inboxes'
   )
   const inboxes = data._results || []
   log(`   Found ${inboxes.length} inboxes`)
@@ -433,9 +427,8 @@ async function syncInboxes(
 }
 
 async function fetchConversationsPage(
-  inboxId: string,
   url: string,
-  headers: Record<string, string>
+  front: ReturnType<typeof createInstrumentedFrontClient>
 ): Promise<{
   conversations: FrontConversation[]
   nextUrl: string | null
@@ -443,7 +436,7 @@ async function fetchConversationsPage(
   const data = await fetchWithRetry<{
     _results: FrontConversation[]
     _pagination?: { next?: string }
-  }>(url, headers)
+  }>(front, url)
 
   return {
     conversations: data._results || [],
@@ -453,11 +446,11 @@ async function fetchConversationsPage(
 
 async function fetchMessages(
   conversationId: string,
-  headers: Record<string, string>
+  front: ReturnType<typeof createInstrumentedFrontClient>
 ): Promise<FrontMessage[]> {
   const data = await fetchWithRetry<{ _results: FrontMessage[] }>(
-    `${FRONT_API_BASE}/conversations/${conversationId}/messages`,
-    headers
+    front,
+    `/conversations/${conversationId}/messages`
   )
   return data._results || []
 }
@@ -624,7 +617,7 @@ async function updateInboxCount(
 async function syncInbox(
   db: DatabaseInstance,
   inbox: FrontInbox,
-  headers: Record<string, string>,
+  front: ReturnType<typeof createInstrumentedFrontClient>,
   inboxIndex: number,
   totalInboxes: number,
   limit?: number,
@@ -638,8 +631,7 @@ async function syncInbox(
     `\n📬 [${inboxIndex}/${totalInboxes}] Starting sync: ${inbox.name} (${inbox.id})`
   )
 
-  let url: string | null =
-    `${FRONT_API_BASE}/inboxes/${inbox.id}/conversations?limit=50`
+  let url: string | null = `/inboxes/${inbox.id}/conversations?limit=50`
   let page = 1
   let totalConversations = 0
   let totalMessages = 0
@@ -653,9 +645,8 @@ async function syncInbox(
 
     try {
       const { conversations, nextUrl } = await fetchConversationsPage(
-        inbox.id,
         url,
-        headers
+        front
       )
 
       logProgress(
@@ -719,7 +710,7 @@ async function syncInbox(
 
         const messageResults = await Promise.all(
           conversationsWithMeta.map(({ conv }) =>
-            fetchMessages(conv.id, headers)
+            fetchMessages(conv.id, front)
               .then((messages) => ({ convId: conv.id, messages, error: null }))
               .catch((err) => ({
                 convId: conv.id,
@@ -804,14 +795,14 @@ async function handleInit(options: CacheOptions): Promise<void> {
   log(`   Limit per inbox: ${options.limit || 'unlimited'}`)
 
   const db = await createDb()
-  const headers = getHeaders()
+  const front = getFrontClient()
 
   try {
     // Run schema migrations for thread tracking
     await runMigrations(db)
 
     // Get inboxes
-    let inboxes = await fetchAllInboxes(headers)
+    let inboxes = await fetchAllInboxes(front)
 
     // Filter by inbox if specified
     if (options.inbox) {
@@ -834,7 +825,7 @@ async function handleInit(options: CacheOptions): Promise<void> {
       const result = await syncInbox(
         db,
         inbox,
-        headers,
+        front,
         i + 1,
         inboxes.length,
         options.limit
@@ -873,14 +864,14 @@ async function handleResume(options: CacheOptions): Promise<void> {
   log(`   Database: ${DB_PATH}`)
 
   const db = await createDb()
-  const headers = getHeaders()
+  const front = getFrontClient()
 
   try {
     // Run schema migrations for thread tracking
     await runMigrations(db)
 
     // Get inboxes that have incomplete sync (or no sync)
-    const inboxes = await fetchAllInboxes(headers)
+    const inboxes = await fetchAllInboxes(front)
     await syncInboxes(db, inboxes)
 
     let totalConversations = 0
@@ -912,7 +903,7 @@ async function handleResume(options: CacheOptions): Promise<void> {
       const result = await syncInbox(
         db,
         inbox,
-        headers,
+        front,
         i + 1,
         inboxes.length,
         options.limit,
@@ -941,13 +932,13 @@ async function handleSync(options: CacheOptions): Promise<void> {
   log('   Fetching only conversations updated since last sync')
 
   const db = await createDb()
-  const headers = getHeaders()
+  const front = getFrontClient()
 
   try {
     // Run schema migrations for thread tracking
     await runMigrations(db)
 
-    let inboxes = await fetchAllInboxes(headers)
+    let inboxes = await fetchAllInboxes(front)
 
     if (options.inbox) {
       inboxes = inboxes.filter((i) => i.id === options.inbox)
@@ -969,8 +960,7 @@ async function handleSync(options: CacheOptions): Promise<void> {
       // Front API doesn't support filtering by updated_at, so we fetch pages
       // and stop when we hit conversations older than last sync
 
-      let url: string | null =
-        `${FRONT_API_BASE}/inboxes/${inbox.id}/conversations?limit=50`
+      let url: string | null = `/inboxes/${inbox.id}/conversations?limit=50`
       let page = 1
       let conversationCount = 0
       let messageCount = 0
@@ -981,9 +971,8 @@ async function handleSync(options: CacheOptions): Promise<void> {
         await sleep(REQUEST_DELAY_MS)
 
         const { conversations, nextUrl } = await fetchConversationsPage(
-          inbox.id,
           url,
-          headers
+          front
         )
 
         // Filter conversations that need processing
@@ -1031,7 +1020,7 @@ async function handleSync(options: CacheOptions): Promise<void> {
 
           const messageResults = await Promise.all(
             toProcess.map((conv) =>
-              fetchMessages(conv.id, headers)
+              fetchMessages(conv.id, front)
                 .then((messages) => ({
                   convId: conv.id,
                   messages,

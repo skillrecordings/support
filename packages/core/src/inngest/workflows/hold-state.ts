@@ -10,17 +10,14 @@
  */
 
 import { ActionsTable, eq, getDb } from '@skillrecordings/database'
-import { createFrontClient } from '@skillrecordings/front-sdk'
+import { createInstrumentedFrontClient } from '../../front/instrumented-client'
 import {
   initializeAxiom,
   log,
   traceWorkflowStep,
 } from '../../observability/axiom'
 import { inngest } from '../client'
-import {
-  SUPPORT_CONVERSATION_SNOOZED,
-  SUPPORT_SNOOZE_EXPIRED,
-} from '../events'
+import { SUPPORT_CONVERSATION_SNOOZED, SUPPORT_SNOOZE_EXPIRED } from '../events'
 
 // ============================================================================
 // Constants
@@ -99,7 +96,7 @@ export const handleConversationSnoozed = inngest.createFunction(
       }
 
       try {
-        const front = createFrontClient({ apiToken: frontToken })
+        const front = createInstrumentedFrontClient({ apiToken: frontToken })
         await front.conversations.addTag(conversationId, FRONT_TAG_ON_HOLD)
 
         const durationMs = Date.now() - stepStartTime
@@ -157,11 +154,13 @@ export const handleConversationSnoozed = inngest.createFunction(
 
         // Update pending actions to include pause metadata
         for (const action of pendingActions) {
-          if (action.requires_approval && !action.approved_at && !action.rejected_at) {
+          if (
+            action.requires_approval &&
+            !action.approved_at &&
+            !action.rejected_at
+          ) {
             const params =
-              typeof action.parameters === 'object'
-                ? action.parameters
-                : {}
+              typeof action.parameters === 'object' ? action.parameters : {}
 
             await db
               .update(ActionsTable)
@@ -291,11 +290,15 @@ export const handleSnoozeExpired = inngest.createFunction(
 
       const frontToken = process.env.FRONT_API_TOKEN
       if (!frontToken) {
-        await log('warn', 'FRONT_API_TOKEN not set, skipping hold tag removal', {
-          workflow: 'support-snooze-expired',
-          step: 'remove-hold-tag',
-          conversationId,
-        })
+        await log(
+          'warn',
+          'FRONT_API_TOKEN not set, skipping hold tag removal',
+          {
+            workflow: 'support-snooze-expired',
+            step: 'remove-hold-tag',
+            conversationId,
+          }
+        )
         return { removed: false, error: 'FRONT_API_TOKEN not configured' }
       }
 
@@ -309,7 +312,7 @@ export const handleSnoozeExpired = inngest.createFunction(
       }
 
       try {
-        const front = createFrontClient({ apiToken: frontToken })
+        const front = createInstrumentedFrontClient({ apiToken: frontToken })
         await front.conversations.removeTag(conversationId, FRONT_TAG_ON_HOLD)
 
         const durationMs = Date.now() - stepStartTime
@@ -349,97 +352,105 @@ export const handleSnoozeExpired = inngest.createFunction(
     })
 
     // Step 2: Resume paused escalation timers and check for pending drafts
-    const resumeResult = await step.run('resume-escalation-timers', async () => {
-      const stepStartTime = Date.now()
+    const resumeResult = await step.run(
+      'resume-escalation-timers',
+      async () => {
+        const stepStartTime = Date.now()
 
-      try {
-        const db = getDb()
+        try {
+          const db = getDb()
 
-        // Find paused actions for this conversation
-        const pausedActions = await db
-          .select()
-          .from(ActionsTable)
-          .where(eq(ActionsTable.conversation_id, conversationId))
+          // Find paused actions for this conversation
+          const pausedActions = await db
+            .select()
+            .from(ActionsTable)
+            .where(eq(ActionsTable.conversation_id, conversationId))
 
-        let resumedCount = 0
-        let hasPendingDraft = false
+          let resumedCount = 0
+          let hasPendingDraft = false
 
-        for (const action of pausedActions) {
-          const params =
-            typeof action.parameters === 'object' ? action.parameters : {}
+          for (const action of pausedActions) {
+            const params =
+              typeof action.parameters === 'object' ? action.parameters : {}
 
-          // Check if this action was paused and is still pending
-          if (
-            (params as Record<string, unknown>)._escalationPaused &&
-            action.requires_approval &&
-            !action.approved_at &&
-            !action.rejected_at
-          ) {
-            hasPendingDraft = true
-            resumedCount++
+            // Check if this action was paused and is still pending
+            if (
+              (params as Record<string, unknown>)._escalationPaused &&
+              action.requires_approval &&
+              !action.approved_at &&
+              !action.rejected_at
+            ) {
+              hasPendingDraft = true
+              resumedCount++
 
-            // Clear pause metadata
-            const { _escalationPaused, _pausedAt, _pausedUntil, ...cleanParams } =
-              params as Record<string, unknown>
+              // Clear pause metadata
+              const {
+                _escalationPaused,
+                _pausedAt,
+                _pausedUntil,
+                ...cleanParams
+              } = params as Record<string, unknown>
 
-            await db
-              .update(ActionsTable)
-              .set({
-                parameters: {
-                  ...cleanParams,
-                  _escalationResumed: true,
-                  _resumedAt: expiredAt,
-                },
-              })
-              .where(eq(ActionsTable.id, action.id))
+              await db
+                .update(ActionsTable)
+                .set({
+                  parameters: {
+                    ...cleanParams,
+                    _escalationResumed: true,
+                    _resumedAt: expiredAt,
+                  },
+                })
+                .where(eq(ActionsTable.id, action.id))
+            }
+          }
+
+          const durationMs = Date.now() - stepStartTime
+
+          await log('info', 'escalation timers resumed', {
+            workflow: 'support-snooze-expired',
+            step: 'resume-escalation-timers',
+            conversationId,
+            resumedCount,
+            hasPendingDraft,
+            durationMs,
+          })
+
+          await traceWorkflowStep({
+            workflowName: 'support-snooze-expired',
+            conversationId,
+            appId,
+            stepName: 'resume-escalation-timers',
+            durationMs,
+            success: true,
+            metadata: { resumedCount, hasPendingDraft },
+          })
+
+          return {
+            resumed: true,
+            count: resumedCount,
+            hasPendingDraft,
+            error: undefined,
+          }
+        } catch (error) {
+          const errorMsg =
+            error instanceof Error ? error.message : String(error)
+
+          await log('error', 'failed to resume escalation timers', {
+            workflow: 'support-snooze-expired',
+            step: 'resume-escalation-timers',
+            conversationId,
+            error: errorMsg,
+          })
+
+          return {
+            resumed: false,
+            count: 0,
+            hasPendingDraft: false,
+            error: errorMsg,
           }
         }
-
-        const durationMs = Date.now() - stepStartTime
-
-        await log('info', 'escalation timers resumed', {
-          workflow: 'support-snooze-expired',
-          step: 'resume-escalation-timers',
-          conversationId,
-          resumedCount,
-          hasPendingDraft,
-          durationMs,
-        })
-
-        await traceWorkflowStep({
-          workflowName: 'support-snooze-expired',
-          conversationId,
-          appId,
-          stepName: 'resume-escalation-timers',
-          durationMs,
-          success: true,
-          metadata: { resumedCount, hasPendingDraft },
-        })
-
-        return {
-          resumed: true,
-          count: resumedCount,
-          hasPendingDraft,
-          error: undefined,
-        }
-      } catch (error) {
-        const errorMsg = error instanceof Error ? error.message : String(error)
-
-        await log('error', 'failed to resume escalation timers', {
-          workflow: 'support-snooze-expired',
-          step: 'resume-escalation-timers',
-          conversationId,
-          error: errorMsg,
-        })
-
-        return {
-          resumed: false,
-          count: 0,
-          hasPendingDraft: false,
-          error: errorMsg,
-        }
       }
-    })
+    )
 
     // Step 3: If there's a pending draft, add a reminder comment
     let commentResult: { added: boolean; skipped: boolean; error?: string } = {
@@ -465,7 +476,7 @@ export const handleSnoozeExpired = inngest.createFunction(
         }
 
         try {
-          const front = createFrontClient({ apiToken: frontToken })
+          const front = createInstrumentedFrontClient({ apiToken: frontToken })
 
           const commentBody = `⏰ **Snooze Expired - Draft Pending Review**
 
@@ -495,7 +506,8 @@ Please review and approve/reject the draft, or send a manual response.`
 
           return { added: true, skipped: false, error: undefined }
         } catch (error) {
-          const errorMsg = error instanceof Error ? error.message : String(error)
+          const errorMsg =
+            error instanceof Error ? error.message : String(error)
 
           await log('error', 'failed to add reminder comment', {
             workflow: 'support-snooze-expired',

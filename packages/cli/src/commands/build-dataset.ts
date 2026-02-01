@@ -10,7 +10,7 @@
  */
 
 import { writeFileSync } from 'fs'
-import { createFrontClient } from '@skillrecordings/core/front'
+import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
 import {
   ActionsTable,
   AppsTable,
@@ -21,6 +21,7 @@ import {
   getDb,
   gte,
 } from '@skillrecordings/database'
+import { type Message } from '@skillrecordings/front-sdk'
 import type { Command } from 'commander'
 
 interface EvalDataPoint {
@@ -70,7 +71,7 @@ async function buildDataset(options: {
     process.exit(1)
   }
 
-  const front = createFrontClient(frontToken)
+  const front = createInstrumentedFrontClient({ apiToken: frontToken })
 
   try {
     // Build query conditions
@@ -155,9 +156,10 @@ async function buildDataset(options: {
       let conversationHistory: EvalDataPoint['conversationHistory'] | undefined
 
       try {
-        const messages = await front.getConversationMessages(
+        const messageList = (await front.conversations.listMessages(
           r.action.conversation_id
-        )
+        )) as { _results?: Message[] }
+        const messages = messageList._results ?? []
 
         // Find trigger message (most recent inbound before draft)
         const draftTime = r.action.created_at?.getTime() ?? Date.now()

@@ -1,17 +1,17 @@
 /**
  * Teammate Registry Service
- * 
+ *
  * Caches Front teammates for quick lookup during message processing.
  * Used to identify if a message is from an instructor vs customer.
- * 
+ *
  * @see docs/prd-pipeline-v3-threads.md for full spec
  */
 
 import {
-  createFrontClient,
   type Message as FrontMessage,
   type Teammate,
 } from '@skillrecordings/front-sdk'
+import { createInstrumentedFrontClient } from '../front/instrumented-client'
 
 // -----------------------------------------------------------------------------
 // Types
@@ -40,8 +40,8 @@ export interface TeammateRegistryConfig {
 // -----------------------------------------------------------------------------
 
 interface CacheEntry {
-  teammates: Map<string, Teammate>  // email -> Teammate
-  teammateIds: Set<string>          // All teammate IDs
+  teammates: Map<string, Teammate> // email -> Teammate
+  teammateIds: Set<string> // All teammate IDs
   expiresAt: number
 }
 
@@ -55,11 +55,11 @@ const DEFAULT_TTL_MS = 5 * 60 * 1000 // 5 minutes
 
 /**
  * Create a teammate registry instance.
- * 
+ *
  * @example
  * ```ts
  * const registry = createTeammateRegistry({ frontApiToken: '...' })
- * 
+ *
  * const author = await registry.getMessageAuthor(message, app)
  * if (author.type === 'instructor') {
  *   // Handle instructor message
@@ -67,7 +67,9 @@ const DEFAULT_TTL_MS = 5 * 60 * 1000 // 5 minutes
  * ```
  */
 export function createTeammateRegistry(config: TeammateRegistryConfig) {
-  const front = createFrontClient({ apiToken: config.frontApiToken })
+  const front = createInstrumentedFrontClient({
+    apiToken: config.frontApiToken,
+  })
   const ttlMs = config.cacheTtlMs ?? DEFAULT_TTL_MS
 
   /**
@@ -126,7 +128,7 @@ export function createTeammateRegistry(config: TeammateRegistryConfig) {
 
     /**
      * Determine who sent a Front message.
-     * 
+     *
      * @param message - The Front message
      * @param instructorTeammateId - The instructor's teammate ID for this app (from AppsTable)
      */
@@ -142,9 +144,10 @@ export function createTeammateRegistry(config: TeammateRegistryConfig) {
         return {
           type: isInstr ? 'instructor' : 'teammate',
           email: message.author.email,
-          name: [message.author.first_name, message.author.last_name]
-            .filter(Boolean)
-            .join(' ') || undefined,
+          name:
+            [message.author.first_name, message.author.last_name]
+              .filter(Boolean)
+              .join(' ') || undefined,
           teammateId: message.author.id,
         }
       }

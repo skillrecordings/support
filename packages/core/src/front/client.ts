@@ -25,22 +25,9 @@ import {
   type InboxList,
   type Message,
   type MessageList,
-  createFrontClient as createSdkClient,
 } from '@skillrecordings/front-sdk'
-import { marked } from 'marked'
-
-// Configure marked for email-safe output
-marked.setOptions({
-  gfm: true,
-  breaks: true,
-})
-
-/**
- * Convert markdown to HTML for Front email drafts.
- */
-function markdownToHtml(text: string): string {
-  return marked.parse(text) as string
-}
+import { createInstrumentedFrontClient } from './instrumented-client'
+import { markdownToHtml } from './markdown'
 
 /**
  * Extract the best customer email from a Front message.
@@ -106,7 +93,7 @@ export type FrontConversationMessages = MessageList
  * This wrapper maintains backward compatibility with the old API.
  */
 export function createFrontClient(apiToken: string) {
-  const sdk = createSdkClient({ apiToken })
+  const sdk = createInstrumentedFrontClient({ apiToken })
 
   return {
     /**

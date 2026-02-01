@@ -15,8 +15,8 @@
  */
 
 import { ActionsTable, getDb } from '@skillrecordings/database'
-import { createFrontClient } from '@skillrecordings/front-sdk'
 import { desc, eq } from 'drizzle-orm'
+import { createInstrumentedFrontClient } from '../../front/instrumented-client'
 import {
   initializeAxiom,
   log,
@@ -164,7 +164,7 @@ export const outboundTrackerWorkflow = inngest.createFunction(
       }
 
       try {
-        const front = createFrontClient({ apiToken: frontToken })
+        const front = createInstrumentedFrontClient({ apiToken: frontToken })
         const msg = await front.messages.get(messageId)
 
         const durationMs = Date.now() - stepStartTime

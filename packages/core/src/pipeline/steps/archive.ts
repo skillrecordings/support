@@ -12,7 +12,7 @@
  * are logged but don't block the pipeline).
  */
 
-import { createFrontClient } from '@skillrecordings/front-sdk'
+import { createInstrumentedFrontClient } from '../../front/instrumented-client'
 import type { ArchiveInput, ArchiveOutput, RouteAction } from '../types'
 
 // ============================================================================
@@ -87,7 +87,7 @@ export async function archiveConversation(
   }
 
   try {
-    const front = createFrontClient({ apiToken: frontApiToken })
+    const front = createInstrumentedFrontClient({ apiToken: frontApiToken })
 
     // Archive the conversation by setting status to 'archived'
     await front.conversations.update(conversationId, {

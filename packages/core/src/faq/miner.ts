@@ -21,9 +21,9 @@ import {
 import {
   type Conversation,
   type Message,
-  createFrontClient,
   paginate,
 } from '@skillrecordings/front-sdk'
+import { createInstrumentedFrontClient } from '../front/instrumented-client'
 import { getApp, getAppByInboxId } from '../services/app-registry'
 import { getOutcomeHistory } from '../trust/repository'
 import {
@@ -256,7 +256,7 @@ export async function mineConversations(
     throw new Error('FRONT_API_TOKEN environment variable required')
   }
 
-  const front = createFrontClient({ apiToken: frontToken })
+  const front = createInstrumentedFrontClient({ apiToken: frontToken })
 
   // Get resolved conversations from our database first (more efficient)
   const dbConversations = await database
@@ -463,7 +463,7 @@ export async function mineFaqCandidates(
  * Uses inbox search to find archived/resolved conversations.
  */
 async function mineFromFrontDirect(
-  front: ReturnType<typeof createFrontClient>,
+  front: ReturnType<typeof createInstrumentedFrontClient>,
   app: NonNullable<Awaited<ReturnType<typeof getApp>>>,
   sinceDate: Date,
   limit: number,

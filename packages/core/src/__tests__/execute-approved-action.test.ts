@@ -42,20 +42,33 @@ vi.mock('../front', () => ({
   createFrontClient: vi.fn(() => mockFrontClient),
 }))
 
-// Mock supportTools - use vi.hoisted to ensure mock fn is available
-const { mockProcessRefund } = vi.hoisted(() => ({
-  mockProcessRefund: vi.fn(),
-}))
+const mockInstrumentedFrontClient = {
+  drafts: {
+    delete: vi.fn().mockResolvedValue({}),
+  },
+  raw: {
+    post: vi.fn().mockResolvedValue({ id: 'msg-123' }),
+  },
+  conversations: {
+    addComment: vi.fn().mockResolvedValue({}),
+  },
+}
+
 vi.mock('../tools', () => ({
   supportTools: {
     processRefund: {
-      execute: mockProcessRefund,
+      execute: vi.fn(),
     },
   },
 }))
 
+import * as instrumentedClient from '../front/instrumented-client'
 import { SUPPORT_ACTION_APPROVED } from '../inngest/events'
 import { executeApprovedAction } from '../inngest/workflows/execute-approved-action'
+import { supportTools } from '../tools'
+
+const mockProcessRefund = supportTools.processRefund
+  .execute as unknown as ReturnType<typeof vi.fn>
 
 describe('executeApprovedAction workflow', () => {
   it('exports a function', () => {
@@ -80,6 +93,10 @@ describe('executeApprovedAction workflow', () => {
 
       // Clear all mocks
       vi.clearAllMocks()
+      vi.spyOn(
+        instrumentedClient,
+        'createInstrumentedFrontClient'
+      ).mockReturnValue(mockInstrumentedFrontClient as any)
 
       // Reset mock implementations
       mockDb.select.mockReturnThis()
@@ -329,6 +346,10 @@ describe('executeApprovedAction workflow', () => {
 
     beforeEach(() => {
       vi.clearAllMocks()
+      vi.spyOn(
+        instrumentedClient,
+        'createInstrumentedFrontClient'
+      ).mockReturnValue(mockInstrumentedFrontClient as any)
       mockDb.select.mockReturnThis()
       mockDb.from.mockReturnThis()
       mockDb.update.mockReturnThis()
@@ -406,10 +427,9 @@ describe('executeApprovedAction workflow', () => {
       )
 
       // Verify Front SDK addComment was called with audit comment
-      expect(mockAddComment).toHaveBeenCalledWith(
-        'conv-789',
-        expect.stringContaining('Auto-sent')
-      )
+      expect(
+        mockInstrumentedFrontClient.conversations.addComment
+      ).toHaveBeenCalledWith('conv-789', expect.stringContaining('Auto-sent'))
     })
 
     it('should not add audit comment when ENABLE_AUDIT_COMMENTS=false', async () => {
@@ -449,7 +469,9 @@ describe('executeApprovedAction workflow', () => {
       expect(stepNames).not.toContain('add-audit-comment')
 
       // Verify Front SDK addComment was NOT called for audit
-      expect(mockAddComment).not.toHaveBeenCalled()
+      expect(
+        mockInstrumentedFrontClient.conversations.addComment
+      ).not.toHaveBeenCalled()
     })
 
     it('should not add audit comment for human-approved actions', async () => {
@@ -486,7 +508,9 @@ describe('executeApprovedAction workflow', () => {
       expect(stepNames).not.toContain('add-audit-comment')
 
       // Verify Front SDK addComment was NOT called for audit
-      expect(mockAddComment).not.toHaveBeenCalled()
+      expect(
+        mockInstrumentedFrontClient.conversations.addComment
+      ).not.toHaveBeenCalled()
     })
 
     it('should not add audit comment for non-send action types', async () => {
@@ -532,7 +556,9 @@ describe('executeApprovedAction workflow', () => {
       expect(stepNames).not.toContain('add-audit-comment')
 
       // Verify Front SDK addComment was NOT called for audit
-      expect(mockAddComment).not.toHaveBeenCalled()
+      expect(
+        mockInstrumentedFrontClient.conversations.addComment
+      ).not.toHaveBeenCalled()
     })
   })
 })

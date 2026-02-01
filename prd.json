@@ -102,7 +102,7 @@
       "title": "Migrate existing Front API calls to use instrumented wrapper",
       "description": "Update existing Front API call sites to use the new instrumented wrapper:\n- Find all direct Front SDK usage\n- Find all raw fetch calls to Front API\n- Replace with instrumented versions\n- Ensure no regressions\n\nThis is the integration step that makes the logging actually flow in production.",
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "validationCommand": "cd /home/joel/Code/skillrecordings/support && bun run build && bun test",
       "acceptanceCriteria": [
         "All Front API calls use instrumented wrapper",
@@ -110,11 +110,38 @@
         "Build passes",
         "Existing tests pass"
       ]
+    },
+    {
+      "id": "story-ml45bzuv",
+      "title": "Fix: Store draftId in action parameters after Front draft creation",
+      "description": "In handle-validated-draft.ts, after the 'create-front-draft' step creates the draft and gets draftId, update the action record to include the draftId in parameters.\n\nCurrent flow:\n1. create-pending-action → stores action WITHOUT draftId\n2. create-front-draft → creates draft, gets draftId, but doesn't store it\n\nFix:\nAfter create-front-draft succeeds, update the ActionsTable record to add draftId to the parameters JSON.\n\n```typescript\n// After line ~375 where frontDraft.id is logged\nif (draftResult.created && draftResult.draftId) {\n  await db.update(ActionsTable)\n    .set({\n      parameters: sql`jsonb_set(parameters, '{draftId}', '\"${draftResult.draftId}\"')`\n    })\n    .where(eq(ActionsTable.id, actionId))\n}\n```\n\nGitHub Issue: #117",
+      "priority": 1,
+      "passes": true,
+      "validationCommand": "cd /home/joel/Code/skillrecordings/support && bun test --filter handle-validated",
+      "acceptanceCriteria": [
+        "draftId is stored in action parameters after Front draft creation",
+        "Action record queryable by draftId",
+        "Existing tests pass"
+      ]
+    },
+    {
+      "id": "story-ml45bzv7",
+      "title": "Fix: execute-approved-action should send reply, not create duplicate draft",
+      "description": "In execute-approved-action.ts, when handling approved send-draft actions:\n\nCurrent (BROKEN):\n- Calls front.createDraft() → creates DUPLICATE draft\n\nFixed flow:\n1. If draftId exists in parameters, delete the existing review draft\n2. Use front.messages.create() or front.conversations.reply() to SEND the message directly\n3. Don't create another draft\n\nKey changes in execute-approved-action.ts around line 123-200:\n```typescript\nif (action.type === 'send-draft' || action.type === 'draft-response') {\n  const params = action.parameters as {\n    response?: string\n    draft?: string\n    draftId?: string  // NEW: the Front draft ID to clean up\n    inboxId?: string\n  }\n  \n  const response = params?.draft || params?.response\n  const existingDraftId = params?.draftId\n  \n  // Delete the review draft if it exists\n  if (existingDraftId) {\n    try {\n      await front.drafts.delete(existingDraftId)\n    } catch (e) {\n      // Draft may already be deleted/sent - non-fatal\n    }\n  }\n  \n  // SEND the message directly (not create another draft)\n  const sent = await front.messages.create(conversationId, {\n    body: contentWithTracking,\n    channel_id: channelId,\n  })\n  \n  return { success: true, output: { messageId: sent.id, conversationId } }\n}\n```\n\nGitHub Issue: #117",
+      "priority": 2,
+      "passes": true,
+      "validationCommand": "cd /home/joel/Code/skillrecordings/support && bun test --filter execute-approved && bun run build",
+      "acceptanceCriteria": [
+        "Approving a draft sends message directly (no duplicate draft)",
+        "Existing review draft is cleaned up",
+        "Message appears in Front conversation as sent",
+        "Build and tests pass"
+      ]
     }
   ],
   "metadata": {
     "createdAt": "2026-02-01T16:40:33.309Z",
-    "totalIterations": 6,
-    "lastIteration": "2026-02-01T19:18:24.187Z"
+    "totalIterations": 8,
+    "lastIteration": "2026-02-01T19:52:32.393Z"
   }
 }

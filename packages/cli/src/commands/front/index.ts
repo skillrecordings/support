@@ -8,11 +8,11 @@
  * - Comparing webhook data vs API data
  */
 
-import {
-  type FrontMessage,
-  createFrontClient,
-} from '@skillrecordings/core/front'
-import { createFrontClient as createSdkClient } from '@skillrecordings/front-sdk'
+import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
+import type {
+  Message as FrontMessage,
+  MessageList,
+} from '@skillrecordings/front-sdk'
 import type { Command } from 'commander'
 import { registerCacheCommand } from '../front-cache'
 import { registerPullCommand } from './pull-conversations'
@@ -21,14 +21,14 @@ import { registerTagCommands } from './tags'
 type Message = FrontMessage
 
 /**
- * Get Front API client from environment (legacy wrapper)
+ * Get Front API client from environment (instrumented)
  */
 function getFrontClient() {
   const apiToken = process.env.FRONT_API_TOKEN
   if (!apiToken) {
     throw new Error('FRONT_API_TOKEN environment variable is required')
   }
-  return createFrontClient(apiToken)
+  return createInstrumentedFrontClient({ apiToken })
 }
 
 /**
@@ -39,7 +39,7 @@ function getFrontSdkClient() {
   if (!apiToken) {
     throw new Error('FRONT_API_TOKEN environment variable is required')
   }
-  return createSdkClient({ apiToken })
+  return createInstrumentedFrontClient({ apiToken })
 }
 
 /**
@@ -63,6 +63,13 @@ function truncate(str: string, len: number): string {
 }
 
 /**
+ * Normalize Front resource ID or URL to ID
+ */
+function normalizeId(idOrUrl: string): string {
+  return idOrUrl.startsWith('http') ? idOrUrl.split('/').pop()! : idOrUrl
+}
+
+/**
  * Command: skill front message <id>
  * Fetch full message details from Front API
  */
@@ -72,7 +79,7 @@ async function getMessage(
 ): Promise<void> {
   try {
     const front = getFrontClient()
-    const message = await front.getMessage(id)
+    const message = await front.messages.get(normalizeId(id))
 
     if (options.json) {
       console.log(JSON.stringify(message, null, 2))
@@ -142,12 +149,15 @@ async function getConversation(
 ): Promise<void> {
   try {
     const front = getFrontClient()
-    const conversation = await front.getConversation(id)
+    const conversation = await front.conversations.get(normalizeId(id))
 
     // Fetch messages if requested
     let messages: Message[] | undefined
     if (options.messages) {
-      messages = await front.getConversationMessages(id)
+      const messageList = (await front.conversations.listMessages(
+        normalizeId(id)
+      )) as MessageList
+      messages = messageList._results ?? []
     }
 
     if (options.json) {

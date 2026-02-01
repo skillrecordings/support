@@ -8,7 +8,7 @@
  */
 
 import { writeFileSync } from 'fs'
-import { createFrontClient } from '@skillrecordings/core/front'
+import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
 import {
   ActionsTable,
   AppsTable,
@@ -20,6 +20,7 @@ import {
   gte,
   or,
 } from '@skillrecordings/database'
+import { type Message } from '@skillrecordings/front-sdk'
 import type { Command } from 'commander'
 
 type ActionRow = typeof ActionsTable.$inferSelect
@@ -527,10 +528,11 @@ async function getResponse(
       const frontToken = process.env.FRONT_API_TOKEN
       if (frontToken) {
         try {
-          const front = createFrontClient(frontToken)
-          const messages = await front.getConversationMessages(
+          const front = createInstrumentedFrontClient({ apiToken: frontToken })
+          const messageList = (await front.conversations.listMessages(
             r.action.conversation_id
-          )
+          )) as { _results?: Message[] }
+          const messages = messageList._results ?? []
 
           response.conversationHistory = messages.map((m) => ({
             id: m.id,
@@ -689,7 +691,9 @@ async function exportResponses(options: {
 
     // Fetch Front context for each
     const frontToken = process.env.FRONT_API_TOKEN
-    const front = frontToken ? createFrontClient(frontToken) : null
+    const front = frontToken
+      ? createInstrumentedFrontClient({ apiToken: frontToken })
+      : null
 
     const exportData: ResponseWithContext[] = []
 
@@ -753,9 +757,10 @@ async function exportResponses(options: {
       // Fetch context
       if (front && r.action.conversation_id) {
         try {
-          const messages = await front.getConversationMessages(
+          const messageList = (await front.conversations.listMessages(
             r.action.conversation_id
-          )
+          )) as { _results?: Message[] }
+          const messages = messageList._results ?? []
 
           record.conversationHistory = messages.map((m) => ({
             id: m.id,

@@ -9,9 +9,9 @@ import {
   type Author,
   type Message,
   type MessageList,
-  createFrontClient,
   paginate,
 } from '@skillrecordings/front-sdk'
+import { createInstrumentedFrontClient } from '../front/instrumented-client'
 
 /**
  * Simplified author info for the thread context
@@ -114,7 +114,7 @@ function toThreadAuthor(author: Author): ThreadAuthor {
  * ```
  */
 export function createCommentContextService(config: CommentContextConfig) {
-  const front = createFrontClient({ apiToken: config.apiToken })
+  const front = createInstrumentedFrontClient({ apiToken: config.apiToken })
 
   return {
     /**

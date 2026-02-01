@@ -11,11 +11,11 @@
 import {
   type Conversation,
   type ConversationList,
-  createFrontClient as createSdkFrontClient,
+  type Message,
 } from '@skillrecordings/front-sdk'
 import { MemoryService } from '@skillrecordings/memory/memory'
 import { IntegrationClient } from '@skillrecordings/sdk/client'
-import { type FrontMessage, createFrontClient } from '../../front/client'
+import { createInstrumentedFrontClient } from '../../front/instrumented-client'
 import { searchKnowledge as searchKnowledgeDB } from '../../knowledge/search'
 import type { KnowledgeSource } from '../../knowledge/types'
 import {
@@ -193,8 +193,11 @@ async function createGatherTools(appId: string): Promise<GatherTools> {
           conversationId,
         })
 
-        const front = createFrontClient(frontToken)
-        const messages = await front.getConversationMessages(conversationId)
+        const front = createInstrumentedFrontClient({ apiToken: frontToken })
+        const messageList = (await front.conversations.listMessages(
+          conversationId
+        )) as { _results?: Message[] }
+        const messages = messageList._results ?? []
 
         await log('info', 'conversation history fetched', {
           workflow: 'support-gather',
@@ -203,7 +206,7 @@ async function createGatherTools(appId: string): Promise<GatherTools> {
           messageCount: messages.length,
         })
 
-        return messages.map((msg: FrontMessage) => ({
+        return messages.map((msg) => ({
           direction: msg.is_inbound ? ('in' as const) : ('out' as const),
           body: msg.body || '',
           timestamp: msg.created_at,
@@ -253,7 +256,7 @@ async function createGatherTools(appId: string): Promise<GatherTools> {
           limit,
         })
 
-        const sdk = createSdkFrontClient({ apiToken: frontToken })
+        const sdk = createInstrumentedFrontClient({ apiToken: frontToken })
 
         // Use Front's alt:email: alias to look up contact by email
         const contactId = `alt:email:${email}`

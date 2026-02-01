@@ -11,7 +11,7 @@
  * - Audit comments (lightweight action trail)
  */
 
-import { createFrontClient } from '@skillrecordings/front-sdk'
+import { createInstrumentedFrontClient } from '../../front/instrumented-client'
 import type { CommentInput, CommentOutput, GatherOutput } from '../types'
 
 // ============================================================================
@@ -499,7 +499,7 @@ export async function addSupportComment(
   const { frontApiToken, authorId, minimal } = options
 
   try {
-    const front = createFrontClient({ apiToken: frontApiToken })
+    const front = createInstrumentedFrontClient({ apiToken: frontApiToken })
 
     // Format the comment
     const body = minimal
@@ -701,7 +701,9 @@ export async function addDecisionComment(
   const startTime = Date.now()
 
   try {
-    const front = createFrontClient({ apiToken: options.frontApiToken })
+    const front = createInstrumentedFrontClient({
+      apiToken: options.frontApiToken,
+    })
     const body = formatDecisionComment(context)
 
     await front.conversations.addComment(conversationId, body, options.authorId)

@@ -34,14 +34,16 @@ export const tagGardeningWorkflow = inngest.createFunction(
   async ({ step, logger }) => {
     // Step 1: Fetch all tags from Front
     const tags = await step.run('fetch-tags', async () => {
-      const { createFrontClient } = await import('@skillrecordings/front-sdk')
+      const { createInstrumentedFrontClient } = await import(
+        '../../front/instrumented-client'
+      )
 
       const token = process.env.FRONT_API_TOKEN
       if (!token) {
         throw new Error('FRONT_API_TOKEN not set')
       }
 
-      const front = createFrontClient({ apiToken: token })
+      const front = createInstrumentedFrontClient({ apiToken: token })
       const result = await front.tags.list()
 
       logger.info(`Fetched ${result._results.length} tags from Front`)
@@ -137,14 +139,16 @@ export const tagGardeningOnDemand = inngest.createFunction(
 
     // Step 1: Fetch all tags from Front
     const tags = await step.run('fetch-tags', async () => {
-      const { createFrontClient } = await import('@skillrecordings/front-sdk')
+      const { createInstrumentedFrontClient } = await import(
+        '../../front/instrumented-client'
+      )
 
       const token = process.env.FRONT_API_TOKEN
       if (!token) {
         throw new Error('FRONT_API_TOKEN not set')
       }
 
-      const front = createFrontClient({ apiToken: token })
+      const front = createInstrumentedFrontClient({ apiToken: token })
       const result = await front.tags.list()
 
       return result._results.map((t) => ({
@@ -225,14 +229,16 @@ export const tagHealthCheckWorkflow = inngest.createFunction(
   { cron: '0 6 * * *' }, // Daily at 6am UTC
   async ({ step, logger }) => {
     const stats = await step.run('check-tag-health', async () => {
-      const { createFrontClient } = await import('@skillrecordings/front-sdk')
+      const { createInstrumentedFrontClient } = await import(
+        '../../front/instrumented-client'
+      )
 
       const token = process.env.FRONT_API_TOKEN
       if (!token) {
         throw new Error('FRONT_API_TOKEN not set')
       }
 
-      const front = createFrontClient({ apiToken: token })
+      const front = createInstrumentedFrontClient({ apiToken: token })
       const result = await front.tags.list()
       const tags = result._results
 
@@ -273,14 +279,16 @@ export const tagHealthCheckOnDemand = inngest.createFunction(
   { event: TAG_HEALTH_CHECK_REQUESTED },
   async ({ step, logger }) => {
     const stats = await step.run('check-tag-health', async () => {
-      const { createFrontClient } = await import('@skillrecordings/front-sdk')
+      const { createInstrumentedFrontClient } = await import(
+        '../../front/instrumented-client'
+      )
 
       const token = process.env.FRONT_API_TOKEN
       if (!token) {
         throw new Error('FRONT_API_TOKEN not set')
       }
 
-      const front = createFrontClient({ apiToken: token })
+      const front = createInstrumentedFrontClient({ apiToken: token })
       const result = await front.tags.list()
       const tags = result._results
 

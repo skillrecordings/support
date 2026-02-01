@@ -7,7 +7,8 @@
  * @see https://dev.frontapp.com/reference/tags
  */
 
-import { FrontApiError, createFrontClient } from '@skillrecordings/front-sdk'
+import { FrontApiError } from '@skillrecordings/front-sdk'
+import { createInstrumentedFrontClient } from '../front/instrumented-client'
 import { log } from '../observability/axiom'
 import type {
   CategoryTagConfig,
@@ -145,7 +146,7 @@ export interface TagRegistryOptions {
  * ```
  */
 export class TagRegistry {
-  private front: ReturnType<typeof createFrontClient>
+  private front: ReturnType<typeof createInstrumentedFrontClient>
   private categoryMapping: CategoryTagMapping
   private tagIdCache: Map<string, string> = new Map()
   private initialized = false
@@ -171,7 +172,9 @@ export class TagRegistry {
   }
 
   constructor(options: TagRegistryOptions) {
-    this.front = createFrontClient({ apiToken: options.frontApiToken })
+    this.front = createInstrumentedFrontClient({
+      apiToken: options.frontApiToken,
+    })
     this.categoryMapping = {
       ...DEFAULT_CATEGORY_TAG_MAPPING,
       ...options.categoryMapping,

@@ -5,9 +5,9 @@
  * Uses LLM to create response based on classification and context.
  */
 
-import { createFrontClient } from '@skillrecordings/front-sdk'
 import { generateText } from 'ai'
 import { marked } from 'marked'
+import { createInstrumentedFrontClient } from '../../front/instrumented-client'
 import {
   initializeAxiom,
   log,
@@ -80,13 +80,13 @@ export interface RegenerateDraftOutput {
  */
 export interface RegenerateDraftDeps {
   generateText: typeof generateText
-  createFrontClient: typeof createFrontClient
+  createFrontClient: typeof createInstrumentedFrontClient
   markdownToHtml: (text: string) => string
 }
 
 const defaultDeps: RegenerateDraftDeps = {
   generateText,
-  createFrontClient,
+  createFrontClient: createInstrumentedFrontClient,
   markdownToHtml: (text: string) => marked.parse(text) as string,
 }
 

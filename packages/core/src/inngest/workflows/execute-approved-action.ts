@@ -5,14 +5,15 @@ import {
   eq,
   getDb,
 } from '@skillrecordings/database'
-import { createFrontClient as createFrontSdkClient } from '@skillrecordings/front-sdk'
+import { type Message } from '@skillrecordings/front-sdk'
 import { IntegrationClient } from '@skillrecordings/sdk/client'
 import {
   type DraftTrackingData,
   embedDraftId,
   storeDraftTracking,
 } from '../../draft'
-import { createFrontClient } from '../../front'
+import { createInstrumentedFrontClient } from '../../front/instrumented-client'
+import { markdownToHtml } from '../../front/markdown'
 import {
   initializeAxiom,
   log,
@@ -125,6 +126,7 @@ export const executeApprovedAction = inngest.createFunction(
         const params = action.parameters as {
           response?: string
           draft?: string // from send-draft action type
+          draftId?: string
           inboxId?: string
           context?: {
             customerEmail?: string
@@ -135,6 +137,7 @@ export const executeApprovedAction = inngest.createFunction(
         }
         // Support both 'draft' (from send-draft) and 'response' (from draft-response)
         const response = params?.draft || params?.response
+        const existingDraftId = params?.draftId
 
         if (!response) {
           return {
@@ -153,7 +156,7 @@ export const executeApprovedAction = inngest.createFunction(
           }
         }
 
-        const front = createFrontClient(frontToken)
+        const front = createInstrumentedFrontClient({ apiToken: frontToken })
         const conversationId = action.conversation_id
         if (!conversationId) {
           return {
@@ -163,31 +166,23 @@ export const executeApprovedAction = inngest.createFunction(
           }
         }
 
-        // Get channel ID for creating draft (required by Front API)
-        let channelId: string | null = params?.inboxId ?? null // legacy param name
-        if (!channelId) {
-          // Look up inbox then channel from conversation
-          const inboxId = await front.getConversationInbox(conversationId)
-          if (inboxId) {
-            channelId = await front.getInboxChannel(inboxId)
-          }
-        }
-
-        if (!channelId) {
-          return {
-            success: false,
-            output: null,
-            error: 'Could not determine channel for draft',
-          }
-        }
-
         // Embed action ID in draft content for RL loop correlation
         const contentWithTracking = embedDraftId(response, actionId)
+        const htmlBody = markdownToHtml(contentWithTracking)
 
-        const draft = await front.createDraft(
-          conversationId,
-          contentWithTracking,
-          channelId
+        if (existingDraftId) {
+          try {
+            await front.drafts.delete(existingDraftId)
+          } catch {
+            // Non-fatal - draft may already be deleted/sent
+          }
+        }
+
+        const sent = await front.raw.post<{ id: string }>(
+          `/conversations/${conversationId}/messages`,
+          {
+            body: htmlBody,
+          }
         )
 
         // Add internal comment with context summary for support team
@@ -204,7 +199,10 @@ export const executeApprovedAction = inngest.createFunction(
           lines.push(`• Memory matches: ${ctx.memoryCount ?? 0}`)
 
           try {
-            await front.addComment(conversationId, lines.join('\n'))
+            await front.conversations.addComment(
+              conversationId,
+              lines.join('\n')
+            )
           } catch {
             // Non-fatal - continue even if comment fails
           }
@@ -222,53 +220,63 @@ export const executeApprovedAction = inngest.createFunction(
             confidence?: number
           }
         }
-        const trackingData: DraftTrackingData = {
-          actionId,
-          conversationId,
-          draftId: draft.id,
-          appId: action.app_id ?? 'unknown',
-          category:
-            trackingParams.category ??
-            trackingParams.context?.category ??
-            'unknown',
-          confidence:
-            trackingParams.confidence ??
-            trackingParams.context?.confidence ??
-            0,
-          autoApproved: approvedBy === 'auto',
-          customerEmail: trackingParams.context?.customerEmail,
-          createdAt: new Date().toISOString(),
-        }
+        if (existingDraftId) {
+          const trackingData: DraftTrackingData = {
+            actionId,
+            conversationId,
+            draftId: existingDraftId,
+            appId: action.app_id ?? 'unknown',
+            category:
+              trackingParams.category ??
+              trackingParams.context?.category ??
+              'unknown',
+            confidence:
+              trackingParams.confidence ??
+              trackingParams.context?.confidence ??
+              0,
+            autoApproved: approvedBy === 'auto',
+            customerEmail: trackingParams.context?.customerEmail,
+            createdAt: new Date().toISOString(),
+          }
 
-        try {
-          await storeDraftTracking(actionId, trackingData)
-          await log('debug', 'draft tracking stored', {
+          try {
+            await storeDraftTracking(actionId, trackingData)
+            await log('debug', 'draft tracking stored', {
+              workflow: 'execute-approved-action',
+              step: 'execute-action',
+              actionId,
+              draftId: existingDraftId,
+            })
+          } catch (trackingError) {
+            // Non-fatal - don't fail send if tracking storage fails
+            await log('warn', 'failed to store draft tracking', {
+              workflow: 'execute-approved-action',
+              step: 'execute-action',
+              actionId,
+              error:
+                trackingError instanceof Error
+                  ? trackingError.message
+                  : 'Unknown error',
+            })
+          }
+        } else {
+          await log('warn', 'skipping draft tracking, no draftId provided', {
             workflow: 'execute-approved-action',
             step: 'execute-action',
             actionId,
-            draftId: draft.id,
-          })
-        } catch (trackingError) {
-          // Non-fatal - don't fail draft creation if tracking storage fails
-          await log('warn', 'failed to store draft tracking', {
-            workflow: 'execute-approved-action',
-            step: 'execute-action',
-            actionId,
-            error:
-              trackingError instanceof Error
-                ? trackingError.message
-                : 'Unknown error',
+            conversationId,
           })
         }
 
         const durationMs = Date.now() - stepStartTime
 
-        await log('info', 'draft created successfully', {
+        await log('info', 'message sent successfully', {
           workflow: 'execute-approved-action',
           step: 'execute-action',
           actionId,
           conversationId,
-          draftId: draft.id,
+          messageId: sent.id,
+          draftId: existingDraftId ?? null,
           durationMs,
         })
 
@@ -279,12 +287,16 @@ export const executeApprovedAction = inngest.createFunction(
           stepName: 'execute-action',
           durationMs,
           success: true,
-          metadata: { actionType: action.type, draftId: draft.id },
+          metadata: {
+            actionType: action.type,
+            messageId: sent.id,
+            draftId: existingDraftId ?? undefined,
+          },
         })
 
         return {
           success: true,
-          output: { draftId: draft.id, conversationId },
+          output: { messageId: sent.id, conversationId },
           error: undefined,
         }
       }
@@ -356,7 +368,9 @@ export const executeApprovedAction = inngest.createFunction(
 
           try {
             // Use SDK directly for updateAssignee (not the deprecated wrapper)
-            const front = createFrontSdkClient({ apiToken: frontToken })
+            const front = createInstrumentedFrontClient({
+              apiToken: frontToken,
+            })
             await front.conversations.updateAssignee(
               args.conversationId,
               args.instructorTeammateId
@@ -506,7 +520,7 @@ export const executeApprovedAction = inngest.createFunction(
         }
 
         try {
-          const front = createFrontSdkClient({ apiToken: frontToken })
+          const front = createInstrumentedFrontClient({ apiToken: frontToken })
 
           // Extract classification data from action parameters
           // handle-validated-draft stores category/confidence at the top level
@@ -678,12 +692,16 @@ export const executeApprovedAction = inngest.createFunction(
               return null
             }
 
-            const front = createFrontClient(frontToken)
+            const front = createInstrumentedFrontClient({
+              apiToken: frontToken,
+            })
             const conversationId = action.conversation_id!
 
             // Fetch conversation messages for indexing
-            const frontMessages =
-              await front.getConversationMessages(conversationId)
+            const messageList = (await front.conversations.listMessages(
+              conversationId
+            )) as { _results?: Message[] }
+            const frontMessages = messageList._results ?? []
 
             // Map Front messages to the event's expected format
             const messages = frontMessages.map((msg) => ({

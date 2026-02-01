@@ -1,7 +1,9 @@
-import { createFrontClient } from '@skillrecordings/front-sdk'
+import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
 
 export async function frontStats() {
-  const front = createFrontClient({ apiToken: process.env.FRONT_API_TOKEN! })
+  const front = createInstrumentedFrontClient({
+    apiToken: process.env.FRONT_API_TOKEN!,
+  })
 
   // List all inboxes
   const inboxes = await front.inboxes.list()

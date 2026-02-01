@@ -12,9 +12,9 @@ import {
   type MessageTemplate,
   type MessageTemplateList,
   MessageTemplateListSchema,
-  createFrontClient,
   paginate,
 } from '@skillrecordings/front-sdk'
+import { createInstrumentedFrontClient } from '../front/instrumented-client'
 import { upsertVector } from '../vector/client'
 import type { VectorDocument } from '../vector/types'
 
@@ -111,7 +111,7 @@ export async function syncTemplates(
     )
   }
 
-  const front = createFrontClient({ apiToken })
+  const front = createInstrumentedFrontClient({ apiToken })
 
   const result: SyncTemplatesResult = {
     synced: 0,

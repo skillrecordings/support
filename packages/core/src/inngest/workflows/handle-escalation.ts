@@ -10,9 +10,9 @@
  */
 
 import type { App } from '@skillrecordings/database'
-import { createFrontClient } from '@skillrecordings/front-sdk'
 import { IntegrationClient } from '@skillrecordings/sdk/client'
 import type { KnownBlock } from '@slack/types'
+import { createInstrumentedFrontClient } from '../../front/instrumented-client'
 import {
   initializeAxiom,
   log,
@@ -419,7 +419,7 @@ export const handleEscalation = inngest.createFunction(
         }
 
         try {
-          const front = createFrontClient({ apiToken: frontToken })
+          const front = createInstrumentedFrontClient({ apiToken: frontToken })
 
           const escalationContext: EscalationContext = {
             type: priority,
@@ -513,7 +513,7 @@ export const handleEscalation = inngest.createFunction(
         }
 
         try {
-          const front = createFrontClient({ apiToken: frontToken })
+          const front = createInstrumentedFrontClient({ apiToken: frontToken })
           await front.conversations.addTag(conversationId, tagId)
 
           const durationMs = Date.now() - stepStartTime

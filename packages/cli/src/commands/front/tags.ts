@@ -10,13 +10,13 @@
  */
 
 import { confirm } from '@inquirer/prompts'
+import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
 import {
   type TagWithConversationCount,
   findCaseVariants,
   findExactDuplicates,
 } from '@skillrecordings/core/tags/audit'
 import { DEFAULT_CATEGORY_TAG_MAPPING } from '@skillrecordings/core/tags/registry'
-import { createFrontClient } from '@skillrecordings/front-sdk'
 import type { Command } from 'commander'
 
 /**
@@ -27,7 +27,7 @@ function getFrontSdkClient() {
   if (!apiToken) {
     throw new Error('FRONT_API_TOKEN environment variable is required')
   }
-  return createFrontClient({ apiToken })
+  return createInstrumentedFrontClient({ apiToken })
 }
 
 /**
@@ -63,22 +63,10 @@ async function fetchTagsRaw(): Promise<
   }> = []
 
   let nextUrl: string | null = 'https://api2.frontapp.com/tags'
+  const front = createInstrumentedFrontClient({ apiToken })
 
   while (nextUrl) {
-    const response = await fetch(nextUrl, {
-      headers: {
-        Authorization: `Bearer ${apiToken}`,
-        Accept: 'application/json',
-      },
-    })
-
-    if (!response.ok) {
-      throw new Error(
-        `Front API error: ${response.status} ${response.statusText}`
-      )
-    }
-
-    const data = (await response.json()) as {
+    const data = (await front.raw.get(nextUrl)) as {
       _results: Array<{
         id: string
         name: string
@@ -109,20 +97,8 @@ async function createTagRaw(params: {
   if (params.highlight) body.highlight = params.highlight
   if (params.description) body.description = params.description
 
-  const response = await fetch('https://api2.frontapp.com/tags', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiToken}`,
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-    },
-    body: JSON.stringify(body),
-  })
-
-  if (!response.ok) {
-    const text = await response.text()
-    throw new Error(`Front API ${response.status}: ${text}`)
-  }
+  const front = createInstrumentedFrontClient({ apiToken })
+  await front.raw.post('/tags', body)
 }
 
 /**
@@ -154,7 +130,7 @@ function sleep(ms: number): Promise<void> {
  * Uses the conversations endpoint and checks pagination
  */
 async function getConversationCount(
-  front: ReturnType<typeof createFrontClient>,
+  front: ReturnType<typeof createInstrumentedFrontClient>,
   tagId: string
 ): Promise<number> {
   try {
@@ -181,7 +157,7 @@ async function fetchConversationCountsRateLimited<
   T extends { id: string; name: string },
 >(
   tags: T[],
-  front: ReturnType<typeof createFrontClient>,
+  front: ReturnType<typeof createInstrumentedFrontClient>,
   options: {
     delayMs?: number
     batchSize?: number
@@ -467,7 +443,7 @@ interface CleanupPlan {
  * Build cleanup plan from current tags
  */
 async function buildCleanupPlan(
-  front: ReturnType<typeof createFrontClient>,
+  front: ReturnType<typeof createInstrumentedFrontClient>,
   tagsWithCounts: TagWithConversationCount[]
 ): Promise<CleanupPlan> {
   const plan: CleanupPlan = {
@@ -631,7 +607,7 @@ function printCleanupPlan(plan: CleanupPlan): void {
  * Execute cleanup plan
  */
 async function executeCleanupPlan(
-  front: ReturnType<typeof createFrontClient>,
+  front: ReturnType<typeof createInstrumentedFrontClient>,
   plan: CleanupPlan
 ): Promise<{ success: number; failed: number }> {
   const results = { success: 0, failed: 0 }

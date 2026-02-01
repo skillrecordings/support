@@ -7,7 +7,8 @@
  * IMPORTANT: The webhook passes empty body/senderEmail - we fetch from Front API.
  */
 
-import { createFrontClient, extractCustomerEmail } from '../../front/client'
+import { extractCustomerEmail } from '../../front/client'
+import { createInstrumentedFrontClient } from '../../front/instrumented-client'
 import {
   initializeAxiom,
   log,
@@ -85,8 +86,8 @@ export const classifyWorkflow = inngest.createFunction(
           }
         }
 
-        const front = createFrontClient(frontApiToken)
-        const message = await front.getMessage(messageId)
+        const front = createInstrumentedFrontClient({ apiToken: frontApiToken })
+        const message = await front.messages.get(messageId)
 
         await log('debug', 'raw recipients from Front API', {
           workflow: 'support-classify',
