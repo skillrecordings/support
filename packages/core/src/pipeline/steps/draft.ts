@@ -70,6 +70,16 @@ export interface DraftOptions {
   runId?: string
   /** Conversation ID for correction tracking */
   conversationId?: string
+  /**
+   * Use agent mode with tools (runSupportAgent) instead of raw generateText.
+   * When true, the agent can use tools like processRefund, transferPurchase, etc.
+   * Tool calls that require approval will be captured in the output.
+   */
+  useAgentMode?: boolean
+  /** Customer email for agent context */
+  customerEmail?: string
+  /** Customer name for agent context */
+  customerName?: string
 }
 
 export interface DraftResult extends DraftOutput {
@@ -242,8 +252,10 @@ export async function draft(
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  // Step 3: Generate with LLM (with memory context if available)
+  // Step 3: Generate with LLM or Agent (with memory context if available)
   // ─────────────────────────────────────────────────────────────────────────
+
+  const { useAgentMode = false, customerEmail, customerName } = options
 
   // Build prompt — check runtime overrides first, then use dynamic
   // context-aware prompts that inject refund policy, invoice URLs,
@@ -266,6 +278,107 @@ ${message.body}
 
 ---
 Write your response:`
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Agent mode: Use runSupportAgent with tools (for HITL approval flow)
+  // ─────────────────────────────────────────────────────────────────────────
+  if (useAgentMode && appId) {
+    const { runSupportAgent } = await import('../../agent/config')
+
+    await log('debug', 'draft using agent mode', {
+      workflow: 'pipeline',
+      step: 'draft',
+      appId,
+      conversationId,
+      category: classification.category,
+    })
+
+    // Build customer context for the agent
+    const customerContext: {
+      email?: string
+      name?: string
+      purchases?: Array<{ id: string; product: string; date: string }>
+    } = {}
+
+    if (customerEmail || context.user?.email) {
+      customerContext.email = customerEmail ?? context.user?.email
+    }
+    if (customerName || context.user?.name) {
+      customerContext.name = customerName ?? context.user?.name
+    }
+    if (context.purchases.length > 0) {
+      customerContext.purchases = context.purchases.map((p) => ({
+        id: p.id,
+        product: p.productName,
+        date: p.purchasedAt,
+      }))
+    }
+
+    // Run the support agent with tools
+    const agentResult = await runSupportAgent({
+      message: userMessage,
+      conversationHistory: [],
+      customerContext,
+      appId,
+      model: model as
+        | 'anthropic/claude-haiku-4-5'
+        | 'anthropic/claude-sonnet-4-5'
+        | 'anthropic/claude-opus-4-5',
+      priorKnowledge: memoryContext || undefined,
+    })
+
+    const toolsUsed = memories.length > 0 ? ['memory_query'] : []
+    // Add tool names from agent result
+    if (agentResult.toolCalls.length > 0) {
+      toolsUsed.push(...agentResult.toolCalls.map((tc) => tc.name))
+    }
+
+    const durationMs = Date.now() - startTime
+
+    await log('info', 'draft completed (agent mode)', {
+      workflow: 'pipeline',
+      step: 'draft',
+      appId,
+      conversationId,
+      category: classification.category,
+      usedTemplate: false,
+      usedMemory: memories.length > 0,
+      memoriesCited: memories.length,
+      draftLength: agentResult.response.trim().length,
+      toolCallCount: agentResult.toolCalls.length,
+      requiresApproval: agentResult.requiresApproval,
+      autoSent: agentResult.autoSent,
+      model,
+      durationMs,
+    })
+
+    return {
+      draft: agentResult.response.trim(),
+      reasoning:
+        agentResult.reasoning ??
+        (memories.length > 0
+          ? `Used ${memories.length} relevant memories for context`
+          : undefined),
+      toolsUsed,
+      durationMs,
+      templateUsed: undefined,
+      memoriesCited: memories.length > 0 ? memories : undefined,
+      // New fields for HITL approval
+      toolCalls:
+        agentResult.toolCalls.length > 0
+          ? agentResult.toolCalls.map((tc) => ({
+              name: tc.name,
+              args: tc.args,
+              result: tc.result,
+            }))
+          : undefined,
+      requiresApproval: agentResult.requiresApproval,
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Standard mode: Raw LLM generation (no tools)
+  // ─────────────────────────────────────────────────────────────────────────
 
   // Generate
   const result = await generateText({

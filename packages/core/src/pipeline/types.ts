@@ -331,6 +331,14 @@ export interface DraftOutput {
   reasoning?: string
   toolsUsed: string[]
   durationMs: number
+  /** Tool calls made by the agent (for HITL approval) */
+  toolCalls?: Array<{
+    name: string
+    args: Record<string, unknown>
+    result?: unknown
+  }>
+  /** Whether the draft requires human approval (e.g., refund, transfer) */
+  requiresApproval?: boolean
 }
 
 // ============================================================================

@@ -198,10 +198,13 @@ export const validateWorkflow = inngest.createFunction(
           confidence: 0,
           signals: {},
         },
-        // Forward full draft object including toolsUsed (was previously dropped)
+        // Forward full draft object including toolsUsed and toolCalls (was previously dropped)
         draft: {
           content: draft.content,
           toolsUsed: draft.toolsUsed,
+          // Tool calls for HITL approval flow
+          toolCalls: draft.toolCalls,
+          requiresApproval: draft.requiresApproval,
         },
         validation: {
           valid: validation.valid,

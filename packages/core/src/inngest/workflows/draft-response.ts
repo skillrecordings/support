@@ -536,14 +536,21 @@ export const draftWorkflow = inngest.createFunction(
         context: gatherOutput,
       }
 
-      await log('debug', 'calling LLM for draft', {
+      await log('debug', 'calling agent for draft', {
         workflow: 'support-draft',
         step: 'draft-response',
         conversationId,
         model: 'claude-haiku-4-5',
+        useAgentMode: true,
       })
 
-      const result = await draft(draftInput)
+      // Use agent mode to enable tool-based HITL approval flow
+      const result = await draft(draftInput, {
+        appId,
+        useAgentMode: true,
+        customerEmail: event.data.senderEmail ?? context.customer?.email,
+        conversationId,
+      })
       const durationMs = Date.now() - stepStartTime
 
       await log('info', 'draft generated', {
@@ -553,6 +560,8 @@ export const draftWorkflow = inngest.createFunction(
         appId,
         draftLength: result.draft.length,
         toolsUsed: result.toolsUsed,
+        toolCallCount: result.toolCalls?.length ?? 0,
+        requiresApproval: result.requiresApproval ?? false,
         draftPreview: result.draft.slice(0, 200),
         durationMs,
       })
@@ -567,6 +576,8 @@ export const draftWorkflow = inngest.createFunction(
         metadata: {
           draftLength: result.draft.length,
           toolsUsed: result.toolsUsed,
+          toolCallCount: result.toolCalls?.length ?? 0,
+          requiresApproval: result.requiresApproval ?? false,
           modelUsed: 'claude-haiku-4-5',
           hasKnowledge: (context.knowledge?.length ?? 0) > 0,
           hasMemory: (context.memories?.length ?? 0) > 0,
@@ -613,6 +624,9 @@ export const draftWorkflow = inngest.createFunction(
         draft: {
           content: draftResult.draft,
           toolsUsed: draftResult.toolsUsed,
+          // Tool calls for HITL approval flow
+          toolCalls: draftResult.toolCalls,
+          requiresApproval: draftResult.requiresApproval,
         },
         context,
         inboxId,
