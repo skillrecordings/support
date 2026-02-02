@@ -37,6 +37,12 @@ export {
 } from './hold-state'
 export { commentEscalationWorkflow } from './comment-escalation'
 export { outboundTrackerWorkflow } from './outbound-tracker'
+export {
+  handleAgentReadyLabel,
+  handleIssueComment,
+  handlePrReview,
+  githubEventHandlers,
+} from './github-events'
 
 import { classifyWorkflow } from './classify'
 import { commentCorrectionWorkflow } from './comment-correction'
@@ -49,6 +55,11 @@ import {
   findStaleTemplatesWorkflow,
 } from './find-stale-templates'
 import { gatherWorkflow } from './gather-context'
+import {
+  handleAgentReadyLabel,
+  handleIssueComment,
+  handlePrReview,
+} from './github-events'
 import { handleEscalation } from './handle-escalation'
 import { handleValidatedDraft } from './handle-validated-draft'
 import { handleConversationSnoozed, handleSnoozeExpired } from './hold-state'
@@ -110,6 +121,10 @@ export const allWorkflows: any[] = [
   tagGardeningOnDemand,
   tagHealthCheckWorkflow,
   tagHealthCheckOnDemand,
+  // GitHub events (Grimlock App)
+  handleAgentReadyLabel,
+  handleIssueComment,
+  handlePrReview,
 ]
 
 // Re-export draftDeletionCheckWorkflow (imported above for allWorkflows array)

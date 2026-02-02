@@ -736,6 +736,100 @@ export type SupportEscalatedEvent = {
   }
 }
 
+// ============================================================================
+// GitHub Events (Grimlock App webhooks)
+// ============================================================================
+
+/** Event emitted when a comment is added to a GitHub issue or PR */
+export const GITHUB_ISSUE_COMMENT = 'github/issue.comment' as const
+
+/** Event emitted when a PR review is submitted */
+export const GITHUB_PR_REVIEW = 'github/pr.review' as const
+
+/** Event emitted when an issue is labeled or unlabeled */
+export const GITHUB_ISSUE_LABELED = 'github/issue.labeled' as const
+
+export type GitHubIssueCommentEvent = {
+  name: typeof GITHUB_ISSUE_COMMENT
+  data: {
+    action: 'created' | 'edited' | 'deleted'
+    comment: {
+      id: number
+      body: string
+      user: string
+      createdAt: string
+      htmlUrl: string
+    }
+    issue: {
+      number: number
+      title: string
+      state: string
+      labels: string[]
+      htmlUrl: string
+    }
+    repository: {
+      fullName: string
+      owner: string
+      name: string
+    }
+    sender: string
+    deliveryId?: string | null
+  }
+}
+
+export type GitHubPrReviewEvent = {
+  name: typeof GITHUB_PR_REVIEW
+  data: {
+    action: 'submitted' | 'edited' | 'dismissed'
+    review: {
+      id: number
+      body: string | null
+      state: 'approved' | 'changes_requested' | 'commented' | 'dismissed'
+      user: string
+      submittedAt: string
+      htmlUrl: string
+    }
+    pullRequest: {
+      number: number
+      title: string
+      state: string
+      htmlUrl: string
+      head: string
+      base: string
+    }
+    repository: {
+      fullName: string
+      owner: string
+      name: string
+    }
+    sender: string
+    deliveryId?: string | null
+  }
+}
+
+export type GitHubIssueLabeledEvent = {
+  name: typeof GITHUB_ISSUE_LABELED
+  data: {
+    action: 'labeled' | 'unlabeled'
+    label: string
+    issue: {
+      number: number
+      title: string
+      state: string
+      labels: string[]
+      htmlUrl: string
+      body: string | null
+    }
+    repository: {
+      fullName: string
+      owner: string
+      name: string
+    }
+    sender: string
+    deliveryId?: string | null
+  }
+}
+
 /**
  * Union of all support platform events.
  * Used to type the Inngest client.
@@ -775,4 +869,8 @@ export type Events = {
   [TAG_HEALTH_CHECK_REQUESTED]: TagHealthCheckRequestedEvent
   // Dead letter queue
   [SUPPORT_DEAD_LETTER]: SupportDeadLetterEvent
+  // GitHub events (Grimlock App)
+  [GITHUB_ISSUE_COMMENT]: GitHubIssueCommentEvent
+  [GITHUB_PR_REVIEW]: GitHubPrReviewEvent
+  [GITHUB_ISSUE_LABELED]: GitHubIssueLabeledEvent
 }

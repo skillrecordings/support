@@ -24,6 +24,10 @@ export {
   SUPPORT_ACTION_APPROVED,
   SUPPORT_ACTION_REJECTED,
   SUPPORT_DEAD_LETTER,
+  // GitHub events (Grimlock App)
+  GITHUB_ISSUE_COMMENT,
+  GITHUB_PR_REVIEW,
+  GITHUB_ISSUE_LABELED,
 } from './events'
 export type { DraftDiffCategory, SupportOutboundMessageEvent } from './events'
 export {
