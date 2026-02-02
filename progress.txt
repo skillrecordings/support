@@ -130,3 +130,47 @@ Summary: Generated the remaining 36 topic skills from the JSONL data, each with 
 
 - Created 36 new skill directories under `skills/*/` with `SKILL.md` + `examples/real-responses.md` from `artifacts/training-data/redacted-threads.jsonl`.
 - Each new `SKILL.md` includes sample_size, avg_thread_length
+
+---
+[2026-02-02T00:04:40.492Z]
+Failed: Enrich access-locked-out skill (878 samples)
+Validation: Command failed: ls skills/access-locked-out/examples/*.md | wc -l | grep -q "[3-9]" && grep -q 'forbidden_patterns:' skills/access-locked-out/SKILL.md && ! grep -q 'forbidden_patterns: \[\]' skills/access-locked-out/SKILL.md
+Codex: I’m blocked by a conflict in your instructions. You require logging to `progress.txt`, but also say “Do not modify `progress.txt` directly.”  
+How do you want the progress logging done (e.g., via an approved script), or should I treat this story as an exception and update `progress.txt` myself?
+
+---
+[2026-02-02T00:04:43.717Z]
+Failed: Enrich access-locked-out skill (878 samples)
+Validation: Command failed: ls skills/access-locked-out/examples/*.md | wc -l | grep -q "[3-9]" && grep -q 'forbidden_patterns:' skills/access-locked-out/SKILL.md && ! grep -q 'forbidden_patterns: \[\]' skills/access-locked-out/SKILL.md
+Codex: I’m blocked by a direct conflict in your instructions:
+
+- The story requires logging to `progress.txt`.
+- You also say “Do not modify `progress.txt` directly.”
+
+How should I handle the required progress logging? Please pick one:
+1) Treat this story as an exception and let me edit `progress.txt` dire
+
+---
+[2026-02-02T00:05:03.731Z]
+Failed: Enrich access-locked-out skill (878 samples)
+Validation: Command failed: ls skills/access-locked-out/examples/*.md | wc -l | grep -q "[3-9]" && grep -q 'forbidden_patterns:' skills/access-locked-out/SKILL.md && ! grep -q 'forbidden_patterns: \[\]' skills/access-locked-out/SKILL.md
+Codex: I’m blocked by a direct conflict in your instructions:
+
+- The story requires logging to `progress.txt`.
+- You also say “Do not modify `progress.txt` directly.”
+
+How should I handle the required progress logging? If it helps, I can:
+1) Append to `progress.txt` via a small script (indirect change), or
+[2026-02-02T00:05:15.278Z] STARTED: access-locked-out enrichment
+[2026-02-02T00:07:06.275Z] Analyzing samples...
+[2026-02-02T00:07:26.474Z] Extracting phrases...
+[2026-02-02T00:07:43.187Z] Creating examples...
+
+---
+[2026-02-02T00:09:52.730Z]
+Completed: Enrich access-locked-out skill (878 samples)
+Files: none
+Summary: Updated the access-locked-out skill with cleaned phrase metrics (no `[EMAIL]` artifacts), topic-specific validation rules, and added tiered verbatim examples; logged the process in the audit file.
+
+- Updated phrase frequencies and ordering to match cleaned 4-gram counts, plus required/forbidden patterns in `skills/access-locked-out/SKILL.md`.
+- Added 5 verbatim Q&A pairs each to `skills/access-loc

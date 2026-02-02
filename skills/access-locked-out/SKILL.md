@@ -5,8 +5,12 @@ description: |
 sample_size: 878
 validation:
   required_phrases:
-    - "let me know if"
-  forbidden_patterns: []
+    - "email address"
+    - "login link"
+  forbidden_patterns:
+    - "(?i)you (must have|probably) used the wrong email"
+    - "(?i)your fault"
+    - "(?i)not (our|my) problem"
 metrics:
   sample_size: 878
   avg_thread_length: 3.68
@@ -14,18 +18,18 @@ metrics:
     - phrase: "let me know if"
       count: 227
       percent: 25.9
+    - phrase: "me know if you"
+      count: 184
+      percent: 21
     - phrase: "if you have any"
       count: 167
       percent: 19
-    - phrase: "me know if you"
-      count: 165
-      percent: 18.8
     - phrase: "know if you have"
       count: 128
       percent: 14.6
-    - phrase: "email let me know"
-      count: 84
-      percent: 9.6
+    - phrase: "you ll need to"
+      count: 108
+      percent: 12.3
     - phrase: "let us know if"
       count: 79
       percent: 9
@@ -65,10 +69,10 @@ Common closings:
 ## Phrases That Work (4-gram frequency)
 
 - "let me know if" — 227 (25.9%)
+- "me know if you" — 184 (21%)
 - "if you have any" — 167 (19%)
-- "me know if you" — 165 (18.8%)
 - "know if you have" — 128 (14.6%)
-- "email let me know" — 84 (9.6%)
+- "you ll need to" — 108 (12.3%)
 - "let us know if" — 79 (9%)
 - "at the top of" — 78 (8.9%)
 - "to purchase the course" — 77 (8.8%)
