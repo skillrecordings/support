@@ -1,57 +1,11 @@
 ---
 name: course-content-locked
-description: |
-  Customer purchased course but content is locked, unavailable, or not accessible as expected.
-sample_size: 520
-validation:
-  required_phrases:
-    - "access the course"
-    - "login link"
-    - "restore purchases"
-  forbidden_patterns:
-    - "(?i)refund"
-    - "(?i)chargeback"
-    - "(?i)purchase order"
-    - "(?i)wire transfer"
-    - "(?i)bank transfer"
-    - "(?i)vat number"
-    - "(?i)invoice number"
-metrics:
-  sample_size: 520
-  avg_thread_length: 3.42
-  top_phrases:
-    - phrase: "let me know if"
-      count: 91
-      percent: 17.5
-    - phrase: "me know if you"
-      count: 77
-      percent: 14.8
-    - phrase: "to access the course"
-      count: 52
-      percent: 10
-    - phrase: "know if you have"
-      count: 50
-      percent: 9.6
-    - phrase: "thanks for the heads"
-      count: 50
-      percent: 9.6
-    - phrase: "for the heads up"
-      count: 50
-      percent: 9.6
-    - phrase: "at the top of"
-      count: 50
-      percent: 9.6
-    - phrase: "you ll need to"
-      count: 49
-      percent: 9.4
-    - phrase: "if you have any"
-      count: 48
-      percent: 9.2
-    - phrase: "let us know if"
-      count: 46
-      percent: 8.8
+description: Restore access to purchased course content. Use when a customer has paid but content is locked, missing, or inaccessible.
+metadata:
+  sample_size: "520"
+  validation: "required_phrases:\n  - \"access the course\"\n  - \"login link\"\n  - \"restore purchases\"\nforbidden_patterns:\n  - \"(?i)refund\"\n  - \"(?i)chargeback\"\n  - \"(?i)purchase order\"\n  - \"(?i)wire transfer\"\n  - \"(?i)bank transfer\"\n  - \"(?i)vat number\"\n  - \"(?i)invoice number\""
+  metrics: "sample_size: 520\navg_thread_length: 3.42\ntop_phrases:\n  - phrase: \"let me know if\"\n    count: 91\n    percent: 17.5\n  - phrase: \"me know if you\"\n    count: 77\n    percent: 14.8\n  - phrase: \"to access the course\"\n    count: 52\n    percent: 10\n  - phrase: \"know if you have\"\n    count: 50\n    percent: 9.6\n  - phrase: \"thanks for the heads\"\n    count: 50\n    percent: 9.6\n  - phrase: \"for the heads up\"\n    count: 50\n    percent: 9.6\n  - phrase: \"at the top of\"\n    count: 50\n    percent: 9.6\n  - phrase: \"you ll need to\"\n    count: 49\n    percent: 9.4\n  - phrase: \"if you have any\"\n    count: 48\n    percent: 9.2\n  - phrase: \"let us know if\"\n    count: 46\n    percent: 8.8"
 ---
-
 # Course Content Locked or Unavailable
 
 ## Response Patterns (from samples)

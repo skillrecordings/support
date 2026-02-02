@@ -48,7 +48,7 @@
       "title": "Fix skill frontmatter to match AgentSkills spec",
       "description": "Based on audit results, update all skills/*/SKILL.md frontmatter:\n\n1. Ensure name field matches directory name exactly (lowercase, hyphens)\n2. Improve description to include both WHAT and WHEN:\n   - Bad: \"Helps with refunds\"\n   - Good: \"Handle refund and cancellation requests for course purchases. Use when customer mentions refund, cancel, money back, or wants to stop their subscription.\"\n3. Remove compatibility field if present\n4. Move custom fields (sample_size, confidence, phrases, etc.) into metadata block:\n   ```yaml\n   metadata:\n     sample_size: \"1247\"\n     avg_thread_length: \"4.2\"\n   ```\n5. Keep only spec-defined fields at top level\n\nProcess all 42 skills.",
       "priority": 11,
-      "passes": false,
+      "passes": true,
       "validationCommand": "bun run scripts/audit-skills-spec.ts 2>&1 | grep -q '0 violations\\|all valid\\|passed'"
     },
     {
@@ -86,7 +86,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-02T03:21:55.559Z",
-    "totalIterations": 7,
-    "lastIteration": "2026-02-02T03:40:07.890Z"
+    "totalIterations": 8,
+    "lastIteration": "2026-02-02T03:46:43.613Z"
   }
 }

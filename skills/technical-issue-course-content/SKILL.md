@@ -1,55 +1,11 @@
 ---
 name: technical-issue-course-content
-description: |
-  Customer reports technical problems with videos, code examples, or course materials not working.
-sample_size: 596
-validation:
-  required_phrases:
-    - "thanks for the heads up"
-    - "let me know if"
-  forbidden_patterns:
-    - "(?i)works on my machine"
-    - "(?i)can't reproduce"
-    - "(?i)cannot reproduce"
-    - "(?i)user error"
-    - "(?i)your fault"
-    - "(?i)not our problem"
-metrics:
-  sample_size: 596
-  avg_thread_length: 3.15
-  top_phrases:
-    - phrase: "for the heads up"
-      count: 79
-      percent: 13.3
-    - phrase: "thanks for the heads"
-      count: 78
-      percent: 13.1
-    - phrase: "the heads up we'll"
-      count: 58
-      percent: 9.7
-    - phrase: "heads up we'll look"
-      count: 58
-      percent: 9.7
-    - phrase: "up we'll look into"
-      count: 58
-      percent: 9.7
-    - phrase: "let me know if"
-      count: 49
-      percent: 8.2
-    - phrase: "we'll look into this"
-      count: 44
-      percent: 7.4
-    - phrase: "look into this asap"
-      count: 41
-      percent: 6.9
-    - phrase: "thanks for the feedback"
-      count: 40
-      percent: 6.7
-    - phrase: "thanks for reaching out"
-      count: 36
-      percent: 6.0
+description: Troubleshoot technical issues with course materials. Use when a customer reports video, code, or content not working.
+metadata:
+  sample_size: "596"
+  validation: "required_phrases:\n  - \"thanks for the heads up\"\n  - \"let me know if\"\nforbidden_patterns:\n  - \"(?i)works on my machine\"\n  - \"(?i)can't reproduce\"\n  - \"(?i)cannot reproduce\"\n  - \"(?i)user error\"\n  - \"(?i)your fault\"\n  - \"(?i)not our problem\""
+  metrics: "sample_size: 596\navg_thread_length: 3.15\ntop_phrases:\n  - phrase: \"for the heads up\"\n    count: 79\n    percent: 13.3\n  - phrase: \"thanks for the heads\"\n    count: 78\n    percent: 13.1\n  - phrase: \"the heads up we'll\"\n    count: 58\n    percent: 9.7\n  - phrase: \"heads up we'll look\"\n    count: 58\n    percent: 9.7\n  - phrase: \"up we'll look into\"\n    count: 58\n    percent: 9.7\n  - phrase: \"let me know if\"\n    count: 49\n    percent: 8.2\n  - phrase: \"we'll look into this\"\n    count: 44\n    percent: 7.4\n  - phrase: \"look into this asap\"\n    count: 41\n    percent: 6.9\n  - phrase: \"thanks for the feedback\"\n    count: 40\n    percent: 6.7\n  - phrase: \"thanks for reaching out\"\n    count: 36\n    percent: 6.0"
 ---
-
 # Technical Issue with Course Content
 
 ## Response Patterns (from samples)

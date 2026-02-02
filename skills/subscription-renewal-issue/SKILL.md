@@ -1,48 +1,11 @@
 ---
 name: subscription-renewal-issue
-description: |
-  Customer has issues with automatic subscription renewals, unintended charges, or lack of renewal notification.
-sample_size: 29
-validation:
-  required_phrases:
-    - "is a one time"
-  forbidden_patterns: []
-metrics:
-  sample_size: 29
-  avg_thread_length: 3.21
-  top_phrases:
-    - phrase: "is a one time"
-      count: 8
-      percent: 27.6
-    - phrase: "it can take 5"
-      count: 7
-      percent: 24.1
-    - phrase: "can take 5 10"
-      count: 7
-      percent: 24.1
-    - phrase: "take 5 10 days"
-      count: 7
-      percent: 24.1
-    - phrase: "5 10 days for"
-      count: 7
-      percent: 24.1
-    - phrase: "10 days for the"
-      count: 7
-      percent: 24.1
-    - phrase: "days for the banks"
-      count: 7
-      percent: 24.1
-    - phrase: "for the banks to"
-      count: 7
-      percent: 24.1
-    - phrase: "the banks to reconcile"
-      count: 6
-      percent: 20.7
-    - phrase: "banks to reconcile and"
-      count: 6
-      percent: 20.7
+description: Resolve subscription renewal and charge issues. Use when a customer reports an unexpected renewal, charge, or missing renewal notice.
+metadata:
+  sample_size: "29"
+  validation: "required_phrases:\n  - \"is a one time\"\nforbidden_patterns: []"
+  metrics: "sample_size: 29\navg_thread_length: 3.21\ntop_phrases:\n  - phrase: \"is a one time\"\n    count: 8\n    percent: 27.6\n  - phrase: \"it can take 5\"\n    count: 7\n    percent: 24.1\n  - phrase: \"can take 5 10\"\n    count: 7\n    percent: 24.1\n  - phrase: \"take 5 10 days\"\n    count: 7\n    percent: 24.1\n  - phrase: \"5 10 days for\"\n    count: 7\n    percent: 24.1\n  - phrase: \"10 days for the\"\n    count: 7\n    percent: 24.1\n  - phrase: \"days for the banks\"\n    count: 7\n    percent: 24.1\n  - phrase: \"for the banks to\"\n    count: 7\n    percent: 24.1\n  - phrase: \"the banks to reconcile\"\n    count: 6\n    percent: 20.7\n  - phrase: \"banks to reconcile and\"\n    count: 6\n    percent: 20.7"
 ---
-
 # Subscription Renewal Issue
 
 ## Response Patterns (from samples)

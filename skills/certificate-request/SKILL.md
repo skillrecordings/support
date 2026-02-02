@@ -1,48 +1,11 @@
 ---
 name: certificate-request
-description: |
-  Customer asks about course completion certificates or LinkedIn certificate options.
-sample_size: 209
-validation:
-  required_phrases:
-    - "let me know if"
-  forbidden_patterns: []
-metrics:
-  sample_size: 209
-  avg_thread_length: 3.12
-  top_phrases:
-    - phrase: "let me know if"
-      count: 52
-      percent: 24.9
-    - phrase: "me know if you"
-      count: 40
-      percent: 19.1
-    - phrase: "know if you have"
-      count: 40
-      percent: 19.1
-    - phrase: "if you have any"
-      count: 38
-      percent: 18.2
-    - phrase: "thanks for reaching out"
-      count: 34
-      percent: 16.3
-    - phrase: "a certificate of completion"
-      count: 29
-      percent: 13.9
-    - phrase: "please let me know"
-      count: 24
-      percent: 11.5
-    - phrase: "you have any further"
-      count: 21
-      percent: 10
-    - phrase: "have any further questions"
-      count: 21
-      percent: 10
-    - phrase: "for your interest in"
-      count: 16
-      percent: 7.7
+description: Provide guidance on completion certificates. Use when a customer asks for a course certificate or LinkedIn certificate details.
+metadata:
+  sample_size: "209"
+  validation: "required_phrases:\n  - \"let me know if\"\nforbidden_patterns: []"
+  metrics: "sample_size: 209\navg_thread_length: 3.12\ntop_phrases:\n  - phrase: \"let me know if\"\n    count: 52\n    percent: 24.9\n  - phrase: \"me know if you\"\n    count: 40\n    percent: 19.1\n  - phrase: \"know if you have\"\n    count: 40\n    percent: 19.1\n  - phrase: \"if you have any\"\n    count: 38\n    percent: 18.2\n  - phrase: \"thanks for reaching out\"\n    count: 34\n    percent: 16.3\n  - phrase: \"a certificate of completion\"\n    count: 29\n    percent: 13.9\n  - phrase: \"please let me know\"\n    count: 24\n    percent: 11.5\n  - phrase: \"you have any further\"\n    count: 21\n    percent: 10\n  - phrase: \"have any further questions\"\n    count: 21\n    percent: 10\n  - phrase: \"for your interest in\"\n    count: 16\n    percent: 7.7"
 ---
-
 # Certificate Request
 
 ## Response Patterns (from samples)

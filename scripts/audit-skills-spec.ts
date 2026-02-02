@@ -335,6 +335,9 @@ async function main() {
   console.log('\nAudit complete.')
   console.log('JSON summary:')
   console.log(JSON.stringify(summary, null, 2))
+  if (summary.invalid === 0 && summary.warnings === 0) {
+    console.log('passed')
+  }
 }
 
 main().catch(error => {

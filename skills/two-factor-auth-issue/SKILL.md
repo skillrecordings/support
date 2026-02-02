@@ -1,48 +1,11 @@
 ---
 name: two-factor-auth-issue
-description: |
-  Customer has issues with two-factor authentication, security codes, or device verification.
-sample_size: 4
-validation:
-  required_phrases:
-    - "to your kit account"
-  forbidden_patterns: []
-metrics:
-  sample_size: 4
-  avg_thread_length: 2.75
-  top_phrases:
-    - phrase: "to your kit account"
-      count: 2
-      percent: 50
-    - phrase: "to log in to"
-      count: 2
-      percent: 50
-    - phrase: "thank you creeland forwarded"
-      count: 1
-      percent: 25
-    - phrase: "you creeland forwarded message"
-      count: 1
-      percent: 25
-    - phrase: "creeland forwarded message from"
-      count: 1
-      percent: 25
-    - phrase: "forwarded message from email"
-      count: 1
-      percent: 25
-    - phrase: "message from email date"
-      count: 1
-      percent: 25
-    - phrase: "from email date december"
-      count: 1
-      percent: 25
-    - phrase: "email date december 5"
-      count: 1
-      percent: 25
-    - phrase: "date december 5 2024"
-      count: 1
-      percent: 25
+description: Help with two-factor authentication problems. Use when a customer cannot get a 2FA code or device verification.
+metadata:
+  sample_size: "4"
+  validation: "required_phrases:\n  - \"to your kit account\"\nforbidden_patterns: []"
+  metrics: "sample_size: 4\navg_thread_length: 2.75\ntop_phrases:\n  - phrase: \"to your kit account\"\n    count: 2\n    percent: 50\n  - phrase: \"to log in to\"\n    count: 2\n    percent: 50\n  - phrase: \"thank you creeland forwarded\"\n    count: 1\n    percent: 25\n  - phrase: \"you creeland forwarded message\"\n    count: 1\n    percent: 25\n  - phrase: \"creeland forwarded message from\"\n    count: 1\n    percent: 25\n  - phrase: \"forwarded message from email\"\n    count: 1\n    percent: 25\n  - phrase: \"message from email date\"\n    count: 1\n    percent: 25\n  - phrase: \"from email date december\"\n    count: 1\n    percent: 25\n  - phrase: \"email date december 5\"\n    count: 1\n    percent: 25\n  - phrase: \"date december 5 2024\"\n    count: 1\n    percent: 25"
 ---
-
 # Two-Factor Authentication Issue
 
 ## Response Patterns (from samples)

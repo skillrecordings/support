@@ -1,48 +1,11 @@
 ---
 name: workshop-attendance-confirmation
-description: |
-  Confirmation emails and calendar invitations for workshop or cohort attendance.
-sample_size: 29
-validation:
-  required_phrases:
-    - "let me know if"
-  forbidden_patterns: []
-metrics:
-  sample_size: 29
-  avg_thread_length: 4
-  top_phrases:
-    - phrase: "let me know if"
-      count: 7
-      percent: 24.1
-    - phrase: "me know if you"
-      count: 5
-      percent: 17.2
-    - phrase: "you need to know"
-      count: 4
-      percent: 13.8
-    - phrase: "if you have any"
-      count: 4
-      percent: 13.8
-    - phrase: "https egghead zoom us"
-      count: 4
-      percent: 13.8
-    - phrase: "egghead zoom us j"
-      count: 4
-      percent: 13.8
-    - phrase: "did you end up"
-      count: 2
-      percent: 6.9
-    - phrase: "you end up finding"
-      count: 2
-      percent: 6.9
-    - phrase: "end up finding the"
-      count: 2
-      percent: 6.9
-    - phrase: "up finding the invite"
-      count: 2
-      percent: 6.9
+description: Send workshop attendance confirmations. Use when a customer needs confirmation, calendar invites, or attendance details.
+metadata:
+  sample_size: "29"
+  validation: "required_phrases:\n  - \"let me know if\"\nforbidden_patterns: []"
+  metrics: "sample_size: 29\navg_thread_length: 4\ntop_phrases:\n  - phrase: \"let me know if\"\n    count: 7\n    percent: 24.1\n  - phrase: \"me know if you\"\n    count: 5\n    percent: 17.2\n  - phrase: \"you need to know\"\n    count: 4\n    percent: 13.8\n  - phrase: \"if you have any\"\n    count: 4\n    percent: 13.8\n  - phrase: \"https egghead zoom us\"\n    count: 4\n    percent: 13.8\n  - phrase: \"egghead zoom us j\"\n    count: 4\n    percent: 13.8\n  - phrase: \"did you end up\"\n    count: 2\n    percent: 6.9\n  - phrase: \"you end up finding\"\n    count: 2\n    percent: 6.9\n  - phrase: \"end up finding the\"\n    count: 2\n    percent: 6.9\n  - phrase: \"up finding the invite\"\n    count: 2\n    percent: 6.9"
 ---
-
 # Workshop Attendance and Confirmations
 
 ## Response Patterns (from samples)

@@ -1,56 +1,11 @@
 ---
 name: access-locked-out
-description: |
-  Customer cannot log in, access course materials, or restore their account despite having purchased content.
-sample_size: 878
-validation:
-  required_phrases:
-    - "used to purchase the"
-    - "login link"
-  forbidden_patterns:
-    - "(?i)chargeback"
-    - "(?i)purchase order"
-    - "(?i)wire transfer"
-    - "(?i)bank transfer"
-    - "(?i)tax invoice"
-    - "(?i)vat number"
-    - "(?i)invoice number"
-metrics:
-  sample_size: 878
-  avg_thread_length: 3.68
-  top_phrases:
-    - phrase: "let me know if"
-      count: 227
-      percent: 25.9
-    - phrase: "if you have any"
-      count: 167
-      percent: 19
-    - phrase: "me know if you"
-      count: 165
-      percent: 18.8
-    - phrase: "know if you have"
-      count: 128
-      percent: 14.6
-    - phrase: "let us know if"
-      count: 79
-      percent: 9
-    - phrase: "at the top of"
-      count: 78
-      percent: 8.9
-    - phrase: "to purchase the course"
-      count: 77
-      percent: 8.8
-    - phrase: "the top of https"
-      count: 75
-      percent: 8.5
-    - phrase: "everything should be back"
-      count: 73
-      percent: 8.3
-    - phrase: "used to purchase the"
-      count: 73
-      percent: 8.3
+description: Restore access for customers who are locked out of their account or courses. Use when a paying customer cannot log in, access materials, or restore purchases.
+metadata:
+  sample_size: "878"
+  validation: "required_phrases:\n  - \"used to purchase the\"\n  - \"login link\"\nforbidden_patterns:\n  - \"(?i)chargeback\"\n  - \"(?i)purchase order\"\n  - \"(?i)wire transfer\"\n  - \"(?i)bank transfer\"\n  - \"(?i)tax invoice\"\n  - \"(?i)vat number\"\n  - \"(?i)invoice number\""
+  metrics: "sample_size: 878\navg_thread_length: 3.68\ntop_phrases:\n  - phrase: \"let me know if\"\n    count: 227\n    percent: 25.9\n  - phrase: \"if you have any\"\n    count: 167\n    percent: 19\n  - phrase: \"me know if you\"\n    count: 165\n    percent: 18.8\n  - phrase: \"know if you have\"\n    count: 128\n    percent: 14.6\n  - phrase: \"let us know if\"\n    count: 79\n    percent: 9\n  - phrase: \"at the top of\"\n    count: 78\n    percent: 8.9\n  - phrase: \"to purchase the course\"\n    count: 77\n    percent: 8.8\n  - phrase: \"the top of https\"\n    count: 75\n    percent: 8.5\n  - phrase: \"everything should be back\"\n    count: 73\n    percent: 8.3\n  - phrase: \"used to purchase the\"\n    count: 73\n    percent: 8.3"
 ---
-
 # Account Access Issues
 
 ## Response Patterns (from samples)
