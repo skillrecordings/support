@@ -329,3 +329,9 @@ Codex: Using skills-enrichment as requested.
 I didn’t change any repo files. `scripts/embed-skills-qdrant.ts` already matches the story (creates `skills` collection at 1024 dims, embeds each skill description with `mxbai-embed-large`, and upserts payload fields). There are 41 `skills/*/SKILL.md`.
 
 I tried
+
+---
+[2026-02-02T14:56:38.769Z]
+Failed: Re-run gap analysis with real Ollama embeddings
+Validation: Command failed: test -f artifacts/gap-analysis/report.md && grep -q 'Embedding strategy.*mxbai\|ollama' artifacts/gap-analysis/report.md
+Codex: Updated `scripts/gap-analysis.ts` to use Ollama `mxbai-embed-large` for every conversation, query Qdrant `skills` for nearest match, and pull conversations from `artifacts/phase-0/embeddings/v2/temp.duckdb`. Removed OpenAI/local-hash logic and updated the report embedding strategy line to `ollama-mx

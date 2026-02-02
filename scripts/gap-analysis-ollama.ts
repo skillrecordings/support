@@ -14,14 +14,15 @@ const DUCKDB_PATH = path.join(
 const OUTPUT_DIR = path.join(process.cwd(), 'artifacts/gap-analysis')
 const OUTPUT_REPORT = path.join(OUTPUT_DIR, 'report.md')
 const OUTPUT_GAPS = path.join(OUTPUT_DIR, 'gaps.json')
+const CHECKPOINT_FILE = path.join(OUTPUT_DIR, 'checkpoint.json')
 
 const QDRANT_URL = process.env.QDRANT_URL || 'http://localhost:6333'
 const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434'
 const EMBEDDING_MODEL = 'mxbai-embed-large'
-const DELAY_MS = 10 // Reduced delay for faster completion
+const DELAY_MS = 10
 const SIMILARITY_THRESHOLD = 0.5
-const BATCH_SIZE = 50
-const MAX_CONVERSATIONS = 500 // Reduced sample for ~5 min completion
+const BATCH_SIZE = 100 // Process 100, then checkpoint
+const MAX_CONVERSATIONS = 2000 // Full sample - we can resume now
 
 // ---------------------------------------------------------------------------
 // Types
@@ -42,6 +43,13 @@ interface GapRecord {
   tags: string
 }
 
+interface Checkpoint {
+  processedIds: string[]
+  gaps: GapRecord[]
+  matched: GapRecord[]
+  lastProcessedIndex: number
+}
+
 interface QdrantSearchResult {
   result: Array<{
     id: number
@@ -60,7 +68,6 @@ interface QdrantSearchResult {
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms))
 
 async function getOllamaEmbedding(text: string, retries = 2): Promise<number[] | null> {
-  // Clean text - remove nulls, excessive whitespace, non-printable chars
   const cleanText = text
     .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, ' ')
     .replace(/\s+/g, ' ')
@@ -78,18 +85,14 @@ async function getOllamaEmbedding(text: string, retries = 2): Promise<number[] |
         body: JSON.stringify({ model: EMBEDDING_MODEL, prompt: cleanText }),
       })
       if (!response.ok) {
-        if (attempt < retries) {
-          await sleep(500) // Wait before retry
-          continue
-        }
-        // Only log on final failure
+        if (attempt < retries) { await sleep(300); continue }
         return null
       }
       const data = await response.json()
       return data.embedding
-    } catch (err) {
+    } catch {
       if (attempt >= retries) return null
-      await sleep(500)
+      await sleep(300)
     }
   }
   return null
@@ -118,13 +121,12 @@ async function loadConversations(): Promise<ConversationRow[]> {
   const { Database } = await import('duckdb-async')
   const db = await Database.create(DUCKDB_PATH, { access_mode: 'READ_ONLY' })
   
-  // Sample conversations for efficiency
   const rows = await db.all<ConversationRow>(`
     SELECT conversation_id, first_message, tags, inbox_id
     FROM conversations
     WHERE first_message IS NOT NULL 
       AND length(first_message) > 20
-    ORDER BY random()
+    ORDER BY conversation_id
     LIMIT ${MAX_CONVERSATIONS}
   `)
   
@@ -132,72 +134,24 @@ async function loadConversations(): Promise<ConversationRow[]> {
   return rows
 }
 
-// ---------------------------------------------------------------------------
-// Main
-// ---------------------------------------------------------------------------
-
-async function main() {
-  console.log('=== Gap Analysis with Ollama + Qdrant ===\n')
-  
-  // Ensure output directory
-  await fs.mkdir(OUTPUT_DIR, { recursive: true })
-  
-  // Load conversations
-  console.log('Loading conversations from DuckDB...')
-  const conversations = await loadConversations()
-  console.log(`Loaded ${conversations.length} conversations\n`)
-  
-  // Process in batches
-  const gaps: GapRecord[] = []
-  const matched: GapRecord[] = []
-  let processed = 0
-  
-  for (let i = 0; i < conversations.length; i += BATCH_SIZE) {
-    const batch = conversations.slice(i, i + BATCH_SIZE)
-    
-    for (const conv of batch) {
-      try {
-        // Get embedding
-        const embedding = await getOllamaEmbedding(conv.first_message)
-        if (!embedding) {
-          processed++
-          continue
-        }
-        
-        // Search skills
-        const result = await searchQdrantSkills(embedding)
-        
-        const bestMatch = result.result[0]
-        const record: GapRecord = {
-          conversation_id: conv.conversation_id,
-          first_message: conv.first_message.slice(0, 200),
-          best_skill: bestMatch?.payload?.name || 'unknown',
-          similarity: bestMatch?.score || 0,
-          tags: conv.tags || '',
-        }
-        
-        if (record.similarity < SIMILARITY_THRESHOLD) {
-          gaps.push(record)
-        } else {
-          matched.push(record)
-        }
-        
-        processed++
-      } catch (err) {
-        console.error(`Error processing ${conv.conversation_id}:`, err)
-      }
-    }
-    
-    // Progress
-    const pct = ((processed / conversations.length) * 100).toFixed(1)
-    console.log(`Progress: ${processed}/${conversations.length} (${pct}%) - Gaps: ${gaps.length}`)
+async function loadCheckpoint(): Promise<Checkpoint | null> {
+  try {
+    const data = await fs.readFile(CHECKPOINT_FILE, 'utf-8')
+    return JSON.parse(data)
+  } catch {
+    return null
   }
-  
-  // Calculate stats
+}
+
+async function saveCheckpoint(checkpoint: Checkpoint): Promise<void> {
+  await fs.writeFile(CHECKPOINT_FILE, JSON.stringify(checkpoint, null, 2))
+}
+
+async function generateReport(gaps: GapRecord[], matched: GapRecord[], processed: number): Promise<void> {
   const gapRate = ((gaps.length / processed) * 100).toFixed(1)
   const matchRate = ((matched.length / processed) * 100).toFixed(1)
   
-  // Cluster gaps by similarity
+  // Cluster gaps by skill
   const skillCounts: Record<string, number> = {}
   for (const g of gaps) {
     skillCounts[g.best_skill] = (skillCounts[g.best_skill] || 0) + 1
@@ -206,7 +160,6 @@ async function main() {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 10)
   
-  // Generate report
   const report = `# Gap Analysis Report
 
 **Generated:** ${new Date().toISOString()}
@@ -241,7 +194,7 @@ ${gaps.slice(0, 10).map((g, i) => `
 
 ## Recommendations
 
-${gapRate > '30' ? `
+${parseFloat(gapRate) > 30 ? `
 ⚠️ **High gap rate (${gapRate}%)** - Consider:
 1. Adding new skills for uncovered topics
 2. Expanding skill descriptions to be more comprehensive
@@ -249,25 +202,112 @@ ${gapRate > '30' ? `
 ` : `
 ✅ **Gap rate is acceptable (${gapRate}%)** - Skills cover most conversations.
 `}
-
-## Next Steps
-
-1. Review gap conversations to identify patterns
-2. Create new skills for recurring uncovered topics
-3. Expand thin skills with more examples
-4. Re-run analysis after improvements
 `
 
   await fs.writeFile(OUTPUT_REPORT, report)
-  console.log(`\nReport written to ${OUTPUT_REPORT}`)
-  
-  // Write gaps JSON
   await fs.writeFile(OUTPUT_GAPS, JSON.stringify({ gaps, stats: { processed, gapRate, matchRate } }, null, 2))
-  console.log(`Gaps written to ${OUTPUT_GAPS}`)
+}
+
+// ---------------------------------------------------------------------------
+// Main
+// ---------------------------------------------------------------------------
+
+async function main() {
+  console.log('=== Gap Analysis with Ollama + Qdrant (Resumable) ===\n')
   
-  console.log(`\n=== Results ===`)
-  console.log(`Gap rate: ${gapRate}%`)
-  console.log(`Match rate: ${matchRate}%`)
+  await fs.mkdir(OUTPUT_DIR, { recursive: true })
+  
+  // Load checkpoint if exists
+  let checkpoint = await loadCheckpoint()
+  const processedSet = new Set(checkpoint?.processedIds || [])
+  const gaps: GapRecord[] = checkpoint?.gaps || []
+  const matched: GapRecord[] = checkpoint?.matched || []
+  let startIndex = checkpoint?.lastProcessedIndex || 0
+  
+  if (checkpoint) {
+    console.log(`Resuming from checkpoint: ${processedSet.size} already processed\n`)
+  }
+  
+  // Load conversations
+  console.log('Loading conversations from DuckDB...')
+  const conversations = await loadConversations()
+  console.log(`Loaded ${conversations.length} conversations\n`)
+  
+  // Filter out already processed
+  const remaining = conversations.filter(c => !processedSet.has(c.conversation_id))
+  console.log(`Remaining to process: ${remaining.length}\n`)
+  
+  if (remaining.length === 0) {
+    console.log('All conversations already processed!')
+    await generateReport(gaps, matched, processedSet.size)
+    console.log(`Report written to ${OUTPUT_REPORT}`)
+    return
+  }
+  
+  // Process in batches with checkpoints
+  const startTime = Date.now()
+  
+  for (let i = 0; i < remaining.length; i++) {
+    const conv = remaining[i]
+    
+    try {
+      const embedding = await getOllamaEmbedding(conv.first_message)
+      if (!embedding) {
+        processedSet.add(conv.conversation_id)
+        continue
+      }
+      
+      const result = await searchQdrantSkills(embedding)
+      const bestMatch = result.result[0]
+      
+      const record: GapRecord = {
+        conversation_id: conv.conversation_id,
+        first_message: conv.first_message.slice(0, 200),
+        best_skill: bestMatch?.payload?.name || 'unknown',
+        similarity: bestMatch?.score || 0,
+        tags: conv.tags || '',
+      }
+      
+      if (record.similarity < SIMILARITY_THRESHOLD) {
+        gaps.push(record)
+      } else {
+        matched.push(record)
+      }
+      
+      processedSet.add(conv.conversation_id)
+    } catch (err) {
+      console.error(`Error processing ${conv.conversation_id}:`, err)
+    }
+    
+    // Checkpoint every BATCH_SIZE
+    if ((i + 1) % BATCH_SIZE === 0) {
+      await saveCheckpoint({
+        processedIds: Array.from(processedSet),
+        gaps,
+        matched,
+        lastProcessedIndex: startIndex + i + 1,
+      })
+      
+      const pct = ((processedSet.size / conversations.length) * 100).toFixed(1)
+      console.log(`Checkpoint: ${processedSet.size}/${conversations.length} (${pct}%) - Gaps: ${gaps.length}`)
+    }
+  }
+  
+  // Final checkpoint
+  await saveCheckpoint({
+    processedIds: Array.from(processedSet),
+    gaps,
+    matched,
+    lastProcessedIndex: conversations.length,
+  })
+  
+  // Generate report
+  await generateReport(gaps, matched, processedSet.size)
+  
+  const elapsed = (Date.now() - startTime) / 1000
+  console.log(`\n=== Done in ${elapsed.toFixed(1)}s ===`)
+  console.log(`Gap rate: ${((gaps.length / processedSet.size) * 100).toFixed(1)}%`)
+  console.log(`Report: ${OUTPUT_REPORT}`)
 }
 
 main().catch(console.error)

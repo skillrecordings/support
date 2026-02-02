@@ -2,23 +2,24 @@
 
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
-import OpenAI from 'openai'
+const OLLAMA_ENDPOINT = 'http://localhost:11434/api/embeddings'
+const QDRANT_ENDPOINT = 'http://localhost:6333'
+const QDRANT_COLLECTION = 'skills'
 
 // ---------------------------------------------------------------------------
 // Configuration
 // ---------------------------------------------------------------------------
 
-const CONVERSATIONS_PARQUET = path.join(
+const CONVERSATIONS_DUCKDB = path.join(
   process.cwd(),
-  'artifacts/phase-0/embeddings/v2/conversations.parquet'
+  'artifacts/phase-0/embeddings/v2/temp.duckdb'
 )
 const SKILLS_INDEX = path.join(process.cwd(), 'skills/index.json')
 const OUTPUT_DIR = path.join(process.cwd(), 'artifacts/gap-analysis')
 const OUTPUT_REPORT = path.join(OUTPUT_DIR, 'report.md')
 const OUTPUT_GAPS = path.join(OUTPUT_DIR, 'gaps.json')
 
-const EMBEDDING_MODEL = 'text-embedding-3-small'
-const LOCAL_EMBEDDING_DIMENSIONS = 512
+const EMBEDDING_MODEL = 'mxbai-embed-large'
 const SIMILARITY_THRESHOLD = 0.5
 const MAX_CLUSTERS = 10
 const EXAMPLES_PER_CLUSTER = 3
@@ -37,7 +38,6 @@ interface SkillIndexEntry {
 interface ConversationRow {
   conversation_id: string
   first_message: string
-  embedding: number[]
 }
 
 interface SkillEmbedding {
@@ -97,33 +97,21 @@ function queryAll<T>(
 // Embeddings
 // ---------------------------------------------------------------------------
 
-let openai: OpenAI | null = null
-const HAS_OPENAI_KEY = Boolean(process.env.OPENAI_API_KEY)
-
-function getOpenAI(): OpenAI {
-  if (!openai) openai = new OpenAI()
-  return openai
-}
-
-async function getEmbeddings(texts: string[]): Promise<number[][]> {
-  if (texts.length === 0) return []
-  const client = getOpenAI()
-  const response = await client.embeddings.create({
-    model: EMBEDDING_MODEL,
-    input: texts,
+async function getOllamaEmbedding(prompt: string): Promise<number[]> {
+  const response = await fetch(OLLAMA_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: EMBEDDING_MODEL, prompt }),
   })
-  const sorted = response.data.sort((a, b) => a.index - b.index)
-  return sorted.map((item) => item.embedding)
-}
-
-async function getEmbeddingsBatched(texts: string[], batchSize = 100): Promise<number[][]> {
-  const embeddings: number[][] = []
-  for (let i = 0; i < texts.length; i += batchSize) {
-    const batch = texts.slice(i, i + batchSize)
-    const batchEmbeddings = await getEmbeddings(batch)
-    embeddings.push(...batchEmbeddings)
+  if (!response.ok) {
+    const body = await response.text()
+    throw new Error(`Ollama embedding failed (${response.status}): ${body}`)
   }
-  return embeddings
+  const data = (await response.json()) as { embedding?: number[] }
+  if (!data.embedding || data.embedding.length === 0) {
+    throw new Error('Ollama embedding response missing embedding array')
+  }
+  return data.embedding
 }
 
 // ---------------------------------------------------------------------------
@@ -138,62 +126,37 @@ function normalizeVector(vector: number[]): { vector: number[]; norm: number } {
   return { vector: normalized, norm }
 }
 
-function fnv1aHash(input: string): number {
-  let hash = 2166136261
-  for (let i = 0; i < input.length; i += 1) {
-    hash ^= input.charCodeAt(i)
-    hash = Math.imul(hash, 16777619)
-  }
-  return hash >>> 0
-}
-
-function hashingEmbedding(text: string, dimensions = LOCAL_EMBEDDING_DIMENSIONS): number[] {
-  const vector = new Array(dimensions).fill(0)
-  const tokens = text
-    .toLowerCase()
-    .replace(/[^a-z0-9\\s-]/g, ' ')
-    .split(/\\s+/)
-    .map((token) => token.trim())
-    .filter((token) => token.length >= 2)
-  for (const token of tokens) {
-    const hash = fnv1aHash(token)
-    const index = hash % dimensions
-    const sign = hash % 2 === 0 ? 1 : -1
-    vector[index] += sign
-  }
-  return vector
-}
-
-function cosineSimilarity(
-  vectorA: number[],
-  normA: number,
-  vectorB: number[],
-  normB: number
-): number {
-  let dot = 0
-  const length = Math.min(vectorA.length, vectorB.length)
-  for (let i = 0; i < length; i += 1) {
-    dot += vectorA[i] * vectorB[i]
-  }
-  if (normA === 0 || normB === 0) return 0
-  return dot / (normA * normB)
-}
-
-function parseEmbedding(value: unknown): number[] {
-  if (Array.isArray(value)) return value.map((item) => Number(item))
-  if (typeof value === 'string') {
-    const trimmed = value.trim()
-    if (trimmed.startsWith('[')) {
-      try {
-        return JSON.parse(trimmed)
-      } catch {
-        // fall through
-      }
+async function searchNearestSkill(
+  vector: number[]
+): Promise<{ name: string; description: string; score: number }> {
+  const response = await fetch(
+    `${QDRANT_ENDPOINT}/collections/${QDRANT_COLLECTION}/points/search`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        vector,
+        limit: 1,
+        with_payload: true,
+      }),
     }
-    const parts = trimmed.split(',').map((part) => Number(part))
-    if (parts.every((part) => Number.isFinite(part))) return parts
+  )
+  if (!response.ok) {
+    const body = await response.text()
+    throw new Error(`Qdrant search failed (${response.status}): ${body}`)
   }
-  throw new Error('Unable to parse embedding value from DuckDB')
+  const data = (await response.json()) as {
+    result?: Array<{ score: number; payload?: { name?: string; description?: string } }>
+  }
+  const hit = data.result?.[0]
+  if (!hit || !hit.payload?.name) {
+    throw new Error('Qdrant search returned no results for skills collection')
+  }
+  return {
+    name: hit.payload.name,
+    description: hit.payload.description ?? '',
+    score: hit.score,
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -400,32 +363,21 @@ async function main() {
   const skillIndexRaw = await fs.readFile(SKILLS_INDEX, 'utf-8')
   const skillIndex = JSON.parse(skillIndexRaw) as { skills: SkillIndexEntry[] }
 
-  const skillTexts = skillIndex.skills.map(
-    (skill) => `${skill.name}: ${skill.description}`
-  )
-  const skillEmbeddingsRaw = HAS_OPENAI_KEY
-    ? await getEmbeddingsBatched(skillTexts)
-    : skillTexts.map((text) => hashingEmbedding(text))
-  const skillEmbeddings: SkillEmbedding[] = skillIndex.skills.map((skill, index) => {
-    const embedding = skillEmbeddingsRaw[index]
-    const { vector: normalized, norm } = normalizeVector(embedding)
-    return {
-      name: skill.name,
-      description: skill.description,
-      embedding: normalized,
-      embeddingNorm: norm,
-    }
-  })
+  const skillEmbeddings: SkillEmbedding[] = skillIndex.skills.map((skill) => ({
+    name: skill.name,
+    description: skill.description,
+    embedding: [],
+    embeddingNorm: 0,
+  }))
 
   const duckdb = await loadDuckDB()
-  const db = new duckdb.Database(':memory:')
+  const db = new duckdb.Database(CONVERSATIONS_DUCKDB)
   const rows = await queryAll<{
     conversation_id: string
     first_message: string
-    embedding: unknown
   }>(
     db,
-    `SELECT conversation_id, first_message, embedding FROM '${CONVERSATIONS_PARQUET}'`
+    'SELECT conversation_id, first_message FROM conversations'
   )
 
   const gaps: GapRecord[] = []
@@ -433,37 +385,15 @@ async function main() {
 
   for (const row of rows) {
     if (!row.first_message) continue
-    let embedding: number[] | null = null
-    if (HAS_OPENAI_KEY) {
-      if (!row.embedding) continue
-      embedding = parseEmbedding(row.embedding)
-    } else {
-      embedding = hashingEmbedding(row.first_message)
-    }
+    const embedding = await getOllamaEmbedding(row.first_message)
     const { vector: normalized, norm } = normalizeVector(embedding)
+    const nearest = await searchNearestSkill(embedding)
 
-    let bestSkill = skillEmbeddings[0]
-    let bestSimilarity = cosineSimilarity(
-      normalized,
-      norm,
-      bestSkill.embedding,
-      bestSkill.embeddingNorm
-    )
-
-    for (let i = 1; i < skillEmbeddings.length; i += 1) {
-      const skill = skillEmbeddings[i]
-      const similarity = cosineSimilarity(normalized, norm, skill.embedding, skill.embeddingNorm)
-      if (similarity > bestSimilarity) {
-        bestSimilarity = similarity
-        bestSkill = skill
-      }
-    }
-
-    if (bestSimilarity < SIMILARITY_THRESHOLD) {
+    if (nearest.score < SIMILARITY_THRESHOLD) {
       gaps.push({
         conversation_id: row.conversation_id,
-        nearest_skill: bestSkill.name,
-        similarity: Number(bestSimilarity.toFixed(4)),
+        nearest_skill: nearest.name,
+        similarity: Number(nearest.score.toFixed(4)),
         cluster_id: null,
         first_message: row.first_message,
         embedding: normalized,
@@ -514,7 +444,7 @@ async function main() {
   reportLines.push(`Total conversations analyzed: ${totalConversations}`)
   reportLines.push(`Total gaps found (similarity < ${SIMILARITY_THRESHOLD}): ${gaps.length}`)
   reportLines.push(`Skills compared: ${skillEmbeddings.length}`)
-  reportLines.push(`Embedding strategy: ${HAS_OPENAI_KEY ? EMBEDDING_MODEL : `local-hash-${LOCAL_EMBEDDING_DIMENSIONS}`}`)
+  reportLines.push(`Embedding strategy: ollama-${EMBEDDING_MODEL}`)
   reportLines.push(`Clusters generated: ${clusterCount}`)
   reportLines.push('')
   reportLines.push('## Top Gap Clusters')
