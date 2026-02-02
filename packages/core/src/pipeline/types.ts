@@ -24,6 +24,9 @@ export type MessageCategory =
   | 'support_transfer' // License transfers
   | 'support_technical' // Product/code questions
   | 'support_billing' // Invoice, receipt, payment
+  | 'technical_support' // General technical support issues
+  | 'feedback' // Customer feedback (content, product, experience)
+  | 'sales_pricing' // Sales and pricing inquiries
   | 'fan_mail' // Personal message to instructor
   | 'spam' // Vendor outreach, marketing
   | 'system' // Automated notifications, bounces
@@ -501,6 +504,73 @@ export interface CategoryTagConfig {
 export type CategoryTagMapping = Record<MessageCategory, CategoryTagConfig>
 
 /**
+ * Skill name type - matches skills/index.json skill names.
+ */
+export type SkillName =
+  | 'access-locked-out'
+  | 'api-documentation-question'
+  | 'app-crash-report'
+  | 'broken-link-404-error'
+  | 'certificate-request'
+  | 'cohort-access-request'
+  | 'cohort-schedule-inquiry'
+  | 'content-feedback'
+  | 'continuing-education-credits'
+  | 'corporate-invoice'
+  | 'course-content-locked'
+  | 'course-difficulty-concern'
+  | 'discount-code-request'
+  | 'duplicate-purchase'
+  | 'email-change'
+  | 'email-delivery-failure'
+  | 'event-sponsorship-request'
+  | 'gift-purchase-option'
+  | 'installment-payment-option'
+  | 'invoice-billing-statement'
+  | 'learning-path-guidance'
+  | 'lesson-content-question'
+  | 'login-link'
+  | 'media-press-outreach'
+  | 'nonprofit-government-discount'
+  | 'outdated-course-content'
+  | 'partnership-collaboration-inquiry'
+  | 'password-reset-issue'
+  | 'payment-method-issue'
+  | 'ppp-pricing'
+  | 'price-feedback'
+  | 'pricing-inquiry'
+  | 'refund-request'
+  | 'scholarship-financial-aid'
+  | 'security-vulnerability-report'
+  | 'student-discount-request'
+  | 'subscription-renewal-issue'
+  | 'team-license-purchase'
+  | 'technical-issue-course-content'
+  | 'two-factor-auth-issue'
+  | 'ui-ux-feedback'
+  | 'website-bug-report'
+  | 'workshop-attendance-confirmation'
+  | 'workshop-cancellation-notice'
+  | 'workshop-technical-setup'
+
+/**
+ * Configuration for mapping a skill to a Front tag.
+ */
+export interface SkillTagConfig {
+  /** Name of the tag in Front (prefixed with skill/) */
+  tagName: string
+  /** Highlight color for visual organization */
+  highlight: TagHighlight
+  /** Optional description for the tag */
+  description?: string
+}
+
+/**
+ * Maps skill names to Front tag configurations.
+ */
+export type SkillTagMapping = Record<SkillName, SkillTagConfig>
+
+/**
  * Input for the tag step.
  */
 export interface TagInput {
@@ -508,6 +578,8 @@ export interface TagInput {
   conversationId: string
   /** Message category from classification */
   category: MessageCategory
+  /** Skill name from classification (optional) */
+  skill?: SkillName
   /** App configuration */
   appConfig: AppConfig
 }
@@ -516,12 +588,18 @@ export interface TagInput {
  * Output from the tag step.
  */
 export interface TagOutput {
-  /** Whether the tag was successfully applied */
+  /** Whether the category tag was successfully applied */
   tagged: boolean
-  /** Front tag ID if successful */
+  /** Front tag ID for category if successful */
   tagId?: string
-  /** Tag name that was applied */
+  /** Tag name that was applied for category */
   tagName?: string
+  /** Whether the skill tag was successfully applied */
+  skillTagged?: boolean
+  /** Front tag ID for skill if successful */
+  skillTagId?: string
+  /** Skill tag name that was applied */
+  skillTagName?: string
   /** Error message if failed */
   error?: string
   /** Duration of the operation in ms */

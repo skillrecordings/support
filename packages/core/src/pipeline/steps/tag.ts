@@ -12,7 +12,7 @@ import { FrontApiError } from '@skillrecordings/front-sdk'
 import { createInstrumentedFrontClient } from '../../front/instrumented-client'
 import { log } from '../../observability/axiom'
 import { type TagRegistry, createTagRegistry } from '../../tags/registry'
-import type { MessageCategory, TagInput, TagOutput } from '../types'
+import type { MessageCategory, SkillName, TagInput, TagOutput } from '../types'
 
 // ============================================================================
 // Options
@@ -47,18 +47,19 @@ async function addTagToConversation(
 
 /**
  * Apply a tag to a Front conversation based on category.
+ * Optionally also applies a skill tag if skill is provided.
  *
- * @param input - Conversation ID and category
+ * @param input - Conversation ID, category, and optional skill
  * @param options - Front API token and optional registry
  * @returns Result with success status and tag info
  *
  * @example
  * ```ts
  * const result = await applyTag(
- *   { conversationId: 'cnv_123', category: 'support_access', appConfig },
+ *   { conversationId: 'cnv_123', category: 'support_access', skill: 'login-link', appConfig },
  *   { frontApiToken: 'xxx' }
  * )
- * // result: { tagged: true, tagId: 'tag_abc', tagName: 'access-issue' }
+ * // result: { tagged: true, tagId: 'tag_abc', tagName: 'access-issue', skillTagged: true, skillTagId: 'tag_xyz', skillTagName: 'skill/login-link' }
  * ```
  */
 export async function applyTag(
@@ -66,7 +67,7 @@ export async function applyTag(
   options: TagStepOptions
 ): Promise<TagOutput> {
   const startTime = Date.now()
-  const { conversationId, category } = input
+  const { conversationId, category, skill } = input
   const { frontApiToken, debug } = options
 
   try {
@@ -81,6 +82,7 @@ export async function applyTag(
         step: 'apply-tag',
         conversationId,
         category,
+        skill,
         error: message,
         errorType: error instanceof Error ? error.constructor.name : 'unknown',
       })
@@ -132,9 +134,12 @@ export async function applyTag(
       }
     }
 
-    // Apply tag to conversation via Front API
+    // Apply category tag to conversation via Front API
+    let categoryTagged = false
+    let recovered = false
     try {
       await addTagToConversation(frontApiToken, conversationId, tagId)
+      categoryTagged = true
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
       const isFrontError = error instanceof FrontApiError
@@ -202,14 +207,9 @@ export async function applyTag(
 
           // Retry applying with the new tag ID
           await addTagToConversation(frontApiToken, conversationId, newTag.id)
-
-          return {
-            tagged: true,
-            tagId: newTag.id,
-            tagName,
-            recovered: true,
-            durationMs: Date.now() - startTime,
-          }
+          tagId = newTag.id
+          categoryTagged = true
+          recovered = true
         } catch (recoveryError) {
           const recoveryMsg =
             recoveryError instanceof Error
@@ -224,47 +224,107 @@ export async function applyTag(
             originalError: message,
             recoveryError: recoveryMsg,
           })
-          return {
-            tagged: false,
-            tagId,
-            tagName,
-            error: `Tag archived and recovery failed: ${recoveryMsg}`,
-            durationMs: Date.now() - startTime,
-          }
+          // Continue to try skill tag even if category tag failed
         }
+      } else {
+        // Non-archived error - log but continue to try skill tag
+        await log('error', 'Front API addTag call failed', {
+          step: 'apply-tag',
+          conversationId,
+          category,
+          tagId,
+          tagName,
+          error: message,
+          errorType:
+            error instanceof Error ? error.constructor.name : 'unknown',
+          frontApiStatus: isFrontError ? error.status : undefined,
+          frontApiTitle: isFrontError ? error.title : undefined,
+        })
       }
+    }
 
-      // Non-archived error - log and fail
-      await log('error', 'Front API addTag call failed', {
-        step: 'apply-tag',
-        conversationId,
-        category,
-        tagId,
-        tagName,
-        error: message,
-        errorType: error instanceof Error ? error.constructor.name : 'unknown',
-        frontApiStatus: isFrontError ? error.status : undefined,
-        frontApiTitle: isFrontError ? error.title : undefined,
-      })
+    if (debug && categoryTagged) {
+      console.log(
+        `[TagStep] Applied category tag "${tagName}" (${tagId}) to ${conversationId}`
+      )
+    }
+
+    // Apply skill tag if skill is provided
+    let skillTagged = false
+    let skillTagId: string | undefined
+    let skillTagName: string | undefined
+
+    if (skill) {
+      try {
+        skillTagId = await registry.getTagIdForSkill(skill)
+        skillTagName = registry.getTagNameForSkill(skill)
+
+        if (skillTagId) {
+          await addTagToConversation(frontApiToken, conversationId, skillTagId)
+          skillTagged = true
+
+          if (debug) {
+            console.log(
+              `[TagStep] Applied skill tag "${skillTagName}" (${skillTagId}) to ${conversationId}`
+            )
+          }
+
+          await log('info', 'skill tag applied successfully', {
+            step: 'apply-tag',
+            conversationId,
+            skill,
+            skillTagId,
+            skillTagName,
+          })
+        } else {
+          await log('warn', 'skill tag ID not found', {
+            step: 'apply-tag',
+            conversationId,
+            skill,
+          })
+        }
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error)
+        const isFrontError = error instanceof FrontApiError
+
+        await log('error', 'skill tag application failed', {
+          step: 'apply-tag',
+          conversationId,
+          skill,
+          skillTagId,
+          skillTagName,
+          error: message,
+          errorType:
+            error instanceof Error ? error.constructor.name : 'unknown',
+          frontApiStatus: isFrontError ? error.status : undefined,
+          frontApiTitle: isFrontError ? error.title : undefined,
+        })
+        // Don't fail the entire operation if only skill tag failed
+      }
+    }
+
+    // Return success if at least the category tag was applied
+    if (categoryTagged) {
       return {
-        tagged: false,
+        tagged: true,
         tagId,
         tagName,
-        error: `Front API addTag failed: ${message}`,
+        skillTagged,
+        skillTagId,
+        skillTagName,
+        recovered,
         durationMs: Date.now() - startTime,
       }
     }
 
-    if (debug) {
-      console.log(
-        `[TagStep] Applied tag "${tagName}" (${tagId}) to ${conversationId}`
-      )
-    }
-
+    // Neither tag succeeded
     return {
-      tagged: true,
-      tagId,
+      tagged: false,
       tagName,
+      skillTagged,
+      skillTagId,
+      skillTagName,
+      error: `Could not apply category tag for: ${category}`,
       durationMs: Date.now() - startTime,
     }
   } catch (error) {
@@ -274,6 +334,7 @@ export async function applyTag(
       step: 'apply-tag',
       conversationId,
       category,
+      skill,
       error: message,
       errorType: error instanceof Error ? error.constructor.name : 'unknown',
       stack: error instanceof Error ? error.stack : undefined,
