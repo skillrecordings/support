@@ -176,7 +176,7 @@ Best,
 **Question**
 
 ```text
-Hi Epic AI team,
+Hi team,
 sorry to interrupt your day but, as for the subject, I confirmed on Discord with [NAME] that I have some issues in accessing both the specific Epic AI channel under Workshops as well as the workshop itself in epicai.pro. Are you able to help me out?
 
 I attach my invoice for the cohort in case you need proof of my purchase.

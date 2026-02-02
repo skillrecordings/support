@@ -49,7 +49,7 @@ metrics:
 
 Common openings:
 - "Hey Arzu,"
-- "Hi Alex,"
+- "Hi there,"
 - "I was able to access the admin console this time, but I'd previously"
 
 Common core lines:

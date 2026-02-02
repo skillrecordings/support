@@ -104,7 +104,7 @@ I see an active license under this email. I've gone ahead and sent you a magic l
 ## Example 5 (cnv_q767h3b)
 **Question:**
 ```
-Hi EpicReact team,
+Hi team,
 
 We previously had access to your platform using the email address
 [EMAIL] [[EMAIL]], but we are no longer receiving the login or

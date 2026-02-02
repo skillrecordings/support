@@ -407,7 +407,7 @@ Thank You
 Hi [NAME],
 
 
-Here's a 40% discount for you :) https://epicreact.dev/?coupon=[REDACTED]
+Here's a 40% discount for you :) https://epicreact.dev/?coupon=[TOKEN]
 
 
 Cheers!

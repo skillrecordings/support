@@ -384,7 +384,7 @@ On Fri, Sep 15, 2023 at 12:32 PM Testing Javascript with Kent C. Dodds <
 >
 > Click below to log in and start learning:
 > Log in to Testing Javascript with Kent C. Dodds
-> <https://app.egghead.io/token/369c862a-f740-4c9b-a4e4-c524c061c8f1?client_id=[REDACTED]>
+> <https://app.egghead.io/token/[TOKEN]?client_id=[REDACTED]>
 >
 > The link is valid for 24 hours or until it is used. You will stay logged
 > in for 60 days. Click here to request another link

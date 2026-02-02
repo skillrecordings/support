@@ -379,7 +379,7 @@ Thanks for reaching out!
 You can use the code below to claim a free Epic React Pro individual license:
 
 
-https://epicreact.dev?coupon=[REDACTED]
+https://epicreact.dev/?coupon=[TOKEN]
 ```
 
 ## cnv_4whhvnr

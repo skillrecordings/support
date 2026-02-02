@@ -389,7 +389,7 @@ Best,
 **Question**
 
 ```text
-Hi AIHero team,
+Hi team,
 
 I was wondering if you’re planning to run more cohorts soon, and if so,
 when applications might open up. I’d love to throw my hat in the ring when

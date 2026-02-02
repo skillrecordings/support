@@ -68,7 +68,7 @@ Best,
 ## Example 4 (cnv_qmcbw3r)
 **Question:**
 ```
-Hi Epic React team,
+Hi team,
 
 Could you please check my account ([EMAIL]) in your system?
 I'm currently not receiving the login link emails.

@@ -102,7 +102,7 @@ It's still in review! Taking a bit longer than expected.
 **Question**
 
 ```text
-Hi Team KCD,
+Hi team,
 
 Could you please check this transaction ?
 

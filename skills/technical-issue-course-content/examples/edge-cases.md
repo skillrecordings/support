@@ -40,7 +40,7 @@ On Fri, Dec 4, 2020 at 1:53 PM Epic React with Kent C. Dodds <
 >    - you can always request another link!
 >
 > *==> Click here to access Epic React with Kent C. Dodds
-> <https://egghead.io/token/8e52cbe5-c418-44ad-8fca-94d25539db08?client_id=[REDACTED]>*
+> <https://egghead.io/token/[TOKEN]?client_id=[REDACTED]>*
 >
 > *This link expires in 24 hours and can only be used once. You can always
 > request another link to be sent if this one has been used or is expired.*
@@ -127,7 +127,7 @@ On Sunday, August 15th, 2021 at 11:04, Epic React with Kent C. Dodds <[EMAIL]> w
 >
 > Click below to log in and start learning:
 >
-> [Log in to Epic React with Kent C. Dodds](https://app.egghead.io/token/254bbefd-cd10-[PHONE]-34c7595d3d0d?client_id=[REDACTED])
+> [Log in to Epic React with Kent C. Dodds](https://app.egghead.io/token/[TOKEN]?client_id=[REDACTED])
 >
 > The link is valid for 24 hours or until it is used. You will stay logged in for 60 days. [Click here to request another link](https://epicreact.dev).
 >

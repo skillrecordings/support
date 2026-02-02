@@ -251,14 +251,14 @@ On Thu, Jan 5, 2023 at 8:07 AM Testing Javascript with [NAME] C. Dodds <
 > Click the link below to access Testing Javascript with [NAME] C. Dodds and
 > start learning:
 > Log in to Testing Javascript with [NAME] C. Dodds
-> <https://app.egghead.io/token/0596e0e0-09b8-483f-bff7-5273b76802b7?client_id=[REDACTED]&create_password=false>
+> <https://app.egghead.io/token/[TOKEN]?client_id=[REDACTED]&create_password=false>
 >
 > The link is valid for 24 hours or until it is used. You will stay logged
 > in for 60 days. Click here to request another link
 > <https://testingjavascript.com>.
 >
 > You can access your invoice here
-> <https://app.egghead.io/token/0596e0e0-09b8-483f-bff7-5273b76802b7?client_id=[REDACTED]&create_password=false>
+> <https://app.egghead.io/token/[TOKEN]?client_id=[REDACTED]&create_password=false>
 > .
 >
 > Happy learning!

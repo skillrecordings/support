@@ -3,7 +3,7 @@
 ## Example 1 (cnv_1jbe8xk5)
 **Question:**
 ```
-Hi Epic React team,
+Hi team,
 
 I hope you’re doing well.
 

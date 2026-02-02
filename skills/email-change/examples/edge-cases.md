@@ -112,7 +112,7 @@ Let me know if you have any issues requesting login links using that email addre
 ## Example 4 (cnv_jvgo4av)
 **Question:**
 ```
-Hi Kent and team,
+Hi team,
 
 I own an account on both epicreact.dev and testingjavascript.com
 

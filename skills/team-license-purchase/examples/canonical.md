@@ -5,7 +5,7 @@
 **Question**
 
 ```text
-Hi EpicReact team,
+Hi team,
 
 I'm looking to arrange about 30+ licences for the Pro package. Do you offer
 any volume based discounts on top of what your website calculator suggests?

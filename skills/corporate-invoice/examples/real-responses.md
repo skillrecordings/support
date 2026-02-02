@@ -84,7 +84,7 @@ Best,
 ## Example
 
 **Customer:**
-Hi AI Hero team and Matt Pocock,
+Hi team,
 
 For context, I purchased the AI Hero cohort “Build Your Own AI Personal
 Assistant in TypeScript” on 18 Nov 2025 using my personal credit card. It

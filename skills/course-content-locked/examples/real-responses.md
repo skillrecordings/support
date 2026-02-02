@@ -5,7 +5,7 @@
 **Question**
 
 ```text
-Hi EpicAI team,
+Hi team,
 
 I have purchased the course, and I can't wait to go through the material,
 but I can't access it. When I click to enter the lessons, I automatically
@@ -324,7 +324,7 @@ Thanks
 >
 > Click below to log in and start learning:
 > Log in to Testing Javascript with Kent C. Dodds
-> <https://app.egghead.io/token/821e9308-7bb4-42d1-9763-93aea08845d6?client_id=[REDACTED]>
+> <https://app.egghead.io/token/[TOKEN]?client_id=[REDACTED]>
 >
 > The link is valid for 24 hours or until it is used. You will stay logged
 > in for 60 days. Click here to request another link

@@ -48,10 +48,10 @@ metrics:
 ## Response Patterns (from samples)
 
 Common openings:
-- "Hi Oscar,"
+- "Hi there,"
 
 Common core lines:
-- "Hi Oscar,"
+- "Hi there,"
 - "The workshop recording should be available next week, we will email you ASAP."
 - "Thanks for your support,"
 
@@ -73,7 +73,7 @@ Common closings:
 
 ## Tone Guidance (observed)
 
-- Openings trend toward: "Hi Oscar,"
+- Openings trend toward: "Hi there,"
 - Closings often include: "Taylor"
 
 ## What NOT To Do

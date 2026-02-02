@@ -233,7 +233,7 @@ On Fri, Dec 18, 2020 at 5:52 PM Epic React with [NAME] C. Dodds <
 >    - you can always request another link!
 >
 > *==> Click here to access your content and invoice for Epic React Pro
-> <https://egghead.io/token/01d9cf5b-5447-424c-a[PHONE]5a3c0?client_id=[REDACTED]&create_password=false>*
+> <https://egghead.io/token/[TOKEN][PHONE]5a3c0?client_id=[REDACTED]&create_password=false>*
 >
 > *This link expires in 24 hours and can only be used once. You can always
 > request another link to be sent if this one has been used or is expired.*
@@ -280,7 +280,7 @@ On Sun, 25 Oct 2020 at 19:11, Epic React with [NAME] C. Dodds <
 >    no longer work.
 >
 > *==> Click here to access your content and invoice for Epic React Pro
-> <https://egghead.io/token/36074fbe-bae9-[PHONE]-7743b4d9fe5e?client_id=[REDACTED]&create_password=false>*
+> <https://egghead.io/token/[TOKEN]?client_id=[REDACTED]&create_password=false>*
 >
 > *This link expires in 24 hours and can only be used once. You can always
 > request another link to be sent if this one has been used or is expired.*

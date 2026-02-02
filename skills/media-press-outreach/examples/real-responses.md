@@ -340,7 +340,7 @@ Other form data:
 **Answer**
 
 ```text
-Hi Aaron 👋
+Hi there 👋
 
 
 Super sorry this email slipped through the cracks for me. I'm guessing it's too late now. Either way, I'm afraid I don't have the bandwidth to sign up for anything else at the moment :-(

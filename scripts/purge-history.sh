@@ -88,7 +88,12 @@ REPLACE_FILE="$(mktemp)"
 trap 'rm -f "$REPLACE_FILE"' EXIT
 cat > "$REPLACE_FILE" <<'REPLACEMENTS'
 regex:(?i)[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}==>[EMAIL]
+regex:(?i)[A-Z0-9._%+-]+%40[A-Z0-9.-]+%2E[A-Z]{2,}==>[EMAIL]
+regex:(?i)mailto:[A-Z0-9._%+-]+(?:%40|@)[A-Z0-9.-]+(?:%2E|\.)[A-Z]{2,}==>mailto:[EMAIL]
 regex:(?i)\b(?:\+?\d{1,3}[-. ]?)?(?:\(?\d{3}\)?[-. ]?)?\d{3}[-. ]?\d{4}\b==>[PHONE]
+regex:(?i)([?&](?:token|auth|access_token|id_token|refresh_token|code|client_id|client_secret)=)[A-Z0-9%._-]{10,}==>\1[REDACTED]
+regex:(?i)([?&][A-Z0-9_]+)=([A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12})==>\1=[REDACTED]
+regex:(?i)([?&][A-Z0-9_]+)=([A-F0-9]{20,})==>\1=[REDACTED]
 REPLACEMENTS
 
 git filter-repo --force \

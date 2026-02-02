@@ -2,7 +2,7 @@
 ## Example
 
 **Customer:**
-Hi Total TypeScript team,
+Hi team,
 
 I wanted to double-check if the location-based discount of 60% is currently correctly applied.
 

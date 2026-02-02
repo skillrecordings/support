@@ -189,7 +189,7 @@ I can go ahead and create an invoice before purchase but It would be full price.
 **Question**
 
 ```text
-Hi Management Team for Epic React,
+Hi team,
 
 I'm the head of the tech team for Acumen.org, we manage https://acumenacademy.org.
 
@@ -242,8 +242,8 @@ Apologies again for the delay!
 Here are two coupons to buy the course at the regionally discounted prices:
 
 
-Kenya (50% discount) - https://epicreact.dev?coupon=a[PHONE]fa8d1c9
-Nigeria (70% discount) - https://epicreact.dev/?coupon=[REDACTED]
+Kenya (50% discount) - https://epicreact.dev?coupon=[TOKEN]
+Nigeria (70% discount) - https://epicreact.dev/?coupon=[TOKEN]
 
 
 Each coupon can be used to purchase the course two times, and they'll both expire if not used within a month.
