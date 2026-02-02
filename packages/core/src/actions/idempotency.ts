@@ -1,9 +1,9 @@
 import { createHash } from 'crypto'
 import {
   IdempotencyKeysTable,
+  and,
   eq,
   getDb,
-  and,
   gt,
   lt,
 } from '@skillrecordings/database'
@@ -14,6 +14,27 @@ import { log } from '../observability/axiom'
  * After this time, a duplicate operation will be allowed to execute again
  */
 const DEFAULT_TTL_MS = 24 * 60 * 60 * 1000
+
+/**
+ * Recursively sort object keys for deterministic JSON serialization
+ *
+ * This is necessary because JSON.stringify's replacer array only sorts
+ * top-level keys - nested objects serialize with their original key order,
+ * causing different nested values to potentially produce identical hashes.
+ */
+export function sortObjectDeep(obj: unknown): unknown {
+  if (obj === null || typeof obj !== 'object') return obj
+  if (Array.isArray(obj)) return obj.map(sortObjectDeep)
+  return Object.keys(obj as Record<string, unknown>)
+    .sort()
+    .reduce(
+      (acc, key) => {
+        acc[key] = sortObjectDeep((obj as Record<string, unknown>)[key])
+        return acc
+      },
+      {} as Record<string, unknown>
+    )
+}
 
 /**
  * Result of an idempotency check
@@ -47,16 +68,20 @@ export interface IdempotencyKeyOptions {
  * Generate a deterministic idempotency key from operation parameters
  *
  * Key format: {conversationId}:{toolName}:{argsHash}
- * The args are sorted to ensure consistent hashing regardless of property order
+ * The args are deeply sorted to ensure consistent hashing regardless of
+ * property order at any nesting level.
  */
 export function generateIdempotencyKey(
   conversationId: string,
   toolName: string,
   args: Record<string, unknown>
 ): string {
-  // Sort args for consistent hashing
-  const sortedArgs = JSON.stringify(args, Object.keys(args).sort())
-  const argsHash = createHash('sha256').update(sortedArgs).digest('hex').slice(0, 16)
+  // Deep sort args for consistent hashing (handles nested objects)
+  const sortedArgs = JSON.stringify(sortObjectDeep(args))
+  const argsHash = createHash('sha256')
+    .update(sortedArgs)
+    .digest('hex')
+    .slice(0, 16)
 
   return `${conversationId}:${toolName}:${argsHash}`
 }
@@ -72,7 +97,13 @@ export function generateIdempotencyKey(
 export async function checkIdempotency(
   options: IdempotencyKeyOptions
 ): Promise<IdempotencyCheckResult> {
-  const { conversationId, toolName, args, actionId, ttlMs = DEFAULT_TTL_MS } = options
+  const {
+    conversationId,
+    toolName,
+    args,
+    actionId,
+    ttlMs = DEFAULT_TTL_MS,
+  } = options
   const key = generateIdempotencyKey(conversationId, toolName, args)
 
   await log('debug', 'idempotency check', {
@@ -167,7 +198,11 @@ export async function checkIdempotency(
               error: existing.error ?? undefined,
             }
           : undefined,
-        status: existing?.status as 'pending' | 'completed' | 'failed' | undefined,
+        status: existing?.status as
+          | 'pending'
+          | 'completed'
+          | 'failed'
+          | undefined,
       }
     }
 
@@ -320,7 +355,8 @@ export async function withIdempotency<T extends Record<string, unknown>>(
     await completeIdempotencyKey(check.key, result)
     return { result, wasCached: false }
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error'
     await failIdempotencyKey(check.key, errorMessage)
     throw error
   }

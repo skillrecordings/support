@@ -3,6 +3,7 @@ import {
   boolean,
   datetime,
   double,
+  index,
   int,
   json,
   mysqlTable,
@@ -283,29 +284,36 @@ export type NewDeadLetterQueueEntry = typeof DeadLetterQueueTable.$inferInsert
  * - toolName: The tool being executed (e.g., processRefund)
  * - argsHash: SHA256 hash of sorted tool arguments
  */
-export const IdempotencyKeysTable = mysqlTable('SUPPORT_idempotency_keys', {
-  id: varchar('id', { length: 255 }).primaryKey(), // The idempotency key itself
-  conversation_id: varchar('conversation_id', { length: 255 }).notNull(),
-  tool_name: varchar('tool_name', { length: 255 }).notNull(),
-  action_id: varchar('action_id', { length: 255 }), // FK to ActionsTable.id
+export const IdempotencyKeysTable = mysqlTable(
+  'SUPPORT_idempotency_keys',
+  {
+    id: varchar('id', { length: 255 }).primaryKey(), // The idempotency key itself
+    conversation_id: varchar('conversation_id', { length: 255 }).notNull(),
+    tool_name: varchar('tool_name', { length: 255 }).notNull(),
+    action_id: varchar('action_id', { length: 255 }), // FK to ActionsTable.id
 
-  // Store the cached result for returning on duplicates
-  result: json('result').$type<Record<string, unknown>>(),
-  error: text('error'),
+    // Store the cached result for returning on duplicates
+    result: json('result').$type<Record<string, unknown>>(),
+    error: text('error'),
 
-  // Execution status
-  status: varchar('status', {
-    length: 50,
-    enum: ['pending', 'completed', 'failed'],
+    // Execution status
+    status: varchar('status', {
+      length: 50,
+      enum: ['pending', 'completed', 'failed'],
+    })
+      .notNull()
+      .default('pending'),
+
+    // TTL for cleanup - keys expire after 24 hours by default
+    expires_at: datetime('expires_at').notNull(),
+    created_at: datetime('created_at').default(sql`CURRENT_TIMESTAMP`),
+    completed_at: datetime('completed_at'),
+  },
+  (table) => ({
+    // Index for efficient cleanup of expired keys
+    expiresAtIdx: index('idx_expires_at').on(table.expires_at),
   })
-    .notNull()
-    .default('pending'),
-
-  // TTL for cleanup - keys expire after 24 hours by default
-  expires_at: datetime('expires_at').notNull(),
-  created_at: datetime('created_at').default(sql`CURRENT_TIMESTAMP`),
-  completed_at: datetime('completed_at'),
-})
+)
 
 export type IdempotencyKey = typeof IdempotencyKeysTable.$inferSelect
 export type NewIdempotencyKey = typeof IdempotencyKeysTable.$inferInsert

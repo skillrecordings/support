@@ -1,9 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
-  generateIdempotencyKey,
   checkIdempotency,
+  generateIdempotencyKey,
   withIdempotency,
 } from '../actions'
+import { sortObjectDeep } from '../actions/idempotency'
 
 // Mock the database module
 vi.mock('@skillrecordings/database', () => {
@@ -56,6 +57,75 @@ vi.mock('../observability/axiom', () => ({
 describe('Idempotency Module', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+  })
+
+  describe('sortObjectDeep', () => {
+    it('should return primitives unchanged', () => {
+      expect(sortObjectDeep('hello')).toBe('hello')
+      expect(sortObjectDeep(42)).toBe(42)
+      expect(sortObjectDeep(true)).toBe(true)
+      expect(sortObjectDeep(null)).toBe(null)
+      expect(sortObjectDeep(undefined)).toBe(undefined)
+    })
+
+    it('should sort top-level object keys', () => {
+      const input = { z: 1, a: 2, m: 3 }
+      const result = sortObjectDeep(input)
+      expect(Object.keys(result as object)).toEqual(['a', 'm', 'z'])
+    })
+
+    it('should recursively sort nested object keys', () => {
+      const input = {
+        z: { c: 1, a: 2 },
+        a: { z: 3, b: 4 },
+      }
+      const result = sortObjectDeep(input) as Record<
+        string,
+        Record<string, number>
+      >
+      expect(Object.keys(result)).toEqual(['a', 'z'])
+      expect(Object.keys(result['a']!)).toEqual(['b', 'z'])
+      expect(Object.keys(result['z']!)).toEqual(['a', 'c'])
+    })
+
+    it('should handle arrays by recursively sorting their object elements', () => {
+      const input = [
+        { z: 1, a: 2 },
+        { y: 3, b: 4 },
+      ]
+      const result = sortObjectDeep(input) as Array<Record<string, number>>
+      expect(Object.keys(result[0]!)).toEqual(['a', 'z'])
+      expect(Object.keys(result[1]!)).toEqual(['b', 'y'])
+    })
+
+    it('should handle deeply nested structures', () => {
+      const input = {
+        level1: {
+          z: {
+            level3: {
+              c: 1,
+              a: 2,
+            },
+            a: 'value',
+          },
+          a: [{ z: 1, a: 2 }],
+        },
+      }
+      const result = JSON.stringify(sortObjectDeep(input))
+      const expected = JSON.stringify({
+        level1: {
+          a: [{ a: 2, z: 1 }],
+          z: {
+            a: 'value',
+            level3: {
+              a: 2,
+              c: 1,
+            },
+          },
+        },
+      })
+      expect(result).toBe(expected)
+    })
   })
 
   describe('generateIdempotencyKey', () => {
@@ -130,6 +200,77 @@ describe('Idempotency Module', () => {
 
       expect(key).toMatch(/^conv-123:processRefund:[a-f0-9]{16}$/)
     })
+
+    it('should generate consistent keys regardless of nested object property order', () => {
+      const key1 = generateIdempotencyKey('conv-123', 'updateCustomer', {
+        customer: {
+          address: {
+            city: 'Portland',
+            state: 'OR',
+          },
+          name: 'John Doe',
+        },
+        action: 'update',
+      })
+
+      const key2 = generateIdempotencyKey('conv-123', 'updateCustomer', {
+        action: 'update',
+        customer: {
+          name: 'John Doe',
+          address: {
+            state: 'OR',
+            city: 'Portland',
+          },
+        },
+      })
+
+      expect(key1).toBe(key2)
+    })
+
+    it('should generate different keys for different nested values', () => {
+      const key1 = generateIdempotencyKey('conv-123', 'updateCustomer', {
+        customer: {
+          address: {
+            city: 'Portland',
+            state: 'OR',
+          },
+        },
+      })
+
+      const key2 = generateIdempotencyKey('conv-123', 'updateCustomer', {
+        customer: {
+          address: {
+            city: 'Seattle',
+            state: 'WA',
+          },
+        },
+      })
+
+      expect(key1).not.toBe(key2)
+    })
+
+    it('should handle arrays within nested objects', () => {
+      const key1 = generateIdempotencyKey('conv-123', 'updateOrder', {
+        order: {
+          items: [
+            { sku: 'ABC', quantity: 2 },
+            { sku: 'XYZ', quantity: 1 },
+          ],
+        },
+      })
+
+      const key2 = generateIdempotencyKey('conv-123', 'updateOrder', {
+        order: {
+          items: [
+            { quantity: 2, sku: 'ABC' },
+            { quantity: 1, sku: 'XYZ' },
+          ],
+        },
+      })
+
+      // Same data, different key order within array objects - should be same
+      expect(key1).toBe(key2)
+    })
   })
 
   describe('checkIdempotency', () => {
@@ -182,7 +323,9 @@ describe('Idempotency Module', () => {
     })
 
     it('should execute function for new operations', async () => {
-      const executeFn = vi.fn().mockResolvedValue({ success: true, data: 'test' })
+      const executeFn = vi
+        .fn()
+        .mockResolvedValue({ success: true, data: 'test' })
 
       const { result, wasCached } = await withIdempotency(
         {
@@ -213,7 +356,9 @@ describe('Idempotency Module', () => {
         ]),
       })
 
-      const executeFn = vi.fn().mockResolvedValue({ success: true, data: 'new' })
+      const executeFn = vi
+        .fn()
+        .mockResolvedValue({ success: true, data: 'new' })
 
       const { result, wasCached } = await withIdempotency(
         {
