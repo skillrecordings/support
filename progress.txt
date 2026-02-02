@@ -174,3 +174,10 @@ Summary: Updated the access-locked-out skill with cleaned phrase metrics (no `[E
 
 - Updated phrase frequencies and ordering to match cleaned 4-gram counts, plus required/forbidden patterns in `skills/access-locked-out/SKILL.md`.
 - Added 5 verbatim Q&A pairs each to `skills/access-loc
+[2026-02-02T00:10:25.837Z] COMPLETED: access-locked-out - 15 examples created, 9 validation rules
+
+---
+[2026-02-02T00:10:43.127Z]
+Completed: Enrich access-locked-out skill (878 samples)
+Files: none
+Summary: Updated access-locked-out skill metrics and validation from all 878 samples with `[EMAIL]` filtered, and added 15 verbatim example Q&A pairs split across canonical, edge-case, and variation files. Changes are in `skills/access-locked-out/SKILL.md`, `skills/access-locked-out/examples/canonical.md`, `skills/access-locked-out/examples/edge-cases.md`, and `skills/access-locked-out/examples/variations.

@@ -5,12 +5,16 @@ description: |
 sample_size: 878
 validation:
   required_phrases:
-    - "email address"
+    - "used to purchase the"
     - "login link"
   forbidden_patterns:
-    - "(?i)you (must have|probably) used the wrong email"
-    - "(?i)your fault"
-    - "(?i)not (our|my) problem"
+    - "(?i)chargeback"
+    - "(?i)purchase order"
+    - "(?i)wire transfer"
+    - "(?i)bank transfer"
+    - "(?i)tax invoice"
+    - "(?i)vat number"
+    - "(?i)invoice number"
 metrics:
   sample_size: 878
   avg_thread_length: 3.68
@@ -18,18 +22,15 @@ metrics:
     - phrase: "let me know if"
       count: 227
       percent: 25.9
-    - phrase: "me know if you"
-      count: 184
-      percent: 21
     - phrase: "if you have any"
       count: 167
       percent: 19
+    - phrase: "me know if you"
+      count: 165
+      percent: 18.8
     - phrase: "know if you have"
       count: 128
       percent: 14.6
-    - phrase: "you ll need to"
-      count: 108
-      percent: 12.3
     - phrase: "let us know if"
       count: 79
       percent: 9
@@ -43,6 +44,9 @@ metrics:
       count: 75
       percent: 8.5
     - phrase: "everything should be back"
+      count: 73
+      percent: 8.3
+    - phrase: "used to purchase the"
       count: 73
       percent: 8.3
 ---
@@ -69,15 +73,15 @@ Common closings:
 ## Phrases That Work (4-gram frequency)
 
 - "let me know if" — 227 (25.9%)
-- "me know if you" — 184 (21%)
 - "if you have any" — 167 (19%)
+- "me know if you" — 165 (18.8%)
 - "know if you have" — 128 (14.6%)
-- "you ll need to" — 108 (12.3%)
 - "let us know if" — 79 (9%)
 - "at the top of" — 78 (8.9%)
 - "to purchase the course" — 77 (8.8%)
 - "the top of https" — 75 (8.5%)
 - "everything should be back" — 73 (8.3%)
+- "used to purchase the" — 73 (8.3%)
 
 ## Tone Guidance (observed)
 
