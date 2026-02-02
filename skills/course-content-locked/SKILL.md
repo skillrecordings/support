@@ -5,8 +5,17 @@ description: |
 sample_size: 520
 validation:
   required_phrases:
-    - "let me know if"
-  forbidden_patterns: []
+    - "access the course"
+    - "login link"
+    - "restore purchases"
+  forbidden_patterns:
+    - "(?i)refund"
+    - "(?i)chargeback"
+    - "(?i)purchase order"
+    - "(?i)wire transfer"
+    - "(?i)bank transfer"
+    - "(?i)vat number"
+    - "(?i)invoice number"
 metrics:
   sample_size: 520
   avg_thread_length: 3.42
@@ -15,8 +24,8 @@ metrics:
       count: 91
       percent: 17.5
     - phrase: "me know if you"
-      count: 58
-      percent: 11.2
+      count: 77
+      percent: 14.8
     - phrase: "to access the course"
       count: 52
       percent: 10
@@ -32,15 +41,15 @@ metrics:
     - phrase: "at the top of"
       count: 50
       percent: 9.6
+    - phrase: "you ll need to"
+      count: 49
+      percent: 9.4
     - phrase: "if you have any"
       count: 48
       percent: 9.2
     - phrase: "let us know if"
       count: 46
       percent: 8.8
-    - phrase: "able to access the"
-      count: 45
-      percent: 8.7
 ---
 
 # Course Content Locked or Unavailable
@@ -65,15 +74,15 @@ Common closings:
 ## Phrases That Work (4-gram frequency)
 
 - "let me know if" — 91 (17.5%)
-- "me know if you" — 58 (11.2%)
+- "me know if you" — 77 (14.8%)
 - "to access the course" — 52 (10%)
 - "know if you have" — 50 (9.6%)
 - "thanks for the heads" — 50 (9.6%)
 - "for the heads up" — 50 (9.6%)
 - "at the top of" — 50 (9.6%)
+- "you ll need to" — 49 (9.4%)
 - "if you have any" — 48 (9.2%)
 - "let us know if" — 46 (8.8%)
-- "able to access the" — 45 (8.7%)
 
 ## Tone Guidance (observed)
 

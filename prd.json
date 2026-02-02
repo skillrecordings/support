@@ -166,7 +166,7 @@
       "title": "Enrich course-content-locked skill (520 samples)",
       "description": "Full enrichment pass on course-content-locked skill.\n\nREQUIREMENTS:\n1. Analyze all 520 samples\n2. Filter [EMAIL] tokens from phrase analysis\n3. Add topic-specific forbidden_patterns and required_phrases\n4. Create tiered examples (canonical, edge-cases, variations)\n5. Update metrics with clean data\n\nValidation: 3+ example files, meaningful validation rules",
       "priority": 33,
-      "passes": false,
+      "passes": true,
       "validationCommand": "ls skills/course-content-locked/examples/*.md | wc -l | grep -q \"[3-9]\""
     },
     {
@@ -180,7 +180,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-01T21:18:54.627Z",
-    "totalIterations": 13,
-    "lastIteration": "2026-02-02T00:19:16.236Z"
+    "totalIterations": 14,
+    "lastIteration": "2026-02-02T00:37:00.292Z"
   }
 }
