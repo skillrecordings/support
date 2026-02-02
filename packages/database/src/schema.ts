@@ -273,3 +273,39 @@ export const DeadLetterQueueTable = mysqlTable('SUPPORT_dead_letter_queue', {
 
 export type DeadLetterQueueEntry = typeof DeadLetterQueueTable.$inferSelect
 export type NewDeadLetterQueueEntry = typeof DeadLetterQueueTable.$inferInsert
+
+/**
+ * Idempotency keys for preventing duplicate tool executions
+ * Each key represents a unique operation that should only execute once
+ *
+ * Key format: {conversationId}:{toolName}:{argsHash}
+ * - conversationId: The Front conversation ID
+ * - toolName: The tool being executed (e.g., processRefund)
+ * - argsHash: SHA256 hash of sorted tool arguments
+ */
+export const IdempotencyKeysTable = mysqlTable('SUPPORT_idempotency_keys', {
+  id: varchar('id', { length: 255 }).primaryKey(), // The idempotency key itself
+  conversation_id: varchar('conversation_id', { length: 255 }).notNull(),
+  tool_name: varchar('tool_name', { length: 255 }).notNull(),
+  action_id: varchar('action_id', { length: 255 }), // FK to ActionsTable.id
+
+  // Store the cached result for returning on duplicates
+  result: json('result').$type<Record<string, unknown>>(),
+  error: text('error'),
+
+  // Execution status
+  status: varchar('status', {
+    length: 50,
+    enum: ['pending', 'completed', 'failed'],
+  })
+    .notNull()
+    .default('pending'),
+
+  // TTL for cleanup - keys expire after 24 hours by default
+  expires_at: datetime('expires_at').notNull(),
+  created_at: datetime('created_at').default(sql`CURRENT_TIMESTAMP`),
+  completed_at: datetime('completed_at'),
+})
+
+export type IdempotencyKey = typeof IdempotencyKeysTable.$inferSelect
+export type NewIdempotencyKey = typeof IdempotencyKeysTable.$inferInsert

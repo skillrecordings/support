@@ -8,6 +8,11 @@ import {
 import { type Message } from '@skillrecordings/front-sdk'
 import { IntegrationClient } from '@skillrecordings/sdk/client'
 import {
+  checkIdempotency,
+  completeIdempotencyKey,
+  failIdempotencyKey,
+} from '../../actions'
+import {
   type DraftTrackingData,
   embedDraftId,
   storeDraftTracking,
@@ -108,6 +113,54 @@ export const executeApprovedAction = inngest.createFunction(
 
       return actionRecord
     })
+
+    // Step 1.5: Idempotency check for the action itself
+    // This prevents the same action from being executed multiple times
+    // (e.g., if the user clicks approve twice, or webhook retry)
+    const idempotencyCheck = await step.run('idempotency-check', async () => {
+      const conversationId = action.conversation_id ?? 'unknown'
+
+      // Check if this action has already been executed
+      const check = await checkIdempotency({
+        conversationId,
+        toolName: `action:${action.type}`,
+        args: { actionId },
+        actionId,
+      })
+
+      if (check.isDuplicate) {
+        await log('warn', 'duplicate action execution blocked', {
+          workflow: 'execute-approved-action',
+          step: 'idempotency-check',
+          actionId,
+          actionType: action.type,
+          idempotencyKey: check.key,
+          status: check.status,
+        })
+      }
+
+      return check
+    })
+
+    // If this is a duplicate and already completed, return cached result
+    if (idempotencyCheck.isDuplicate && idempotencyCheck.status === 'completed') {
+      await log('info', 'returning cached result for duplicate action', {
+        workflow: 'execute-approved-action',
+        actionId,
+        cachedResult: idempotencyCheck.cachedResult,
+      })
+
+      return {
+        actionId,
+        executed: true,
+        approvedBy,
+        wasCached: true,
+        cachedResult: idempotencyCheck.cachedResult,
+      }
+    }
+
+    // If duplicate is still pending, this is a race condition - let it proceed
+    // The atomic DB check will prevent actual double-execution
 
     // Step 2: Execute based on action type
     const result = await step.run('execute-action', async () => {
@@ -644,6 +697,21 @@ export const executeApprovedAction = inngest.createFunction(
           status: result.success ? 'approved' : 'rejected',
         })
         .where(eq(ApprovalRequestsTable.action_id, actionId))
+
+      // Complete idempotency key with result
+      if (idempotencyCheck.key) {
+        if (result.success) {
+          await completeIdempotencyKey(idempotencyCheck.key, {
+            success: true,
+            output: result.output,
+          })
+        } else {
+          await failIdempotencyKey(
+            idempotencyCheck.key,
+            'error' in result ? result.error ?? 'Unknown error' : 'Unknown error'
+          )
+        }
+      }
 
       const durationMs = Date.now() - stepStartTime
 
