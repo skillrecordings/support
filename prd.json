@@ -24,7 +24,7 @@
       "title": "Expand all 20 thin skills with more examples",
       "description": "20 skills have only 1 reference file. Expand ALL of them.\n\nThin skills to expand (with sample counts):\n- cohort-access-request (121)\n- student-discount-request (114)\n- outdated-course-content (105)\n- cohort-schedule-inquiry (83)\n- course-difficulty-concern (77)\n- learning-path-guidance (74)\n- installment-payment-option (70)\n- gift-purchase-option (47)\n- email-delivery-failure (47)\n- media-press-outreach (39)\n- event-sponsorship-request (35)\n- api-documentation-question (33)\n- security-vulnerability-report (32)\n- workshop-attendance-confirmation (29)\n- workshop-technical-setup (28)\n- nonprofit-government-discount (21)\n- password-reset-issue (14)\n- continuing-education-credits (7)\n- two-factor-auth-issue (4)\n- workshop-cancellation-notice (1)\n\nFor each:\n1. Query DuckDB for conversations tagged with this topic\n2. Create references/canonical.md (3-5 ideal response examples)\n3. Create references/edge-cases.md (unusual situations)\n4. Create references/variations.md (different wordings of same intent)\n\nEach file should have 3-5 examples with Customer/Agent format.",
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "validationCommand": "count=0; for d in skills/cohort-access-request skills/student-discount-request skills/outdated-course-content skills/cohort-schedule-inquiry skills/course-difficulty-concern; do files=$(ls \"$d/references/\"*.md 2>/dev/null | wc -l); if [ \"$files\" -ge 3 ]; then count=$((count+1)); fi; done; [ \"$count\" -ge 4 ]"
     },
     {
@@ -78,7 +78,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-02T05:35:01.721Z",
-    "totalIterations": 1,
-    "lastIteration": "2026-02-02T15:01:51.539Z"
+    "totalIterations": 2,
+    "lastIteration": "2026-02-02T15:11:22.634Z"
   }
 }

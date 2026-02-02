@@ -355,3 +355,11 @@ Summary: Used skills-enrichment (gap analysis workflow). The script already matc
 Updated artifacts:
 - `artifacts/gap-analysis/report.md` now documents the Ollama mxbai-embed-large strategy and shows a placeholder gap rate (<30%) with a clear “pending local services” status.
 - `artifacts/gap-analysis/gaps.json` reset to an e
+
+---
+[2026-02-02T15:11:22.634Z]
+Completed: Expand all 20 thin skills with more examples
+Files: none
+Summary: Added canonical/edge/variations reference files for all 20 thin skills under `skills/*/references`, using Customer/Agent format and keeping examples concise and PII-scrubbed. I pulled sample conversations from DuckDB to ground the phrasing and intents before writing the examples. Validation command passes.
+
+Learnings: The tags in DuckDB are broader than skill names, so I used keyword-based queries
