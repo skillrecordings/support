@@ -59,7 +59,7 @@ On Tue, Aug 5, 2025 at 3:50 PM Epic React <[EMAIL]> wrote:
 
 > Accept your license *borjaantona@playtomic​.io* for Epic React.
 > Accept License
-> <https://www.epicreact.dev/api/auth/callback/email?callbackUrl=https%3A%2F%2Fwww.epicreact.dev%2Ftransfer%2F4016bace-65d9-4b13-b5ed-fdc56f19c9b1&token=[REDACTED]&email=borjaantona%40playtomic.io>
+> <[AUTH_LINK]>
 >
 > This link is valid until Tuesday, August 12th, 2025 at 1:48:19 PM GMT+0.
 > If you need additional help, reply!

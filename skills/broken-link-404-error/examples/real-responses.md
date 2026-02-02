@@ -205,7 +205,7 @@ Em qua., 22 de jan. de 2025 às 09:42, [NAME] TypeScript <
 > [image: [NAME] TypeScript]
 > Log in as *adrianogsallesf@gmail​.com* to [NAME] TypeScript.
 > Log in
-> <https://www.totaltypescript.com/api/auth/callback/email?callbackUrl=https%3A%2F%2Fwww.totaltypescript.com%2F&token=[REDACTED]&email=adrianogsallesf%40gmail.com>
+> <[AUTH_LINK]>
 >
 > The link is valid for 24 hours or until it is used once. You will stay
 > logged in for 60 days. Click here to request another link

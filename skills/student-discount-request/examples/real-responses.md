@@ -76,7 +76,7 @@ Best regards,
 Hi [NAME],
 
 
-I can get you a discount. This coupon would be valid for 1 week: https://www.totaltypescript.com?code=[REDACTED] 
+I can get you a discount. This coupon would be valid for 1 week: https://www.totaltypescript.com/?code=[REDACTED] 
 
 
 I hope that helps!
@@ -295,7 +295,7 @@ Hey [NAME],
 I can get you a 25% off coupon! Hope It helps.
 
 
-https://www.epicreact.dev/buy?coupon=[REDACTED]
+https://www.epicreact.dev/buy?coupon=%5BTOKEN%5D
 
 
 Best,

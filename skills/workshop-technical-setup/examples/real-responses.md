@@ -214,10 +214,10 @@ On Fri, Dec 5, 2025 at 11:24 AM [NAME] AI Pro <[EMAIL]> wrote:
 > Log in as *[EMAIL] <[EMAIL]>* to [NAME] AI
 > Pro.
 > Log In
-> <https://www.epicai.pro/api/auth/callback/postmark?callbackUrl=https%3A%2F%2Fwww.epicai.pro&token=[REDACTED]&email=xifeng.jin88%40gmail.com>
+> <[AUTH_LINK]>
 >
 > or copy and paste this URL into your browser:
-> https://www.epicai.pro/api/auth/callback/postmark?callbackUrl=https%3A%2F%2Fwww.epicai.pro&token=[REDACTED]&email=xifeng.jin88%40gmail.com
+> [AUTH_LINK]
 > ------------------------------
 >
 > The login link above is valid for 24 hours or until it is used once. You

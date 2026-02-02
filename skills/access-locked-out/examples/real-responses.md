@@ -18,7 +18,7 @@ wrote:
 > [image: Total TypeScript]
 > Log in as *ddominguez​.dev@gmail​.com* to Total TypeScript.
 > Log in
-> <https://www.totaltypescript.com/api/auth/callback/email?callbackUrl=https%3A%2F%2Fwww.totaltypescript.com%2F&token=[REDACTED]&email=ddominguez.dev%40gmail.com>
+> <[AUTH_LINK]>
 >
 > The link is valid for 24 hours or until it is used once. You will stay
 > logged in for 60 days. Click here to request another link

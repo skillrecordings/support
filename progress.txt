@@ -45,3 +45,13 @@ Summary: I added the purge script at `scripts/purge-history.sh` and did not run 
 Two blockers before I can finish:
 
 1) You asked to “add instructions to progress.txt,” but the same instruc
+
+---
+[2026-02-02T03:32:20.336Z]
+Completed: Deep scrub: Remove tokens, auth URLs, and encoded emails
+Files: none
+Summary: Added a new deep URL scrubber script and ran it against `skills/`, aggressively redacting tokens, emails (including URL-encoded), client IDs, and auth callbacks while preserving domains when safe.
+
+Details
+- New script: `scripts/deep-scrub-pii.ts` (walks all files under `skills/`, skips binaries, scrubs URLs with param-aware and token/UUID/hex detection, supports `--dry-run`)
+- Updated files: mult

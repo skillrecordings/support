@@ -86,7 +86,7 @@ On Mon, 6 Mar 2023 at 10:03, Pro Tailwind <[EMAIL]> wrote:
 > [image: Pro Tailwind]
 > Log in as *jakub​.plucinsky@gmail​.com* to Pro Tailwind.
 > Log in
-> <https://www.protailwind.com/api/auth/callback/email?callbackUrl=https%3A%2F%2Fwww.protailwind.com%2Fwelcome%3FpurchaseId%3D2192ea89-92a5-486a-a1f0-3de5229acc7b&token=[REDACTED]&email=jakub.plucinsky%40gmail.com>
+> <[AUTH_LINK]>
 >
 > The link is valid for 24 hours or until it is used once. You will stay
 > logged in for 60 days. Click here to request another link

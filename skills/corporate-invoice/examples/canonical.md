@@ -35,7 +35,7 @@ To: [EMAIL] <[EMAIL]>
 Subject: Thank you for Purchasing Testing JavaScript (www.testingjavascript.com)
 
 Log in as xico2541@hotmail​.com to Testing JavaScript.
-Log in <https://www.testingjavascript.com/api/auth/callback/email?callbackUrl=https%3A%2F%2Fwww.testingjavascript.com%2Fwelcome%3FpurchaseId%3Da1eac124-0893-4c1e-a58c-6eab87d4dcdc%26provider%3Dstripe&token=[REDACTED]&email=xico2541%40hotmail.com>
+Log in <[AUTH_LINK]>
 The link is valid for 24 hours or until it is used once. You will stay logged in for 60 days. Click here to request another link<https://www.testingjavascript.com/login>.
 Once you are logged in, you can access your invoice here<https://www.testingjavascript.com/invoices>.
 If you need additional help, reply!

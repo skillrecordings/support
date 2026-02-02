@@ -78,7 +78,7 @@ Hey [NAME],
 Sadly I still don't see anything even under [EMAIL]. I'm not sure what happened to the license, but I trust you did pay for It so I'll go ahead and give you a new license to assign to any email you'd like.
 
 
-https://www.testingjavascript.com?code=[REDACTED] 
+https://www.testingjavascript.com/?code=[REDACTED] 
 
 
 Enjoy the course!

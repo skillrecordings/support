@@ -293,7 +293,7 @@ Hey [NAME]!
 As part of your ticket to my Advanced React workshop, here's your free ticket to the new self-paced version! We just released the first section, and we'll be putting up the others as we finish them.
 
 
-https://totaltypescript.com?code=[REDACTED]
+https://totaltypescript.com/?code=[REDACTED]
 ```
 
 ## cnv_htb89tz

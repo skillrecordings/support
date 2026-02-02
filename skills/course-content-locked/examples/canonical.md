@@ -160,7 +160,7 @@ Hello,
 
 I got the testing course from my work and all worked fine but when I try to load content on the website recently I only get previews displayed.
 
-This is my current access link: https://testingjavascript.com/#access_token=oe1bK8WPD390lOogzn6CZTzkgXyt1WbilqGsKDG7Ar4&token_type=Bearer&expires_in=[PHONE]
+This is my current access link: https://testingjavascript.com/#access_token=[TOKEN]&token_type=Bearer&expires_in=[PHONE]
 
 Could you please help me with that?
 

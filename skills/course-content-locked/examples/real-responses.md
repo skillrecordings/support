@@ -24,10 +24,10 @@ On Tue, Dec 23, 2025 at 12:17 AM Epic AI Pro <[EMAIL]> wrote:
 >
 > Log in as *[EMAIL] <[EMAIL]>* to Epic AI Pro.
 > Log In
-> <https://www.epicai.pro/api/auth/callback/postmark?callbackUrl=https%3A%2F%2Fwww.epicai.pro%2F&token=[REDACTED]&email=codesanja%40gmail.com>
+> <[AUTH_LINK]>
 >
 > or copy and paste this URL into your browser:
-> https://www.epicai.pro/api/auth/callback/postmark?callbackUrl=https%3A%2F%2Fwww.epicai.pro%2F&token=[REDACTED]&email=codesanja%40gmail.com
+> [AUTH_LINK]
 > ------------------------------
 >
 > The login link above is valid for 24 hours or until it is used once. You

@@ -251,10 +251,10 @@ Thank you,
 > 
 > Click the link below to access Epic React with Kent C. Dodds and start learning:
 > 
-> Log in to Epic React with Kent C. Dodds <https://app.egghead.io/token/410d292e-be23-4bcb-b3c7-5f155330e27e?client_id=[PHONE]3dd5a03999d7b141ec809b9e[PHONE]e907e7205a9ac83cf&create_password=false>
+> Log in to Epic React with Kent C. Dodds <https://app.egghead.io/token/410d292e-be23-4bcb-b3c7-5f155330e27e?client_id=[REDACTED]&create_password=false>
 > The link is valid for 24 hours or until it is used. You will stay logged in for 60 days. Click here to request another link <https://epicreact.dev/>. 
 > 
-> You can access your invoice here <https://app.egghead.io/token/410d292e-be23-4bcb-b3c7-5f155330e27e?client_id=[PHONE]3dd5a03999d7b141ec809b9e[PHONE]e907e7205a9ac83cf&create_password=false>.
+> You can access your invoice here <https://app.egghead.io/token/410d292e-be23-4bcb-b3c7-5f155330e27e?client_id=[REDACTED]&create_password=false>.
 > 
 > Happy learning!
 >
@@ -299,7 +299,7 @@ Thanks
 >
 > You can also click the URL to claim for yourself.
 >
-> Claim URL: https://epicreact.dev/?coupon=[REDACTED]
+> Claim URL: https://epicreact.dev/?coupon=%5BTOKEN%5D
 >
 > Thanks!
 >

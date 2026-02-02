@@ -225,7 +225,7 @@ On Mon, Jul 8, 2024 at 11:22 PM <[EMAIL]> wrote:
 
 > Log in as *dhardin07@gmail​.com* to Testing JavaScript.
 > Log in
-> <https://www.testingjavascript.com/api/auth/callback/email?callbackUrl=https%3A%2F%2Fwww.testingjavascript.com&token=[REDACTED]&email=dhardin07%40gmail.com>
+> <[AUTH_LINK]>
 >
 > The link is valid for 24 hours or until it is used once. You will stay
 > logged in for 60 days. Click here to request another link

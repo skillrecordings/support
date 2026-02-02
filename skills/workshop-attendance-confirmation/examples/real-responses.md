@@ -125,7 +125,7 @@ Log in as [EMAIL] to Epic AI Pro.
 | Log In |
 
 
-or copy and paste this URL into your browser: https://www.epicai.pro/api/auth/callback/postmark?callbackUrl=https%3A%2F%2Fwww.epicai.pro%2Fwelcome%3FpurchaseId%3Dpurch_2f431ded-[PHONE]-b102-f9f3b71e971f&token=[REDACTED]&email=paganio%40yahoo.com
+or copy and paste this URL into your browser: [AUTH_LINK]
 
 Get your customizable invoice here.
 
@@ -301,7 +301,7 @@ On Tuesday, July 25, 2023, 2:02 AM, [NAME] Pocock <[EMAIL]> wrote:
 
 Hey [NAME]!
 As part of your ticket to my Advanced React workshop, here's your free ticket to the new self-paced version! We just released the first section, and we'll be putting up the others as we finish them.
-https://totaltypescript.com?code=[REDACTED]
+https://totaltypescript.com/?code=[REDACTED]
 —[NAME] Pocock
 ```
 
@@ -314,7 +314,7 @@ Hey [NAME]!
 As part of your ticket to my Advanced React workshop, here's your free ticket to the new self-paced version! We just released the first section, and we'll be putting up the others as we finish them.
 
 
-https://totaltypescript.com?code=[REDACTED]
+https://totaltypescript.com/?code=[REDACTED]
 ```
 
 ## cnv_jxyz8av
