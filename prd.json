@@ -1,186 +1,44 @@
 {
   "version": "1.0",
-  "projectName": "faq-real-extraction",
-  "description": "Extract REAL FAQ Q&A pairs from DuckDB cache using existing LLM topic classifications. CRITICAL: NO LLM SYNTHESIS - this is verbatim text extraction only. All work must be logged to artifacts/faq-extraction-audit.md with process notes.",
+  "projectName": "pii-scrub",
+  "description": "Scrub PII from skills examples and artifacts, then purge from git history",
   "stories": [
     {
-      "id": "story-ml48u37t",
-      "title": "Create extraction script scaffold with audit logging",
-      "description": "Create `scripts/extract-real-faqs.ts` with:\n1. Audit logger that writes to `artifacts/faq-extraction-audit.md`\n2. Every major step logs: timestamp, action, reasoning\n3. Script skeleton with NO ai/LLM imports\n\n⛔ FORBIDDEN: Do not import from 'ai', '@ai-sdk/*', or any LLM library\n✅ REQUIRED: Use DuckDB, fs, path only\n\nThe audit file format:\n```\n# FAQ Extraction Audit Log\n\n## [timestamp] Step Name\n**Action:** What was done\n**Reasoning:** Why this approach\n**Output:** What was produced\n```",
+      "id": "story-ml4lt7m0",
+      "title": "Create PII scrubbing utility script",
+      "description": "Create scripts/scrub-pii.ts that:\n1. Detects emails (regex), names (from context), phone numbers, addresses\n2. Replaces with redacted placeholders: [EMAIL], [NAME], [PHONE], etc.\n3. Processes .md and .json files recursively\n4. Has --dry-run mode to preview changes\n5. Reports count of redactions per file\n\nUse Bun. Keep it simple - regex-based detection is fine for emails/phones. For names, look for patterns like \"Hi [Name],\" or \"Thanks, [Name]\" in the conversation context.",
       "priority": 1,
       "passes": true,
-      "validationCommand": "grep -L \"generateText\\|generateObject\\|from 'ai'\\|from \\\"ai\\\"\" scripts/extract-real-faqs.ts && test -f scripts/extract-real-faqs.ts && echo \"PASS\"",
-      "acceptanceCriteria": [
-        "scripts/extract-real-faqs.ts exists",
-        "File does NOT contain: import.*from.*ai, generateText, generateObject",
-        "Audit logger function exists and writes to artifacts/faq-extraction-audit.md",
-        "Running script creates audit file with header"
-      ]
+      "validationCommand": "test -f scripts/scrub-pii.ts && bun run scripts/scrub-pii.ts --dry-run skills/access-locked-out/examples/real-responses.md 2>&1 | grep -q 'EMAIL\\|redact'"
     },
     {
-      "id": "story-ml48u8hx",
-      "title": "Load classifications and build topic-to-conversations map",
-      "description": "Add function to load `artifacts/phase-1/llm-topics/classifications.json` and create a Map<topicId, conversationId[]>.\n\nLog to audit:\n- Number of topics found\n- Total conversations loaded\n- Top 5 topics by count\n\n⛔ FORBIDDEN: No LLM calls, no content generation\n✅ REQUIRED: Pure file reading and data structure building",
+      "id": "story-ml4lt7md",
+      "title": "Scrub PII from all skill example files",
+      "description": "Run the scrub-pii script on all files in skills/*/examples/*.md and skills/*/*.md\n\nReplace all detected PII with redacted placeholders. Verify no raw emails remain after scrubbing.\n\nRun: bun run scripts/scrub-pii.ts skills/",
       "priority": 2,
-      "passes": true,
-      "validationCommand": "grep -q \"loadClassifications\" scripts/extract-real-faqs.ts && grep -L \"generateText\\|generateObject\" scripts/extract-real-faqs.ts && echo \"PASS\"",
-      "acceptanceCriteria": [
-        "Function loadClassifications() exists",
-        "Returns Map with topic IDs as keys",
-        "Audit log shows topic counts",
-        "No AI imports in file"
-      ]
+      "passes": false,
+      "validationCommand": "! grep -r -E '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}' skills/ --include=\"*.md\" 2>/dev/null | grep -v '\\[EMAIL\\]' | grep -q '@'"
     },
     {
-      "id": "story-ml48ufoe",
-      "title": "Query DuckDB for real Q&A pairs by conversation ID",
-      "description": "Add function to query DuckDB for actual message content:\n\n```typescript\nasync function getConversationQA(db: Connection, conversationId: string): Promise<{\n  question: string  // First inbound message body_text\n  answer: string    // Last outbound message body_text  \n  threadLength: number\n} | null>\n```\n\nSQL must select from `messages` table WHERE `conversation_id = ?`\n- Question = first message where is_inbound = true, ordered by created_at ASC\n- Answer = last message where is_inbound = false, ordered by created_at DESC\n\n⛔ FORBIDDEN: No text transformation, cleaning, or summarization\n✅ REQUIRED: Return EXACT body_text from database\n\nLog to audit: Sample of 3 extracted Q&A pairs showing raw text",
+      "id": "story-ml4lt7mg",
+      "title": "Scrub or remove PII from artifacts directory",
+      "description": "The artifacts/ directory contains extracted data with PII. Options:\n1. If artifacts are gitignored and not needed in repo: delete them\n2. If they need to stay: scrub PII from all .json and .jsonl files\n\nCheck if artifacts/ is in .gitignore. If not, add it. Then either scrub or delete the PII-containing files.\n\nPreferred: Add artifacts/ to .gitignore and delete the PII-containing files (they can be regenerated).",
       "priority": 3,
-      "passes": true,
-      "validationCommand": "grep -q \"getConversationQA\" scripts/extract-real-faqs.ts && grep -q \"body_text\" scripts/extract-real-faqs.ts && grep -L \"generateText\" scripts/extract-real-faqs.ts && echo \"PASS\"",
-      "acceptanceCriteria": [
-        "Function getConversationQA exists",
-        "Uses SQL SELECT from messages table",
-        "Returns raw body_text without modification",
-        "Audit shows sample extractions"
-      ]
+      "passes": false,
+      "validationCommand": "grep -q 'artifacts/' .gitignore && ! find artifacts -name \"*.json\" -exec grep -l -E '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}' {} \\; 2>/dev/null | grep -q '.'"
     },
     {
-      "id": "story-ml48unht",
-      "title": "Filter and rank conversations for quality extraction",
-      "description": "Add function to filter conversations within each topic for extraction quality:\n\n```typescript\nfunction rankConversationsForExtraction(\n  conversationIds: string[], \n  db: Connection\n): Promise<string[]>  // Returns top 10 IDs\n```\n\nQuality signals (query from DuckDB):\n1. Thread length ≤ 4 messages (quick resolution)\n2. Has both inbound AND outbound messages\n3. Status = 'archived' (resolved)\n4. NOT tagged with 'spam' or 'collaboration'\n\nUse `packages/core/src/faq/filters.ts` shouldFilter() for additional spam detection on question text.\n\n⛔ FORBIDDEN: No LLM-based quality scoring\n✅ REQUIRED: Pure SQL + deterministic filters\n\nLog to audit: Filter stats per topic (total → after each filter → final)",
+      "id": "story-ml4lt7ml",
+      "title": "Commit scrubbed files and prepare git history purge",
+      "description": "1. Stage and commit all scrubbed files with message \"chore: scrub PII from examples and artifacts\"\n2. Create scripts/purge-history.sh that uses git-filter-repo to:\n   - Remove artifacts/ from all history\n   - Remove any .json files that contained PII\n   - Rewrite commits that touched skill examples\n3. Add instructions to progress.txt for manual execution\n\nDO NOT run the history purge automatically - just prepare the script. This is destructive and needs human approval.",
       "priority": 4,
-      "passes": true,
-      "validationCommand": "grep -q \"rankConversationsForExtraction\" scripts/extract-real-faqs.ts && grep -q \"shouldFilter\" scripts/extract-real-faqs.ts && echo \"PASS\"",
-      "acceptanceCriteria": [
-        "Function rankConversationsForExtraction exists",
-        "Filters by thread length, status, tags",
-        "Uses shouldFilter from filters.ts",
-        "Returns max 10 per topic",
-        "Audit shows filter funnel stats"
-      ]
-    },
-    {
-      "id": "story-ml48uv8l",
-      "title": "Main extraction loop with JSONL output",
-      "description": "Implement main() that:\n1. Loads classifications\n2. For each of 41 topics:\n   - Get conversation IDs for topic\n   - Rank/filter to top 10\n   - Extract real Q&A for each\n   - Write to output\n3. Output: `artifacts/phase-1/real-faq-candidates.jsonl`\n\nOutput schema per line:\n```json\n{\n  \"topicId\": \"email_change_request\",\n  \"topicName\": \"Email Change Request\", \n  \"conversationId\": \"cnv_xxx\",\n  \"question\": \"<EXACT body_text from first inbound message>\",\n  \"answer\": \"<EXACT body_text from last outbound message>\",\n  \"threadLength\": 3,\n  \"extractedAt\": \"2026-02-01T...\"\n}\n```\n\n⛔ FORBIDDEN: No summarization, no cleaning, no LLM enhancement of text\n✅ REQUIRED: question and answer are VERBATIM from messages.body_text\n\nLog to audit: Final stats - topics processed, total Q&A pairs extracted, any skipped topics",
-      "priority": 5,
-      "passes": true,
-      "validationCommand": "bun scripts/extract-real-faqs.ts && test -f artifacts/phase-1/real-faq-candidates.jsonl && wc -l artifacts/phase-1/real-faq-candidates.jsonl | grep -E \"^[0-9]+\" && echo \"PASS\"",
-      "acceptanceCriteria": [
-        "Main function orchestrates full extraction",
-        "Output file artifacts/phase-1/real-faq-candidates.jsonl created",
-        "Each line is valid JSON with required fields",
-        "Audit log shows completion stats"
-      ]
-    },
-    {
-      "id": "story-ml48v2jl",
-      "title": "Validation: Verify extraction integrity (no LLM, data matches DB)",
-      "description": "Create validation script `scripts/validate-faq-extraction.ts` that:\n\n1. **Code audit**: Grep extract-real-faqs.ts for forbidden patterns\n   - FAIL if contains: generateText, generateObject, import.*ai\n   \n2. **Data integrity**: Sample 5 random entries from output\n   - Query DuckDB for same conversation_id\n   - Verify question matches first inbound body_text EXACTLY\n   - Verify answer matches last outbound body_text EXACTLY\n   \n3. **Output validation**:\n   - All 41 topics represented (or documented why skipped)\n   - Each entry has non-empty question and answer\n   - No entries where question === answer\n\nWrite results to `artifacts/faq-extraction-validation.md`\n\n⛔ This is the guardrail story - it catches if earlier stories cheated",
-      "priority": 6,
-      "passes": true,
-      "validationCommand": "bun scripts/validate-faq-extraction.ts && cat artifacts/faq-extraction-validation.md | grep -q \"PASS\" && echo \"PASS\"",
-      "acceptanceCriteria": [
-        "scripts/validate-faq-extraction.ts exists",
-        "Checks for forbidden AI imports",
-        "Verifies sample data matches DuckDB exactly",
-        "Creates validation report",
-        "Script exits 0 only if ALL checks pass"
-      ]
-    },
-    {
-      "id": "story-ml4bxuua",
-      "title": "Enrich refund-request skill with phrase frequency and validation",
-      "description": "Analyze all 1,433 refund samples to:\n1. Extract top 10 phrases by frequency (appear in >10% of responses)\n2. Identify edge cases (threads with >3 messages)\n3. Add machine-checkable validation rules to frontmatter\n4. Add metrics block (sample_size, avg_thread_length, phrase frequencies)\n5. Expand examples to include canonical (5), edge-cases (5), variations (5)\n\nInput: artifacts/training-data/redacted-threads.jsonl (filter topicId=refund_request)\nOutput: Updated skills/refund-request/SKILL.md and examples/*.md\n\nValidation: SKILL.md has validation block with required_phrases and forbidden_patterns, examples/ has 3+ files with 5+ examples each",
-      "priority": 10,
-      "passes": true,
-      "validationCommand": "test -f skills/refund-request/SKILL.md && grep -q \"validation:\" skills/refund-request/SKILL.md && ls skills/refund-request/examples/*.md | wc -l | grep -q \"[3-9]\""
-    },
-    {
-      "id": "story-ml4by542",
-      "title": "Enrich email-change skill with phrase frequency and validation",
-      "description": "Analyze all 2,920 email-change samples to:\n1. Extract top 10 phrases by frequency (appear in >10% of responses)\n2. Identify edge cases (can't find license, multiple products, already transferred)\n3. Add machine-checkable validation rules to frontmatter\n4. Add metrics block\n5. Expand examples: canonical (5), edge-cases (5), variations (5)\n\nInput: artifacts/training-data/redacted-threads.jsonl (filter topicId=email_change_request)\nOutput: Updated skills/email-change/SKILL.md and examples/*.md\n\nValidation: SKILL.md has validation block, examples/ has 3+ files",
-      "priority": 11,
-      "passes": true,
-      "validationCommand": "test -f skills/email-change/SKILL.md && grep -q \"validation:\" skills/email-change/SKILL.md && ls skills/email-change/examples/*.md | wc -l | grep -q \"[3-9]\""
-    },
-    {
-      "id": "story-ml4by54d",
-      "title": "Enrich ppp-pricing skill with phrase frequency and validation",
-      "description": "Analyze all 715 ppp-pricing samples to:\n1. Extract top 10 phrases by frequency\n2. Identify sub-categories (how to get PPP, discount stacking, scholarship, restrictions)\n3. Add validation rules (no custom discounts, must mention free content if declining)\n4. Add metrics block\n5. Expand examples: canonical (5), edge-cases (5), variations (5)\n\nInput: artifacts/training-data/redacted-threads.jsonl (filter topicId=ppp_pricing_inquiry)\nOutput: Updated skills/ppp-pricing/SKILL.md and examples/*.md",
-      "priority": 12,
-      "passes": true,
-      "validationCommand": "test -f skills/ppp-pricing/SKILL.md && grep -q \"validation:\" skills/ppp-pricing/SKILL.md && ls skills/ppp-pricing/examples/*.md | wc -l | grep -q \"[3-9]\""
-    },
-    {
-      "id": "story-ml4by54f",
-      "title": "Enrich corporate-invoice skill with phrase frequency and validation",
-      "description": "Analyze all 720 corporate-invoice samples to:\n1. Extract top 10 phrases by frequency\n2. Identify sub-categories (post-purchase, pre-purchase, VAT, foreign tax)\n3. Add validation rules\n4. Add metrics block\n5. Expand examples: canonical (5), edge-cases (5), variations (5)\n\nInput: artifacts/training-data/redacted-threads.jsonl (filter topicId=corporate_invoice_request)\nOutput: Updated skills/corporate-invoice/SKILL.md and examples/*.md",
-      "priority": 13,
-      "passes": true,
-      "validationCommand": "test -f skills/corporate-invoice/SKILL.md && grep -q \"validation:\" skills/corporate-invoice/SKILL.md && ls skills/corporate-invoice/examples/*.md | wc -l | grep -q \"[3-9]\""
-    },
-    {
-      "id": "story-ml4by54l",
-      "title": "Enrich login-link skill with phrase frequency and validation",
-      "description": "Analyze all 999 login-link samples to:\n1. Extract top 10 phrases by frequency\n2. Identify sub-categories (manual resend, wrong email, spam folder, delivery confirmed)\n3. Add validation rules\n4. Add metrics block\n5. Expand examples: canonical (5), edge-cases (5), variations (5)\n\nInput: artifacts/training-data/redacted-threads.jsonl (filter topicId=login_link_not_received)\nOutput: Updated skills/login-link/SKILL.md and examples/*.md",
-      "priority": 14,
-      "passes": true,
-      "validationCommand": "test -f skills/login-link/SKILL.md && grep -q \"validation:\" skills/login-link/SKILL.md && ls skills/login-link/examples/*.md | wc -l | grep -q \"[3-9]\""
-    },
-    {
-      "id": "story-ml4byb8f",
-      "title": "Generate skills for remaining 36 topics",
-      "description": "After enriching the 5 POC skills, generate SKILL.md files for all remaining topics in the taxonomy.\n\nFor each topic:\n1. Create skills/{topic-slug}/SKILL.md with:\n   - Frontmatter (name, description, sample_size, validation rules)\n   - Response patterns extracted from samples\n   - Phrases that work (with frequency)\n   - Tone guidance\n   - What NOT to do\n2. Create examples/real-responses.md with 8-10 real Q&A pairs\n\nInput: \n- artifacts/training-data/redacted-threads.jsonl\n- artifacts/phase-1/llm-topics/taxonomy.json (for topic list)\n- Existing 5 skills as template\n\nOutput: skills/ directory with 41 total skill directories\n\nValidation: ls skills/ | wc -l shows 41+ directories",
-      "priority": 20,
-      "passes": true,
-      "validationCommand": "test $(ls -d skills/*/ | wc -l) -ge 20"
-    },
-    {
-      "id": "story-ml4equmj",
-      "title": "Enrich access-locked-out skill (878 samples)",
-      "description": "Full enrichment pass on access-locked-out skill.\n\nREQUIREMENTS:\n1. Analyze all 878 samples from redacted-threads.jsonl (topicId: access_locked_out)\n2. Fix phrase analysis: filter out [EMAIL] tokens before frequency counting\n3. Add topic-specific forbidden_patterns (not generic) - e.g., don't blame user\n4. Add topic-specific required_phrases based on actual data\n5. Create tiered examples:\n   - examples/canonical.md (5 ideal responses)\n   - examples/edge-cases.md (5 tricky situations)\n   - examples/variations.md (5 different tones/approaches)\n6. Update metrics with clean phrase data (no [EMAIL] artifacts)\n\nValidation: skills/access-locked-out/examples/ has 3+ files, SKILL.md has non-empty forbidden_patterns",
-      "priority": 30,
-      "passes": true,
-      "validationCommand": "ls skills/access-locked-out/examples/*.md | wc -l | grep -q \"[3-9]\" && grep -q 'forbidden_patterns:' skills/access-locked-out/SKILL.md && ! grep -q 'forbidden_patterns: \\[\\]' skills/access-locked-out/SKILL.md"
-    },
-    {
-      "id": "story-ml4equpg",
-      "title": "Enrich technical-issue-course-content skill (596 samples)",
-      "description": "Full enrichment pass on technical-issue-course-content skill.\n\nREQUIREMENTS:\n1. Analyze all 596 samples from redacted-threads.jsonl\n2. Fix phrase analysis: filter out [EMAIL] tokens before frequency counting\n3. Add topic-specific forbidden_patterns (e.g., don't blame user, don't say \"works on my machine\")\n4. Add topic-specific required_phrases based on actual successful responses\n5. Create tiered examples:\n   - examples/canonical.md (5 ideal responses)\n   - examples/edge-cases.md (5 tricky situations)\n   - examples/variations.md (5 different tones/approaches)\n6. Update metrics with clean phrase data\n\nValidation: skills/technical-issue-course-content/examples/ has 3+ files with real content",
-      "priority": 31,
-      "passes": true,
-      "validationCommand": "ls skills/technical-issue-course-content/examples/*.md | wc -l | grep -q \"[3-9]\" && grep -q 'forbidden_patterns:' skills/technical-issue-course-content/SKILL.md"
-    },
-    {
-      "id": "story-ml4equpi",
-      "title": "Enrich pricing-inquiry skill (523 samples)",
-      "description": "Full enrichment pass on pricing-inquiry skill.\n\nREQUIREMENTS:\n1. Analyze all 523 samples\n2. Filter [EMAIL] tokens from phrase analysis\n3. Add forbidden_patterns: no making up prices, no promising discounts not in system\n4. Create tiered examples (canonical, edge-cases, variations - 5 each)\n5. Update metrics\n\nValidation: 3+ example files, non-empty forbidden_patterns",
-      "priority": 32,
-      "passes": true,
-      "validationCommand": "ls skills/pricing-inquiry/examples/*.md | wc -l | grep -q \"[3-9]\""
-    },
-    {
-      "id": "story-ml4equpn",
-      "title": "Enrich course-content-locked skill (520 samples)",
-      "description": "Full enrichment pass on course-content-locked skill.\n\nREQUIREMENTS:\n1. Analyze all 520 samples\n2. Filter [EMAIL] tokens from phrase analysis\n3. Add topic-specific forbidden_patterns and required_phrases\n4. Create tiered examples (canonical, edge-cases, variations)\n5. Update metrics with clean data\n\nValidation: 3+ example files, meaningful validation rules",
-      "priority": 33,
-      "passes": true,
-      "validationCommand": "ls skills/course-content-locked/examples/*.md | wc -l | grep -q \"[3-9]\""
-    },
-    {
-      "id": "story-ml4equpr",
-      "title": "Enrich team-license-purchase skill (508 samples)",
-      "description": "Full enrichment pass on team-license-purchase skill.\n\nREQUIREMENTS:\n1. Analyze all 508 samples\n2. CRITICAL: Filter [EMAIL] tokens - this skill had \"email email email email\" noise\n3. Add forbidden_patterns: no making up discount codes, no unauthorized bulk pricing\n4. Create tiered examples (canonical, edge-cases, variations)\n5. Update metrics with CLEAN phrase data (no [EMAIL] artifacts)\n\nValidation: 3+ example files, no \"email email\" in phrases, non-empty forbidden_patterns",
-      "priority": 34,
-      "passes": true,
-      "validationCommand": "ls skills/team-license-purchase/examples/*.md | wc -l | grep -q \"[3-9]\" && ! grep -q \"email email\" skills/team-license-purchase/SKILL.md"
+      "passes": false,
+      "validationCommand": "git log -1 --oneline | grep -qi 'scrub\\|pii' && test -f scripts/purge-history.sh"
     }
   ],
   "metadata": {
-    "createdAt": "2026-02-01T21:18:54.627Z",
-    "totalIterations": 15,
-    "lastIteration": "2026-02-02T02:10:05.031Z"
+    "createdAt": "2026-02-02T03:21:55.559Z",
+    "totalIterations": 1,
+    "lastIteration": "2026-02-02T03:23:19.240Z"
   }
 }
