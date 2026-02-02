@@ -158,7 +158,7 @@
       "title": "Enrich pricing-inquiry skill (523 samples)",
       "description": "Full enrichment pass on pricing-inquiry skill.\n\nREQUIREMENTS:\n1. Analyze all 523 samples\n2. Filter [EMAIL] tokens from phrase analysis\n3. Add forbidden_patterns: no making up prices, no promising discounts not in system\n4. Create tiered examples (canonical, edge-cases, variations - 5 each)\n5. Update metrics\n\nValidation: 3+ example files, non-empty forbidden_patterns",
       "priority": 32,
-      "passes": false,
+      "passes": true,
       "validationCommand": "ls skills/pricing-inquiry/examples/*.md | wc -l | grep -q \"[3-9]\""
     },
     {
@@ -180,7 +180,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-01T21:18:54.627Z",
-    "totalIterations": 12,
-    "lastIteration": "2026-02-02T00:14:06.620Z"
+    "totalIterations": 13,
+    "lastIteration": "2026-02-02T00:19:16.236Z"
   }
 }

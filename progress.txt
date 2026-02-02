@@ -190,3 +190,12 @@ Summary: Updated the technical-issue-course-content skill with cleaned metrics, 
 
 - Updated metrics and validation in `skills/technical-issue-course-content/SKILL.md` (cleaned 4-gram counts with `[EMAIL]` filtered, required phrases, forbidden patterns).
 - 
+
+---
+[2026-02-02T00:19:16.236Z]
+Completed: Enrich pricing-inquiry skill (523 samples)
+Files: none
+Summary: Added tiered, verbatim pricing‑inquiry examples and tightened validation to discourage invented prices/unsupported discount promises, while confirming metrics from all 523 samples; logged the full process to the audit log.
+
+- Updated validation in `skills/pricing-inquiry/SKILL.md` (non‑empty forbidden patterns; metrics unchanged after `[EMAIL]` filtering).
+- Added verbatim example tiers in `skills

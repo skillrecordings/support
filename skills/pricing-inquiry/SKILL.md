@@ -6,7 +6,14 @@ sample_size: 523
 validation:
   required_phrases:
     - "let me know if"
-  forbidden_patterns: []
+  forbidden_patterns:
+    - "(?i)price is \\$"
+    - "(?i)we can (?:do|offer) \\$"
+    - "(?i)discount code"
+    - "(?i)coupon"
+    - "(?i)promo code"
+    - "(?i)custom discount"
+    - "(?i)special discount"
 metrics:
   sample_size: 523
   avg_thread_length: 2.84
