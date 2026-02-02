@@ -18,10 +18,10 @@ const OUTPUT_GAPS = path.join(OUTPUT_DIR, 'gaps.json')
 const QDRANT_URL = process.env.QDRANT_URL || 'http://localhost:6333'
 const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434'
 const EMBEDDING_MODEL = 'mxbai-embed-large'
-const DELAY_MS = 50 // Small delay between requests
+const DELAY_MS = 10 // Reduced delay for faster completion
 const SIMILARITY_THRESHOLD = 0.5
 const BATCH_SIZE = 50
-const MAX_CONVERSATIONS = 2000 // Sample for efficiency
+const MAX_CONVERSATIONS = 500 // Reduced sample for ~5 min completion
 
 // ---------------------------------------------------------------------------
 // Types
