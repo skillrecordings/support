@@ -40,7 +40,7 @@
       "title": "Audit current skills against AgentSkills spec",
       "description": "Create scripts/audit-skills-spec.ts that:\n1. Reads all skills/*/SKILL.md files\n2. Validates frontmatter against AgentSkills spec:\n   - name: required, 1-64 chars, lowercase alphanumeric + hyphens, must match directory name\n   - description: required, 1-1024 chars, describes what AND when to use\n   - license: optional\n   - metadata: optional key-value map\n   - NO compatibility field (per Joel's note)\n3. Checks body length (recommend < 500 lines, warn if > 5000 tokens)\n4. Reports violations per skill\n5. Outputs JSON summary of what needs fixing\n\nRun with: bun run scripts/audit-skills-spec.ts",
       "priority": 10,
-      "passes": false,
+      "passes": true,
       "validationCommand": "test -f scripts/audit-skills-spec.ts && bun run scripts/audit-skills-spec.ts 2>&1 | grep -qE 'skills|audit|valid'"
     },
     {
@@ -86,7 +86,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-02T03:21:55.559Z",
-    "totalIterations": 6,
-    "lastIteration": "2026-02-02T03:37:34.716Z"
+    "totalIterations": 7,
+    "lastIteration": "2026-02-02T03:40:07.890Z"
   }
 }

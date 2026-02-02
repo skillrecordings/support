@@ -64,3 +64,11 @@ Summary: Applied a final PII sweep across `skills/**/*.md`, redacting auth URLs,
 
 Redaction report
 - Auth URL tokens: replaced `/token/<uuid>` with `/token/[TOKEN]` in `skills/subscription-renewal-issue/examples/real-responses.md`, `skills/invoice-billing-statement/exam
+
+---
+[2026-02-02T03:40:07.891Z]
+Completed: Audit current skills against AgentSkills spec
+Files: none
+Summary: Added `scripts/audit-skills-spec.ts` to scan every `skills/*/SKILL.md`, parse the frontmatter for required fields, enforce name/description rules (including directory match and “when to use” heuristic), flag forbidden `compatibility`, and warn on large bodies. The script prints per‑skill results and a JSON summary at the end.
+
+Validation: `test -f scripts/audit-skills-spec.ts && bun run scripts/au
