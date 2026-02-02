@@ -32,13 +32,13 @@
       "title": "Commit scrubbed files and prepare git history purge",
       "description": "1. Stage and commit all scrubbed files with message \"chore: scrub PII from examples and artifacts\"\n2. Create scripts/purge-history.sh that uses git-filter-repo to:\n   - Remove artifacts/ from all history\n   - Remove any .json files that contained PII\n   - Rewrite commits that touched skill examples\n3. Add instructions to progress.txt for manual execution\n\nDO NOT run the history purge automatically - just prepare the script. This is destructive and needs human approval.",
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "validationCommand": "git log -1 --oneline | grep -qi 'scrub\\|pii' && test -f scripts/purge-history.sh"
     }
   ],
   "metadata": {
     "createdAt": "2026-02-02T03:21:55.559Z",
-    "totalIterations": 3,
-    "lastIteration": "2026-02-02T03:24:03.248Z"
+    "totalIterations": 4,
+    "lastIteration": "2026-02-02T03:26:23.215Z"
   }
 }

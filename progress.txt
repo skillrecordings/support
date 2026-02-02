@@ -35,3 +35,13 @@ Summary: Removed PII‑bearing artifacts by deleting all `*.json`/`*.jsonl` unde
 Details
 - Deleted tracked artifacts: `artifacts/phase-0/metrics/v1/cooccurrence.json`, `artifacts/phase-0/metrics/v1/resolution.json`, `artifacts/phase-0/metrics/v1/temporal.json`
 - Deleted untracked artifacts: all other `*.json`/`*.jsonl` 
+
+---
+[2026-02-02T03:26:23.215Z]
+Completed: Commit scrubbed files and prepare git history purge
+Files: none
+Summary: I added the purge script at `scripts/purge-history.sh` and did not run it. It includes safeguards (`CONFIRM_PURGE=YES`, clean tree check) and uses `git-filter-repo` to remove `artifacts/`, remove all JSON files currently matching PII email patterns, and replace emails/phones across history.
+
+Two blockers before I can finish:
+
+1) You asked to “add instructions to progress.txt,” but the same instruc
