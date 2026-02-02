@@ -6,7 +6,15 @@ sample_size: 508
 validation:
   required_phrases:
     - "let me know if"
-  forbidden_patterns: []
+  forbidden_patterns:
+    - "(?i)discount code"
+    - "(?i)promo code"
+    - "(?i)here(?:'s| is) a coupon"
+    - "(?i)coupon gives you"
+    - "(?i)code=[a-z0-9-]{6,}"
+    - "(?i)we can (?:do|offer) \\$"
+    - "(?i)we can (?:do|offer) \\d+% off"
+    - "(?i)custom (?:bulk|team) pric"
 metrics:
   sample_size: 508
   avg_thread_length: 4.98
@@ -25,10 +33,7 @@ metrics:
       percent: 26.2
     - phrase: "if you have any"
       count: 132
-      percent: 26
-    - phrase: "email email email email"
-      count: 72
-      percent: 14.2
+      percent: 26.0
     - phrase: "please let me know"
       count: 68
       percent: 13.4
@@ -40,7 +45,10 @@ metrics:
       percent: 10.4
     - phrase: "your interest in the"
       count: 51
-      percent: 10
+      percent: 10.0
+    - phrase: "interest in the course"
+      count: 51
+      percent: 10.0
 ---
 
 # Team License Purchase
@@ -53,7 +61,6 @@ Common openings:
 - "Hey David,"
 
 Common core lines:
-- "[EMAIL]"
 - "Thanks for your interest in the course!"
 - "Thanks for reaching out!"
 
@@ -69,11 +76,11 @@ Common closings:
 - "me know if you" — 148 (29.1%)
 - "know if you have" — 133 (26.2%)
 - "if you have any" — 132 (26%)
-- "email email email email" — 72 (14.2%)
 - "please let me know" — 68 (13.4%)
 - "for your interest in" — 56 (11%)
 - "thanks for your interest" — 53 (10.4%)
 - "your interest in the" — 51 (10%)
+- "interest in the course" — 51 (10%)
 
 ## Tone Guidance (observed)
 
@@ -85,6 +92,8 @@ Common closings:
 - Don't introduce policy details that are not present in the verified response lines above.
 - Don't paraphrase or reframe the customer's question in a way that changes meaning.
 - Don't add refund/discount promises unless they appear in the extracted responses for this topic.
+- Don't invent discount codes or promotional links.
+- Don't quote custom bulk pricing unless it is explicitly in the verified response lines above.
 
 ## Validation
 

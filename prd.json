@@ -174,13 +174,13 @@
       "title": "Enrich team-license-purchase skill (508 samples)",
       "description": "Full enrichment pass on team-license-purchase skill.\n\nREQUIREMENTS:\n1. Analyze all 508 samples\n2. CRITICAL: Filter [EMAIL] tokens - this skill had \"email email email email\" noise\n3. Add forbidden_patterns: no making up discount codes, no unauthorized bulk pricing\n4. Create tiered examples (canonical, edge-cases, variations)\n5. Update metrics with CLEAN phrase data (no [EMAIL] artifacts)\n\nValidation: 3+ example files, no \"email email\" in phrases, non-empty forbidden_patterns",
       "priority": 34,
-      "passes": false,
+      "passes": true,
       "validationCommand": "ls skills/team-license-purchase/examples/*.md | wc -l | grep -q \"[3-9]\" && ! grep -q \"email email\" skills/team-license-purchase/SKILL.md"
     }
   ],
   "metadata": {
     "createdAt": "2026-02-01T21:18:54.627Z",
-    "totalIterations": 14,
-    "lastIteration": "2026-02-02T00:37:00.292Z"
+    "totalIterations": 15,
+    "lastIteration": "2026-02-02T02:10:05.031Z"
   }
 }

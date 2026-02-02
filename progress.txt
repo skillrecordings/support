@@ -214,3 +214,12 @@ Summary: Updated the course-content-locked skill using all 520 redacted samples,
 
 Details:
 - Updated metrics + validation in `skills/course-content-locked/SKILL.md` to match the 520-sample analysis and refreshed ph
+
+---
+[2026-02-02T02:10:05.032Z]
+Completed: Enrich team-license-purchase skill (508 samples)
+Files: none
+Summary: Updated the team-license-purchase skill with cleaned metrics (filtered `[EMAIL]` noise), added validation guards against invented discount codes/unauthorized bulk pricing, and added tiered verbatim examples for canonical, edge-case, and variation scenarios.
+
+- Updated `skills/team-license-purchase/SKILL.md` with cleaned top phrases, added forbidden patterns, and tightened guidance.
+- Added verbati
