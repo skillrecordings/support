@@ -262,6 +262,10 @@ export const handleValidatedDraft = inngest.createFunction(
       return { conversationId, messageId, autoApproved: true, actionId }
     }
 
+    // Check if this is a tool-based approval (e.g., refund, transfer)
+    const hasToolCalls = draft.toolCalls && draft.toolCalls.length > 0
+    const isToolBasedApproval = draft.requiresApproval && hasToolCalls
+
     // Request human approval
     const actionId = await step.run('create-pending-action', async () => {
       const stepStartTime = Date.now()
@@ -271,32 +275,60 @@ export const handleValidatedDraft = inngest.createFunction(
         step: 'create-pending-action',
         conversationId,
         reason: decision.reason,
+        isToolBasedApproval,
+        toolCallCount: draft.toolCalls?.length ?? 0,
       })
 
       const db = getDb()
       const id = randomUUID()
 
+      // Determine action type based on whether tool calls are present
+      const actionType = isToolBasedApproval ? 'tool-execution' : 'send-draft'
+
+      // Build parameters based on action type
+      const parameters = isToolBasedApproval
+        ? {
+            // Tool-based action parameters
+            toolCalls: draft.toolCalls,
+            draft: draft.content,
+            messageId,
+            validationIssues: validation.issues,
+            validationScore: decision.score,
+            // Flatten key metadata for easy access (from classification)
+            category,
+            confidence: confidence ?? decision.score,
+            reasoning,
+            // Original message for audit trail
+            subject: subject ?? '',
+            body: body ?? '',
+            senderEmail: senderEmail ?? '',
+            // Keep full context for backward compatibility
+            context: context ?? undefined,
+          }
+        : {
+            // Standard draft action parameters
+            draft: draft.content,
+            messageId,
+            validationIssues: validation.issues,
+            validationScore: decision.score,
+            // Flatten key metadata for easy access (from classification)
+            category,
+            confidence: confidence ?? decision.score,
+            reasoning,
+            // Original message for audit trail
+            subject: subject ?? '',
+            body: body ?? '',
+            senderEmail: senderEmail ?? '',
+            // Keep full context for backward compatibility
+            context: context ?? undefined,
+          }
+
       await db.insert(ActionsTable).values({
         id,
         conversation_id: conversationId,
         app_id: appId,
-        type: 'send-draft',
-        parameters: {
-          draft: draft.content,
-          messageId,
-          validationIssues: validation.issues,
-          validationScore: decision.score,
-          // Flatten key metadata for easy access (from classification)
-          category,
-          confidence: confidence ?? decision.score,
-          reasoning,
-          // Original message for audit trail
-          subject: subject ?? '',
-          body: body ?? '',
-          senderEmail: senderEmail ?? '',
-          // Keep full context for backward compatibility
-          context: context ?? undefined,
-        },
+        type: actionType,
+        parameters,
         // Dedicated columns for queryability
         category,
         confidence: confidence ?? decision.score,
@@ -313,6 +345,9 @@ export const handleValidatedDraft = inngest.createFunction(
         conversationId,
         appId,
         actionId: id,
+        actionType,
+        isToolBasedApproval,
+        toolCallCount: draft.toolCalls?.length ?? 0,
         durationMs,
       })
 
@@ -323,7 +358,13 @@ export const handleValidatedDraft = inngest.createFunction(
         stepName: 'create-pending-action',
         durationMs,
         success: true,
-        metadata: { actionId: id, autoApproved: false },
+        metadata: {
+          actionId: id,
+          autoApproved: false,
+          actionType,
+          isToolBasedApproval,
+          toolCallCount: draft.toolCalls?.length ?? 0,
+        },
       })
 
       return id
@@ -503,7 +544,15 @@ export const handleValidatedDraft = inngest.createFunction(
       workflow: 'support-handle-validated',
       conversationId,
       actionId,
+      isToolBasedApproval,
+      toolCallCount: draft.toolCalls?.length ?? 0,
     })
+
+    // Build action type and parameters based on whether this is tool-based
+    const actionType = isToolBasedApproval ? 'tool-execution' : 'send-draft'
+    const actionParameters = isToolBasedApproval
+      ? { draft: draft.content, toolCalls: draft.toolCalls }
+      : { draft: draft.content }
 
     await step.sendEvent('emit-approval-requested', {
       name: SUPPORT_APPROVAL_REQUESTED,
@@ -512,8 +561,8 @@ export const handleValidatedDraft = inngest.createFunction(
         conversationId,
         appId,
         action: {
-          type: 'send-draft',
-          parameters: { draft: draft.content },
+          type: actionType,
+          parameters: actionParameters,
         },
         agentReasoning: decision.reason,
         customerEmail: senderEmail || undefined,
@@ -529,7 +578,7 @@ export const handleValidatedDraft = inngest.createFunction(
       conversationId,
       appId,
       actionId,
-      actionType: 'send-draft',
+      actionType,
     })
 
     const totalDurationMs = Date.now() - workflowStartTime
@@ -546,6 +595,9 @@ export const handleValidatedDraft = inngest.createFunction(
         actionId,
         outcome: 'approval-requested',
         reason: decision.reason,
+        isToolBasedApproval,
+        actionType,
+        toolCallCount: draft.toolCalls?.length ?? 0,
         totalDurationMs,
       }
     )
@@ -557,7 +609,13 @@ export const handleValidatedDraft = inngest.createFunction(
       stepName: 'complete',
       durationMs: totalDurationMs,
       success: true,
-      metadata: { outcome: 'approval-requested', actionId },
+      metadata: {
+        outcome: 'approval-requested',
+        actionId,
+        actionType,
+        isToolBasedApproval,
+        toolCallCount: draft.toolCalls?.length ?? 0,
+      },
     })
 
     return { conversationId, messageId, autoApproved: false, actionId }

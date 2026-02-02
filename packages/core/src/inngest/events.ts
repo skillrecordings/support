@@ -434,6 +434,14 @@ export type SupportDraftCreatedEvent = {
     draft: {
       content: string
       toolsUsed: string[]
+      /** Tool calls made by agent for HITL approval */
+      toolCalls?: Array<{
+        name: string
+        args: Record<string, unknown>
+        result?: unknown
+      }>
+      /** Whether the draft requires human approval (e.g., refund, transfer) */
+      requiresApproval?: boolean
     }
     context: unknown
     /** Optional: inbox ID from webhook (pass-through) */
@@ -468,6 +476,14 @@ export type SupportDraftValidatedEvent = {
       content: string
       /** Tools used during drafting (e.g. lookup-user, search-knowledge) */
       toolsUsed?: string[]
+      /** Tool calls made by agent for HITL approval */
+      toolCalls?: Array<{
+        name: string
+        args: Record<string, unknown>
+        result?: unknown
+      }>
+      /** Whether the draft requires human approval (e.g., refund, transfer) */
+      requiresApproval?: boolean
     }
     validation: {
       valid: boolean
