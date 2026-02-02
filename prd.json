@@ -24,7 +24,7 @@
       "title": "Scrub or remove PII from artifacts directory",
       "description": "The artifacts/ directory contains extracted data with PII. Options:\n1. If artifacts are gitignored and not needed in repo: delete them\n2. If they need to stay: scrub PII from all .json and .jsonl files\n\nCheck if artifacts/ is in .gitignore. If not, add it. Then either scrub or delete the PII-containing files.\n\nPreferred: Add artifacts/ to .gitignore and delete the PII-containing files (they can be regenerated).",
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "validationCommand": "grep -q 'artifacts/' .gitignore && ! find artifacts -name \"*.json\" -exec grep -l -E '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}' {} \\; 2>/dev/null | grep -q '.'"
     },
     {
@@ -38,7 +38,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-02T03:21:55.559Z",
-    "totalIterations": 2,
-    "lastIteration": "2026-02-02T03:23:31.669Z"
+    "totalIterations": 3,
+    "lastIteration": "2026-02-02T03:24:03.248Z"
   }
 }

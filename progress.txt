@@ -25,3 +25,13 @@ Changes made
 
 Validation
 - `grep -r -E '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}' skills/ --include="*.md" 2>/de
+
+---
+[2026-02-02T03:24:03.249Z]
+Completed: Scrub or remove PII from artifacts directory
+Files: none
+Summary: Removed PII‑bearing artifacts by deleting all `*.json`/`*.jsonl` under `artifacts/` (the folder is already gitignored), keeping the non‑JSON artifacts intact.
+
+Details
+- Deleted tracked artifacts: `artifacts/phase-0/metrics/v1/cooccurrence.json`, `artifacts/phase-0/metrics/v1/resolution.json`, `artifacts/phase-0/metrics/v1/temporal.json`
+- Deleted untracked artifacts: all other `*.json`/`*.jsonl` 
