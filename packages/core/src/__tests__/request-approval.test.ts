@@ -26,7 +26,7 @@ vi.mock('@skillrecordings/database', () => ({
 vi.mock('@skillrecordings/core/slack/client', () => ({
   postApprovalMessage: vi
     .fn()
-    .mockResolvedValue({ ts: '[PHONE].123456', channel: 'C123456789' }),
+    .mockResolvedValue({ ts: '1706745600.123456', channel: 'C123456789' }),
 }))
 
 // Mock approval blocks builder

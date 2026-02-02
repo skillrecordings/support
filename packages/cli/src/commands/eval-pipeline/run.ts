@@ -108,7 +108,7 @@ function getClassifySourceHash(): string {
   }
   // Fallback hash based on current hour
   return createHash('md5')
-    .update(Math.floor(Date.now() / [PHONE]).toString())
+    .update(Math.floor(Date.now() / 300000).toString())
     .digest('hex')
 }
 

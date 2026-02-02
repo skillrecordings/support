@@ -70,7 +70,7 @@ describe('Front Webhook Handler', () => {
         payload: {
           id: 'evt_comment123',
           type: 'new_comment_added',
-          emitted_at: [PHONE],
+          emitted_at: 1706745600,
           conversation: {
             id: 'cnv_abc123',
             subject: 'Test conversation',
@@ -89,7 +89,7 @@ describe('Front Webhook Handler', () => {
                 first_name: 'Test',
                 last_name: 'Agent',
               },
-              posted_at: [PHONE],
+              posted_at: 1706745600,
               _links: {
                 self: 'https://api.frontapp.com/comments/com_xyz789',
               },
@@ -124,7 +124,7 @@ describe('Front Webhook Handler', () => {
             },
             appId: 'test-app',
             inboxId: 'inb_test123',
-            postedAt: [PHONE],
+            postedAt: 1706745600,
           }),
         })
       )
@@ -327,8 +327,8 @@ describe('Front Webhook Handler', () => {
         payload: {
           id: 'evt_snooze123',
           type: 'conversation_snoozed',
-          emitted_at: [PHONE],
-          snooze_until: [PHONE], // 24 hours later
+          emitted_at: 1706745600,
+          snooze_until: 1706832000, // 24 hours later
           conversation: {
             id: 'cnv_abc123',
             subject: 'Snoozed conversation',
@@ -358,8 +358,8 @@ describe('Front Webhook Handler', () => {
             conversationId: 'cnv_abc123',
             appId: 'test-app',
             inboxId: 'inb_test123',
-            snoozedAt: [PHONE],
-            snoozedUntil: [PHONE],
+            snoozedAt: 1706745600,
+            snoozedUntil: 1706832000,
           }),
         })
       )
@@ -371,7 +371,7 @@ describe('Front Webhook Handler', () => {
       const snoozePayload = {
         type: 'conversation_snoozed',
         payload: {
-          emitted_at: [PHONE],
+          emitted_at: 1706745600,
           conversation: { id: 'cnv_abc123' },
           source: {
             data: [{ id: 'inb_unknown' }],
@@ -393,7 +393,7 @@ describe('Front Webhook Handler', () => {
       const snoozePayload = {
         type: 'conversation_snoozed',
         payload: {
-          emitted_at: [PHONE],
+          emitted_at: 1706745600,
           conversation: { id: 'cnv_abc123' },
           source: {
             data: [{ id: 'inb_test123' }],
@@ -409,7 +409,7 @@ describe('Front Webhook Handler', () => {
           name: 'support/conversation.snoozed',
           data: expect.objectContaining({
             conversationId: 'cnv_abc123',
-            snoozedAt: [PHONE],
+            snoozedAt: 1706745600,
             snoozedUntil: undefined,
           }),
         })
@@ -425,7 +425,7 @@ describe('Front Webhook Handler', () => {
         payload: {
           id: 'evt_expired123',
           type: 'conversation_snooze_expired',
-          emitted_at: [PHONE],
+          emitted_at: 1706745600,
           conversation: {
             id: 'cnv_abc123',
             subject: 'Snooze expired conversation',
@@ -455,7 +455,7 @@ describe('Front Webhook Handler', () => {
             conversationId: 'cnv_abc123',
             appId: 'test-app',
             inboxId: 'inb_test123',
-            expiredAt: [PHONE],
+            expiredAt: 1706745600,
           }),
         })
       )
@@ -467,7 +467,7 @@ describe('Front Webhook Handler', () => {
       const expiredPayload = {
         type: 'conversation_snooze_expired',
         payload: {
-          emitted_at: [PHONE],
+          emitted_at: 1706745600,
           conversation: { id: 'cnv_abc123' },
           source: {
             data: [{ id: 'inb_unknown' }],
@@ -527,7 +527,7 @@ describe('Front Webhook Handler', () => {
         payload: {
           id: 'evt_outbound123',
           type: 'outbound',
-          emitted_at: [PHONE],
+          emitted_at: 1706745600,
           conversation: {
             id: 'cnv_abc123',
             subject: 'Re: Refund request',
@@ -579,7 +579,7 @@ describe('Front Webhook Handler', () => {
               name: 'Support Agent',
             },
             subject: 'Re: Refund request',
-            sentAt: [PHONE],
+            sentAt: 1706745600,
           }),
         })
       )
@@ -591,7 +591,7 @@ describe('Front Webhook Handler', () => {
       const outboundPayload = {
         type: 'outbound',
         payload: {
-          emitted_at: [PHONE],
+          emitted_at: 1706745600,
           conversation: { id: 'cnv_abc123' },
           target: {
             data: {
@@ -644,7 +644,7 @@ describe('Front Webhook Handler', () => {
       const outboundPayload = {
         type: 'outbound',
         payload: {
-          emitted_at: [PHONE],
+          emitted_at: 1706745600,
           conversation: { id: 'cnv_abc123' },
           target: {
             data: {

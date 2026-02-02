@@ -45,7 +45,7 @@ describe('getSubscriptionStatus', () => {
       const mockSubscription = {
         id: 'sub_123',
         status: 'active',
-        current_period_end: [PHONE], // Unix timestamp
+        current_period_end: 1735689600, // Unix timestamp
         cancel_at_period_end: false,
         items: {
           data: [
@@ -78,7 +78,7 @@ describe('getSubscriptionStatus', () => {
         expect(result.data).toEqual({
           id: 'sub_123',
           status: 'active',
-          currentPeriodEnd: [PHONE],
+          currentPeriodEnd: 1735689600,
           cancelAtPeriodEnd: false,
           planName: 'Total TypeScript Pro',
         })
@@ -94,7 +94,7 @@ describe('getSubscriptionStatus', () => {
       const mockSubscription = {
         id: 'sub_456',
         status: 'active',
-        current_period_end: [PHONE],
+        current_period_end: 1735689600,
         cancel_at_period_end: false,
         items: {
           data: [
@@ -152,7 +152,7 @@ describe('getSubscriptionStatus', () => {
       const mockSubscription = {
         id: 'sub_789',
         status: 'canceled',
-        current_period_end: [PHONE],
+        current_period_end: 1735689600,
         cancel_at_period_end: true,
         items: {
           data: [

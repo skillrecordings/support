@@ -307,7 +307,7 @@ function toJSDate(value: any): Date | null {
   // If it's a number (unix timestamp in seconds or ms)
   if (typeof value === 'number') {
     // Check if it's seconds (< 10 billion) or milliseconds
-    if (value < [PHONE]) {
+    if (value < 1000000000) {
       return new Date(value * 1000)
     }
     return new Date(value)

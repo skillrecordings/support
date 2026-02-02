@@ -64,8 +64,8 @@ export async function evalRouting(
 
   // Create a mock cache and context for routing
   const cache = new RouterCache({
-    decisionTtlMs: [PHONE],
-    contextTtlMs: [PHONE],
+    decisionTtlMs: 300000,
+    contextTtlMs: 300000,
   })
 
   for (const datapoint of dataset) {

@@ -114,8 +114,8 @@ describe('Hold State Workflow Logic', () => {
     describe('pause-escalation-timers step', () => {
       it('finds and pauses pending actions for conversation', async () => {
         const conversationId = 'cnv_test123'
-        const snoozedAt = [PHONE]
-        const snoozedUntil = [PHONE]
+        const snoozedAt = 1706745600
+        const snoozedUntil = 1706745600
 
         // Mock pending action
         const pendingAction = {
@@ -130,7 +130,10 @@ describe('Hold State Workflow Logic', () => {
         mockDb.where.mockResolvedValueOnce([pendingAction])
 
         // Simulate the step logic
-        const pendingActions = await mockDb.select().from('ActionsTable').where()
+        const pendingActions = await mockDb
+          .select()
+          .from('ActionsTable')
+          .where()
 
         for (const action of pendingActions) {
           if (
@@ -225,7 +228,7 @@ describe('Hold State Workflow Logic', () => {
 
     describe('resume-escalation-timers step', () => {
       it('resumes paused actions and detects pending drafts', async () => {
-        const expiredAt = [PHONE]
+        const expiredAt = 1706745600
 
         // Mock paused action
         const pausedAction = {
@@ -236,8 +239,8 @@ describe('Hold State Workflow Logic', () => {
           parameters: {
             draft: 'test draft',
             _escalationPaused: true,
-            _pausedAt: [PHONE],
-            _pausedUntil: [PHONE],
+            _pausedAt: 1706745600,
+            _pausedUntil: 1706832000,
           },
         }
 

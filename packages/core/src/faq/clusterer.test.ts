@@ -2,8 +2,12 @@
  * Tests for FAQ Clusterer
  */
 
-import { describe, expect, it, vi, beforeEach } from 'vitest'
-import type { ResolvedConversation, ConversationCluster, FaqCandidate } from './types'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import type {
+  ConversationCluster,
+  FaqCandidate,
+  ResolvedConversation,
+} from './types'
 import { FAQ_THRESHOLDS } from './types'
 
 // Mock the vector client
@@ -34,7 +38,9 @@ describe('FAQ Clusterer', () => {
       ]
 
       // With minClusterSize of 5, no clusters should be returned
-      const result = await clusterBySimilarity(conversations, { minClusterSize: 5 })
+      const result = await clusterBySimilarity(conversations, {
+        minClusterSize: 5,
+      })
       expect(result).toHaveLength(0)
     })
   })
@@ -48,21 +54,31 @@ describe('FAQ Clusterer', () => {
           id: 'cluster1',
           centroid: 'How do I get a refund?',
           conversations: [
-            createMockConversation('conv1', 'How do I get a refund?', 'Request here.', true),
+            createMockConversation(
+              'conv1',
+              'How do I get a refund?',
+              'Request here.',
+              true
+            ),
             createMockConversation('conv2', 'Refund please', 'Done.', true),
-            createMockConversation('conv3', 'I need a refund', 'Processed.', false),
+            createMockConversation(
+              'conv3',
+              'I need a refund',
+              'Processed.',
+              false
+            ),
           ],
           cohesion: 0.85,
           unchangedRate: 0.67,
           mostRecent: new Date(),
-          oldest: new Date(Date.now() - [PHONE]),
+          oldest: new Date(Date.now() - 86400000),
         },
       ]
 
       const candidates = await generateCandidatesFromClusters(clusters)
 
       expect(candidates).toHaveLength(1)
-      
+
       const candidate = candidates[0]
       expect(candidate).toBeDefined()
       expect(candidate?.question).toBe('How do I get a refund?')
@@ -88,7 +104,7 @@ describe('FAQ Clusterer', () => {
           cohesion: 0.8,
           unchangedRate: 0.5,
           mostRecent: new Date(),
-          oldest: new Date(Date.now() - [PHONE]),
+          oldest: new Date(Date.now() - 86400000),
         },
       ]
 
@@ -105,9 +121,11 @@ describe('FAQ Clusterer', () => {
         {
           id: 'cluster1',
           centroid: 'High confidence question',
-          conversations: Array(10).fill(null).map((_, i) =>
-            createMockConversation(`conv${i}`, 'Question', 'Answer', true)
-          ),
+          conversations: Array(10)
+            .fill(null)
+            .map((_, i) =>
+              createMockConversation(`conv${i}`, 'Question', 'Answer', true)
+            ),
           cohesion: 0.9,
           unchangedRate: 1.0, // 100% unchanged
           mostRecent: new Date(),
@@ -137,8 +155,8 @@ describe('FAQ Clusterer', () => {
       const filtered = filterAutoSurfaceCandidates(candidates)
 
       expect(filtered).toHaveLength(2)
-      expect(filtered.map(c => c.id)).toContain('c3')
-      expect(filtered.map(c => c.id)).toContain('c4')
+      expect(filtered.map((c) => c.id)).toContain('c3')
+      expect(filtered.map((c) => c.id)).toContain('c4')
     })
   })
 

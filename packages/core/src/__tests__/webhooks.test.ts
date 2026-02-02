@@ -1,4 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
+import type { VerificationOptions, WebhookHeaders } from '../webhooks/types'
 import {
   computeSignature,
   parseSignatureHeader,
@@ -6,7 +7,6 @@ import {
   verifyTimestamp,
   verifyWebhook,
 } from '../webhooks/verify'
-import type { VerificationOptions, WebhookHeaders } from '../webhooks/types'
 
 describe('webhook verification', () => {
   const testSecret = 'whsec_test_secret'
@@ -14,11 +14,11 @@ describe('webhook verification', () => {
 
   describe('parseSignatureHeader', () => {
     it('parses valid signature header', () => {
-      const header = 't=[PHONE],v1=abc123,v1=def456'
+      const header = 't=1706745600,v1=abc123,v1=def456'
       const result = parseSignatureHeader(header)
 
       expect(result).toEqual({
-        timestamp: [PHONE],
+        timestamp: 1706745600,
         signatures: ['abc123', 'def456'],
       })
     })
@@ -26,37 +26,37 @@ describe('webhook verification', () => {
     it('throws on missing timestamp', () => {
       const header = 'v1=abc123'
       expect(() => parseSignatureHeader(header)).toThrow(
-        'Missing timestamp in signature header',
+        'Missing timestamp in signature header'
       )
     })
 
     it('throws on missing signatures', () => {
-      const header = 't=[PHONE]'
+      const header = 't=1706745600'
       expect(() => parseSignatureHeader(header)).toThrow(
-        'Missing signatures in signature header',
+        'Missing signatures in signature header'
       )
     })
 
     it('throws on invalid timestamp', () => {
       const header = 't=notanumber,v1=abc123'
       expect(() => parseSignatureHeader(header)).toThrow(
-        'Invalid timestamp in signature header',
+        'Invalid timestamp in signature header'
       )
     })
 
     it('throws on malformed header', () => {
       const header = 'malformed'
       expect(() => parseSignatureHeader(header)).toThrow(
-        'Invalid signature header format',
+        'Invalid signature header format'
       )
     })
 
     it('ignores unknown keys for forward compatibility', () => {
-      const header = 't=[PHONE],v1=abc123,v2=future,unknown=value'
+      const header = 't=1706745600,v1=abc123,v2=future,unknown=value'
       const result = parseSignatureHeader(header)
 
       expect(result).toEqual({
-        timestamp: [PHONE],
+        timestamp: 1706745600,
         signatures: ['abc123'],
       })
     })
@@ -64,7 +64,7 @@ describe('webhook verification', () => {
 
   describe('computeSignature', () => {
     it('computes HMAC-SHA256 hex signature', () => {
-      const payload = '[PHONE].{"test":"data"}'
+      const payload = '1706745600.{"test":"data"}'
       const signature = computeSignature(payload, testSecret)
 
       expect(signature).toMatch(/^[a-f0-9]{64}$/) // SHA256 hex is 64 chars
@@ -72,7 +72,7 @@ describe('webhook verification', () => {
     })
 
     it('produces consistent signatures', () => {
-      const payload = '[PHONE].{"test":"data"}'
+      const payload = '1706745600.{"test":"data"}'
       const sig1 = computeSignature(payload, testSecret)
       const sig2 = computeSignature(payload, testSecret)
 
@@ -97,7 +97,7 @@ describe('webhook verification', () => {
 
   describe('verifySignature', () => {
     it('verifies valid signature', () => {
-      const payload = '[PHONE].{"test":"data"}'
+      const payload = '1706745600.{"test":"data"}'
       const signature = computeSignature(payload, testSecret)
 
       const result = verifySignature(payload, signature, testSecret)
@@ -105,7 +105,7 @@ describe('webhook verification', () => {
     })
 
     it('rejects invalid signature', () => {
-      const payload = '[PHONE].{"test":"data"}'
+      const payload = '1706745600.{"test":"data"}'
       const wrongSignature = 'a'.repeat(64)
 
       const result = verifySignature(payload, wrongSignature, testSecret)
@@ -113,7 +113,7 @@ describe('webhook verification', () => {
     })
 
     it('rejects signature with wrong secret', () => {
-      const payload = '[PHONE].{"test":"data"}'
+      const payload = '1706745600.{"test":"data"}'
       const signature = computeSignature(payload, 'wrong_secret')
 
       const result = verifySignature(payload, signature, testSecret)
@@ -121,7 +121,7 @@ describe('webhook verification', () => {
     })
 
     it('rejects signature with mismatched length', () => {
-      const payload = '[PHONE].{"test":"data"}'
+      const payload = '1706745600.{"test":"data"}'
       const shortSignature = 'abc'
 
       const result = verifySignature(payload, shortSignature, testSecret)
@@ -241,7 +241,7 @@ describe('webhook verification', () => {
       const expiredSignedPayload = `${tenMinutesAgo}.${testPayload}`
       const expiredSignature = computeSignature(
         expiredSignedPayload,
-        testSecret,
+        testSecret
       )
       const headers: WebhookHeaders = {
         'x-support-signature': `t=${tenMinutesAgo},v1=${expiredSignature}`,

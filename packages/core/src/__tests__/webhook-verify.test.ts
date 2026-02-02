@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
 import { createHmac } from 'crypto'
+import { describe, expect, it } from 'vitest'
 import {
   parseSignatureHeader,
   verifySignature,
@@ -56,18 +56,18 @@ function createTestPayload(body: object = { event: 'test' }): string {
 
 describe('parseSignatureHeader', () => {
   it('parses valid signature header with single signature', () => {
-    const header = 't=[PHONE],v1=abc123def456'
+    const header = 't=1706745600,v1=abc123def456'
     const result = parseSignatureHeader(header)
 
-    expect(result.timestamp).toBe[PHONE])
+    expect(result.timestamp).toBe(1706745600)
     expect(result.signatures).toEqual(['abc123def456'])
   })
 
   it('parses header with multiple signatures (key rotation)', () => {
-    const header = 't=[PHONE],v1=abc123,v1=def456'
+    const header = 't=1706745600,v1=abc123,v1=def456'
     const result = parseSignatureHeader(header)
 
-    expect(result.timestamp).toBe[PHONE])
+    expect(result.timestamp).toBe(1706745600)
     expect(result.signatures).toEqual(['abc123', 'def456'])
   })
 
@@ -77,7 +77,7 @@ describe('parseSignatureHeader', () => {
   })
 
   it('throws on missing signature', () => {
-    const header = 't=[PHONE]'
+    const header = 't=1706745600'
     expect(() => parseSignatureHeader(header)).toThrow('signature')
   })
 
@@ -150,7 +150,11 @@ describe('verifySignature', () => {
       validSignature.slice(0, -1) +
       (validSignature.slice(-1) === 'a' ? 'b' : 'a')
 
-    const result = verifySignature(signedPayload, almostValidSignature, TEST_SECRET)
+    const result = verifySignature(
+      signedPayload,
+      almostValidSignature,
+      TEST_SECRET
+    )
     expect(result).toBe(false)
   })
 })

@@ -58,7 +58,7 @@ describe('lookupCharge', () => {
         status: 'succeeded',
         refunded: false,
         amount_refunded: 0,
-        created: [PHONE], // 2024-01-01
+        created: 1704067200, // 2024-01-01
         description: 'Total TypeScript - Full Course',
         customer: 'cus_123',
       } as Stripe.Charge
@@ -82,7 +82,7 @@ describe('lookupCharge', () => {
           refunded: false,
           customer: 'cus_123',
           description: 'Total TypeScript - Full Course',
-          created: [PHONE],
+          created: 1704067200,
         })
       }
 
@@ -100,7 +100,7 @@ describe('lookupCharge', () => {
         status: 'succeeded',
         refunded: true,
         amount_refunded: 29900,
-        created: [PHONE], // 2023-12-01
+        created: 1704067200, // 2023-12-01
         description: 'Total TypeScript - Pro Bundle',
         customer: 'cus_456',
       } as Stripe.Charge

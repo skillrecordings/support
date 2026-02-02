@@ -59,7 +59,7 @@ describe('getPaymentHistory', () => {
           status: 'succeeded',
           refunded: false,
           amount_refunded: 0,
-          created: [PHONE], // 2024-01-01
+          created: 1704067200, // 2024-01-01
           description: 'Total TypeScript - Full Course',
         } as Stripe.Charge,
         {
@@ -69,7 +69,7 @@ describe('getPaymentHistory', () => {
           status: 'succeeded',
           refunded: true,
           amount_refunded: 29900,
-          created: [PHONE], // 2023-12-01
+          created: 1704067200, // 2023-12-01
           description: 'Total TypeScript - Pro Bundle',
         } as Stripe.Charge,
       ]
@@ -96,7 +96,7 @@ describe('getPaymentHistory', () => {
           currency: 'usd',
           status: 'succeeded',
           refunded: false,
-          created: [PHONE],
+          created: 1704067200,
           description: 'Total TypeScript - Full Course',
         })
       }

@@ -117,8 +117,8 @@ describe('createCommentContextService', () => {
             id: 'msg_001',
             body: 'Hello, I need help!',
             is_inbound: true,
-            created_at: [PHONE],
-            recipients: [{ handle: '[EMAIL]', role: 'from' }],
+            created_at: 1706745600,
+            recipients: [{ handle: 'customer@example.com', role: 'from' }],
           }),
         ],
         _pagination: {},
@@ -131,11 +131,11 @@ describe('createCommentContextService', () => {
         id: 'msg_001',
         body: 'Hello, I need help!',
         isInbound: true,
-        createdAt: [PHONE],
-        authorEmail: '[EMAIL]',
+        createdAt: 1706745600,
+        authorEmail: 'customer@example.com',
         authorId: null,
       })
-      expect(thread.latestTimestamp).toBe[PHONE])
+      expect(thread.latestTimestamp).toBe(1706745600)
     })
 
     it('returns thread with multiple messages sorted by creation time', async () => {
@@ -152,10 +152,10 @@ describe('createCommentContextService', () => {
             id: 'msg_003',
             body: 'Is there anything else I can help with?',
             is_inbound: false,
-            created_at: [PHONE],
+            created_at: 1706745800,
             author: {
               id: 'tea_agent',
-              email: '[EMAIL]',
+              email: 'agent@example.com',
               first_name: 'Support',
               last_name: 'Agent',
             },
@@ -164,17 +164,17 @@ describe('createCommentContextService', () => {
             id: 'msg_001',
             body: 'Hello, I need help!',
             is_inbound: true,
-            created_at: [PHONE],
-            recipients: [{ handle: '[EMAIL]', role: 'from' }],
+            created_at: 1706745600,
+            recipients: [{ handle: 'customer@example.com', role: 'from' }],
           }),
           createMockMessage({
             id: 'msg_002',
             body: 'Hi! I can help you with that.',
             is_inbound: false,
-            created_at: [PHONE],
+            created_at: 1706745700,
             author: {
               id: 'tea_agent',
-              email: '[EMAIL]',
+              email: 'agent@example.com',
               first_name: 'Support',
               last_name: 'Agent',
             },
@@ -191,7 +191,7 @@ describe('createCommentContextService', () => {
         'msg_002',
         'msg_003',
       ])
-      expect(thread.latestTimestamp).toBe[PHONE])
+      expect(thread.latestTimestamp).toBe(1706745800)
     })
 
     it('builds author map from teammate authors', async () => {
@@ -207,10 +207,10 @@ describe('createCommentContextService', () => {
             id: 'msg_001',
             body: 'First response',
             is_inbound: false,
-            created_at: [PHONE],
+            created_at: 1706745600,
             author: {
               id: 'tea_alice',
-              email: '[EMAIL]',
+              email: 'alice@example.com',
               first_name: 'Alice',
               last_name: 'Smith',
             },
@@ -219,10 +219,10 @@ describe('createCommentContextService', () => {
             id: 'msg_002',
             body: 'Second response',
             is_inbound: false,
-            created_at: [PHONE],
+            created_at: 1706745700,
             author: {
               id: 'tea_bob',
-              email: '[EMAIL]',
+              email: 'bob@example.com',
               first_name: 'Bob',
             },
           }),
@@ -230,10 +230,10 @@ describe('createCommentContextService', () => {
             id: 'msg_003',
             body: 'Follow-up from Alice',
             is_inbound: false,
-            created_at: [PHONE],
+            created_at: 1706745800,
             author: {
               id: 'tea_alice',
-              email: '[EMAIL]',
+              email: 'alice@example.com',
               first_name: 'Alice',
               last_name: 'Smith',
             },
@@ -249,7 +249,7 @@ describe('createCommentContextService', () => {
       const alice = thread.authors.get('tea_alice')
       expect(alice).toMatchObject({
         id: 'tea_alice',
-        email: '[EMAIL]',
+        email: 'alice@example.com',
         name: 'Alice Smith',
         isTeammate: true,
       })
@@ -257,7 +257,7 @@ describe('createCommentContextService', () => {
       const bob = thread.authors.get('tea_bob')
       expect(bob).toMatchObject({
         id: 'tea_bob',
-        email: '[EMAIL]',
+        email: 'bob@example.com',
         name: 'Bob',
         isTeammate: true,
       })
@@ -278,8 +278,8 @@ describe('createCommentContextService', () => {
             id: 'msg_001',
             body: 'Page 1 message',
             is_inbound: true,
-            created_at: [PHONE],
-            recipients: [{ handle: '[EMAIL]', role: 'from' }],
+            created_at: 1706745600,
+            recipients: [{ handle: 'customer@example.com', role: 'from' }],
           }),
         ],
         _pagination: {
@@ -294,10 +294,10 @@ describe('createCommentContextService', () => {
             id: 'msg_002',
             body: 'Page 2 message',
             is_inbound: false,
-            created_at: [PHONE],
+            created_at: 1706745700,
             author: {
               id: 'tea_agent',
-              email: '[EMAIL]',
+              email: 'agent@example.com',
               first_name: 'Agent',
             },
           }),
@@ -325,11 +325,11 @@ describe('createCommentContextService', () => {
             id: 'msg_001',
             body: 'Inbound message',
             is_inbound: true,
-            created_at: [PHONE],
+            created_at: 1706745600,
             author: null,
             recipients: [
-              { handle: '[EMAIL]', role: 'from' },
-              { handle: '[EMAIL]', role: 'to' },
+              { handle: 'customer@example.com', role: 'from' },
+              { handle: 'support@example.com', role: 'to' },
             ],
           }),
         ],
@@ -338,7 +338,7 @@ describe('createCommentContextService', () => {
 
       const thread = await service.getCommentThread('cnv_test')
 
-      expect(thread.messages[0]?.authorEmail).toBe('[EMAIL]')
+      expect(thread.messages[0]?.authorEmail).toBe('customer@example.com')
       expect(thread.messages[0]?.authorId).toBeNull()
     })
 
@@ -355,13 +355,13 @@ describe('createCommentContextService', () => {
             id: 'msg_001',
             body: 'Outbound message',
             is_inbound: false,
-            created_at: [PHONE],
+            created_at: 1706745600,
             author: {
               id: 'tea_agent',
-              email: '[EMAIL]',
+              email: 'agent@example.com',
               first_name: 'Agent',
             },
-            recipients: [{ handle: '[EMAIL]', role: 'to' }],
+            recipients: [{ handle: 'customer@example.com', role: 'to' }],
           }),
         ],
         _pagination: {},
@@ -369,7 +369,7 @@ describe('createCommentContextService', () => {
 
       const thread = await service.getCommentThread('cnv_test')
 
-      expect(thread.messages[0]?.authorEmail).toBe('[EMAIL]')
+      expect(thread.messages[0]?.authorEmail).toBe('agent@example.com')
       expect(thread.messages[0]?.authorId).toBe('tea_agent')
     })
   })

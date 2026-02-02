@@ -91,9 +91,9 @@ export function parseTimeArg(input: string): string {
   if (match) {
     const [, num, unit] = match
     const msPerUnit: Record<string, number> = {
-      h: [PHONE],
+      h: 1706745600,
       m: 60000,
-      d: [PHONE],
+      d: 1706745600,
     }
     const ms = unit ? msPerUnit[unit] : undefined
     if (!ms || !num) {

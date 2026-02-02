@@ -57,7 +57,7 @@ describe('verifyRefund', () => {
         amount: 9900,
         balance_transaction: null,
         charge: 'ch_123',
-        created: [PHONE], // 2024-01-01
+        created: 1704067200, // 2024-01-01
         currency: 'usd',
         status: 'succeeded',
         reason: 'requested_by_customer',
@@ -85,7 +85,7 @@ describe('verifyRefund', () => {
           amount: 9900,
           chargeId: 'ch_123',
           reason: 'requested_by_customer',
-          created: [PHONE],
+          created: 1704067200,
         })
       }
 
@@ -102,7 +102,7 @@ describe('verifyRefund', () => {
         amount: 29900,
         balance_transaction: null,
         charge: 'ch_456',
-        created: [PHONE],
+        created: 1704067200,
         currency: 'usd',
         status: 'pending',
         reason: null,
@@ -136,7 +136,7 @@ describe('verifyRefund', () => {
         amount: 5000,
         balance_transaction: null,
         charge: 'ch_789',
-        created: [PHONE],
+        created: 1704067200,
         currency: 'usd',
         status: 'failed',
         reason: 'duplicate',
@@ -250,7 +250,7 @@ describe('verifyRefund', () => {
         object: 'refund',
         amount: 1000,
         charge: 'ch_123',
-        created: [PHONE],
+        created: 1704067200,
         currency: 'usd',
         status: 'succeeded',
         reason: null,

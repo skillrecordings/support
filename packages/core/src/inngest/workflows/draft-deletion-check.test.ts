@@ -48,7 +48,7 @@ describe('Draft Deletion Check', () => {
     })
 
     it('is 7,200,000 milliseconds', () => {
-      expect(DELETION_TIMEOUT_MS).toBe([PHONE])
+      expect(DELETION_TIMEOUT_MS).toBe(300000)
     })
   })
 

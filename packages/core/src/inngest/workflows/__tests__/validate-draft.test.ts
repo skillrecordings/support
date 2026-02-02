@@ -114,12 +114,12 @@ describe('validate-draft workflow — event emission', () => {
         {
           body: 'I need help with generics',
           from: '[EMAIL]',
-          date: '[PHONE]',
+          date: '2024-01-15',
         },
         {
           body: 'Sure, let me look into that.',
           from: 'agent',
-          date: '[PHONE]',
+          date: '2024-01-15',
         },
       ],
       priorConversations: [
