@@ -186,6 +186,7 @@ export const routeWorkflow = inngest.createFunction(
             tagId: result.tagId,
             tagName: result.tagName,
             durationMs,
+            tagged: result.tagged,
           })
         } else {
           await log('error', 'tag application returned failure', {
@@ -196,6 +197,7 @@ export const routeWorkflow = inngest.createFunction(
             tagName: result.tagName,
             error: result.error,
             durationMs,
+            tagged: result.tagged,
           })
         }
 
