@@ -181,3 +181,12 @@ Summary: Updated the access-locked-out skill with cleaned phrase metrics (no `[E
 Completed: Enrich access-locked-out skill (878 samples)
 Files: none
 Summary: Updated access-locked-out skill metrics and validation from all 878 samples with `[EMAIL]` filtered, and added 15 verbatim example Q&A pairs split across canonical, edge-case, and variation files. Changes are in `skills/access-locked-out/SKILL.md`, `skills/access-locked-out/examples/canonical.md`, `skills/access-locked-out/examples/edge-cases.md`, and `skills/access-locked-out/examples/variations.
+
+---
+[2026-02-02T00:14:06.621Z]
+Completed: Enrich technical-issue-course-content skill (596 samples)
+Files: none
+Summary: Updated the technical-issue-course-content skill with cleaned metrics, topic-specific validation rules, and added tiered verbatim examples sourced from the classified threads; logged the extraction process in the audit file.
+
+- Updated metrics and validation in `skills/technical-issue-course-content/SKILL.md` (cleaned 4-gram counts with `[EMAIL]` filtered, required phrases, forbidden patterns).
+- 

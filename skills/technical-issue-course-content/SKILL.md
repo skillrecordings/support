@@ -5,8 +5,15 @@ description: |
 sample_size: 596
 validation:
   required_phrases:
-    - "for the heads up"
-  forbidden_patterns: []
+    - "thanks for the heads up"
+    - "let me know if"
+  forbidden_patterns:
+    - "(?i)works on my machine"
+    - "(?i)can't reproduce"
+    - "(?i)cannot reproduce"
+    - "(?i)user error"
+    - "(?i)your fault"
+    - "(?i)not our problem"
 metrics:
   sample_size: 596
   avg_thread_length: 3.15
@@ -27,20 +34,20 @@ metrics:
       count: 58
       percent: 9.7
     - phrase: "let me know if"
-      count: 50
-      percent: 8.4
+      count: 49
+      percent: 8.2
     - phrase: "we'll look into this"
       count: 44
       percent: 7.4
-    - phrase: "to access the course"
-      count: 44
-      percent: 7.4
-    - phrase: "able to access the"
-      count: 42
-      percent: 7
     - phrase: "look into this asap"
       count: 41
       percent: 6.9
+    - phrase: "thanks for the feedback"
+      count: 40
+      percent: 6.7
+    - phrase: "thanks for reaching out"
+      count: 36
+      percent: 6.0
 ---
 
 # Technical Issue with Course Content
@@ -69,11 +76,11 @@ Common closings:
 - "the heads up we'll" — 58 (9.7%)
 - "heads up we'll look" — 58 (9.7%)
 - "up we'll look into" — 58 (9.7%)
-- "let me know if" — 50 (8.4%)
+- "let me know if" — 49 (8.2%)
 - "we'll look into this" — 44 (7.4%)
-- "to access the course" — 44 (7.4%)
-- "able to access the" — 42 (7%)
 - "look into this asap" — 41 (6.9%)
+- "thanks for the feedback" — 40 (6.7%)
+- "thanks for reaching out" — 36 (6.0%)
 
 ## Tone Guidance (observed)
 
