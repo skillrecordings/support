@@ -33,7 +33,7 @@ Best,
 **Question**
 
 ```text
-Hey Matt!
+Hey [NAME]!
 
 Clicked on your article, and saw some weird css stuff going on in safari. The top banner is being cut off!
 Screenshot attached.
@@ -46,7 +46,7 @@ Best regards/
 Terveisin,
 Daniel Wargh
 
-On Mon, Oct 9, 2023 at 16:35, Matt Pocock <[[EMAIL]](mailto:On Mon, Oct 9, 2023 at 16:35, Matt Pocock <<a href=)> wrote:
+On Mon, Oct 9, 2023 at 16:35, [NAME] Pocock <[[EMAIL]](mailto:On Mon, Oct 9, 2023 at 16:35, [NAME] Pocock <<a href=)> wrote:
 
 > Hey Daniel,
 >
@@ -75,13 +75,13 @@ On Mon, Oct 9, 2023 at 16:35, Matt Pocock <[[EMAIL]](mailto:On Mon, Oct 9, 2023 
 > [strongly typing react props](https://click.convertkit-mail2.com/92un3pwoxganhq978edb9h0g3o633/dphehmu07wxp2xam/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS9yZWFjdC1wcm9wcy10eXBlc2NyaXB0)
 >
 > Cheers,
-> Matt
+> [NAME]
 >
 > P.S. [The Advanced React with TypeScript workshop](https://click.convertkit-mail2.com/92un3pwoxganhq978edb9h0g3o633/z2hgh7u3drzlzkbp/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS93b3Jrc2hvcHMvYWR2YW5jZWQtcmVhY3Qtd2l0aC10eXBlc2NyaXB0) is now complete and officially launched! Take advantage of [the 20% launch discount](https://click.convertkit-mail2.com/92un3pwoxganhq978edb9h0g3o633/x0hph3uw7dmqmdf5/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS9idXk=) for this week only.
 >
 > ​[Unsubscribe](https://unsubscribe.convertkit-mail2.com/92un3pwoxganhq978edb9h0g3o633) from Total TypeScript emails
 >
-> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080
+> [ADDRESS], Ste. B, PMB #97429, Houston, TX 77080
 ```
 
 **Answer**
@@ -104,7 +104,7 @@ fractional price.
 **Answer**
 
 ```text
-Hey Parker,
+Hey [NAME],
 
 
 Thanks for the heads up!
@@ -129,7 +129,7 @@ _<https://epicreact.dev/modules/advanced-react-patterns/advanced-react-patterns-
 **Answer**
 
 ```text
-Hey Soham,
+Hey [NAME],
 
 
 Thanks for the heads up! Everything should be back up and running smoothly now. Let us know if that's not the case.
@@ -265,7 +265,7 @@ Looking in the console, there seem to be a combination of some resource failing 
 [cid:image003.png@01D6FA3D.77D316C0]
 
 --
-Torleif Berger
+[NAME] Berger
 | software engineer
 | www.geekality.net
 ```
@@ -273,7 +273,7 @@ Torleif Berger
 **Answer**
 
 ```text
-Hey Torleif,
+Hey [NAME],
 
 
 Thanks for the heads up! We'll look into this ASAP.

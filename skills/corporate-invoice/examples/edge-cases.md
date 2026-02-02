@@ -19,7 +19,7 @@ advancing the full amount and getting reimbursed later.
 
 Could you please issue a pro forma invoice including:
 
-   - My name and email associated with the Epic React account (Adrian
+   - My name and email associated with the Epic React account ([NAME]
    Pereira, [EMAIL])
    - Billing details for my company
       - Company name: Empathy Systems Corporation SLU
@@ -34,12 +34,12 @@ details or request this document, please let me know and I will follow it.
 Thank you very much for your help and for the work you do with Epic React.
 
 Best regards,
-Adrian
+[NAME]
 ```
 
 **Answer:**
 ```
-Hey Adrian,
+Hey [NAME],
 
 
 We only make custom invoices for larger team purchases.
@@ -66,12 +66,12 @@ If it is possible to put the following email on the receipt that would also be r
 I was a bit nervous about switching the account to my work email as I wasn’t sure I’d be able to switch it back again?
 
 Thanks a lot and all the best
-Dave
+[NAME]
 ```
 
 **Answer:**
 ```
-Hey Dave,
+Hey [NAME],
 
 
 Our receipts don't have the emails on them. I've attached It. If you need the email I can give you an updated invoice with [EMAIL] on It!
@@ -191,7 +191,7 @@ I would love to hear whether these requirements can be met.
 
 Kind regards,
 
-Arjen
+[NAME]
 
 
 This message has been sent by ABN AMRO Bank N.V., which has its seat at Gustav Mahlerlaan 10 (1082 PP) Amsterdam, the Netherlands, and is registered in the Commercial Register of Amsterdam under number [PHONE].
@@ -201,7 +201,7 @@ Dit bericht is verzonden door ABN AMRO Bank N.V., statutair gevestigd aan de Gus
 
 **Answer:**
 ```
-Hey Arjen,
+Hey [NAME],
 
 
 That's correct. It's In our policy for individual purchases to get an invoice post purchase. Sorry If that doesn't work out.

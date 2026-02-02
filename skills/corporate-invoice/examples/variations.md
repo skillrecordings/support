@@ -21,12 +21,12 @@ If you require any additional information or documentation to issue the invoice,
 Thank you in advance for your support.
 
 Best regards,
-Ignacio García
+[NAME] García
 ```
 
 **Answer:**
 ```
-Hey Ignacio,
+Hey [NAME],
 
 
 It looks like the invoice you attached has all the correct info. 
@@ -74,19 +74,19 @@ My company to purchase your service has need:
 thank you
 Kind Regards
 
-Giovanna
+[NAME]
 -- 
 
-Giovanna La Vara | Talent Management Specialist
+[NAME] La Vara | Talent Management Specialist
 
 *Prima Assicurazioni*
 Email: [EMAIL]
-Mobile: +[PHONE]
+Mobile: [PHONE]
 ```
 
 **Answer:**
 ```
-Hey Giovanna,
+Hey [NAME],
 
 
 I've attached a copy of our W-9 tax form - it has all of our relevant company information, including Tax ID.
@@ -132,7 +132,7 @@ resident within the meaning of the agreement.
 We thank you send it to us as soon as possible.
 
 Greetings
-Francisco Jiménez
+[NAME] Jiménez
 ThePowerMBA
 
 E [EMAIL] <[EMAIL]>W
@@ -141,7 +141,7 @@ https://thepowermba.com
 
 **Answer:**
 ```
-Hey Francisco,
+Hey [NAME],
 
 
 We don't have or provide a tax residence certificate. However, I've attached a copy of our W-9 tax form that includes all relevant company information.

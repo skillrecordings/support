@@ -11,13 +11,13 @@ I am a Epic React V1 Pro user. Is the upgrade to v2 included in my original
 purchase or do I need to purchase v2 separately?
 
 Thanks,
--John Riviello
+-[NAME] Riviello
 ```
 
 **Answer**
 
 ```text
-Hi John,
+Hi [NAME],
 
 
 If you own Epic React V1 you can get an upgrade discount! It's an entirely new learning experience and was a ton of work. You can find more details here: https://www.epicreact.dev/ 
@@ -83,7 +83,7 @@ www.getjobber.com <http://getjobber.com/>
 
 ```text
 
-Hey Taylor,
+Hey [NAME],
 
 
 Thank you for your interest in Epic React Pro!
@@ -111,7 +111,7 @@ It looks like excellent content and I do not suggest you change anything
 about your pricing. Just giving you one person’s thought process on this
 and I hope it helps.  Good luck!
 
-On Wed, Dec 14, 2022 at 6:33 AM Matt Pocock <[EMAIL]>
+On Wed, Dec 14, 2022 at 6:33 AM [NAME] Pocock <[EMAIL]>
 wrote:
 
 > Hello Glenn,
@@ -126,7 +126,7 @@ wrote:
 >
 > Thanks,
 >
-> Matt
+> [NAME]
 >
 > Unsubscribe from only Workshop Offers
 > <https://click.convertkit-mail2.com/k0uv8x7k8qt2uv92owfl/6qh060p9aoup3pmrgvbo/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_dGFnSWQ9MzMyMDY4OA==>.
@@ -134,7 +134,7 @@ wrote:
 > <https://unsubscribe.convertkit-mail2.com/k0uv8x7k8qt2uv92owfl> from all
 > emails at any time.
 >
-> 12333 Sowden Rd, Ste. B
+> [ADDRESS], Ste. B
 > <https://www.google.com/maps/search/12333+Sowden+Rd,+Ste.+B?entry=gmail&source=g>,
 > PMB #97429, Houston, TX 77080
 >
@@ -155,7 +155,7 @@ Instead of something cheaper, what would make this course worth $400+ to you?
 ```text
 The insane price.
 
-On Wed, 14 Dec 2022 at 15:44 Matt Pocock <[EMAIL]> wrote:
+On Wed, 14 Dec 2022 at 15:44 [NAME] Pocock <[EMAIL]> wrote:
 
 > Hello Pierre,
 >
@@ -169,7 +169,7 @@ On Wed, 14 Dec 2022 at 15:44 Matt Pocock <[EMAIL]> wrote:
 >
 > Thanks,
 >
-> Matt
+> [NAME]
 >
 > Unsubscribe from only Workshop Offers
 > <https://click.convertkit-mail2.com/75u25kqm3ec2u54pxlfz/6qh060p9aoup3pmrgvbo/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_dGFnSWQ9MzMyMDY4OA==>.
@@ -177,7 +177,7 @@ On Wed, 14 Dec 2022 at 15:44 Matt Pocock <[EMAIL]> wrote:
 > <https://unsubscribe.convertkit-mail2.com/75u25kqm3ec2u54pxlfz> from all
 > emails at any time.
 >
-> 12333 Sowden Rd, Ste. B
+> [ADDRESS], Ste. B
 > <https://www.google.com/maps/search/12333+Sowden+Rd,+Ste.+B?entry=gmail&source=g>,
 > PMB #97429, Houston, TX 77080
 >
@@ -198,7 +198,7 @@ The price is incredibly logical, actually.
 **Question**
 
 ```text
-Hi Matt,
+Hi [NAME],
 
 To be honest, the price...
 I love your content and your post and I think I should acquire your
@@ -221,7 +221,7 @@ it's too much.
 Hope this helps, and I am sorry for not being able to support your work.
 Have a nice day.
 
-On Wed, 14 Dec 2022 at 15:56, Matt Pocock <[EMAIL]> wrote:
+On Wed, 14 Dec 2022 at 15:56, [NAME] Pocock <[EMAIL]> wrote:
 
 > Hello Marc,
 >
@@ -235,7 +235,7 @@ On Wed, 14 Dec 2022 at 15:56, Matt Pocock <[EMAIL]> wrote:
 >
 > Thanks,
 >
-> Matt
+> [NAME]
 >
 > Unsubscribe from only Workshop Offers
 > <https://click.convertkit-mail2.com/27uol5vpvkb9uwo0q9f3/6qh060p9aoup3pmrgvbo/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_dGFnSWQ9MzMyMDY4OA==>.
@@ -243,7 +243,7 @@ On Wed, 14 Dec 2022 at 15:56, Matt Pocock <[EMAIL]> wrote:
 > <https://unsubscribe.convertkit-mail2.com/27uol5vpvkb9uwo0q9f3> from all
 > emails at any time.
 >
-> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080
+> [ADDRESS], Ste. B, PMB #97429, Houston, TX 77080
 >
 > ​
 >
@@ -269,10 +269,10 @@ We will keep layering the value for the finished product so you'll be fully conv
 **Question**
 
 ```text
-Matt's lessons are definitely the best I've seen for typescript, however
+[NAME]'s lessons are definitely the best I've seen for typescript, however
 the price is insane compared to udemy.  For me it comes down to value.
 
-On Wed, Dec 14, 2022 at 9:39 AM Matt Pocock <[EMAIL]>
+On Wed, Dec 14, 2022 at 9:39 AM [NAME] Pocock <[EMAIL]>
 wrote:
 
 > Hello Danny,
@@ -287,7 +287,7 @@ wrote:
 >
 > Thanks,
 >
-> Matt
+> [NAME]
 >
 > Unsubscribe from only Workshop Offers
 > <https://click.convertkit-mail2.com/4zu2n4pe4wa7u82q7ltx/6qh060p9aoup3pmrgvbo/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_dGFnSWQ9MzMyMDY4OA==>.
@@ -295,7 +295,7 @@ wrote:
 > <https://unsubscribe.convertkit-mail2.com/4zu2n4pe4wa7u82q7ltx> from all
 > emails at any time.
 >
-> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080
+> [ADDRESS], Ste. B, PMB #97429, Houston, TX 77080
 >
 > ​
 >
@@ -319,13 +319,13 @@ I would like to know if the offer in kcdbundle.com to get both course for 50% it
 Thanks!
 
 --
-Damir
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Damir,
+Hey [NAME],
 
 
 Thanks for reaching out!
@@ -342,7 +342,7 @@ Please let me know if you have any further questions!
 **Question**
 
 ```text
-Hi Matt,
+Hi [NAME],
 
 First of all thank you for all the great content you put out. I’ve learned
 a bunch from you already, and I’m grateful for that.
@@ -545,13 +545,13 @@ wrote:
 > <https://click.convertkit-mail2.com/r8un4l5og9coh238gpmt2/08hwhgum6n3p5ncl/aHR0cHM6Ly90d2l0dGVyLmNvbS9tYXR0cG9jb2NrdWs=>
 > !
 >
-> -Matt
+> -[NAME]
 >
 > ​Unsubscribe
 > <https://unsubscribe.convertkit-mail2.com/r8un4l5og9coh238gpmt2> from
 > Total TypeScript emails
 >
-> 12333 Sowden Rd, Ste. B
+> [ADDRESS], Ste. B
 > <https://www.google.com/maps/search/12333+Sowden+Rd,+Ste.+B?entry=gmail&source=g>,
 > PMB #97429, Houston, TX 77080
 >

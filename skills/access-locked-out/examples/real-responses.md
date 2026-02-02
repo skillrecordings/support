@@ -10,7 +10,7 @@ further assistance please?
 
 Thank you,
 
--Daniel
+-[NAME]
 
 On Sun, Feb 23, 2025, 9:52 PM Total TypeScript <[EMAIL]>
 wrote:
@@ -33,7 +33,7 @@ wrote:
 **Answer**
 
 ```text
-Hey Daniel,
+Hey [NAME],
 
 
 Are you still having issues accessing content? It looks like you should have access on my end. 
@@ -52,20 +52,20 @@ don't see the course when I logged in as [EMAIL]
 
 https://www.epicai.pro/invoices/mc_aa66c86e-2a5c-4761-9b9d-eb04ab275e8c
 here is the invoice which shows the email forwarding address: "Invoice For
-Juha Linnanen
+[NAME] Linnanen
 [EMAIL]"
 
 Can you fix so that the course is enrolled with [EMAIL]?
 
 Thanks,
 
-Juha
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Juha,
+Hey [NAME],
 
 
 No worries! I've transferred the license to [EMAIL].
@@ -88,7 +88,7 @@ Screenshot for reference:
 [cid:[EMAIL]39490]
 
 Thanks and regard,
-Ashwani Nayak
+[NAME] Nayak
 
 This message (including any attachments) contains confidential information intended for a specific individual and purpose, and is protected by law. If you are not the intended recipient, you should delete this message and any disclosure, copying, or distribution of this message, or the taking of any action based on it, by you is strictly prohibited.
 
@@ -100,7 +100,7 @@ v.E.1
 **Answer**
 
 ```text
-Hey Ashwani,
+Hey [NAME],
 
 
 Are you using any type of VPN or trying to login outside of India? It looks like you bought the regional discount license so that might be blocking you. 
@@ -131,13 +131,13 @@ Please let me know how I can update my email and regain access as soon as
 possible. I’d really appreciate your help.
 
 Thanks in advance,
-Rafael Umbelino
+[NAME] Umbelino
 ```
 
 **Answer**
 
 ```text
-Hey Rafael,
+Hey [NAME],
 
 
 We always recommend the license being under a personal address. I got the license transferred over to [EMAIL] from [EMAIL]. 
@@ -161,13 +161,13 @@ My username is [EMAIL], I purchased Epic React Pro course on
 product list. How can I access the course?
 
 Thanks,
-Taewon
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Taewon,
+Hey [NAME],
 
 
 I’m able to see the course under your account on my end. Could you try logging out and logging back in, making sure you use [EMAIL]? 
@@ -193,7 +193,7 @@ access to those contents?
 **Answer**
 
 ```text
-Hey Andoni,
+Hey [NAME],
 
 
 I'm not seeing any purchase history under the email [EMAIL]. Could It be under a different email?

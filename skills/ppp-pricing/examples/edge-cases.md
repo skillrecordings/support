@@ -98,19 +98,19 @@ Best,
 ## Example 5 (cnv_1jbxd6xx)
 **Question:**
 ```
-Dear Dan,
+Dear [NAME],
 
-Hi Dan, I come from Viet Nam. I plan to buy a Just Javascript Course and I plan only visit from Viet Nam but do not see PPP offer and support generate a custom receipt. Can I request it from here?
+Hi [NAME], I come from Viet Nam. I plan to buy a Just Javascript Course and I plan only visit from Viet Nam but do not see PPP offer and support generate a custom receipt. Can I request it from here?
 
 Thank you for your attention!
 
 Best regards,
-Hung Nguyen
+[NAME] Nguyen
 ```
 
 **Answer:**
 ```
-Hey Hung,
+Hey [NAME],
 
 
 We don't offer a PPP for Just Javascript. After purchasing the course we send a receipt.

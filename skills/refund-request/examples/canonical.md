@@ -3,7 +3,7 @@
 ## Example 1 (cnv_1jdn7nhh)
 **Question:**
 ```
-Hi Matt,
+Hi [NAME],
 I think I do not need this course right now, can I get refund of this and could
 you please unenroll me from this course.
 ```
@@ -22,7 +22,7 @@ Best,
 ## Example 2 (cnv_1jdn7hyd)
 **Question:**
 ```
-Hi Kent,
+Hi [NAME],
 I think I do not need this course as of now, can I get the refund for this?
 ```
 
@@ -55,12 +55,12 @@ My purchase email is: [EMAIL]
 Thank you in advance.
 
 Kind regards,
-Daniel.
+[NAME].
 ```
 
 **Answer:**
 ```
-Hey Daniel, 
+Hey [NAME], 
 
 
 No worries. We've initiated a refund. It can take 5-10 days for the banks to reconcile and return the money to your account.
@@ -86,14 +86,14 @@ We've initiated a refund. It can take 5-10 days for the banks to reconcile and r
 ## Example 5 (cnv_1jdamyn9)
 **Question:**
 ```
-Hi Team,
+Hi [NAME],
 
 I purchased this course https://www.epicai.pro/ but didn't have time to go
 through this.
 can you please help give refund for this
 
 Regards,
-Geetha
+[NAME]
 ```
 
 **Answer:**

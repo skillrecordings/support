@@ -13,13 +13,13 @@ any volume based discounts on top of what your website calculator suggests?
 Thank you!
 
 Regards,
-Max
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Max,
+Hey [NAME],
 
 
 Thank you for your interest in the course!
@@ -65,7 +65,7 @@ Head of Engineering, Buyer Experience
 **Answer**
 
 ```text
-Hey William,
+Hey [NAME],
 
 
 No problem!
@@ -154,21 +154,21 @@ Can someone please help me out with this?
 I am looking to do 9 KCD Bundles and 5 standalone testing.
 
 Many thanks,
-Jonathan
+[NAME]
 
 -- 
 
-Jonathan Lemon
+[NAME] Lemon
 
 Sonos | Software Engineering Manager | Go to Market
 
-[EMAIL] | ([PHONE] | he/him/his
+[EMAIL] | [PHONE] | he/him/his
 ```
 
 **Answer**
 
 ```text
-Hey Jonathan,
+Hey [NAME],
 
 
 Thanks for reaching out!
@@ -238,7 +238,7 @@ Hi,
 Looking to procure a business type of license that will cater for 5 developers.
 
 Thanks,
-Makhate Makhate
+[NAME] [NAME]
 Disclaimer:
 
 This message and any attachments are subject to HISP SA's privacy policy published at https://www.hisp.org/privacy-policy.  Please read the privacy policy before opening any attachment or taking any other action in terms of this electronic transmission.  If you cannot access the privacy policy, kindly send an email to [EMAIL]<mailto:[EMAIL]%20?subject=Send%20me%20a%20copy%20of%20the%20HISP%20SA%20Privacy%20Policy> and a copy will be provided to you. By replying to this e-mail or opening any attachment you agree to be bound by the provisions of the HISP SA privacy policy.
@@ -247,7 +247,7 @@ This message and any attachments are subject to HISP SA's privacy policy publish
 **Answer**
 
 ```text
-Hey Makhate,
+Hey [NAME],
 
 
 You can find our "For my team" purchase option here: https://www.totaltypescript.com/buy 
@@ -270,13 +270,13 @@ Australia, Japan and beyond. We use TS heavily on the front and back end. I'm
 interested in team pricing for our org. I've put down 20 seats but we're around
 100 engineers so I'm keen to understand the process for adding people, whether
 that has to happen up front or if it's possible to add more over time etc. Many
-thanks! Tom
+thanks! [NAME]
 ```
 
 **Answer**
 
 ```text
-Hi Tom,
+Hi [NAME],
 
 
 For 20 seats you get 25% off so It will be $7,500. I've attached the quote. 
@@ -307,7 +307,7 @@ many employees to enroll for the course.
 
 Thanks,
 
-Shaiket Das
+[NAME]
 ```
 
 **Answer**

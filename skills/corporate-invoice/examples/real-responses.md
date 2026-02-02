@@ -24,7 +24,7 @@ I am writing to request the issuance of a tax- and accounting-compliant invoice 
 Billing details bel
 
 **Agent:**
-Hey Ignacio,
+Hey [NAME],
 
 
 It looks like the invoice you attached has all the correct info. 
@@ -61,12 +61,12 @@ Best,
 **Customer:**
 Hi,
 
-My name is Joel and I am responsible for the Talent and Development Department at K-LAGAN.
+My name is [NAME] and I am responsible for the Talent and Development Department at K-LAGAN.
 
 I am reaching out because one of our employees is interested in taking your "Ship Modern Full-Stack Web Applications" course. In order to proceed with the payment through our Finance Department, we would
 
 **Agent:**
-Hey Joel,
+Hey [NAME],
 
 
 We don't create invoices pre-purchase unless It's for a larger team order. You can purchase the license for your employee using the "For my team" purchase option on our site. https://www.epicweb.dev/buy 
@@ -119,7 +119,7 @@ Is it possible to get a receipt rather than an invoice? I managed to convince my
 If it is possible to put the following email on the receipt that would als
 
 **Agent:**
-Hey Dave,
+Hey [NAME],
 
 
 Our receipts don't have the emails on them. I've attached It. If you need the email I can give you an updated invoice with [EMAIL] on It!

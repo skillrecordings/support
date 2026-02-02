@@ -19,7 +19,7 @@ Not currently, but it's on the roadmap. This is a pre-release.
 **Question**
 
 ```text
-Hi Team
+Hi [NAME]
 
 Thank you for making this course available. I am so excited to get started!
 
@@ -28,13 +28,13 @@ of competency option once the course is complete that will aid career
 development?
 
 thank you,
-Andrew
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Andrew,
+Hey [NAME],
 
 
 Thanks for reaching out!
@@ -55,7 +55,7 @@ Can you please share how to receive that.
 
 
 Sincerely,
-Sagar Vadalia,
+[NAME] Vadalia,
 Email: [EMAIL]
 |
 Mobile:
@@ -66,7 +66,7 @@ Mobile:
 **Answer**
 
 ```text
-Hey Sagar,
+Hey [NAME],
 
 
 You should see a certificate of completion on the page for each completed course here: https://www.epicreact.dev/workshops 
@@ -91,13 +91,13 @@ Hi,
 Do I get a certificate after completion of the course?
 
 Thanks,
-Lenssen
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Lenssen,
+Hey [NAME],
 
 
 We do offer completion certificates. You should get one once you've finished any course.
@@ -168,13 +168,13 @@ Does one receive a certificate after completing epic react?
 
 Kind Regards
 
-Matthew Bevis
+[NAME] Bevis
 ```
 
 **Answer**
 
 ```text
-Hey Matthew,
+Hey [NAME],
 
 
 Thanks for reaching out!
@@ -197,7 +197,7 @@ Where can I find and download the certificate?
 **Answer**
 
 ```text
-Hi Adithya,
+Hi [NAME],
 
 
 I've attached your Testing JavaScript Certificate. Let me know If that looks good!

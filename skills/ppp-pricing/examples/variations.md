@@ -15,12 +15,12 @@ Is that correct? I want to make sure everything is ok before deciding to purchas
 
 Thank you for the great work.
 
-Zahari Tilev
+[NAME] Tilev
 ```
 
 **Answer:**
 ```
-Hey Zahari,
+Hey [NAME],
 
 
 The highest discount would be your PPP discount. The sale discount ended, but also It didn't stack with PPP. 
@@ -50,12 +50,12 @@ Hi,
 
 Is the Epic React course any cheaper in India?
 
-Wes
+[NAME]
 ```
 
 **Answer:**
 ```
-Hey Wes,
+Hey [NAME],
 
 
 I've just verified the discount is displaying correctly when using a VPN with India as the location:
@@ -70,9 +70,9 @@ If you don't see it when browsing, the issue is due to location - either your ph
 ## Example 4 (cnv_1jbn5gf9)
 **Question:**
 ```
-Hello Matt,
+Hello [NAME],
 
-My name is Abdelaziz, a developer from Morocco. I’m a big fan of your work, I
+My name is [NAME], a developer from Morocco. I’m a big fan of your work, I
 watch your videos on YouTube regularly, and I truly appreciate the effort and
 dedication you put into teaching. I’ve learned so much from you, and your
 content has been a real inspiration for me.
@@ -91,12 +91,12 @@ Thank you so much for your time and for the incredible content you create. I
 hope to continue learning from you and one day support your work fully.
 
 Warm regards,
-Abdelaziz
+[NAME]
 ```
 
 **Answer:**
 ```
-Hey Abdelaziz,
+Hey [NAME],
 
 
 Sorry to say, but we're not able to increase the discount. The highest regional discount Is the highest we offer right now.
@@ -124,7 +124,7 @@ while)
 On Mon, Dec 15, 2025, 10:46 PM Total TypeScript <[EMAIL]>
 wrote:
 
-> Hello Raksha,
+> Hello [NAME],
 >
 > Becoming a TypeScript Wizard is a boon for your work, your team, and your
 > employer.
@@ -184,7 +184,7 @@ wrote:
 > <https://7751c435.unsubscribe.convertkit-mail2.com/gku5w33v7rh5hlxxlq5brh8wm4v99bmh99rrl>
 > from all emails at any time.
 >
-> 12333 Sowden Rd, Ste. B
+> [ADDRESS], Ste. B
 > <https://www.google.com/maps/search/12333+Sowden+Rd,+Ste.+B?entry=gmail&source=g>,
 > PMB #97429, Houston, TX 77080
 >
@@ -194,7 +194,7 @@ wrote:
 
 **Answer:**
 ```
-Hey Raksha,
+Hey [NAME],
 
 
 Thanks for your interest in Total TypeScript!

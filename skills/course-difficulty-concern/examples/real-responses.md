@@ -28,7 +28,7 @@ If you find that this course isn't for you, we do offer a full refund if it is r
 **Question**
 
 ```text
-Hi Team Total TypeScript,
+Hi [NAME] Total TypeScript,
 
 How much familiar do I have to be to start learning Zod?
 I am a beginner in TypeScript. I understand basic typescript and have used
@@ -38,7 +38,7 @@ to dive into Zod or should I polish my typescript knowledge first?
 
 Thanks
 
-On Fri, Sep 16, 2022 at 2:07 AM Total TypeScript <[EMAIL]>
+[NAME], Sep 16, 2022 at 2:07 AM Total TypeScript <[EMAIL]>
 wrote:
 
 > free 10 lesson interactive zod video tutorial  ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌
@@ -76,7 +76,7 @@ wrote:
 > squeezing out a glowing crystal]
 > <https://click.convertkit-mail2.com/gkurle45gmt5hdndw94br/58hvh8u5d29gqpt6/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS90dXRvcmlhbHMvem9kP3V0bV9zb3VyY2U9bmV3c2xldHRlciZ1dG1fbWVkaXVtPWVtYWlsJnV0bV9jYW1wYWlnbj16b2Q=>
 >
-> Matt created this free interactive Total TypeScript Zod video tutorial
+> [NAME] created this free interactive Total TypeScript Zod video tutorial
 > <https://click.convertkit-mail2.com/gkurle45gmt5hdndw94br/58hvh8u5d29gqpt6/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS90dXRvcmlhbHMvem9kP3V0bV9zb3VyY2U9bmV3c2xldHRlciZ1dG1fbWVkaXVtPWVtYWlsJnV0bV9jYW1wYWlnbj16b2Q=>.
 > Short and to the point this Zod tutorial will give you a taste of Zod and
 > how you can use it to make your own code type safe! Type safer?
@@ -91,7 +91,7 @@ wrote:
 > <https://unsubscribe.convertkit-mail2.com/gkurle45gmt5hdndw94br> from
 > Total TypeScript emails
 >
-> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080
+> [ADDRESS], Ste. B, PMB #97429, Houston, TX 77080
 >
 ```
 
@@ -160,13 +160,13 @@ that money elsewhere in developing more beginner javascript courses first.
 Let me know if this is possible.Appreciate your help.
 
 Thanks,
-Victor
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Victor,
+Hey [NAME],
 
 
 That email address was correct - I was able to find your license.
@@ -230,12 +230,12 @@ Best,
 **Question**
 
 ```text
-Hi Team, is there any pre-requisites for joining ai hero course. I work
+Hi [NAME], is there any pre-requisites for joining ai hero course. I work
 only on front end stack and comfortable with React, typescript
 
 Thanks
 
-On Mon, 16 Jun, 2025, 1:50 pm Matt Pocock, <[EMAIL]> wrote:
+[NAME], 16 Jun, 2025, 1:50 pm [NAME] Pocock, <[EMAIL]> wrote:
 
 > 60% Discount got Total TypeScript Supporters  ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­
 >
@@ -269,7 +269,7 @@ On Mon, 16 Jun, 2025, 1:50 pm Matt Pocock, <[EMAIL]> wrote:
 > <https://unsubscribe.convertkit-mail2.com/0vu2k5koxda9h97wwophlhvmgn555snh77003>
 > from all emails at any time.
 >
-> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080
+> [ADDRESS], Ste. B, PMB #97429, Houston, TX 77080
 >
 > ​
 >
@@ -278,7 +278,7 @@ On Mon, 16 Jun, 2025, 1:50 pm Matt Pocock, <[EMAIL]> wrote:
 **Answer**
 
 ```text
-Hi Raju,
+Hi [NAME],
 
 
 I'd recommend being comfortable with React and TypeScript.
@@ -296,7 +296,7 @@ Let me know if you have any other questions!
 
 ```text
 
-Hi Matt,
+Hi [NAME],
 
 
 I’m reaching out because I’m having some difficulty understanding the purpose and focus of this course. I’m very interested in the topic, but the course description includes a lot of unfamiliar terminology, which is making it hard to grasp the overall objectives.
@@ -315,7 +315,7 @@ Best regards,
 
 
 -- 
-Damir
+[NAME]
 
 
 
@@ -344,7 +344,7 @@ Jun 16, 2025, 10:20 by [EMAIL]:
 > Unsubscribe from AI Hero Emails <https://click.convertkit-mail2.com/0vuk8k89lkb9h97wwophlhvmgn555snh77003/n2h4prp8fquv5ek4kxc6/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==>> . You can also > unsubscribe <https://unsubscribe.convertkit-mail2.com/0vuk8k89lkb9h97wwophlhvmgn555snh77003>>  from all emails at any time.
 >
 >
-> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080
+> [ADDRESS], Ste. B, PMB #97429, Houston, TX 77080
 >
 >
 >
@@ -356,7 +356,7 @@ Jun 16, 2025, 10:20 by [EMAIL]:
 **Answer**
 
 ```text
-Hi Damir,
+Hi [NAME],
 
 
 Thanks for reaching out—happy to clear things up.
@@ -410,7 +410,7 @@ Hey man, I'm interested in the course but it's apparently not for
 beginners, what resources do you recommend going through to finally reach
 that level to take this course?
 
-On Mon, 8 Apr 2024 at 12:16, Dan Abramov <[EMAIL]> wrote:
+[NAME], 8 Apr 2024 at 12:16, Dan Abramov <[EMAIL]> wrote:
 
 > Most programming courses – whether for beginners or professionals– focus
 > more on how to write code rather than how to read code.
@@ -452,7 +452,7 @@ On Mon, 8 Apr 2024 at 12:16, Dan Abramov <[EMAIL]> wrote:
 > - Unsubscribe from All Emails
 > <https://unsubscribe.convertkit-mail.com/zlu9q0xnr0unh4xmr9dtph2k9d500>
 >
-> 12333 Sowden Rd Ste B, PMB#97429, Houston, TX [PHONE]
+> [ADDRESS] Ste B, PMB#97429, Houston, TX [PHONE]
 >
 >
 ```
@@ -460,7 +460,7 @@ On Mon, 8 Apr 2024 at 12:16, Dan Abramov <[EMAIL]> wrote:
 **Answer**
 
 ```text
-Hey Parham, 
+Hey [NAME], 
 
 
 I've heard javascript.info is good. I'd recommend going through the JavaScript Fundamentals sections.
@@ -478,7 +478,7 @@ couple months on my own. Wanted to check if that's going to be sufficient
 experience for the course, thanks!
 -Morgan
 
-On Fri, Dec 9, 2022, 7:25 AM Matt Pocock <[EMAIL]> wrote:
+[NAME], Dec 9, 2022, 7:25 AM [NAME] Pocock <[EMAIL]> wrote:
 
 > We are opened Total TypeScript for pre-sale with a 20% discount. The
 > pre-sale will be available until DATE and closes again until the new year
@@ -580,7 +580,7 @@ On Fri, Dec 9, 2022, 7:25 AM Matt Pocock <[EMAIL]> wrote:
 >
 > Questions? Hit reply.
 >
-> -Matt
+> -[NAME]
 >
 > ​
 >
@@ -590,7 +590,7 @@ On Fri, Dec 9, 2022, 7:25 AM Matt Pocock <[EMAIL]> wrote:
 > <https://unsubscribe.convertkit-mail2.com/d0udwk40p3hmunm6mvam> from all
 > emails at any time.
 >
-> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080
+> [ADDRESS], Ste. B, PMB #97429, Houston, TX 77080
 >
 > ​
 >

@@ -48,7 +48,7 @@ Angular-up.com <http://angular-up.com/>
 Perfect! Thank you!
 
 —
-Kent C. Dodds
+[NAME] C. Dodds
 
 --- original message ---
 On June 26, 2022 at 3:14 AM GMT+2 [EMAIL] wrote:
@@ -63,18 +63,18 @@ Updated!
 **Question**
 
 ```text
-Kent! Thank you for the great 'state of MCP' summary.
+[NAME]! Thank you for the great 'state of MCP' summary.
 We're running an MCP-focused event for 200+ engineering leaders in Seattle
 on Oct. 29. How do we talk you into joining us? We loved your Dev Days talk
 about Jarvis, and your post about MCP Search ... our audience would too.
 This is a community event; not a corporate event.
 Are you available on Oct. 29?
 
-Scott
+[NAME]
 
-On Wed, Aug 20, 2025 at 1:05 PM Kent C. Dodds <[EMAIL]> wrote:
+On Wed, Aug 20, 2025 at 1:05 PM [NAME] C. Dodds <[EMAIL]> wrote:
 
-> Hello Scott!
+> Hello [NAME]!
 >
 > Seems like Model Context Protocol has been all the rage recently. And
 > we’ve got the standard range of feelings about it as well. Some people
@@ -206,7 +206,7 @@ On Wed, Aug 20, 2025 at 1:05 PM Kent C. Dodds <[EMAIL]> wrote:
 > your inbox again before you know it with more practical knowledge to share
 > to help you contribute to this new and growing ecosystem.
 >
-> — Kent
+> — [NAME]
 >
 > P.S. I've been working hard on something I'll be announcing soon. You're
 > not going to want to miss it. Stay tuned!
@@ -225,10 +225,10 @@ On Wed, Aug 20, 2025 at 1:05 PM Kent C. Dodds <[EMAIL]> wrote:
 **Answer**
 
 ```text
-Hey Scott,
+Hey [NAME],
 
 
-We support any questions related to the course and platform functionality, but you’ll have to reach out to Kent directly on X/bluesky/discord or his site for this.
+We support any questions related to the course and platform functionality, but you’ll have to reach out to [NAME] directly on X/bluesky/discord or his site for this.
 
 
 https://x.com/kentcdodds 
@@ -248,7 +248,7 @@ Best,
 Hey team,
 
 
-I hope this email finds you well. I am Konica, working on a campaign for
+I hope this email finds you well. I am [NAME], working on a campaign for
 ChatLLM, our All-in-one AI super assistant.
 
 
@@ -261,13 +261,13 @@ paid sponsorship? If yes, please share your sponsorship rate.
 
 Best,
 
-Konica
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Konica,
+Hey [NAME],
 
 
 We support any questions related to the course and platform functionality, but you can reach out to Matt directly on X/bluesky/discord for this.
@@ -317,7 +317,7 @@ share our detailed sponsorship kit.
 
 Thanks,
 
-The Tech Horizons Club Team
+[NAME] Club Team
 
 [EMAIL]
 
@@ -332,7 +332,7 @@ hack-the-vibe.devpost.com
 Hey,
 
 
-We support any questions related to the course and platform functionality, but you’ll have to reach out to Kent directly on X/bluesky/discord or his site for this.
+We support any questions related to the course and platform functionality, but you’ll have to reach out to [NAME] directly on X/bluesky/discord or his site for this.
 
 
 https://x.com/kentcdodds 
@@ -353,7 +353,7 @@ Hi,
 
 Hope you are having a great day.
 
-We recently did an Interview with Kent on Software Engineering Daily.
+We recently did an Interview with [NAME] on Software Engineering Daily.
 https://softwareengineeringdaily.com/2021/10/29/learning-react-with-kent-c-dodds/
 
 Can you sponsor us an *Epic React Pro (Individual) *course ?
@@ -370,7 +370,7 @@ Best,
 **Answer**
 
 ```text
-Hey Ankur,
+Hey [NAME],
 
 
 Thanks for reaching out!
@@ -387,9 +387,9 @@ https://epicreact.dev?coupon=[REDACTED]
 **Question**
 
 ```text
-Hi Kent
+Hi [NAME]
 
-My name is Daniel and I am the organizer of Uphill Conf. I wanted to ask you if you would like to come and speak at our conference on 24th April 2020. 
+My name is [NAME] and I am the organizer of Uphill Conf. I wanted to ask you if you would like to come and speak at our conference on 24th April 2020. 
  
 Uphill Conf is a single day conference and takes place in Bern, Switzerland. We are a rather small conference with 1 talk track and a more casual “lounge track”.  In addition, we are going to organize full day workshops the day before the conference. 
 
@@ -401,7 +401,7 @@ If you are interested in coming to Switzerland I can send you more detailed info
   
 Best regards,
  
-Daniel
+[NAME]
 
 ---
 
@@ -416,7 +416,7 @@ Other form data:
 **Answer**
 
 ```text
-Hi Daniel! I am honored you'd invite me and as much as I would love to attend, I'm afraid that the timing won't work out for me this year. I wish you the very best on your conference!
+Hi [NAME]! I am honored you'd invite me and as much as I would love to attend, I'm afraid that the timing won't work out for me this year. I wish you the very best on your conference!
 ```
 
 ## cnv_qw1log7
@@ -436,7 +436,7 @@ Thank you for your help.
 
 Best regards,
 
-Stepan Konecny
+[NAME] Konecny
 
 Procurement Administrator
 JetBrains s.r.o.
@@ -445,7 +445,7 @@ JetBrains s.r.o.
 **Answer**
 
 ```text
-Hey Stepan,
+Hey [NAME],
 
 
 I can create an invoice for you, and once it’s paid I’ll provide 100% off coupon codes for you to distribute.
@@ -516,7 +516,7 @@ We support any questions related to course and functionality, you’ll have to c
 **Question**
 
 ```text
-Hi Kent,
+Hi [NAME],
 
 Hope you're doing great. I was wondering whether you would like to come give a talk at the conference (May 14-15) and if possible a workshop on the 12th (9:30am-5:30pm) about React testing. We will also take care of travel and lodging and if you come with your spouse we'll take care of hers too plus a $4000 stipend for the workshop (we'll take care of venue, food, wifi, ticket promotion, etc).
 
@@ -524,7 +524,7 @@ Let me know what you think.
 
 Best,
 
--Patrick 
+-[NAME] 
 
 ---
 
@@ -540,7 +540,7 @@ Other form data:
 **Answer**
 
 ```text
-Hi Patrick!
+Hi [NAME]!
 
 
 I'm honored to be invited! I'm afraid that the timing doesn't work out this year. But I definitely want to attend React Europe one day! Good luck on the conference.
@@ -551,13 +551,13 @@ I'm honored to be invited! I'm afraid that the timing doesn't work out this year
 **Question**
 
 ```text
-Hi Kent!
+Hi [NAME]!
 
 Quick question: would you ever be interested in visiting Portugal and give a talk on [JNation](https://jnation.pt/)? :)
 
 
 Thanks,
-André
+[NAME]é
 
 ---
 
@@ -572,7 +572,7 @@ Other form data:
 **Answer**
 
 ```text
-Hi André,
+Hi [NAME]é,
 
 
 I'm honored you'd think of me! I'm afraid that right now international travel is very hard for me and I don't think that I could make this one work. Maybe in the future. Thanks for reaching out!

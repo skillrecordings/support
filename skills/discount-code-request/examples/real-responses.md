@@ -11,13 +11,13 @@ I missed the Epic React (https://epicreact.dev/ <https://epicreact.dev/>) 40% sa
 
 Thank you.
 
-Venkata Jillella
+[NAME] Jillella
 ```
 
 **Answer**
 
 ```text
-Hey Venkata,
+Hey [NAME],
 
 
 The 40% discount window is over but there is about an hour and a half left for the 30% discount. It is still an extremely valuable purchase!
@@ -57,20 +57,20 @@ Best,
 **Question**
 
 ```text
-Hey Team,
+Hey [NAME],
 
 Follow you on X and love your content as well as what you do for the open source community. I am still learning and getting my foot wet to get from sales into the tech playing field after some years of being just unhappy on the job.
 
 Do you by any chance offer discounts? If not that’s totally fine and will revisit your workshops in a couple of months. 
 
 Best 
-Fabio
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Fabio,
+Hey [NAME],
 
 
 Not at the moment, but when we do It's announced on our newsletter! https://www.totaltypescript.com/newsletter
@@ -106,12 +106,12 @@ I have a training expense of about $470.
 Is it possible for you to give me a further discount?
 
 Thanks,
-Caner
+[NAME]
     On Friday 16 May 2025 at 17:03:12 BST, Total TypeScript <[EMAIL]> wrote:  
  
- #yiv3692200580 .yiv3692200580ck-link {text-decoration:underline;}#yiv3692200580 .yiv3692200580ck-link {text-decoration:underline;}@media only screen {#yiv3692200580 .yiv3692200580email * {}}@media screen and (max-width:384px) {#yiv3692200580 .yiv3692200580mail-message-content {width:414px !important;}}@media only screen {#yiv3692200580 .yiv3692200580email * {}}@media screen and (max-width:384px) {#yiv3692200580 .yiv3692200580mail-message-content {width:414px !important;}}@media only screen and (max-width:600px) {#yiv3692200580 .yiv3692200580ck-mobile-font-size {font-size:50px !important;}}@media only screen and (max-width:600px) {#yiv3692200580 .yiv3692200580ck-mobile-font-size {font-size:50px !important;}} 
+ #yiv[PHONE] .yiv[PHONE]ck-link {text-decoration:underline;}#yiv[PHONE] .yiv[PHONE]ck-link {text-decoration:underline;}@media only screen {#yiv[PHONE] .yiv[PHONE]email * {}}@media screen and (max-width:384px) {#yiv[PHONE] .yiv[PHONE]mail-message-content {width:414px !important;}}@media only screen {#yiv[PHONE] .yiv[PHONE]email * {}}@media screen and (max-width:384px) {#yiv[PHONE] .yiv[PHONE]mail-message-content {width:414px !important;}}@media only screen and (max-width:600px) {#yiv[PHONE] .yiv[PHONE]ck-mobile-font-size {font-size:50px !important;}}@media only screen and (max-width:600px) {#yiv[PHONE] .yiv[PHONE]ck-mobile-font-size {font-size:50px !important;}} 
 | 
-Hello Caner,
+Hello [NAME],
 
 Becoming a TypeScript Wizard is a boon for your work, your team, and your employer.
 
@@ -120,7 +120,7 @@ Many workplaces automatically approve training expenses around $500 or less, so 
 But if you do need boss approval, and you’re not sure what to put in the request, ​I created this template you can use to tell your boss why it’s a great idea​ for them to invest in Total TypeScript Pro Complete:
    
    - TypeScript helps catch errors before production through compile-time checking, saving development time and improving user experience
-   - Team-wide access ensures shared knowledge of TypeScript best practices, enabling faster development and more confident code updates
+   - [NAME]-wide access ensures shared knowledge of TypeScript best practices, enabling faster development and more confident code updates
 
 Best of all, right now, Total TypeScript is on sale — meaning you (or your boss!) can save $239 on the Complete package, plus additional discounts for your team for 5 or more seats so you can level up as a team.
 
@@ -141,7 +141,7 @@ PS: Total TypeScript Pro Essentials​ (included in Pro Complete) is excellent i
 |  
 Unsubscribe from Total TypeScript Spring 2025 Sale Emails. You can also unsubscribe from all emails at any time.
  
-12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080
+[ADDRESS], Ste. B, PMB #97429, Houston, TX 77080
 
 ​
  |
@@ -158,7 +158,7 @@ We will communicate any future discounts/promotions via email so keep an eye on 
 **Question**
 
 ```text
-Dear Matt and Team,
+Dear [NAME] and [NAME],
 
 
 
@@ -169,7 +169,7 @@ Have a good day,
 
 
 
-Best Regards,
+Best [NAME],
 
 Ilya.
 
@@ -182,7 +182,7 @@ Ilya.
 
 
 
-Hey Ilya Zolotov,
+Hey [NAME],
 
 I love TypeScript for its community. They're generous, curious, and fiercely inventive.
 
@@ -303,7 +303,7 @@ Check out the https://click.convertkit-mail2.com/qdumrxpdvns7h7xogqnslh8lgxkkkb4
 https://click.convertkit-mail2.com/qdumrxpdvns7h7xogqnslh8lgxkkkb4/wnh2h6uw0op89et7/aHR0cHM6Ly90b3RhbHR5cGVzY3JpcHQuY29t and save 35%!
 
 
--Matt
+-[NAME]
 
 ​
 
@@ -317,7 +317,7 @@ https://click.convertkit-mail2.com/qdumrxpdvns7h7xogqnslh8lgxkkkb4/wnh2h6uw0op89
 
 ​https://unsubscribe.convertkit-mail2.com/qdumrxpdvns7h7xogqnslh8lgxkkkb4 from Total TypeScript emails
 
-12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080
+[ADDRESS], Ste. B, PMB #97429, Houston, TX 77080
 ```
 
 **Answer**
@@ -331,7 +331,7 @@ The price is set to increase, so the displayed price is the discounted price. So
 **Question**
 
 ```text
-Hi Matt,
+Hi [NAME],
 
 I like your content. I would really appreciate if you could give me a 60%
 discount without regional restrictions as I travel a lot.
@@ -366,15 +366,15 @@ Could I please have a discount code? I would appreciate this greatly please!
 
 Thank you and I look forward to your reply.
 
-Regards,
+[NAME],
 
-Izunna
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Izunna,
+Hey [NAME],
 
 
 Thanks for reaching out!
@@ -392,7 +392,7 @@ However, if you're able to purchase either the Basic or Standard package, you'll
 **Question**
 
 ```text
-Hello Team,
+Hello [NAME],
 
 As Kent suggested me I finished the email course which was supposed to give
 me a surprise discount to purchase Epic React course. I haven't received
@@ -404,7 +404,7 @@ Thank You
 **Answer**
 
 ```text
-Hi Rahul,
+Hi [NAME],
 
 
 Here's a 40% discount for you :) https://epicreact.dev/?coupon=[REDACTED]
@@ -427,14 +427,14 @@ be very appreciative.
 Source: https://bsky.app/profile/tjblackman08.bsky.social/post/3mddx43uy4k2s
 
 Thank you,
-Trevor
+[NAME]
 ```
 
 **Answer**
 
 ```text
 
-Hi Trevor,
+Hi [NAME],
 
 
 I hope this helps: https://www.epicai.pro/workshops/epic-mcp-from-scratch-to-production?coupon=coupon_mr2rn

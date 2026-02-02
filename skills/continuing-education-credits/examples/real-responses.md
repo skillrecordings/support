@@ -18,14 +18,14 @@ Can you help please? For example, let me/them know how long each workshop is?
 **Answer**
 
 ```text
-Hey Grace,
+Hey [NAME],
 
 
 Sorry, I was splitting the total average. Tracking your own times Is probably best right now. 
 
 
 
-Also, Marcy Is working with the certification team at IAAP so we can give correct and accurate credits per workshop. 
+Also, [NAME] Is working with the certification team at IAAP so we can give correct and accurate credits per workshop. 
 
 
 Let me know If you need anything else.
@@ -71,7 +71,7 @@ Any thoughts you have would be greatly appreciated.
 United in Accessibility
 
 
-Ellen Strom
+[NAME] Strom
 
 Certification Program Assistant, Global Initiative for Inclusive ICTs (G3ict)
 
@@ -88,7 +88,7 @@ United States |Eastern Time Zone
 **Answer**
 
 ```text
-— Haze ----------- Forwarded message ----------- From: [EMAIL] Date: December 17, 2025 at 5:43 AM PST Subject: Marcy Sutton Testing Accessibility Course To: [EMAIL] Hello! I work on the certification team at IAAP, reviewing education credit requests.&nbsp; I got this question today:&nbsp; can you tell me how many CAEC credits this course is worth please? It has taken me 20 hours to complete but is self paced. It is unclear how many I could submit a claim for. We typically go off the # of hours documented on the website or on a certificate of completion.&nbsp; I don't see anything like that on your website.&nbsp; Do you have a suggestion on what we should award for your 6 workshops? Foundations of Accessibility Design Thinking and People Skills for Accessibility Manual Accessibility Testing Semantic markup with HTML and ARIA Coding Accessible Interactions and Mechanics Automated Accessibility Testing Some examples from other providers: We award 15 credits (total of 45) for the DHS trusted tester Deque has the # of credits earned on each of their course completion certificates. Any thoughts you have would be greatly appreciated. U nited in Accessibility&nbsp;&nbsp; Ellen Strom Certification Program Assistant, Global Initiative for Inclusive ICTs (G3ict)&nbsp; International Association of Accessibility Professionals (IAAP), a Division of G3ict&nbsp;&nbsp; LinkedIn &nbsp;| G3ict &nbsp;| IAAP &nbsp;| M-Enabling &nbsp; United States |Eastern Time Zone &nbsp; Register now
+— Haze ----------- Forwarded message ----------- From: [EMAIL] Date: December 17, 2025 at 5:43 AM PST Subject: [NAME] Sutton Testing Accessibility Course To: [EMAIL] Hello! I work on the certification team at IAAP, reviewing education credit requests.&nbsp; I got this question today:&nbsp; can you tell me how many CAEC credits this course is worth please? It has taken me 20 hours to complete but is self paced. It is unclear how many I could submit a claim for. We typically go off the # of hours documented on the website or on a certificate of completion.&nbsp; I don't see anything like that on your website.&nbsp; Do you have a suggestion on what we should award for your 6 workshops? Foundations of Accessibility Design Thinking and People Skills for Accessibility Manual Accessibility Testing Semantic markup with HTML and ARIA Coding Accessible Interactions and Mechanics Automated Accessibility Testing Some examples from other providers: We award 15 credits (total of 45) for the DHS trusted tester Deque has the # of credits earned on each of their course completion certificates. Any thoughts you have would be greatly appreciated. U nited in Accessibility&nbsp;&nbsp; [NAME] Strom Certification Program Assistant, Global Initiative for Inclusive ICTs (G3ict)&nbsp; International Association of Accessibility Professionals (IAAP), a Division of G3ict&nbsp;&nbsp; LinkedIn &nbsp;| G3ict &nbsp;| IAAP &nbsp;| M-Enabling &nbsp; United States |Eastern Time Zone &nbsp; Register now
 ```
 
 ## cnv_1jc2mqud
@@ -96,7 +96,7 @@ United States |Eastern Time Zone
 **Question**
 
 ```text
-Hi Marcy,
+Hi [NAME],
 
 I work with the certification team at IAAP. I have a certification holder who is
 asking if we award education credits for your workshops. After reviewing your
@@ -107,13 +107,13 @@ recommendation for the # of hours for each workshop?
 
 Best,
 
-Ellen
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Ellen
+Hey [NAME]
 
 
 Each workshop's time varies, but typically a single workshop can be completed within a week if you dedicate 2-3 hours per day.
@@ -129,7 +129,7 @@ With 6 workshops in the Professional tier, you can expect to finish within 6-8 w
 Hi, I am looking to take the Testing Accessibility training with learning and development funds from my organization. The organization requires the training to provide an Address, Telephone Number, and number of hours for the training. Would you be able to provide that so I can get it approved?
 
 Best,
-Joe
+[NAME]
 ```
 
 **Answer**
@@ -156,7 +156,7 @@ We are trying to assist the employee how to properly submitting their applicatio
 
 Thank you in advance for your help.
 
-Tanya Kurkowski (she/her/hers)
+[NAME] Kurkowski (she/her/hers)
 Senior Supervisor, Employee Services | Bright Horizons EdAssist Solutions
 E: [EMAIL]<mailto:[EMAIL]>
 [cid:image003.png@01D45FD9.7D360060]  [cid:image007.png@01D3DE40.B07CF9D0] <https://www.linkedin.com/company/edassist>  [cid:image008.png@01D3DE40.B07CF9D0] <https://www.facebook.com/EdAssist>  [cid:image009.png@01D3DE40.B07CF9D0] <https://twitter.com/edassist_bh>  [cid:image010.png@01D3DE40.B07CF9D0] <http://blogs.brighthorizons.com/saw/category/tuition-assistance/>
@@ -166,9 +166,8 @@ Out of Office: 3/24-4/1
 
 Internal Reference# [PHONE]
 
-Bright Horizons Children's Centers LLC., 2 Wells Ave. Newton, MA 02459 USA
-Bright Horizons Family Solutions Limited (Co. No. [PHONE]), r/o 2 Crown
-Court, Rushden, Northamptonshire NN10 6BS UK
+Bright Horizons Children's Centers LLC., [ADDRESS] Newton, MA 02459 USA
+Bright Horizons Family Solutions Limited (Co. No. [PHONE]), r/o [ADDRESS], Rushden, Northamptonshire NN10 6BS UK
 
 This e-mail and any attachments to it are intended only for the addressee
 and may contain information which is confidential and/or legally privileged.
@@ -184,7 +183,7 @@ amendment to or deletion of or from this e-mail.
 **Answer**
 
 ```text
-Hey Tanya,
+Hey [NAME],
 
 
 The Epic React Pro course is designed to be (once purchased) completed however the user sees fit - So the workshops do not have any time restrictions for when they need to be completed and the user can access the course whenever they would like for however long they need it which makes it yours forever. 
@@ -233,7 +232,7 @@ Will there be any credit or degree provided after the course completion?
 because it is required for me to reimburse the course fee from my company.
 
 Thanks
-Srikanth
+[NAME]
 ```
 
 **Answer**

@@ -12,7 +12,7 @@ joining from AEST time zone and if the cohort is only during US day time,
 it gets pretty late for folks here to join.
 
 Thanks,
-Eshaan
+[NAME]
 ```
 
 **Answer**
@@ -56,7 +56,7 @@ I hope that helps!
 **Question**
 
 ```text
-Hi Matt,
+Hi [NAME],
 
 I’m interested in joining the cohort, but I’m wondering if next week is
 the right time for me given the heavy holidy schedule.
@@ -65,14 +65,14 @@ Do you have any idea when future cohorts will be held?
 
 Thank you,
 
-Emilio
+[NAME]
 
-On December 3, 2025, "Matt Pocock (AI Hero)" <[EMAIL]> wrote:
+On December 3, 2025, "[NAME] Pocock (AI Hero)" <[EMAIL]> wrote:
 >  cohort enrollment closes Friday Dec 5th!
 >
 >  ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­
 >
-> Hello Emilio,
+> Hello [NAME],
 >
 > Learning AI by building a project is the best way to learn.
 >
@@ -123,7 +123,7 @@ On December 3, 2025, "Matt Pocock (AI Hero)" <[EMAIL]> wrote:
 > ​ENROLL NOW <https://click.convertkit-
 > mail2.com/gku5nm45wzu5hlxl9m2trh8wm4v99bmh99rrl/l2heh6ulrr8megc6/aHR0cHM6Ly93d3cuYWloZXJvLmRldi9jb2hvcnRzL2J1aWxkLXlvdXItb3duLWFpLXBlcnNvbmFsLWFzc2lzdGFudC1pbi10eXBlc2NyaXB0>​
 >
-> -Matt
+> -[NAME]
 >
 > Unsubscribe from AI Hero Emails <https://click.convertkit-
 > mail2.com/gku5nm45wzu5hlxl9m2trh8wm4v99bmh99rrl/48hkn9nlb7umgg4dlzhx/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==>.
@@ -131,7 +131,7 @@ On December 3, 2025, "Matt Pocock (AI Hero)" <[EMAIL]> wrote:
 > mail2.com/gku5nm45wzu5hlxl9m2trh8wm4v99bmh99rrl> from all emails at
 > any time.
 >
-> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080
+> [ADDRESS], Ste. B, PMB #97429, Houston, TX 77080
 >
 > ​
 >
@@ -140,7 +140,7 @@ On December 3, 2025, "Matt Pocock (AI Hero)" <[EMAIL]> wrote:
 **Answer**
 
 ```text
-Hey Emilio,
+Hey [NAME],
 
 
 Thank you for your interest! But, we don't currently have a date planned for the next cohort.
@@ -151,11 +151,11 @@ Thank you for your interest! But, we don't currently have a date planned for the
 **Question**
 
 ```text
-Hi Kent,
+Hi [NAME],
 we love your work, blogs and courses. Do you have any timelines for the advanced react / hooks workshops ? Me and my team would like to attend to those online curses if possible.
 
 Thanks and take care,
-Mat
+[NAME]
 
 ---
 
@@ -170,7 +170,7 @@ Other form data:
 **Answer**
 
 ```text
-Hey Mat,
+Hey [NAME],
 
 
 No problem!
@@ -184,13 +184,13 @@ I've transferred the license to [EMAIL]. Let me know if you have any issues acce
 **Question**
 
 ```text
-Hey Kent,
+Hey [NAME],
 
 Can you provide a link to the next cohort?
 
-Nuno
+[NAME]
 
-On Fri, Nov 14, 2025, 15:37 Kent C. Dodds <[EMAIL]> wrote:
+On Fri, Nov 14, 2025, 15:37 [NAME] C. Dodds <[EMAIL]> wrote:
 
 > Hi skew,
 >
@@ -331,7 +331,7 @@ On Fri, Nov 14, 2025, 15:37 Kent C. Dodds <[EMAIL]> wrote:
 > hearing more from me in the coming weeks about the things I’m learning and
 > sharing.
 >
-> — Kent
+> — [NAME]
 >
 > ​
 > ​
@@ -350,7 +350,7 @@ On Fri, Nov 14, 2025, 15:37 Kent C. Dodds <[EMAIL]> wrote:
 **Answer**
 
 ```text
-Hey Nuno,
+Hey [NAME],
 
 
 Right now we're working on getting Mastering MCP to a fully self-paced experience and will also release In December four of our past MCP workshops. 
@@ -365,8 +365,8 @@ We don't have an exact time frame for when the next cohort will be, but you can 
 **Question**
 
 ```text
-Hello! My name is Asier and I was wondering when a new cohort would be
-available to join and learn about MCP from Kent.
+Hello! My name is [NAME] and I was wondering when a new cohort would be
+available to join and learn about MCP from [NAME].
 I'm really looking to jump on this technology with a guided tutor.
 
 Thanks a lot.
@@ -375,7 +375,7 @@ Thanks a lot.
 **Answer**
 
 ```text
-Hey Asier,
+Hey [NAME],
 
 
 We don't have a confirmed date right now, but whenever we do It will be announced on our newsletter! https://www.epicai.pro/newsletter​
@@ -397,13 +397,13 @@ the time comes!
 
 Thanks a lot,
 
-Ronnie
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Ronnie,
+Hey [NAME],
 
 
 Sorry we didn't get back to this email! We're running a new cohort and course right now If you're interested https://www.aihero.dev/ 
@@ -417,10 +417,10 @@ Best,
 **Question**
 
 ```text
-Hey Matt!
+Hey [NAME]!
 Will there be new course cohort soon?
 
-Best regards, Anton Novoselov
+Best regards, [NAME] Novoselov
 
 
 On Thu, Jul 24, 2025 at 10:55 AM AI Hero <[EMAIL]> wrote:
@@ -433,17 +433,17 @@ On Thu, Jul 24, 2025 at 10:55 AM AI Hero <[EMAIL]> wrote:
 >
 > Cheers,
 >
-> Matt Pocock
+> [NAME] Pocock
 > unsubscribe
 > <https://subscriptions.pstmrk.it/unsubscribe?m=1.n6dDHM1YRElvEVR8ScS8JA.8ZKMviJit60QwDLJbNR_tCTMsB9y95zMk4imQJfmZjO-LGDThpo6Pf1RE1ArlKwJ3rd6N_vt74cHM9Zelq6RvwdmGvSMG5TyRulYSQgmcvZFLIdTRw62yKhr5hy8VdrwfZ16S4WRXSvUGMy4CCTgeCp5CnL--BtQOxSoJQ_AMdJRwbpR4dnBmjm07Y60nF6kSaDExSMO4E1IU-Om4o6WSma_hLYzEa4-pJdQwq1s0BUDxBH9Hd-NTjjzsbOLT012aSMVngd8NH8WmzJnJ9mvGzbBwDww9QX3nEp-B_4SMSInm1zi-zNgL2w79_SrE6XJrhEVf_wme541Zp244TMEgD2bbgPdG6fWbkDKqhTub7AebRwj-vvRBYATubYEW7_a_Lx9rfvP63691GCUZEgoJKkXSi7v4vnJ4WPH2vcKG7PNSMg8UjUW26JJH7EO-WX4XviB9nk5w2INrWBmd2qcIRwRFRRWtfhvj5gc5EdOEObPSGZIMB7AssUZnaNhOXBEQSaPkir2mbhBV-0X4dT1AhZcF7gcesQZYmP9DM5i238>
-> 12333 Sowden Rd, Ste. B, PMB #97429 Houston, TX [PHONE]
+> [ADDRESS], Ste. B, PMB #97429 Houston, TX [PHONE]
 >
 ```
 
 **Answer**
 
 ```text
-Hey Anton,
+Hey [NAME],
 
 
 Sorry we never got around to this email! We do have a new cohort going on right https://www.aihero.dev/cohorts/build-your-own-ai-personal-assistant-in-typescript 
@@ -465,7 +465,7 @@ Just like to inquire regarding the upcoming workshop on Sept 22-Oct 3 what
 time is the workshop? TIA
 
 Cheers,
-Ivy
+[NAME]
 ```
 
 **Answer**
@@ -484,21 +484,21 @@ Everything else can fit into whatever schedule you have for yourself. Expect to 
 **Question**
 
 ```text
-Hi Team,
+Hi [NAME],
 
 May I know the schedule for Epic React workshop, it seems we are week away
 and like to plan accordingly
 
 
 Thanks,
-Sudarsan Reddy K
+[NAME] Reddy K
 Mob: [PHONE]
 ```
 
 **Answer**
 
 ```text
-Hi Sudarsan,
+Hi [NAME],
 
 
 The workshop is self-paced. It's a lot of material though. It could take you anywhere between 1-6 months to do it based on your level of experience.

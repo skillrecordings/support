@@ -44,21 +44,21 @@ Can someone please help me out with this?
 I am looking to do 9 KCD Bundles and 5 standalone testing.
 
 Many thanks,
-Jonathan
+[NAME]
 
 -- 
 
-Jonathan Lemon
+[NAME] Lemon
 
 Sonos | Software Engineering Manager | Go to Market
 
-[EMAIL] | ([PHONE] | he/him/his
+[EMAIL] | [PHONE] | he/him/his
 ```
 
 **Answer**
 
 ```text
-Hey Jonathan,
+Hey [NAME],
 
 
 Thanks for reaching out!

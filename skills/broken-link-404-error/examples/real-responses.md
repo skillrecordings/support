@@ -41,7 +41,7 @@ On Thu, 29 Jan 2026 at 19:39, Matt Pocock (AI Hero) <[EMAIL]> wrote:
 > <https://7751c435.unsubscribe.convertkit-mail2.com/lmu0l0qdr0s6u0v3ko8t6h8kxn400igh77eel>
 > from all emails at any time.
 >
-> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080
+> [ADDRESS], Ste. B, PMB #97429, Houston, TX 77080
 >
 > ​
 >
@@ -94,16 +94,16 @@ wrote:
 >
 > ​Unsubscribe
 > <https://unsubscribe.convertkit-mail2.com/zlunm3v8owunhkkmglqcphwrpd000i6>
-> from Total TypeScript emails
+> from [NAME] TypeScript emails
 >
-> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080
+> [ADDRESS], Ste. B, PMB #97429, Houston, TX 77080
 >
 ```
 
 **Answer**
 
 ```text
-Hey Drew,
+Hey [NAME],
 
 
 The link should be working now! Thanks for the heads up.
@@ -157,9 +157,9 @@ On Tue, Mar 11, 2025 at 18:18 Matt Pocock <[EMAIL]> wrote:
 >
 > ​Unsubscribe
 > <https://unsubscribe.convertkit-mail2.com/k0ukqpg7rdb6h55o7xkflhovzw777s8>
-> from Total TypeScript emails
+> from [NAME] TypeScript emails
 >
-> 12333 Sowden Rd, Ste. B
+> [ADDRESS], Ste. B
 > <https://www.google.com/maps/search/12333+Sowden+Rd,+Ste.+B?entry=gmail&source=g>,
 > PMB #97429, Houston, TX 77080
 >
@@ -168,7 +168,7 @@ On Tue, Mar 11, 2025 at 18:18 Matt Pocock <[EMAIL]> wrote:
 **Answer**
 
 ```text
-Hey Kevin,
+Hey [NAME],
 
 
 The link should be working now! Thanks for the heads up.
@@ -185,25 +185,25 @@ Best,
 **Question**
 
 ```text
-Hey Total!
+Hey [NAME]!
 
 I can't access the course via the link I sent, I get a 404 status and in
 the network tab of the console I'm just redirected.
 Can you help me please?
 
- Adriano G. Salles Ferreira
+ [NAME] G. Salles Ferreira
  Porto Alegre - RS
- Cel: (051) [PHONE]
+ Cel: [PHONE]94
  E-mail: [EMAIL]
  Linkedin: https://www.linkedin.com/in/adriano-salles-69230aa2/
 
 
 
-Em qua., 22 de jan. de 2025 às 09:42, Total TypeScript <
+Em qua., 22 de jan. de 2025 às 09:42, [NAME] TypeScript <
 [EMAIL]> escreveu:
 
-> [image: Total TypeScript]
-> Log in as *adrianogsallesf@gmail​.com* to Total TypeScript.
+> [image: [NAME] TypeScript]
+> Log in as *adrianogsallesf@gmail​.com* to [NAME] TypeScript.
 > Log in
 > <https://www.totaltypescript.com/api/auth/callback/email?callbackUrl=https%3A%2F%2Fwww.totaltypescript.com%2F&token=[REDACTED]&email=adrianogsallesf%40gmail.com>
 >
@@ -220,7 +220,7 @@ Em qua., 22 de jan. de 2025 às 09:42, Total TypeScript <
 **Answer**
 
 ```text
-Hey Adriano,
+Hey [NAME],
 
 
 I've sent you a new login link. Let me know If that one still doesn't work!
@@ -245,16 +245,16 @@ https://www.aihero.dev/11-tips-for-ai-coding-with-ralph-wiggum?ck_subscriber_id=
 
 Thanks,
 
-Micky
+[NAME]
 
 ________________________________
 From: Matt Pocock (AI Hero) <[EMAIL]>
 Sent: Thursday, January 29, 2026 1:24:50 PM
-To: Micky Thompson <[EMAIL]>
+To: [NAME] Thompson <[EMAIL]>
 Subject: 11 Tips For Coding With Ralph Wiggum
 
 
-Hey Micky,
+Hey [NAME],
 
 What if you could point an AI at your codebase and have it ship features for hours while you're completely away from the keyboard?
 
@@ -272,7 +272,7 @@ Matt
 
 Unsubscribe from AI Hero Emails<https://7751c435.click.convertkit-mail2.com/v8ug83ogdpfmux3pknztghv3xwmllh9hrrdde/g3h72p2wcwumgrrwepur/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==>. You can also unsubscribe<https://7751c435.unsubscribe.convertkit-mail2.com/v8ug83ogdpfmux3pknztghv3xwmllh9hrrdde> from all emails at any time.
 
-12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080
+[ADDRESS], Ste. B, PMB #97429, Houston, TX 77080
 
 ​
 
@@ -332,7 +332,7 @@ On 29 Jan 2026 at 19:24 +0000, Matt Pocock (AI Hero) <[EMAIL]>, wrote:
 > ​Read the full article →
 > Matt
 > Unsubscribe from AI Hero Emails. You can also unsubscribe from all emails at any time.
-> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080
+> [ADDRESS], Ste. B, PMB #97429, Houston, TX 77080
 >
 ```
 
@@ -377,7 +377,7 @@ Hrmm this is what I’ve seeing when I click “Read the full article”
 > 
 > Unsubscribe from AI Hero Emails <https://7751c435.click.convertkit-mail2.com/o8upgkzngqawuklr842hvhqzd58rraoh99mmp/g3h72p2wcwumgrrwepur/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9YWlfaGVybw==>. You can also unsubscribe <https://7751c435.unsubscribe.convertkit-mail2.com/o8upgkzngqawuklr842hvhqzd58rraoh99mmp> from all emails at any time.
 > 
-> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080
+> [ADDRESS], Ste. B, PMB #97429, Houston, TX 77080
 > 
 > ​
 ```
@@ -457,7 +457,7 @@ The Get Access button points to https://www.epicai.pro/cohorts/undefined.
 **Answer**
 
 ```text
-Hey Josh,
+Hey [NAME],
 
 
 Thanks for the heads up! We took note of that.

@@ -2,7 +2,7 @@
 ## Example
 
 **Customer:**
-Hi Matt,
+Hi [NAME],
 I think I do not need this course right now, can I get refund of this and could
 you please unenroll me from this course.
 
@@ -20,7 +20,7 @@ Best,
 ## Example
 
 **Customer:**
-Hi Kent,
+Hi [NAME],
 I think I do not need this course as of now, can I get the refund for this?
 
 
@@ -77,8 +77,7 @@ require for the refund.
 
 Account: [EMAIL]
 
-Best Regards
-Denis
+Best [NAME]
 
 
 **Agent:**
@@ -100,11 +99,11 @@ minutes long.
 I don't want to pay 25$ for a content that is barely an hour long. Please
 refund my payment.
 Sincerely,
-Tayfun Ozdemir.
+[NAME] Ozdemir.
 
 
 **Agent:**
-Hey Tayfun,
+Hey [NAME],
 
 
 We always refund If Its within 30 days. Sorry your request took a while to get back to. 
@@ -131,7 +130,7 @@ For now I would like to get a refund since I purchased this using my
 priva
 
 **Agent:**
-Hey Daniel, 
+Hey [NAME], 
 
 
 No worries. We've initiated a refund. It can take 5-10 days for the banks to reconcile and return the money to your account.
@@ -145,7 +144,7 @@ the shortcut.
 
 
 **Agent:**
-Hey Andreas, 
+Hey [NAME], 
 
 
 We've initiated a refund. It can take 5-10 days for the banks to reconcile and return the money to your account.

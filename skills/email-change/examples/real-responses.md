@@ -12,7 +12,7 @@ address, where it should be my personal one (updated by your support team
 in 2024) and I'm afraid that would b
 
 **Agent:**
-Hey Vasco,
+Hey [NAME],
 
 
 I went ahead and updated your accounts info to be [EMAIL]. Let me know If that works now. 
@@ -48,7 +48,7 @@ www.commercetools.com <http://www.commercetools.com/>
 
 
 **Agent:**
-Hey Rafa,
+Hey [NAME],
 
 
 I've transferred your license to [EMAIL]! Let me know If you run into any issues.
@@ -106,12 +106,12 @@ Hi,
 I would like to know if it would be possible to change my email address that the sign-in link is sent to for the Just JavaScript content. I would like to change this from the email in the invoice ([EMAIL]) to [EMAIL], would that be possible?
 
 Many thanks,
-Nomaira
+[NAME]
 
 
 
 **Agent:**
-Hey Nomaira,
+Hey [NAME],
 
 
 I've transferred your license to [EMAIL]! Let me know If you run into any issues.
@@ -147,7 +147,7 @@ company email account might not be available later because of oncoming merger.
 
 
 **Agent:**
-Hey Pankaj,
+Hey [NAME],
 
 
 I've transferred your license to [EMAIL] 
@@ -169,11 +169,11 @@ lost the domain. Could you help me get my access back?
 Thanks.
 
 Kind regards,
-Mark
+[NAME]
 
 
 **Agent:**
-Hey Mark,
+Hey [NAME],
 
 
 Looks like you're logged In under Epic Web. The products you own are on the Epic React site https://www.epicreact.dev.

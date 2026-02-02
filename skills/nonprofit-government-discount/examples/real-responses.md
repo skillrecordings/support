@@ -54,9 +54,7 @@ VAT-ID: DE129515865.
 
 If you have any questions, feel free to contact me.
 
-Best Regards
-
-Patrick Steil
+Best [NAME]
 Procurement
 Administrative Management (AM)
 
@@ -78,7 +76,7 @@ they are the same invoice as the one you've got access to so you can make a copy
 **Question**
 
 ```text
-Hi Simon,
+Hi [NAME],
 
 Keen to take part in the Multi-Theme Strategy with Tailwind CSS workshop…
 
@@ -117,7 +115,7 @@ We’re looking to buying 10 seats for your course for our organization and were
 Thank you,
 
 
-Herlander Diogo Pinto
+[NAME]
 
 Tech Lead @ Canadahelps
 
@@ -158,7 +156,7 @@ Respectfully,
 [cid:7e2f1a66-bc08-49b0-8f87-8dbdacd4da8d]<https://www.linkedin.com/company/vilnius-city-municipality/?originalSubdomain=lt>
 
 
-Monika Lapinskaitė
+[NAME] Lapinskaitė
 
 Organizacijos vystymo grupės
 
@@ -168,13 +166,13 @@ ________________________________
 
 [EMAIL]
 
-+[PHONE]
+[PHONE]
 ```
 
 **Answer**
 
 ```text
-Hey Monika,
+Hey [NAME],
 
 
 We can't invoice for the PPP discount. You'll have to use the self checkout option and select the regional discount checkmark: https://www.epicreact.dev/buy 
@@ -218,11 +216,11 @@ You can see more on Acumen and our mission here:
 Thanks for your time and consideration,
 
 
-Joshua Maddox
+[NAME] Maddox
 Associate Director
 Acumen
 
-444 Spear Street, Suite 213
+[ADDRESS], Suite 213
 San Francisco, CA 94105
 [EMAIL]
 
@@ -235,7 +233,7 @@ on the web<http://www.acumen.org/> \\ on twitter<http://twitter.com/acumen> \\ o
 **Answer**
 
 ```text
-Hey Joshua,
+Hey [NAME],
 
 
 Apologies again for the delay!
@@ -244,7 +242,7 @@ Apologies again for the delay!
 Here are two coupons to buy the course at the regionally discounted prices:
 
 
-Kenya (50% discount) - https://epicreact.dev?coupon=[REDACTED]
+Kenya (50% discount) - https://epicreact.dev?coupon=a[PHONE]fa8d1c9
 Nigeria (70% discount) - https://epicreact.dev/?coupon=[REDACTED]
 
 
@@ -261,7 +259,7 @@ Let me know if you have any questions or need anything else!
 ```text
 Hi,
 
-We would like to order this workshop Get Really Good at React | Epic React by Kent C. Dodds (epic react pro)<https://epicreact.dev/>
+We would like to order this workshop Get Really Good at React | Epic React by [NAME] C. Dodds (epic react pro)<https://epicreact.dev/>
 
 Would it be possible for us as a government authority to pay the workshop via invoice?
 
@@ -302,13 +300,13 @@ I need a quote so that I can purchase training.
 Is it possible to receive a quote?
 
 Thanks
-Ray Sisneros
+[NAME] Sisneros
 ```
 
 **Answer**
 
 ```text
-Hey Ray,
+Hey [NAME],
 
 
 I've attached your quote.
@@ -322,7 +320,7 @@ Please let me know if you have any questions!
 **Question**
 
 ```text
-Hi Kent, I love your work!
+Hi [NAME], I love your work!
 
 
 

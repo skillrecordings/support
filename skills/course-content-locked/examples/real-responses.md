@@ -14,7 +14,7 @@ get redirected back to the homepage, please check the video attached.
 Can you help me?
 
 Thank you,
-Sanja
+[NAME]
 
 On Tue, Dec 23, 2025 at 12:17 AM Epic AI Pro <[EMAIL]> wrote:
 
@@ -46,7 +46,7 @@ On Tue, Dec 23, 2025 at 12:17 AM Epic AI Pro <[EMAIL]> wrote:
 **Answer**
 
 ```text
-Hey Sanja,
+Hey [NAME],
 
 
 We got this fixed by removing the start learning button from the page It's broken on. It was added before other features. 
@@ -96,7 +96,7 @@ wrote:
 > ​
 >
 > ​
-> -Matt
+> -[NAME]
 >
 > PS Be on the lookout for a sale coming to Total TypeScript, you won’t want
 > to miss it!
@@ -110,7 +110,7 @@ wrote:
 > <https://unsubscribe.convertkit-mail2.com/68u8ok45w8i8h56x0rguohp6ddokkh9>
 > from all emails at any time.
 >
-> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080
+> [ADDRESS], Ste. B, PMB #97429, Houston, TX 77080
 >
 > ​
 >
@@ -119,7 +119,7 @@ wrote:
 **Answer**
 
 ```text
-Hey Meehir,
+Hey [NAME],
 
 
 This was a bug on our end! Should be working now.
@@ -136,7 +136,7 @@ Best,
 **Question**
 
 ```text
-Hi Team,
+Hi [NAME],
 
 First of all I would like to thank the team for putting up such a wonderful
 course, so addictive that I even look to upskill during the weekend. I had
@@ -153,7 +153,7 @@ Thanks in advance for your help.
 **Answer**
 
 ```text
-Hey Bharat,
+Hey [NAME],
 
 
 It looks like you bought the course using the regional discount. This can happen if you're using a VPN or anything that might move your location from the place you bought It (India). 
@@ -215,20 +215,20 @@ If you're still running into any issues let me know.
 **Question**
 
 ```text
-Hi Matt,
+Hi [NAME],
 
 I cannot access the Pro Workshop content. I am getting errors on the screenshots. I tried cleaning the cache. logging out and logging in again and checking that in my purchase history, I can still see that Complete Volume is still there.
 
 Is there any ongoing maintenance?
 
 Best,
-Fatih
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hi Fatih,
+Hi [NAME],
 
 
 We recently had an update, so this should be working now. 
@@ -251,7 +251,7 @@ show lock icons instead.
 **Answer**
 
 ```text
-Hi Arkadiusz,
+Hi [NAME],
 
 
 We recently had an update, so this should be working now. 
@@ -314,7 +314,7 @@ Please rectify.
 
 Thanks
 
-On Fri, Mar 3, 2023 at 7:53 PM Testing Javascript with Kent C. Dodds <
+[NAME], Mar 3, 2023 at 7:53 PM Testing Javascript with Kent C. Dodds <
 [EMAIL]> wrote:
 
 > Hi!

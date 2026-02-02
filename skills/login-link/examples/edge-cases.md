@@ -34,12 +34,12 @@ Hi,
 I'm trying to login in Epic AI Pro to watch Master the Model Context Protocol course, I got it in 16/09, but I didn't receive any e-mail to login. Can you help me, please?
 
 Atenciosamente,
-Henrique Cícero
+[NAME] Cícero
 ```
 
 **Answer:**
 ```
-Hey Henrique,
+Hey [NAME],
 
 
 I did some digging and it looks like our emails are getting blocked by Spamhaus. We've made an appeal to be taken off that list. 
@@ -54,7 +54,7 @@ Thanks for bringing this issue up! We appreciate that.
 ## Example 3 (cnv_gjpm5tz)
 **Question:**
 ```
-Hi Team,
+Hi [NAME],
 
 I purchased course from the site on IST15th Sep 2022 , but as mentioned
 didn't receive any email from [EMAIL] to access the course. My
@@ -64,12 +64,12 @@ Attaching the screenshot for reference.
 
 [image: image.png]
 Thanks and Regards,
-Snehal
+[NAME]
 ```
 
 **Answer:**
 ```
-Hey Snehal,
+Hey [NAME],
 
 
 We're having trouble reaching you because are attempts so far have resulted in failed deliveries due to your email inbox being over quota.

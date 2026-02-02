@@ -13,7 +13,7 @@ Since this is a remote session, I wanted to make sure before hand that I
 have the meeting link.
 
 Regards,
-Rahul Nair[image: Screenshot 2025-07-09 at 11.26.12 AM.png]
+[NAME][image: Screenshot 2025-07-09 at 11.26.12 AM.png]
 ```
 
 **Answer**
@@ -142,14 +142,14 @@ I guess it is probably related to Discord but it's 3am so I am not in
 the mood to look further. Hope the above error is enough to help you figure
 out the solution
 
-Note that I owned Epic React V1 and have joined your discord a long time
+Note that I owned [NAME] React V1 and have joined your discord a long time
 ago.
 ```
 
 **Answer**
 
 ```text
-Hello Pakapon,
+Hello [NAME],
 
 
 I pushed some overly strict validation a while ago. This should be working again now with the latest version. Can you run:
@@ -162,32 +162,32 @@ from within the workshop directory, and then try again. It should be working now
 **Question**
 
 ```text
-Hi Kent!
+Hi [NAME]!
 
 Nice to meet you. I’m looking forward to the MCP workshop tomorrow. I seem to recall seeing some instructions about how to prepare for a workshop but I can’t seem to find the link. Is there anything specific to prepare for the workshop tomorrow? See you there!
 
 Thanks!
 
-Kevin Maes
+[NAME] Maes
 
 
 
-> On May 21, 2025, at 10:42 PM, Epic AI Pro <[EMAIL]> wrote:
+> On May 21, 2025, at 10:42 PM, [NAME] AI Pro <[EMAIL]> wrote:
 > 
 > If you have any questions or feedback, please reply to this email and let me know.
 > 
 > Cheers,
 > 
-> Kent C. Dodds
+> [NAME] C. Dodds
 > 
 > unsubscribe <https://subscriptions.pstmrk.it/unsubscribe?m=1.LXHc_2mHWSl-7MZ6vXtCTg.vyFzT4t5xAgCqvuvKSYqmjpYoUaVoe_E7g_ffCC8LbSMOO50rVwfpVlhQaDgrA60-LqrGyCW4IYtTYoYpE8l1qED1O_6O6NW5rCGEklKjN0Pn6cA3ZDJBHDt1I5ZVXG6-EB194_H-FZTDQmLHoBryiPsMPCAlqnxRznRAICiH7HTkJl2nNNXhQxbRKYJJcqoVc0Hb22jdkGPUZoVsXfr9Ws7JJyb1_8PNd8HrRBDxm2kNJIvLlZ34hgVoR94Vmq5fynHYsAWuIZe-dY9-mkn3By4JAsZBd7-BMLrfTFkKri1lPY48TEQL-gzrL6wUWh2sw0Xy9zKp3MWuuDTE51iN_ADBi105LRQzt4hMf3ofgCklr6QW5dGxGhW1j0rFmFBOmc3-7Wx0NmjI-IXI49NkMS9Ii9snJrfCcI3Lh47pjsoMfM9sgIzhCfwixgmbkZ2taqy9Wt4GjYJceOWLwAIu5ME4TWazHyUJ9_WfrI_h2YneTTu7woZQn1kHNQuHOQ94PC3A0ggqRx1GDpVzt2PXLyyZxDwOH7xOnj8O1ocHlpth92Eiq-w0lz-vPBGPwPb>
-> 12333 Sowden Rd, Ste. B, PMB #97429 Houston, TX [PHONE]
+> [ADDRESS], Ste. B, PMB #97429 Houston, TX [PHONE]
 ```
 
 **Answer**
 
 ```text
-Hi Kevin,
+Hi [NAME],
 
 
 You should have received a calendar invite titled "Workshop: MCP Fundamentals (2025-06-17)" with details. I see you're on the invite list. Check your spam? See you tomorrow!
@@ -198,20 +198,20 @@ You should have received a calendar invite titled "Workshop: MCP Fundamentals (2
 **Question**
 
 ```text
-Hi Epic,
+Hi [NAME],
 
 I just bought this course and tried to run the workshops locally but it
 kept showing this (the screenshot) even after logging in numerous times.
 would love to get some help
 [image: Screenshot 2025-12-05 at 12.03.19 PM.png]
 
-On Fri, Dec 5, 2025 at 11:24 AM Epic AI Pro <[EMAIL]> wrote:
+On Fri, Dec 5, 2025 at 11:24 AM [NAME] AI Pro <[EMAIL]> wrote:
 
-> Epic AI Pro
+> [NAME] AI Pro
 >
 >  ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿
 >
-> Log in as *[EMAIL] <[EMAIL]>* to Epic AI
+> Log in as *[EMAIL] <[EMAIL]>* to [NAME] AI
 > Pro.
 > Log In
 > <https://www.epicai.pro/api/auth/callback/postmark?callbackUrl=https%3A%2F%2Fwww.epicai.pro&token=[REDACTED]&email=xifeng.jin88%40gmail.com>
@@ -250,7 +250,7 @@ I logged in as you and you have access to all the lessons and workshops.
 **Question**
 
 ```text
-Hi Simon,
+Hi [NAME],
 
 Trying to fill out form, but I see this message on Google’s page:
 
@@ -261,10 +261,7 @@ This form can only be viewed by users in the owner's organization.
 Try contacting the owner of the form if you think this is a mistake.
 
 Best,
-Ken
-
-
-On Mar 25, 2024, at 7:00 PM, Pro Tailwind <[EMAIL]> wrote:
+[NAME] 25, 2024, at 7:00 PM, Pro Tailwind <[EMAIL]> wrote:
 
 https://forms.gle/HuobUgMWkan9cZTa8<https://click.convertkit-mail2.com/92u36rwn9lanhqrnvn9h9h0x48633/n2hohqu3ewwm6gh0/aHR0cHM6Ly9mb3Jtcy5nbGUvSHVvYlVnTVdrYW45Y1pUYTg=>
 ```
@@ -283,13 +280,13 @@ I am really sorry about this. I have changed the permissions so that the form ca
 **Question**
 
 ```text
-Hello Team,
+Hello [NAME],
 I am looking forward to the workshop. I have been attempting to access the instructions on the workshop page as indicated, but I am unable to do so as it displays "Page Not Found". I have attached a screenshot for your reference.
 
 
 Regards,
-Vijay Kumar Chauhan
-On 15 Jul 2025 at 8:50 AM +0530, Epic AI <[EMAIL]>, wrote:
+[NAME] Kumar Chauhan
+On 15 Jul 2025 at 8:50 AM +0530, [NAME] AI <[EMAIL]>, wrote:
 > Workshop: MCP Fundamentals (2025-07-28)
 >
 > This event isn't in your calendar yet
@@ -301,7 +298,7 @@ On 15 Jul 2025 at 8:50 AM +0530, Epic AI <[EMAIL]>, wrote:
 > When
 > Monday 28 Jul ⋅ 21:00 – Tuesday 29 Jul 2025 ⋅ 03:00 (India Standard Time - Kolkata)
 > Organiser
-> Epic AI
+> [NAME] AI
 > [EMAIL]
 > Guests
 > (Guest list has been hidden at organiser's request)
@@ -318,7 +315,7 @@ On 15 Jul 2025 at 8:50 AM +0530, Epic AI <[EMAIL]>, wrote:
 **Answer**
 
 ```text
-Hey Vijay,
+Hey [NAME],
 
 Sorry about the dead link! Thanks for the heads up. 
 

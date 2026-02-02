@@ -11,7 +11,7 @@ The current discount of 50% from 795 on TypeScript Pro Complete is 397.50.
 With Bulgaria discount to activate 60% off with regional pricing, the discount is applied on the tota
 
 **Agent:**
-Hey Zahari,
+Hey [NAME],
 
 
 The highest discount would be your PPP discount. The sale discount ended, but also It didn't stack with PPP. 
@@ -33,7 +33,7 @@ free for 6 months, it'll be great. Thanks. And ofcourse once I learn from
 here, I'd be happy to repay my debt by freelancing for your website
 
 **Agent:**
-Hey Raksha,
+Hey [NAME],
 
 
 Thanks for your interest in Total TypeScript!
@@ -48,7 +48,7 @@ https://www.totaltypescript.com/tutorials
 ## Example
 
 **Customer:**
-Hi Matt,
+Hi [NAME],
 
 I’m writing from Somalia. Here we usually end up buying very cheap courses,
 but they’re nowhere near the quality of TotalTypeScript. That’s why I’m
@@ -70,18 +70,18 @@ Best,
 ## Example
 
 **Customer:**
-Dear Dan,
+Dear [NAME],
 
-Hi Dan, I come from Viet Nam. I plan to buy a Just Javascript Course and I plan only visit from Viet Nam but do not see PPP offer and support generate a custom receipt. Can I request it from here?
+Hi [NAME], I come from Viet Nam. I plan to buy a Just Javascript Course and I plan only visit from Viet Nam but do not see PPP offer and support generate a custom receipt. Can I request it from here?
 
 Thank you for your attention!
 
 Best regards,
-Hung Nguyen
+[NAME] Nguyen
 
 
 **Agent:**
-Hey Hung,
+Hey [NAME],
 
 
 We don't offer a PPP for Just Javascript. After purchasing the course we send a receipt.
@@ -98,7 +98,7 @@ Dear KenC Dodds,
 I got a scholarship and took your previous course. Your course is very useful for my work and study. Can I take your other course if possible, because my budget is 50$ per course, that's the highest. I don't want to take it for free but there is no other way, can I buy other course
 
 **Agent:**
-Hey Phuc,
+Hey [NAME],
 
 
 Thanks for reaching out! Unfortunately, we aren't offering any more discount scholarships at this time.
@@ -114,16 +114,16 @@ Best,
 ## Example
 
 **Customer:**
-Hello Kent,
+Hello [NAME],
 
-My name is Milad, and I am a JavaScript developer based in Iran. Due to the
+My name is [NAME], and I am a JavaScript developer based in Iran. Due to the
 current U.S. sanctions, day-to-day life has become increasingly
 challenging, and my income has been significantly affected. I came across
 your course and am very interested in joining the MCP workshop. However,
 
 
 **Agent:**
-Hey Milad,
+Hey [NAME],
 
 
 Sorry, we don't have any alternative payment methods besides the ones available during Stripe checkout.
@@ -143,12 +143,12 @@ I plan to purchase your course before the end of the year.
 On Tue, Dec 2, 2025 at 1:10 AM Total TypeScript <[EMAIL]>
 wrote:
 
-> Hello James,
+> Hello [NAME],
 >
 > Just a quick heads up - in a few hours, Tot
 
 **Agent:**
-Hey James,
+Hey [NAME],
 
 
 I've extended this discount for you! https://www.totaltypescript.com/buy?code=[REDACTED] 

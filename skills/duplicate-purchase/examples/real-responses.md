@@ -16,7 +16,7 @@ _<https://epicreact.dev/learn>_
 **Answer**
 
 ```text
-Hey Ilyas,
+Hey [NAME],
 
 
 Per your request we've refunded your most recent course enrollment.
@@ -30,7 +30,7 @@ It may take 5-10 business days for the refunded amount to show up in your accoun
 **Question**
 
 ```text
-Hi There,
+Hi [NAME],
 
 I recently purchased the Epic React by Kent C. Dodds - Epic React Pro Bundle, however for some reason its purchased 3x licenses when I only required ONE.
 
@@ -38,13 +38,13 @@ Could you please look into this? Invoice #: DC-ER-47489
 
 Kind Regards,
 
-Lauren Kelaher
+[NAME] Kelaher
 IT Procurement Administrator
 
 IOOF Holdings Ltd
 
 T 03 [PHONE] | ioof.com.au<http://www.ioof.com.au/> | LinkedIn<https://www.linkedin.com/company/ioof>
-Level 6, 161 Collins Street, Melbourne VIC 3000
+Level 6, [ADDRESS], Melbourne VIC 3000
 [Company Logo]
 
 *******************************************************************************************
@@ -65,7 +65,7 @@ may contain personal views of the sender not authorised by us.
 **Answer**
 
 ```text
-Hey Lauren,
+Hey [NAME],
 
 
 Sorry for the confusion!
@@ -101,7 +101,7 @@ Thank you.
 **Answer**
 
 ```text
-Hey Kuria,
+Hey [NAME],
 
 
 I've transferred your license to [EMAIL]
@@ -130,7 +130,7 @@ Created: November 25, 2022Status: Paid
 
 Invoice For
 
-Cynthia Dacey Nolan
+Cynthia [NAME] Nolan
 [EMAIL] [Nolan￼[EMAIL]]
 
 
@@ -142,14 +142,14 @@ Created: November 28, 2025Status: Paid
 
 Invoice For
 
-Dacey Nolan
+[NAME] Nolan
 [EMAIL] [Nolan￼[EMAIL]]
 ```
 
 **Answer**
 
 ```text
-Hey Dacey,
+Hey [NAME],
 
 
 I've refunded the license under [EMAIL]. Let me know if you need anything else. It can take 5-10 days for the banks to process the refund.
@@ -160,7 +160,7 @@ I've refunded the license under [EMAIL]. Let me know if you need anything else. 
 **Question**
 
 ```text
-Hey Daniel,
+Hey [NAME],
 
 I accidentally purchased the same JustJavaScript course twice using this
 email address: *[EMAIL] <[EMAIL]>*.
@@ -173,13 +173,13 @@ Could you please cancel (and refund, if possible) the later order? I’d
 really appreciate your help.
 
 Best,
-Abhishek
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Abhishek, 
+Hey [NAME], 
 
 
 We've initiated a refund for the latest order. It can take 5-10 days for the banks to reconcile and return the money to your account.
@@ -207,7 +207,7 @@ We've initiated a refund. It can take 5-10 days for the banks to reconcile and r
 **Question**
 
 ```text
-Hi All, 
+Hi [NAME], 
 
 
 Not sure what happened, but it looks like I got billed twice for this class. Can you all help me with resolving this. 
@@ -222,7 +222,7 @@ Thanks
 
 
 
-Zach Legein
+[NAME] Legein
 
 Sent from space
 
@@ -254,13 +254,13 @@ Sent from space
 
 > See you inside,
 
-> The Epic AI Pro Team
+> The Epic AI Pro [NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Zach,
+Hey [NAME],
 
 
 Thanks for waiting. I went ahead and intuited the refund for that duplicate purchase! I can take 5-10 days for the banks to process the funds.
@@ -283,13 +283,13 @@ accidentally! Is there any chance I can get my recent purchase refunded?
 Both purchases were on the same email address.
 
 Thanks,
-Shanon
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hi Shanon, 
+Hi [NAME], 
 
 
 Sorry about the wait! We've initiated a refund. It can take 5-10 days for the banks to reconcile and return the money to your account.
@@ -306,13 +306,13 @@ already had a license from a previous purchase from July 15, 2024. Can I
 get the second purchase refunded?
 
 Thanks,
-Albert
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Albert, 
+Hey [NAME], 
 
 
 We've initiated a refund. It can take 5-10 days for the banks to reconcile and return the money to your account.
@@ -323,13 +323,13 @@ We've initiated a refund. It can take 5-10 days for the banks to reconcile and r
 **Question**
 
 ```text
-Hi Team,
+Hi [NAME],
 
 I accidentally claimed two license with different email id's [EMAIL]<mailto:[EMAIL]> and  [EMAIL]<mailto:[EMAIL]>, would like to keep one license for email [EMAIL]<mailto:[EMAIL]> and cancel other
 
 Please help me to cancel one license for me.
 
-Vara Korukonapalli
+[NAME] Korukonapalli
 Associate Principal, Clearing, Pricing & Risk Developer
 P [PHONE]
 www.theocc.com<http://www.theocc.com/>
@@ -345,7 +345,7 @@ Business Sensitive
 **Answer**
 
 ```text
-Hi Vara,
+Hi [NAME],
 
 
 We can't unclaim the license, but we can transfer the license for [EMAIL] to another email address If that Is what you'd like.

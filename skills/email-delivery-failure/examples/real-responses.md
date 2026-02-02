@@ -21,7 +21,7 @@ The response was:
 
 ```text
 
-Hi Michael,
+Hi [NAME],
 
 
 
@@ -65,7 +65,7 @@ I didnt receive a confirmation email after i bought it
 **Answer**
 
 ```text
-Hey Rasmus,
+Hey [NAME],
 
 
 I've transferred your license to [EMAIL]. 
@@ -88,7 +88,7 @@ Learn more here: https://support.google.com/mail/?p=DisabledUser
 
 The response was:
 
-550 5.2.1 The email account that you tried to reach is inactive. For more information, go to https://support.google.com/mail/?p=DisabledUser 8926c6da1cb9f-4c8d6841405sor4916772173.0 - gsmtp
+550 5.2.1 The email account that you tried to reach is inactive. For more information, go to https://support.google.com/mail/?p=DisabledUser 8926c6da1cb9f-4c8d6841405sor[PHONE].0 - gsmtp
 ```
 
 **Answer**
@@ -149,13 +149,13 @@ Hi there,
 I have not got the email after the payment was made.
 
 Regards,
-Kan
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Kan,
+Hey [NAME],
 
 
 Once you're logged in, you can view a fully customized invoice here: https://testingjavascript.com/invoice.
@@ -174,13 +174,13 @@ I just purchased the course  with this mail ([EMAIL]) and no emails arrived,
 so can you please help
 
 Many thanks for considering my request.
-Mahmoud Madkour
+[NAME] Madkour
 ```
 
 **Answer**
 
 ```text
-Hello Mahmoud,
+Hello [NAME],
 
 
 I do see a purchase made under this account.
@@ -199,31 +199,31 @@ Thank you for your email. I'll be out of the office and unavailable until July 2
 
 The information contained in this e-mail and any attachments to it may be legally privileged and include confidential information intended only for the recipient(s) identified above. If you are not one of those intended recipients, you are hereby notified that any dissemination, distribution or copying of this e-mail or its attachments is strictly prohibited. If you have received this e-mail in error, please notify the sender of that fact by return e-mail and permanently delete the e-mail and any attachments to it immediately. Please do not retain copy or use this e-mail or its attachments for any purpose, nor disclose all or any part of its contents to any other person.  To review our Privacy Notice, please visit:  https://davies-group.com/privacy-notice 
 Any statements made, or intentions expressed in this communication may not necessarily reflect the view of the Company. Be advised that no content herein may be held binding upon the Company or any associated Company unless confirmed by the issuance of a formal contractual document. The Company may monitor the content of emails sent and received via its network for viruses or unauthorised use and for other lawful business purposes. 
-The sender of this email is a member of the Davies Group of companies, the UK parent of which is Davies Group Limited (registered in the UK Company Number [PHONE]). 5th Floor, 20 Gracechurch Street, London, United Kingdom EC3V 0BG. Unless stated, all UK subsidiaries are registered at 5th Floor, 20 Gracechurch Street, London, United Kingdom EC3V 0BG. 
+The sender of this email is a member of the Davies Group of companies, the UK parent of which is Davies Group Limited (registered in the UK Company Number [PHONE]). 5th Floor, [ADDRESS], London, United Kingdom EC3V 0BG. Unless stated, all UK subsidiaries are registered at 5th Floor, [ADDRESS], London, United Kingdom EC3V 0BG. 
 
-A.M Associates Insurance Services Ltd, Company Reg: [PHONE], 2425 Matheson Blvd. E., 8th Floor Mississauga, Ontario, L4W 5K4 Canada
+A.M Associates Insurance Services Ltd, Company Reg: [PHONE], [ADDRESS] E., 8th Floor Mississauga, Ontario, L4W 5K4 Canada
 Associated Loss Adjusters Ltd, Company Reg: 247275, Unit 10B, Beckett Way, Park West Business Park, Dublin, D12W702 Ireland
 Asta Capital Limited, Company Reg: [PHONE], Registered In: UK
 Banwell & Associates Ltd, Company Reg: [PHONE], Registered In: UK
 Bascoon Limited, Company Reg: 500694, Unit 10B, Beckett Way, Park West Business Park, Dublin 12, D12 W702 Ireland
 Building Validation Solutions Limited, Company Reg: [PHONE], Registered In: UK
-Canada Reports Inc, Company Reg: BC1413263, 2800 Park Place, 666 Burrard Street, Vancouver BC V6C 2Z7 Canada
+Canada Reports Inc, Company Reg: BC1413263, [ADDRESS], [ADDRESS], Vancouver BC V6C 2Z7 Canada
 BVS Subsidence Ltd, Company Reg: [PHONE], Registered In: UK
-Cedar Consulting LLC (Delaware), Company Reg: [PHONE], Corporation Trust Centre 1209 Orange St, Wilmington, New Castle, DE, 19801 USA
+Cedar Consulting LLC (Delaware), Company Reg: [PHONE], Corporation Trust Centre [ADDRESS], Wilmington, New Castle, DE, 19801 USA
 Claims Management Services Ltd, Company Reg: [PHONE], Registered In: UK
 Codebase8 Ltd, Company Reg: [PHONE], Registered In: UK
 Contact Partners Limited, Company Reg: [PHONE], Registered In: UK
 Core Insurance Services Ltd, Company Reg: [PHONE], Registered In: UK
-Davies (SAC) Ltd, Company Reg: 30104, Crawford House, 50 Cedar Avenue, Hamilton, Bermuda HM 11 Bermuda
+Davies (SAC) Ltd, Company Reg: 30104, Crawford House, [ADDRESS], Hamilton, Bermuda HM 11 Bermuda
 Davies Broking Services Limited, Company Reg: [PHONE], Registered In: UK Authorised and regulated by the Financial Conduct Authority (FCA) - 486865
-Davies Captive Management Limited, Company Reg: 06623, Crawford House, 50 Cedar Avenue, Hamilton, Bermuda HM 11 Bermuda
+Davies Captive Management Limited, Company Reg: 06623, Crawford House, [ADDRESS], Hamilton, Bermuda HM 11 Bermuda
 Davies Claims Solutions LLC, Company Reg: [PHONE], 1209, Orange Street, Corporation Trust Center, in the City of Wilmington, County of New Castle, Delaware 19801 USA
 Davies Construction & Engineering Ltd, Company Reg: [PHONE], Registered In: UK
 Davies Consulting & Managed Services Limited, Company Reg: [PHONE], Registered In: UK
-Davies Consulting (Bermuda) Limited, Company Reg: 54959, Crawford House, 50 Cedar Avenue, Hamilton, Bermuda HM 11 Bermuda
+Davies Consulting (Bermuda) Limited, Company Reg: 54959, Crawford House, [ADDRESS], Hamilton, Bermuda HM 11 Bermuda
 Davies Europe Limited, Company Reg: [PHONE], Registered In: UK
-Davies Insurance Limited, Company Reg: 48257, Crawford House, 50 Cedar Avenue, Hamilton, HM 11 Bermuda
-Davies Insurance Management LLC, Company Reg: [PHONE], 135 Allen Brook Lane, Suite 101, Williston, VT, 05495, USA
+Davies Insurance Limited, Company Reg: 48257, Crawford House, [ADDRESS], Hamilton, HM 11 Bermuda
+Davies Insurance Management LLC, Company Reg: [PHONE], [ADDRESS], Suite 101, Williston, VT, 05495, USA
 Davies Insurer and Market Services Ltd, Company Reg: [PHONE], Registered In: UK
 Davies Intermediary Support Services Ltd, Company Reg: [PHONE], Registered In: UK Authorised and Regulated by the Financial Conduct Authority (FCA) - 310517
 Davies Learning Experiences Ltd, Company Reg: [PHONE], Registered In: UK
@@ -236,58 +236,58 @@ Davies MGA Services Ltd, Company Reg: [PHONE], Registered In: UK Authorised and 
 Davies Property Claims LLC, Company Reg: [PHONE], 1020 NE LOOP 410 STE 805, SAN ANTONIO, TX, 78209 USA
 Davies Resourcing Ltd, Company Reg: [PHONE], Registered In: UK
 Davies Technology Solutions, Company Reg: [PHONE], Registered In: UK
-Davies US LLC, Company Reg: [PHONE], Corporation Trust Center, 1209 Orange Street, Wilmington, DE 19801 USA
+Davies US LLC, Company Reg: [PHONE], Corporation Trust Center, [ADDRESS], Wilmington, DE 19801 USA
 Direct Group Property Services Ltd, Company Reg: [PHONE], Registered In: UK
 Direct Validation Services Ltd, Company Reg: [PHONE], Registered In: UK
 Eastwell Contractor Management and Claim Care Ltd, Company Reg: [PHONE], Registered In: UK
-Ember (Canada) Inc, Company Reg: [PHONE], [PHONE] Upper Water Street, Purdy’s Wharf Tower II, Halifax, NS B3J 3R7 Canada
+Ember (Canada) Inc, Company Reg: [PHONE], 1300-[ADDRESS], Purdy’s Wharf Tower II, Halifax, NS B3J 3R7 Canada
 Ember Services Ltd, Company Reg: [PHONE], Registered In: UK
 Farradane Limited, Company Reg: [PHONE], Registered In: UK
-Frontier Adjusters Inc, Company Reg: [PHONE], 1900 W. Littleton Boulevard, Littleton, CO 80120 USA
+Frontier Adjusters Inc, Company Reg: [PHONE], [ADDRESS], Littleton, CO 80120 USA
 Garwyn Ireland Limited, Company Reg: 279634, Unit 10B, Beckett Way, Park West Business Park, Dublin 12, D12 W702, Ireland
 Garwyn Limited, Company Reg: [PHONE], Registered In: UK
 GBB (UK) Holdings Ltd, Company Reg: [PHONE], Registered In: UK
 GBB (UK) Ltd, Company Reg: [PHONE], Registered In: UK
 Grovelands Resourcing Limited, Company Reg: [PHONE], Registered In: UK
-Insurance Risk Services Holdings LLC, Company Reg: [PHONE], 801 International Parkway, Suite 500, Lake Mary, FL 32746 USA
-Insurance Risk Services Inc, Company Reg: [PHONE], 801 International Parkway, Suite 500, Lake Mary, FL 32746 USA
-Jeco Excess Agency Inc, Company Reg: [PHONE], 6015 Resource Lane, Lakewood Ranch, FL 34202 USA
+Insurance Risk Services Holdings LLC, Company Reg: [PHONE], [ADDRESS], Suite 500, Lake Mary, FL 32746 USA
+Insurance Risk Services Inc, Company Reg: [PHONE], [ADDRESS], Suite 500, Lake Mary, FL 32746 USA
+Jeco Excess Agency Inc, Company Reg: [PHONE], [ADDRESS], Lakewood Ranch, FL 34202 USA
 JMD Specialist Insurance Services Group Limited, Company Reg: [PHONE], Registered In: UK
 JMD Specialist Insurance Services Ltd, Company Reg: [PHONE], Registered In: UK
-John Heath & Company Inc, Company Reg: P9800008229, Cogency Glocal Inc., 115 North Calhoun St., Suite 4, Tallahassee, FL 32301 USA
-Johns Eastern Company Inc , Company Reg: [PHONE], 6015 Resource Lane, Lakewood Ranch, FL 34202 USA
-Johnson Claim Service Inc, Company Reg: [PHONE], 251 Little Falls Drive, Wilmington, New Castle, DE, 19808 USA
+John Heath & Company Inc, Company Reg: P[PHONE], Cogency Glocal Inc., [ADDRESS], Suite 4, Tallahassee, FL 32301 USA
+Johns Eastern Company Inc , Company Reg: [PHONE], [ADDRESS], Lakewood Ranch, FL 34202 USA
+Johnson Claim Service Inc, Company Reg: [PHONE], [ADDRESS], Wilmington, New Castle, DE, 19808 USA
 Keoghs LLP , Company Reg: OC321124, Registered In: UK Authorised and regulated by the SRA - 573546
 Managed Fleet Services Ltd, Company Reg: [PHONE], Registered In: UK
-Merlinos & Associates Inc, Company Reg: [PHONE], 5550 Peachtree Parkway, Suite 600, Peachtree Corners, GA 30092 USA
-MVP Advisory Group, LLC, Company Reg: [PHONE], 830 West Main Street, Lake Zurich, IL 60047 USA
+Merlinos & Associates Inc, Company Reg: [PHONE], [ADDRESS], Suite 600, Peachtree Corners, GA 30092 USA
+MVP Advisory Group, LLC, Company Reg: [PHONE], [ADDRESS], Lake Zurich, IL 60047 USA
 Nationwide Property Assistance Ltd, Company Reg: [PHONE], Registered In: UK Authorised and regulated by the Financial Conduct Authority (FCA) - 659799
-Northshore International Insurance Services Inc., Company Reg: [PHONE], 199 Rosewood Dr., Suite 310, Danvers, 01923, MA, USA
+Northshore International Insurance Services Inc., Company Reg: [PHONE], [ADDRESS], Suite 310, Danvers, 01923, MA, USA
 PJ Web Solutions Limited, Company Reg: [PHONE], Registered In: UK
 ProAdjust Limited, Company Reg: 380982, Unit 10B, Beckett Way, Park West Business Park, Dublin 12, D12 W702 Ireland
-Quest Bermuda Holdings Limited, Company Reg: 42704, Crawford House, 50 Cedar Avenue, Hamilton HM, 11 Bermuda Bermuda
+Quest Bermuda Holdings Limited, Company Reg: 42704, Crawford House, [ADDRESS], Hamilton HM, 11 Bermuda Bermuda
 Quest Captive Management LLC, Company Reg: [PHONE], 1209, Orange Street, Corporation Trust Center, in the City of Wilmington, County of New Castle, Delaware 19801 USA
-Quest Intermediaries (Bermuda) Ltd, Company Reg: 04985, Crawford House, 50 Cedar Avenue, Hamilton HM, 11 Bermuda Bermuda
+Quest Intermediaries (Bermuda) Ltd, Company Reg: 04985, Crawford House, [ADDRESS], Hamilton HM, 11 Bermuda Bermuda
 Quick Internet Software Solutions, Inc., Company Reg: [PHONE], 3206 Earl Rudder Freeway South College Station TX 77845 USA
 Sionic Global (CTL) Limited, Company Reg: [PHONE], Registered In: UK
 Surveyorship Limited, Company Reg: [PHONE], Registered In: UK
 The Littleton Group Western Division, Inc., Company Reg: [PHONE], 1250 S. Capital of Texas Hwy., Bldg. 1, Ste. 550, Austin, TX, 78716, USA
 Thornpart Adjusters Ltd, Company Reg: 357224, Unit 10B, Beckett Way, Park West Business Park, Dublin 12, D12 W702, Ireland
-Topmark Claims Management Limited, Company Reg: SC305608, 160 Bath Street, Glasgow, Scotland, G2 4TB UK
+Topmark Claims Management Limited, Company Reg: SC305608, [ADDRESS], Glasgow, Scotland, G2 4TB UK
 Total Loss Settlement Service Ltd, Company Reg: [PHONE], Registered In: UK
-US Reports Inc., Company Reg: [PHONE], 3528 Precision Dr. Suite 200, Fort Collins, CO 80528 USA
+US Reports Inc., Company Reg: [PHONE], [ADDRESS] Suite 200, Fort Collins, CO 80528 USA
 Ufton Associates Ltd, Company Reg: [PHONE], Registered In: UK
 Vehicle Replacement Group, Company Reg: [PHONE], Registered In: UK
 Veriphy Ltd, Company Reg: [PHONE], Registered In: UK
 Verso DMS, Company Reg: [PHONE], Registered In: UK
-WA Consulting LLC, Company Reg: [PHONE], 202 S. Rome Avenue Suite 100, Tampa, FL 33606 USA
+WA Consulting LLC, Company Reg: [PHONE], [ADDRESS] Suite 100, Tampa, FL 33606 USA
 Worksmart Ltd, Company Reg: [PHONE], Registered In: UK
 ```
 
 **Answer**
 
 ```text
-Hey Carl!
+Hey [NAME]!
 
 
 As part of your ticket to my Advanced React workshop, here's your free ticket to the new self-paced version! We just released the first section, and we'll be putting up the others as we finish them.
@@ -315,13 +315,13 @@ I'd like to submit my receipt before the office closes for the holidays.
 Looking forward to hearing from you,
 
 Regards,
-Charlene
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Charlene,
+Hey [NAME],
 
 
 Our email processor was experiencing issues on Friday and into the weekend, so login links were being sent out much later than when they are requested.
@@ -351,13 +351,13 @@ Additionally, if you could please send me the receipt, that would be
 awesome!
 
 Thank you,
-Meg
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Meg,
+Hey [NAME],
 
 
 Our email processor was experiencing issues on Friday and into the weekend, so login links were being sent out much later than when they were requested.
@@ -381,7 +381,7 @@ We have purchased a new LMS using [EMAIL]. However, we have not received any con
 Kind Regards.
 [cid:[EMAIL]6C0590]
 [cizgi]
-Mustafa YAŞAR
+[NAME] YAŞAR
 Gözen Sistem / BT Ofis Sözleşme Yönetim Uzmanı
 Gözen System / IT Back Office Contract Management Specialist
 Telefon
@@ -407,7 +407,7 @@ This email and its attachments may contain private and confidential information 
 **Answer**
 
 ```text
-Hey Mustafa,
+Hey [NAME],
 
 
 You can access the course using the email login link at the top of https://testingjavascript.com. You'll need to enter the email address you used to purchase the course to have a login link sent.

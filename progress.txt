@@ -13,3 +13,15 @@ Files changed:
 
 Validation:
 - `test 
+
+---
+[2026-02-02T03:23:31.669Z]
+Completed: Scrub PII from all skill example files
+Files: none
+Summary: Scrubbed PII across all `skills/**` markdown files by running the repo script; validation grep now returns no raw emails.
+
+Changes made
+- Updated many files under `skills/**/examples/*.md` and `skills/**/SKILL.md` with `[EMAIL]`, `[NAME]`, `[PHONE]`, `[ADDRESS]` placeholders from the scrubber.
+
+Validation
+- `grep -r -E '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}' skills/ --include="*.md" 2>/de

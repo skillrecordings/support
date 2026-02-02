@@ -17,7 +17,7 @@ the receipt from Stripe.
 Can you help me get access to my course?
 
 Thanks,
-Joel
+[NAME]
 ```
 
 **Answer**

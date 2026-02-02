@@ -15,10 +15,10 @@ I'm currently using the EpicReact course to learn..well React. I've been watchin
 I've refreshed my browser multiple times along closing and restarting the window. Is there something else wrong that I am doing here?
 
 Thanks,
-Trent Murchison
+[NAME] Murchison
 [cid:image002.png@01D8766F.728CD7F0]
 
-Trent Murchison (She/Her,They/Them)
+[NAME] Murchison (She/Her,They/Them)
 Software Developer
 T: (833) 34REACH
 W: www.reachmedianetwork.com<http://www.reachmedianetwork.com/>
@@ -29,7 +29,7 @@ W: www.reachmedianetwork.com<http://www.reachmedianetwork.com/>
 **Answer**
 
 ```text
-Hey Trent,
+Hey [NAME],
 
 
 There may be a caching issue preventing you from viewing the course content. Please follow the steps below:
@@ -66,7 +66,7 @@ the course so that's not the problem.
 Also I'm not using a VPN.
 
 Best,
-Adrian
+[NAME]
 ```
 
 **Answer**
@@ -100,7 +100,7 @@ Thanks for the report-- we were able to get this fixed!
 Hey Epic React folks!
 
 Following up on this tweet
-<https://twitter.com/TomerAberbach/status/1822318461386666379>. It seems
+<https://twitter.com/TomerAberbach/status/[PHONE][PHONE]>. It seems
 that when I click on `Basic JS "Hello World"`, it loads for a while, and
 then crashes with a 500 error.
 
@@ -120,13 +120,13 @@ Some additional information that might help:
 Let me know if I can provide any other information! Thanks in advance :)
 
 Cheers,
-Tomer
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hi Tomer,
+Hi [NAME],
 
 
 We fixed the error! Glad to hear It's working for you. 

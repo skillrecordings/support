@@ -21,7 +21,7 @@ www.commercetools.com <http://www.commercetools.com/>
 
 **Answer:**
 ```
-Hey Rafa,
+Hey [NAME],
 
 
 I've transferred your license to [EMAIL]! Let me know If you run into any issues.
@@ -39,13 +39,13 @@ Hi,
 I would like to know if it would be possible to change my email address that the sign-in link is sent to for the Just JavaScript content. I would like to change this from the email in the invoice ([EMAIL]) to [EMAIL], would that be possible?
 
 Many thanks,
-Nomaira
+[NAME]
 
 ```
 
 **Answer:**
 ```
-Hey Nomaira,
+Hey [NAME],
 
 
 I've transferred your license to [EMAIL]! Let me know If you run into any issues.
@@ -65,7 +65,7 @@ company email account might not be available later because of oncoming merger.
 
 **Answer:**
 ```
-Hey Pankaj,
+Hey [NAME],
 
 
 I've transferred your license to [EMAIL] 
@@ -95,12 +95,12 @@ Thank you in advance for your support.
 Please let us know if you need any additional information from our side.
 
 Kind regards,
-Jeroen
+[NAME]
 ```
 
 **Answer:**
 ```
-Hey Jeroen,
+Hey [NAME],
 
 
 I've transferred your license to [EMAIL]! Let me know If you run into any issues.
@@ -117,7 +117,7 @@ Hi there,
 I currently have access to the Total Typescript Complete Volume course on this email: [EMAIL]. I was wondering if I can change it to another email address: [EMAIL]. Thank you!
 
 Best,
-Linda Ngo
+[NAME] Ngo
 
 DISCLAIMER:
 This message, including any attachments, is intended only for the 
@@ -132,7 +132,7 @@ delete or destroy it and all attachments, copies and printouts. Thank you.
 
 **Answer:**
 ```
-Hey Linda,
+Hey [NAME],
 
 
 I've transferred your license to [EMAIL] 

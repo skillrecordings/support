@@ -57,19 +57,19 @@ Best,
 **Question**
 
 ```text
-Hi Kent, do you need to build new API endpoints to support your MCP server?
+Hi [NAME], do you need to build new API endpoints to support your MCP server?
 I usually heard people complaining that MCP servers are just wrappers of
 public APIs, so I wonder if the LLMs can have access to the public API
 documentation, wouldn’t be able to do the same using the terminal?
 
 thanks!
 
-Felipe Salazar
+[NAME] Salazar
 
 
-On Mon, Aug 25, 2025 at 5:34 PM Kent C. Dodds <[EMAIL]> wrote:
+On Mon, Aug 25, 2025 at 5:34 PM [NAME] C. Dodds <[EMAIL]> wrote:
 
-> Hi Felipe,
+> Hi [NAME],
 >
 > In my last email, I talked a lot about how MCP is already providing a lot
 > of value despite the number of improvements that still need to be made to
@@ -109,7 +109,7 @@ On Mon, Aug 25, 2025 at 5:34 PM Kent C. Dodds <[EMAIL]> wrote:
 > better while following Epic workshops.
 >
 > Follow along with this ~10 minute demo video right now to see it in action!
-> [image: Kent is onscreen explaining while his computer shows Cursor’s MCP
+> [image: [NAME] is onscreen explaining while his computer shows Cursor’s MCP
 > tools. The interface highlights Epicshop MCP features like workshop
 > navigation, playground management, and progress analysis.]
 > <https://click.convertkit-mail.com/lmuk2n8kn5tmhn3rdl7c6h83v7v00bgh4xov/58hvh8ug5mmzddc6/aHR0cHM6Ly93d3cuZXBpY2FpLnByby95b3VyLWFpLWFzc2lzdGFudC1pbnN0cnVjdG9yLXRoZS1lcGljc2hvcC1tY3Atc2VydmVyLTBlYXpy>
@@ -204,7 +204,7 @@ On Mon, Aug 25, 2025 at 5:34 PM Kent C. Dodds <[EMAIL]> wrote:
 > preparing for you to help you take your place in this new world of user
 > interaction. Stay tuned for more.
 >
-> — Kent
+> — [NAME]
 >
 > P.S. I really do read replies. If you have any questions or thoughts to
 > share, hit me up by hitting reply!
@@ -223,10 +223,10 @@ On Mon, Aug 25, 2025 at 5:34 PM Kent C. Dodds <[EMAIL]> wrote:
 **Answer**
 
 ```text
-Hi Felipe!
+Hi [NAME]!
 
 
-That's a common question. The answer is that an MCP server is a wrapper around an API in the same way a website is a wrapper around an API. That is to say it's much more than just a wrapper and people try to make it that way to their own demise. In fact, Notion's MCP server started as a simple wrapper and then they realized it didn't work that well and they "went back to the drawing board." Read more about this here: https://x.com/NotionAPI/status/1955666037816623486
+That's a common question. The answer is that an MCP server is a wrapper around an API in the same way a website is a wrapper around an API. That is to say it's much more than just a wrapper and people try to make it that way to their own demise. In fact, Notion's MCP server started as a simple wrapper and then they realized it didn't work that well and they "went back to the drawing board." Read more about this here: https://x.com/NotionAPI/status/[PHONE][PHONE]
 
 
 Understanding how to design MCP servers is something I teach about on EpicAI.pro. Stay tuned for the announcement about this on Friday :)
@@ -285,7 +285,7 @@ https://www.totaltypescript.com/typescript-and-node
 **Question**
 
 ```text
-Hey Kent!
+Hey [NAME]!
 
 I was wondering if you know of any MCP servers (or other APIs) which
 currently offer a natural language “chat” interface like you describe here:
@@ -299,7 +299,7 @@ but I hadn’t considered MCP servers as potentially offering one.
 Thanks!
 Nimo
 
-On Wed, Aug 27, 2025 at 15:50 Kent C. Dodds <[EMAIL]> wrote:
+On Wed, Aug 27, 2025 at 15:50 [NAME] C. Dodds <[EMAIL]> wrote:
 
 > Hey Nimo!
 >
@@ -463,7 +463,7 @@ On Wed, Aug 27, 2025 at 15:50 Kent C. Dodds <[EMAIL]> wrote:
 > Remember, I’ve got a really exciting *announcement coming on Friday*.
 > You’re not going to want to miss it.
 >
-> — Kent
+> — [NAME]
 >
 > ​
 > ​
@@ -482,7 +482,7 @@ On Wed, Aug 27, 2025 at 15:50 Kent C. Dodds <[EMAIL]> wrote:
 **Answer**
 
 ```text
-Hey Nemo, I'm not aware of any servers right now, but I do know that Darren Shepherd (https://x.com/ibuildthecloud) is at least looking into building stuff like this. 
+Hey [NAME], I'm not aware of any servers right now, but I do know that Darren Shepherd (https://x.com/ibuildthecloud) is at least looking into building stuff like this. 
 
 
 I'll be making a course about it before too long as well.
@@ -744,7 +744,7 @@ Best,
 **Question**
 
 ```text
-Hi Matt,
+Hi [NAME],
 
 Sorry to reach out this way; I don’t use Twitter and couldn’t find another contact.
 

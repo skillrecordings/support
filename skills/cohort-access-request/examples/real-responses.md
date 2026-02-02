@@ -36,7 +36,7 @@ Thanks for the patience, happy learning!
 **Question**
 
 ```text
-Hi Kent,
+Hi [NAME],
 would there a specific channel for the MCP cohort in Epic Web Discord?
 
 kind regards Mark
@@ -52,10 +52,10 @@ If you have any questions or feedback, please reply to this email and let me kno
 
 Cheers,
 
-Kent C. Dodds
+[NAME] C. Dodds
 
 unsubscribe<https://subscriptions.pstmrk.it/unsubscribe?m=1.jGDIoIwK2F8m3eadv5IVag.868mLec2Va1FjXhUGtapJhkOSSGu4pzNaR7pT8NQUeJwO-KmOlf8QE3r3OJGaTvKHR3Ha0cpG3XZxARHuUFoIl3GC5DE9xwWgm76Rm6PJbj4Kj2-dApjlxzkVmo_UeKQSYKi5bJ0dDhlxwx79HakMJz_cXEKUkjfG7HGXzk-PhETSkS7QZ6PMLImO5eZVmN-6s0-Fi-DCICbQntz5EIlCs_bhw5Xj-DGDCsQKU71ZpdD16E553zI_B39FKpvmMKu3feIsh1NjbPJOlWVzZR7-AM6vhLxTFkPLTvYVk69HQAFNY7ngMLn7R13xeholKBUE7DSv9VqfBWHeAu-LT1oBwoywpJesbgkTQd9FjiPNkGrK71WtyP36i92dCG3kJhKKJycU6QxOT1fOH-Gxc1tNG-mC7umG0zlcSZkq-CD97UqsyZsG2L4Io8v-lt-TqQvZhQW2LuDu-pUJvgk6fKUwMd2JgLBM1hymC5k-Z72KodhbwFp9KqNr6v4r1SftOstQnmZmdQeT-UIVRZWxC1fUg83m4MqjTfH67-dSASEoLM>
-12333 Sowden Rd, Ste. B, PMB #97429 Houston, TX [PHONE]
+[ADDRESS], Ste. B, PMB #97429 Houston, TX [PHONE]
 ```
 
 **Answer**
@@ -114,20 +114,20 @@ Hi,
 My email is [EMAIL]
 
 I was part of the epic ai cohort back in the fall. I am not able to access
-the self paced workshop, which I believe is an error based on what Kent
+the self paced workshop, which I believe is an error based on what [NAME]
 said in the discord. Could I please get access to this? It is new years
 eve, don't worry I am not expecting this to be fixed today at all. Just
 when you get a chance in the next week or so.
 
 Thank you,
 
-Christian Hansen.
+[NAME] Hansen.
 ```
 
 **Answer**
 
 ```text
-Hey Christian,
+Hey [NAME],
 
 
 You should have access to all the self paced content now! Let me know If not.
@@ -141,7 +141,7 @@ Best,
 **Question**
 
 ```text
-Hello Epic Team,
+Hello [NAME],
 
 I participated in the Epic AI MCP Cohort, but don’t appear to have access to the new self paced course.
 
@@ -151,7 +151,7 @@ Thanks!
 
 Best regards,
 
-Brandon Perfetti <https://brandonperfetti.com/>
+[NAME] Perfetti <https://brandonperfetti.com/>
 [PHONE]
 
 
@@ -162,7 +162,7 @@ Brandon Perfetti <https://brandonperfetti.com/>
 **Answer**
 
 ```text
-Hey Brandon,
+Hey [NAME],
 
 
 You should have access now! Let me know If not.
@@ -177,7 +177,7 @@ Best,
 
 ```text
 Hi Epic AI team,
-sorry to interrupt your day but, as for the subject, I confirmed on Discord with Kent that I have some issues in accessing both the specific Epic AI channel under Workshops as well as the workshop itself in epicai.pro. Are you able to help me out?
+sorry to interrupt your day but, as for the subject, I confirmed on Discord with [NAME] that I have some issues in accessing both the specific Epic AI channel under Workshops as well as the workshop itself in epicai.pro. Are you able to help me out?
 
 I attach my invoice for the cohort in case you need proof of my purchase.
 
@@ -188,7 +188,7 @@ Andrea
 
 Andrea Barghigiani
 Frontend Engineer
-+[PHONE]
+[PHONE]
 LinkedIn
 [EMAIL]
 ```
@@ -257,7 +257,7 @@ Sky UK Limited (Registration No. [PHONE]), Sky-In-Home Service Limited (Registra
 **Answer**
 
 ```text
-Hey Daniel, you should definitely have no trouble catching up. Just make sure to join the Discord and take a look at the conversation history. And you can watch the recordings of the office hours. Everything else is pretty self-paced. Welcome to the cohort!
+Hey [NAME], you should definitely have no trouble catching up. Just make sure to join the Discord and take a look at the conversation history. And you can watch the recordings of the office hours. Everything else is pretty self-paced. Welcome to the cohort!
 ```
 
 ## cnv_qcrazwn
@@ -273,7 +273,7 @@ some of the topics.
 Andrés Felipe Gallego S.
 
 
-Kent C. Dodds <[EMAIL]> schrieb am Fr. 27. Juni 2025 um 18:11:
+[NAME] C. Dodds <[EMAIL]> schrieb am Fr. 27. Juni 2025 um 18:11:
 
 > Hello Felipe!
 >
@@ -331,7 +331,7 @@ Kent C. Dodds <[EMAIL]> schrieb am Fr. 27. Juni 2025 um 18:11:
 >
 > I hope to see you there!
 >
-> — Kent
+> — [NAME]
 >
 > P.S. Have you seen the new EpicAI.pro logo and shirt
 > <https://click.convertkit-mail.com/zlu6krnvmvhnhkd5z28tphwzp7000f6h7w8l/reh8h9umvp0gd8i2/aHR0cHM6Ly9rY2QuaW0vc2hpcnRz>?
@@ -351,7 +351,7 @@ Kent C. Dodds <[EMAIL]> schrieb am Fr. 27. Juni 2025 um 18:11:
 **Answer**
 
 ```text
-Hey Andres,
+Hey [NAME],
 
 
 We won't have any recordings, but we will have a written summary.
@@ -373,13 +373,13 @@ recorded and if we will have access to the recordings afterwards?
 
 Thanks,
 
-Peter Jones
+[NAME] Jones
 ```
 
 **Answer**
 
 ```text
-Hi Peter,
+Hi [NAME],
 
 
 The material will be recorded in a very high value-to-minute format on EpicReact.Dev similar to TestingJavaScript.com and you can buy a license for that when it's released. If you get a Masterclass ticket then you'll not only get a free license to EpicReact.Dev, but you'll get early access as well.

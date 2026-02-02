@@ -10,13 +10,13 @@ Hi,
 I have purchased the epic react course a year ago with this exact email, but when I login and try to watch the courses the only option I can see is to buy them again. Could you please help me on this ?
 
 Best regards,
-Donika
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Donika,
+Hey [NAME],
 
 
 There may be a caching issue preventing you from viewing the course content. Please follow the steps below:
@@ -48,7 +48,7 @@ mean that I won't be able to re-login after that and won't be able to
 access the content?
 
 Thanks,
-Sana Siddiqui
+[NAME] Siddiqui
 
 -- 
 *Important: *The contents in this system and any attachments are intended 
@@ -65,7 +65,7 @@ hereto.
 **Answer**
 
 ```text
-Hey Sana,
+Hey [NAME],
 
 
 The 60 days message means that you will need to request a new magic link after 60 days.
@@ -99,7 +99,7 @@ you. Could that be the reason why I’m experiencing this access issue?
 
 Could you please check my account and restore my access?
 Kind regards,
-Steve
+[NAME]
 
 On Mon, 15 Dec 2025 at 14:35, Kent C. Dodds <[EMAIL]> wrote:
 
@@ -283,7 +283,7 @@ bnjms.nl
 **Answer**
 
 ```text
-Hey Steve,
+Hey [NAME],
 
 
 Sorry about that issue! Let me know If you're still experiencing It. I think we fixed the problem on our end. You can find the content here https://www.epicai.pro/cohorts/master-mcp 
@@ -335,13 +335,13 @@ I'm also unable to run npm run setup locally.
 It used to work. Not any more.
 
 Best,
-Tomasz
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Tomasz,
+Hey [NAME],
 
 
 I wasn't able to find a license associated with this email address ([EMAIL]) – is it possible it was purchased using a different one?

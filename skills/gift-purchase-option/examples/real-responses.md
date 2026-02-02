@@ -13,11 +13,11 @@ on LinkedIn.
 Is there a way that I could purchase a license and gift it to someone?
 
 Very respectfully,
-Matt Peck
+[NAME] Peck
 
 Owner, Lead Developer
 
-Matt Peck Development, LLC
+[NAME] Peck Development, LLC
 Email: [EMAIL]
 Website: mattpeckdevelopment.com
 Get Quote <https://mattpeckdevelopment.com/get-quote>
@@ -26,7 +26,7 @@ Get Quote <https://mattpeckdevelopment.com/get-quote>
 **Answer**
 
 ```text
-Hey Matt,
+Hey [NAME],
 
 
 Thanks for reaching out!
@@ -43,7 +43,7 @@ Please let me know if you have any further questions!
 **Question**
 
 ```text
-Hi Kent,
+Hi [NAME],
 
 I'd like to purchase the *Pro Testing* course. Is it possibile to send it as a gift to a mail different from the one that purchase the course.
 
@@ -51,13 +51,13 @@ I'd like to purchase the *Pro Testing* course. Is it possibile to send it as a g
 Regards,
 
 
-Cristiano
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Cristiano,
+Hey [NAME],
 
 
 I've transferred the license to [EMAIL]. Let me know if you have any issues accessing the account using that email address.
@@ -79,13 +79,13 @@ will only the email under the user who buys it able to access ?
 
 Thank you.
 
-Sam
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Sam,
+Hey [NAME],
 
 
 Whatever email you purchase under will have access to the course. However, the email you purchase under can always be transferred to a different email by asking us.
@@ -108,13 +108,13 @@ I'd like to buy this course as a gift for someone else.  Is there any way
 to do that?
 
 Thanks,
-Ben
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Ben,
+Hey [NAME],
 
 
 If you'd like to send it as a gift could enter their email during the stripe checkout.
@@ -133,7 +133,7 @@ Would you mind please to gift the license linked to [EMAIL]<mailto:[EMAIL]> to [
 
 Thank you
 
-Tanguy Maxant
+[NAME] Maxant
 Office Manager
 
 NEW WORK Networking Spain S.L.
@@ -141,12 +141,12 @@ Consell de Cent, 334 1°1ª   |  08009  Barcelona - Spain
 
 Join me on XING here<https://www.xing.com/profile/Tanguy_Maxant/>
 
-[signature_2067695915]
+[signature_[PHONE]]
 Commercial Register: Registro Mercantil de Barcelona, C.I.F. B64062920
 Management Board: Petra von Strombeck, Jens Pape
 
 Follow us:
- [signature_1554797825]  @newwork_es<https://twitter.com/newwork_es>
+ [signature_[PHONE]]  @newwork_es<https://twitter.com/newwork_es>
 [A close up of a logo  Description automatically generated]   newwork_es<https://www.instagram.com/newwork_es/>
 
 This e-mail may contain confidential and/or privileged information. If you are not the intended recipient (or have received this e-mail in error) please notify the sender immediately and destroy this e-mail. Any unauthorised copying, disclosure or distribution of the material in this e-mail is strictly forbidden and may be unlawful.
@@ -155,7 +155,7 @@ This e-mail may contain confidential and/or privileged information. If you are n
 **Answer**
 
 ```text
-Hey Tanguy,
+Hey [NAME],
 
 
 I've transferred your license to [EMAIL].
@@ -183,7 +183,7 @@ Waiting to hear from you soon.
 Many thanks,
 
 
-Paul Jordan
+[NAME] Jordan
 Client Admin Associate, Learnerbly
 He/Him
 | www.learnerbly.com
@@ -196,7 +196,7 @@ He/Him
 **Answer**
 
 ```text
-Hey Paul,
+Hey [NAME],
 
 
 Thanks for reaching out!
@@ -215,11 +215,11 @@ need to enter their email address when I check out on Stripe, so that they
 can log use it to log in later?
 
 thanks!
-Larissa
+[NAME]
 
 -- 
 
-Larissa Murillo
+[NAME] Murillo
 
 Marketing Manager at marketgoo <https://www.marketgoo.com>
 
@@ -230,7 +230,7 @@ Marketing Manager at marketgoo <https://www.marketgoo.com>
 **Answer**
 
 ```text
-Hey Larissa,
+Hey [NAME],
 
 
 Thanks for your interest in the course!
@@ -256,13 +256,13 @@ for him to sign up?
 
 Thanks for your help,
 
-Andrew
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Andrew,
+Hey [NAME],
 
 
 if you purchase a single "team" license you'll get a code a code so you can gift the license to someone else.
@@ -280,7 +280,7 @@ How do I now gift this to somebody else?
 
 Regards
 
-Jonathan
+[NAME]
 ```
 
 **Answer**
@@ -302,13 +302,13 @@ How can I link the purchase to their email address and not the one I entered in 
 
 Many thanks,
 
-Daniel Kostro
+[NAME] Kostro
 ```
 
 **Answer**
 
 ```text
-Hey Daniel,
+Hey [NAME],
 
 
 I've transferred the licenses to [EMAIL] and [EMAIL] so that they may now access the course.

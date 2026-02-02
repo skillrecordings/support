@@ -5,16 +5,14 @@
 **Question**
 
 ```text
-Hi Team,
+Hi [NAME],
 
 Would really love to purchase this. Wanted to ask do you or do you ever
 plan to officer a pay over 3-6 month option? That would allow me to
 purchase this.
 
 Thanks,
-Daniyaal
-
-On Thu, Oct 19, 2023 at 4:35 PM Kent C. Dodds <[EMAIL]> wrote:
+[NAME], Oct 19, 2023 at 4:35 PM [NAME] C. Dodds <[EMAIL]> wrote:
 
 > Hi daniyaal beg,
 > ​
@@ -75,7 +73,7 @@ On Thu, Oct 19, 2023 at 4:35 PM Kent C. Dodds <[EMAIL]> wrote:
 > <https://click.convertkit-mail.com/5qu04lgv9pi7hvl9g24h6hrz42v44/8ghqh3ul5kne4wuk/aHR0cHM6Ly93d3cuZXBpY3dlYi5kZXYv>
 > !
 >
-> – Kent
+> – [NAME]
 >
 > ​
 >
@@ -111,7 +109,7 @@ I’m interested in the epic react and I wonder if it would be possible to buy t
 
 Regards,
 --
-Fabien MARIE-LOUISE
+[NAME] MARIE-LOUISE
 Développeur iOS & Android
 
 GIP Symaris
@@ -126,7 +124,7 @@ Web : http://www.symaris.fr
 **Answer**
 
 ```text
-Hey Fabien,
+Hey [NAME],
 
 
 Thanks for your interest in the course!
@@ -140,7 +138,7 @@ Currently, we only accept a single payment via credit card from the website.
 **Question**
 
 ```text
-Hi Matt,
+Hi [NAME],
 I’m interested in enrolling in the “Build Your Own AI Personal Assistant in TypeScript” course.
 Could you please let me know if there is a flexible payment plan available, ideally something spread over 6–12 months?
 
@@ -158,10 +156,10 @@ If you have any questions or feedback, please reply to this email and let me kno
 
 Cheers,
 
-Matt Pocock
+[NAME] Pocock
 
 unsubscribe<https://subscriptions.pstmrk.it/unsubscribe?m=1.k9M-P5cYg4dPGpQ3-jMijw.8L0wXuMve-eCFhWy3PHn9dTKq02YsdSNRhMDOYGCG15SsDd3mM_RLuo5-CEfU1bazE81s4ticIdvv30u-bNwPUAF6f7JWJ6Zx7bVPPOJ2fzFdLojqUV8vsVPbX5BZEBsKyQwj_RWTRZc_fV7VfFHhiDyN1lu_gXyujlVha5fBI7u1EX-Rde7VgqmMh_R6AxyIEe2GXmnQRhnoJ1TmcJS5s5G6YHyA8NQz4FXfWO5Y3UoUYUva9MTol_LjWa0PK1Q7Cwm15agCPLiwbxVjoSq9mi6pktL9pWkS5d77vGc2XUTAIgn6GyYtwnCEkFYHTNav9LCObwss814WWGgU2jM_3tQy27p2JloKmk3osYHP6x4TemA1-HDiIzhmve3hKE9O0r_ehChU2jJQDGl6LEXT62kG9_xRKSxmuBl4Ye5lPcHhMv9-TAycdkfDrJrF_cl0faCS9AwQ4oYQJbl20neqnQTmTEKCWimIZmpd_kJn1Z8vmYRod4uy6l5KLhxrEftOaiX9bXSMLXmc4PNEOilM03es9cSwbY-hzBgkd8LN41foDK6rEMtGs71PVcB4cSS>
-12333 Sowden Rd, Ste. B, PMB #97429 Houston, TX [PHONE]
+[ADDRESS], Ste. B, PMB #97429 Houston, TX [PHONE]
 ```
 
 **Answer**
@@ -175,22 +173,22 @@ Sometimes these options are presented in checkout via Stripe, but we don't offer
 **Question**
 
 ```text
-Hi Matt,
+Hi [NAME],
 
 I’m very interested in this course, but I can’t pay for it right now.
 
 Is it possible to pay in parts?
 
 Thanks!
-El 14 dic 2022, 15:29 +0100, Matt Pocock <[EMAIL]>, escribió:
+El 14 dic 2022, 15:29 +0100, [NAME] Pocock <[EMAIL]>, escribió:
 > Hello Antonio Giroz,
 > I've emailed a couple of times about the Total TypeScript Core Volume Pre-Release. It's a set of three in depth self-paced TypeScript workshops covering Type Transforms, Generics, and Advanced TypeScript Patterns.
 > What's holding you back from buying the Core Volume?
 > Reply and let me know. It will really help me out.
 > Thanks,
-> Matt
+> [NAME]
 > Unsubscribe from only Workshop Offers. You can also unsubscribe from all emails at any time.
-> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080
+> [ADDRESS], Ste. B, PMB #97429, Houston, TX 77080
 >
 ```
 
@@ -206,13 +204,13 @@ Not currently, but we are considering it.
 
 ```text
 Can you do a payment plan for this? Like break up the 695 into 4 payments or
-similar. US dollars are expensive right now. Thanks, James.
+similar. US dollars are expensive right now. Thanks, [NAME].
 ```
 
 **Answer**
 
 ```text
-Hey James,
+Hey [NAME],
 
 
 We don't have any split payment options sorry.
@@ -229,7 +227,7 @@ Best,
 **Question**
 
 ```text
-Hi Matt
+Hi [NAME]
 Thank u for your email
 can i pay in installments?
 Thank u!
@@ -237,7 +235,7 @@ Thank u!
 On Wed, 14 May 2025 at 19:01, Total TypeScript <[EMAIL]>
 wrote:
 
-> Hello Moustafa,
+> Hello [NAME],
 >
 > You’ve probably heard by now that TypeScript is essential for modern web
 > development. You’re likely using it in your projects.
@@ -311,7 +309,7 @@ wrote:
 > This is your chance to gain the skills and confidence that will set you
 > apart. Don’t let it pass you by.
 >
-> -Matt
+> -[NAME]
 >
 > Unsubscribe from Total TypeScript Spring 2025 Sale Emails
 > <https://click.convertkit-mail2.com/n4u23xmk5ktvhxkx50vf6h6pw5wgghl/owh2ll76uwuwn4xo0wsv/aHR0cHM6Ly93d3cudG90YWx0eXBlc2NyaXB0LmNvbS91bnN1YnNjcmliZWQ_c2VxdWVuY2U9dW5zdWJzY3JpYmVfc3ByaW5nXzIwMjU=>.
@@ -319,7 +317,7 @@ wrote:
 > <https://unsubscribe.convertkit-mail2.com/n4u23xmk5ktvhxkx50vf6h6pw5wgghl>
 > from all emails at any time.
 >
-> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080
+> [ADDRESS], Ste. B, PMB #97429, Houston, TX 77080
 >
 > ​
 >
@@ -328,7 +326,7 @@ wrote:
 **Answer**
 
 ```text
-Hey Moustafa,
+Hey [NAME],
 
 
 We don't have any options to pay In installments sorry!
@@ -365,7 +363,7 @@ Best,
 **Question**
 
 ```text
-Hi Kent,
+Hi [NAME],
 
 Is there a way to pay the Epic React Pro in installments? $417 in one shot is a
 bit heavy on me. Let me know thanks!
@@ -382,7 +380,7 @@ During the checkout Stripe displays various options including pay over time opti
 **Question**
 
 ```text
-Matt,
+[NAME],
 
 By chance, do you support any payment types such as PayPal that allow payment
 over time?

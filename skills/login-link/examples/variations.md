@@ -6,7 +6,7 @@
 I think maybe the magic link is not working?
 I have tried to log in twice to my account on the above email, but I never
 receive the login link?
-Thanks, George
+Thanks, [NAME]
 ```
 
 **Answer:**
@@ -28,13 +28,13 @@ Is there an issue with it?
 Attached is the invoice for the purchase.
 
 Thank you for your help.
-Best Regards,
-Nuno Santos
+Best [NAME],
+[NAME] Santos
 ```
 
 **Answer:**
 ```
-Hey Nuno,
+Hey [NAME],
 
 
 On our end It's showing the links are getting delivered. They could be ending up in your spam or getting blocked by an email filter If you have one on.
@@ -79,7 +79,7 @@ inaccessible for a while.
 Thanks in advance for your help!
 Best regards,
 
-Petr
+[NAME]
 
 -- 
 This email, including attached files, may contain confidential information 
@@ -96,7 +96,7 @@ and attachments of it. Thank you.
 
 **Answer:**
 ```
-Hey Petr,
+Hey [NAME],
 
 
 Looks like your license Is under the email [EMAIL] not [EMAIL]. 
@@ -119,7 +119,7 @@ Attached is a copy of my purchase receipt.  Invoice #: DC-ER-16473
 
 Can you help?
 
-Nick coleman
+[NAME] coleman
 [EMAIL] <mailto:[EMAIL]>
 
 
@@ -128,7 +128,7 @@ Nick coleman
 
 **Answer:**
 ```
-Hey Nick,
+Hey [NAME],
 
 
 Looks like the license Is under [EMAIL]. I've sent you a login email. 

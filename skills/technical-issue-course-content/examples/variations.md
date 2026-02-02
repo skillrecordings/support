@@ -13,14 +13,14 @@ video, and not the solution.
 **Answer**
 
 ```text
-Hey Adrian!
+Hey [NAME]!
 
 
 Thanks for the heads up-- this will be fixed later this afternoon.
 
 
 Cheers,
-Taylor
+[NAME]
 ```
 
 ## cnv_hwlihhj
@@ -55,7 +55,7 @@ videos are using some bookstore application. So the solutions in the videos
 don't apply to the exercise.
 
 Cheers,
-Tomer
+[NAME]
 ```
 
 **Answer**
@@ -74,13 +74,13 @@ I started the Epic React course online, and am running into an error when trying
 
 Any help you can give me is greatly appreciated! Thank you!
 
-Emily Mikl
+[NAME] Mikl
 ```
 
 **Answer**
 
 ```text
-Hey Emily,
+Hey [NAME],
 
 
 Sorry you are having this issue! 

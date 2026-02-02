@@ -11,7 +11,7 @@ like to forward content from my personal email to work email and get
 flagged down the line . Is there a possibility of using any other 
 
 **Agent:**
-Hey Akarsh,
+Hey [NAME],
 
 
 Right now we don’t have a way to share a single license across two email addresses, sorry.
@@ -33,10 +33,10 @@ Can you please let me know what can I do to fix this? I have attached the purcha
 
 Looking forward to trying out new things.
 
-Paras.'
+[NAME].'
 
 **Agent:**
-Hey Paras,
+Hey [NAME],
 
 
 Sorry you're having issues getting the link. On our end It's showing delivered. Most often It's inside some email filter like your spam folder. 
@@ -60,7 +60,7 @@ Thank you!
 
 
 Cheers,
-Guedis
+[NAME]
 
 
 **Agent:**
@@ -131,11 +131,11 @@ Hi,
 I'm trying to login in Epic AI Pro to watch Master the Model Context Protocol course, I got it in 16/09, but I didn't receive any e-mail to login. Can you help me, please?
 
 Atenciosamente,
-Henrique Cícero
+[NAME] Cícero
 
 
 **Agent:**
-Hey Henrique,
+Hey [NAME],
 
 
 I did some digging and it looks like our emails are getting blocked by Spamhaus. We've made an appeal to be taken off that list. 
@@ -150,7 +150,7 @@ Thanks for bringing this issue up! We appreciate that.
 ## Example
 
 **Customer:**
-Hi Matt,
+Hi [NAME],
 
 I've ordered the "Build your AI assistant in 5 days", but I didn't receive any email even after 30 minutes. I checked my spam folder as well.
 
@@ -161,7 +161,7 @@ I got this error message below after the payment.
 Thanks,
 Sunny
 
-Matt Pocock (AI Hero) <[EMAIL]> schrieb am Samstag, 22. November 2025 um 6:32 n
+[NAME] Pocock (AI Hero) <[EMAIL]> schrieb am Samstag, 22. November 2025 um 6:32 n
 
 **Agent:**
 Yes every purchase you've made since June has been associated with [EMAIL]

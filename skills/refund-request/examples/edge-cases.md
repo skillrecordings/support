@@ -59,7 +59,7 @@ Thanks!
 
 **Answer:**
 ```
-Hey Alisson,
+Hey [NAME],
 
 
 Thanks for giving the course a go – per your request we've refunded your course enrollment and revoked access.
@@ -80,12 +80,12 @@ minutes long.
 I don't want to pay 25$ for a content that is barely an hour long. Please
 refund my payment.
 Sincerely,
-Tayfun Ozdemir.
+[NAME] Ozdemir.
 ```
 
 **Answer:**
 ```
-Hey Tayfun,
+Hey [NAME],
 
 
 We always refund If Its within 30 days. Sorry your request took a while to get back to. 

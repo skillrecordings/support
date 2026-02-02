@@ -19,13 +19,13 @@ need to do.
 Thank you in advance for your help!
 
 regards,
-Elias Pineda
+[NAME] Pineda
 ```
 
 **Answer**
 
 ```text
-Hey Elias,
+Hey [NAME],
 
 
 It sounds like this may be a caching issue. Please follow the steps below:
@@ -58,13 +58,13 @@ Can you please help me out?
 
 Thanks,
 
-Seb
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Seb,
+Hey [NAME],
 
 
 It sounds like this may be a caching issue. Please follow the steps below:
@@ -87,7 +87,7 @@ Let me know if you're able to view your invoice and the course content after doi
 **Question**
 
 ```text
-Hey Support,
+Hey [NAME],
 
 I just purchased the Pro version and have signed in, but I have no idea how
 to access the content. After signing in I'm still on the landing page, and
@@ -96,13 +96,13 @@ there is nothing new.
 Can you help me find the testing content?
 
 Best,
-Norm
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Norm,
+Hey [NAME],
 
 
 You can access the course using the email login link at the top of https://testingjavascript.com. You'll need to enter the email address you used to purchase the course to have a login link sent.
@@ -142,7 +142,7 @@ tom katz
 **Answer**
 
 ```text
-Hey Tom,
+Hey [NAME],
 
 
 You can access the course using the "Restore Purchases" button at the top of https://epicreact.dev. You'll need to enter the email address you used to purchase the course to have a login link sent.
@@ -165,13 +165,13 @@ This is my current access link: https://testingjavascript.com/#access_token=oe1b
 Could you please help me with that?
 
 Kind regards
-Julian
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Julian,
+Hey [NAME],
 
 
 You can access the course using the email login link at the top of https://testingjavascript.com. You'll need to enter the email address you used to purchase the course to have a login link sent.

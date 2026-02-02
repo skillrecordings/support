@@ -40,17 +40,17 @@ If we offer parity pricing in your area, it will automatically show up on the pr
 ## Example 3 (cnv_cidduvb)
 **Question:**
 ```
-Hi There,
+Hi [NAME],
 
 I wanted to buy your testing PRO course - but am from Pakistan - was hoping for a discount. 
 
 Regards,
-Hash
+[NAME]
 ```
 
 **Answer:**
 ```
-Hey Hash,
+Hey [NAME],
 
 
 Thanks for your interest in the course!
@@ -95,7 +95,7 @@ Regards.
 
 **Answer:**
 ```
-Hey Ahmed,
+Hey [NAME],
 
 
 Thanks for your interest in the course!

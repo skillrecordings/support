@@ -5,26 +5,25 @@
 **Question**
 
 ```text
-Hi Kent,
+Hi [NAME],
 
 Just wanted to let you know that your episode is live and can be found at:
 
-  *   iTunes: https://podcasts.apple.com/us/podcast/kent-c-dodds-improving-the-world-with-quality-software/id1479112888?i=[PHONE]
+  *   iTunes: https://podcasts.apple.com/us/podcast/kent-c-dodds-improving-the-world-with-quality-software/id[PHONE]?i=[PHONE]4
   *   Spotify: https://open.spotify.com/episode/5BdBgt6aMPOn96CBZc6wQu?si=M8QQe4OoSXaLOIXSPmfkrQ
   *   Stitcher: https://www.stitcher.com/show/the-solocoder-podcast/episode/75-kent-c-dodds-improving-the-world-with-quality-software-s04-e15-[PHONE]
   *   Site: https://solocoder.com/podcast/kent-c-dodds-improving-the-world-with-quality-software
 
 I hope you like it. BTW, it would be great if you could share on social. 😉
 
-  *   On LinkedIn: https://www.linkedin.com/posts/adersonoliveira_coders-reactjs-podcast-activity-6755523957815959552-LpOQ
+  *   On LinkedIn: https://www.linkedin.com/posts/adersonoliveira_coders-reactjs-podcast-activity-[PHONE][PHONE]-LpOQ
 
-  *   On Twitter: https://twitter.com/AdersonOliveira/status/1349757914664349696
+  *   On Twitter: https://twitter.com/AdersonOliveira/status/[PHONE][PHONE]
 
 Thank you so much for being part of the podcast!
 
 Cheers,
-Aderson Oliveira
-Check out The SoloCoder Podcast on iTunes<https://itunes.apple.com/podcast/id1479112888?mt=2&ls=1> or Google Play<https://play.google.com/music/m/Iqukkm2eh3uy3h4efkj743p6b7i?t=The_SoloCoder_Podcast>
+[NAME] out The SoloCoder Podcast on iTunes<https://itunes.apple.com/podcast/id[PHONE]?mt=2&ls=1> or Google Play<https://play.google.com/music/m/Iqukkm2eh3uy3h4efkj743p6b7i?t=The_SoloCoder_Podcast>
 ```
 
 **Answer**
@@ -38,12 +37,12 @@ Thanks! I've listened to it already and I thought it was great. Thanks!
 **Question**
 
 ```text
- Hi Kent,​
+ Hi [NAME],​
 
 I’m reaching out to recommend Sandy Ryza <https://kitcaster.com/sandy-ryza/>
 as a guest for your podcast The Lead Engineer at Dagster Labs
 <https://dagster.io/about> and a co-author of Advanced Analytics with Spark
-<https://www.oreilly.com/library/view/advanced-analytics-with/[PHONE]/>,
+<https://www.oreilly.com/library/view/advanced-analytics-with/[PHONE]1/>,
 he’s a data leader turned engineering leader by his determination to create
 the tools data professionals need with an education-first dev mindset.
 
@@ -76,8 +75,7 @@ Would you be interested in having Sandy on as a guest? I’d love to
 facilitate that conversation.
 
 Best,
-Olivia
-Olivia Laurienti
+[NAME]
 
 Campaign Manager
 
@@ -85,7 +83,7 @@ Kitcaster
 [image: mobilePhone] [PHONE]
 [image: emailAddress] [EMAIL]
 [image: website] kitcaster.com <//kitcaster.com>
-[image: address] 2565 Curtis Street, Denver, CO, 80205
+[image: address] [ADDRESS], Denver, CO, 80205
 [image: facebook] <https://www.facebook.com/kitcasterpod>
 [image: twitter] <https://twitter.com/kitcasterpod>
 [image: linkedin] <https://www.linkedin.com/company/[PHONE]/admin/>
@@ -100,7 +98,7 @@ Podcast hosts make great podcast guests. We’re here for you. ✌️
 Hello, 
 
 
-We support any questions related to course and functionality, you’ll have to contact Kent directly for this kind of collaboration. We don’t have Kent’s email, you’ll have to reach out on his personal website or Twitter.
+We support any questions related to course and functionality, you’ll have to contact [NAME] directly for this kind of collaboration. We don’t have [NAME]’s email, you’ll have to reach out on his personal website or Twitter.
 ```
 
 ## cnv_lkiq6tj
@@ -108,7 +106,7 @@ We support any questions related to course and functionality, you’ll have to c
 **Question**
 
 ```text
-Hi Kent,
+Hi [NAME],
 
 I am reaching out on behalf of an advertiser that is interested in
 sponsoring your podcast. Can you confirm that (a) you do offer advertising
@@ -131,7 +129,7 @@ If you'd like me to stop sending you emails, please click here
 Hello, 
 
 
-We support any questions related to course and functionality, you’ll have to contact Kent directly for this kind of collaboration. We don’t have Kent’s email, you’ll have to reach out on his personal website or Twitter.
+We support any questions related to course and functionality, you’ll have to contact [NAME] directly for this kind of collaboration. We don’t have [NAME]’s email, you’ll have to reach out on his personal website or Twitter.
 ```
 
 ## cnv_ptbx6x3
@@ -139,11 +137,11 @@ We support any questions related to course and functionality, you’ll have to c
 **Question**
 
 ```text
-Hey Kent,
+Hey [NAME],
 
-I hope you’re doing great. I saw your tweet https://x.com/kentcdodds/status/1910211041910194307 and I would like to invite to join me over "Yalla Let's Code” Podcast to share your story and talk about AI and MCPs.
+I hope you’re doing great. I saw your tweet https://x.com/kentcdodds/status/[PHONE][PHONE] and I would like to invite to join me over "Yalla Let's Code” Podcast to share your story and talk about AI and MCPs.
 
-My name is Ilias Haddad, and I host "Yalla Let's Code," a podcast focused on software engineers. Our show reaches developers and aspiring tech entrepreneurs who are particularly interested in learning from founders who started as engineers themselves.
+My name is [NAME] Haddad, and I host "Yalla Let's Code," a podcast focused on software engineers. Our show reaches developers and aspiring tech entrepreneurs who are particularly interested in learning from founders who started as engineers themselves.
 
 As a software engineer, working on online courses and tech events. I would love to have in the podcast to share the story behind Indie Hackers podcast and community that will be beneficial for software eng who want to start their own business and share your thoughts about AI and MCP as well.
 
@@ -153,11 +151,11 @@ Would you be interested in joining us for an episode? You can book a time that w
 
 Thank you for considering this invitation. I look forward to the possibility of featuring your story on our show.
 
-Btw, My recent podcast episode was with Wes Boy (https://x.com/IliasHaddad3/status/1909968958335131969)
+Btw, My recent podcast episode was with Wes Boy (https://x.com/IliasHaddad3/status/[PHONE][PHONE])
 
 Best regards,
 
-Ilias Haddad
+[NAME] Haddad
 Host,
 Yalla Let's CodE
 ```
@@ -165,10 +163,10 @@ Yalla Let's CodE
 **Answer**
 
 ```text
-Hey Ilias,
+Hey [NAME],
 
 
-We support any questions related to the course and platform functionality, but you can reach out to Kent directly on X/bluesky/discord or his site for this kind of collaboration.
+We support any questions related to the course and platform functionality, but you can reach out to [NAME] directly on X/bluesky/discord or his site for this kind of collaboration.
 
 
 https://x.com/kentcdodds 
@@ -185,7 +183,7 @@ Best,
 **Question**
 
 ```text
-Dear Chats with Kent podcast crew,
+Dear Chats with [NAME] podcast crew,
 
 
 
@@ -229,9 +227,9 @@ Thanks, but I don't take guest recommendations.
 **Question**
 
 ```text
-Hi Matt,
+Hi [NAME],
 
-My name is Elizabeth, producer for the PodRocket podcast. It's been a while
+My name is [NAME], producer for the PodRocket podcast. It's been a while
 since you've joined us on the pod, and I was reaching out to see if you
 might be interested in coming back on!
 
@@ -245,17 +243,17 @@ more information!
 
 Cheers,
 
-*Elizabeth Becz*
+*[NAME] Becz*
 Producer | PodRocket Podcast <https://podrocket.logrocket.com/>
 ```
 
 **Answer**
 
 ```text
-Hey Elizabeth,
+Hey [NAME],
 
 
-We support any questions related to the course and platform functionality, but you can reach out to Matt directly on X/bluesky/discord for this kind of collaboration.
+We support any questions related to the course and platform functionality, but you can reach out to [NAME] directly on X/bluesky/discord for this kind of collaboration.
 
 
 https://x.com/mattpocockuk 
@@ -292,7 +290,7 @@ ps no need to worry about any follow ups but if you do send an 'unsubscribe' I'l
 Hello, 
 
 
-We support any questions related to course and functionality, you’ll have to contact Matt directly for this kind of collaboration. We don’t have Matt’s email, you’ll have to reach out on his personal website or Twitter.
+We support any questions related to course and functionality, you’ll have to contact [NAME] directly for this kind of collaboration. We don’t have [NAME]’s email, you’ll have to reach out on his personal website or Twitter.
 ```
 
 ## cnv_mfd2oxz
@@ -300,7 +298,7 @@ We support any questions related to course and functionality, you’ll have to c
 **Question**
 
 ```text
-Hey Matt!
+Hey [NAME]!
 
 I have been following you for a while, and I really enjoy your content, I have a
 podcast at danielfrey.me [http://danielfrey.me] Talks show, which I would like
@@ -310,7 +308,7 @@ know if you would like to join!
 
 Looking forward to hearing your thoughts,
 
-Daniel
+[NAME]
 ```
 
 **Answer**
@@ -319,7 +317,7 @@ Daniel
 Hello, 
 
 
-We support any questions related to course and functionality, you’ll have to contact Matt directly for this kind of collaboration. We don’t have Matt’s email, you’ll have to reach out on his personal website or Twitter.
+We support any questions related to course and functionality, you’ll have to contact [NAME] directly for this kind of collaboration. We don’t have [NAME]’s email, you’ll have to reach out on his personal website or Twitter.
 ```
 
 ## cnv_6j6mljb
@@ -327,7 +325,7 @@ We support any questions related to course and functionality, you’ll have to c
 **Question**
 
 ```text
-Hey Kent. Would you be interested in speaking at PickJS (https://pickjs.com/)? It's online-only this year, so you could speak from wherever you'd like. It's a conference about advanced JavaScript topics. I'm helping organize the event this year but I know the other organizers are also interested in having you speak. 50% of the proceeds go to the WHO COVID-19 response fund. Thanks Kent! BTW, I was really hoping I could attend the ISYS alumni meet up a few weeks back to hear you speak, but had a meeting come up. I heard it was great!
+Hey [NAME]. Would you be interested in speaking at PickJS (https://pickjs.com/)? It's online-only this year, so you could speak from wherever you'd like. It's a conference about advanced JavaScript topics. I'm helping organize the event this year but I know the other organizers are also interested in having you speak. 50% of the proceeds go to the WHO COVID-19 response fund. Thanks [NAME]! BTW, I was really hoping I could attend the ISYS alumni meet up a few weeks back to hear you speak, but had a meeting come up. I heard it was great!
 
 ---
 
@@ -379,19 +377,16 @@ Would you be open to exploring them with us?
 
 Regards,
 
-Dan
-
-
-Unsubscribe here
+[NAME] here
 ```
 
 **Answer**
 
 ```text
-Hey Daniel,
+Hey [NAME],
 
 
-We support any questions related to the course and platform functionality, but you’ll have to reach out to Kent directly on X/bluesky/discord or his site for this kind of collaboration.
+We support any questions related to the course and platform functionality, but you’ll have to reach out to [NAME] directly on X/bluesky/discord or his site for this kind of collaboration.
 
 
 https://x.com/kentcdodds 

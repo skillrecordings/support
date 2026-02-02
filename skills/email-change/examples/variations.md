@@ -18,13 +18,13 @@ I'm also wondering if buying 3 seats of the Pro version means that mine
 
 Thanks in advance for your help
 Best regards,
-Vasco Borges
+[NAME] Borges
 [EMAIL]
 ```
 
 **Answer:**
 ```
-Hey Vasco,
+Hey [NAME],
 
 
 I went ahead and updated your accounts info to be [EMAIL]. Let me know If that works now. 
@@ -92,7 +92,7 @@ my personal one, [EMAIL]
 
 **Answer:**
 ```
-Hey Carlos,
+Hey [NAME],
 
 
 Sorry about the wait on this one! I've transferred all your TTS licenses [EMAIL] under to [EMAIL].
@@ -109,13 +109,13 @@ Hi,
 Could you please change my email address from [EMAIL] <mailto:[EMAIL]> to [EMAIL] <mailto:[EMAIL]> ?
 
 Thank you!
-Charlie Sakamaki
+[NAME] Sakamaki
 
 ```
 
 **Answer:**
 ```
-Hey Charlie,
+Hey [NAME],
 
 
 I've transferred all your licenses to [EMAIL] 

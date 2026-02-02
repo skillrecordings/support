@@ -13,13 +13,13 @@ any volume based discounts on top of what your website calculator suggests?
 Thank you!
 
 Regards,
-Max
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Max,
+Hey [NAME],
 
 
 Thank you for your interest in the course!
@@ -49,7 +49,7 @@ Hi,
 Looking to procure a business type of license that will cater for 5 developers.
 
 Thanks,
-Makhate Makhate
+[NAME] [NAME]
 Disclaimer:
 
 This message and any attachments are subject to HISP SA's privacy policy published at https://www.hisp.org/privacy-policy.  Please read the privacy policy before opening any attachment or taking any other action in terms of this electronic transmission.  If you cannot access the privacy policy, kindly send an email to [EMAIL]<mailto:[EMAIL]%20?subject=Send%20me%20a%20copy%20of%20the%20HISP%20SA%20Privacy%20Policy> and a copy will be provided to you. By replying to this e-mail or opening any attachment you agree to be bound by the provisions of the HISP SA privacy policy.
@@ -58,7 +58,7 @@ This message and any attachments are subject to HISP SA's privacy policy publish
 **Answer**
 
 ```text
-Hey Makhate,
+Hey [NAME],
 
 
 You can find our "For my team" purchase option here: https://www.totaltypescript.com/buy 

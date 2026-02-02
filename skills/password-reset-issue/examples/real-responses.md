@@ -12,13 +12,13 @@ saying the recovery token is invalid, so I wasn't able to sign up. Could I
 request another veirfication link?
 
 Thank you!
-Charlie
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Charlie,
+Hey [NAME],
 
 
 I apologize for the delayed response! There was a bug recently introduced that was causing the erroneous prompt for you to set a recovery password. This has been reverted, so you should be able to request a login link that works now. Let me know if that's not the case.
@@ -53,13 +53,13 @@ my learning and complete the course.
 Thank you in advance for your understanding and support.
 
 Best regards,
-Arzu Hasanova
+[NAME] Hasanova
 ```
 
 **Answer**
 
 ```text
-Hey Arzu, 
+Hey [NAME], 
 
 
 What email address is associated with this account?
@@ -73,28 +73,27 @@ And for security reasons could you provide the last 4 digits of the card that yo
 **Question**
 
 ```text
-Hello Joel,
+Hello [NAME],
 
 I hope this email finds you well.
 
 I am glad to inform you that again we have disabled the login challenge for you for a grace period of 24 hours from now. Please use  your updated password and access the admin panel and let me know if you are able to access it now.
 
-I would request you to enroll for a 2VS as soon as you will be able to access the admin panel to avoid further lockouts. Please refer to the help article https://support.google.com/a/answer/[PHONE]?hl=en&sjid=[REDACTED]-AP to enroll for 2SV.
+I would request you to enroll for a 2VS as soon as you will be able to access the admin panel to avoid further lockouts. Please refer to the help article https://support.google.com/a/answer/[PHONE]?hl=en&sjid=[PHONE][PHONE]-AP to enroll for 2SV.
 
 Should you have queries in the meantime, please do not hesitate to contact me by replying to this message.
 
 Have a great day!
 
-Regards,
+[NAME],
 
-Hemangini
-Google Workspace Support
+[NAME] Support
 
 
 Follow @AskWorkspace for regular helpful tips & product updates
 
 
-© 2024 Google LLC 1600 Amphitheatre Parkway, Mountain View, CA 94043
+© [ADDRESS], Mountain View, CA 94043
 
 ref:_00Df423Flu._5004M12aIVs:ref
 ```
@@ -111,7 +110,7 @@ On Wed, Mar 6, 2024 at 5:28 PM Google Workspace Support <
 > [image: Google Workspace]
 >
 >
-> Hello Joel,
+> Hello [NAME],
 >
 > I hope this email finds you well.
 >
@@ -123,7 +122,7 @@ On Wed, Mar 6, 2024 at 5:28 PM Google Workspace Support <
 > I would request you to enroll for a 2VS as soon as you will be able to
 > access the admin panel to avoid further lockouts. Please refer to the help
 > article
-> https://support.google.com/a/answer/[PHONE]?hl=en&sjid=[REDACTED]-AP
+> https://support.google.com/a/answer/[PHONE]?hl=en&sjid=[PHONE][PHONE]-AP
 > to enroll for 2SV.
 >
 > Should you have queries in the meantime, please do not hesitate to contact
@@ -131,7 +130,7 @@ On Wed, Mar 6, 2024 at 5:28 PM Google Workspace Support <
 >
 > Have a great day!
 >
-> Regards,
+> [NAME],
 >
 > Hemangini
 > Google Workspace Support
@@ -142,7 +141,7 @@ On Wed, Mar 6, 2024 at 5:28 PM Google Workspace Support <
 > tips & product updates
 >
 >
-> © 2024 Google LLC 1600 Amphitheatre Parkway, Mountain View, CA 94043
+> © [ADDRESS], Mountain View, CA 94043
 >
 >
 > ref:_00Df423Flu._5004M12aIVs:ref
@@ -163,10 +162,8 @@ I think my username is [EMAIL]
 I've tried the "Restore Purchases" link on the website but I didn't receive
 any email.
 
-Regards,
-Tom
-
-About Ascential plc
+[NAME],
+[NAME] plc
 Ascential delivers specialist information, analytics and ecommerce optimisation platforms to the world's leading consumer brands and their ecosystems.
 Our world-class businesses improve performance and solve problems for our customers by delivering immediately actionable information combined with visionary longer-term thinking across Digital Commerce, Product Design and Marketing. We also serve customers across Retail & Financial Services.
 With over 3,000 employees across five continents, we combine local expertise with a global footprint for clients in over 120 countries.
@@ -210,23 +207,23 @@ Kind regards Marius
 **Question**
 
 ```text
-Hi Kent!
+Hi [NAME]!
 
 So, I have switched computers and have had this link expire on me. Is there
 anyway that I can grab another link from you so I can access this content?
 
-Best Regards,
+Best [NAME],
 
-Anthony Andras
+[NAME] Andras
 
-On Fri, Dec 18, 2020 at 5:52 PM Epic React with Kent C. Dodds <
+On Fri, Dec 18, 2020 at 5:52 PM Epic React with [NAME] C. Dodds <
 [EMAIL]> wrote:
 
 > Hi! 👋
 >
 > Thank you for purchasing Epic React Pro. I know you will ❤️ it.
 >
-> Click the link below to access your purchase for Epic React with Kent C.
+> Click the link below to access your purchase for Epic React with [NAME] C.
 > Dodds.
 >
 >    - this link *expires in 24 hours*. After that you will need to request
@@ -236,7 +233,7 @@ On Fri, Dec 18, 2020 at 5:52 PM Epic React with Kent C. Dodds <
 >    - you can always request another link!
 >
 > *==> Click here to access your content and invoice for Epic React Pro
-> <https://egghead.io/token/01d9cf5b-5447-424c-a020-77069295a3c0?client_id=[REDACTED]&create_password=false>*
+> <https://egghead.io/token/01d9cf5b-5447-424c-a[PHONE]5a3c0?client_id=[PHONE]3dd5a03999d7b141ec809b9e[PHONE]e907e7205a9ac83cf&create_password=false>*
 >
 > *This link expires in 24 hours and can only be used once. You can always
 > request another link to be sent if this one has been used or is expired.*
@@ -246,7 +243,7 @@ On Fri, Dec 18, 2020 at 5:52 PM Epic React with Kent C. Dodds <
 **Answer**
 
 ```text
-Hey Anthony,
+Hey [NAME],
 
 
 You can access the course using the "Restore Purchases" button at the top of https://epicreact.dev. You'll need to enter the email address you used to purchase the course to have a login link sent.
@@ -267,14 +264,14 @@ what is my password? I did not understand this link request things.
 thanks
 ender
 
-On Sun, 25 Oct 2020 at 19:11, Epic React with Kent C. Dodds <
+On Sun, 25 Oct 2020 at 19:11, Epic React with [NAME] C. Dodds <
 [EMAIL]> wrote:
 
 > Hi! 👋
 >
 > Thank you for purchasing Epic React Pro. I know you will ❤️ it.
 >
-> Click the link below to access your purchase for Epic React with Kent C.
+> Click the link below to access your purchase for Epic React with [NAME] C.
 > Dodds.
 >
 >    - this link *expires in 24 hours*. After that you will need to request
@@ -283,7 +280,7 @@ On Sun, 25 Oct 2020 at 19:11, Epic React with Kent C. Dodds <
 >    no longer work.
 >
 > *==> Click here to access your content and invoice for Epic React Pro
-> <https://egghead.io/token/36074fbe-bae9-[PHONE]-7743b4d9fe5e?client_id=[REDACTED]&create_password=false>*
+> <https://egghead.io/token/36074fbe-bae9-[PHONE]-7743b4d9fe5e?client_id=[PHONE]3dd5a03999d7b141ec809b9e[PHONE]e907e7205a9ac83cf&create_password=false>*
 >
 > *This link expires in 24 hours and can only be used once. You can always
 > request another link to be sent if this one has been used or is expired.*
@@ -293,7 +290,7 @@ On Sun, 25 Oct 2020 at 19:11, Epic React with Kent C. Dodds <
 **Answer**
 
 ```text
-Hey Ender,
+Hey [NAME],
 
 
 You can access the course using the "Restore Purchases" button at the top of https://epicreact.dev. You'll need to enter the email address you used to purchase the course to have a login link sent.
@@ -319,13 +316,13 @@ Your password could not be reset. Reset password token is invalid
 Can you help solve this?
 
 Thanks
-Dominic
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Dominic,
+Hey [NAME],
 
 
 Thanks for the feedback and giving the course a go – per your request we've refunded your course enrollment and revoked access.
@@ -355,14 +352,14 @@ the following error message: "No invoices found, please log in and visit
 
 Please help me :(
 
-Best Regards,
-Walther Carrasco
+Best [NAME],
+[NAME] Carrasco
 ```
 
 **Answer**
 
 ```text
-Hey Walther,
+Hey [NAME],
 
 
 We don't have a username and password authentication system for Testing JavaScript.
@@ -392,7 +389,7 @@ How I can connect to your website the next time ?
 **Answer**
 
 ```text
-Hey Julien,
+Hey [NAME],
 
 
 Glad you were able to access the course - let us know if you have any additional questions!

@@ -5,7 +5,7 @@
 **Question**
 
 ```text
-Hi Matt!
+Hi [NAME]!
 
 I've been following your journey for a while, and purchased the full TS course!
 I've also been to your in person workshops for TS!
@@ -46,9 +46,7 @@ I am a JavaScript developer and have a reasonably basic understanding of the lan
 I would like to seek your kind help in understanding where do I start on Total TypeScript, is it from the Free Tutorials or from Pro Workshops. If its Free Tutorials, please suggest a starting point.
 
 Regards,
-Ranganath Kini
-
-Sent with [Proton Mail](https://proton.me/) secure email.
+[NAME] with [Proton Mail](https://proton.me/) secure email.
 ```
 
 **Answer**
@@ -70,7 +68,7 @@ JavaScript" was the first module and now it appears in the middle. Can you
 tell me in what order we should go through these modules?
 
 Thanks,
-Corbin Fanning
+[NAME] Fanning
 Engineering Lead - Web, Accounts, & Documents
 p: [PHONE]
 e: [EMAIL]
@@ -80,7 +78,7 @@ www.foreflight.com
 **Answer**
 
 ```text
-Hey Corbin,
+Hey [NAME],
 
 
 This issue should be resolved now.
@@ -109,14 +107,14 @@ https://www.totaltypescript.com/typescript-learning-path
 **Question**
 
 ```text
-HI Matt,
+HI [NAME],
 Where should I start your course from, Should I go through Pro workshops or
 should I start with Free tutorials? should I start with React with
 typescript or with Plain typescript first?
 
 -- 
 Regards,
-Sumeet Sood,
+[NAME],
 +91-99888-38799
 ```
 
@@ -162,7 +160,7 @@ Regards
 **Answer**
 
 ```text
-Hey Joey,
+Hey [NAME],
 
 
 You can find the KCD Learning Clubs here: https://github.com/kentcdodds/kcd-learning-clubs-ideas
@@ -198,13 +196,13 @@ Thanks in advance for your guidance. I’m really looking forward to working
 through the content.
 
 Kinds regards,
-Rebecca Tang
+[NAME] Tang
 ```
 
 **Answer**
 
 ```text
-Hey Rebecca,
+Hey [NAME],
 
 
 We offer learning paths here! https://www.totaltypescript.com/typescript-learning-path 

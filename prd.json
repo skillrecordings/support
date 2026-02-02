@@ -16,7 +16,7 @@
       "title": "Scrub PII from all skill example files",
       "description": "Run the scrub-pii script on all files in skills/*/examples/*.md and skills/*/*.md\n\nReplace all detected PII with redacted placeholders. Verify no raw emails remain after scrubbing.\n\nRun: bun run scripts/scrub-pii.ts skills/",
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "validationCommand": "! grep -r -E '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}' skills/ --include=\"*.md\" 2>/dev/null | grep -v '\\[EMAIL\\]' | grep -q '@'"
     },
     {
@@ -38,7 +38,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-02T03:21:55.559Z",
-    "totalIterations": 1,
-    "lastIteration": "2026-02-02T03:23:19.240Z"
+    "totalIterations": 2,
+    "lastIteration": "2026-02-02T03:23:31.669Z"
   }
 }

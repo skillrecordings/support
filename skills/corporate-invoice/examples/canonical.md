@@ -70,12 +70,12 @@ Address:  Av. Camilo-no.94, 4300-095 - Porto - Portugal
 VAT / NIF / Tax number: PT510148301
 
 Thanks in advance,
-Elliot
+[NAME]
 ```
 
 **Answer:**
 ```
-Hey Elliot,
+Hey [NAME],
 
 
 You'll have the option to edit the invoice to add any info after purchase. If you need help with that just let us know!
@@ -122,7 +122,7 @@ We paid acces to your cours for our employee, and financial department asked a t
 Could you please send me this document?
 
 Best regard,
-Anna
+[NAME]
 
 
 Чебыкина Анна
@@ -134,12 +134,12 @@ web: http://cardsmobile.ru
 tel:+7 (904) 515-11-04
 
 Когда всё складывается!
-Скачайте из Google Play<https://app.appsflyer.com/ru.cardsmobile.mw3?pid=signature> или AppStore<https://app.appsflyer.com/id1129811786?pid=signature>
+Скачайте из Google Play<https://app.appsflyer.com/ru.cardsmobile.mw3?pid=signature> или AppStore<https://app.appsflyer.com/id[PHONE]?pid=signature>
 ```
 
 **Answer:**
 ```
-Hey Anna,
+Hey [NAME],
 
 
 We don't have or distribute a Tax Residency Certificate. However, I've attached a copy of our W-9 tax form.

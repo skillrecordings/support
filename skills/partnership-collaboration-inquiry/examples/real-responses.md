@@ -5,7 +5,7 @@
 **Question**
 
 ```text
-Hey Matt Pocock team,
+Hey [NAME] Pocock team,
 
 Really enjoyed your recent videos. Your breakdown of AI tools and how to
 use them best is always spot on.
@@ -35,14 +35,13 @@ think this will be a fit for your audience?
 
 Would love to do a dedicated video this week.
 Best,
-Audery Graham
-Composio <https://composio.dev/>
+[NAME] <https://composio.dev/>
 ```
 
 **Answer**
 
 ```text
-I'm unable to route this directly to Matt through the system. Since this is a business partnership inquiry rather than a product support question, it should be forwarded to Matt's business development contact directly. You'll want to reach out to the appropriate business contact channel for Total TypeScript rather than through support.
+I'm unable to route this directly to [NAME] through the system. Since this is a business partnership inquiry rather than a product support question, it should be forwarded to [NAME]'s business development contact directly. You'll want to reach out to the appropriate business contact channel for Total TypeScript rather than through support.
 ```
 
 ## cnv_1j9zrmxx
@@ -54,7 +53,7 @@ Hello there,
 
 Reaching out to you for a possible collaboration with Notta.
 
-My name is Huzaifa, and I represent *Awaisson Media*, an influencer marketing
+My name is [NAME], and I represent *Awaisson Media*, an influencer marketing
 agency working with tech and lifestyle brands. We’re currently
 collaborating with *Notta* to promote their newly launched *Notta Memo*, a
 smart voice recorder designed for students, creators and businesses.
@@ -74,17 +73,17 @@ Looking forward to your reply!
 
 Best regards,
 -- 
-*Huzaifa*
+*[NAME]*
 *Awaisson Media*
 ```
 
 **Answer**
 
 ```text
-Hey Huzaifa,
+Hey [NAME],
 
 
-We support any questions related to the course and platform functionality, but you can reach out to Matt directly on X/bluesky/discord for this kind of collaboration.
+We support any questions related to the course and platform functionality, but you can reach out to [NAME] directly on X/bluesky/discord for this kind of collaboration.
 
 
 https://x.com/mattpocockuk 
@@ -100,7 +99,7 @@ Best,
 **Question**
 
 ```text
-Hey Matt,
+Hey [NAME],
 
 I'm reaching out to check if you would be interested in showcasing Motia in
 one of your videos.
@@ -118,7 +117,7 @@ Let me know what you think, And we can discuss further.
 -- 
 
 
-Rohit Ghumare
+[NAME] Ghumare
 
 Head of Developer Relations, Motia.dev
 
@@ -137,10 +136,10 @@ Twitter icon] <https://x.com/ghumare64>
 **Answer**
 
 ```text
-Hey Rohit,
+Hey [NAME],
 
 
-We support any questions related to the course and platform functionality, but you can reach out to Matt directly on X/bluesky/discord for this.
+We support any questions related to the course and platform functionality, but you can reach out to [NAME] directly on X/bluesky/discord for this.
 
 
 https://x.com/mattpocockuk 
@@ -156,10 +155,10 @@ Best,
 **Question**
 
 ```text
-Hey  Kent C. Dodds  ,
+Hey  [NAME] C. Dodds  ,
 
 
-I’m Cherry from Partnerly（ https://partnerly.us/）
+I’m [NAME] from Partnerly（ https://partnerly.us/）
  — we help top AI & tech brands grow through awesome creator
 partnerships. Think of us like your plug-in for long-term collabs with
 exciting AI software launches.
@@ -190,17 +189,17 @@ Would be great to get something rolling!
 
 Cheers,
 
-Cherry
+[NAME]
 Partnerships @ Partnerly
 ```
 
 **Answer**
 
 ```text
-Hey Cherry,
+Hey [NAME],
 
 
-We support any questions related to the course and platform functionality, but you’ll have to reach out to Kent directly on X/bluesky/discord or his site for this.
+We support any questions related to the course and platform functionality, but you’ll have to reach out to [NAME] directly on X/bluesky/discord or his site for this.
 
 
 https://x.com/kentcdodds 
@@ -227,10 +226,10 @@ Thank you so much!
 **Answer**
 
 ```text
-Hey Dana,
+Hey [NAME],
 
 
-We support any questions related to the course and platform functionality, but you’ll have to reach out to Kent directly on X/bluesky/discord or his site for this.
+We support any questions related to the course and platform functionality, but you’ll have to reach out to [NAME] directly on X/bluesky/discord or his site for this.
 
 
 https://x.com/kentcdodds 
@@ -247,10 +246,10 @@ Best,
 **Question**
 
 ```text
- Hi Matt,
+ Hi [NAME],
 
 I hope this email finds you well!
-My name is Ashley Peng, and I’m the Digital Marketing Specialist at UPDF. I
+My name is [NAME] Peng, and I’m the Digital Marketing Specialist at UPDF. I
 came across your YouTube channel (
 https://www.youtube.com/@mattpocockuk/videos) and was truly impressed by
 the quality of your content.
@@ -264,7 +263,7 @@ me at [EMAIL]
 
 Looking forward to hearing from you :)
 Best regards,
-*Ashley Peng*
+*[NAME] Peng*
 [image: UPDF logo]· Digital Marketing Specialist
 Superace Software Technology Co., Ltd.
 [EMAIL]
@@ -274,10 +273,10 @@ www.updf.com <https://updf.com/>
 **Answer**
 
 ```text
-Hey Ashley,
+Hey [NAME],
 
 
-We support any questions related to the course and platform functionality, but you can reach out to Matt directly on X/bluesky/discord for this kind of collaboration.
+We support any questions related to the course and platform functionality, but you can reach out to [NAME] directly on X/bluesky/discord for this kind of collaboration.
 
 
 https://x.com/mattpocockuk 
@@ -293,7 +292,7 @@ Best,
 **Question**
 
 ```text
-Hi Kent,
+Hi [NAME],
 
 Hope all is well! Loved your X content and the tips you share in your
 posts. I wanted to reach out to see if you might be open to partnerships.
@@ -307,16 +306,16 @@ Would love to explore if there’s an opportunity to collaborate, we are open
 to long term partnership. Let me know if you’d be interested and be open to
 a quick chat and feel free to send over your rate!
 Best,
-Nora
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Nora,
+Hey [NAME],
 
 
-We support any questions related to the course and platform functionality, but you’ll have to reach out to Kent directly on X/bluesky/discord or his site for this kind of collaboration.
+We support any questions related to the course and platform functionality, but you’ll have to reach out to [NAME] directly on X/bluesky/discord or his site for this kind of collaboration.
 
 
 https://x.com/kentcdodds 
@@ -348,7 +347,7 @@ Looking forward to hearing a quick response from your side
 
 Regards,
 
-Daisy
+[NAME]
 
 DigitalWebFX
 
@@ -360,7 +359,7 @@ Ref: 001
 **Answer**
 
 ```text
-Hey Daisy,
+Hey [NAME],
 
 
 We don't offer guest posts on our site, but thanks for reaching out!
@@ -374,16 +373,16 @@ Best,
 **Question**
 
 ```text
-Hi Matt,
+Hi [NAME],
 
-I’m Annastasia, reaching out on behalf of CSC Generation Holdings, a tech-driven holding company building the next generation of consumer brands. We’re currently looking to partner with standout creators in the TypeScript space, and we’re really impressed by how Total TypeScript is helping developers level up with clarity and depth.
+I’m [NAME], reaching out on behalf of CSC Generation Holdings, a tech-driven holding company building the next generation of consumer brands. We’re currently looking to partner with standout creators in the TypeScript space, and we’re really impressed by how Total TypeScript is helping developers level up with clarity and depth.
 
 We’d love to explore a potential sponsorship with you. If you’re interested, would you mind sending over your media kit, rate card, or any details about how you typically structure partnerships?
 
 Looking forward to hearing from you!
 
 Thanks so much,
-Annastasia Black
+[NAME] Black
 Executive Assistant to Justin Yoshimura
 CSC Generation
 M: [PHONE]
@@ -392,10 +391,10 @@ M: [PHONE]
 **Answer**
 
 ```text
-Hey Annastasia,
+Hey [NAME],
 
 
-We support any questions related to the course and platform functionality, but you can reach out to Matt directly on X/bluesky/discord for this kind of partnership.
+We support any questions related to the course and platform functionality, but you can reach out to [NAME] directly on X/bluesky/discord for this kind of partnership.
 
 
 https://x.com/mattpocockuk 
@@ -411,7 +410,7 @@ Best,
 **Question**
 
 ```text
-Hello Matt,
+Hello [NAME],
 
 I would be excited to showcase you as a contributor on our evolving platform similar to dev.to, with full credit and a link to your site.
 
@@ -452,7 +451,7 @@ I'll be happy to share the link and more information about the platform.
 
 
 Sincerely,  
-Lena Carter
+[NAME] Carter
 
 
 
@@ -462,10 +461,10 @@ Lena Carter
 **Answer**
 
 ```text
-Hey Lena,
+Hey [NAME],
 
 
-We support any questions related to the course and platform functionality, but you can reach out to Matt on these platforms directly on X/bluesky/discord for this kind of collaboration.
+We support any questions related to the course and platform functionality, but you can reach out to [NAME] on these platforms directly on X/bluesky/discord for this kind of collaboration.
 
 
 https://x.com/mattpocockuk 

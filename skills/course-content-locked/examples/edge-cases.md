@@ -15,7 +15,7 @@ Thanks!
 **Answer**
 
 ```text
-Hey Arif,
+Hey [NAME],
 
 
 The interviews are the bonus content left out when using the regional discount. You would need a full license to see the interviews.
@@ -68,13 +68,13 @@ everything is locked and I can see only the preview of the course. My question
 is “What exactly I receive for the price of $278?“
 
 Best regards,
-Ilian
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Ilian,
+Hey [NAME],
 
 
 I've transferred you license to [EMAIL]. Let me know If you run into any issues with that.
@@ -143,7 +143,7 @@ Greetings,
 I just purchased Mega bundle and I’m trying to access React related workshops and Bonus sections, but the site won’t give me access to the lessons. I will attach screenshots of the content showing on my end (sections with no lesson numbers underneath are not accessible) and what the bundle includes for reference.
 
 Thanks,
-Mai
+[NAME]
 ```
 
 **Answer**

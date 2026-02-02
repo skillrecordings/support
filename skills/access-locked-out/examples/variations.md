@@ -27,13 +27,13 @@ the course and would like to begin as soon as possible.
 
 Thanks,
 
-Matthias Heinsen
+[NAME] Heinsen
 ```
 
 **Answer**
 
 ```text
-Hey Matthias,
+Hey [NAME],
 
 
 Sorry about the wait time! Is this still an issue for you? On my end It looks like you should be able to login. If It's still having issues try to request a new login link here https://www.epicreact.dev/login 
@@ -69,7 +69,7 @@ On Tue, Aug 5, 2025 at 3:50 PM Epic React <[EMAIL]> wrote:
 
 -- 
 
-Borja Antona Gómez
+[NAME] Antona Gómez
 
 Frontend Engineer
 
@@ -79,7 +79,7 @@ playtomic.io
 **Answer**
 
 ```text
-Hey Borja,
+Hey [NAME],
 
 
 Sorry about the wait time! Is this still an issue for you? Looks like the license was claimed correctly on my end. If It's still having issues try to request a new login link here https://www.epicreact.dev/login 
@@ -107,13 +107,13 @@ provide the last four of the credit card used if that helps.
 I'm just looking to get back into the courses and go through them again.
 
 Thank you,
-Jesse
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Jesse,
+Hey [NAME],
 
 
 Looks like It was under [EMAIL]. I've transferred your license to [EMAIL] 
@@ -149,7 +149,7 @@ I've tried multiple login links but nothing works.
 I attached the invoice of my purchase to confirm my access. Please help me!
 
 Thanks,
-Oscar Mejia Bautista
+[NAME]
 ```
 
 **Answer**

@@ -5,7 +5,7 @@
 **Question**
 
 ```text
-Liebes Team,
+Liebes [NAME],
 
 wenn wir keine neuen Zahlungsinformationen angeben, wird dann unser Abo einfach gekündigt oder womit müssen wir als Folge darauf rechnen?
 
@@ -155,13 +155,13 @@ Thank you for your response.
 
 Kind regards,
 
-Lenka Silná
+[NAME] Silná
 ```
 
 **Answer**
 
 ```text
-Hey Lenka,
+Hey [NAME],
 
 
 I've refunded the charge. It can take 5-10 days for the banks to return the funds.
@@ -240,7 +240,7 @@ Can you please do not renew the payment of the subscription?
 
 Thank you
 
-Ferran Riera Bosch
+[NAME] Riera Bosch
 IT Development Manager
 
 werfen
@@ -255,7 +255,7 @@ werfen.com
 
 De: Epic React with Kent C. Dodds <[EMAIL]>
 Enviado el: Monday, January 17, 2022 13:03
-Para: Ferran Riera <[EMAIL]>
+Para: [NAME] Riera <[EMAIL]>
 Asunto: [EXTERNAL] Sign-in link for Epic React with Kent C. Dodds
 
 CAUTION:
@@ -269,7 +269,7 @@ You asked us to send you a log in link for Epic React with Kent C. Dodds.
 Click below to log in and start learning:
 [Log in to Epic React with Kent C. Dodds]
 
-The link is valid for 24 hours or until it is used. You will stay logged in for 60 days. Click here to request another link<https://eur03.safelinks.protection.outlook.com/?url=https%3A%2F%2Fepicreact.dev%2F&data=04%7C01%7Cfriera1%40werfen.com%7Cba679365c4364c83723408d9d9b14146%7C6f1611d68df74fdda3abebb1fc59a4ce%7C0%7C0%7C637780177592134210%7CUnknown%7CTWFpbGZsb3d8eyJWIjoiMC4wLjAwMDAiLCJQIjoiV2luMzIiLCJBTiI6Ik1haWwiLCJXVCI6Mn0%3D%7C3000&sdata=Ot1sceA3pYfv%2F2U7zQFZK4p0VM7f%2FWA7TXW2ZvELg%2BM%3D&reserved=0>.
+The link is valid for 24 hours or until it is used. You will stay logged in for 60 days. Click here to request another link<https://eur03.safelinks.protection.outlook.com/?url=https%3A%2F%2Fepicreact.dev%2F&data=04%7C01%7Cfriera1%40werfen.com%7Cba679365c4364c83723408d9d9b14146%7C6f1611d68df74fdda3abebb1fc59a4ce%7C0%7C0%7C[PHONE]134210%7CUnknown%7CTWFpbGZsb3d8eyJWIjoiMC4wLjAwMDAiLCJQIjoiV2luMzIiLCJBTiI6Ik1haWwiLCJXVCI6Mn0%3D%7C3000&sdata=Ot1sceA3pYfv%2F2U7zQFZK4p0VM7f%2FWA7TXW2ZvELg%2BM%3D&reserved=0>.
 
 Happy learning!
 ```
@@ -277,7 +277,7 @@ Happy learning!
 **Answer**
 
 ```text
-Hello Ferran,
+Hello [NAME],
 
 
 Epic React is a one-time purchase, not a subscription, so there aren't any renewal charges.
@@ -288,7 +288,7 @@ Epic React is a one-time purchase, not a subscription, so there aren't any renew
 **Question**
 
 ```text
-Hi Ken,
+Hi [NAME],
 
 I'm a big fan of your work, I hope you can help me sort out a recent charge
 I got on my credit card.
@@ -319,13 +319,13 @@ Thanks in advance.
 Keep up the good work.
 
 Best regards,
-Dario
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Dario,
+Hey [NAME],
 
 
 I apologize for the confusion!
@@ -370,7 +370,7 @@ The purchase is a one-time thing. You will not lose access to the course, yours 
 **Question**
 
 ```text
-Hello Team,
+Hello [NAME],
 
 Is this a one time purchase or will my renewal happen automatically?
 
@@ -411,7 +411,7 @@ Happy learning!
 **Question**
 
 ```text
-Hey Guys
+Hey [NAME]
 
 I've recently upgraded my testing javascript membership to pro from basic
 and although the stripe UI showed success and took the money, my membership
@@ -423,13 +423,13 @@ My email address is [EMAIL]
 
 Kind regards
 
-Aadam
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Aadam,
+Hey [NAME],
 
 
 I apologize for the confusion!
@@ -463,8 +463,7 @@ Please confirm the cancellation and inform me which email address is associated 
 
 Regards,
 
-Sylwia Nowicka
-Executive Assistant
+[NAME] Assistant
 Wolters Kluwer Polska Sp. z o.o.
 Mobile +48 728 323 684
 [EMAIL]<mailto:[EMAIL]>
@@ -479,7 +478,7 @@ ________________________________
 
 Niniejszy e-mail może zawierać informacje poufne, a nadto może stanowić przedmiot praw własności intelektualnej i/lub tajemnicę przedsiębiorstwa Wolters Kluwer Polska sp. z o.o., ul. Przyokopowa 33, 01-208 Warszawa, Sąd Rejonowy dla m. st. Warszawy Wydział XII Gospodarczy Krajowego Rejestru Sądowego (miejsce przechowywania dokumentacji spółki), KRS 709879, NIP 583-001-89-31, REGON [PHONE], kapitał zakładowy 19.919.527 PLN. Jeśli nie jest Pan/Pani adresatem niniejszego e-maila, uprasza się o niezwłoczne zawiadomienie nadawcy o jego otrzymaniu oraz o jego usunięcie. Jakiekolwiek wykorzystanie, w tym rozpowszechnianie lub ujawnianie, niniejszego e-maila jest zakazane.
 
-Administratorem Pani/Pana danych osobowych jest Wolters Kluwer Polska Sp. z o.o. Dane kontaktowe administratora znajdują się w Polityce prywatności<https://nam04.safelinks.protection.outlook.com/?url=http%3A%2F%2Fwww.wolterskluwer.pl%2Fpolityka-prywatnosci&data=02%7C01%7CKrzysztof.Rozko%40wolterskluwer.com%7Cd56b21f526294f3a614408d82d7747d1%7C8ac76c91e7f141ffa89c3553b2da2c17%7C0%7C0%7C637309337609502366&sdata=mEao1UG3MSofh0Bt4gCOIM6KRE2zl%2F6KYkZ3NaJimF8%3D&reserved=0>, a nadto wskazujemy, że z naszym Inspektorem Ochrony Danych osobowych można skontaktować się e-mailem pod adresem: [EMAIL]. Pani/Pana dane osobowe są przetwarzane w celu nawiązania lub zachowania relacji biznesowych z Wolters Kluwer Polska, lub w celu marketingu bezpośredniego produktów lub usług ww. spółki, a jeśli dodatkowo wyraził/a Pan/i zgodę na marketing telefoniczny lub e-mailowy, również na przekazywanie informacji handlowych w tej formie. Podstawą prawną przetwarzania Pana/Pani danych osobowych są przepisy art. 6 ust. 1 lit. a) lub b) lub f) Rozporządzenia Parlamentu Europejskiego i Rady (UE) 2016/679 z dnia 27 kwietnia 2016 r. w sprawie ochrony osób fizycznych w związku z przetwarzaniem danych osobowych i w sprawie swobodnego przepływu takich danych. Dane osobowe, pochodzą bezpośrednio od Państwa (lub zostały przekazane w Państwa imieniu) lub zostały zebrane ze źródeł publicznie dostępnych i są to w szczególności: imię i nazwisko, adres e-mail, telefon kontaktowy, adres korespondencyjny. Odbiorcą Pana/Pani danych osobowych są pracownicy i współpracownicy oraz podmioty wspomagające z Wolters Kluwer Polska. Ma Pan/Pani prawo dostępu do swoich danych osobowych, ich sprostowania, usunięcia lub ograniczenia przetwarzania a także prawo do wniesienia sprzeciwu wobec przetwarzania, oraz prawo do przenoszenia danych. W przypadku wyrażenia przez Pana/Panią zgody na przetwarzanie danych osobowych, ma Pan/Pani prawo do cofnięcia zgody w dowolnym momencie bez wpływu na zgodność z prawem przetwarzania. W Polityce prywatności informujemy również o szczegółach dot. przetwarzania, okresie przechowywania danych. Wskazujemy również dane organu nadzorczego, do którego może Pani/Pan złożyć skargę w razie uznania, że przetwarzamy Pani/Pana dane w sposób niezgodny z przepisami prawa. Jednocześnie już w tym zapewniamy, że: nie wykorzystujemy danych osobowych w celach innych niż przewidziane przepisami prawa, nie sprzedajemy Państwa danych osobowych jakimkolwiek podmiotom, przetwarzamy Państwa dane tylko w zakresie w jakim jest to niezbędne i dbamy o ich bezpieczeństwo.
+Administratorem Pani/Pana danych osobowych jest Wolters Kluwer Polska Sp. z o.o. Dane kontaktowe administratora znajdują się w Polityce prywatności<https://nam04.safelinks.protection.outlook.com/?url=http%3A%2F%2Fwww.wolterskluwer.pl%2Fpolityka-prywatnosci&data=02%7C01%7CKrzysztof.Rozko%40wolterskluwer.com%7Cd56b21f526294f3a614408d82d7747d1%7C8ac76c91e7f141ffa89c3553b2da2c17%7C0%7C0%7C[PHONE]502366&sdata=mEao1UG3MSofh0Bt4gCOIM6KRE2zl%2F6KYkZ3NaJimF8%3D&reserved=0>, a nadto wskazujemy, że z naszym Inspektorem Ochrony Danych osobowych można skontaktować się e-mailem pod adresem: [EMAIL]. Pani/Pana dane osobowe są przetwarzane w celu nawiązania lub zachowania relacji biznesowych z Wolters Kluwer Polska, lub w celu marketingu bezpośredniego produktów lub usług ww. spółki, a jeśli dodatkowo wyraził/a Pan/i zgodę na marketing telefoniczny lub e-mailowy, również na przekazywanie informacji handlowych w tej formie. Podstawą prawną przetwarzania Pana/Pani danych osobowych są przepisy art. 6 ust. 1 lit. a) lub b) lub f) Rozporządzenia Parlamentu Europejskiego i Rady (UE) 2016/679 z dnia 27 kwietnia 2016 r. w sprawie ochrony osób fizycznych w związku z przetwarzaniem danych osobowych i w sprawie swobodnego przepływu takich danych. Dane osobowe, pochodzą bezpośrednio od Państwa (lub zostały przekazane w Państwa imieniu) lub zostały zebrane ze źródeł publicznie dostępnych i są to w szczególności: imię i nazwisko, adres e-mail, telefon kontaktowy, adres korespondencyjny. Odbiorcą Pana/Pani danych osobowych są pracownicy i współpracownicy oraz podmioty wspomagające z Wolters Kluwer Polska. Ma Pan/Pani prawo dostępu do swoich danych osobowych, ich sprostowania, usunięcia lub ograniczenia przetwarzania a także prawo do wniesienia sprzeciwu wobec przetwarzania, oraz prawo do przenoszenia danych. W przypadku wyrażenia przez Pana/Panią zgody na przetwarzanie danych osobowych, ma Pan/Pani prawo do cofnięcia zgody w dowolnym momencie bez wpływu na zgodność z prawem przetwarzania. W Polityce prywatności informujemy również o szczegółach dot. przetwarzania, okresie przechowywania danych. Wskazujemy również dane organu nadzorczego, do którego może Pani/Pan złożyć skargę w razie uznania, że przetwarzamy Pani/Pana dane w sposób niezgodny z przepisami prawa. Jednocześnie już w tym zapewniamy, że: nie wykorzystujemy danych osobowych w celach innych niż przewidziane przepisami prawa, nie sprzedajemy Państwa danych osobowych jakimkolwiek podmiotom, przetwarzamy Państwa dane tylko w zakresie w jakim jest to niezbędne i dbamy o ich bezpieczeństwo.
 ```
 
 **Answer**

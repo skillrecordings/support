@@ -14,7 +14,7 @@ Many thanks
 
 **Answer:**
 ```
-Hey Raf,
+Hey [NAME],
 
 
 Sorry about the wait on this one! I went ahead and got It refunded.
@@ -77,12 +77,12 @@ you could refund both of those charges, that would be great.
 
 Best,
 
-Shane Jeffery
+[NAME] Jeffery
 ```
 
 **Answer:**
 ```
-Hey Shane,
+Hey [NAME],
 
 
 Thanks for the feedback and giving the course a go – per your request I've refunded your course enrollment and revoked access. I've also issued a refund for the duplicate charge.
@@ -104,12 +104,12 @@ I would like to be refunded, pls.
 My purchase e-mail was [EMAIL] <mailto:[EMAIL]>.
 
 Best,
-Max.
+[NAME].
 ```
 
 **Answer:**
 ```
-Hey Max,
+Hey [NAME],
 
 
 We've refunded your course enrollment and removed your access.

@@ -8,12 +8,12 @@ Hey team,
 I would like to change my address to access Total Typescript from this account, to: [EMAIL]
 
 Cheers,
-Steven Frostwick
+[NAME] Frostwick
 ```
 
 **Answer:**
 ```
-Hey Steven,
+Hey [NAME],
 
 
 I'm not seeing any purchases or licenses under [EMAIL] or [EMAIL]
@@ -47,10 +47,10 @@ Best regards,
 Jyotsana Gupta
 Training Specialist
 
-+[PHONE]
+[PHONE]
 [EMAIL]
 www.vtnetzwelt.com <https://vtnetzwelt.com/>
-+[PHONE]
+[PHONE]
 [image: linkedin icon] <https://www.linkedin.com/company/vt-netzwelt> [image:
 Twitter] <https://twitter.com/VTNetzwelt> [image: Instagram]
 <https://www.instagram.com/vtnetzweltofficial/> [image: Facebook]
@@ -91,16 +91,16 @@ Current Epic Web Dev login: [EMAIL]
 Could you please help me with that?
 
 Thank you,
-Rodrigo
+[NAME]
 
 -- 
-  Rodrigo Santoro Silverio
+  [NAME] Santoro Silverio
   [EMAIL]
 ```
 
 **Answer:**
 ```
-Hey Rodrigo,
+Hey [NAME],
 
 
 I've transferred all of your licenses to "[EMAIL]".
@@ -125,14 +125,14 @@ Is there anyway, you can transfer those purchases to this email id:
 [EMAIL]?
 
 Many thanks and warm regards,
-Saket Tawde
-+[PHONE]
+[NAME] Tawde
+[PHONE]
 Pune, India
 ```
 
 **Answer:**
 ```
-Hey Saket,
+Hey [NAME],
 
 
 I went ahead and transferred all the purchases from [EMAIL] to [EMAIL]. Let me know If you need help with anything else. 
@@ -148,12 +148,12 @@ Could you please change the email address of my account from
 Thanks in advance.
 
 Best,
-Niels
+[NAME]
 ```
 
 **Answer:**
 ```
-Hey Niels,
+Hey [NAME],
 
 
 This was already done a few months ago! It should be all good to go under [EMAIL]. 

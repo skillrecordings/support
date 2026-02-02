@@ -5,7 +5,7 @@
 **Question**
 
 ```text
-👋  Kent ! I learn your testing course at Testing Javascript.
+👋  [NAME] ! I learn your testing course at Testing Javascript.
 Thank you for an interesting and useful course, I'm learning it with
 pleasure!)
 I found a mistake in the  configuration example .eslintrc. Prop 'extends:'.
@@ -33,7 +33,7 @@ The package.json file in the video specifies that the `npm run validate` script 
 
 Thanks for curating such a wonderful material. 
 
-Best Regards,
+Best [NAME],
 Oluwasetemi
 https://oluwasetemi <https://oluwasetemi/>.dev
 ```
@@ -41,7 +41,7 @@ https://oluwasetemi <https://oluwasetemi/>.dev
 **Answer**
 
 ```text
-Hey Ojo! Thanks for all of these! Getting a fix in for those and it should be live soon!
+Hey [NAME]! Thanks for all of these! Getting a fix in for those and it should be live soon!
 ```
 
 ## cnv_oip38sn
@@ -93,16 +93,16 @@ Or if you could recommend other related resource.
 
 Thanks
 
-Sami
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hi Samiullah,
+Hi [NAME],
 
 
-At Egghead we offer the same course for free, and It was more recently updated 3 years ago​ How to Write an Open Source JavaScript Library. Still gonna be a bit old, but lots of good info. Kent also has some great blogs on his site about open source kentcdodds.com.
+At Egghead we offer the same course for free, and It was more recently updated 3 years ago​ How to Write an Open Source JavaScript Library. Still gonna be a bit old, but lots of good info. [NAME] also has some great blogs on his site about open source kentcdodds.com.
 
 Feel free to ask the same questions on Kents discord! I'm sure you could get some great recommendations there https://kcd.im/discord. 
 
@@ -116,7 +116,7 @@ Best,
 **Question**
 
 ```text
-Hi Kent,
+Hi [NAME],
 
 Hope this email finds you well!
 
@@ -127,8 +127,8 @@ I wanted to check with you if the material is still relevant.
 Please let me know if there is anything I need to do to get the latest
 content.
 
-Thanks & Regards,
-Vijay
+Thanks & [NAME],
+[NAME]
 ```
 
 **Answer**
@@ -170,7 +170,7 @@ Documentation on creating public user tables has been moved here. The creator of
 **Question**
 
 ```text
-Hi Kent,
+Hi [NAME],
    Looks like the lesson below from now onwards needs to use @emotion/jest
 instead of
    jest-emotion. I was getting the error shown in the screenshot.
@@ -189,14 +189,14 @@ should go here */
   ]
 }
 
-Regards
-Aswin
+[NAME]
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Aswin,
+Hey [NAME],
 
 
 Thanks for the heads up! We'll look into this ASAP.
@@ -217,13 +217,13 @@ At 2:21, the variable "testDAta" should be "testData".
 
 [image: image.png]
 
-- Sung Kim
+- [NAME] Kim
 ```
 
 **Answer**
 
 ```text
-Hey Sung,
+Hey [NAME],
 
 
 Thanks for the feedback on the code and transcripts you've been providing! We'll work on getting those updated ASAP.
@@ -241,16 +241,16 @@ is this still relevant?
 
 thanks!
 
-On Thu, Jan 5, 2023 at 8:07 AM Testing Javascript with Kent C. Dodds <
+On Thu, Jan 5, 2023 at 8:07 AM Testing Javascript with [NAME] C. Dodds <
 [EMAIL]> wrote:
 
 > Hi!
 >
 > Thank you for purchasing Standard Testing. We know you will love it.
 >
-> Click the link below to access Testing Javascript with Kent C. Dodds and
+> Click the link below to access Testing Javascript with [NAME] C. Dodds and
 > start learning:
-> Log in to Testing Javascript with Kent C. Dodds
+> Log in to Testing Javascript with [NAME] C. Dodds
 > <https://app.egghead.io/token/0596e0e0-09b8-483f-bff7-5273b76802b7?client_id=[REDACTED]&create_password=false>
 >
 > The link is valid for 24 hours or until it is used. You will stay logged

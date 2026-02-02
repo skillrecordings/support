@@ -39,7 +39,7 @@ Yes! strictNullChecks is baked into strict, so it's on by default in my cheat sh
 **Question**
 
 ```text
-Hello Team,
+Hello [NAME],
 
 I found a mistmach between what is say in the video and what you find in the notes. The mismatch happens in Function Overloads vs Union Types - Solution video. In the video Matt say:
 
@@ -51,13 +51,13 @@ But in the notes you find the opposite:
 
 This lead to confusion. I'm sure the notes are correct but I'm not 100% sure of this.
 
-Greetings, Said.
+Greetings, [NAME].
 ```
 
 **Answer**
 
 ```text
-Hello Said,
+Hello [NAME],
 Thanks for bringing this to our attention! You are correct-- the advice should be "same types? Use a union. Different types? Function overloads".
 
 
@@ -76,13 +76,13 @@ I was wondering if the Epic React Course (Pro version) was taught in Typescript?
 
 
 Thanks,
-Brandon
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Brandon,
+Hey [NAME],
 
 
 Thanks for reaching out!
@@ -116,13 +116,13 @@ Apologies if this is mentioned in an earlier lesson. I'm dipping in and out
 and at the moment I need to learn about custom hooks.
 
 Kind regards,
-Ann-Marie
+[NAME]-Marie
 ```
 
 **Answer**
 
 ```text
-Hi Ann,
+Hi [NAME],
 
 
 Every workshop has a repo that you're supposed to download and install (as explained in https://epicreact.dev/welcome). That's where you can run the app and go through exercises and that's where the background information is.
@@ -185,13 +185,13 @@ activate a date button with “Enter” key, it doesn’t work for some reason.
 
 Have a great day!
 
-Stefania Mellai (I’m also in the a11y slack)
+[NAME] Mellai (I’m also in the a11y slack)
 ```
 
 **Answer**
 
 ```text
-Hi Stefania,
+Hi [NAME],
 
 
 Thanks so much for your message! I've been without internet for a few weeks, so thanks also for your patience in my response as I come back online.
@@ -244,7 +244,7 @@ printed later
 **Answer**
 
 ```text
-Hey Minh,
+Hey [NAME],
 
 
 You may want to try asking again in Discord.
@@ -291,7 +291,7 @@ Thanks even if you don't respond.
 **Answer**
 
 ```text
-Hi Stephen!
+Hi [NAME]!
 
 
 I think of DetailedHTMLProps as kind of an 'internal' type used to construct other types. So, it is probably more likely to change than something like ComponentPropsWithRef, which I consider to be more of a 'public' API.

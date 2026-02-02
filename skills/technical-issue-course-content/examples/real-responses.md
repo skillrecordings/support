@@ -38,10 +38,10 @@ I'm currently using the EpicReact course to learn..well React. I've been watchin
 I've refreshed my browser multiple times along closing and restarting the window. Is there something else wrong that I am doing here?
 
 Thanks,
-Trent Murchison
+[NAME] Murchison
 [cid:image002.png@01D8766F.728CD7F0]
 
-Trent Murchison (She/Her,They/Them)
+[NAME] Murchison (She/Her,They/Them)
 Software Developer
 T: (833) 34REACH
 W: www.reachmedianetwork.com<http://www.reachmedianetwork.com/>
@@ -52,7 +52,7 @@ W: www.reachmedianetwork.com<http://www.reachmedianetwork.com/>
 **Answer**
 
 ```text
-Hey Trent,
+Hey [NAME],
 
 
 There may be a caching issue preventing you from viewing the course content. Please follow the steps below:
@@ -144,7 +144,7 @@ Ultimate.app/Contents/plugins/javascript-impl/languageService/eslint/bin/eslint8
 
 ```text
 
-Hi Pano,
+Hi [NAME],
 
 
 We appreciate the question! I always like to direct these to our discord server https://kcd.im/discord. 
@@ -176,7 +176,7 @@ Vercel is working correctly.
 
 500: INTERNAL_SERVER_ERROR
 Code: FUNCTION_INVOCATION_FAILED
-ID: cdg1::6qzj5-[PHONE]-[PHONE]
+ID: cdg1::6qzj[PHONE][PHONE]09275
 
 Maybe it is related because my account ([EMAIL] [[EMAIL]]) was created
 some time ago (I “abandoned” the course some time ago and I recently started it
@@ -191,7 +191,7 @@ yet, so I expect a lot. Good work!
 **Answer**
 
 ```text
-Hi Jaime,
+Hi [NAME],
 
 
 We recently had an update which could be causing this. Visit https://www.epicreact.dev/learn to refresh data and It should work. 
@@ -219,7 +219,7 @@ Thanks in advance!
 
 Kind regards,
 
-Dustin Hardin
+[NAME] Hardin
 
 On Mon, Jul 8, 2024 at 11:22 PM <[EMAIL]> wrote:
 
@@ -240,7 +240,7 @@ On Mon, Jul 8, 2024 at 11:22 PM <[EMAIL]> wrote:
 **Answer**
 
 ```text
-Hey Dustin,
+Hey [NAME],
 
 
 Currently, I can see a license for Full Stack Vol 1, and Epic React under [EMAIL], but I'm not seeing Testing JavaScript. 
@@ -328,13 +328,13 @@ I purchased your course last week and wanted to start now. When I tried to play 
 Thanks a lot in advance!
  
 Best,
-Charlotte Bilsing
+[NAME] Bilsing
 ```
 
 **Answer**
 
 ```text
-Hey Charlotte,
+Hey [NAME],
 
 
 We're sorry to hear this is happening. It's something we're looking into. What we can recommend right now is that you continue using your personal laptop, but If that doesn't work we can provide a refund.

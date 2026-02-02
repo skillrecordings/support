@@ -8,7 +8,7 @@
 I want to purchase the Epic React course, but I’m confused what currency the purchase is in? I live in Canada so I’m wondering if it will charge my credit card in CAD or USD?
 
 Thanks,
-- Sean Macfarlane
+- [NAME] Macfarlane
 Frontend Manager
 NetExperience
 ```
@@ -16,7 +16,7 @@ NetExperience
 **Answer**
 
 ```text
-Hey Sean,
+Hey [NAME],
 
 
 Thanks for your interest in the course!
@@ -50,7 +50,7 @@ www.getjobber.com <http://getjobber.com/>
 
 ```text
 
-Hey Taylor,
+Hey [NAME],
 
 
 Thank you for your interest in Epic React Pro!
@@ -77,13 +77,13 @@ manager so that my company can sponsor me with the course. I'm wondering
 whether the fee is Canadian dollar or US dollar.
 
 Thanks,
-Abbie
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Abbie,
+Hey [NAME],
 
 
 Thanks for your interest in the course!
@@ -104,7 +104,7 @@ is available for purchase?
 **Answer**
 
 ```text
-Hey Sofia,
+Hey [NAME],
 
 
 It's not available right now, but you can sign up here to be notified when the next course is https://www.epicai.pro/cohorts/master-mcp 

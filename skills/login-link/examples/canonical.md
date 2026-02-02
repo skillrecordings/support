@@ -9,12 +9,12 @@ I’m tryjng again. I’m unable to access my account of Epic React. I’m not g
 
 Would appreciate some help with that. Can’t login and that blows. My manager paid for the whole team to have the course.
 
-David
+[NAME]
 ```
 
 **Answer:**
 ```
-Hi David, 
+Hi [NAME], 
 
 
 I just manually requested a login link for "[EMAIL]" and it was processed and delivered successfully from our side.
@@ -41,12 +41,12 @@ Please your help, Im trying to login to justjavascrip.com but email to
 login did not arrive. I already checked span and they are nor there.
 
 Than you in advance ,
- Yulissa
+ [NAME]
 ```
 
 **Answer:**
 ```
-Hey Yulissa,
+Hey [NAME],
 
 
 I just manually requested a login link for [EMAIL] and it was processed and delivered successfully from our side.
@@ -65,12 +65,12 @@ Can you please let me know what can I do to fix this? I have attached the purcha
 
 Looking forward to trying out new things.
 
-Paras.'
+[NAME].'
 ```
 
 **Answer:**
 ```
-Hey Paras,
+Hey [NAME],
 
 
 Sorry you're having issues getting the link. On our end It's showing delivered. Most often It's inside some email filter like your spam folder. 
@@ -90,12 +90,12 @@ Hi,
 I have tried a couple of times to get a new sign-in link for https://justjavascript.com/, but I am not getting any mails in my inbox or junk mail 
 
 Best regards,
-Alvar
+[NAME]
 ```
 
 **Answer:**
 ```
-Hey Alvar, 
+Hey [NAME], 
 
 
 I see an active license under this email. I've gone ahead and sent you a magic link. Let me know if it works or not. 
@@ -120,7 +120,7 @@ Best regards.
 
 **Answer:**
 ```
-Hey Gorka,
+Hey [NAME],
 
 
 On our end It shows we're sending the emails and they've been delivered to [EMAIL] 

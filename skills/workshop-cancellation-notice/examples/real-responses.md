@@ -32,7 +32,7 @@ Pawel
 **Answer**
 
 ```text
-Hi Oscar,
+Hi [NAME],
 The workshop recording should be available next week, we will email you ASAP.
 
 

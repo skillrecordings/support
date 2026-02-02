@@ -5,7 +5,7 @@
 **Question**
 
 ```text
-Hey Epic React Team,
+Hey [NAME],
 
 I'm having some issues playing some videos...
 
@@ -20,7 +20,7 @@ Can you please help me with this issue?
 
 Regards,
 
-Alejandro Monasterios
+[NAME] Monasterios
 
 
 
@@ -40,7 +40,7 @@ On Fri, Dec 4, 2020 at 1:53 PM Epic React with Kent C. Dodds <
 >    - you can always request another link!
 >
 > *==> Click here to access Epic React with Kent C. Dodds
-> <https://egghead.io/token/8e52cbe5-c418-44ad-8fca-94d25539db08?client_id=[REDACTED]>*
+> <https://egghead.io/token/8e52cbe5-c418-44ad-8fca-94d25539db08?client_id=[PHONE]3dd5a03999d7b141ec809b9e[PHONE]e907e7205a9ac83cf>*
 >
 > *This link expires in 24 hours and can only be used once. You can always
 > request another link to be sent if this one has been used or is expired.*
@@ -49,7 +49,7 @@ On Fri, Dec 4, 2020 at 1:53 PM Epic React with Kent C. Dodds <
 
 -- 
 
-*Alejandro Marcio Monasterios Rios*
+*[NAME] Marcio Monasterios Rios*
 *Ingeniero de Software - Emprendedor*
 
 *Mi propósito es crear y participar de ambientes que ayuden a la humanidad
@@ -60,7 +60,7 @@ conciencia. *
 **Answer**
 
 ```text
-Hey Alejandro,
+Hey [NAME],
 
 
 Gmail was having service issues yesterday, so we were seeing a lot of bounce backs. This resulted in our email processor marking your address as inactive, which prevented any additional emails from being sent to you.
@@ -86,7 +86,7 @@ Which value should I pass to the ref? How can I download them?
 
 Best,
 
-Guilherme
+[NAME]
 ```
 
 **Answer**
@@ -100,7 +100,7 @@ Try this: https://share.getcloudapp.com/collections/7DfR4PA/TJS
 **Question**
 
 ```text
-Hi Team,
+Hi [NAME],
 
 I have bought the Online Course to learn / refresh React. Unfortunately there is no subtitle / caption available? Is there a setting for showing the subtitle? I am deaf and I need to have subtitle otherwise it doesn't make the sense to join this course.
 Can you help me here?
@@ -127,7 +127,7 @@ On Sunday, August 15th, 2021 at 11:04, Epic React with Kent C. Dodds <[EMAIL]> w
 >
 > Click below to log in and start learning:
 >
-> [Log in to Epic React with Kent C. Dodds](https://app.egghead.io/token/254bbefd-cd10-[PHONE]-34c7595d3d0d?client_id=[REDACTED])
+> [Log in to Epic React with Kent C. Dodds](https://app.egghead.io/token/254bbefd-cd10-[PHONE]-34c7595d3d0d?client_id=[PHONE]3dd5a03999d7b141ec809b9e[PHONE]e907e7205a9ac83cf)
 >
 > The link is valid for 24 hours or until it is used. You will stay logged in for 60 days. [Click here to request another link](https://epicreact.dev).
 >
@@ -178,7 +178,7 @@ help me.
 **Answer**
 
 ```text
-Hey Adil,
+Hey [NAME],
 
 
 You should not be installing the workshop app globally.

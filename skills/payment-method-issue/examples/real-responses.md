@@ -14,7 +14,7 @@ Could you help ?
 -- 
 <https://www.ifood.com.br/>
 
-Jhonatan Alves
+[NAME] Alves
 
 *People Development*
 
@@ -32,7 +32,7 @@ www.ifood.com.br
 ```text
 
 
-Hey Jhonatan,
+Hey [NAME],
 
 
 Thanks for reaching out!
@@ -65,7 +65,7 @@ Have you ever had this happen before? do you know any workarounds ?
 **Answer**
 
 ```text
-Hey Paulina,
+Hey [NAME],
 
 
 Looks like It went through! We can't do much on our when a card gets declined, but I'm glad It worked out. 
@@ -164,13 +164,13 @@ Maggie
 
 Unsubscribe from Just JavaScript emails - Unsubscribe from All Emails
 
-12333 Sowden Rd Ste B, PMB#97429, Houston, TX [PHONE]
+[ADDRESS] Ste B, PMB#97429, Houston, TX [PHONE]
 ```
 
 **Answer**
 
 ```text
-Hey Amie,
+Hey [NAME],
 
 
 We are not currently accepting crypto payments.
@@ -181,7 +181,7 @@ We are not currently accepting crypto payments.
 **Question**
 
 ```text
-Greetings Matt. Thank you for the tour you are doing. Thanks to you, I looked at
+Greetings [NAME]. Thank you for the tour you are doing. Thanks to you, I looked at
 TS from a different angle. I tried to buy the course. Unfortunately the card is
 rejected.I think that the reason is restrictions or sanctions.
 ```
@@ -247,7 +247,7 @@ No alternative payment options are available at this time
 **Question**
 
 ```text
-Hi Matt,
+Hi [NAME],
 I'm unable to pay for the course with my Indian cards, as there is a
 regulatory step required before it can be charged. I thought stripe had
 fixed this, but it throws card declined error. Is there a PayPal link I
@@ -255,7 +255,7 @@ could use?
 
 Thanks,
 
-On Fri, Dec 9, 2022, 21:05 Matt Pocock <[EMAIL]> wrote:
+[NAME], Dec 9, 2022, 21:05 [NAME] Pocock <[EMAIL]> wrote:
 
 > We are opened Total TypeScript for pre-sale with a 20% discount. The
 > pre-sale will be available until DATE and closes again until the new year
@@ -357,7 +357,7 @@ On Fri, Dec 9, 2022, 21:05 Matt Pocock <[EMAIL]> wrote:
 >
 > Questions? Hit reply.
 >
-> -Matt
+> -[NAME]
 >
 > ​
 >
@@ -367,7 +367,7 @@ On Fri, Dec 9, 2022, 21:05 Matt Pocock <[EMAIL]> wrote:
 > <https://unsubscribe.convertkit-mail2.com/mvum8qrvdks6uz757vsm> from all
 > emails at any time.
 >
-> 12333 Sowden Rd, Ste. B, PMB #97429, Houston, TX 77080
+> [ADDRESS], Ste. B, PMB #97429, Houston, TX 77080
 >
 > ​
 >
@@ -393,13 +393,13 @@ Is it possible to purchase it with paypal or transfer it on your
 bank account?
 
 
-Nicat
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Nicat,
+Hey [NAME],
 
 
 Thanks for your interest in the course!

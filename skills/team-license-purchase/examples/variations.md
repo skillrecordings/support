@@ -35,13 +35,13 @@ Australia, Japan and beyond. We use TS heavily on the front and back end. I'm
 interested in team pricing for our org. I've put down 20 seats but we're around
 100 engineers so I'm keen to understand the process for adding people, whether
 that has to happen up front or if it's possible to add more over time etc. Many
-thanks! Tom
+thanks! [NAME]
 ```
 
 **Answer**
 
 ```text
-Hi Tom,
+Hi [NAME],
 
 
 For 20 seats you get 25% off so It will be $7,500. I've attached the quote. 

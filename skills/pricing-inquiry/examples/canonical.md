@@ -68,13 +68,13 @@ Hi,
 I'm looking into buying the TypeScript course but have trouble understanding if it's a purchase or a subscription. Is the cost yearly or do I have access to the course indefinitely?
 
 Sincerely,
-Niro
+[NAME]
 ```
 
 **Answer**
 
 ```text
-Hey Niro,
+Hey [NAME],
 
 
 It's a single purchase not a subscription! 
@@ -122,13 +122,13 @@ I am a Epic React V1 Pro user. Is the upgrade to v2 included in my original
 purchase or do I need to purchase v2 separately?
 
 Thanks,
--John Riviello
+-[NAME] Riviello
 ```
 
 **Answer**
 
 ```text
-Hi John,
+Hi [NAME],
 
 
 If you own Epic React V1 you can get an upgrade discount! It's an entirely new learning experience and was a ton of work. You can find more details here: https://www.epicreact.dev/ 
