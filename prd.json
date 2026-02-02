@@ -80,13 +80,13 @@
       "title": "Verify complete PII removal and commit",
       "description": "Final verification pass:\n\n1. Run comprehensive PII scan:\n   - No emails (plain or URL-encoded)\n   - No auth tokens (UUID, hex strings > 20 chars in URL params)\n   - No phone numbers\n   - No names in greetings (Hi [Name])\n\n2. Generate report of all redactions made\n\n3. Commit with message: \"chore: deep scrub PII from examples (tokens, auth URLs, encoded emails)\"\n\n4. Update the purge-history.sh script to also rewrite commits containing these patterns",
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "validationCommand": "git log -1 --oneline | grep -qi 'deep scrub\\|pii' && ! grep -r -E '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}|token=[a-f0-9-]{20,}' skills/ --include=\"*.md\" 2>/dev/null | grep -v '\\[' | grep -q '.'"
     }
   ],
   "metadata": {
     "createdAt": "2026-02-02T03:21:55.559Z",
-    "totalIterations": 5,
-    "lastIteration": "2026-02-02T03:32:20.335Z"
+    "totalIterations": 6,
+    "lastIteration": "2026-02-02T03:37:34.716Z"
   }
 }

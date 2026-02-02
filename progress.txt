@@ -55,3 +55,12 @@ Summary: Added a new deep URL scrubber script and ran it against `skills/`, aggr
 Details
 - New script: `scripts/deep-scrub-pii.ts` (walks all files under `skills/`, skips binaries, scrubs URLs with param-aware and token/UUID/hex detection, supports `--dry-run`)
 - Updated files: mult
+
+---
+[2026-02-02T03:37:34.717Z]
+Completed: Verify complete PII removal and commit
+Files: none
+Summary: Applied a final PII sweep across `skills/**/*.md`, redacting auth URLs, coupon codes, and named greetings, and expanded `scripts/purge-history.sh` to rewrite encoded emails and token-like URL params in history.
+
+Redaction report
+- Auth URL tokens: replaced `/token/<uuid>` with `/token/[TOKEN]` in `skills/subscription-renewal-issue/examples/real-responses.md`, `skills/invoice-billing-statement/exam
