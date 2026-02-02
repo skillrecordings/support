@@ -16,7 +16,7 @@
       "title": "Re-run gap analysis with real Ollama embeddings",
       "description": "The previous gap analysis used fake hash embeddings. Re-run with real Ollama embeddings.\n\n1. Update scripts/gap-analysis.ts to use Ollama mxbai-embed-large:\n   - Remove any local hash fallback\n   - Call http://localhost:11434/api/embeddings for each conversation\n   - Use the skills collection in Qdrant to find nearest skill\n\n2. For each conversation in DuckDB (artifacts/phase-0/embeddings/v2/temp.duckdb):\n   - Get first_message text\n   - Generate embedding via Ollama\n   - Search Qdrant skills collection for nearest match\n   - Record similarity score\n\n3. Flag gaps: conversations with similarity < 0.5\n\n4. Cluster gaps to identify common uncovered patterns\n\n5. Output:\n   - artifacts/gap-analysis/report.md (human readable)\n   - artifacts/gap-analysis/gaps.json (machine readable)\n\n6. Report should show gaps < 30% (not 92% like before)",
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "validationCommand": "test -f artifacts/gap-analysis/report.md && grep -q 'Embedding strategy.*mxbai\\|ollama' artifacts/gap-analysis/report.md"
     },
     {
@@ -78,6 +78,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-02T05:35:01.721Z",
-    "totalIterations": 0
+    "totalIterations": 1,
+    "lastIteration": "2026-02-02T14:59:03.630Z"
   }
 }

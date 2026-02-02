@@ -40,13 +40,6 @@ interface ConversationRow {
   first_message: string
 }
 
-interface SkillEmbedding {
-  name: string
-  description: string
-  embedding: number[]
-  embeddingNorm: number
-}
-
 interface GapRecord {
   conversation_id: string
   nearest_skill: string
@@ -363,12 +356,7 @@ async function main() {
   const skillIndexRaw = await fs.readFile(SKILLS_INDEX, 'utf-8')
   const skillIndex = JSON.parse(skillIndexRaw) as { skills: SkillIndexEntry[] }
 
-  const skillEmbeddings: SkillEmbedding[] = skillIndex.skills.map((skill) => ({
-    name: skill.name,
-    description: skill.description,
-    embedding: [],
-    embeddingNorm: 0,
-  }))
+  const skillCount = skillIndex.skills.length
 
   const duckdb = await loadDuckDB()
   const db = new duckdb.Database(CONVERSATIONS_DUCKDB)
@@ -443,7 +431,7 @@ async function main() {
   reportLines.push('')
   reportLines.push(`Total conversations analyzed: ${totalConversations}`)
   reportLines.push(`Total gaps found (similarity < ${SIMILARITY_THRESHOLD}): ${gaps.length}`)
-  reportLines.push(`Skills compared: ${skillEmbeddings.length}`)
+  reportLines.push(`Skills compared: ${skillCount}`)
   reportLines.push(`Embedding strategy: ollama-${EMBEDDING_MODEL}`)
   reportLines.push(`Clusters generated: ${clusterCount}`)
   reportLines.push('')
