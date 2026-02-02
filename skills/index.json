@@ -1,5 +1,5 @@
 {
-  "generated": "2026-02-02T04:43:47.104Z",
+  "generated": "2026-02-02T14:00:00.000Z",
   "skills": [
     {
       "name": "access-locked-out",
@@ -20,6 +20,18 @@
       "sample_size": 33,
       "references": [
         "real-responses.md"
+      ]
+    },
+    {
+      "name": "app-crash-report",
+      "description": "Customer reporting application crashes, missing exercises, broken features, StackBlitz issues, or other technical problems with the course platform.",
+      "path": "/skills/app-crash-report/SKILL.md",
+      "sample_size": 760,
+      "references": [
+        "canonical.md",
+        "edge-cases.md",
+        "real-responses.md",
+        "variations.md"
       ]
     },
     {
@@ -56,6 +68,18 @@
       "sample_size": 83,
       "references": [
         "real-responses.md"
+      ]
+    },
+    {
+      "name": "content-feedback",
+      "description": "Customer providing feedback about course content including suggestions for improvements, typo corrections, error reports in exercises or solutions, and feature requests for content.",
+      "path": "/skills/content-feedback/SKILL.md",
+      "sample_size": 586,
+      "references": [
+        "canonical.md",
+        "edge-cases.md",
+        "real-responses.md",
+        "variations.md"
       ]
     },
     {
@@ -272,6 +296,18 @@
       ]
     },
     {
+      "name": "price-feedback",
+      "description": "Customer expressing concerns about pricing, affordability, regional pricing issues, or requesting discounts. Often from freelancers, individual developers paying out of pocket, or users in regions with unfavorable exchange rates.",
+      "path": "/skills/price-feedback/SKILL.md",
+      "sample_size": 643,
+      "references": [
+        "canonical.md",
+        "edge-cases.md",
+        "real-responses.md",
+        "variations.md"
+      ]
+    },
+    {
       "name": "pricing-inquiry",
       "description": "Answer pricing questions for courses. Use when a customer asks about current price, pricing model, or availability.",
       "path": "/skills/pricing-inquiry/SKILL.md",
@@ -288,6 +324,18 @@
       "description": "Handle refund requests. Use when a customer asks for a refund, money back, or to cancel a purchase or subscription.",
       "path": "/skills/refund-request/SKILL.md",
       "sample_size": 1433,
+      "references": [
+        "canonical.md",
+        "edge-cases.md",
+        "real-responses.md",
+        "variations.md"
+      ]
+    },
+    {
+      "name": "scholarship-financial-aid",
+      "description": "Customer requesting free access due to financial hardship, sanctions, or being a student who cannot afford the course. Common from users in sanctioned countries (Iran, Afghanistan, Russia) or students on limited budgets.",
+      "path": "/skills/scholarship-financial-aid/SKILL.md",
+      "sample_size": 485,
       "references": [
         "canonical.md",
         "edge-cases.md",
