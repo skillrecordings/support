@@ -1,0 +1,60 @@
+{
+  "version": "1.0",
+  "projectName": "skills-enrichment",
+  "description": "Enrich skills with cross-links, expanded examples, templates, and indexes",
+  "stories": [
+    {
+      "id": "story-ml4oohri",
+      "title": "Generate llms.txt and index.json for skill discovery",
+      "description": "Create the skills index files for agent discovery:\n\n1. Generate `skills/llms.txt` in standard format:\n```\n# Support Agent Skills Index\n# Generated: 2026-02-02\n\n/skills/refund-request/SKILL.md - Handle refund and cancellation requests...\n/skills/email-change/SKILL.md - Process email address change requests...\n...\n```\n\n2. Generate `skills/index.json` with structured metadata:\n```json\n{\n  \"generated\": \"2026-02-02T...\",\n  \"skills\": [\n    {\n      \"name\": \"refund-request\",\n      \"description\": \"...\",\n      \"path\": \"/skills/refund-request/SKILL.md\",\n      \"sample_size\": 1433,\n      \"references\": [\"canonical.md\", \"edge-cases.md\", ...]\n    }\n  ]\n}\n```\n\nRead all skills/*/SKILL.md, parse frontmatter, generate both files.",
+      "priority": 1,
+      "passes": true,
+      "validationCommand": "test -f skills/llms.txt && test -f skills/index.json && wc -l < skills/llms.txt | grep -qE '^4[0-9]$|^5[0-9]$'"
+    },
+    {
+      "id": "story-ml4oohub",
+      "title": "Add cross-skill links based on topic co-occurrence",
+      "description": "Analyze which skills often appear together in conversations and add related_skills metadata.\n\n1. Query the DuckDB embeddings database for conversations with multiple tags/topics\n2. Build co-occurrence matrix: which topics appear together in same conversations\n3. For each skill, add to metadata:\n```yaml\nmetadata:\n  related_skills: [\"email-change\", \"access-locked-out\"]\n```\n\nFocus on meaningful relationships:\n- refund-request often pairs with: duplicate-purchase, subscription-renewal-issue\n- email-change often pairs with: access-locked-out, login-link\n- corporate-invoice often pairs with: team-license-purchase\n\nUpdate all 41 SKILL.md files with related_skills where co-occurrence > 5%.",
+      "priority": 2,
+      "passes": true,
+      "validationCommand": "grep -l 'related_skills' skills/*/SKILL.md | wc -l | grep -qE '^[1-9][0-9]*$'"
+    },
+    {
+      "id": "story-ml4oohud",
+      "title": "Extract response templates for common patterns",
+      "description": "Create reusable response templates from patterns found across skills.\n\n1. Create `templates/` directory\n2. Analyze references/*.md across all skills for common patterns\n3. Extract templates:\n\n```markdown\n# templates/refund-initiated.md\nWe've initiated a refund. It can take 5-10 days for the banks to reconcile and return the money to your account.\n\n# templates/login-link-sent.md  \nI've sent a fresh login link to [EMAIL]. Check your spam folder if you don't see it within a few minutes.\n\n# templates/greeting-apologetic.md\nSorry about the wait on this one!\n\n# templates/closing-friendly.md\nLet me know if you have any other questions!\n```\n\n4. Create `templates/index.md` listing all templates with usage notes\n5. Aim for 8-12 templates covering the most common response fragments",
+      "priority": 3,
+      "passes": true,
+      "validationCommand": "test -d templates && ls templates/*.md | wc -l | grep -qE '^[5-9]$|^1[0-9]$'"
+    },
+    {
+      "id": "story-ml4oohuh",
+      "title": "Expand thin skills with more examples",
+      "description": "31 skills have only 1 reference file. Expand them with more examples.\n\nFor each skill with only real-responses.md:\n1. Query DuckDB for more conversations matching this topic\n2. Create canonical.md (3-5 ideal response patterns)\n3. Create edge-cases.md (unusual situations)\n4. Create variations.md (same intent, different wording)\n\nPriority order (by sample size, expand top 10 thin skills):\n- lesson-content-question (414 samples, 1 file)\n- discount-code-request (388 samples, 1 file)\n- payment-method-issue (317 samples, 1 file)\n- subscription-renewal-issue (272 samples, 1 file)\n- duplicate-purchase (253 samples, 1 file)\n\nEach expanded skill should have 3-4 reference files with 3-5 examples each.",
+      "priority": 4,
+      "passes": true,
+      "validationCommand": "for d in skills/lesson-content-question skills/discount-code-request skills/payment-method-issue; do test -f \"$d/references/canonical.md\" || exit 1; done"
+    },
+    {
+      "id": "story-ml4oohuk",
+      "title": "Gap analysis: Find uncovered ticket patterns",
+      "description": "Create a script to find tickets that don't match any skill well.\n\n1. Create `scripts/gap-analysis.ts`:\n   - Load skill descriptions and embed them\n   - For each conversation in DuckDB, find nearest skill\n   - Flag conversations with similarity < 0.5 as \"gaps\"\n   - Cluster gaps to find common uncovered patterns\n\n2. Output `artifacts/gap-analysis/report.md`:\n   - Total gaps found\n   - Top 10 gap clusters with example tickets\n   - Suggested new skills\n\n3. Output `artifacts/gap-analysis/gaps.json`:\n   - List of gap conversation IDs\n   - Nearest skill and similarity score\n   - Cluster assignments\n\nThis identifies what skills we're missing.",
+      "priority": 5,
+      "passes": true,
+      "validationCommand": "test -f scripts/gap-analysis.ts && test -f artifacts/gap-analysis/report.md"
+    },
+    {
+      "id": "story-ml4oohum",
+      "title": "Add validation rules to all skills",
+      "description": "Ensure every skill has explicit validation rules in the body.\n\nFor each SKILL.md, add or improve the \"## Validation\" section:\n```markdown\n## Validation\n\nDraft must:\n- [ ] [Specific requirement 1]\n- [ ] [Specific requirement 2]\n- [ ] NOT [thing to avoid]\n```\n\nAlso ensure metadata.validation has machine-readable rules:\n```yaml\nmetadata:\n  validation: |\n    required_phrases:\n      - \"specific phrase\"\n    forbidden_patterns:\n      - \"(?i)pattern to avoid\"\n    max_length: 500\n```\n\nUpdate all 41 skills with clear validation criteria.",
+      "priority": 6,
+      "passes": true,
+      "validationCommand": "grep -l '## Validation' skills/*/SKILL.md | wc -l | grep -qE '^4[0-1]$'"
+    }
+  ],
+  "metadata": {
+    "createdAt": "2026-02-02T04:41:59.835Z",
+    "totalIterations": 6,
+    "lastIteration": "2026-02-02T05:16:07.971Z"
+  }
+}

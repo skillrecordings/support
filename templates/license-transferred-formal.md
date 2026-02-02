@@ -1,0 +1,1 @@
+Your license has been successfully transferred to the new account. The recipient should now have full access to all associated materials.

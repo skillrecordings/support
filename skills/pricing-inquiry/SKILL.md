@@ -2,8 +2,24 @@
 name: pricing-inquiry
 description: Answer pricing questions for courses. Use when a customer asks about current price, pricing model, or availability.
 metadata:
+  trigger_phrases:
+      - "answer pricing"
+      - "pricing questions"
+      - "questions courses"
+  related_skills: ["installment-payment-option", "student-discount-request", "lesson-content-question", "discount-code-request", "course-difficulty-concern"]
   sample_size: "523"
-  validation: "required_phrases:\n  - \"let me know if\"\nforbidden_patterns:\n  - \"(?i)price is \\\\$\"\n  - \"(?i)we can (?:do|offer) \\\\$\"\n  - \"(?i)discount code\"\n  - \"(?i)coupon\"\n  - \"(?i)promo code\"\n  - \"(?i)custom discount\"\n  - \"(?i)special discount\""
+  validation: |
+    required_phrases:
+      - "let me know if"
+    forbidden_patterns:
+      - "(?i)price is \\\\\\\\$"
+      - "(?i)we can (?:do|offer) \\\\\\\\$"
+      - "(?i)discount code"
+      - "(?i)coupon"
+      - "(?i)promo code"
+      - "(?i)custom discount"
+      - "(?i)special discount"
+    max_length: 500
   metrics: "sample_size: 523\navg_thread_length: 2.84\ntop_phrases:\n  - phrase: \"let me know if\"\n    count: 90\n    percent: 17.2\n  - phrase: \"me know if you\"\n    count: 86\n    percent: 16.4\n  - phrase: \"know if you have\"\n    count: 86\n    percent: 16.4\n  - phrase: \"if you have any\"\n    count: 53\n    percent: 10.1\n  - phrase: \"thanks for reaching out\"\n    count: 52\n    percent: 9.9\n  - phrase: \"https www totaltypescript com\"\n    count: 50\n    percent: 9.6\n  - phrase: \"for your interest in\"\n    count: 43\n    percent: 8.2\n  - phrase: \"thanks for your interest\"\n    count: 40\n    percent: 7.6\n  - phrase: \"your interest in the\"\n    count: 40\n    percent: 7.6\n  - phrase: \"interest in the course\"\n    count: 40\n    percent: 7.6"
 ---
 # Pricing Information
@@ -54,3 +70,4 @@ Common closings:
 Draft must:
 - [ ] Include at least one of the required phrases from the validation block
 - [ ] Stay consistent with the observed response patterns above
+- [ ] NOT introduce policy details that are not present in the verified response lines above.

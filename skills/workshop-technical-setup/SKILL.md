@@ -2,8 +2,17 @@
 name: workshop-technical-setup
 description: Help with workshop technical setup. Use when a customer asks about required setup, tools, or preparation.
 metadata:
+  trigger_phrases:
+      - "workshop technical"
+      - "technical setup"
+      - "setup customer"
+  related_skills: ["course-difficulty-concern", "api-documentation-question", "technical-issue-course-content", "workshop-attendance-confirmation", "lesson-content-question"]
   sample_size: "28"
-  validation: "required_phrases:\n  - \"on thu 22 jan\"\nforbidden_patterns: []"
+  validation: |
+    required_phrases:
+      - "on thu 22 jan"
+    forbidden_patterns: []
+    max_length: 500
   metrics: "sample_size: 28\navg_thread_length: 4.11\ntop_phrases:\n  - phrase: \"on thu 22 jan\"\n    count: 5\n    percent: 17.9\n  - phrase: \"thu 22 jan 2026\"\n    count: 5\n    percent: 17.9\n  - phrase: \"22 jan 2026 at\"\n    count: 5\n    percent: 17.9\n  - phrase: \"let me know if\"\n    count: 5\n    percent: 17.9\n  - phrase: \"jan 22 2026 at\"\n    count: 4\n    percent: 14.3\n  - phrase: \"am j sanchez email\"\n    count: 4\n    percent: 14.3\n  - phrase: \"j sanchez email wrote\"\n    count: 4\n    percent: 14.3\n  - phrase: \"kent c dodds me\"\n    count: 4\n    percent: 14.3\n  - phrase: \"c dodds me kentcdodds\"\n    count: 4\n    percent: 14.3\n  - phrase: \"dodds me kentcdodds com\"\n    count: 4\n    percent: 14.3"
 ---
 # Workshop Technical Setup and Preparation
@@ -54,3 +63,4 @@ Common closings:
 Draft must:
 - [ ] Include at least one of the required phrases from the validation block
 - [ ] Stay consistent with the observed response patterns above
+- [ ] NOT introduce policy details that are not present in the verified response lines above.

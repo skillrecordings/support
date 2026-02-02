@@ -2,8 +2,17 @@
 name: website-bug-report
 description: Handle website bug reports. Use when a customer reports site errors or platform issues.
 metadata:
+  trigger_phrases:
+      - "handle website"
+      - "website bug"
+      - "bug reports"
+  related_skills: ["broken-link-404-error", "technical-issue-course-content", "certificate-request", "ppp-pricing", "login-link", "access-locked-out"]
   sample_size: "286"
-  validation: "required_phrases:\n  - \"thanks for the heads\"\nforbidden_patterns: []"
+  validation: |
+    required_phrases:
+      - "thanks for the heads"
+    forbidden_patterns: []
+    max_length: 500
   metrics: "sample_size: 286\navg_thread_length: 2.78\ntop_phrases:\n  - phrase: \"thanks for the heads\"\n    count: 69\n    percent: 24.1\n  - phrase: \"for the heads up\"\n    count: 69\n    percent: 24.1\n  - phrase: \"let us know if\"\n    count: 52\n    percent: 18.2\n  - phrase: \"let me know if\"\n    count: 35\n    percent: 12.2\n  - phrase: \"now let us know\"\n    count: 33\n    percent: 11.5\n  - phrase: \"the heads up we'll\"\n    count: 31\n    percent: 10.8\n  - phrase: \"heads up we'll look\"\n    count: 29\n    percent: 10.1\n  - phrase: \"up we'll look into\"\n    count: 29\n    percent: 10.1\n  - phrase: \"everything should be back\"\n    count: 26\n    percent: 9.1\n  - phrase: \"us know if you\"\n    count: 25\n    percent: 8.7"
 ---
 # Website Bug Report
@@ -54,3 +63,4 @@ Common closings:
 Draft must:
 - [ ] Include at least one of the required phrases from the validation block
 - [ ] Stay consistent with the observed response patterns above
+- [ ] NOT introduce policy details that are not present in the verified response lines above.

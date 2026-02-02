@@ -2,8 +2,20 @@
 name: refund-request
 description: Handle refund requests. Use when a customer asks for a refund, money back, or to cancel a purchase or subscription.
 metadata:
+  trigger_phrases:
+      - "handle refund"
+      - "refund requests"
+      - "requests customer"
+  related_skills: ["duplicate-purchase", "subscription-renewal-issue"]
   sample_size: "1433"
-  validation: "required_phrases:\n  - \"refund\"\n  - \"5-10\"\nforbidden_patterns:\n  - \"(?i)why\"\n  - \"(?i)feedback\""
+  validation: |
+    required_phrases:
+      - "refund"
+      - "5-10"
+    forbidden_patterns:
+      - "(?i)why"
+      - "(?i)feedback"
+    max_length: 500
   metrics: "sample_size: 1433\navg_thread_length: 2.76\ntop_phrases:\n  - phrase: \"it may take 5-10\"\n    count: 840\n    percent: 58.6\n  - phrase: \"may take 5-10 business\"\n    count: 840\n    percent: 58.6\n  - phrase: \"take 5-10 business days\"\n    count: 840\n    percent: 58.6\n  - phrase: \"business days for the\"\n    count: 839\n    percent: 58.5\n  - phrase: \"show up in your\"\n    count: 839\n    percent: 58.5\n  - phrase: \"up in your account\"\n    count: 839\n    percent: 58.5\n  - phrase: \"5-10 business days for\"\n    count: 838\n    percent: 58.5\n  - phrase: \"to show up in\"\n    count: 838\n    percent: 58.5\n  - phrase: \"account depending on how\"\n    count: 837\n    percent: 58.4\n  - phrase: \"by your financial institution\"\n    count: 837\n    percent: 58.4"
 ---
 # Refund Request

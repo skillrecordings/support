@@ -1,0 +1,1 @@
+Your refund has been processed and submitted to your financial institution. Please allow 5-10 business days for the funds to appear in your account, as processing times vary by bank.

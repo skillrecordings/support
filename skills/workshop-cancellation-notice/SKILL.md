@@ -2,8 +2,17 @@
 name: workshop-cancellation-notice
 description: Notify about workshop cancellations. Use when a scheduled workshop or session is canceled or rescheduled.
 metadata:
+  trigger_phrases:
+      - "notify about"
+      - "about workshop"
+      - "workshop cancellations"
+  related_skills: ["workshop-attendance-confirmation", "subscription-renewal-issue", "workshop-technical-setup"]
   sample_size: "1"
-  validation: "required_phrases:\n  - \"hi oscar the workshop\"\nforbidden_patterns: []"
+  validation: |
+    required_phrases:
+      - "hi oscar the workshop"
+    forbidden_patterns: []
+    max_length: 500
   metrics: "sample_size: 1\navg_thread_length: 19\ntop_phrases:\n  - phrase: \"hi oscar the workshop\"\n    count: 1\n    percent: 100\n  - phrase: \"oscar the workshop recording\"\n    count: 1\n    percent: 100\n  - phrase: \"the workshop recording should\"\n    count: 1\n    percent: 100\n  - phrase: \"workshop recording should be\"\n    count: 1\n    percent: 100\n  - phrase: \"recording should be available\"\n    count: 1\n    percent: 100\n  - phrase: \"should be available next\"\n    count: 1\n    percent: 100\n  - phrase: \"be available next week\"\n    count: 1\n    percent: 100\n  - phrase: \"available next week we\"\n    count: 1\n    percent: 100\n  - phrase: \"next week we will\"\n    count: 1\n    percent: 100\n  - phrase: \"week we will email\"\n    count: 1\n    percent: 100"
 ---
 # Workshop Cancellation Notice
@@ -50,3 +59,4 @@ Common closings:
 Draft must:
 - [ ] Include at least one of the required phrases from the validation block
 - [ ] Stay consistent with the observed response patterns above
+- [ ] NOT introduce policy details that are not present in the verified response lines above.

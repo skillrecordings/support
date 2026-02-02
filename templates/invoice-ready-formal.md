@@ -1,0 +1,1 @@
+Your invoice has been prepared and is attached to this correspondence. Please review it at your earliest convenience and let us know if you require any modifications.

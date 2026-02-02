@@ -1,0 +1,58 @@
+# Progress Log for skills-enrichment
+
+Initialized: 2026-02-02T04:41:59.835Z
+
+---
+[2026-02-02T04:43:58.898Z]
+Completed: Generate llms.txt and index.json for skill discovery
+Files: none
+Summary: Generated the skill discovery indexes from all `skills/*/SKILL.md` frontmatter, emitting the standard `llms.txt` list and a structured `index.json` with sample sizes and references. Wrote both files under `skills/` to match the story spec and current date.
+
+- Created `skills/llms.txt` with the header and per-skill description lines derived from frontmatter.
+- Created `skills/index.json` with `gene
+
+---
+[2026-02-02T04:52:43.047Z]
+Completed: Add cross-skill links based on topic co-occurrence
+Files: none
+Summary: Updated all 41 skill frontmatters to include `metadata.related_skills`, computed from the embeddings DuckDB (`artifacts/phase-0/embeddings/v2/temp.duckdb`) tag co-occurrence with a 5% overlap threshold and a minimum co-occurrence count of 5. This yields the requested pairings (e.g., refund-request ↔ duplicate-purchase/subscription-renewal-issue, email-change ↔ access-locked-out/login-link, corpora
+
+---
+[2026-02-02T04:53:20.018Z]
+Completed: Extract response templates for common patterns
+Files: none
+Summary: Created a new `templates/` directory with 10 reusable response fragments distilled from common patterns in skill references, plus an index describing usage and placeholders. Added files: `templates/refund-initiated.md`, `templates/login-link-sent.md`, `templates/greeting-apologetic.md`, `templates/closing-friendly.md`, `templates/check-spam-folder.md`, `templates/license-transferred.md`, `template
+
+---
+[2026-02-02T05:03:24.082Z]
+Failed: Expand thin skills with more examples
+Validation: 
+Codex: 
+
+---
+[2026-02-02T05:08:22.443Z]
+Completed: Expand thin skills with more examples
+Files: none
+Summary: Added canonical, edge-case, and variation reference files for the three priority skills, using DuckDB conversation samples to seed 3 examples per file and keeping responses aligned with each skill’s required phrases and tone.
+
+Details:
+- New reference files in `skills/lesson-content-question/references/`, `skills/discount-code-request/references/`, `skills/payment-method-issue/references/`
+- Each 
+
+---
+[2026-02-02T05:11:49.179Z]
+Completed: Gap analysis: Find uncovered ticket patterns
+Files: none
+Summary: Created the gap analysis script and generated the requested artifacts.
+
+- Added `scripts/gap-analysis.ts` to load skill descriptions, embed skills, score each conversation, flag gaps below the 0.5 threshold, cluster gaps, and emit both `report.md` and `gaps.json`.
+- Generated `artifacts/gap-analysis/report.md` and `artifacts/gap-analysis/gaps.json` from the local data. The report records the embed
+
+---
+[2026-02-02T05:16:07.971Z]
+Completed: Add validation rules to all skills
+Files: none
+Summary: Updated all 41 skill files to add machine-readable `metadata.validation` blocks with `required_phrases`, `forbidden_patterns`, and `max_length`, and ensured each `## Validation` checklist includes a NOT rule (using the first “What NOT To Do” item). Added missing `required_phrases` for the corporate invoice skill. Changes are in the `skills/*/SKILL.md` files.
+
+Validation run:
+- `grep -l '## Validat

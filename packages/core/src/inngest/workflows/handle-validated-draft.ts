@@ -110,10 +110,13 @@ export const handleValidatedDraft = inngest.createFunction(
         score: validation.score,
       })
 
-      const autoApproveThreshold = 0.8
+      // AUTO-SEND DISABLED: Always require human approval
+      // Previously: autoApproveThreshold = 0.8, auto-sent if score >= threshold
+      // Changed 2026-02-02 per Joel's request for safety
+      const autoApproveThreshold = Infinity // Effectively disabled
       const score = validation.score ?? (validation.valid ? 1.0 : 0.0)
 
-      const autoApprove = validation.valid && score >= autoApproveThreshold
+      const autoApprove = false // Always require human approval
       const reason = autoApprove
         ? 'Validation passed with high confidence'
         : validation.issues?.join(', ') || 'Validation did not pass threshold'

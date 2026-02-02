@@ -2,8 +2,17 @@
 name: continuing-education-credits
 description: Respond to CEU or professional credit inquiries. Use when a learner asks whether a course qualifies for continuing education credits.
 metadata:
+  trigger_phrases:
+      - "respond ceu"
+      - "ceu professional"
+      - "professional credit"
+  related_skills: ["student-discount-request", "certificate-request", "lesson-content-question", "course-difficulty-concern", "pricing-inquiry"]
   sample_size: "7"
-  validation: "required_phrases:\n  - \"the certification team at\"\nforbidden_patterns: []"
+  validation: |
+    required_phrases:
+      - "the certification team at"
+    forbidden_patterns: []
+    max_length: 500
   metrics: "sample_size: 7\navg_thread_length: 2.71\ntop_phrases:\n  - phrase: \"the certification team at\"\n    count: 2\n    percent: 28.6\n  - phrase: \"certification team at iaap\"\n    count: 2\n    percent: 28.6\n  - phrase: \"let me know if\"\n    count: 2\n    percent: 28.6\n  - phrase: \"me know if you\"\n    count: 2\n    percent: 28.6\n  - phrase: \"hey grace sorry i\"\n    count: 1\n    percent: 14.3\n  - phrase: \"grace sorry i was\"\n    count: 1\n    percent: 14.3\n  - phrase: \"sorry i was splitting\"\n    count: 1\n    percent: 14.3\n  - phrase: \"i was splitting the\"\n    count: 1\n    percent: 14.3\n  - phrase: \"was splitting the total\"\n    count: 1\n    percent: 14.3\n  - phrase: \"splitting the total average\"\n    count: 1\n    percent: 14.3"
 ---
 # Continuing Education Credits
@@ -54,3 +63,4 @@ Common closings:
 Draft must:
 - [ ] Include at least one of the required phrases from the validation block
 - [ ] Stay consistent with the observed response patterns above
+- [ ] NOT introduce policy details that are not present in the verified response lines above.

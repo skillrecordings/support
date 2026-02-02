@@ -57,6 +57,7 @@
     "@ai-sdk/provider-utils": "^4.0.11",
     "@anthropic-ai/sdk": "^0.72.1",
     "ai": "^6.0.65",
+    "duckdb-async": "^1.4.2",
     "redis": "^5.10.0",
     "zod": "^4.3.5"
   }

@@ -1,0 +1,92 @@
+{
+  "version": "1.0",
+  "projectName": "pii-scrub",
+  "description": "Scrub PII from skills examples and artifacts, then purge from git history",
+  "stories": [
+    {
+      "id": "story-ml4lt7m0",
+      "title": "Create PII scrubbing utility script",
+      "description": "Create scripts/scrub-pii.ts that:\n1. Detects emails (regex), names (from context), phone numbers, addresses\n2. Replaces with redacted placeholders: [EMAIL], [NAME], [PHONE], etc.\n3. Processes .md and .json files recursively\n4. Has --dry-run mode to preview changes\n5. Reports count of redactions per file\n\nUse Bun. Keep it simple - regex-based detection is fine for emails/phones. For names, look for patterns like \"Hi [Name],\" or \"Thanks, [Name]\" in the conversation context.",
+      "priority": 1,
+      "passes": true,
+      "validationCommand": "test -f scripts/scrub-pii.ts && bun run scripts/scrub-pii.ts --dry-run skills/access-locked-out/examples/real-responses.md 2>&1 | grep -q 'EMAIL\\|redact'"
+    },
+    {
+      "id": "story-ml4lt7md",
+      "title": "Scrub PII from all skill example files",
+      "description": "Run the scrub-pii script on all files in skills/*/examples/*.md and skills/*/*.md\n\nReplace all detected PII with redacted placeholders. Verify no raw emails remain after scrubbing.\n\nRun: bun run scripts/scrub-pii.ts skills/",
+      "priority": 2,
+      "passes": true,
+      "validationCommand": "! grep -r -E '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}' skills/ --include=\"*.md\" 2>/dev/null | grep -v '\\[EMAIL\\]' | grep -q '@'"
+    },
+    {
+      "id": "story-ml4lt7mg",
+      "title": "Scrub or remove PII from artifacts directory",
+      "description": "The artifacts/ directory contains extracted data with PII. Options:\n1. If artifacts are gitignored and not needed in repo: delete them\n2. If they need to stay: scrub PII from all .json and .jsonl files\n\nCheck if artifacts/ is in .gitignore. If not, add it. Then either scrub or delete the PII-containing files.\n\nPreferred: Add artifacts/ to .gitignore and delete the PII-containing files (they can be regenerated).",
+      "priority": 3,
+      "passes": true,
+      "validationCommand": "grep -q 'artifacts/' .gitignore && ! find artifacts -name \"*.json\" -exec grep -l -E '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}' {} \\; 2>/dev/null | grep -q '.'"
+    },
+    {
+      "id": "story-ml4lt7ml",
+      "title": "Commit scrubbed files and prepare git history purge",
+      "description": "1. Stage and commit all scrubbed files with message \"chore: scrub PII from examples and artifacts\"\n2. Create scripts/purge-history.sh that uses git-filter-repo to:\n   - Remove artifacts/ from all history\n   - Remove any .json files that contained PII\n   - Rewrite commits that touched skill examples\n3. Add instructions to progress.txt for manual execution\n\nDO NOT run the history purge automatically - just prepare the script. This is destructive and needs human approval.",
+      "priority": 4,
+      "passes": true,
+      "validationCommand": "git log -1 --oneline | grep -qi 'scrub\\|pii' && test -f scripts/purge-history.sh"
+    },
+    {
+      "id": "story-ml4lyqxb",
+      "title": "Audit current skills against AgentSkills spec",
+      "description": "Create scripts/audit-skills-spec.ts that:\n1. Reads all skills/*/SKILL.md files\n2. Validates frontmatter against AgentSkills spec:\n   - name: required, 1-64 chars, lowercase alphanumeric + hyphens, must match directory name\n   - description: required, 1-1024 chars, describes what AND when to use\n   - license: optional\n   - metadata: optional key-value map\n   - NO compatibility field (per Joel's note)\n3. Checks body length (recommend < 500 lines, warn if > 5000 tokens)\n4. Reports violations per skill\n5. Outputs JSON summary of what needs fixing\n\nRun with: bun run scripts/audit-skills-spec.ts",
+      "priority": 10,
+      "passes": true,
+      "validationCommand": "test -f scripts/audit-skills-spec.ts && bun run scripts/audit-skills-spec.ts 2>&1 | grep -qE 'skills|audit|valid'"
+    },
+    {
+      "id": "story-ml4lyqxp",
+      "title": "Fix skill frontmatter to match AgentSkills spec",
+      "description": "Based on audit results, update all skills/*/SKILL.md frontmatter:\n\n1. Ensure name field matches directory name exactly (lowercase, hyphens)\n2. Improve description to include both WHAT and WHEN:\n   - Bad: \"Helps with refunds\"\n   - Good: \"Handle refund and cancellation requests for course purchases. Use when customer mentions refund, cancel, money back, or wants to stop their subscription.\"\n3. Remove compatibility field if present\n4. Move custom fields (sample_size, confidence, phrases, etc.) into metadata block:\n   ```yaml\n   metadata:\n     sample_size: \"1247\"\n     avg_thread_length: \"4.2\"\n   ```\n5. Keep only spec-defined fields at top level\n\nProcess all 42 skills.",
+      "priority": 11,
+      "passes": true,
+      "validationCommand": "bun run scripts/audit-skills-spec.ts 2>&1 | grep -q '0 violations\\|all valid\\|passed'"
+    },
+    {
+      "id": "story-ml4lyqxr",
+      "title": "Restructure verbose skills to use references directory",
+      "description": "For any SKILL.md over 500 lines:\n1. Create references/ subdirectory\n2. Move detailed content to references/REFERENCE.md or topic-specific files\n3. Keep SKILL.md focused on core instructions\n4. Update SKILL.md to reference the moved content: \"See [detailed examples](references/examples.md)\"\n\nAlso rename examples/ to references/ for consistency with spec (or keep both if examples/ serves a different purpose).\n\nGoal: Every SKILL.md under 500 lines, with overflow in references/",
+      "priority": 12,
+      "passes": false,
+      "validationCommand": "! find skills -name \"SKILL.md\" -exec wc -l {} \\; | awk '$1 > 500 {exit 1}'"
+    },
+    {
+      "id": "story-ml4lyqxx",
+      "title": "Generate skills index (llms.txt format)",
+      "description": "Create scripts/generate-skills-index.ts that:\n1. Reads all skills/*/SKILL.md\n2. Extracts name and description from frontmatter\n3. Generates skills/llms.txt in the standard format:\n   ```\n   # Support Agent Skills Index\n   \n   /skills/refund-request/SKILL.md - Handle refund and cancellation requests...\n   /skills/access-locked-out/SKILL.md - Help users who can't access...\n   ```\n4. Also generates skills/index.json with structured metadata for programmatic access\n\nRun on commit hook or manually: bun run scripts/generate-skills-index.ts",
+      "priority": 13,
+      "passes": false,
+      "validationCommand": "test -f skills/llms.txt && test -f skills/index.json && wc -l < skills/llms.txt | grep -qE '^4[0-9]$'"
+    },
+    {
+      "id": "story-ml4m4171",
+      "title": "Deep scrub: Remove tokens, auth URLs, and encoded emails",
+      "description": "The initial PII scrub missed sensitive data in URLs. Create scripts/deep-scrub-pii.ts that:\n\n1. Detect and redact URLs containing:\n   - token= or &token= params → replace token value with [TOKEN]\n   - email= params (including URL-encoded like email%3D) → replace with [EMAIL]\n   - access_token= → [TOKEN]\n   - auth/callback paths with tokens\n   - Any UUID or long hex string (32+ chars) that looks like a token\n   - client_id= params → [CLIENT_ID]\n   - purchaseId= or similar transaction IDs → [PURCHASE_ID]\n\n2. Replace entire sensitive URLs with redacted versions:\n   - Keep domain: https://example.com/api/auth/callback?token=[TOKEN]&email=[EMAIL]\n   - Or just: [AUTH_LINK]\n\n3. Also catch URL-encoded emails: %40 = @\n\n4. Process ALL files in skills/ directory recursively\n\n5. Run validation: no raw tokens, no real emails in URLs\n\nBe aggressive — better to over-redact than miss PII.",
+      "priority": 5,
+      "passes": true,
+      "validationCommand": "! grep -r -E 'token=[a-f0-9-]{20,}|email=[^&\\s]+@|access_token=' skills/ --include=\"*.md\" 2>/dev/null | grep -v '\\[TOKEN\\]\\|\\[EMAIL\\]' | grep -q '.'"
+    },
+    {
+      "id": "story-ml4m417e",
+      "title": "Verify complete PII removal and commit",
+      "description": "Final verification pass:\n\n1. Run comprehensive PII scan:\n   - No emails (plain or URL-encoded)\n   - No auth tokens (UUID, hex strings > 20 chars in URL params)\n   - No phone numbers\n   - No names in greetings (Hi [Name])\n\n2. Generate report of all redactions made\n\n3. Commit with message: \"chore: deep scrub PII from examples (tokens, auth URLs, encoded emails)\"\n\n4. Update the purge-history.sh script to also rewrite commits containing these patterns",
+      "priority": 6,
+      "passes": true,
+      "validationCommand": "git log -1 --oneline | grep -qi 'deep scrub\\|pii' && ! grep -r -E '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}|token=[a-f0-9-]{20,}' skills/ --include=\"*.md\" 2>/dev/null | grep -v '\\[' | grep -q '.'"
+    }
+  ],
+  "metadata": {
+    "createdAt": "2026-02-02T03:21:55.559Z",
+    "totalIterations": 8,
+    "lastIteration": "2026-02-02T03:46:43.613Z"
+  }
+}

@@ -2,8 +2,17 @@
 name: invoice-billing-statement
 description: Provide receipts and billing statements. Use when a customer needs an invoice, receipt, or payment confirmation for a completed purchase.
 metadata:
+  trigger_phrases:
+      - "provide receipts"
+      - "receipts billing"
+      - "billing statements"
+  related_skills: ["corporate-invoice", "email-change", "payment-method-issue", "login-link"]
   sample_size: "488"
-  validation: "required_phrases:\n  - \"view a fully customized\"\nforbidden_patterns: []"
+  validation: |
+    required_phrases:
+      - "view a fully customized"
+    forbidden_patterns: []
+    max_length: 500
   metrics: "sample_size: 488\navg_thread_length: 3.15\ntop_phrases:\n  - phrase: \"view a fully customized\"\n    count: 163\n    percent: 33.4\n  - phrase: \"a fully customized invoice\"\n    count: 163\n    percent: 33.4\n  - phrase: \"fully customized invoice here\"\n    count: 162\n    percent: 33.2\n  - phrase: \"customized invoice here https\"\n    count: 162\n    percent: 33.2\n  - phrase: \"can view a fully\"\n    count: 159\n    percent: 32.6\n  - phrase: \"you can view a\"\n    count: 151\n    percent: 30.9\n  - phrase: \"logged in you can\"\n    count: 147\n    percent: 30.1\n  - phrase: \"once you're logged in\"\n    count: 145\n    percent: 29.7\n  - phrase: \"you're logged in you\"\n    count: 145\n    percent: 29.7\n  - phrase: \"in you can view\"\n    count: 145\n    percent: 29.7"
 ---
 # Invoice and Billing Statement
@@ -54,3 +63,4 @@ Common closings:
 Draft must:
 - [ ] Include at least one of the required phrases from the validation block
 - [ ] Stay consistent with the observed response patterns above
+- [ ] NOT introduce policy details that are not present in the verified response lines above.

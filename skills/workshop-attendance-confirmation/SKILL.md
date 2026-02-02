@@ -2,8 +2,17 @@
 name: workshop-attendance-confirmation
 description: Send workshop attendance confirmations. Use when a customer needs confirmation, calendar invites, or attendance details.
 metadata:
+  trigger_phrases:
+      - "send workshop"
+      - "workshop attendance"
+      - "attendance confirmations"
+  related_skills: ["workshop-cancellation-notice", "invoice-billing-statement", "cohort-schedule-inquiry", "certificate-request", "workshop-technical-setup"]
   sample_size: "29"
-  validation: "required_phrases:\n  - \"let me know if\"\nforbidden_patterns: []"
+  validation: |
+    required_phrases:
+      - "let me know if"
+    forbidden_patterns: []
+    max_length: 500
   metrics: "sample_size: 29\navg_thread_length: 4\ntop_phrases:\n  - phrase: \"let me know if\"\n    count: 7\n    percent: 24.1\n  - phrase: \"me know if you\"\n    count: 5\n    percent: 17.2\n  - phrase: \"you need to know\"\n    count: 4\n    percent: 13.8\n  - phrase: \"if you have any\"\n    count: 4\n    percent: 13.8\n  - phrase: \"https egghead zoom us\"\n    count: 4\n    percent: 13.8\n  - phrase: \"egghead zoom us j\"\n    count: 4\n    percent: 13.8\n  - phrase: \"did you end up\"\n    count: 2\n    percent: 6.9\n  - phrase: \"you end up finding\"\n    count: 2\n    percent: 6.9\n  - phrase: \"end up finding the\"\n    count: 2\n    percent: 6.9\n  - phrase: \"up finding the invite\"\n    count: 2\n    percent: 6.9"
 ---
 # Workshop Attendance and Confirmations
@@ -54,3 +63,4 @@ Common closings:
 Draft must:
 - [ ] Include at least one of the required phrases from the validation block
 - [ ] Stay consistent with the observed response patterns above
+- [ ] NOT introduce policy details that are not present in the verified response lines above.

@@ -2,8 +2,17 @@
 name: two-factor-auth-issue
 description: Help with two-factor authentication problems. Use when a customer cannot get a 2FA code or device verification.
 metadata:
+  trigger_phrases:
+      - "two factor"
+      - "factor authentication"
+      - "authentication problems"
+  related_skills: ["password-reset-issue", "access-locked-out", "login-link", "payment-method-issue", "email-delivery-failure"]
   sample_size: "4"
-  validation: "required_phrases:\n  - \"to your kit account\"\nforbidden_patterns: []"
+  validation: |
+    required_phrases:
+      - "to your kit account"
+    forbidden_patterns: []
+    max_length: 500
   metrics: "sample_size: 4\navg_thread_length: 2.75\ntop_phrases:\n  - phrase: \"to your kit account\"\n    count: 2\n    percent: 50\n  - phrase: \"to log in to\"\n    count: 2\n    percent: 50\n  - phrase: \"thank you creeland forwarded\"\n    count: 1\n    percent: 25\n  - phrase: \"you creeland forwarded message\"\n    count: 1\n    percent: 25\n  - phrase: \"creeland forwarded message from\"\n    count: 1\n    percent: 25\n  - phrase: \"forwarded message from email\"\n    count: 1\n    percent: 25\n  - phrase: \"message from email date\"\n    count: 1\n    percent: 25\n  - phrase: \"from email date december\"\n    count: 1\n    percent: 25\n  - phrase: \"email date december 5\"\n    count: 1\n    percent: 25\n  - phrase: \"date december 5 2024\"\n    count: 1\n    percent: 25"
 ---
 # Two-Factor Authentication Issue
@@ -54,3 +63,4 @@ Common closings:
 Draft must:
 - [ ] Include at least one of the required phrases from the validation block
 - [ ] Stay consistent with the observed response patterns above
+- [ ] NOT introduce policy details that are not present in the verified response lines above.

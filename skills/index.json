@@ -1,0 +1,404 @@
+{
+  "generated": "2026-02-02T04:43:47.104Z",
+  "skills": [
+    {
+      "name": "access-locked-out",
+      "description": "Restore access for customers who are locked out of their account or courses. Use when a paying customer cannot log in, access materials, or restore purchases.",
+      "path": "/skills/access-locked-out/SKILL.md",
+      "sample_size": 878,
+      "references": [
+        "canonical.md",
+        "edge-cases.md",
+        "real-responses.md",
+        "variations.md"
+      ]
+    },
+    {
+      "name": "api-documentation-question",
+      "description": "Answer API and technical documentation questions. Use when a customer asks about API usage, code implementation, or integration details.",
+      "path": "/skills/api-documentation-question/SKILL.md",
+      "sample_size": 33,
+      "references": [
+        "real-responses.md"
+      ]
+    },
+    {
+      "name": "broken-link-404-error",
+      "description": "Address broken links and missing resources. Use when a customer reports a 404 or a link to course or website content is not working.",
+      "path": "/skills/broken-link-404-error/SKILL.md",
+      "sample_size": 236,
+      "references": [
+        "real-responses.md"
+      ]
+    },
+    {
+      "name": "certificate-request",
+      "description": "Provide guidance on completion certificates. Use when a customer asks for a course certificate or LinkedIn certificate details.",
+      "path": "/skills/certificate-request/SKILL.md",
+      "sample_size": 209,
+      "references": [
+        "real-responses.md"
+      ]
+    },
+    {
+      "name": "cohort-access-request",
+      "description": "Help with access to cohort materials and recordings. Use when a customer cannot find or access cohort content, workshop materials, or live session recordings.",
+      "path": "/skills/cohort-access-request/SKILL.md",
+      "sample_size": 121,
+      "references": [
+        "real-responses.md"
+      ]
+    },
+    {
+      "name": "cohort-schedule-inquiry",
+      "description": "Share cohort schedule information. Use when a customer asks about dates, timing, or when the next cohort starts.",
+      "path": "/skills/cohort-schedule-inquiry/SKILL.md",
+      "sample_size": 83,
+      "references": [
+        "real-responses.md"
+      ]
+    },
+    {
+      "name": "continuing-education-credits",
+      "description": "Respond to CEU or professional credit inquiries. Use when a learner asks whether a course qualifies for continuing education credits.",
+      "path": "/skills/continuing-education-credits/SKILL.md",
+      "sample_size": 7,
+      "references": [
+        "real-responses.md"
+      ]
+    },
+    {
+      "name": "corporate-invoice",
+      "description": "Handle corporate invoice and reimbursement requests. Use when a customer needs an invoice, VAT or tax info, or documentation for company reimbursement.",
+      "path": "/skills/corporate-invoice/SKILL.md",
+      "sample_size": 720,
+      "references": [
+        "canonical.md",
+        "edge-cases.md",
+        "real-responses.md",
+        "variations.md"
+      ]
+    },
+    {
+      "name": "course-content-locked",
+      "description": "Restore access to purchased course content. Use when a customer has paid but content is locked, missing, or inaccessible.",
+      "path": "/skills/course-content-locked/SKILL.md",
+      "sample_size": 520,
+      "references": [
+        "canonical.md",
+        "edge-cases.md",
+        "real-responses.md",
+        "variations.md"
+      ]
+    },
+    {
+      "name": "course-difficulty-concern",
+      "description": "Advise on course difficulty and prerequisites. Use when a customer is unsure about the level or required knowledge.",
+      "path": "/skills/course-difficulty-concern/SKILL.md",
+      "sample_size": 77,
+      "references": [
+        "real-responses.md"
+      ]
+    },
+    {
+      "name": "discount-code-request",
+      "description": "Respond to discount or coupon requests. Use when a customer asks for a promo code or special pricing.",
+      "path": "/skills/discount-code-request/SKILL.md",
+      "sample_size": 388,
+      "references": [
+        "real-responses.md"
+      ]
+    },
+    {
+      "name": "duplicate-purchase",
+      "description": "Resolve duplicate purchases. Use when a customer bought the same course or license twice or was charged twice.",
+      "path": "/skills/duplicate-purchase/SKILL.md",
+      "sample_size": 234,
+      "references": [
+        "real-responses.md"
+      ]
+    },
+    {
+      "name": "email-change",
+      "description": "Transfer licenses to a new email address. Use when a customer wants to change account email, move a license, or update access after a job change.",
+      "path": "/skills/email-change/SKILL.md",
+      "sample_size": 2920,
+      "references": [
+        "canonical.md",
+        "edge-cases.md",
+        "real-responses.md",
+        "variations.md"
+      ]
+    },
+    {
+      "name": "email-delivery-failure",
+      "description": "Handle email delivery failures. Use when messages bounce or a customer reports not receiving emails.",
+      "path": "/skills/email-delivery-failure/SKILL.md",
+      "sample_size": 47,
+      "references": [
+        "real-responses.md"
+      ]
+    },
+    {
+      "name": "event-sponsorship-request",
+      "description": "Handle event sponsorship inquiries. Use when organizers ask for sponsorship or support for conferences or hackathons.",
+      "path": "/skills/event-sponsorship-request/SKILL.md",
+      "sample_size": 35,
+      "references": [
+        "real-responses.md"
+      ]
+    },
+    {
+      "name": "gift-purchase-option",
+      "description": "Guide gift purchases. Use when a customer wants to buy a course for someone else.",
+      "path": "/skills/gift-purchase-option/SKILL.md",
+      "sample_size": 47,
+      "references": [
+        "real-responses.md"
+      ]
+    },
+    {
+      "name": "installment-payment-option",
+      "description": "Answer payment plan questions. Use when a customer asks about installments or split payments for a course.",
+      "path": "/skills/installment-payment-option/SKILL.md",
+      "sample_size": 70,
+      "references": [
+        "real-responses.md"
+      ]
+    },
+    {
+      "name": "invoice-billing-statement",
+      "description": "Provide receipts and billing statements. Use when a customer needs an invoice, receipt, or payment confirmation for a completed purchase.",
+      "path": "/skills/invoice-billing-statement/SKILL.md",
+      "sample_size": 488,
+      "references": [
+        "real-responses.md"
+      ]
+    },
+    {
+      "name": "learning-path-guidance",
+      "description": "Recommend learning paths. Use when a customer asks which courses to take and in what order.",
+      "path": "/skills/learning-path-guidance/SKILL.md",
+      "sample_size": 74,
+      "references": [
+        "real-responses.md"
+      ]
+    },
+    {
+      "name": "lesson-content-question",
+      "description": "Answer lesson-specific content questions. Use when a customer asks about a lesson, code example, or concept in a course.",
+      "path": "/skills/lesson-content-question/SKILL.md",
+      "sample_size": 414,
+      "references": [
+        "real-responses.md"
+      ]
+    },
+    {
+      "name": "login-link",
+      "description": "Provide login link help. Use when a customer cannot access courses and requests a login link or access email.",
+      "path": "/skills/login-link/SKILL.md",
+      "sample_size": 999,
+      "references": [
+        "canonical.md",
+        "edge-cases.md",
+        "real-responses.md",
+        "variations.md"
+      ]
+    },
+    {
+      "name": "media-press-outreach",
+      "description": "Handle media and press outreach. Use when journalists or podcast producers request interviews, features, or press information.",
+      "path": "/skills/media-press-outreach/SKILL.md",
+      "sample_size": 39,
+      "references": [
+        "real-responses.md"
+      ]
+    },
+    {
+      "name": "nonprofit-government-discount",
+      "description": "Respond to nonprofit or government discount requests. Use when an organization asks about special pricing for nonprofit, education, or government.",
+      "path": "/skills/nonprofit-government-discount/SKILL.md",
+      "sample_size": 21,
+      "references": [
+        "real-responses.md"
+      ]
+    },
+    {
+      "name": "outdated-course-content",
+      "description": "Handle reports of outdated course content. Use when a customer says material is old or no longer matches current technology.",
+      "path": "/skills/outdated-course-content/SKILL.md",
+      "sample_size": 105,
+      "references": [
+        "real-responses.md"
+      ]
+    },
+    {
+      "name": "partnership-collaboration-inquiry",
+      "description": "Handle partnership and collaboration inquiries. Use when a third party asks about partnerships, promotions, or collaborations.",
+      "path": "/skills/partnership-collaboration-inquiry/SKILL.md",
+      "sample_size": 485,
+      "references": [
+        "real-responses.md"
+      ]
+    },
+    {
+      "name": "password-reset-issue",
+      "description": "Help with password resets and account recovery. Use when a customer cannot reset their password or access their account.",
+      "path": "/skills/password-reset-issue/SKILL.md",
+      "sample_size": 14,
+      "references": [
+        "real-responses.md"
+      ]
+    },
+    {
+      "name": "payment-method-issue",
+      "description": "Resolve payment method problems. Use when a customer has trouble paying with a card, Apple Pay, or a regional payment option.",
+      "path": "/skills/payment-method-issue/SKILL.md",
+      "sample_size": 317,
+      "references": [
+        "real-responses.md"
+      ]
+    },
+    {
+      "name": "ppp-pricing",
+      "description": "Explain Purchasing Power Parity pricing. Use when a customer asks about PPP, regional pricing, affordability, or discount stacking.",
+      "path": "/skills/ppp-pricing/SKILL.md",
+      "sample_size": 715,
+      "references": [
+        "canonical.md",
+        "edge-cases.md",
+        "real-responses.md",
+        "variations.md"
+      ]
+    },
+    {
+      "name": "pricing-inquiry",
+      "description": "Answer pricing questions for courses. Use when a customer asks about current price, pricing model, or availability.",
+      "path": "/skills/pricing-inquiry/SKILL.md",
+      "sample_size": 523,
+      "references": [
+        "canonical.md",
+        "edge-cases.md",
+        "real-responses.md",
+        "variations.md"
+      ]
+    },
+    {
+      "name": "refund-request",
+      "description": "Handle refund requests. Use when a customer asks for a refund, money back, or to cancel a purchase or subscription.",
+      "path": "/skills/refund-request/SKILL.md",
+      "sample_size": 1433,
+      "references": [
+        "canonical.md",
+        "edge-cases.md",
+        "real-responses.md",
+        "variations.md"
+      ]
+    },
+    {
+      "name": "security-vulnerability-report",
+      "description": "Respond to security vulnerability reports. Use when a researcher reports a security issue or asks about bug bounty policy.",
+      "path": "/skills/security-vulnerability-report/SKILL.md",
+      "sample_size": 32,
+      "references": [
+        "real-responses.md"
+      ]
+    },
+    {
+      "name": "student-discount-request",
+      "description": "Respond to student discount inquiries. Use when a student or academic asks about educational pricing.",
+      "path": "/skills/student-discount-request/SKILL.md",
+      "sample_size": 114,
+      "references": [
+        "real-responses.md"
+      ]
+    },
+    {
+      "name": "subscription-renewal-issue",
+      "description": "Resolve subscription renewal and charge issues. Use when a customer reports an unexpected renewal, charge, or missing renewal notice.",
+      "path": "/skills/subscription-renewal-issue/SKILL.md",
+      "sample_size": 29,
+      "references": [
+        "real-responses.md"
+      ]
+    },
+    {
+      "name": "team-license-purchase",
+      "description": "Handle team and bulk license purchases. Use when an organization asks to buy multiple licenses for a team.",
+      "path": "/skills/team-license-purchase/SKILL.md",
+      "sample_size": 508,
+      "references": [
+        "canonical.md",
+        "edge-cases.md",
+        "real-responses.md",
+        "variations.md"
+      ]
+    },
+    {
+      "name": "technical-issue-course-content",
+      "description": "Troubleshoot technical issues with course materials. Use when a customer reports video, code, or content not working.",
+      "path": "/skills/technical-issue-course-content/SKILL.md",
+      "sample_size": 596,
+      "references": [
+        "canonical.md",
+        "edge-cases.md",
+        "real-responses.md",
+        "variations.md"
+      ]
+    },
+    {
+      "name": "two-factor-auth-issue",
+      "description": "Help with two-factor authentication problems. Use when a customer cannot get a 2FA code or device verification.",
+      "path": "/skills/two-factor-auth-issue/SKILL.md",
+      "sample_size": 4,
+      "references": [
+        "real-responses.md"
+      ]
+    },
+    {
+      "name": "ui-ux-feedback",
+      "description": "Capture UI and UX feedback plus feature requests. Use when a customer shares design feedback or asks for product changes.",
+      "path": "/skills/ui-ux-feedback/SKILL.md",
+      "sample_size": 216,
+      "references": [
+        "real-responses.md"
+      ]
+    },
+    {
+      "name": "website-bug-report",
+      "description": "Handle website bug reports. Use when a customer reports site errors or platform issues.",
+      "path": "/skills/website-bug-report/SKILL.md",
+      "sample_size": 286,
+      "references": [
+        "real-responses.md"
+      ]
+    },
+    {
+      "name": "workshop-attendance-confirmation",
+      "description": "Send workshop attendance confirmations. Use when a customer needs confirmation, calendar invites, or attendance details.",
+      "path": "/skills/workshop-attendance-confirmation/SKILL.md",
+      "sample_size": 29,
+      "references": [
+        "real-responses.md"
+      ]
+    },
+    {
+      "name": "workshop-cancellation-notice",
+      "description": "Notify about workshop cancellations. Use when a scheduled workshop or session is canceled or rescheduled.",
+      "path": "/skills/workshop-cancellation-notice/SKILL.md",
+      "sample_size": 1,
+      "references": [
+        "real-responses.md"
+      ]
+    },
+    {
+      "name": "workshop-technical-setup",
+      "description": "Help with workshop technical setup. Use when a customer asks about required setup, tools, or preparation.",
+      "path": "/skills/workshop-technical-setup/SKILL.md",
+      "sample_size": 28,
+      "references": [
+        "real-responses.md"
+      ]
+    }
+  ]
+}

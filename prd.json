@@ -1,92 +1,83 @@
 {
   "version": "1.0",
-  "projectName": "pii-scrub",
-  "description": "Scrub PII from skills examples and artifacts, then purge from git history",
+  "projectName": "skills-enrichment-phase2",
+  "description": "Deep enrichment with Ollama embeddings, Qdrant vectors, expanded examples, trigger phrases, and anti-patterns",
   "stories": [
     {
-      "id": "story-ml4lt7m0",
-      "title": "Create PII scrubbing utility script",
-      "description": "Create scripts/scrub-pii.ts that:\n1. Detects emails (regex), names (from context), phone numbers, addresses\n2. Replaces with redacted placeholders: [EMAIL], [NAME], [PHONE], etc.\n3. Processes .md and .json files recursively\n4. Has --dry-run mode to preview changes\n5. Reports count of redactions per file\n\nUse Bun. Keep it simple - regex-based detection is fine for emails/phones. For names, look for patterns like \"Hi [Name],\" or \"Thanks, [Name]\" in the conversation context.",
+      "id": "story-ml4ql3nz",
+      "title": "Create Qdrant skills collection and embed all 41 skills",
+      "description": "Create a Qdrant collection for skills and embed all skill descriptions using Ollama.\n\n1. Create collection `skills` with 1024 dimensions (for mxbai-embed-large):\n```bash\ncurl -X PUT http://localhost:6333/collections/skills \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"vectors\": {\"size\": 1024, \"distance\": \"Cosine\"}}'\n```\n\n2. For each skill in skills/*/SKILL.md:\n   - Read name and description from frontmatter\n   - Generate embedding via Ollama:\n   ```bash\n   curl -s http://localhost:11434/api/embeddings \\\n     -d '{\"model\": \"mxbai-embed-large\", \"prompt\": \"DESCRIPTION\"}'\n   ```\n   - Upsert to Qdrant with payload: name, description, path, sample_size\n\n3. Create script `scripts/embed-skills-qdrant.ts` for repeatability\n\n4. Verify: curl http://localhost:6333/collections/skills should show 41 points",
       "priority": 1,
       "passes": true,
-      "validationCommand": "test -f scripts/scrub-pii.ts && bun run scripts/scrub-pii.ts --dry-run skills/access-locked-out/examples/real-responses.md 2>&1 | grep -q 'EMAIL\\|redact'"
+      "validationCommand": "curl -s http://localhost:6333/collections/skills | jq -e '.result.points_count >= 40'"
     },
     {
-      "id": "story-ml4lt7md",
-      "title": "Scrub PII from all skill example files",
-      "description": "Run the scrub-pii script on all files in skills/*/examples/*.md and skills/*/*.md\n\nReplace all detected PII with redacted placeholders. Verify no raw emails remain after scrubbing.\n\nRun: bun run scripts/scrub-pii.ts skills/",
+      "id": "story-ml4ql3oc",
+      "title": "Re-run gap analysis with real Ollama embeddings",
+      "description": "The previous gap analysis used fake hash embeddings. Re-run with real Ollama embeddings.\n\n1. Update scripts/gap-analysis.ts to use Ollama mxbai-embed-large:\n   - Remove any local hash fallback\n   - Call http://localhost:11434/api/embeddings for each conversation\n   - Use the skills collection in Qdrant to find nearest skill\n\n2. For each conversation in DuckDB (artifacts/phase-0/embeddings/v2/temp.duckdb):\n   - Get first_message text\n   - Generate embedding via Ollama\n   - Search Qdrant skills collection for nearest match\n   - Record similarity score\n\n3. Flag gaps: conversations with similarity < 0.5\n\n4. Cluster gaps to identify common uncovered patterns\n\n5. Output:\n   - artifacts/gap-analysis/report.md (human readable)\n   - artifacts/gap-analysis/gaps.json (machine readable)\n\n6. Report should show gaps < 30% (not 92% like before)",
       "priority": 2,
-      "passes": true,
-      "validationCommand": "! grep -r -E '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}' skills/ --include=\"*.md\" 2>/dev/null | grep -v '\\[EMAIL\\]' | grep -q '@'"
+      "passes": false,
+      "validationCommand": "test -f artifacts/gap-analysis/report.md && grep -q 'Embedding strategy.*mxbai\\|ollama' artifacts/gap-analysis/report.md"
     },
     {
-      "id": "story-ml4lt7mg",
-      "title": "Scrub or remove PII from artifacts directory",
-      "description": "The artifacts/ directory contains extracted data with PII. Options:\n1. If artifacts are gitignored and not needed in repo: delete them\n2. If they need to stay: scrub PII from all .json and .jsonl files\n\nCheck if artifacts/ is in .gitignore. If not, add it. Then either scrub or delete the PII-containing files.\n\nPreferred: Add artifacts/ to .gitignore and delete the PII-containing files (they can be regenerated).",
+      "id": "story-ml4ql3oe",
+      "title": "Expand all 20 thin skills with more examples",
+      "description": "20 skills have only 1 reference file. Expand ALL of them.\n\nThin skills to expand (with sample counts):\n- cohort-access-request (121)\n- student-discount-request (114)\n- outdated-course-content (105)\n- cohort-schedule-inquiry (83)\n- course-difficulty-concern (77)\n- learning-path-guidance (74)\n- installment-payment-option (70)\n- gift-purchase-option (47)\n- email-delivery-failure (47)\n- media-press-outreach (39)\n- event-sponsorship-request (35)\n- api-documentation-question (33)\n- security-vulnerability-report (32)\n- workshop-attendance-confirmation (29)\n- workshop-technical-setup (28)\n- nonprofit-government-discount (21)\n- password-reset-issue (14)\n- continuing-education-credits (7)\n- two-factor-auth-issue (4)\n- workshop-cancellation-notice (1)\n\nFor each:\n1. Query DuckDB for conversations tagged with this topic\n2. Create references/canonical.md (3-5 ideal response examples)\n3. Create references/edge-cases.md (unusual situations)\n4. Create references/variations.md (different wordings of same intent)\n\nEach file should have 3-5 examples with Customer/Agent format.",
       "priority": 3,
-      "passes": true,
-      "validationCommand": "grep -q 'artifacts/' .gitignore && ! find artifacts -name \"*.json\" -exec grep -l -E '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}' {} \\; 2>/dev/null | grep -q '.'"
+      "passes": false,
+      "validationCommand": "count=0; for d in skills/cohort-access-request skills/student-discount-request skills/outdated-course-content skills/cohort-schedule-inquiry skills/course-difficulty-concern; do files=$(ls \"$d/references/\"*.md 2>/dev/null | wc -l); if [ \"$files\" -ge 3 ]; then count=$((count+1)); fi; done; [ \"$count\" -ge 4 ]"
     },
     {
-      "id": "story-ml4lt7ml",
-      "title": "Commit scrubbed files and prepare git history purge",
-      "description": "1. Stage and commit all scrubbed files with message \"chore: scrub PII from examples and artifacts\"\n2. Create scripts/purge-history.sh that uses git-filter-repo to:\n   - Remove artifacts/ from all history\n   - Remove any .json files that contained PII\n   - Rewrite commits that touched skill examples\n3. Add instructions to progress.txt for manual execution\n\nDO NOT run the history purge automatically - just prepare the script. This is destructive and needs human approval.",
+      "id": "story-ml4ql3oi",
+      "title": "Fill all 23 empty related_skills using Qdrant similarity",
+      "description": "23 skills have `related_skills: []`. Use Qdrant to find semantically similar skills.\n\nSkills with empty related_skills:\n- api-documentation-question\n- cohort-access-request\n- cohort-schedule-inquiry\n- continuing-education-credits\n- course-difficulty-concern\n- (18 more...)\n\nFor each skill with empty related_skills:\n1. Get the skill's embedding from Qdrant\n2. Search for top 5 similar skills (excluding self)\n3. Add skills with similarity > 0.6 to related_skills\n4. Update the SKILL.md frontmatter\n\nExample result:\n```yaml\nmetadata:\n  related_skills: [\"cohort-schedule-inquiry\", \"workshop-attendance-confirmation\"]\n```\n\nCreate script: scripts/fill-related-skills.ts",
       "priority": 4,
       "passes": true,
-      "validationCommand": "git log -1 --oneline | grep -qi 'scrub\\|pii' && test -f scripts/purge-history.sh"
+      "validationCommand": "empty=$(grep -l 'related_skills: \\[\\]' skills/*/SKILL.md 2>/dev/null | wc -l); [ \"$empty\" -lt 10 ]"
     },
     {
-      "id": "story-ml4lyqxb",
-      "title": "Audit current skills against AgentSkills spec",
-      "description": "Create scripts/audit-skills-spec.ts that:\n1. Reads all skills/*/SKILL.md files\n2. Validates frontmatter against AgentSkills spec:\n   - name: required, 1-64 chars, lowercase alphanumeric + hyphens, must match directory name\n   - description: required, 1-1024 chars, describes what AND when to use\n   - license: optional\n   - metadata: optional key-value map\n   - NO compatibility field (per Joel's note)\n3. Checks body length (recommend < 500 lines, warn if > 5000 tokens)\n4. Reports violations per skill\n5. Outputs JSON summary of what needs fixing\n\nRun with: bun run scripts/audit-skills-spec.ts",
-      "priority": 10,
-      "passes": true,
-      "validationCommand": "test -f scripts/audit-skills-spec.ts && bun run scripts/audit-skills-spec.ts 2>&1 | grep -qE 'skills|audit|valid'"
-    },
-    {
-      "id": "story-ml4lyqxp",
-      "title": "Fix skill frontmatter to match AgentSkills spec",
-      "description": "Based on audit results, update all skills/*/SKILL.md frontmatter:\n\n1. Ensure name field matches directory name exactly (lowercase, hyphens)\n2. Improve description to include both WHAT and WHEN:\n   - Bad: \"Helps with refunds\"\n   - Good: \"Handle refund and cancellation requests for course purchases. Use when customer mentions refund, cancel, money back, or wants to stop their subscription.\"\n3. Remove compatibility field if present\n4. Move custom fields (sample_size, confidence, phrases, etc.) into metadata block:\n   ```yaml\n   metadata:\n     sample_size: \"1247\"\n     avg_thread_length: \"4.2\"\n   ```\n5. Keep only spec-defined fields at top level\n\nProcess all 42 skills.",
-      "priority": 11,
-      "passes": true,
-      "validationCommand": "bun run scripts/audit-skills-spec.ts 2>&1 | grep -q '0 violations\\|all valid\\|passed'"
-    },
-    {
-      "id": "story-ml4lyqxr",
-      "title": "Restructure verbose skills to use references directory",
-      "description": "For any SKILL.md over 500 lines:\n1. Create references/ subdirectory\n2. Move detailed content to references/REFERENCE.md or topic-specific files\n3. Keep SKILL.md focused on core instructions\n4. Update SKILL.md to reference the moved content: \"See [detailed examples](references/examples.md)\"\n\nAlso rename examples/ to references/ for consistency with spec (or keep both if examples/ serves a different purpose).\n\nGoal: Every SKILL.md under 500 lines, with overflow in references/",
-      "priority": 12,
-      "passes": false,
-      "validationCommand": "! find skills -name \"SKILL.md\" -exec wc -l {} \\; | awk '$1 > 500 {exit 1}'"
-    },
-    {
-      "id": "story-ml4lyqxx",
-      "title": "Generate skills index (llms.txt format)",
-      "description": "Create scripts/generate-skills-index.ts that:\n1. Reads all skills/*/SKILL.md\n2. Extracts name and description from frontmatter\n3. Generates skills/llms.txt in the standard format:\n   ```\n   # Support Agent Skills Index\n   \n   /skills/refund-request/SKILL.md - Handle refund and cancellation requests...\n   /skills/access-locked-out/SKILL.md - Help users who can't access...\n   ```\n4. Also generates skills/index.json with structured metadata for programmatic access\n\nRun on commit hook or manually: bun run scripts/generate-skills-index.ts",
-      "priority": 13,
-      "passes": false,
-      "validationCommand": "test -f skills/llms.txt && test -f skills/index.json && wc -l < skills/llms.txt | grep -qE '^4[0-9]$'"
-    },
-    {
-      "id": "story-ml4m4171",
-      "title": "Deep scrub: Remove tokens, auth URLs, and encoded emails",
-      "description": "The initial PII scrub missed sensitive data in URLs. Create scripts/deep-scrub-pii.ts that:\n\n1. Detect and redact URLs containing:\n   - token= or &token= params → replace token value with [TOKEN]\n   - email= params (including URL-encoded like email%3D) → replace with [EMAIL]\n   - access_token= → [TOKEN]\n   - auth/callback paths with tokens\n   - Any UUID or long hex string (32+ chars) that looks like a token\n   - client_id= params → [CLIENT_ID]\n   - purchaseId= or similar transaction IDs → [PURCHASE_ID]\n\n2. Replace entire sensitive URLs with redacted versions:\n   - Keep domain: https://example.com/api/auth/callback?token=[TOKEN]&email=[EMAIL]\n   - Or just: [AUTH_LINK]\n\n3. Also catch URL-encoded emails: %40 = @\n\n4. Process ALL files in skills/ directory recursively\n\n5. Run validation: no raw tokens, no real emails in URLs\n\nBe aggressive — better to over-redact than miss PII.",
+      "id": "story-ml4ql3ol",
+      "title": "Add trigger phrases to all 41 skills",
+      "description": "Mine common phrases from conversations that lead to each skill. Add trigger_phrases to metadata.\n\nFor each skill:\n1. Query DuckDB for conversations tagged with this topic\n2. Extract common n-grams (2-4 words) from first messages\n3. Filter for phrases that indicate intent (not generic greetings)\n4. Add top 5-10 trigger phrases to metadata\n\nExample:\n```yaml\nmetadata:\n  trigger_phrases:\n    - \"want a refund\"\n    - \"money back\"\n    - \"cancel my purchase\"\n    - \"get refunded\"\n    - \"return the course\"\n```\n\nFor skills with low sample counts, use semantic inference from the skill description.\n\nCreate script: scripts/extract-trigger-phrases.ts",
       "priority": 5,
       "passes": true,
-      "validationCommand": "! grep -r -E 'token=[a-f0-9-]{20,}|email=[^&\\s]+@|access_token=' skills/ --include=\"*.md\" 2>/dev/null | grep -v '\\[TOKEN\\]\\|\\[EMAIL\\]' | grep -q '.'"
+      "validationCommand": "count=$(grep -l 'trigger_phrases' skills/*/SKILL.md | wc -l); [ \"$count\" -ge 30 ]"
     },
     {
-      "id": "story-ml4m417e",
-      "title": "Verify complete PII removal and commit",
-      "description": "Final verification pass:\n\n1. Run comprehensive PII scan:\n   - No emails (plain or URL-encoded)\n   - No auth tokens (UUID, hex strings > 20 chars in URL params)\n   - No phone numbers\n   - No names in greetings (Hi [Name])\n\n2. Generate report of all redactions made\n\n3. Commit with message: \"chore: deep scrub PII from examples (tokens, auth URLs, encoded emails)\"\n\n4. Update the purge-history.sh script to also rewrite commits containing these patterns",
+      "id": "story-ml4ql3on",
+      "title": "Create template variations (formal, casual, brief)",
+      "description": "Each template should have 3 variations for different tones.\n\nCurrent templates in templates/:\n- refund-initiated.md\n- login-link-sent.md\n- greeting-apologetic.md\n- closing-friendly.md\n- check-spam-folder.md\n- license-transferred.md\n- invoice-ready.md\n- troubleshoot-relogin.md\n- apology-confusion.md\n- login-link-troubleshoot.md\n\nFor each template, create:\n- {name}-formal.md (professional, corporate tone)\n- {name}-brief.md (minimal, just the facts)\n\nUpdate templates/index.md to document all variations.\n\nExample for refund-initiated:\n```\n# refund-initiated.md (default)\nWe've initiated a refund. It can take 5-10 days for the banks to reconcile.\n\n# refund-initiated-formal.md\nYour refund has been processed and submitted to your financial institution. Please allow 5-10 business days for the funds to appear in your account.\n\n# refund-initiated-brief.md\nRefund initiated. 5-10 days to process.\n```",
       "priority": 6,
       "passes": true,
-      "validationCommand": "git log -1 --oneline | grep -qi 'deep scrub\\|pii' && ! grep -r -E '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}|token=[a-f0-9-]{20,}' skills/ --include=\"*.md\" 2>/dev/null | grep -v '\\[' | grep -q '.'"
+      "validationCommand": "formal=$(ls templates/*-formal.md 2>/dev/null | wc -l); brief=$(ls templates/*-brief.md 2>/dev/null | wc -l); [ \"$formal\" -ge 8 ] && [ \"$brief\" -ge 8 ]"
+    },
+    {
+      "id": "story-ml4ql3or",
+      "title": "Add anti-patterns to top 10 skills by sample size",
+      "description": "Create references/anti-patterns.md for the top 10 skills showing what NOT to do.\n\nTop 10 skills by sample size:\n1. email-change (2920)\n2. refund-request (1433)\n3. login-link (999)\n4. access-locked-out (878)\n5. corporate-invoice (720)\n6. ppp-pricing (715)\n7. technical-issue-course-content (596)\n8. pricing-inquiry (523)\n9. course-content-locked (520)\n10. team-license-purchase (508)\n\nFor each, create references/anti-patterns.md with 3-5 examples:\n\n```markdown\n# Anti-Patterns for [Skill Name]\n\n## Anti-Pattern: [Name]\n\n❌ **BAD:**\n\"[bad response example]\"\n\n✅ **GOOD:**\n\"[correct response example]\"\n\n**Why it's wrong:** [explanation]\n\n---\n\n## Anti-Pattern: [Name]\n...\n```\n\nCommon anti-patterns to look for:\n- Asking unnecessary questions\n- Over-explaining policies\n- Promising things we can't deliver\n- Being too formal/robotic\n- Missing required information (like 5-10 days for refunds)",
+      "priority": 7,
+      "passes": true,
+      "validationCommand": "count=$(ls skills/*/references/anti-patterns.md 2>/dev/null | wc -l); [ \"$count\" -ge 8 ]"
+    },
+    {
+      "id": "story-ml4ql3ow",
+      "title": "Embed all 21k conversations into Qdrant",
+      "description": "Create a Qdrant collection with all conversations for semantic search and gap analysis.\n\n1. Create collection `conversations` with 1024 dimensions:\n```bash\ncurl -X PUT http://localhost:6333/collections/conversations \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"vectors\": {\"size\": 1024, \"distance\": \"Cosine\"}}'\n```\n\n2. Query all conversations from DuckDB:\n```sql\nSELECT conversation_id, inbox_id, tags, first_message, token_count\nFROM conversations\n```\n\n3. For each conversation (batch for efficiency):\n   - Generate embedding via Ollama mxbai-embed-large\n   - Upsert to Qdrant with payload: conversation_id, inbox_id, tags, first_message_preview\n\n4. Use batching (100 at a time) to avoid overwhelming Ollama\n\n5. Create script: scripts/embed-conversations-qdrant.ts\n\n6. Progress reporting via moltbot every 1000 conversations\n\nTarget: 21,588 points in conversations collection",
+      "priority": 8,
+      "passes": false,
+      "validationCommand": "curl -s http://localhost:6333/collections/conversations | jq -e '.result.points_count >= 20000'"
+    },
+    {
+      "id": "story-ml4ql3oz",
+      "title": "Final validation and quality report",
+      "description": "Generate comprehensive quality report and validate all enrichments.\n\n1. Create scripts/quality-report.ts that checks:\n   - All 41 skills have 3+ reference files\n   - All 41 skills have non-empty related_skills\n   - All 41 skills have trigger_phrases\n   - All 41 skills have ## Validation section\n   - All templates have formal/brief variations\n   - Top 10 skills have anti-patterns.md\n   - Qdrant skills collection has 41+ points\n   - Qdrant conversations collection has 20k+ points\n   - Gap analysis shows < 30% gaps\n\n2. Output artifacts/quality-report.md with:\n   - Summary statistics\n   - Per-skill checklist\n   - Issues found\n   - Recommendations\n\n3. Update the Codex skill at ~/.codex/skills/skills-enrichment/SKILL.md:\n   - Update \"Current Status\" section with final numbers\n   - Update \"Loop Iteration\" count\n   - Document any remaining issues\n\n4. Commit all changes with message: \"feat: Phase 2 skills enrichment complete\"",
+      "priority": 9,
+      "passes": false,
+      "validationCommand": "test -f artifacts/quality-report.md && grep -q 'Phase 2\\|enrichment complete' artifacts/quality-report.md"
     }
   ],
   "metadata": {
-    "createdAt": "2026-02-02T03:21:55.559Z",
-    "totalIterations": 8,
-    "lastIteration": "2026-02-02T03:46:43.613Z"
+    "createdAt": "2026-02-02T05:35:01.721Z",
+    "totalIterations": 0
   }
 }

@@ -2,8 +2,25 @@
 name: access-locked-out
 description: Restore access for customers who are locked out of their account or courses. Use when a paying customer cannot log in, access materials, or restore purchases.
 metadata:
+  trigger_phrases:
+      - "restore access"
+      - "access customers"
+      - "customers who"
+  related_skills: ["email-change", "website-bug-report"]
   sample_size: "878"
-  validation: "required_phrases:\n  - \"used to purchase the\"\n  - \"login link\"\nforbidden_patterns:\n  - \"(?i)chargeback\"\n  - \"(?i)purchase order\"\n  - \"(?i)wire transfer\"\n  - \"(?i)bank transfer\"\n  - \"(?i)tax invoice\"\n  - \"(?i)vat number\"\n  - \"(?i)invoice number\""
+  validation: |
+    required_phrases:
+      - "used to purchase the"
+      - "login link"
+    forbidden_patterns:
+      - "(?i)chargeback"
+      - "(?i)purchase order"
+      - "(?i)wire transfer"
+      - "(?i)bank transfer"
+      - "(?i)tax invoice"
+      - "(?i)vat number"
+      - "(?i)invoice number"
+    max_length: 500
   metrics: "sample_size: 878\navg_thread_length: 3.68\ntop_phrases:\n  - phrase: \"let me know if\"\n    count: 227\n    percent: 25.9\n  - phrase: \"if you have any\"\n    count: 167\n    percent: 19\n  - phrase: \"me know if you\"\n    count: 165\n    percent: 18.8\n  - phrase: \"know if you have\"\n    count: 128\n    percent: 14.6\n  - phrase: \"let us know if\"\n    count: 79\n    percent: 9\n  - phrase: \"at the top of\"\n    count: 78\n    percent: 8.9\n  - phrase: \"to purchase the course\"\n    count: 77\n    percent: 8.8\n  - phrase: \"the top of https\"\n    count: 75\n    percent: 8.5\n  - phrase: \"everything should be back\"\n    count: 73\n    percent: 8.3\n  - phrase: \"used to purchase the\"\n    count: 73\n    percent: 8.3"
 ---
 # Account Access Issues
@@ -54,3 +71,4 @@ Common closings:
 Draft must:
 - [ ] Include at least one of the required phrases from the validation block
 - [ ] Stay consistent with the observed response patterns above
+- [ ] NOT introduce policy details that are not present in the verified response lines above.

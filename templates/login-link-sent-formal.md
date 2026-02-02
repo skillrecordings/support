@@ -1,0 +1,1 @@
+A secure login link has been sent to your registered email address. Please note that this link will expire in 24 hours for security purposes.

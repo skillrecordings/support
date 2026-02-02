@@ -2,8 +2,17 @@
 name: password-reset-issue
 description: Help with password resets and account recovery. Use when a customer cannot reset their password or access their account.
 metadata:
+  trigger_phrases:
+      - "password resets"
+      - "resets account"
+      - "account recovery"
+  related_skills: ["access-locked-out", "two-factor-auth-issue", "login-link", "course-content-locked", "refund-request"]
   sample_size: "14"
-  validation: "required_phrases:\n  - \"let me know if\"\nforbidden_patterns: []"
+  validation: |
+    required_phrases:
+      - "let me know if"
+    forbidden_patterns: []
+    max_length: 500
   metrics: "sample_size: 14\navg_thread_length: 3.14\ntop_phrases:\n  - phrase: \"let me know if\"\n    count: 7\n    percent: 50\n  - phrase: \"if you have any\"\n    count: 7\n    percent: 50\n  - phrase: \"me know if you\"\n    count: 6\n    percent: 42.9\n  - phrase: \"know if you have\"\n    count: 6\n    percent: 42.9\n  - phrase: \"you used to purchase\"\n    count: 4\n    percent: 28.6\n  - phrase: \"used to purchase the\"\n    count: 4\n    percent: 28.6\n  - phrase: \"able to access the\"\n    count: 3\n    percent: 21.4\n  - phrase: \"at the top of\"\n    count: 3\n    percent: 21.4\n  - phrase: \"the top of https\"\n    count: 3\n    percent: 21.4\n  - phrase: \"you'll need to enter\"\n    count: 3\n    percent: 21.4"
 ---
 # Password Reset or Recovery
@@ -54,3 +63,4 @@ Common closings:
 Draft must:
 - [ ] Include at least one of the required phrases from the validation block
 - [ ] Stay consistent with the observed response patterns above
+- [ ] NOT introduce policy details that are not present in the verified response lines above.
