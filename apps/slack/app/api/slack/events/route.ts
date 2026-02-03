@@ -1,4 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
+import {
+  addReaction,
+  clearAssistantStatus,
+  removeReaction,
+  setAssistantStatus,
+} from '../../../../../../packages/slack/src/feedback/status'
 import { handleAppMention } from '../../../../../../packages/slack/src/handlers/mention'
 import { handleThreadReply } from '../../../../../../packages/slack/src/handlers/thread-reply'
 
@@ -30,21 +36,49 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ ok: true })
       }
 
+      const channel = event?.channel
+      const messageTs = event?.ts
+      const threadTs = event?.thread_ts ?? event?.ts
+
       if (event?.type === 'app_mention') {
-        // Handle @mentions
-        await handleAppMention({
-          event_id: body.event_id,
-          event: event,
-        })
-      } else if (event?.type === 'message' && event?.thread_ts) {
-        // Handle thread replies (messages with thread_ts that aren't the parent)
-        if (event.thread_ts !== event.ts) {
-          const result = await handleThreadReply({
+        // Show thinking feedback
+        await Promise.all([
+          addReaction(channel, messageTs, 'eyes'),
+          setAssistantStatus(channel, threadTs, 'is thinking...', [
+            'is thinking...',
+          ]),
+        ])
+
+        try {
+          // Handle @mentions
+          await handleAppMention({
             event_id: body.event_id,
             event: event,
           })
-          if (!result.handled) {
-            console.log('Thread reply not handled:', result.reason)
+        } finally {
+          // Clear feedback
+          await Promise.all([
+            removeReaction(channel, messageTs, 'eyes'),
+            clearAssistantStatus(channel, threadTs),
+          ])
+        }
+      } else if (event?.type === 'message' && event?.thread_ts) {
+        // Handle thread replies (messages with thread_ts that aren't the parent)
+        if (event.thread_ts !== event.ts) {
+          // Show thinking feedback
+          await addReaction(channel, messageTs, 'eyes')
+
+          try {
+            const result = await handleThreadReply({
+              event_id: body.event_id,
+              event: event,
+            })
+            if (!result.handled) {
+              console.log('Thread reply not handled:', result.reason)
+            }
+          } finally {
+            // Clear feedback
+            await removeReaction(channel, messageTs, 'eyes')
           }
         }
       } else if (event?.type === 'message') {
