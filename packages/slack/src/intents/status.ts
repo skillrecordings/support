@@ -4,6 +4,7 @@ import {
   type FrontClient,
   createFrontClient,
 } from '../../../front-sdk/src'
+import { STATUS_CACHE_TTL_MS } from '../config'
 import {
   type HealthStats,
   type PendingSummaryItem,
@@ -47,7 +48,7 @@ export interface StatusHandlerResult {
   cacheHit: boolean
 }
 
-const CACHE_TTL_MS = 30_000
+const CACHE_TTL_MS = STATUS_CACHE_TTL_MS
 const DEFAULT_CACHE_STORE = new Map<
   string,
   StatusCacheEntry<StatusHandlerResult>

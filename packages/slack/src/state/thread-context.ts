@@ -1,5 +1,6 @@
 import { initializeAxiom, log } from '../../../core/src/observability/axiom'
 import { type Redis, getRedis } from '../../../core/src/redis/client'
+import { THREAD_CONTEXT_TTL_SECONDS } from '../config'
 
 export interface ThreadContext {
   threadTs: string
@@ -42,7 +43,7 @@ export type ThreadContextWriteResult =
   | { status: 'ok'; context?: ThreadContext }
   | { status: 'error'; message: string }
 
-export const DEFAULT_THREAD_CONTEXT_TTL_SECONDS = 60 * 60
+export const DEFAULT_THREAD_CONTEXT_TTL_SECONDS = THREAD_CONTEXT_TTL_SECONDS
 export const STALE_THREAD_MESSAGE =
   'This thread has expired. Please start a new conversation.'
 

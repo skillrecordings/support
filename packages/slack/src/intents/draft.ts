@@ -1,5 +1,6 @@
 import { generateText } from 'ai'
 import { initializeAxiom, log } from '../../../core/src/observability/axiom'
+import { DEFAULT_DRAFT_MODEL } from '../config'
 
 export type RefinementIntent =
   | { type: 'simplify' }
@@ -57,7 +58,7 @@ export interface DraftRefinementResult {
   charDelta: number
 }
 
-const DEFAULT_MODEL = 'anthropic/claude-sonnet-4-5'
+const DEFAULT_MODEL = DEFAULT_DRAFT_MODEL
 const DEFAULT_STORE = createDraftStore()
 
 function getNow(deps?: DraftRefinementDeps): Date {
@@ -237,7 +238,7 @@ export async function applyRefinement(
   const logger = getLogger(deps)
   initialize()
   await logger('info', 'slack.draft_refined', {
-    threadTs: context?.threadTs ?? state.threadTs,
+    slackThreadTs: context?.threadTs ?? state.threadTs,
     userId: context?.userId,
     channel: context?.channel,
     traceId: context?.traceId,

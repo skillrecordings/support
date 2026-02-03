@@ -118,7 +118,7 @@ async function logAction(
     traceId: deps?.traceId,
     actionType: action.type,
     conversationId: context.conversationId,
-    threadTs: context.threadTs,
+    slackThreadTs: context.threadTs,
     channel: context.channel,
     requestedBy: context.requestedBy,
     success: result.ok,

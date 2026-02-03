@@ -124,7 +124,7 @@ export async function handleThreadReply(
     initialize()
     await logger('info', 'slack.draft_approved', {
       traceId,
-      threadTs,
+      slackThreadTs: threadTs,
       userId: event.user,
       channel: event.channel,
       version: updated.versions[updated.versions.length - 1]?.id,
@@ -150,7 +150,7 @@ export async function handleThreadReply(
     initialize()
     await logger('info', 'slack.draft_rejected', {
       traceId,
-      threadTs,
+      slackThreadTs: threadTs,
       userId: event.user,
       channel: event.channel,
       reason: intent.reason,
