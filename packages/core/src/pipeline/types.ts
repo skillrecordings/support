@@ -349,6 +349,8 @@ export interface ValidateInput {
   draft: string
   context: GatherOutput
   strictMode?: boolean
+  /** Original customer message (string) for skill-based ground truth checks */
+  originalMessage?: string
   /** Original customer message for relevance checking */
   customerMessage?: {
     subject: string
@@ -382,6 +384,7 @@ export type ValidationIssueType =
   | 'bad_tone'
   | 'repeated_mistake' // Draft may repeat a known corrected mistake
   | 'relevance' // Draft doesn't address the customer's actual question
+  | 'ground_truth_mismatch' // Draft contradicts retrieved skill content
 
 // ============================================================================
 // Step 5b: Comment (for support_teammate action)

@@ -18,6 +18,7 @@ import { generateObject } from 'ai'
 import { z } from 'zod'
 import { type RelevantMemory, queryCorrectedMemories } from '../../memory/query'
 import { log } from '../../observability/axiom'
+import { type RetrievedSkill, retrieveSkills } from '../../skill-retrieval'
 import type {
   GatherOutput,
   MessageCategory,
@@ -137,6 +138,13 @@ const BANNED_PHRASES = [
   /Don't hesitate to/i,
 ]
 
+const FABRICATION_PATTERNS = {
+  price: /\$[\d,]+(?:\.\d{2})?/g,
+  timeline: /within \d+ (?:hours?|days?|weeks?)/gi,
+  percentage: /\d+%/g,
+  guarantee: /guarantee|always|never|definitely|certainly/gi,
+} as const
+
 // Length thresholds
 const MIN_RESPONSE_LENGTH = 10
 const MAX_RESPONSE_LENGTH = 2000
@@ -239,6 +247,92 @@ function checkFabrication(
   return issues
 }
 
+type ClaimType = keyof typeof FABRICATION_PATTERNS
+
+interface Claim {
+  type: ClaimType
+  value: string
+  index?: number
+}
+
+function stripQuotedText(draft: string): string {
+  const lines = draft.split(/\r?\n/)
+  const keptLines: string[] = []
+
+  for (const line of lines) {
+    if (/^On .+ wrote:$/i.test(line.trim())) {
+      break
+    }
+
+    if (/^\s*>/.test(line)) {
+      continue
+    }
+
+    keptLines.push(line)
+  }
+
+  const keptText = keptLines.join('\n')
+
+  return keptText.replace(
+    /(customer|you)\s+(?:said|wrote|mentioned|stated|shared|quoted)[:\s]*"[^"]+"/gi,
+    (match) => match.replace(/"[^"]+"/g, '')
+  )
+}
+
+function extractClaims(draft: string): Claim[] {
+  const claims: Claim[] = []
+  for (const [type, pattern] of Object.entries(FABRICATION_PATTERNS)) {
+    const matches = draft.matchAll(pattern)
+    for (const match of matches) {
+      claims.push({
+        type: type as ClaimType,
+        value: match[0],
+        index: match.index,
+      })
+    }
+  }
+  return claims
+}
+
+function checkClaimAgainstSkills(
+  claim: Claim,
+  skills: RetrievedSkill[]
+): boolean {
+  const claimValue = claim.value.toLowerCase()
+  for (const skill of skills) {
+    const description = skill.description?.toLowerCase() ?? ''
+    const markdown = skill.markdown?.toLowerCase() ?? ''
+    if (description.includes(claimValue) || markdown.includes(claimValue)) {
+      return true
+    }
+  }
+  return false
+}
+
+function checkFabricatedClaims(
+  draft: string,
+  skills: RetrievedSkill[]
+): ValidationIssue[] {
+  const issues: ValidationIssue[] = []
+  const cleanedDraft = stripQuotedText(draft)
+  const claims = extractClaims(cleanedDraft)
+
+  for (const claim of claims) {
+    const isSourced = checkClaimAgainstSkills(claim, skills)
+    if (!isSourced) {
+      issues.push({
+        type: 'fabrication',
+        severity: claim.type === 'price' ? 'error' : 'warning',
+        message: `Unsourced ${claim.type} claim: ${claim.value}`,
+        match: claim.value,
+        position: claim.index,
+      })
+    }
+  }
+
+  return issues
+}
+
 function checkLength(draft: string): ValidationIssue[] {
   const issues: ValidationIssue[] = []
 
@@ -269,8 +363,9 @@ const relevanceSchema = z.object({
   relevant: z
     .boolean()
     .describe('Whether the draft response addresses the customer message'),
-  score: z
+  score: z.coerce
     .number()
+    .finite()
     .min(0)
     .max(1)
     .describe(
@@ -342,6 +437,65 @@ Is this draft response relevant to what the customer asked?`
   }
 
   return { issues, score: object.score }
+}
+
+// ============================================================================
+// Ground truth comparison (skill retrieval)
+// ============================================================================
+
+function extractRefundDays(text: string): number[] {
+  if (!/refund/i.test(text)) return []
+
+  const matches = text.matchAll(/(\d{1,3})\s*[- ]?\s*day(?:s)?/gi)
+  const days: number[] = []
+  for (const match of matches) {
+    const value = Number(match[1])
+    if (!Number.isNaN(value)) {
+      days.push(value)
+    }
+  }
+
+  return days
+}
+
+function checkGroundTruth(
+  draft: string,
+  skills: RetrievedSkill[]
+): ValidationIssue[] {
+  if (skills.length === 0) return []
+
+  const draftDays = extractRefundDays(draft)
+  if (draftDays.length === 0) return []
+
+  const skillDays = skills.flatMap((skill) => {
+    const skillText = [skill.name, skill.description, skill.markdown].filter(
+      Boolean
+    )
+    return extractRefundDays(skillText.join('\n'))
+  })
+
+  const uniqueSkillDays = Array.from(new Set(skillDays))
+  if (uniqueSkillDays.length === 0) return []
+
+  const uniqueDraftDays = Array.from(new Set(draftDays))
+  const mismatchedDays = uniqueDraftDays.filter(
+    (day) => !uniqueSkillDays.includes(day)
+  )
+
+  if (mismatchedDays.length === 0) return []
+
+  return [
+    {
+      type: 'ground_truth_mismatch',
+      severity: 'error',
+      message: `Draft refund timeframe (${mismatchedDays.join(
+        ', '
+      )} days) conflicts with ground truth (${uniqueSkillDays.join(', ')} days)`,
+      match: `draft:${mismatchedDays.join(', ')} skill:${uniqueSkillDays.join(
+        ', '
+      )}`,
+    },
+  ]
 }
 
 // ============================================================================
@@ -462,6 +616,33 @@ export async function validate(
   ]
 
   const patternIssueCount = allIssues.length
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Ground Truth: Retrieve skills and compare draft against known info
+  // ─────────────────────────────────────────────────────────────────────────
+  const skillQuery =
+    input.originalMessage ??
+    customerMessage?.body ??
+    customerMessage?.subject ??
+    draft
+
+  let relevantSkills: RetrievedSkill[] = []
+
+  if (skillQuery.trim().length > 0) {
+    try {
+      relevantSkills = await retrieveSkills(skillQuery, { topK: 3 })
+      allIssues.push(...checkGroundTruth(draft, relevantSkills))
+      allIssues.push(...checkFabricatedClaims(draft, relevantSkills))
+    } catch (error) {
+      await log('warn', 'ground truth skill retrieval failed', {
+        workflow: 'pipeline',
+        step: 'validate',
+        appId,
+        category,
+        error: error instanceof Error ? error.message : String(error),
+      })
+    }
+  }
 
   let correctionsChecked: RelevantMemory[] | undefined
   let memoryCheckPerformed = false

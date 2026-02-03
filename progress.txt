@@ -1,3 +1,30 @@
 # Progress Log for epic3-validator-overhaul
 
 Initialized: 2026-02-03T03:41:05.745Z
+
+---
+[2026-02-03T03:51:50.621Z]
+Completed: Epic 3.1: Ground Truth + Relevance Fix (#138)
+Files: none
+Summary: Couldn’t load the `tdd-red-green-refactor` skill file — it’s not present at `/home/joel/.codex/skills/tdd-red-green-refactor/SKILL.md`, so I proceeded without it.
+
+Added skill-retrieval–backed ground-truth checks plus a refund-day mismatch validator in `packages/core/src/pipeline/steps/validate.ts`, and made relevance scoring more robust with numeric coercion in the schema.  
+Updated validation ty
+
+---
+[2026-02-03T04:02:40.916Z]
+Failed: Epic 3.2: Fabrication Detection (#139)
+Validation:              ^
+TypeError: vi.mocked is not a function. (In 'vi.mocked(retrieveSkills)', 'vi.mocked' is undefined)
+      at <anonymous> (/home/joel/Code/skillrecordings/support/packages/core/src/pipeline/steps/__tests__/validate.test.ts:227:8)
+      at <anonymous> (/home/joel/Code/skillrecordings/sup
+Codex: 
+
+---
+[2026-02-03T04:04:42.033Z]
+Completed: Epic 3.2: Fabrication Detection (#139)
+Files: none
+Summary: Adjusted the validate pipeline tests to avoid `vi.mocked` at runtime by using explicit mock helpers for `retrieveSkills` and `generateObject`, which unblocks the fabrication-detection test cases without touching implementation logic. The change is localized to `packages/core/src/pipeline/steps/__tests__/validate.test.ts`, keeping the story scope tight.
+
+Tests:
+- `bun test packages/core/src/pipelin
