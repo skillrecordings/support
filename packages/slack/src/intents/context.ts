@@ -47,6 +47,7 @@ export interface CustomerContextDeps {
   now?: () => Date
   logger?: typeof log
   initializeAxiom?: typeof initializeAxiom
+  traceId?: string
 }
 
 export interface CustomerContextResult<T = undefined> {
@@ -203,7 +204,10 @@ async function logQuery(
   const logger = getLogger(deps)
   const init = getInitializer(deps)
   init()
-  await logger(level, 'slack.customer_context', payload)
+  await logger(level, 'slack.customer_context', {
+    traceId: deps?.traceId,
+    ...payload,
+  })
 }
 
 export async function handleHistoryQuery(

@@ -27,6 +27,7 @@ export interface QuickActionDeps {
   resolveSlackUserId?: (
     assignee: string
   ) => Promise<string | null> | string | null
+  traceId?: string
 }
 
 export interface QuickActionResult {
@@ -114,6 +115,7 @@ async function logAction(
   const initialize = getInitializer(deps)
   initialize()
   await logger(level, 'slack.quick_action', {
+    traceId: deps?.traceId,
     actionType: action.type,
     conversationId: context.conversationId,
     threadTs: context.threadTs,

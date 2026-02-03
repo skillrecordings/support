@@ -38,6 +38,7 @@ export interface StatusHandlerDeps {
   now?: () => Date
   logger?: typeof log
   initializeAxiom?: typeof initializeAxiom
+  traceId?: string
 }
 
 export interface StatusHandlerResult {
@@ -292,6 +293,7 @@ export async function handleUrgentQuery(
   const cached = await resolveCachedResult(cache, cacheKey, now)
   if (cached) {
     await logger('info', 'slack.status_query', {
+      traceId: deps?.traceId,
       queryType: 'urgent',
       filters: query.filters ?? {},
       urgentCount: undefined,
@@ -321,6 +323,7 @@ export async function handleUrgentQuery(
   }
 
   await logger('info', 'slack.status_query', {
+    traceId: deps?.traceId,
     queryType: 'urgent',
     filters: query.filters ?? {},
     urgentCount: items.length,
@@ -343,6 +346,7 @@ export async function handlePendingQuery(
   const cached = await resolveCachedResult(cache, cacheKey, now)
   if (cached) {
     await logger('info', 'slack.status_query', {
+      traceId: deps?.traceId,
       queryType: 'pending',
       filters: query.filters ?? {},
       pendingCount: undefined,
@@ -365,6 +369,7 @@ export async function handlePendingQuery(
   }
 
   await logger('info', 'slack.status_query', {
+    traceId: deps?.traceId,
     queryType: 'pending',
     filters: query.filters ?? {},
     pendingCount: openConversations.length,
@@ -387,6 +392,7 @@ export async function handleHealthQuery(
   const cached = await resolveCachedResult(cache, cacheKey, now)
   if (cached) {
     await logger('info', 'slack.status_query', {
+      traceId: deps?.traceId,
       queryType: 'health',
       filters: query.filters ?? {},
       pendingCount: undefined,
@@ -416,6 +422,7 @@ export async function handleHealthQuery(
   }
 
   await logger('info', 'slack.status_query', {
+    traceId: deps?.traceId,
     queryType: 'health',
     filters: query.filters ?? {},
     pendingCount: stats.pending,
