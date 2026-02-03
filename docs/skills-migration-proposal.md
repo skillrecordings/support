@@ -39,26 +39,26 @@ flowchart LR
 ```mermaid
 flowchart TD
     subgraph Source["Source (Qdrant)"]
-        SK1[Skill Record]
-        SK2[skill_id: string]
-        SK3[content: string]
-        SK4[vector: float[1536]]
-        SK5[metadata: object]
+        SK1["Skill Record"]
+        SK2["skill_id: string"]
+        SK3["content: string"]
+        SK4["vector: float‹1536›"]
+        SK5["metadata: object"]
     end
     
     subgraph Transform["Transform (Export)"]
-        TR1[Extract TEXT fields]
-        TR2[Preserve metadata]
-        TR3[Drop vectors]
-        TR4[Format for Upstash]
+        TR1["Extract TEXT fields"]
+        TR2["Preserve metadata"]
+        TR3["Drop vectors"]
+        TR4["Format for Upstash"]
     end
     
     subgraph Target["Target (Upstash)"]
-        UP1[Skill Record]
-        UP2[id: string]
-        UP3[data: string]
-        UP4[metadata: object]
-        UP5[vector: auto-generated]
+        UP1["Skill Record"]
+        UP2["id: string"]
+        UP3["data: string"]
+        UP4["metadata: object"]
+        UP5["vector: auto-generated"]
     end
     
     SK1 --> TR1
