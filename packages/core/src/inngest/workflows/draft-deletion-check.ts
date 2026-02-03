@@ -62,8 +62,9 @@ export const draftDeletionCheckWorkflow = inngest.createFunction(
       conversationId,
       appId,
       traceId,
-      category: classification.category,
-      draftLength: draft.content.length,
+      category: classification?.category,
+      // Guard against undefined draft.content from incomplete event data
+      draftLength: draft?.content?.length ?? 0,
     })
 
     // Find the action ID for this draft (needed for RL signal)

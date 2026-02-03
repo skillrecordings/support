@@ -56,14 +56,15 @@ export const validateWorkflow = inngest.createFunction(
       messageId,
       appId,
       traceId,
-      draftLength: draft.content.length,
+      // Guard against undefined draft.content - assertion happens after this log
+      draftLength: draft?.content?.length ?? 0,
       ...buildDataFlowCheck('support-validate', 'receiving', {
         subject,
         body,
         category: classification?.category,
         confidence: classification?.confidence,
         reasoning: classification?.reasoning,
-        draftContent: draft.content,
+        draftContent: draft?.content,
         signals: classification?.signals,
       }),
     })
