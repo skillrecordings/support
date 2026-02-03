@@ -1,11 +1,15 @@
 #!/usr/bin/env bun
 /**
- * Populate Upstash Redis with metadata cache for fast lookups.
+ * Populate Upstash Redis with FULL skill content.
+ * Redis is the source of truth for skill data — Vector only has embeddings.
+ *
+ * Stores:
+ *   - skill_id, name, description, path
+ *   - Full SKILL.md content (if available)
  *
  * Usage:
- *   bun scripts/populate-upstash-redis.ts --input artifacts/skills-export.jsonl --prefix skill:
- *   bun scripts/populate-upstash-redis.ts --input artifacts/conversations-export.jsonl --prefix conv:
- *   bun scripts/populate-upstash-redis.ts --all --input-dir artifacts/
+ *   bun scripts/populate-upstash-redis.ts --input artifacts/skills-export.jsonl
+ *   bun scripts/populate-upstash-redis.ts --input artifacts/skills-export.jsonl --include-markdown
  *
  * Secrets (via secrets CLI or env):
  *   UPSTASH_REDIS_REST_URL
@@ -13,10 +17,11 @@
  */
 
 import { parseArgs } from "util";
-import { readFileSync, readdirSync } from "fs";
+import { readFileSync, existsSync } from "fs";
+import { join } from "path";
 import { Redis } from "@upstash/redis";
 
-const BATCH_SIZE = 100;
+const BATCH_SIZE = 50;
 
 interface ExportRecord {
   id: string;
@@ -24,72 +29,34 @@ interface ExportRecord {
   metadata: Record<string, unknown>;
 }
 
-/**
- * Read JSONL file and parse records
- */
+interface SkillData {
+  skill_id: string;
+  name: string;
+  description: string;
+  path: string;
+  sample_size?: number;
+  markdown?: string; // Full SKILL.md content
+  indexed_at: string;
+}
+
 function readJsonl(filePath: string): ExportRecord[] {
   const content = readFileSync(filePath, "utf-8");
   const lines = content.trim().split("\n").filter(Boolean);
   return lines.map((line) => JSON.parse(line));
 }
 
-/**
- * Populate Redis with metadata
- */
-async function populateRedis(
-  redis: Redis,
-  records: ExportRecord[],
-  prefix: string
-): Promise<{ success: number; failed: number }> {
-  let success = 0;
-  let failed = 0;
+function readSkillMarkdown(skillPath: string): string | undefined {
+  // skillPath is like "skills/refund-request/SKILL.md"
+  const fullPath = join(process.cwd(), skillPath);
 
-  // Use pipeline for batch operations
-  for (let i = 0; i < records.length; i += BATCH_SIZE) {
-    const batch = records.slice(i, i + BATCH_SIZE);
-    const pipeline = redis.pipeline();
-
-    for (const record of batch) {
-      const key = `${prefix}${record.id}`;
-      // Store metadata + text as JSON
-      pipeline.set(key, JSON.stringify({
-        id: record.id,
-        text: record.data,
-        ...record.metadata,
-      }));
-    }
-
+  if (existsSync(fullPath)) {
     try {
-      await pipeline.exec();
-      success += batch.length;
-    } catch (err) {
-      console.error(`\nBatch ${i / BATCH_SIZE + 1} failed:`, err);
-      failed += batch.length;
+      return readFileSync(fullPath, "utf-8");
+    } catch {
+      return undefined;
     }
-
-    const progress = Math.min(i + BATCH_SIZE, records.length);
-    process.stdout.write(`\r  Populated ${progress}/${records.length} keys...`);
   }
-
-  console.log(); // New line after progress
-  return { success, failed };
-}
-
-/**
- * Populate from a single file
- */
-async function populateFile(
-  redis: Redis,
-  filePath: string,
-  prefix: string
-): Promise<{ success: number; failed: number }> {
-  console.log(`\nPopulating from: ${filePath}`);
-  console.log(`  Key prefix: ${prefix}`);
-
-  const records = readJsonl(filePath);
-  console.log(`  Records: ${records.length}`);
-
-  return populateRedis(redis, records, prefix);
+  return undefined;
 }
 
 async function main() {
@@ -97,101 +64,96 @@ async function main() {
     args: process.argv.slice(2),
     options: {
       input: { type: "string", short: "i" },
-      prefix: { type: "string", short: "p" },
-      all: { type: "boolean" },
-      "input-dir": { type: "string", short: "d" },
+      "include-markdown": { type: "boolean", short: "m" },
       "dry-run": { type: "boolean" },
     },
   });
 
-  // Check for credentials
+  if (!values.input) {
+    console.log("Usage: bun scripts/populate-upstash-redis.ts --input artifacts/skills-export.jsonl [--include-markdown]");
+    process.exit(1);
+  }
+
   const url = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
 
   if (!url || !token) {
     console.error("Missing UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN");
-    console.error("\nSet via environment or use secrets CLI:");
-    console.error(
-      '  export UPSTASH_REDIS_REST_URL=$(secrets lease upstash_redis_url --raw --ttl 1h --client-id "migration")'
-    );
-    console.error(
-      '  export UPSTASH_REDIS_REST_TOKEN=$(secrets lease upstash_redis_token --raw --ttl 1h --client-id "migration")'
-    );
     process.exit(1);
   }
 
   const redis = new Redis({ url, token });
+  const includeMarkdown = values["include-markdown"] || false;
 
-  // Check connection
   console.log("Checking Upstash Redis connection...");
   const pong = await redis.ping();
   console.log(`  Connected! Ping: ${pong}`);
 
-  const dbSize = await redis.dbsize();
-  console.log(`  Current keys: ${dbSize}`);
+  const records = readJsonl(values.input);
+  console.log(`\nPopulating ${records.length} skills to Redis`);
+  console.log(`  Include SKILL.md content: ${includeMarkdown ? "YES" : "NO"}\n`);
 
   if (values["dry-run"]) {
-    console.log("\n[DRY RUN] Would populate but not executing.");
+    console.log("[DRY RUN] Would populate:");
+    records.slice(0, 3).forEach((r) => {
+      const md = includeMarkdown ? readSkillMarkdown(r.metadata.path as string) : undefined;
+      console.log(`  - skill:${r.metadata.name} (${md ? `${md.length} chars markdown` : "no markdown"})`);
+    });
+    console.log(`  ... and ${records.length - 3} more`);
+    return;
   }
 
-  let totalSuccess = 0;
-  let totalFailed = 0;
+  let success = 0;
+  let failed = 0;
+  let markdownCount = 0;
 
-  if (values.all) {
-    const inputDir = values["input-dir"] || "artifacts";
-    const files = readdirSync(inputDir).filter((f) => f.endsWith("-export.jsonl"));
+  // Process in batches using pipeline
+  for (let i = 0; i < records.length; i += BATCH_SIZE) {
+    const batch = records.slice(i, i + BATCH_SIZE);
+    const pipeline = redis.pipeline();
 
-    console.log(`\nPopulating from all files in ${inputDir}/`);
-    console.log(`  Found: ${files.join(", ")}`);
+    for (const record of batch) {
+      const skillData: SkillData = {
+        skill_id: record.metadata.name as string,
+        name: record.metadata.name as string,
+        description: record.data, // The full description text
+        path: record.metadata.path as string,
+        sample_size: record.metadata.sample_size as number | undefined,
+        indexed_at: new Date().toISOString(),
+      };
 
-    // Prefix mapping
-    const prefixMap: Record<string, string> = {
-      "skills-export.jsonl": "skill:",
-      "conversations-export.jsonl": "conv:",
-    };
-
-    for (const file of files) {
-      const prefix = prefixMap[file] || `${file.replace("-export.jsonl", "")}:`;
-      const filePath = `${inputDir}/${file}`;
-
-      if (!values["dry-run"]) {
-        const result = await populateFile(redis, filePath, prefix);
-        totalSuccess += result.success;
-        totalFailed += result.failed;
-      } else {
-        const records = readJsonl(filePath);
-        console.log(`\n  Would populate ${records.length} keys with prefix "${prefix}"`);
+      // Optionally include full SKILL.md content
+      if (includeMarkdown) {
+        const markdown = readSkillMarkdown(skillData.path);
+        if (markdown) {
+          skillData.markdown = markdown;
+          markdownCount++;
+        }
       }
-    }
-  } else if (values.input) {
-    const prefix = values.prefix || "rec:";
 
-    if (!values["dry-run"]) {
-      const result = await populateFile(redis, values.input, prefix);
-      totalSuccess = result.success;
-      totalFailed = result.failed;
-    } else {
-      const records = readJsonl(values.input);
-      console.log(`\nWould populate ${records.length} keys with prefix "${prefix}"`);
+      const key = `skill:${skillData.skill_id}`;
+      pipeline.set(key, JSON.stringify(skillData));
     }
-  } else {
-    console.log(`
-Usage:
-  bun scripts/populate-upstash-redis.ts --input artifacts/skills-export.jsonl --prefix skill:
-  bun scripts/populate-upstash-redis.ts --input artifacts/conversations-export.jsonl --prefix conv:
-  bun scripts/populate-upstash-redis.ts --all --input-dir artifacts/
-  bun scripts/populate-upstash-redis.ts --all --dry-run
-    `);
-    process.exit(1);
+
+    try {
+      await pipeline.exec();
+      success += batch.length;
+    } catch (err) {
+      console.error(`\nBatch failed:`, err);
+      failed += batch.length;
+    }
+
+    process.stdout.write(`\r  Populated ${Math.min(i + BATCH_SIZE, records.length)}/${records.length}...`);
   }
 
-  if (!values["dry-run"]) {
-    // Final stats
-    const finalSize = await redis.dbsize();
-    console.log(`\n✅ Redis population complete!`);
-    console.log(`  Success: ${totalSuccess}, Failed: ${totalFailed}`);
-    console.log(`  Total keys now: ${finalSize}`);
+  console.log(`\n\n✅ Redis population complete!`);
+  console.log(`  Success: ${success}, Failed: ${failed}`);
+  if (includeMarkdown) {
+    console.log(`  Skills with markdown: ${markdownCount}`);
   }
+
+  const dbSize = await redis.dbsize();
+  console.log(`  Total Redis keys: ${dbSize}`);
 }
 
 main().catch((err) => {
