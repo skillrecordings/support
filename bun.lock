@@ -62,6 +62,7 @@
       "dependencies": {
         "@skillrecordings/core": "*",
         "@skillrecordings/database": "*",
+        "@skillrecordings/front-sdk": "*",
         "@skillrecordings/memory": "*",
         "next": "16.1.0",
         "react": "^19.2.0",
@@ -262,6 +263,17 @@
         "@types/node": "^22.15.3",
         "tsup": "^8.0.0",
         "typescript": "5.9.2",
+      },
+    },
+    "packages/slack": {
+      "name": "@skillrecordings/slack",
+      "version": "0.0.1",
+      "dependencies": {
+        "@skillrecordings/core": "*",
+        "@skillrecordings/front-sdk": "*",
+      },
+      "devDependencies": {
+        "typescript": "^5.8.3",
       },
     },
     "packages/typescript-config": {
@@ -1037,6 +1049,8 @@
     "@skillrecordings/review-tui": ["@skillrecordings/review-tui@workspace:packages/review-tui"],
 
     "@skillrecordings/sdk": ["@skillrecordings/sdk@workspace:packages/sdk"],
+
+    "@skillrecordings/slack": ["@skillrecordings/slack@workspace:packages/slack"],
 
     "@slack/logger": ["@slack/logger@4.0.0", "", { "dependencies": { "@types/node": ">=18.0.0" } }, "sha512-Wz7QYfPAlG/DR+DfABddUZeNgoeY7d1J39OCR2jR+v7VBsB8ezulDK5szTnDDPDwLH5IWhLvXIHlCFZV7MSKgA=="],
 

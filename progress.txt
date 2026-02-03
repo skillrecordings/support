@@ -1,38 +1,61 @@
-# Progress Log for epic3-validator-overhaul
+# Progress Log for epic6-slack-conversational
 
-Initialized: 2026-02-03T03:41:05.745Z
-
----
-[2026-02-03T03:51:50.621Z]
-Completed: Epic 3.1: Ground Truth + Relevance Fix (#138)
-Files: none
-Summary: Couldn’t load the `tdd-red-green-refactor` skill file — it’s not present at `/home/joel/.codex/skills/tdd-red-green-refactor/SKILL.md`, so I proceeded without it.
-
-Added skill-retrieval–backed ground-truth checks plus a refund-day mismatch validator in `packages/core/src/pipeline/steps/validate.ts`, and made relevance scoring more robust with numeric coercion in the schema.  
-Updated validation ty
+Initialized: 2026-02-03T17:10:51.448Z
 
 ---
-[2026-02-03T04:02:40.916Z]
-Failed: Epic 3.2: Fabrication Detection (#139)
-Validation:              ^
-TypeError: vi.mocked is not a function. (In 'vi.mocked(retrieveSkills)', 'vi.mocked' is undefined)
-      at <anonymous> (/home/joel/Code/skillrecordings/support/packages/core/src/pipeline/steps/__tests__/validate.test.ts:227:8)
-      at <anonymous> (/home/joel/Code/skillrecordings/sup
+[2026-02-03T17:22:12.069Z]
+Failed: Epic 6.1: @Mention Handling + Intent Router (#156)
+Validation: • Packages in scope: @repo/eslint-config, @repo/typescript-config, @repo/ui, @skillrecordings/cli, @skillrecordings/core, @skillrecordings/database, @skillrecordings/front-sdk, @skillrecordings/memory, @skillrecordings/review-tui, @skillrecordings/sdk, front, slack, web
+• Running check-types in 13 p
 Codex: 
 
 ---
-[2026-02-03T04:04:42.033Z]
-Completed: Epic 3.2: Fabrication Detection (#139)
+[2026-02-03T17:28:00.610Z]
+Completed: Epic 6.1: @Mention Handling + Intent Router (#156)
 Files: none
-Summary: Adjusted the validate pipeline tests to avoid `vi.mocked` at runtime by using explicit mock helpers for `retrieveSkills` and `generateObject`, which unblocks the fabrication-detection test cases without touching implementation logic. The change is localized to `packages/core/src/pipeline/steps/__tests__/validate.test.ts`, keeping the story scope tight.
+Summary: Skill note: `tdd-red-green-refactor` skill file was not found at `/home/joel/.codex/skills/tdd-red-green-refactor/SKILL.md`, so I proceeded without it.
 
-Tests:
-- `bun test packages/core/src/pipelin
+**Summary**
+1. Added a `scripts/test.mjs` wrapper and updated `package.json` so `bun run test <paths>` runs `vitest --run` with file arguments.
+2. Updated `packages/slack/src/handlers/__tests__/mention.test.ts` to stub Slack/Axiom dependencies via
 
 ---
-[2026-02-03T04:11:56.789Z]
-Completed: Epic 3.3: Four-Tier Response System (#140)
+[2026-02-03T17:36:24.584Z]
+Completed: Epic 6.2: Status Queries (#157)
 Files: none
-Summary: Four-tier decision logic is now integrated into validation, with category thresholds and gradient confidence scoring layered on top of the existing issue checks. I kept the original validation output intact for downstream consumers, and added a decision shape that returns `auto-send`, `draft`, `needs-review`, or `escalate`, plus a thresholds helper for category-specific defaults.
+Summary: Summary:
+- Implemented Slack status query handlers with Front data fetching, 30s caching, and Axiom logging in `packages/slack/src/intents/status.ts`.
+- Added Slack Block Kit formatter helpers and Front link builder in `packages/slack/src/formatters/status.ts`.
+- Added TDD coverage for urgent, pending, health, link generation, and cache behavior in `packages/slack/src/intents/__tests__/status.test
 
-Details and wher
+---
+[2026-02-03T17:41:13.248Z]
+Completed: Epic 6.3: Draft Refinement in Threads (#158)
+Files: none
+Summary: **Summary**
+Implemented draft refinement intent parsing, versioned draft state, and Slack thread reply handling with Axiom logging. Added tests for intent parsing, version history, approvals, thread reply handling, and graceful ignore behavior.  
+Files: `packages/slack/src/intents/draft.ts`, `packages/slack/src/handlers/thread-reply.ts`, `packages/slack/src/intents/__tests__/draft.test.ts`, `packa
+
+---
+[2026-02-03T17:50:39.925Z]
+Completed: Epic 6.4: Quick Actions (#159)
+Files: none
+Summary: Summary:
+1. Added quick action intent parsing and handlers with Front API execution, confirmation prompts, and Axiom logging in `packages/slack/src/intents/action.ts` and `packages/slack/src/confirmations/action.ts`.
+2. Wired quick action flow into Slack mention + thread-reply handlers with confirmation handling and minimal context derivation in `packages/slack/src/handlers/mention.ts` and `packag
+
+---
+[2026-02-03T17:57:41.326Z]
+Completed: Epic 6.5: Customer Context Lookup (#160)
+Files: none
+Summary: **Summary**
+- Added customer context intent parsing and handlers with Front history lookup, purchase aggregation, support stats derivation, and Axiom logging in `packages/slack/src/intents/context.ts`.
+- Implemented Slack Block Kit formatting for customer profile, purchases, and history in `packages/slack/src/formatters/customer.ts`.
+- Added TDD coverage for parsing, profile assembly, empty states
+
+---
+[2026-02-03T18:02:34.568Z]
+Completed: Epic 6.6: Thread State Management + Epic 4 Integration (#161)
+Files: none
+Summary: **Summary**
+Implemented Redis-backed thread context state with TTL, stale detection, reset-language helper, and Axiom logging in `packages/slack/src/state/thread-context.ts`. Added correction event capture + query helpers with Axiom logging in `packages/slack/src/learning/corrections.ts`. Added TDD coverage in `packages/slack/src/state/__tests__/thread-context.test.ts` and `packages/slack/src/lear

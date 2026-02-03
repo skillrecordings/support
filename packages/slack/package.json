@@ -1,0 +1,17 @@
+{
+  "name": "@skillrecordings/slack",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts"
+  },
+  "dependencies": {
+    "@skillrecordings/core": "*",
+    "@skillrecordings/front-sdk": "*"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}

@@ -8,7 +8,7 @@
     "format": "biome format --write .",
     "format:check": "biome check .",
     "lint:oxlint": "oxlint .",
-    "test": "turbo run test",
+    "test": "node scripts/test.mjs",
     "test:all": "vitest --run",
     "eval": "evalite",
     "eval:watch": "evalite watch",
