@@ -24,7 +24,7 @@
       "title": "Epic 6.2: Status Queries (#157)",
       "description": "Implement status query handlers so team members can ask the bot about support queue health directly in Slack.\n\n## Files to Create\n```\npackages/slack/src/intents/status.ts        # Status query handlers\npackages/slack/src/intents/__tests__/status.test.ts\npackages/slack/src/formatters/status.ts     # Slack Block Kit formatting\n```\n\n## Implementation\n\n### 1. Query Types\n```typescript\ninterface StatusQuery {\n  type: \"urgent\" | \"pending\" | \"health\"\n  filters?: {\n    product?: string\n    assignee?: string\n    since?: Date\n  }\n}\n```\n\n### 2. Handlers\n- `handleUrgentQuery()` — list unhandled urgent/high-priority items\n- `handlePendingQuery()` — summary by category/product\n- `handleHealthQuery()` — quick stats (handled today, pending, avg response time)\n\n### 3. Front API Integration\n- Query conversations with status=open, priority filters\n- Use existing Front SDK (`packages/front-sdk/`)\n- Cache results briefly (30s) to avoid hammering API\n\n### 4. Response Format (Slack Block Kit)\n```\n📊 *Support Status*\n━━━━━━━━━━━━━━━━\n\n🔴 *Urgent (3)*\n• [TT] License transfer request — 2h ago [View](front-link)\n• [ER] Refund request urgent — 45m ago [View](front-link)\n\n📋 *Summary*\n• Handled today: 12\n• Pending: 8\n• Avg response: 1.2h\n```\n\n## TDD Tests to Write FIRST\n1. \"urgent\" query with results\n2. \"urgent\" query empty state\n3. \"pending\" query with category breakdown\n4. \"status\" / \"health\" query with stats\n5. Front link generation\n6. Cache behavior\n\n## Depends On\nStory 1 (6.1) must pass first — provides intent routing.",
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "validationCommand": "cd ~/Code/skillrecordings/support && bun run check-types && bun test packages/slack/src/intents/__tests__/status.test.ts 2>&1 | tail -30",
       "acceptanceCriteria": [
         "@supportbot anything urgent? lists unhandled urgent items",
@@ -101,7 +101,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-03T17:10:51.448Z",
-    "totalIterations": 1,
-    "lastIteration": "2026-02-03T17:28:00.609Z"
+    "totalIterations": 2,
+    "lastIteration": "2026-02-03T17:36:24.584Z"
   }
 }

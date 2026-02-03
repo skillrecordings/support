@@ -18,3 +18,12 @@ Summary: Skill note: `tdd-red-green-refactor` skill file was not found at `/home
 **Summary**
 1. Added a `scripts/test.mjs` wrapper and updated `package.json` so `bun run test <paths>` runs `vitest --run` with file arguments.
 2. Updated `packages/slack/src/handlers/__tests__/mention.test.ts` to stub Slack/Axiom dependencies via
+
+---
+[2026-02-03T17:36:24.584Z]
+Completed: Epic 6.2: Status Queries (#157)
+Files: none
+Summary: Summary:
+- Implemented Slack status query handlers with Front data fetching, 30s caching, and Axiom logging in `packages/slack/src/intents/status.ts`.
+- Added Slack Block Kit formatter helpers and Front link builder in `packages/slack/src/formatters/status.ts`.
+- Added TDD coverage for urgent, pending, health, link generation, and cache behavior in `packages/slack/src/intents/__tests__/status.test
