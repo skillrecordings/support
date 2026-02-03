@@ -390,8 +390,30 @@ Write your response:`
       durationMs,
     })
 
+    // Extract draft: prefer response text, but fall back to draftResponse tool call result
+    // This handles cases where the model uses the tool but doesn't produce additional text
+    let draftContent = agentResult.response.trim()
+    if (!draftContent && agentResult.toolCalls.length > 0) {
+      const draftToolCall = agentResult.toolCalls.find(
+        (tc) => tc.name === 'draftResponse'
+      )
+      const draftResult = draftToolCall?.result as
+        | { body?: string; drafted?: boolean }
+        | undefined
+      if (draftResult?.body) {
+        draftContent = draftResult.body
+        await log('debug', 'draft extracted from draftResponse tool call', {
+          workflow: 'pipeline',
+          step: 'draft',
+          appId,
+          conversationId,
+          draftLength: draftContent.length,
+        })
+      }
+    }
+
     return {
-      draft: agentResult.response.trim(),
+      draft: draftContent,
       reasoning:
         agentResult.reasoning ??
         (memories.length > 0
