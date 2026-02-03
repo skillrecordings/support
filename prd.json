@@ -1,61 +1,107 @@
 {
   "version": "1.0",
-  "projectName": "epic3-validator-overhaul",
-  "description": "Epic 3: Validator Overhaul — Ground truth comparison, fabrication detection, four-tier response system",
+  "projectName": "epic6-slack-conversational",
+  "description": "Epic 6: Conversational Slack Support Bot — @mention handling, status queries, draft refinement, quick actions, customer context, thread state",
   "stories": [
     {
-      "id": "story-ml61xjvm",
-      "title": "Epic 3.1: Ground Truth + Relevance Fix (#138)",
-      "description": "Wire skill retrieval into validator for ground truth comparison. Fix the broken LLM relevance check.\n\n## Files to modify\n- packages/core/src/pipeline/steps/validate.ts (main changes)\n- packages/core/src/pipeline/types.ts (if needed)\n\n## Implementation\n\n### 1. Import skill retrieval\n```typescript\nimport { retrieveSkills } from \"../../../scripts/skill-retrieval\";\n```\n\n### 2. In validate(), after pattern checks:\n```typescript\n// Retrieve relevant skills for ground truth\nconst customerMessage = input.originalMessage || input.draft.content;\nconst relevantSkills = await retrieveSkills(customerMessage, { topK: 3 });\n```\n\n### 3. Fix relevance check\n- Find why body assertion fails (look for relevanceCheck function)\n- Ensure customer message is passed correctly\n- Return numeric score 0.0-1.0\n\n### 4. Add ground truth comparison\n- Compare draft claims against skill content\n- Flag mismatches as validation issues\n\n## Tests to write FIRST (TDD)\nCreate in packages/core/src/pipeline/steps/__tests__/validate.test.ts:\n\n```typescript\ndescribe(\"ground truth comparison\", () => {\n  it(\"retrieves skills for customer message\", async () => {\n    // Mock retrieveSkills, verify called with message\n  });\n\n  it(\"passes when draft matches skill content\", async () => {\n    // Draft says \"30-day refund\" and skill confirms it\n  });\n\n  it(\"flags when draft contradicts skill content\", async () => {\n    // Draft says \"30-day refund\" but skill says \"60-day\"\n  });\n});\n\ndescribe(\"relevance check\", () => {\n  it(\"returns numeric score not N/A\", async () => {\n    // Verify relevance score is number between 0-1\n  });\n});\n```\n\n## Environment\nUpstash credentials needed - set before running:\n```bash\nexport UPSTASH_VECTOR_REST_URL=$(secrets lease upstash_vector_url --raw --ttl 2h --client-id \"ralph\")\nexport UPSTASH_VECTOR_REST_TOKEN=$(secrets lease upstash_vector_token --raw --ttl 2h --client-id \"ralph\")\nexport UPSTASH_REDIS_REST_URL=$(secrets lease upstash_redis_url --raw --ttl 2h --client-id \"ralph\")\nexport UPSTASH_REDIS_REST_TOKEN=$(secrets lease upstash_redis_token --raw --ttl 2h --client-id \"ralph\")\n```",
+      "id": "story-ml6uuzdq",
+      "title": "Epic 6.1: @Mention Handling + Intent Router (#156)",
+      "description": "Implement @mention handling for the support bot in Slack. When team members @mention the bot, parse their intent and route to the appropriate handler.\n\n## Files to Create\n```\npackages/slack/src/handlers/mention.ts      # @mention event handler\npackages/slack/src/intents/router.ts        # Intent classification + routing\npackages/slack/src/intents/types.ts         # Intent type definitions\npackages/slack/src/handlers/__tests__/mention.test.ts\npackages/slack/src/intents/__tests__/router.test.ts\n```\n\n## Implementation\n\n### 1. Intent Types (types.ts)\n```typescript\ntype IntentCategory = \n  | \"status_query\"    // \"anything urgent?\", \"whats pending?\"\n  | \"draft_action\"    // \"approve\", \"send\", \"simplify\"\n  | \"context_lookup\"  // \"history with X\", \"who is X\"\n  | \"escalation\"      // \"escalate to [name]\"\n  | \"unknown\"         // fallback\n\ninterface ParsedIntent {\n  category: IntentCategory\n  confidence: number\n  entities: Record<string, string> // email, name, etc.\n  rawText: string\n}\n```\n\n### 2. Mention Handler (mention.ts)\n- Subscribe to Slack `app_mention` event\n- Parse text after @mention\n- Route to intent router\n- Post response in thread (not channel)\n\n### 3. Intent Router (router.ts)\n- Pattern matching for intent categories\n- Entity extraction (emails, names)\n- Unknown intent fallback with help message\n\n### 4. Help Response\n```\nI can help with:\n- Status queries: \"anything urgent?\", \"whats pending?\", \"status\"\n- Draft refinement: reply to my draft notifications with feedback\n- Quick actions: \"approve and send\", \"escalate to [name]\", \"archive\"\n- Customer lookup: \"history with customer@email.com\"\n\nJust @mention me with what you need!\n```\n\n## TDD Tests to Write FIRST\n1. Basic @mention detection and response\n2. Intent parsing for each category\n3. Unknown intent fallback response\n4. Threading behavior (response in thread, not channel)\n5. Entity extraction (emails, names)\n6. Edge cases: empty mention, mention with only whitespace\n\n## Axiom Logging\nLog every intent detection: `traceId`, `slackThreadTs`, `userId`, `rawText`, `detectedIntent`, `confidence`",
       "priority": 1,
       "passes": true,
-      "validationCommand": "cd ~/Code/skillrecordings/support && bun test packages/core/src/pipeline/steps/__tests__/validate.test.ts 2>&1 | tail -20 && bun run check-types 2>&1 | tail -10",
+      "validationCommand": "cd ~/Code/skillrecordings/support && bun run check-types && bun test packages/slack/src/handlers/__tests__/mention.test.ts packages/slack/src/intents/__tests__/router.test.ts 2>&1 | tail -30",
       "acceptanceCriteria": [
-        "retrieveSkills() called in validate step with customer message",
-        "Relevance check returns numeric score (not N/A)",
-        "Draft matching skill content passes validation",
-        "Draft contradicting skill content flagged as issue",
-        "All TypeScript type checks pass",
-        "Tests written BEFORE implementation (TDD)"
+        "Bot responds to @supportbot mentions in configured channel(s)",
+        "Mentions parsed for intent categories: query, action, feedback, unknown",
+        "Unknown intents get helpful help response listing capabilities",
+        "Response posted in thread (not polluting main channel)",
+        "Intent detection logged to Axiom",
+        "Tests written FIRST (TDD)"
       ]
     },
     {
-      "id": "story-ml61xw85",
-      "title": "Epic 3.2: Fabrication Detection (#139)",
-      "description": "Detect when drafts make specific claims without source data from skills.\n\n## Files to modify\n- packages/core/src/pipeline/steps/validate.ts\n- packages/core/src/pipeline/types.ts (add fabrication issue type)\n\n## Implementation\n\n### 1. Define claim patterns\n```typescript\nconst FABRICATION_PATTERNS = {\n  price: /\\$[\\d,]+(?:\\.\\d{2})?/g,\n  timeline: /within \\d+ (?:hours?|days?|weeks?)/gi,\n  percentage: /\\d+%/g,\n  guarantee: /guarantee|always|never|definitely|certainly/gi,\n};\n```\n\n### 2. Extract claims from draft\n```typescript\nfunction extractClaims(draft: string): Claim[] {\n  const claims: Claim[] = [];\n  for (const [type, pattern] of Object.entries(FABRICATION_PATTERNS)) {\n    const matches = draft.matchAll(pattern);\n    for (const match of matches) {\n      claims.push({ type, value: match[0], index: match.index });\n    }\n  }\n  return claims;\n}\n```\n\n### 3. Cross-reference against skills\n```typescript\nfunction checkClaimAgainstSkills(claim: Claim, skills: RetrievedSkill[]): boolean {\n  // Check if claim appears in any skill content\n  for (const skill of skills) {\n    if (skill.description.includes(claim.value) || skill.markdown?.includes(claim.value)) {\n      return true; // Claim is sourced\n    }\n  }\n  return false; // Potential fabrication\n}\n```\n\n### 4. Add to validation issues\n```typescript\n// New issue type in types.ts\ntype ValidationIssueType = ... | 'fabrication';\n\n// Flag unsourced claims\nif (!isSourced) {\n  issues.push({\n    type: 'fabrication',\n    severity: claim.type === 'price' ? 'error' : 'warning',\n    message: `Unsourced ${claim.type} claim: ${claim.value}`,\n  });\n}\n```\n\n## Tests to write FIRST (TDD)\n```typescript\ndescribe(\"fabrication detection\", () => {\n  it(\"passes when price matches skill content\", async () => {\n    // Draft says \"$99\" and skill has \"$99\"\n  });\n\n  it(\"flags price claim not in skills\", async () => {\n    // Draft says \"$149\" but no skill mentions this\n  });\n\n  it(\"flags timeline without source\", async () => {\n    // Draft says \"within 24 hours\" with no source\n  });\n\n  it(\"does not flag quoted customer text\", async () => {\n    // Customer said \"$50\" - draft quoting them is fine\n  });\n});\n```\n\n## Depends on\nStory 1 (Ground Truth) must pass first - provides skill retrieval.",
+      "id": "story-ml6uw31d",
+      "title": "Epic 6.2: Status Queries (#157)",
+      "description": "Implement status query handlers so team members can ask the bot about support queue health directly in Slack.\n\n## Files to Create\n```\npackages/slack/src/intents/status.ts        # Status query handlers\npackages/slack/src/intents/__tests__/status.test.ts\npackages/slack/src/formatters/status.ts     # Slack Block Kit formatting\n```\n\n## Implementation\n\n### 1. Query Types\n```typescript\ninterface StatusQuery {\n  type: \"urgent\" | \"pending\" | \"health\"\n  filters?: {\n    product?: string\n    assignee?: string\n    since?: Date\n  }\n}\n```\n\n### 2. Handlers\n- `handleUrgentQuery()` — list unhandled urgent/high-priority items\n- `handlePendingQuery()` — summary by category/product\n- `handleHealthQuery()` — quick stats (handled today, pending, avg response time)\n\n### 3. Front API Integration\n- Query conversations with status=open, priority filters\n- Use existing Front SDK (`packages/front-sdk/`)\n- Cache results briefly (30s) to avoid hammering API\n\n### 4. Response Format (Slack Block Kit)\n```\n📊 *Support Status*\n━━━━━━━━━━━━━━━━\n\n🔴 *Urgent (3)*\n• [TT] License transfer request — 2h ago [View](front-link)\n• [ER] Refund request urgent — 45m ago [View](front-link)\n\n📋 *Summary*\n• Handled today: 12\n• Pending: 8\n• Avg response: 1.2h\n```\n\n## TDD Tests to Write FIRST\n1. \"urgent\" query with results\n2. \"urgent\" query empty state\n3. \"pending\" query with category breakdown\n4. \"status\" / \"health\" query with stats\n5. Front link generation\n6. Cache behavior\n\n## Depends On\nStory 1 (6.1) must pass first — provides intent routing.",
       "priority": 2,
-      "passes": true,
-      "validationCommand": "cd ~/Code/skillrecordings/support && bun test packages/core/src/pipeline/steps/__tests__/validate.test.ts 2>&1 | tail -20 && bun run check-types 2>&1 | tail -10",
+      "passes": false,
+      "validationCommand": "cd ~/Code/skillrecordings/support && bun run check-types && bun test packages/slack/src/intents/__tests__/status.test.ts 2>&1 | tail -30",
       "acceptanceCriteria": [
-        "Price claims without skill source flagged as error",
-        "Timeline claims without source flagged as warning",
-        "Claims matching skill content pass validation",
-        "No false positives on quoted customer text",
-        "fabrication issue type added to types.ts",
-        "Tests written BEFORE implementation (TDD)"
+        "@supportbot anything urgent? lists unhandled urgent items",
+        "@supportbot whats pending? shows summary by category",
+        "@supportbot status shows health metrics",
+        "Results include Front links",
+        "Empty states handled gracefully",
+        "All queries logged to Axiom"
       ]
     },
     {
-      "id": "story-ml61yb0c",
-      "title": "Epic 3.3: Four-Tier Response System (#140)",
-      "description": "Implement four-tier response system with category-specific thresholds.\n\n## Files to modify\n- packages/core/src/pipeline/steps/validate.ts\n- packages/core/src/pipeline/types.ts\n- NEW: packages/core/src/pipeline/thresholds.ts\n\n## Implementation\n\n### 1. New ValidatorDecision type (types.ts)\n```typescript\nexport type ValidatorDecision =\n  | { action: \"auto-send\"; draft: string; confidence: number }\n  | { action: \"draft\"; draft: string; issues?: ValidationIssue[] }\n  | { action: \"escalate\"; reason: string; urgency: \"normal\" | \"high\" | \"critical\" }\n  | { action: \"needs-review\"; draft: string; concerns: string[] };\n```\n\n### 2. Category thresholds (new file: thresholds.ts)\n```typescript\nexport interface CategoryThreshold {\n  autoSendMinConfidence: number;\n  autoSendMinVolume: number;\n  escalateAlways?: boolean;\n  escalateOnKeywords?: string[];\n}\n\nexport const CATEGORY_THRESHOLDS: Record<string, CategoryThreshold> = {\n  \"support_team-license\": {\n    autoSendMinConfidence: 0.98,\n    autoSendMinVolume: 50,\n    escalateAlways: true, // Nightmare #1: large team sales\n  },\n  \"support_bug-report\": {\n    autoSendMinConfidence: 0.95,\n    autoSendMinVolume: 30,\n    escalateOnKeywords: [\"multiple users\", \"widespread\", \"everyone\"],\n  },\n  \"support_refund\": {\n    autoSendMinConfidence: 0.95,\n    autoSendMinVolume: 100,\n  },\n  // Default for unspecified categories\n  default: {\n    autoSendMinConfidence: 0.95,\n    autoSendMinVolume: 50,\n  },\n};\n```\n\n### 3. Gradient scoring (validate.ts)\n```typescript\nfunction calculateConfidenceScore(issues: ValidationIssue[]): number {\n  let score = 1.0;\n  for (const issue of issues) {\n    switch (issue.severity) {\n      case 'error': score -= 0.3; break;\n      case 'warning': score -= 0.1; break;\n      case 'info': score -= 0.02; break;\n    }\n  }\n  return Math.max(0, score);\n}\n```\n\n### 4. Update validate() return\n```typescript\nexport async function validate(input: ValidateInput): Promise<ValidatorDecision> {\n  // ... existing checks ...\n\n  const confidence = calculateConfidenceScore(allIssues);\n  const threshold = CATEGORY_THRESHOLDS[category] || CATEGORY_THRESHOLDS.default;\n\n  // Check for escalation triggers\n  if (threshold.escalateAlways) {\n    return { action: \"escalate\", reason: \"Category requires human review\", urgency: \"normal\" };\n  }\n\n  // Check for auto-send eligibility (earned through RL)\n  const categoryStats = await getCategoryStats(category);\n  if (categoryStats.sentUnchangedRate >= threshold.autoSendMinConfidence \n      && categoryStats.volume >= threshold.autoSendMinVolume\n      && confidence >= 0.95) {\n    return { action: \"auto-send\", draft: input.draft.content, confidence };\n  }\n\n  // Default to draft\n  return { action: \"draft\", draft: input.draft.content, issues: allIssues };\n}\n```\n\n## Tests to write FIRST (TDD)\n```typescript\ndescribe(\"four-tier response system\", () => {\n  it(\"returns draft action by default\", async () => {});\n  it(\"escalates team-license category always\", async () => {});\n  it(\"calculates gradient score correctly\", async () => {});\n  it(\"auto-send only when category has earned it\", async () => {});\n});\n\ndescribe(\"category thresholds\", () => {\n  it(\"uses category-specific threshold when defined\", async () => {});\n  it(\"falls back to default threshold\", async () => {});\n});\n```",
+      "id": "story-ml6uw334",
+      "title": "Epic 6.3: Draft Refinement in Threads (#158)",
+      "description": "Enable team members to refine AI-generated drafts by replying to bot notifications in Slack threads. Natural language feedback triggers draft revisions.\n\n## Files to Create\n```\npackages/slack/src/handlers/thread-reply.ts    # Reply handler\npackages/slack/src/intents/draft.ts            # Draft refinement logic\npackages/slack/src/intents/__tests__/draft.test.ts\npackages/slack/src/handlers/__tests__/thread-reply.test.ts\n```\n\n## Implementation\n\n### 1. Refinement Types\n```typescript\ntype RefinementIntent = \n  | { type: \"simplify\" }\n  | { type: \"formalize\" }\n  | { type: \"shorten\" }\n  | { type: \"add_content\"; content: string }\n  | { type: \"mention_topic\"; topic: string }\n  | { type: \"approve\" }\n  | { type: \"reject\"; reason?: string }\n```\n\n### 2. Thread Reply Handler\n- Listen for `message` events in threads where bot has posted\n- Parse refinement intent from reply text\n- Apply refinement to current draft\n- Post revised draft in same thread\n\n### 3. Draft Revision\n- Call LLM to apply refinement (simplify, formalize, etc.)\n- Track version history: original → v1 → v2 → sent\n- Show diff indicator in response\n\n### 4. Approval Flow\n- \"looks good\" / \"approve\" triggers send confirmation\n- Integration point for Epic 4 learning capture\n\n## TDD Tests to Write FIRST\n1. \"simplify\" refinement parses correctly\n2. \"add [link]\" extracts content\n3. Thread reply triggers handler\n4. Draft versioning tracks history\n5. Approval detection\n6. Non-refinement replies ignored gracefully\n\n## Depends On\nStory 1 (6.1) for intent handling",
       "priority": 3,
-      "passes": true,
-      "validationCommand": "cd ~/Code/skillrecordings/support && bun test packages/core/src/pipeline/steps/__tests__/validate.test.ts 2>&1 | tail -20 && bun test packages/core/src/pipeline/__tests__/thresholds.test.ts 2>&1 | tail -10 && bun run check-types 2>&1 | tail -10",
+      "passes": false,
+      "validationCommand": "cd ~/Code/skillrecordings/support && bun run check-types && bun test packages/slack/src/intents/__tests__/draft.test.ts packages/slack/src/handlers/__tests__/thread-reply.test.ts 2>&1 | tail -30",
       "acceptanceCriteria": [
-        "ValidatorDecision type with 4 actions implemented",
-        "Default action is 'draft'",
-        "Team license category triggers escalate",
-        "Gradient scoring calculates 0.0-1.0",
-        "Category thresholds file created",
-        "Auto-send only for earned categories",
-        "Tests written BEFORE implementation (TDD)"
+        "Reply to draft notification with feedback revises draft",
+        "Supports simplify, formalize, shorten, add content refinements",
+        "Revised draft posted in same thread",
+        "looks good / approve triggers send confirmation",
+        "Refinement history tracked for learning",
+        "All refinements logged to Axiom"
+      ]
+    },
+    {
+      "id": "story-ml6uw337",
+      "title": "Epic 6.4: Quick Actions (#159)",
+      "description": "Implement quick action commands that let team members take immediate action on support items directly from Slack.\n\n## Files to Create\n```\npackages/slack/src/intents/action.ts           # Quick action handlers\npackages/slack/src/intents/__tests__/action.test.ts\npackages/slack/src/confirmations/action.ts     # Confirmation dialogs\n```\n\n## Implementation\n\n### 1. Action Types\n```typescript\ntype QuickAction = \n  | { type: \"approve_send\" }\n  | { type: \"escalate\"; assignee: string }\n  | { type: \"add_context\"; note: string }\n  | { type: \"archive\" }\n  | { type: \"close\" }\n```\n\n### 2. Action Handlers\n- `handleApproveSend()` — send draft via Front API, archive conversation\n- `handleEscalate()` — reassign in Front, notify person in Slack\n- `handleAddContext()` — add internal note to Front\n- `handleArchive()` — archive without sending\n\n### 3. Confirmation Flow\n```\nUser: \"approve and send\"\nBot: \"Ready to send this response to customer@email.com:\n     > [draft preview, first 200 chars...]\n     Reply yes to confirm or cancel to abort\"\nUser: \"yes\"\nBot: \"✅ Response sent! Conversation archived.\"\n```\n\n### 4. Error Handling\n- Graceful failure if Front API errors\n- Rollback messaging if partial failure\n\n## TDD Tests to Write FIRST\n1. \"approve and send\" parses correctly\n2. \"escalate to [name]\" extracts assignee\n3. Confirmation flow state machine\n4. Front API error handling\n5. Action logging to Axiom\n\n## Depends On\nStories 1, 3 for intent handling and thread context",
+      "priority": 4,
+      "passes": false,
+      "validationCommand": "cd ~/Code/skillrecordings/support && bun run check-types && bun test packages/slack/src/intents/__tests__/action.test.ts 2>&1 | tail -30",
+      "acceptanceCriteria": [
+        "approve and send sends draft and archives",
+        "escalate to [name] reassigns in Front and notifies",
+        "needs more context adds internal note",
+        "archive/close archives without sending",
+        "Confirmation step before destructive actions",
+        "All actions logged to Axiom"
+      ]
+    },
+    {
+      "id": "story-ml6uw33e",
+      "title": "Epic 6.5: Customer Context Lookup (#160)",
+      "description": "Enable team members to query customer history and context directly in Slack.\n\n## Files to Create\n```\npackages/slack/src/intents/context.ts          # Customer lookup handlers\npackages/slack/src/intents/__tests__/context.test.ts\npackages/slack/src/formatters/customer.ts      # Slack formatting for customer data\n```\n\n## Implementation\n\n### 1. Query Types\n```typescript\ninterface CustomerQuery {\n  type: \"history\" | \"profile\" | \"purchases\"\n  email: string\n}\n\ninterface CustomerProfile {\n  email: string\n  name?: string\n  products: string[]\n  lifetimeValue: number\n  supportStats: {\n    totalTickets: number\n    resolvedTickets: number\n    lastContact?: Date\n  }\n}\n```\n\n### 2. Handlers\n- `handleHistoryQuery()` — pull prior conversations from Front\n- `handleProfileQuery()` — customer summary with purchases and stats\n- `handlePurchasesQuery()` — list products owned\n\n### 3. Data Sources\n- Front API for conversation history\n- Purchase data from SDK integrations\n- Aggregate stats from prior tickets\n\n### 4. Response Format\n```\n👤 *Customer Profile*\n━━━━━━━━━━━━━━━━\ncustomer@email.com\n\n📦 *Products*\n• Total TypeScript (purchased Jan 2025)\n• Epic React (purchased Mar 2024)\n\n📊 *Support History*\n• Total tickets: 5\n• Last contact: 2 weeks ago\n• Avg resolution: 1.2 days\n\nRecent tickets:\n1. License transfer — Resolved ✅\n2. Login issue — Resolved ✅\n```\n\n## TDD Tests to Write FIRST\n1. \"history with X@email.com\" parses email\n2. \"who is X\" extracts identifier\n3. Profile assembly from multiple sources\n4. Empty state handling\n5. Formatting for Slack Block Kit\n\n## Depends On\nStory 1 (6.1) for intent routing",
+      "priority": 5,
+      "passes": false,
+      "validationCommand": "cd ~/Code/skillrecordings/support && bun run check-types && bun test packages/slack/src/intents/__tests__/context.test.ts 2>&1 | tail -30",
+      "acceptanceCriteria": [
+        "history with X@email.com pulls prior conversations",
+        "who is X@email.com shows customer profile",
+        "Profile includes products owned and support stats",
+        "Empty state handled gracefully",
+        "Queries logged to Axiom"
+      ]
+    },
+    {
+      "id": "story-ml6uw33j",
+      "title": "Epic 6.6: Thread State Management + Epic 4 Integration (#161)",
+      "description": "Implement persistent thread context so the bot remembers what conversation/draft is being discussed, and integrate with Epic 4 learning system.\n\n## Files to Create\n```\npackages/slack/src/state/thread-context.ts     # Thread state management\npackages/slack/src/state/__tests__/thread-context.test.ts\npackages/slack/src/learning/corrections.ts     # Epic 4 integration\npackages/slack/src/learning/__tests__/corrections.test.ts\n```\n\n## Implementation\n\n### 1. Thread Context Schema\n```typescript\ninterface ThreadContext {\n  threadTs: string           // Slack thread timestamp (unique ID)\n  channelId: string\n  conversationId: string     // Front conversation ID\n  currentDraft: string\n  draftVersion: number\n  customerId?: string\n  createdAt: Date\n  lastActivityAt: Date\n  ttlSeconds: number         // Default 3600 (1 hour)\n}\n```\n\n### 2. State Management\n- Redis-backed storage for thread context\n- TTL-based expiration (1 hour default)\n- `getThreadContext()`, `setThreadContext()`, `clearThreadContext()`\n- Stale thread detection and graceful handoff message\n\n### 3. Epic 4 Learning Integration\n```typescript\ninterface CorrectionEvent {\n  conversationId: string\n  originalDraft: string\n  revisedDraft: string\n  refinementType: string\n  userId: string\n  timestamp: Date\n  threadTs: string\n}\n```\n- Capture all refinements as correction events\n- Store in format queryable for training extraction\n- Integration hook for Epic 4 learning pipeline\n\n### 4. Stale Handling\n- \"This thread has expired. Please start a new conversation.\"\n- \"new topic\" / \"different customer\" explicitly clears context\n\n## TDD Tests to Write FIRST\n1. Thread context CRUD operations\n2. TTL expiration behavior\n3. Stale thread detection\n4. Correction event capture\n5. Context clearing on \"new topic\"\n6. Redis connection error handling\n\n## Depends On\nAll prior Epic 6 stories",
+      "priority": 6,
+      "passes": false,
+      "validationCommand": "cd ~/Code/skillrecordings/support && bun run check-types && bun test packages/slack/src/state/__tests__/thread-context.test.ts packages/slack/src/learning/__tests__/corrections.test.ts 2>&1 | tail -30",
+      "acceptanceCriteria": [
+        "Each thread maintains conversation context",
+        "Context persists for configurable TTL window",
+        "Stale threads get clear handoff message",
+        "All refinements captured as correction events",
+        "Corrections queryable for training extraction",
+        "Thread state ops logged to Axiom"
       ]
     }
   ],
   "metadata": {
-    "createdAt": "2026-02-03T03:41:05.745Z",
-    "totalIterations": 3,
-    "lastIteration": "2026-02-03T04:11:56.788Z"
+    "createdAt": "2026-02-03T17:10:51.448Z",
+    "totalIterations": 1,
+    "lastIteration": "2026-02-03T17:28:00.609Z"
   }
 }
