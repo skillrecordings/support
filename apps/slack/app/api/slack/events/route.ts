@@ -18,8 +18,30 @@ import { handleThreadReply } from '../../../../../../packages/slack/src/handlers
  * - message.groups: Messages in private channels
  * - message.im: Direct messages
  */
+// Simple in-memory deduplication (events processed in last 60s)
+const processedEvents = new Map<string, number>()
+const DEDUP_TTL_MS = 60_000
+
+function isDuplicate(eventId: string): boolean {
+  const now = Date.now()
+  // Clean old entries
+  for (const [id, ts] of processedEvents) {
+    if (now - ts > DEDUP_TTL_MS) processedEvents.delete(id)
+  }
+  if (processedEvents.has(eventId)) return true
+  processedEvents.set(eventId, now)
+  return false
+}
+
 export async function POST(request: NextRequest) {
   try {
+    // Slack retries if we don't respond in 3s - acknowledge retries immediately
+    const retryNum = request.headers.get('X-Slack-Retry-Num')
+    if (retryNum) {
+      console.log(`Slack retry #${retryNum} - acknowledging immediately`)
+      return NextResponse.json({ ok: true })
+    }
+
     const body = await request.json()
 
     // Handle Slack URL verification challenge
@@ -30,6 +52,12 @@ export async function POST(request: NextRequest) {
     // Handle event callbacks
     if (body.type === 'event_callback') {
       const event = body.event
+
+      // Deduplicate by event_id
+      if (body.event_id && isDuplicate(body.event_id)) {
+        console.log(`Duplicate event ${body.event_id} - skipping`)
+        return NextResponse.json({ ok: true })
+      }
 
       // Skip bot messages to prevent loops
       if (event?.bot_id || event?.subtype === 'bot_message') {
