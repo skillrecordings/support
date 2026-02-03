@@ -154,6 +154,7 @@ const ROUTING_RULES: RoutingRule[] = [
 
 export function route(input: RouteInput): RouteOutput {
   const startTime = Date.now()
+  const { classification, appConfig } = input
 
   // Apply rules in order (first match wins)
   for (const rule of ROUTING_RULES) {
@@ -163,16 +164,34 @@ export function route(input: RouteInput): RouteOutput {
         reason: rule.reason,
       }
 
-      // Fire-and-forget logging (sync function can't await)
-      log('info', 'route decision made', {
+      // High-cardinality decision-point logging
+      log('info', 'route:decision', {
         workflow: 'pipeline',
         step: 'route',
-        appId: input.appConfig?.appId,
-        category: input.classification.category,
-        confidence: input.classification.confidence,
+        appId: appConfig?.appId,
+        // Decision outcome
         action: result.action,
         reason: result.reason,
         ruleName: rule.name,
+        // Classification inputs
+        category: classification.category,
+        confidence: classification.confidence,
+        classificationReasoning: classification.reasoning,
+        // Signal inputs that drove the decision
+        hasAngrySentiment: classification.signals.hasAngrySentiment,
+        hasLegalThreat: classification.signals.hasLegalThreat,
+        hasOutsidePolicyTimeframe:
+          classification.signals.hasOutsidePolicyTimeframe,
+        isPersonalToInstructor: classification.signals.isPersonalToInstructor,
+        isAutomated: classification.signals.isAutomated,
+        isVendorOutreach: classification.signals.isVendorOutreach,
+        isPresalesFaq: classification.signals.isPresalesFaq,
+        isPresalesTeam: classification.signals.isPresalesTeam,
+        // Decision explanation
+        matchedRule: rule.name,
+        rulesEvaluated:
+          ROUTING_RULES.findIndex((r) => r.name === rule.name) + 1,
+        totalRules: ROUTING_RULES.length,
         durationMs: Date.now() - startTime,
       }).catch(() => {})
 
@@ -186,13 +205,29 @@ export function route(input: RouteInput): RouteOutput {
     reason: 'No routing rule matched - needs human review',
   }
 
-  log('info', 'route decision made (default)', {
+  // High-cardinality decision-point logging for default case
+  log('info', 'route:decision', {
     workflow: 'pipeline',
     step: 'route',
-    appId: input.appConfig?.appId,
-    category: input.classification.category,
+    appId: appConfig?.appId,
+    // Decision outcome
     action: defaultResult.action,
     reason: defaultResult.reason,
+    ruleName: 'default_fallback',
+    // Classification inputs
+    category: classification.category,
+    confidence: classification.confidence,
+    classificationReasoning: classification.reasoning,
+    // Signal inputs
+    hasAngrySentiment: classification.signals.hasAngrySentiment,
+    hasLegalThreat: classification.signals.hasLegalThreat,
+    hasOutsidePolicyTimeframe: classification.signals.hasOutsidePolicyTimeframe,
+    isPersonalToInstructor: classification.signals.isPersonalToInstructor,
+    // Decision explanation
+    matchedRule: null,
+    rulesEvaluated: ROUTING_RULES.length,
+    totalRules: ROUTING_RULES.length,
+    noRuleMatched: true,
     durationMs: Date.now() - startTime,
   }).catch(() => {})
 
@@ -472,6 +507,8 @@ const THREAD_ROUTING_RULES: ThreadRoutingRule[] = [
  */
 export function routeThread(input: ThreadRouteInput): RouteOutput {
   const startTime = Date.now()
+  const { classification, appConfig } = input
+  const signals = classification.signals
 
   for (const rule of THREAD_ROUTING_RULES) {
     if (rule.condition(input)) {
@@ -480,17 +517,42 @@ export function routeThread(input: ThreadRouteInput): RouteOutput {
         reason: rule.reason,
       }
 
-      // Fire-and-forget logging
-      log('info', 'routeThread decision made', {
+      // High-cardinality decision-point logging
+      log('info', 'routeThread:decision', {
         workflow: 'pipeline',
         step: 'routeThread',
-        appId: input.appConfig?.appId,
-        category: input.classification.category,
-        confidence: input.classification.confidence,
-        threadLength: input.classification.signals.threadLength,
+        appId: appConfig?.appId,
+        // Decision outcome
         action: result.action,
         reason: result.reason,
         ruleName: rule.name,
+        // Classification inputs
+        category: classification.category,
+        confidence: classification.confidence,
+        classificationReasoning: classification.reasoning,
+        // Thread context
+        threadLength: signals.threadLength,
+        threadDurationHours: signals.threadDurationHours,
+        threadPattern: signals.threadPattern,
+        customerMessageCount: signals.customerMessageCount,
+        lastResponderType: signals.lastResponderType,
+        // Thread signals that drove the decision
+        hasTeammateMessage: signals.hasTeammateMessage,
+        hasInstructorMessage: signals.hasInstructorMessage,
+        instructorIsAuthor: signals.instructorIsAuthor,
+        isInternalThread: signals.isInternalThread,
+        awaitingCustomerReply: signals.awaitingCustomerReply,
+        hasResolutionPhrase: signals.hasResolutionPhrase,
+        // Escalation signals
+        hasAngrySentiment: signals.hasAngrySentiment,
+        hasLegalThreat: signals.hasLegalThreat,
+        hasOutsidePolicyTimeframe: signals.hasOutsidePolicyTimeframe,
+        isPersonalToInstructor: signals.isPersonalToInstructor,
+        // Decision explanation
+        matchedRule: rule.name,
+        rulesEvaluated:
+          THREAD_ROUTING_RULES.findIndex((r) => r.name === rule.name) + 1,
+        totalRules: THREAD_ROUTING_RULES.length,
         durationMs: Date.now() - startTime,
       }).catch(() => {})
 
@@ -503,13 +565,27 @@ export function routeThread(input: ThreadRouteInput): RouteOutput {
     reason: 'No routing rule matched - needs human review',
   }
 
-  log('info', 'routeThread decision made (default)', {
+  // High-cardinality decision-point logging for default case
+  log('info', 'routeThread:decision', {
     workflow: 'pipeline',
     step: 'routeThread',
-    appId: input.appConfig?.appId,
-    category: input.classification.category,
+    appId: appConfig?.appId,
+    // Decision outcome
     action: defaultResult.action,
     reason: defaultResult.reason,
+    ruleName: 'default_fallback',
+    // Classification inputs
+    category: classification.category,
+    confidence: classification.confidence,
+    // Thread context
+    threadLength: signals.threadLength,
+    threadPattern: signals.threadPattern,
+    customerMessageCount: signals.customerMessageCount,
+    // Decision explanation
+    matchedRule: null,
+    rulesEvaluated: THREAD_ROUTING_RULES.length,
+    totalRules: THREAD_ROUTING_RULES.length,
+    noRuleMatched: true,
     durationMs: Date.now() - startTime,
   }).catch(() => {})
 
