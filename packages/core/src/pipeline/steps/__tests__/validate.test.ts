@@ -271,6 +271,221 @@ describe('relevance check', () => {
   })
 })
 
+describe('audience-awareness check', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('flags jargon-heavy draft for audience review', async () => {
+    retrieveSkillsMock.mockResolvedValue([])
+    generateObjectMock.mockResolvedValue({
+      object: {
+        issues: [
+          {
+            type: 'technical_jargon',
+            phrase: 'API endpoint',
+            suggestion: 'connection point',
+          },
+          {
+            type: 'technical_jargon',
+            phrase: 'webhook',
+            suggestion: 'automatic notification',
+          },
+        ],
+        appropriate: false,
+        reasoning: 'Contains technical terms without explanation',
+      },
+    })
+
+    const result = await validate(
+      makeInput(
+        'The API endpoint is returning a 503 error. Check your webhook configuration and ensure the OAuth2 bearer token has the correct scopes.',
+        { subject: 'Technical Issue', body: 'My course is not loading.' },
+        'My course is not loading.'
+      ),
+      {
+        skipMemoryQuery: true,
+        skipRelevanceCheck: true,
+        checkAudienceAwareness: true,
+      }
+    )
+
+    expect(
+      result.issues.some((issue) => issue.type === 'audience_inappropriate')
+    ).toBe(true)
+  })
+
+  it('passes customer-appropriate response', async () => {
+    retrieveSkillsMock.mockResolvedValue([])
+    generateObjectMock.mockResolvedValue({
+      object: {
+        issues: [],
+        appropriate: true,
+        reasoning: 'Response uses plain language appropriate for customers',
+      },
+    })
+
+    const result = await validate(
+      makeInput(
+        'I can see your course access is active. Try clearing your browser cache and logging in again. If that does not work, try a different browser.',
+        { subject: 'Access Issue', body: 'Cannot access my course.' },
+        'Cannot access my course.'
+      ),
+      {
+        skipMemoryQuery: true,
+        skipRelevanceCheck: true,
+        checkAudienceAwareness: true,
+      }
+    )
+
+    expect(
+      result.issues.some((issue) => issue.type === 'audience_inappropriate')
+    ).toBe(false)
+    expect(result.valid).toBe(true)
+  })
+
+  it('flags internal process references', async () => {
+    retrieveSkillsMock.mockResolvedValue([])
+    generateObjectMock.mockResolvedValue({
+      object: {
+        issues: [
+          {
+            type: 'internal_reference',
+            phrase: 'Stripe dashboard',
+            suggestion: 'payment system',
+          },
+        ],
+        appropriate: false,
+        reasoning: 'References internal tools customers should not know about',
+      },
+    })
+
+    const result = await validate(
+      makeInput(
+        'I checked the Stripe dashboard and your subscription is active. The Intercom ticket has been escalated to tier 2.',
+        { subject: 'Billing', body: 'Why was I charged?' },
+        'Why was I charged?'
+      ),
+      {
+        skipMemoryQuery: true,
+        skipRelevanceCheck: true,
+        checkAudienceAwareness: true,
+      }
+    )
+
+    expect(
+      result.issues.some((issue) => issue.type === 'audience_inappropriate')
+    ).toBe(true)
+  })
+})
+
+describe('tool failure escalation', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('escalates when lookupUser tool failed', async () => {
+    retrieveSkillsMock.mockResolvedValue([])
+    vi.spyOn(validateModule, 'getCategoryStats').mockResolvedValue({
+      sentUnchangedRate: 0.99,
+      volume: 120,
+    })
+
+    const contextWithToolFailures: GatherOutput = {
+      ...emptyContext,
+      gatherErrors: [{ step: 'user', error: 'Connection timeout' }],
+    }
+
+    const result = await validate(
+      {
+        draft: 'Your account details show you have access.',
+        context: contextWithToolFailures,
+        customerMessage: { subject: 'Access', body: 'Cannot access course.' },
+        originalMessage: 'Cannot access course.',
+      },
+      {
+        skipMemoryQuery: true,
+        skipRelevanceCheck: true,
+        category: 'support_access',
+      }
+    )
+
+    expect(result.action).toBe('escalate')
+    if (result.action !== 'escalate') {
+      throw new Error(`Expected escalate, got ${result.action}`)
+    }
+    expect(result.reason).toContain('unable to verify customer')
+    expect(result.urgency).toBe('normal')
+  })
+
+  it('does not escalate when non-critical tools fail', async () => {
+    retrieveSkillsMock.mockResolvedValue([])
+    vi.spyOn(validateModule, 'getCategoryStats').mockResolvedValue({
+      sentUnchangedRate: 0.99,
+      volume: 120,
+    })
+
+    const contextWithToolFailures: GatherOutput = {
+      ...emptyContext,
+      user: { id: '123', email: 'test@example.com', name: 'Test User' },
+      gatherErrors: [{ step: 'knowledge', error: 'Search unavailable' }],
+    }
+
+    const result = await validate(
+      {
+        draft: 'Your account is active and you have full access.',
+        context: contextWithToolFailures,
+        customerMessage: { subject: 'Access', body: 'Cannot access course.' },
+        originalMessage: 'Cannot access course.',
+      },
+      {
+        skipMemoryQuery: true,
+        skipRelevanceCheck: true,
+        category: 'support_access',
+      }
+    )
+
+    // Should still work - knowledge search failure is not critical
+    expect(result.action).not.toBe('escalate')
+  })
+
+  it('escalates when multiple critical tools fail', async () => {
+    retrieveSkillsMock.mockResolvedValue([])
+    vi.spyOn(validateModule, 'getCategoryStats').mockResolvedValue({
+      sentUnchangedRate: 0,
+      volume: 0,
+    })
+
+    const contextWithToolFailures: GatherOutput = {
+      ...emptyContext,
+      gatherErrors: [
+        { step: 'user', error: 'Connection timeout' },
+        { step: 'purchases', error: 'Database unavailable' },
+      ],
+    }
+
+    const result = await validate(
+      {
+        draft: 'I can process your refund.',
+        context: contextWithToolFailures,
+        customerMessage: { subject: 'Refund', body: 'Please refund me.' },
+        originalMessage: 'Please refund me.',
+      },
+      {
+        skipMemoryQuery: true,
+        skipRelevanceCheck: true,
+        category: 'support_refund',
+      }
+    )
+
+    expect(result.action).toBe('escalate')
+    if (result.action !== 'escalate') {
+      throw new Error(`Expected escalate, got ${result.action}`)
+    }
+    expect(result.reason).toContain('unable to verify')
+  })
+})
+
 describe('fabrication detection', () => {
   beforeEach(() => {
     vi.clearAllMocks()

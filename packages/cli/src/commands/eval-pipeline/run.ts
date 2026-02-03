@@ -954,6 +954,8 @@ async function runValidateEval(
         repeated_mistake: 'noBannedPhrases', // No specific assertion
         relevance: 'noBannedPhrases', // No specific assertion for relevance
         ground_truth_mismatch: 'noBannedPhrases', // No specific assertion
+        audience_inappropriate: 'noBannedPhrases', // No specific assertion
+        tool_failure: 'noBannedPhrases', // No specific assertion
       }
 
       // Check if assertions match
