@@ -87,7 +87,7 @@
       "title": "Epic 6.6: Thread State Management + Epic 4 Integration (#161)",
       "description": "Implement persistent thread context so the bot remembers what conversation/draft is being discussed, and integrate with Epic 4 learning system.\n\n## Files to Create\n```\npackages/slack/src/state/thread-context.ts     # Thread state management\npackages/slack/src/state/__tests__/thread-context.test.ts\npackages/slack/src/learning/corrections.ts     # Epic 4 integration\npackages/slack/src/learning/__tests__/corrections.test.ts\n```\n\n## Implementation\n\n### 1. Thread Context Schema\n```typescript\ninterface ThreadContext {\n  threadTs: string           // Slack thread timestamp (unique ID)\n  channelId: string\n  conversationId: string     // Front conversation ID\n  currentDraft: string\n  draftVersion: number\n  customerId?: string\n  createdAt: Date\n  lastActivityAt: Date\n  ttlSeconds: number         // Default 3600 (1 hour)\n}\n```\n\n### 2. State Management\n- Redis-backed storage for thread context\n- TTL-based expiration (1 hour default)\n- `getThreadContext()`, `setThreadContext()`, `clearThreadContext()`\n- Stale thread detection and graceful handoff message\n\n### 3. Epic 4 Learning Integration\n```typescript\ninterface CorrectionEvent {\n  conversationId: string\n  originalDraft: string\n  revisedDraft: string\n  refinementType: string\n  userId: string\n  timestamp: Date\n  threadTs: string\n}\n```\n- Capture all refinements as correction events\n- Store in format queryable for training extraction\n- Integration hook for Epic 4 learning pipeline\n\n### 4. Stale Handling\n- \"This thread has expired. Please start a new conversation.\"\n- \"new topic\" / \"different customer\" explicitly clears context\n\n## TDD Tests to Write FIRST\n1. Thread context CRUD operations\n2. TTL expiration behavior\n3. Stale thread detection\n4. Correction event capture\n5. Context clearing on \"new topic\"\n6. Redis connection error handling\n\n## Depends On\nAll prior Epic 6 stories",
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "validationCommand": "cd ~/Code/skillrecordings/support && bun run check-types && bun test packages/slack/src/state/__tests__/thread-context.test.ts packages/slack/src/learning/__tests__/corrections.test.ts 2>&1 | tail -30",
       "acceptanceCriteria": [
         "Each thread maintains conversation context",
@@ -101,7 +101,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-03T17:10:51.448Z",
-    "totalIterations": 5,
-    "lastIteration": "2026-02-03T17:57:41.326Z"
+    "totalIterations": 6,
+    "lastIteration": "2026-02-03T18:02:34.566Z"
   }
 }

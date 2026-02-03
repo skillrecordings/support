@@ -52,3 +52,10 @@ Summary: **Summary**
 - Added customer context intent parsing and handlers with Front history lookup, purchase aggregation, support stats derivation, and Axiom logging in `packages/slack/src/intents/context.ts`.
 - Implemented Slack Block Kit formatting for customer profile, purchases, and history in `packages/slack/src/formatters/customer.ts`.
 - Added TDD coverage for parsing, profile assembly, empty states
+
+---
+[2026-02-03T18:02:34.568Z]
+Completed: Epic 6.6: Thread State Management + Epic 4 Integration (#161)
+Files: none
+Summary: **Summary**
+Implemented Redis-backed thread context state with TTL, stale detection, reset-language helper, and Axiom logging in `packages/slack/src/state/thread-context.ts`. Added correction event capture + query helpers with Axiom logging in `packages/slack/src/learning/corrections.ts`. Added TDD coverage in `packages/slack/src/state/__tests__/thread-context.test.ts` and `packages/slack/src/lear
