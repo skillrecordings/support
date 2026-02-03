@@ -831,25 +831,6 @@ export async function validate(
     issuesByType[issue.type] = (issuesByType[issue.type] ?? 0) + 1
   }
 
-  await log('info', 'validate completed', {
-    workflow: 'pipeline',
-    step: 'validate',
-    appId,
-    category,
-    valid: !hasErrors,
-    totalIssues: allIssues.length,
-    patternIssues: patternIssueCount,
-    memoryIssues: allIssues.length - patternIssueCount,
-    relevanceScore,
-    confidence,
-    decisionThreshold: threshold,
-    issuesByType,
-    memoryCheckPerformed,
-    relevanceCheckPerformed,
-    correctionsChecked: correctionsChecked?.length ?? 0,
-    durationMs,
-  })
-
   const escalationKeyword = threshold.escalateOnKeywords?.find((keyword) => {
     const haystack = [
       input.originalMessage,
@@ -902,6 +883,54 @@ export async function validate(
       }
     }
   }
+
+  // High-cardinality decision-point logging
+  await log('info', 'validate:decision', {
+    workflow: 'pipeline',
+    step: 'validate',
+    appId,
+    category,
+    // Decision outcome
+    valid: !hasErrors,
+    action: decision.action,
+    confidence,
+    // Issue breakdown
+    totalIssues: allIssues.length,
+    errorCount: allIssues.filter((i) => i.severity === 'error').length,
+    warningCount: allIssues.filter((i) => i.severity === 'warning').length,
+    infoCount: allIssues.filter((i) => i.severity === 'info').length,
+    // Issue types detected
+    issuesByType,
+    hasInternalLeak: (issuesByType['internal_leak'] ?? 0) > 0,
+    hasMetaCommentary: (issuesByType['meta_commentary'] ?? 0) > 0,
+    hasBannedPhrase: (issuesByType['banned_phrase'] ?? 0) > 0,
+    hasFabrication: (issuesByType['fabrication'] ?? 0) > 0,
+    hasGroundTruthMismatch: (issuesByType['ground_truth_mismatch'] ?? 0) > 0,
+    hasRepeatedMistake: (issuesByType['repeated_mistake'] ?? 0) > 0,
+    hasRelevanceIssue: (issuesByType['relevance'] ?? 0) > 0,
+    // Validation checks performed
+    patternCheckCount: patternIssueCount,
+    memoryCheckPerformed,
+    relevanceCheckPerformed,
+    groundTruthCheckPerformed: relevantSkills.length > 0,
+    // Relevance details
+    relevanceScore,
+    relevanceThreshold: 0.5,
+    relevancePassed: relevanceScore === undefined || relevanceScore >= 0.5,
+    // Memory correction check
+    correctionsChecked: correctionsChecked?.length ?? 0,
+    correctionThreshold,
+    // Threshold configuration
+    decisionThreshold: threshold,
+    escalateAlways: threshold.escalateAlways,
+    escalationKeywordMatched: escalationKeyword ?? null,
+    autoSendEligible: confidence >= 0.95,
+    // Ground truth
+    skillsRetrieved: relevantSkills.length,
+    // Decision explanation
+    strictMode,
+    durationMs,
+  })
 
   return {
     ...decision,

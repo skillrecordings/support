@@ -237,10 +237,15 @@ export function extractSignals(input: ClassifyInput): MessageSignals {
 // Fast-path classification (no LLM needed)
 // ============================================================================
 
+export interface FastClassifyResult extends ClassifyOutput {
+  /** Internal tracking of which fast-path rule matched (for logging only) */
+  _fastPathRule?: string
+}
+
 export function fastClassify(
   input: ClassifyInput,
   signals: MessageSignals
-): ClassifyOutput | null {
+): FastClassifyResult | null {
   const text = `${input.subject} ${input.body}`.toLowerCase()
 
   // Automated system messages - high confidence
@@ -250,6 +255,7 @@ export function fastClassify(
       confidence: 0.95,
       signals,
       reasoning: 'Detected automated/system message patterns',
+      _fastPathRule: 'automated_system',
     }
   }
 
@@ -260,6 +266,7 @@ export function fastClassify(
       confidence: 0.9,
       signals,
       reasoning: 'Detected vendor/marketing outreach patterns',
+      _fastPathRule: 'vendor_outreach',
     }
   }
 
@@ -270,6 +277,7 @@ export function fastClassify(
       confidence: 0.85,
       signals,
       reasoning: 'Explicit refund request detected',
+      _fastPathRule: 'explicit_refund',
     }
   }
 
@@ -284,6 +292,7 @@ export function fastClassify(
       confidence: 0.85,
       signals,
       reasoning: 'Access issue patterns detected',
+      _fastPathRule: 'access_issue',
     }
   }
 
@@ -297,6 +306,7 @@ export function fastClassify(
       confidence: 0.8,
       signals,
       reasoning: 'Transfer request patterns detected',
+      _fastPathRule: 'transfer_request',
     }
   }
 
@@ -307,6 +317,7 @@ export function fastClassify(
       confidence: 0.85,
       signals,
       reasoning: 'Billing/invoice request detected',
+      _fastPathRule: 'invoice_billing',
     }
   }
 
@@ -515,19 +526,48 @@ export async function classify(
     if (fastResult) {
       const durationMs = Date.now() - startTime
 
-      await log('info', 'classify completed (fast-path)', {
+      // High-cardinality decision-point logging
+      await log('info', 'classify:decision', {
         workflow: 'pipeline',
         step: 'classify',
         appId,
         conversationId,
+        // Decision outcome
         category: fastResult.category,
         confidence: fastResult.confidence,
         reasoning: fastResult.reasoning,
+        // Decision path
+        decisionPath: 'fast-path',
+        fastPathRule: fastResult._fastPathRule,
+        // Input signals that drove the decision
+        signalsActive: Object.entries(signals)
+          .filter(([_, v]) => v === true)
+          .map(([k]) => k),
+        signalsInactive: Object.entries(signals)
+          .filter(([_, v]) => v === false)
+          .map(([k]) => k),
+        // Raw signals for debugging
+        hasEmailInBody: signals.hasEmailInBody,
+        hasPurchaseDate: signals.hasPurchaseDate,
+        hasErrorMessage: signals.hasErrorMessage,
+        isReply: signals.isReply,
+        mentionsInstructor: signals.mentionsInstructor,
+        hasAngrySentiment: signals.hasAngrySentiment,
+        isAutomated: signals.isAutomated,
+        isVendorOutreach: signals.isVendorOutreach,
+        hasLegalThreat: signals.hasLegalThreat,
+        hasOutsidePolicyTimeframe: signals.hasOutsidePolicyTimeframe,
+        isPersonalToInstructor: signals.isPersonalToInstructor,
+        isPresalesFaq: signals.isPresalesFaq,
+        isPresalesTeam: signals.isPresalesTeam,
+        // Context
         usedLLM: false,
         durationMs,
       })
 
-      return fastResult
+      // Return without internal tracking property
+      const { _fastPathRule: _, ...result } = fastResult
+      return result
     }
   }
 
@@ -536,16 +576,47 @@ export async function classify(
 
   const durationMs = Date.now() - startTime
 
-  await log('info', 'classify completed (LLM)', {
+  // High-cardinality decision-point logging
+  await log('info', 'classify:decision', {
     workflow: 'pipeline',
     step: 'classify',
     appId,
     conversationId,
+    // Decision outcome
     category: result.category,
     confidence: result.confidence,
     reasoning: result.reasoning,
+    // Decision path
+    decisionPath: 'llm',
+    fastPathRule: null,
+    // Why LLM was needed (fast-path didn't match)
+    llmReason: forceLLM ? 'forceLLM=true' : 'no_fast_path_match',
+    // Input signals that drove the decision
+    signalsActive: Object.entries(signals)
+      .filter(([_, v]) => v === true)
+      .map(([k]) => k),
+    signalsInactive: Object.entries(signals)
+      .filter(([_, v]) => v === false)
+      .map(([k]) => k),
+    // Raw signals for debugging
+    hasEmailInBody: signals.hasEmailInBody,
+    hasPurchaseDate: signals.hasPurchaseDate,
+    hasErrorMessage: signals.hasErrorMessage,
+    isReply: signals.isReply,
+    mentionsInstructor: signals.mentionsInstructor,
+    hasAngrySentiment: signals.hasAngrySentiment,
+    isAutomated: signals.isAutomated,
+    isVendorOutreach: signals.isVendorOutreach,
+    hasLegalThreat: signals.hasLegalThreat,
+    hasOutsidePolicyTimeframe: signals.hasOutsidePolicyTimeframe,
+    isPersonalToInstructor: signals.isPersonalToInstructor,
+    isPresalesFaq: signals.isPresalesFaq,
+    isPresalesTeam: signals.isPresalesTeam,
+    // Memory context
     usedLLM: true,
+    model,
     memoriesCited: result.citedMemoryIds?.length ?? 0,
+    citedMemoryIds: result.citedMemoryIds,
     durationMs,
   })
 
@@ -872,6 +943,11 @@ function fastDetectSpam(input: ThreadClassifyInput): boolean {
   return false
 }
 
+export interface FastClassifyThreadResult extends ThreadClassifyOutput {
+  /** Internal tracking of which fast-path rule matched (for logging only) */
+  _fastPathRule?: string
+}
+
 /**
  * Thread-aware fast-path classification.
  *
@@ -886,7 +962,7 @@ function fastDetectSpam(input: ThreadClassifyInput): boolean {
 export function fastClassifyThread(
   input: ThreadClassifyInput,
   signals: ThreadSignals
-): ThreadClassifyOutput | null {
+): FastClassifyThreadResult | null {
   // 1. System messages - automated/no-reply senders (highest priority)
   if (signals.isAutomated && signals.threadLength === 1) {
     return {
@@ -894,6 +970,7 @@ export function fastClassifyThread(
       confidence: 0.95,
       signals,
       reasoning: 'Automated system message',
+      _fastPathRule: 'system_automated',
     }
   }
 
@@ -904,6 +981,7 @@ export function fastClassifyThread(
       confidence: 0.95,
       signals,
       reasoning: 'Tagged as AD in Front',
+      _fastPathRule: 'ad_tag',
     }
   }
 
@@ -915,6 +993,7 @@ export function fastClassifyThread(
       confidence: 0.9,
       signals,
       reasoning: 'Detected spam patterns (partnership/affiliate/SEO outreach)',
+      _fastPathRule: 'spam_patterns',
     }
   }
 
@@ -925,6 +1004,7 @@ export function fastClassifyThread(
       confidence: 0.85,
       signals,
       reasoning: 'Detected vendor/marketing outreach patterns',
+      _fastPathRule: 'vendor_outreach',
     }
   }
 
@@ -935,6 +1015,7 @@ export function fastClassifyThread(
       confidence: 0.9,
       signals,
       reasoning: 'Thread is internal/instructor-initiated',
+      _fastPathRule: 'internal_thread',
     }
   }
 
@@ -945,6 +1026,7 @@ export function fastClassifyThread(
       confidence: 0.85,
       signals,
       reasoning: 'Customer indicated resolution (thanks + confirmation)',
+      _fastPathRule: 'resolved_thread',
     }
   }
 
@@ -957,6 +1039,7 @@ export function fastClassifyThread(
       confidence: 0.9,
       signals,
       reasoning: 'Last message was outbound, waiting for customer response',
+      _fastPathRule: 'awaiting_customer',
     }
   }
 
@@ -1093,18 +1176,47 @@ export async function classifyThread(
     if (fastResult) {
       const durationMs = Date.now() - startTime
 
-      await log('info', 'classifyThread completed (fast-path)', {
+      // High-cardinality decision-point logging
+      await log('info', 'classifyThread:decision', {
         workflow: 'pipeline',
         step: 'classifyThread',
         appId: input.appId,
+        // Decision outcome
         category: fastResult.category,
         confidence: fastResult.confidence,
         reasoning: fastResult.reasoning,
+        // Decision path
+        decisionPath: 'fast-path',
+        fastPathRule: fastResult._fastPathRule,
+        // Thread context
+        threadLength: signals.threadLength,
+        threadDurationHours: signals.threadDurationHours,
+        threadPattern: signals.threadPattern,
+        customerMessageCount: signals.customerMessageCount,
+        // Thread signals that drove the decision
+        hasTeammateMessage: signals.hasTeammateMessage,
+        hasInstructorMessage: signals.hasInstructorMessage,
+        instructorIsAuthor: signals.instructorIsAuthor,
+        isInternalThread: signals.isInternalThread,
+        awaitingCustomerReply: signals.awaitingCustomerReply,
+        hasResolutionPhrase: signals.hasResolutionPhrase,
+        lastResponderType: signals.lastResponderType,
+        // Input signals
+        hasAngrySentiment: signals.hasAngrySentiment,
+        hasLegalThreat: signals.hasLegalThreat,
+        isAutomated: signals.isAutomated,
+        isVendorOutreach: signals.isVendorOutreach,
+        isPersonalToInstructor: signals.isPersonalToInstructor,
+        // Context
+        hasTags: !!input.tags?.length,
+        tagCount: input.tags?.length ?? 0,
         usedLLM: false,
         durationMs,
       })
 
-      return fastResult
+      // Return without internal tracking property
+      const { _fastPathRule: _, ...threadResult } = fastResult
+      return threadResult
     }
   }
 
@@ -1113,15 +1225,43 @@ export async function classifyThread(
 
   const durationMs = Date.now() - startTime
 
-  await log('info', 'classifyThread completed (LLM)', {
+  // High-cardinality decision-point logging
+  await log('info', 'classifyThread:decision', {
     workflow: 'pipeline',
     step: 'classifyThread',
     appId: input.appId,
+    // Decision outcome
     category: result.category,
     confidence: result.confidence,
     reasoning: result.reasoning,
+    // Decision path
+    decisionPath: 'llm',
+    fastPathRule: null,
+    llmReason: forceLLM ? 'forceLLM=true' : 'no_fast_path_match',
+    // Thread context
+    threadLength: signals.threadLength,
+    threadDurationHours: signals.threadDurationHours,
+    threadPattern: signals.threadPattern,
+    customerMessageCount: signals.customerMessageCount,
+    // Thread signals that drove the decision
+    hasTeammateMessage: signals.hasTeammateMessage,
+    hasInstructorMessage: signals.hasInstructorMessage,
+    instructorIsAuthor: signals.instructorIsAuthor,
+    isInternalThread: signals.isInternalThread,
+    awaitingCustomerReply: signals.awaitingCustomerReply,
+    hasResolutionPhrase: signals.hasResolutionPhrase,
+    lastResponderType: signals.lastResponderType,
+    // Input signals
+    hasAngrySentiment: signals.hasAngrySentiment,
+    hasLegalThreat: signals.hasLegalThreat,
+    isAutomated: signals.isAutomated,
+    isVendorOutreach: signals.isVendorOutreach,
+    isPersonalToInstructor: signals.isPersonalToInstructor,
+    // Memory context
     usedLLM: true,
+    model,
     memoriesCited: result.citedMemoryIds?.length ?? 0,
+    citedMemoryIds: result.citedMemoryIds,
     durationMs,
   })
 

@@ -151,16 +151,34 @@ export async function draft(
 
         const durationMs = Date.now() - startTime
 
-        await log('info', 'draft completed (template match)', {
+        // High-cardinality decision-point logging for template match
+        await log('info', 'draft:decision', {
           workflow: 'pipeline',
           step: 'draft',
           appId,
           conversationId,
+          // Decision outcome
           category: classification.category,
-          usedTemplate: true,
+          decisionPath: 'template',
+          // Template match details
           templateName: matchResult.match.name,
           templateConfidence: matchResult.match.confidence,
+          templateThreshold,
+          confidenceAboveThreshold:
+            matchResult.match.confidence >= templateThreshold,
+          // Draft result
           draftLength: interpolatedContent.length,
+          variablesInterpolated: Object.keys(variables).length,
+          // Decision inputs
+          hasContext: !!context,
+          hasUser: !!context.user,
+          hasPurchases: context.purchases.length > 0,
+          hasKnowledge: context.knowledge.length > 0,
+          // Why this path
+          usedTemplate: true,
+          usedMemory: false,
+          usedLLM: false,
+          usedAgentMode: false,
           durationMs,
         })
 
@@ -335,19 +353,39 @@ Write your response:`
 
     const durationMs = Date.now() - startTime
 
-    await log('info', 'draft completed (agent mode)', {
+    // High-cardinality decision-point logging for agent mode
+    await log('info', 'draft:decision', {
       workflow: 'pipeline',
       step: 'draft',
       appId,
       conversationId,
+      // Decision outcome
       category: classification.category,
-      usedTemplate: false,
-      usedMemory: memories.length > 0,
-      memoriesCited: memories.length,
+      decisionPath: 'agent',
+      // Draft result
       draftLength: agentResult.response.trim().length,
+      // Agent mode details
       toolCallCount: agentResult.toolCalls.length,
+      toolsInvoked: agentResult.toolCalls.map((tc) => tc.name),
       requiresApproval: agentResult.requiresApproval,
       autoSent: agentResult.autoSent,
+      hasReasoning: !!agentResult.reasoning,
+      // Memory context
+      usedMemory: memories.length > 0,
+      memoriesCited: memories.length,
+      citedMemoryIds: memories.map((m) => m.id),
+      topMemoryScore: memories[0]?.score,
+      // Decision inputs
+      hasContext: !!context,
+      hasUser: !!context.user,
+      hasPurchases: context.purchases.length > 0,
+      hasKnowledge: context.knowledge.length > 0,
+      hasCustomerEmail: !!customerEmail,
+      hasCustomerName: !!customerName,
+      // Why this path
+      usedTemplate: false,
+      usedLLM: true,
+      usedAgentMode: true,
       model,
       durationMs,
     })
@@ -390,16 +428,35 @@ Write your response:`
   const toolsUsed = memories.length > 0 ? ['memory_query'] : []
   const durationMs = Date.now() - startTime
 
-  await log('info', 'draft completed (LLM)', {
+  // High-cardinality decision-point logging for LLM mode
+  await log('info', 'draft:decision', {
     workflow: 'pipeline',
     step: 'draft',
     appId,
     conversationId,
+    // Decision outcome
     category: classification.category,
-    usedTemplate: false,
+    decisionPath: 'llm',
+    // Draft result
+    draftLength: result.text.trim().length,
+    // Memory context
     usedMemory: memories.length > 0,
     memoriesCited: memories.length,
-    draftLength: result.text.trim().length,
+    citedMemoryIds: memories.map((m) => m.id),
+    topMemoryScore: memories[0]?.score,
+    // Decision inputs
+    hasContext: !!context,
+    hasUser: !!context.user,
+    hasPurchases: context.purchases.length > 0,
+    hasKnowledge: context.knowledge.length > 0,
+    hasPromptOverride: !!promptOverride,
+    // Why this path (not template, not agent)
+    templateSkipped: skipTemplateMatch,
+    templateNotMatched: !skipTemplateMatch,
+    agentModeDisabled: !useAgentMode,
+    usedTemplate: false,
+    usedLLM: true,
+    usedAgentMode: false,
     model,
     durationMs,
   })

@@ -478,6 +478,26 @@ export async function gather(
     bodyExtractedEmail,
   }
 
+  // High-cardinality decision-point logging for email resolution
+  await log('info', 'gather:email-resolution', {
+    workflow: 'pipeline',
+    step: 'gather',
+    appId,
+    category: classification.category,
+    // Decision outcome
+    emailFound: !!customerEmail,
+    emailSource,
+    // Decision inputs
+    hasSenderEmail: !!message.from,
+    hasBodyExtractedEmail: !!bodyExtractedEmail,
+    senderEmailDomain: message.from?.split('@')[1],
+    // Decision explanation
+    usedSender: emailSource === 'sender',
+    usedBodyFallback: emailSource === 'body',
+    emailMismatch:
+      message.from && bodyExtractedEmail && message.from !== bodyExtractedEmail,
+  })
+
   // ============================================================================
   // Step 3: Run all gather operations in parallel with timeout
   // ============================================================================
@@ -627,20 +647,40 @@ export async function gather(
 
   const durationMs = Date.now() - startTime
 
-  await log('info', 'gather completed', {
+  // High-cardinality decision-point logging for gather completion
+  await log('info', 'gather:decision', {
     workflow: 'pipeline',
     step: 'gather',
     appId,
     category: classification.category,
+    // Context assembly outcome
     gatheredSources: result.gatheredSources,
+    gatheredSourceCount: result.gatheredSources.length,
+    failedSources: result.gatherErrors.map((e) => e.step),
+    failedSourceCount: result.gatherErrors.length,
+    // Individual source results
     hasUser: !!result.user,
+    hasUserEmail: !!result.user?.email,
+    hasUserName: !!result.user?.name,
     purchaseCount: result.purchases.length,
+    purchaseProducts: result.purchases.map((p) => p.productName),
+    purchaseStatuses: result.purchases.map((p) => p.status),
     knowledgeCount: result.knowledge.length,
+    knowledgeTypes: result.knowledge.map((k) => k.type),
     historyCount: result.history.length,
     memoryCount: result.priorMemory.length,
     priorConversationCount: result.priorConversations.length,
-    errorCount: result.gatherErrors.length,
+    // Memory priority guidance
+    hasMustGatherPriorities:
+      (result.gatherPriorities?.mustGather.length ?? 0) > 0,
+    mustGatherTypes: result.gatherPriorities?.mustGather.map((p) => p.dataType),
+    mayGatherTypes: result.gatherPriorities?.mayGather.map((p) => p.dataType),
+    memorySourceCount: result.gatherPriorities?.sourceMemories.length ?? 0,
+    // Email resolution
     emailSource: result.emailResolution?.source,
+    customerEmailFound: !!result.emailResolution?.email,
+    // Errors (without exposing internal details)
+    errorSteps: result.gatherErrors.map((e) => e.step),
     durationMs,
   })
 
