@@ -116,8 +116,9 @@ describe('handleThreadReply', () => {
       { draftStore }
     )
 
-    expect(result.handled).toBe(false)
-    expect(postMessage).not.toHaveBeenCalled()
+    // Non-refinement intents now fall back to general intent routing
+    expect(result.handled).toBe(true)
+    expect(postMessage).toHaveBeenCalled()
   })
 })
 

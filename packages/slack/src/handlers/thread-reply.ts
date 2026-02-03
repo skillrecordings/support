@@ -16,6 +16,8 @@ import {
   markDraftStatus,
   parseRefinementIntent,
 } from '../intents/draft'
+import { executeIntent } from '../intents/executor'
+import { routeIntent } from '../intents/router'
 
 export interface ThreadReplyEvent {
   type: 'message'
@@ -94,14 +96,37 @@ export async function handleThreadReply(
   }
 
   const intent = parseRefinementIntent(event.text)
-  if (!intent) {
-    return { handled: false, reason: 'no_intent' }
-  }
-
   const store = getDraftStore(deps)
   const state = store.get(threadTs)
-  if (!state) {
-    return { handled: false, reason: 'missing_draft', intent }
+
+  // If no draft context, fall back to general intent routing
+  if (!intent || !state) {
+    const slackClient = deps?.slackClient ?? getSlackClient()
+    const { intent: routedIntent, response } = routeIntent(event.text)
+
+    // Execute the intent
+    const executionResult = await executeIntent(routedIntent, {
+      channel: event.channel,
+      threadTs,
+      userId: event.user,
+    })
+
+    // If execution failed or unknown intent, post the response
+    if (!executionResult.success || routedIntent.category === 'unknown') {
+      await slackClient.chat.postMessage({
+        channel: event.channel,
+        text: executionResult.success
+          ? response
+          : `⚠️ ${executionResult.message}`,
+        thread_ts: threadTs,
+      })
+    }
+
+    return {
+      handled: true,
+      responseText: executionResult.message || response,
+      threadTs,
+    }
   }
 
   const slackClient = deps?.slackClient ?? getSlackClient()
