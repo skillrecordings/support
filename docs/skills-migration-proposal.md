@@ -2,7 +2,9 @@
 
 ## Overview
 
-This document outlines the migration strategy for skills data from local Qdrant (development) to Upstash Vector + Redis (production).
+This document outlines the migration strategy for **skills data only** from local Qdrant (development) to Upstash Vector + Redis (production).
+
+> ⚠️ **Scope: Skills only.** Conversations stay in local Qdrant for dev/analysis. Only skills get migrated to production Upstash.
 
 **Key Insight:** Export TEXT to Upstash, not Qdrant embeddings — Upstash auto-embeds with its own model for consistent search.
 
@@ -148,25 +150,25 @@ flowchart TD
 
 ## Migration Steps
 
-1. **Export from Qdrant**
-   ```bash
-   bun scripts/export-skills-text.ts --output artifacts/skills-export.jsonl
-   ```
+```bash
+# 1. Export skills from local Qdrant (TEXT only, no vectors)
+bun scripts/export-qdrant-text.ts --collection skills --output artifacts/skills-export.jsonl
 
-2. **Transform for Upstash**
-   ```bash
-   bun scripts/transform-for-upstash.ts --input artifacts/skills-export.jsonl
-   ```
+# 2. Import to Upstash Vector (auto-embeds with BGE_LARGE_EN_V1_5)
+export UPSTASH_VECTOR_REST_URL=$(secrets lease upstash_vector_url --raw --ttl 1h --client-id "migration")
+export UPSTASH_VECTOR_REST_TOKEN=$(secrets lease upstash_vector_token --raw --ttl 1h --client-id "migration")
+bun scripts/import-upstash-vector.ts --input artifacts/skills-export.jsonl --namespace skills
 
-3. **Import to Upstash Vector**
-   ```bash
-   bun scripts/import-upstash-vector.ts --input artifacts/skills-upstash.jsonl
-   ```
+# 3. Populate Redis metadata cache
+export UPSTASH_REDIS_REST_URL=$(secrets lease upstash_redis_url --raw --ttl 1h --client-id "migration")
+export UPSTASH_REDIS_REST_TOKEN=$(secrets lease upstash_redis_token --raw --ttl 1h --client-id "migration")
+bun scripts/populate-upstash-redis.ts --input artifacts/skills-export.jsonl --prefix skill:
+```
 
-4. **Populate Redis Cache**
-   ```bash
-   bun scripts/populate-upstash-redis.ts --input artifacts/skills-metadata.jsonl
-   ```
+Or use the orchestrator:
+```bash
+bun scripts/migrate-to-upstash.ts --skills-only
+```
 
 ## Related
 
