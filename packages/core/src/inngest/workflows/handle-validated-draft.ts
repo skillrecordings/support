@@ -458,9 +458,9 @@ export const handleValidatedDraft = inngest.createFunction(
       await db
         .update(ActionsTable)
         .set({
-          parameters: sql`jsonb_set(parameters, '{draftId}', ${JSON.stringify(
+          parameters: sql`JSON_SET(parameters, '$.draftId', ${JSON.stringify(
             draftResult.draftId
-          )}::jsonb)`,
+          )})`,
         })
         .where(eq(ActionsTable.id, actionId))
     }
