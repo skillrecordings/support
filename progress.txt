@@ -43,3 +43,12 @@ Files: none
 Summary: Summary:
 1. Added quick action intent parsing and handlers with Front API execution, confirmation prompts, and Axiom logging in `packages/slack/src/intents/action.ts` and `packages/slack/src/confirmations/action.ts`.
 2. Wired quick action flow into Slack mention + thread-reply handlers with confirmation handling and minimal context derivation in `packages/slack/src/handlers/mention.ts` and `packag
+
+---
+[2026-02-03T17:57:41.326Z]
+Completed: Epic 6.5: Customer Context Lookup (#160)
+Files: none
+Summary: **Summary**
+- Added customer context intent parsing and handlers with Front history lookup, purchase aggregation, support stats derivation, and Axiom logging in `packages/slack/src/intents/context.ts`.
+- Implemented Slack Block Kit formatting for customer profile, purchases, and history in `packages/slack/src/formatters/customer.ts`.
+- Added TDD coverage for parsing, profile assembly, empty states

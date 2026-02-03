@@ -72,7 +72,7 @@
       "title": "Epic 6.5: Customer Context Lookup (#160)",
       "description": "Enable team members to query customer history and context directly in Slack.\n\n## Files to Create\n```\npackages/slack/src/intents/context.ts          # Customer lookup handlers\npackages/slack/src/intents/__tests__/context.test.ts\npackages/slack/src/formatters/customer.ts      # Slack formatting for customer data\n```\n\n## Implementation\n\n### 1. Query Types\n```typescript\ninterface CustomerQuery {\n  type: \"history\" | \"profile\" | \"purchases\"\n  email: string\n}\n\ninterface CustomerProfile {\n  email: string\n  name?: string\n  products: string[]\n  lifetimeValue: number\n  supportStats: {\n    totalTickets: number\n    resolvedTickets: number\n    lastContact?: Date\n  }\n}\n```\n\n### 2. Handlers\n- `handleHistoryQuery()` — pull prior conversations from Front\n- `handleProfileQuery()` — customer summary with purchases and stats\n- `handlePurchasesQuery()` — list products owned\n\n### 3. Data Sources\n- Front API for conversation history\n- Purchase data from SDK integrations\n- Aggregate stats from prior tickets\n\n### 4. Response Format\n```\n👤 *Customer Profile*\n━━━━━━━━━━━━━━━━\ncustomer@email.com\n\n📦 *Products*\n• Total TypeScript (purchased Jan 2025)\n• Epic React (purchased Mar 2024)\n\n📊 *Support History*\n• Total tickets: 5\n• Last contact: 2 weeks ago\n• Avg resolution: 1.2 days\n\nRecent tickets:\n1. License transfer — Resolved ✅\n2. Login issue — Resolved ✅\n```\n\n## TDD Tests to Write FIRST\n1. \"history with X@email.com\" parses email\n2. \"who is X\" extracts identifier\n3. Profile assembly from multiple sources\n4. Empty state handling\n5. Formatting for Slack Block Kit\n\n## Depends On\nStory 1 (6.1) for intent routing",
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "validationCommand": "cd ~/Code/skillrecordings/support && bun run check-types && bun test packages/slack/src/intents/__tests__/context.test.ts 2>&1 | tail -30",
       "acceptanceCriteria": [
         "history with X@email.com pulls prior conversations",
@@ -101,7 +101,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-03T17:10:51.448Z",
-    "totalIterations": 4,
-    "lastIteration": "2026-02-03T17:50:39.924Z"
+    "totalIterations": 5,
+    "lastIteration": "2026-02-03T17:57:41.326Z"
   }
 }
