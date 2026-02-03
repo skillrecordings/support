@@ -237,7 +237,8 @@ function checkFabrication(
   const issues: ValidationIssue[] = []
 
   // Check for fabricated course content when no knowledge was found
-  const hasKnowledge = context.knowledge.length > 0
+  // Guard against undefined context.knowledge from incomplete event data
+  const hasKnowledge = (context.knowledge?.length ?? 0) > 0
 
   const fabricationPatterns = [
     /Start with the (?:fundamentals|basics) section/i,
@@ -559,10 +560,11 @@ const CRITICAL_TOOLS_BY_CATEGORY: Record<string, string[]> = {
  * Returns an escalation decision if critical tools are unavailable.
  */
 function checkToolFailures(
-  gatherErrors: Array<{ step: string; error: string }>,
+  gatherErrors: Array<{ step: string; error: string }> | undefined,
   category: MessageCategory | undefined
 ): { shouldEscalate: boolean; reason: string } {
-  if (gatherErrors.length === 0) {
+  // Guard against undefined gatherErrors from incomplete event data
+  if (!gatherErrors || gatherErrors.length === 0) {
     return { shouldEscalate: false, reason: '' }
   }
 
@@ -1097,8 +1099,8 @@ export async function validate(
     // Tool failure check
     toolFailureEscalation: toolFailureResult.shouldEscalate,
     toolFailureReason: toolFailureResult.reason || null,
-    gatherErrorCount: context.gatherErrors.length,
-    gatherErrorSteps: context.gatherErrors.map((e) => e.step),
+    gatherErrorCount: context.gatherErrors?.length ?? 0,
+    gatherErrorSteps: context.gatherErrors?.map((e) => e.step) ?? [],
     // Relevance details
     relevanceScore,
     relevanceThreshold: 0.5,
