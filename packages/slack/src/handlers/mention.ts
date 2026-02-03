@@ -13,6 +13,7 @@ import {
   parseQuickAction,
 } from '../intents/action'
 import { getDraftStore } from '../intents/draft'
+import { executeIntent } from '../intents/executor'
 import { routeIntent } from '../intents/router'
 import type { ParsedIntent } from '../intents/types'
 
@@ -134,11 +135,31 @@ export async function handleAppMention(
   }
 
   const { intent, response } = routeIntent(rawText)
-  await slackClient.chat.postMessage({
-    channel: payload.event.channel,
-    text: response,
-    thread_ts: threadTs,
-  })
+
+  // Only post the placeholder response for unknown intents
+  // For known intents, the executor will handle messaging
+  if (intent.category === 'unknown') {
+    await slackClient.chat.postMessage({
+      channel: payload.event.channel,
+      text: response,
+      thread_ts: threadTs,
+    })
+  } else {
+    // Execute the intent (this will post results to the thread)
+    const executionResult = await executeIntent(intent, {
+      channel: payload.event.channel,
+      threadTs,
+      userId: payload.event.user,
+    })
+
+    await log('info', 'slack.intent_executed', {
+      traceId: payload.event_id ?? randomUUID(),
+      slackThreadTs: threadTs,
+      userId: payload.event.user,
+      detectedIntent: intent.category,
+      executionSuccess: executionResult.success,
+    })
+  }
 
   await log('info', 'slack.intent_detected', {
     traceId: payload.event_id ?? randomUUID(),

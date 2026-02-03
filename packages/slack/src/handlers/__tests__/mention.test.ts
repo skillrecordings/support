@@ -9,6 +9,7 @@ import {
 } from 'vitest'
 import * as axiomModule from '../../../../core/src/observability/axiom'
 import * as slackClientModule from '../../../../core/src/slack/client'
+import * as executorModule from '../../intents/executor'
 import { HELP_RESPONSE } from '../../intents/router'
 
 type HandleAppMention = typeof import('../mention').handleAppMention
@@ -33,9 +34,14 @@ describe('handleAppMention', () => {
     } as ReturnType<typeof slackClientModule.getSlackClient>)
     vi.spyOn(axiomModule, 'initializeAxiom').mockImplementation(() => {})
     vi.spyOn(axiomModule, 'log').mockResolvedValue(undefined)
+    // Mock the executor to avoid actual API calls
+    vi.spyOn(executorModule, 'executeIntent').mockResolvedValue({
+      success: true,
+      message: 'Executed successfully',
+    })
   })
 
-  it('posts a response in the thread for status queries', async () => {
+  it('executes status queries via the executor', async () => {
     await handleAppMention({
       event_id: 'evt-123',
       event: {
@@ -47,11 +53,14 @@ describe('handleAppMention', () => {
       },
     })
 
-    expect(postMessage).toHaveBeenCalledWith({
-      channel: 'C123',
-      text: expect.stringContaining('status'),
-      thread_ts: '1700000000.000100',
-    })
+    expect(executorModule.executeIntent).toHaveBeenCalledWith(
+      expect.objectContaining({ category: 'status_query' }),
+      expect.objectContaining({
+        channel: 'C123',
+        threadTs: '1700000000.000100',
+        userId: 'U123',
+      })
+    )
   })
 
   it('uses thread_ts when provided', async () => {
