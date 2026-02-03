@@ -19,6 +19,7 @@ import {
 } from '../../draft'
 import { createInstrumentedFrontClient } from '../../front/instrumented-client'
 import { markdownToHtml } from '../../front/markdown'
+import { notifyToolFailure } from '../../notifications/slack-failure'
 import {
   initializeAxiom,
   log,
@@ -143,7 +144,10 @@ export const executeApprovedAction = inngest.createFunction(
     })
 
     // If this is a duplicate and already completed, return cached result
-    if (idempotencyCheck.isDuplicate && idempotencyCheck.status === 'completed') {
+    if (
+      idempotencyCheck.isDuplicate &&
+      idempotencyCheck.status === 'completed'
+    ) {
       await log('info', 'returning cached result for duplicate action', {
         workflow: 'execute-approved-action',
         actionId,
@@ -531,6 +535,37 @@ export const executeApprovedAction = inngest.createFunction(
 
       // Aggregate results
       const allSuccessful = results.every((r) => r.result.success)
+
+      // Send Slack notifications for any failed tool executions
+      for (const { tool, result: toolResult } of results) {
+        if (!toolResult.success) {
+          // Extract customer email from action parameters if available
+          const actionParams = action.parameters as {
+            context?: { customerEmail?: string }
+            toolCalls?: Array<{ name: string; args: Record<string, unknown> }>
+          }
+          const customerEmail = actionParams?.context?.customerEmail
+          const toolCall = actionParams?.toolCalls?.find(
+            (tc) => tc.name === tool
+          )
+
+          await notifyToolFailure({
+            actionId,
+            conversationId: action.conversation_id ?? 'unknown',
+            appId: action.app_id ?? 'unknown',
+            toolName: tool,
+            toolResult: toolResult as {
+              success: boolean
+              error?: { code?: string; message?: string }
+            },
+            parameters: toolCall?.args,
+            customerEmail,
+            approvedBy,
+            approvedAt,
+          })
+        }
+      }
+
       return {
         success: allSuccessful,
         output: results,
@@ -708,7 +743,9 @@ export const executeApprovedAction = inngest.createFunction(
         } else {
           await failIdempotencyKey(
             idempotencyCheck.key,
-            'error' in result ? result.error ?? 'Unknown error' : 'Unknown error'
+            'error' in result
+              ? (result.error ?? 'Unknown error')
+              : 'Unknown error'
           )
         }
       }
