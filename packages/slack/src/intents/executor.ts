@@ -8,6 +8,7 @@ import {
   createFrontClient,
 } from '@skillrecordings/front-sdk'
 import { getSlackClient } from '../../../core/src/slack/client'
+import { setAssistantStatus } from '../feedback/status'
 import type { ParsedIntent } from './types'
 
 function getFrontClient() {
@@ -30,6 +31,16 @@ export interface ExecutionResult {
   success: boolean
   message: string
   data?: unknown
+}
+
+/**
+ * Update the assistant status in Slack to show what we're doing
+ */
+async function updateStatus(
+  context: ExecutionContext,
+  status: string
+): Promise<void> {
+  await setAssistantStatus(context.channel, context.threadTs, status, [status])
 }
 
 /**
@@ -86,16 +97,15 @@ async function executeStatusQuery(
   const front = getFrontClient()
   const slackClient = getSlackClient()
 
-  // Post initial acknowledgment
-  await slackClient.chat.postMessage({
-    channel: context.channel,
-    text: '🔍 Checking pending items...',
-    thread_ts: context.threadTs,
-  })
+  // Update status: searching Front
+  await updateStatus(context, '🔍 Searching Front for open conversations...')
 
   // Search for open/unassigned conversations
   const conversations = await front.conversations.search('status:open')
   const results = conversations._results as Conversation[]
+
+  // Update status: analyzing results
+  await updateStatus(context, `📊 Analyzing ${results.length} conversations...`)
 
   // Filter to unassigned or urgent
   const pending = results.filter(
@@ -175,18 +185,20 @@ async function executeContextLookup(
   const front = getFrontClient()
   const slackClient = getSlackClient()
 
-  // Post initial acknowledgment
-  await slackClient.chat.postMessage({
-    channel: context.channel,
-    text: `🔍 Looking up ${email || name}...`,
-    thread_ts: context.threadTs,
-  })
-
   const searchQuery = email || name || ''
+
+  // Update status: searching Front
+  await updateStatus(context, `🔍 Searching Front for "${searchQuery}"...`)
 
   // Search for conversations with this customer
   const conversations = await front.conversations.search(searchQuery)
   const results = conversations._results as Conversation[]
+
+  // Update status: found results
+  await updateStatus(
+    context,
+    `📋 Found ${results.length} conversation${results.length === 1 ? '' : 's'}...`
+  )
 
   if (results.length === 0) {
     const message = `No conversations found for "${searchQuery}".`
