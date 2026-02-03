@@ -152,6 +152,15 @@ export async function handleAppMention(
       userId: payload.event.user,
     })
 
+    // If execution failed, post the error message
+    if (!executionResult.success) {
+      await slackClient.chat.postMessage({
+        channel: payload.event.channel,
+        text: `⚠️ ${executionResult.message}`,
+        thread_ts: threadTs,
+      })
+    }
+
     await log('info', 'slack.intent_executed', {
       traceId: payload.event_id ?? randomUUID(),
       slackThreadTs: threadTs,
