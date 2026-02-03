@@ -56,7 +56,7 @@
       "title": "Epic 6.4: Quick Actions (#159)",
       "description": "Implement quick action commands that let team members take immediate action on support items directly from Slack.\n\n## Files to Create\n```\npackages/slack/src/intents/action.ts           # Quick action handlers\npackages/slack/src/intents/__tests__/action.test.ts\npackages/slack/src/confirmations/action.ts     # Confirmation dialogs\n```\n\n## Implementation\n\n### 1. Action Types\n```typescript\ntype QuickAction = \n  | { type: \"approve_send\" }\n  | { type: \"escalate\"; assignee: string }\n  | { type: \"add_context\"; note: string }\n  | { type: \"archive\" }\n  | { type: \"close\" }\n```\n\n### 2. Action Handlers\n- `handleApproveSend()` — send draft via Front API, archive conversation\n- `handleEscalate()` — reassign in Front, notify person in Slack\n- `handleAddContext()` — add internal note to Front\n- `handleArchive()` — archive without sending\n\n### 3. Confirmation Flow\n```\nUser: \"approve and send\"\nBot: \"Ready to send this response to customer@email.com:\n     > [draft preview, first 200 chars...]\n     Reply yes to confirm or cancel to abort\"\nUser: \"yes\"\nBot: \"✅ Response sent! Conversation archived.\"\n```\n\n### 4. Error Handling\n- Graceful failure if Front API errors\n- Rollback messaging if partial failure\n\n## TDD Tests to Write FIRST\n1. \"approve and send\" parses correctly\n2. \"escalate to [name]\" extracts assignee\n3. Confirmation flow state machine\n4. Front API error handling\n5. Action logging to Axiom\n\n## Depends On\nStories 1, 3 for intent handling and thread context",
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "validationCommand": "cd ~/Code/skillrecordings/support && bun run check-types && bun test packages/slack/src/intents/__tests__/action.test.ts 2>&1 | tail -30",
       "acceptanceCriteria": [
         "approve and send sends draft and archives",
@@ -101,7 +101,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-03T17:10:51.448Z",
-    "totalIterations": 3,
-    "lastIteration": "2026-02-03T17:41:13.247Z"
+    "totalIterations": 4,
+    "lastIteration": "2026-02-03T17:50:39.924Z"
   }
 }

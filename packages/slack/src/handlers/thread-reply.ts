@@ -2,6 +2,11 @@ import { randomUUID } from 'node:crypto'
 import { initializeAxiom, log } from '../../../core/src/observability/axiom'
 import { getSlackClient } from '../../../core/src/slack/client'
 import {
+  getActionConfirmationStore,
+  resolveActionConfirmation,
+} from '../confirmations/action'
+import { type QuickActionDeps, handleQuickAction } from '../intents/action'
+import {
   type DraftRefinementDeps,
   type DraftStore,
   type RefinementIntent,
@@ -26,9 +31,10 @@ export interface ThreadReplyPayload {
   event_id?: string
 }
 
-export interface ThreadReplyDeps extends DraftRefinementDeps {
+export interface ThreadReplyDeps extends DraftRefinementDeps, QuickActionDeps {
   slackClient?: ReturnType<typeof getSlackClient>
   draftStore?: DraftStore
+  confirmationStore?: ReturnType<typeof getActionConfirmationStore>
 }
 
 export interface ThreadReplyResult {
@@ -51,6 +57,40 @@ export async function handleThreadReply(
   const threadTs = event.thread_ts
   if (!threadTs || threadTs === event.ts) {
     return { handled: false, reason: 'not_thread_reply' }
+  }
+
+  const confirmationStore = getActionConfirmationStore({
+    confirmationStore: deps?.confirmationStore,
+  })
+  const confirmation = resolveActionConfirmation(
+    confirmationStore,
+    threadTs,
+    event.text
+  )
+  if (confirmation.status !== 'ignore') {
+    const slackClient = deps?.slackClient ?? getSlackClient()
+
+    if (confirmation.status === 'cancel') {
+      const responseText = 'Canceled — no changes were made.'
+      await slackClient.chat.postMessage({
+        channel: event.channel,
+        text: responseText,
+        thread_ts: threadTs,
+      })
+      return { handled: true, responseText, threadTs }
+    }
+
+    const result = await handleQuickAction(
+      confirmation.action,
+      confirmation.context,
+      deps
+    )
+    await slackClient.chat.postMessage({
+      channel: event.channel,
+      text: result.message,
+      thread_ts: threadTs,
+    })
+    return { handled: true, responseText: result.message, threadTs }
   }
 
   const intent = parseRefinementIntent(event.text)

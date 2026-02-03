@@ -26,6 +26,8 @@ export interface DraftThreadState {
   approvedAt?: Date
   rejectedAt?: Date
   sentAt?: Date
+  conversationId?: string
+  recipientEmail?: string
 }
 
 export interface DraftStore {

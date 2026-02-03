@@ -1,6 +1,18 @@
 import { randomUUID } from 'node:crypto'
 import { initializeAxiom, log } from '../../../core/src/observability/axiom'
 import { getSlackClient } from '../../../core/src/slack/client'
+import {
+  getActionConfirmationStore,
+  requestActionConfirmation,
+  requiresActionConfirmation,
+} from '../confirmations/action'
+import {
+  type QuickActionContext,
+  type QuickActionDeps,
+  handleQuickAction,
+  parseQuickAction,
+} from '../intents/action'
+import { getDraftStore } from '../intents/draft'
 import { routeIntent } from '../intents/router'
 import type { ParsedIntent } from '../intents/types'
 
@@ -18,11 +30,24 @@ export interface AppMentionPayload {
   event_id?: string
 }
 
+export interface AppMentionDeps extends QuickActionDeps {
+  slackClient?: ReturnType<typeof getSlackClient>
+  draftStore?: ReturnType<typeof getDraftStore>
+  confirmationStore?: ReturnType<typeof getActionConfirmationStore>
+  resolveActionContext?: (
+    payload: AppMentionPayload,
+    threadTs: string
+  ) => Promise<QuickActionContext> | QuickActionContext
+}
+
 function stripLeadingMention(text: string): string {
   return text.replace(/^<@[^>]+>\s*/, '').trim()
 }
 
-export async function handleAppMention(payload: AppMentionPayload): Promise<{
+export async function handleAppMention(
+  payload: AppMentionPayload,
+  deps?: AppMentionDeps
+): Promise<{
   intent: ParsedIntent
   responseText: string
   threadTs: string
@@ -31,10 +56,84 @@ export async function handleAppMention(payload: AppMentionPayload): Promise<{
   initializeAxiom()
 
   const rawText = stripLeadingMention(payload.event.text)
-  const { intent, response } = routeIntent(rawText)
   const threadTs = payload.event.thread_ts ?? payload.event.ts
+  const quickAction = parseQuickAction(rawText)
+  const slackClient = deps?.slackClient ?? getSlackClient()
 
-  const slackClient = getSlackClient()
+  if (quickAction) {
+    const draftStore = getDraftStore({ draftStore: deps?.draftStore })
+    const draftState = draftStore.get(threadTs)
+    const latestDraft = draftState?.versions.at(-1)
+    const context: QuickActionContext = deps?.resolveActionContext
+      ? await deps.resolveActionContext(payload, threadTs)
+      : {
+          conversationId: draftState?.conversationId ?? '',
+          draftText: latestDraft?.text,
+          recipientEmail: draftState?.recipientEmail,
+          threadTs,
+          channel: payload.event.channel,
+          requestedBy: payload.event.user,
+        }
+
+    if (requiresActionConfirmation(quickAction)) {
+      const confirmationStore = getActionConfirmationStore({
+        confirmationStore: deps?.confirmationStore,
+      })
+      const { message } = requestActionConfirmation({
+        store: confirmationStore,
+        threadTs,
+        action: quickAction,
+        context,
+      })
+
+      await slackClient.chat.postMessage({
+        channel: payload.event.channel,
+        text: message,
+        thread_ts: threadTs,
+      })
+
+      await log('info', 'slack.quick_action_confirmation', {
+        traceId: payload.event_id ?? randomUUID(),
+        slackThreadTs: threadTs,
+        userId: payload.event.user,
+        actionType: quickAction.type,
+      })
+
+      return {
+        intent: {
+          category: 'quick_action',
+          confidence: 0.9,
+          entities: {},
+          rawText,
+        },
+        responseText: message,
+        threadTs,
+        channel: payload.event.channel,
+      }
+    }
+
+    const result = await handleQuickAction(quickAction, context, deps)
+
+    await slackClient.chat.postMessage({
+      channel: payload.event.channel,
+      text: result.message,
+      thread_ts: threadTs,
+    })
+
+    return {
+      intent: {
+        category: 'quick_action',
+        confidence: 0.9,
+        entities: {},
+        rawText,
+      },
+      responseText: result.message,
+      threadTs,
+      channel: payload.event.channel,
+    }
+  }
+
+  const { intent, response } = routeIntent(rawText)
   await slackClient.chat.postMessage({
     channel: payload.event.channel,
     text: response,
