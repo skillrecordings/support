@@ -1,5 +1,5 @@
+import type { Conversation, ConversationList } from '@skillrecordings/front-sdk'
 import { describe, expect, it, vi } from 'vitest'
-import type { Conversation, ConversationList } from '../../../../front-sdk/src'
 import { formatCustomerProfileBlocks } from '../../formatters/customer'
 import {
   handleHistoryQuery,

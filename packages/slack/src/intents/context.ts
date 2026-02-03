@@ -1,9 +1,9 @@
-import { initializeAxiom, log } from '../../../core/src/observability/axiom'
 import {
   type Conversation,
   type FrontClient,
   createFrontClient,
-} from '../../../front-sdk/src'
+} from '@skillrecordings/front-sdk'
+import { initializeAxiom, log } from '../../../core/src/observability/axiom'
 import type { Purchase, User } from '../../../sdk/src/integration'
 import {
   formatCustomerHistoryBlocks,

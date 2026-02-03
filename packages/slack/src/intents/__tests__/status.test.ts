@@ -1,5 +1,5 @@
+import type { Conversation, ConversationList } from '@skillrecordings/front-sdk'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import type { Conversation, ConversationList } from '../../../../front-sdk/src'
 import { buildFrontLink } from '../../formatters/status'
 import {
   createStatusCache,

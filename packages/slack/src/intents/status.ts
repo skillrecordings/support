@@ -1,9 +1,9 @@
-import { initializeAxiom, log } from '../../../core/src/observability/axiom'
 import {
   type Conversation,
   type FrontClient,
   createFrontClient,
-} from '../../../front-sdk/src'
+} from '@skillrecordings/front-sdk'
+import { initializeAxiom, log } from '../../../core/src/observability/axiom'
 import { STATUS_CACHE_TTL_MS } from '../config'
 import {
   type HealthStats,

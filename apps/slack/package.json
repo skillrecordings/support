@@ -17,7 +17,8 @@
     "@skillrecordings/memory": "*",
     "next": "16.1.0",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "@skillrecordings/front-sdk": "*"
   },
   "devDependencies": {
     "@repo/eslint-config": "*",

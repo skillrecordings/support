@@ -1,5 +1,5 @@
+import { type FrontClient, createFrontClient } from '@skillrecordings/front-sdk'
 import { initializeAxiom, log } from '../../../core/src/observability/axiom'
-import { type FrontClient, createFrontClient } from '../../../front-sdk/src'
 
 export type QuickAction =
   | { type: 'approve_send' }
