@@ -185,7 +185,7 @@ describe('fastClassify — spam fast-path', () => {
   it('does NOT fast-classify vendor outreach with email in body (goes to LLM)', () => {
     const input = makeInput(
       'Affiliate Opportunity',
-      'Contact me at [EMAIL] for our affiliate Opportunity'
+      'Contact me at test@example.com for our affiliate Opportunity'
     )
     const signals = extractSignals(input)
     const result = fastClassify(input, signals)

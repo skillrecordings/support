@@ -23,7 +23,7 @@ describe('getPaymentHistory', () => {
   const mockContext: ExecutionContext = {
     user: {
       id: 'user-123',
-      email: '[EMAIL]',
+      email: 'test@example.com',
       name: 'Test Customer',
     },
     purchases: [],
@@ -81,7 +81,7 @@ describe('getPaymentHistory', () => {
 
       const result = await getPaymentHistory.execute(
         {
-          customerEmail: '[EMAIL]',
+          customerEmail: 'test@example.com',
           limit: 10,
         },
         mockContext
@@ -103,7 +103,7 @@ describe('getPaymentHistory', () => {
 
       // Verify Stripe API called with correct params
       expect(mockChargesList).toHaveBeenCalledWith(
-        { customer: '[EMAIL]', limit: 10 },
+        { customer: 'test@example.com', limit: 10 },
         { stripeAccount: 'acct_1LFP5yAozSgJZBRP' }
       )
     })
@@ -116,13 +116,13 @@ describe('getPaymentHistory', () => {
 
       await getPaymentHistory.execute(
         {
-          customerEmail: '[EMAIL]',
+          customerEmail: 'test@example.com',
         },
         mockContext
       )
 
       expect(mockChargesList).toHaveBeenCalledWith(
-        { customer: '[EMAIL]', limit: 25 },
+        { customer: 'test@example.com', limit: 25 },
         { stripeAccount: 'acct_1LFP5yAozSgJZBRP' }
       )
     })
@@ -135,7 +135,7 @@ describe('getPaymentHistory', () => {
 
       const result = await getPaymentHistory.execute(
         {
-          customerEmail: '[EMAIL]',
+          customerEmail: 'test@example.com',
         },
         mockContext
       )
@@ -156,7 +156,7 @@ describe('getPaymentHistory', () => {
 
       const result = await getPaymentHistory.execute(
         {
-          customerEmail: '[EMAIL]',
+          customerEmail: 'test@example.com',
         },
         mockContext
       )
@@ -179,7 +179,7 @@ describe('getPaymentHistory', () => {
 
       const result = await getPaymentHistory.execute(
         {
-          customerEmail: '[EMAIL]',
+          customerEmail: 'test@example.com',
         },
         contextWithoutStripe
       )
@@ -199,7 +199,7 @@ describe('getPaymentHistory', () => {
 
       const result = await getPaymentHistory.execute(
         {
-          customerEmail: '[EMAIL]',
+          customerEmail: 'test@example.com',
         },
         mockContext
       )
@@ -230,7 +230,7 @@ describe('getPaymentHistory', () => {
     it('should reject negative limit', async () => {
       const result = await getPaymentHistory.execute(
         {
-          customerEmail: '[EMAIL]',
+          customerEmail: 'test@example.com',
           limit: -5,
         },
         mockContext
@@ -245,7 +245,7 @@ describe('getPaymentHistory', () => {
     it('should reject limit over 100', async () => {
       const result = await getPaymentHistory.execute(
         {
-          customerEmail: '[EMAIL]',
+          customerEmail: 'test@example.com',
           limit: 150,
         },
         mockContext

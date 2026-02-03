@@ -1,34 +1,38 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createCommentContextService } from './comment-context'
 
+// Shared mock client instance
+const mockClient = {
+  conversations: {
+    listMessages: vi.fn(),
+  },
+  raw: {
+    get: vi.fn(),
+  },
+}
+
 // Mock the front-sdk module
-vi.mock('@skillrecordings/front-sdk', () => {
-  const mockListMessages = vi.fn()
-  const mockRawGet = vi.fn()
+vi.mock('@skillrecordings/front-sdk', () => ({
+  FRONT_API_BASE: 'https://api2.frontapp.com',
+  createFrontClient: vi.fn(() => mockClient),
+  paginate: vi.fn(async (firstPage, getPage) => {
+    const results: unknown[] = []
+    let page = await firstPage()
+    results.push(...page._results)
 
-  return {
-    createFrontClient: vi.fn(() => ({
-      conversations: {
-        listMessages: mockListMessages,
-      },
-      raw: {
-        get: mockRawGet,
-      },
-    })),
-    paginate: vi.fn(async (firstPage, getPage) => {
-      const results: unknown[] = []
-      let page = await firstPage()
+    while (page._pagination?.next) {
+      page = await getPage(page._pagination.next)
       results.push(...page._results)
+    }
 
-      while (page._pagination?.next) {
-        page = await getPage(page._pagination.next)
-        results.push(...page._results)
-      }
+    return results
+  }),
+}))
 
-      return results
-    }),
-  }
-})
+// Mock the instrumented client (what the code actually uses)
+vi.mock('../front/instrumented-client', () => ({
+  createInstrumentedFrontClient: vi.fn(() => mockClient),
+}))
 
 import { createFrontClient, paginate } from '@skillrecordings/front-sdk'
 
@@ -87,11 +91,7 @@ describe('createCommentContextService', () => {
     it('returns empty thread for conversation with no messages', async () => {
       const service = createCommentContextService({ apiToken: 'test-token' })
 
-      const mockFn = createFrontClient as ReturnType<typeof vi.fn>
-      const mockClient = mockFn.mock.results[0]?.value as
-        | MockFrontClient
-        | undefined
-      mockClient?.conversations.listMessages.mockResolvedValue({
+      mockClient.conversations.listMessages.mockResolvedValue({
         _results: [],
         _pagination: {},
       })
@@ -107,11 +107,7 @@ describe('createCommentContextService', () => {
     it('returns thread with single message', async () => {
       const service = createCommentContextService({ apiToken: 'test-token' })
 
-      const mockFn = createFrontClient as ReturnType<typeof vi.fn>
-      const mockClient = mockFn.mock.results[0]?.value as
-        | MockFrontClient
-        | undefined
-      mockClient?.conversations.listMessages.mockResolvedValue({
+      mockClient.conversations.listMessages.mockResolvedValue({
         _results: [
           createMockMessage({
             id: 'msg_001',
@@ -141,11 +137,7 @@ describe('createCommentContextService', () => {
     it('returns thread with multiple messages sorted by creation time', async () => {
       const service = createCommentContextService({ apiToken: 'test-token' })
 
-      const mockFn = createFrontClient as ReturnType<typeof vi.fn>
-      const mockClient = mockFn.mock.results[0]?.value as
-        | MockFrontClient
-        | undefined
-      mockClient?.conversations.listMessages.mockResolvedValue({
+      mockClient.conversations.listMessages.mockResolvedValue({
         _results: [
           // Return in reverse order to test sorting
           createMockMessage({
@@ -197,11 +189,7 @@ describe('createCommentContextService', () => {
     it('builds author map from teammate authors', async () => {
       const service = createCommentContextService({ apiToken: 'test-token' })
 
-      const mockFn = createFrontClient as ReturnType<typeof vi.fn>
-      const mockClient = mockFn.mock.results[0]?.value as
-        | MockFrontClient
-        | undefined
-      mockClient?.conversations.listMessages.mockResolvedValue({
+      mockClient.conversations.listMessages.mockResolvedValue({
         _results: [
           createMockMessage({
             id: 'msg_001',
@@ -266,13 +254,8 @@ describe('createCommentContextService', () => {
     it('handles pagination for long threads', async () => {
       const service = createCommentContextService({ apiToken: 'test-token' })
 
-      const mockFn = createFrontClient as ReturnType<typeof vi.fn>
-      const mockClient = mockFn.mock.results[0]?.value as
-        | MockFrontClient
-        | undefined
-
       // First page
-      mockClient?.conversations.listMessages.mockResolvedValue({
+      mockClient.conversations.listMessages.mockResolvedValue({
         _results: [
           createMockMessage({
             id: 'msg_001',
@@ -288,7 +271,7 @@ describe('createCommentContextService', () => {
       })
 
       // Second page (fetched via raw.get)
-      mockClient?.raw.get.mockResolvedValue({
+      mockClient.raw.get.mockResolvedValue({
         _results: [
           createMockMessage({
             id: 'msg_002',
@@ -315,11 +298,7 @@ describe('createCommentContextService', () => {
     it('extracts sender email from recipients for inbound messages', async () => {
       const service = createCommentContextService({ apiToken: 'test-token' })
 
-      const mockFn = createFrontClient as ReturnType<typeof vi.fn>
-      const mockClient = mockFn.mock.results[0]?.value as
-        | MockFrontClient
-        | undefined
-      mockClient?.conversations.listMessages.mockResolvedValue({
+      mockClient.conversations.listMessages.mockResolvedValue({
         _results: [
           createMockMessage({
             id: 'msg_001',
@@ -345,11 +324,7 @@ describe('createCommentContextService', () => {
     it('uses author email when author is present', async () => {
       const service = createCommentContextService({ apiToken: 'test-token' })
 
-      const mockFn = createFrontClient as ReturnType<typeof vi.fn>
-      const mockClient = mockFn.mock.results[0]?.value as
-        | MockFrontClient
-        | undefined
-      mockClient?.conversations.listMessages.mockResolvedValue({
+      mockClient.conversations.listMessages.mockResolvedValue({
         _results: [
           createMockMessage({
             id: 'msg_001',

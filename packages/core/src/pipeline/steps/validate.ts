@@ -657,6 +657,8 @@ export interface ValidateOptions {
   appId?: string
   /** Category of the support request (for more targeted memory queries) */
   category?: MessageCategory
+  /** Optional category stats provider (primarily for testing) */
+  getCategoryStats?: (category?: MessageCategory) => Promise<CategoryStats>
   /** Skip memory query (for testing or when memory service unavailable) */
   skipMemoryQuery?: boolean
   /** Similarity threshold for matching corrections (default: 0.7) */
@@ -751,6 +753,7 @@ export async function validate(
   const {
     appId,
     category,
+    getCategoryStats: getCategoryStatsOverride,
     skipMemoryQuery = false,
     correctionThreshold = 0.7,
     skipRelevanceCheck = false,
@@ -1044,7 +1047,9 @@ export async function validate(
       urgency: 'high',
     }
   } else {
-    const categoryStats = await getCategoryStats(category)
+    const categoryStats = await (getCategoryStatsOverride ?? getCategoryStats)(
+      category
+    )
     const meetsAutoSend =
       categoryStats.sentUnchangedRate >= threshold.autoSendMinConfidence &&
       categoryStats.volume >= threshold.autoSendMinVolume &&

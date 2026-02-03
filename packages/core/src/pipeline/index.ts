@@ -627,6 +627,8 @@ export async function runThreadPipeline(
             conversationId: input.thread.conversationId,
             context,
             appId: input.appConfig.appId,
+            category: classification.category,
+            action: routing.action,
           },
           {
             frontApiToken: options.frontApiToken,

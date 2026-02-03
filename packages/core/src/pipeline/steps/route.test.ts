@@ -12,26 +12,21 @@ import type {
   ThreadClassifyOutput,
   ThreadSignals,
 } from '../types'
-import {
-  recordEscalationConfirmed,
-  recordRoutingOutcome,
-  recordShouldHaveEscalated,
-  recordUnnecessaryEscalation,
-  route,
-  routeThread,
-  routeThreadWithMemory,
-  routeWithMemory,
-  shouldEscalate,
-  shouldRespond,
-  shouldSilence,
-} from './route'
 
-// Create mock functions
-const mockStore = vi.fn().mockResolvedValue({ id: 'mem-123' })
-const mockRecordCitationOutcome = vi.fn().mockResolvedValue(undefined)
-const mockQueryMemoriesForStage = vi.fn().mockResolvedValue([])
-const mockFormatMemoriesCompact = vi.fn().mockReturnValue('')
-const mockCiteMemories = vi.fn().mockResolvedValue(undefined)
+// Use vi.hoisted for proper mock hoisting
+const {
+  mockStore,
+  mockRecordCitationOutcome,
+  mockQueryMemoriesForStage,
+  mockFormatMemoriesCompact,
+  mockCiteMemories,
+} = vi.hoisted(() => ({
+  mockStore: vi.fn().mockResolvedValue({ id: 'mem-123' }),
+  mockRecordCitationOutcome: vi.fn().mockResolvedValue(undefined),
+  mockQueryMemoriesForStage: vi.fn().mockResolvedValue([]),
+  mockFormatMemoriesCompact: vi.fn().mockReturnValue(''),
+  mockCiteMemories: vi.fn().mockResolvedValue(undefined),
+}))
 
 // Mock the memory services
 vi.mock('@skillrecordings/memory/support-memory', () => ({
@@ -49,6 +44,19 @@ vi.mock('../../memory/query', () => ({
 
 // Import for type checking (the actual implementations are mocked above)
 import { SupportMemoryService } from '@skillrecordings/memory/support-memory'
+import {
+  recordEscalationConfirmed,
+  recordRoutingOutcome,
+  recordShouldHaveEscalated,
+  recordUnnecessaryEscalation,
+  route,
+  routeThread,
+  routeThreadWithMemory,
+  routeWithMemory,
+  shouldEscalate,
+  shouldRespond,
+  shouldSilence,
+} from './route'
 
 describe('route step', () => {
   const mockSignals = {
@@ -476,6 +484,19 @@ describe('thread routing', () => {
       })
 
       expect(result.action).toBe('support_teammate')
+    })
+
+    it('silences system threads even if teammate signals are present', () => {
+      const result = routeThread({
+        classification: createThreadClassification('system', {
+          hasTeammateMessage: true,
+          lastResponderType: 'customer',
+          awaitingCustomerReply: false,
+        }),
+        appConfig: mockAppConfig,
+      })
+
+      expect(result.action).toBe('silence')
     })
   })
 

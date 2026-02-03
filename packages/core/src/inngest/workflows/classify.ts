@@ -7,6 +7,7 @@
  * IMPORTANT: The webhook passes empty body/senderEmail - we fetch from Front API.
  */
 
+import { isCollaboratorEmail } from '../../config/collaborators'
 import { extractCustomerEmail } from '../../front/client'
 import { createInstrumentedFrontClient } from '../../front/instrumented-client'
 import {
@@ -191,6 +192,30 @@ export const classifyWorkflow = inngest.createFunction(
       effectiveBodyLength: effectiveBody.length,
       usedFetchedValues: fetchedMessage.fetched,
     })
+
+    if (isCollaboratorEmail(effectiveSenderEmail)) {
+      await log('info', 'collaborator allowlist matched, skipping pipeline', {
+        workflow: 'support-classify',
+        conversationId,
+        messageId,
+        traceId,
+        senderEmail: effectiveSenderEmail,
+      })
+
+      await traceWorkflowStep({
+        workflowName: 'support-classify',
+        conversationId,
+        appId,
+        stepName: 'collaborator-allowlist',
+        durationMs: Date.now() - workflowStartTime,
+        success: true,
+        metadata: {
+          senderEmail: effectiveSenderEmail,
+        },
+      })
+
+      return { conversationId, messageId, skipped: true }
+    }
 
     // Run classification
     const classification = await step.run('classify', async () => {

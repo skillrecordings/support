@@ -5,9 +5,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Mock dependencies before imports
-vi.mock('@skillrecordings/front-sdk', () => ({
-  createFrontClient: vi.fn(),
-}))
+vi.mock('@skillrecordings/front-sdk', async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import('@skillrecordings/front-sdk')>()
+  return {
+    ...actual,
+    createFrontClient: vi.fn(),
+  }
+})
 
 vi.mock('@skillrecordings/database', () => ({
   database: {
@@ -30,6 +35,17 @@ vi.mock('@skillrecordings/database', () => ({
 vi.mock('../services/app-registry', () => ({
   getApp: vi.fn(),
   getAppByInboxId: vi.fn(),
+}))
+
+vi.mock('../front/instrumented-client', () => ({
+  createInstrumentedFrontClient: vi.fn(() => ({
+    inboxes: {
+      listConversations: vi.fn().mockResolvedValue({ _results: [] }),
+    },
+    conversations: {
+      listMessages: vi.fn().mockResolvedValue({ _results: [] }),
+    },
+  })),
 }))
 
 vi.mock('../trust/repository', () => ({

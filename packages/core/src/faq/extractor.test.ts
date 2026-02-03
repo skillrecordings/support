@@ -2,7 +2,7 @@
  * Tests for FAQ Extraction Pipeline
  */
 
-import { describe, expect, it, mock } from 'bun:test'
+import { describe, expect, it, vi } from 'vitest'
 
 // Import the functions we want to test (need to expose them)
 // For now, we test the scoring logic by importing and testing

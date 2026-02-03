@@ -17,8 +17,8 @@ describe('TagSchema', () => {
     highlight: 'blue',
     is_private: false,
     is_visible_in_conversation_lists: true,
-    created_at: [PHONE],
-    updated_at: [PHONE],
+    created_at: 1700000000,
+    updated_at: 1700000001,
   }
 
   it('parses a valid tag', () => {

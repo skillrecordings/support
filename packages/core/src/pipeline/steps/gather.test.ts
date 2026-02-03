@@ -40,7 +40,7 @@ vi.mock('../../observability/axiom', () => ({
 describe('gather step', () => {
   const mockUser: User = {
     id: 'usr_123',
-    email: '[EMAIL]',
+    email: 'customer@example.com',
     name: 'Test Customer',
     createdAt: '2025-01-01T00:00:00Z',
   }
@@ -85,7 +85,7 @@ describe('gather step', () => {
     message: {
       subject: 'Need help with access',
       body: 'I purchased the course but cannot login',
-      from: '[EMAIL]',
+      from: 'customer@example.com',
       conversationId: 'cnv_123',
     },
     classification: createClassifyOutput(),
@@ -95,13 +95,13 @@ describe('gather step', () => {
 
   describe('extractEmail', () => {
     it('extracts valid email from text', () => {
-      const text = 'Please contact me at [EMAIL] for help'
-      expect(extractEmail(text)).toBe('[EMAIL]')
+      const text = 'Please contact me at customer@example.com for help'
+      expect(extractEmail(text)).toBe('customer@example.com')
     })
 
     it('returns first email if multiple present', () => {
-      const text = 'From [EMAIL] to [EMAIL]'
-      expect(extractEmail(text)).toBe('[EMAIL]')
+      const text = 'From customer@example.com to other@example.com'
+      expect(extractEmail(text)).toBe('customer@example.com')
     })
 
     it('returns null for no email', () => {
@@ -110,33 +110,33 @@ describe('gather step', () => {
     })
 
     it('filters out noreply addresses', () => {
-      const text = '[EMAIL] and [EMAIL]'
-      expect(extractEmail(text)).toBe('[EMAIL]')
+      const text = 'noreply@company.com and customer@example.com'
+      expect(extractEmail(text)).toBe('customer@example.com')
     })
 
     it('filters out internal support emails', () => {
       const text =
-        '[EMAIL] forwarded from [EMAIL]'
-      expect(extractEmail(text)).toBe('[EMAIL]')
+        'support@totaltypescript.com forwarded from customer@example.com'
+      expect(extractEmail(text)).toBe('customer@example.com')
     })
   })
 
   describe('determineCustomerEmail', () => {
     it('prioritizes sender email over body extraction', () => {
       const result = determineCustomerEmail(
-        '[EMAIL]',
-        'Contact me at [EMAIL]'
+        'primary@example.com',
+        'Contact me at secondary@example.com'
       )
-      expect(result.email).toBe('[EMAIL]')
+      expect(result.email).toBe('primary@example.com')
       expect(result.source).toBe('sender')
     })
 
     it('falls back to body when sender is missing', () => {
       const result = determineCustomerEmail(
         undefined,
-        'My email is [EMAIL]'
+        'My email is fallback@example.com'
       )
-      expect(result.email).toBe('[EMAIL]')
+      expect(result.email).toBe('fallback@example.com')
       expect(result.source).toBe('body')
     })
 
@@ -147,8 +147,11 @@ describe('gather step', () => {
     })
 
     it('handles empty sender string', () => {
-      const result = determineCustomerEmail('', '[EMAIL]')
-      expect(result.email).toBe('[EMAIL]')
+      const result = determineCustomerEmail(
+        '',
+        'Contact me at body@example.com'
+      )
+      expect(result.email).toBe('body@example.com')
       expect(result.source).toBe('body')
     })
   })
@@ -330,18 +333,18 @@ describe('gather step', () => {
       const input = createGatherInput({
         message: {
           subject: 'Help',
-          body: 'My email is [EMAIL]',
-          from: '[EMAIL]',
+          body: 'My email is body@example.com',
+          from: 'sender@example.com',
         },
       })
 
       const result = await gather(input, { skipMemory: true })
 
       expect(result.emailResolution).toBeDefined()
-      expect(result.emailResolution?.email).toBe('[EMAIL]')
+      expect(result.emailResolution?.email).toBe('sender@example.com')
       expect(result.emailResolution?.source).toBe('sender')
       expect(result.emailResolution?.bodyExtractedEmail).toBe(
-        '[EMAIL]'
+        'body@example.com'
       )
     })
 
@@ -370,7 +373,7 @@ describe('gather step', () => {
 
       const formatted = formatContextForPrompt(context)
 
-      expect(formatted).toContain('[EMAIL]')
+      expect(formatted).toContain('customer@example.com')
       expect(formatted).toContain('Test Customer')
       expect(formatted).toContain('Total TypeScript')
       expect(formatted).toContain('active')
@@ -462,7 +465,9 @@ describe('gather step', () => {
             totalSeats: 10,
             claimedSeats: 7,
             availableSeats: 3,
-            claimedBy: [{ email: '[EMAIL]', claimedAt: '2025-01-15' }],
+            claimedBy: [
+              { email: 'seat-holder@example.com', claimedAt: '2025-01-15' },
+            ],
           },
         ],
       }

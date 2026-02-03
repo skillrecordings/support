@@ -1,13 +1,18 @@
 import { createHmac } from 'node:crypto'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Mock fetch globally
 const mockFetch = vi.fn()
-vi.stubGlobal('fetch', mockFetch)
+const originalFetch = globalThis.fetch
+globalThis.fetch = mockFetch as unknown as typeof fetch
 
 describe('health command', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+  })
+
+  afterAll(() => {
+    globalThis.fetch = originalFetch
   })
 
   describe('signRequest', () => {
@@ -31,7 +36,7 @@ describe('health command', () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         status: 200,
-        json: async () => ({ id: 'user-123', email: '[EMAIL]' }),
+        json: async () => ({ id: 'user-123', email: 'test@example.com' }),
       })
 
       // Test that fetch was called with correct headers

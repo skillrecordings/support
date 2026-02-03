@@ -18,23 +18,23 @@ import {
 
 describe('isNoiseSenderDomain', () => {
   it('filters CastingWords', () => {
-    expect(isNoiseSenderDomain('[EMAIL]')).toBe(true)
+    expect(isNoiseSenderDomain('notify@castingwords.com')).toBe(true)
   })
 
   it('filters Google domains', () => {
-    expect(isNoiseSenderDomain('[EMAIL]')).toBe(true)
-    expect(isNoiseSenderDomain('[EMAIL]')).toBe(true)
+    expect(isNoiseSenderDomain('calendar@google.com')).toBe(true)
+    expect(isNoiseSenderDomain('noreply@googlemail.com')).toBe(true)
   })
 
   it('filters cloud service domains', () => {
-    expect(isNoiseSenderDomain('[EMAIL]')).toBe(true)
-    expect(isNoiseSenderDomain('[EMAIL]')).toBe(true)
-    expect(isNoiseSenderDomain('[EMAIL]')).toBe(true)
+    expect(isNoiseSenderDomain('alerts@vercel.com')).toBe(true)
+    expect(isNoiseSenderDomain('status@cloudinary.com')).toBe(true)
+    expect(isNoiseSenderDomain('noreply@mux.com')).toBe(true)
   })
 
   it('allows customer domains', () => {
-    expect(isNoiseSenderDomain('[EMAIL]')).toBe(false)
-    expect(isNoiseSenderDomain('[EMAIL]')).toBe(false)
+    expect(isNoiseSenderDomain('user@gmail.com')).toBe(false)
+    expect(isNoiseSenderDomain('customer@example.com')).toBe(false)
   })
 
   it('handles invalid emails', () => {
@@ -159,13 +159,13 @@ describe('isServiceNotification', () => {
 
 describe('shouldFilter', () => {
   it('filters by sender domain first', () => {
-    const result = shouldFilter('Any message', '[EMAIL]')
+    const result = shouldFilter('Any message', 'notify@castingwords.com')
     expect(result.filtered).toBe(true)
     expect(result.reason).toBe('sender_domain')
   })
 
   it('filters lesson comments', () => {
-    const comment = `Wayne [EMAIL] writes:
+    const comment = `Wayne wayne@example.com writes:
 Is that WallabyJS?
 --- lesson: https://egghead.io/lessons/...`
     const result = shouldFilter(comment)
@@ -196,7 +196,7 @@ Is that WallabyJS?
   it('passes legitimate support messages', () => {
     const result = shouldFilter(
       'Hi, I would like to request a refund for my purchase',
-      '[EMAIL]'
+      'customer@example.com'
     )
     expect(result.filtered).toBe(false)
     expect(result.reason).toBeUndefined()

@@ -29,20 +29,24 @@ describe('FAQ Clusterer', () => {
       expect(result).toHaveLength(0)
     })
 
-    it('should respect minClusterSize option', async () => {
-      const { clusterBySimilarity } = await import('./clusterer')
+    // This test requires OPENAI_API_KEY for computing embeddings
+    it.skipIf(!process.env.OPENAI_API_KEY)(
+      'should respect minClusterSize option',
+      async () => {
+        const { clusterBySimilarity } = await import('./clusterer')
 
-      const conversations: ResolvedConversation[] = [
-        createMockConversation('conv1', 'Question 1', 'Answer 1'),
-        createMockConversation('conv2', 'Question 2', 'Answer 2'),
-      ]
+        const conversations: ResolvedConversation[] = [
+          createMockConversation('conv1', 'Question 1', 'Answer 1'),
+          createMockConversation('conv2', 'Question 2', 'Answer 2'),
+        ]
 
-      // With minClusterSize of 5, no clusters should be returned
-      const result = await clusterBySimilarity(conversations, {
-        minClusterSize: 5,
-      })
-      expect(result).toHaveLength(0)
-    })
+        // With minClusterSize of 5, no clusters should be returned
+        const result = await clusterBySimilarity(conversations, {
+          minClusterSize: 5,
+        })
+        expect(result).toHaveLength(0)
+      }
+    )
   })
 
   describe('generateCandidatesFromClusters', () => {

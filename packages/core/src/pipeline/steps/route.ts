@@ -359,6 +359,7 @@ const THREAD_ROUTING_RULES: ThreadRoutingRule[] = [
   {
     name: 'support_teammate',
     condition: ({ classification }) =>
+      classification.category !== 'system' &&
       shouldSupportTeammate(classification.signals),
     action: 'support_teammate',
     reason: 'Human teammate is handling - adding context as comment',

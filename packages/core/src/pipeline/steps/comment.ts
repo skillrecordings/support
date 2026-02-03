@@ -495,8 +495,15 @@ export async function addSupportComment(
   input: CommentInput,
   options: AddCommentOptions
 ): Promise<CommentOutput> {
-  const { conversationId, context } = input
+  const { conversationId, context, action, category } = input
   const { frontApiToken, authorId, minimal } = options
+
+  if (action === 'silence' || category === 'system') {
+    return {
+      added: false,
+      error: 'Skipped support comment for silence/system',
+    }
+  }
 
   try {
     const front = createInstrumentedFrontClient({ apiToken: frontApiToken })
@@ -699,6 +706,14 @@ export async function addDecisionComment(
   options: AddDecisionCommentOptions
 ): Promise<{ added: boolean; error?: string; durationMs: number }> {
   const startTime = Date.now()
+
+  if (context.action === 'silence' || context.category === 'system') {
+    return {
+      added: false,
+      error: 'Skipped decision comment for silence/system',
+      durationMs: Date.now() - startTime,
+    }
+  }
 
   try {
     const front = createInstrumentedFrontClient({

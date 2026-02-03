@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { z } from 'zod'
 import { createTool, setAuditHooks } from '../tools'
 import type { ExecutionContext } from '../tools'
@@ -29,18 +29,21 @@ describe('createTool', () => {
     })
 
     const mockContext: ExecutionContext = {
-      user: { id: '1', email: '[EMAIL]' },
+      user: { id: '1', email: 'test@example.com' },
       purchases: [],
       appConfig: { id: 'app1', name: 'Test App' },
       traceId: 'trace-123',
       conversationId: 'conv-123',
     }
 
-    const result = await tool.execute({ email: '[EMAIL]' }, mockContext)
+    const result = await tool.execute(
+      { email: 'test@example.com' },
+      mockContext
+    )
 
     expect(result.success).toBe(true)
     if (result.success) {
-      expect(result.data).toEqual({ email: '[EMAIL]', found: true })
+      expect(result.data).toEqual({ email: 'test@example.com', found: true })
     }
   })
 
@@ -55,14 +58,17 @@ describe('createTool', () => {
     })
 
     const mockContext: ExecutionContext = {
-      user: { id: '1', email: '[EMAIL]' },
+      user: { id: '1', email: 'test@example.com' },
       purchases: [],
       appConfig: { id: 'app1', name: 'Test App' },
       traceId: 'trace-123',
       conversationId: 'conv-123',
     }
 
-    const result = await tool.execute({ email: 'not-an-email' } as any, mockContext)
+    const result = await tool.execute(
+      { email: 'not-an-email' } as any,
+      mockContext
+    )
 
     expect(result.success).toBe(false)
     if (!result.success) {
@@ -82,7 +88,7 @@ describe('createTool', () => {
     })
 
     const mockContext: ExecutionContext = {
-      user: { id: '1', email: '[EMAIL]' },
+      user: { id: '1', email: 'test@example.com' },
       purchases: [],
       appConfig: { id: 'app1', name: 'Test App' },
       traceId: 'trace-123',
@@ -104,9 +110,12 @@ describe('createTool', () => {
       description: 'Process refund',
       parameters: z.object({ purchaseId: z.string() }),
       requiresApproval: (params, context) => {
-        const purchase = context.purchases.find((p) => p.id === params.purchaseId)
+        const purchase = context.purchases.find(
+          (p) => p.id === params.purchaseId
+        )
         if (!purchase) return true
-        const daysSince = (Date.now() - purchase.purchasedAt.getTime()) / (1000 * 60 * 60 * 24)
+        const daysSince =
+          (Date.now() - purchase.purchasedAt.getTime()) / (1000 * 60 * 60 * 24)
         return daysSince > 30
       },
       execute: async ({ purchaseId }) => ({ refunded: purchaseId }),
@@ -115,7 +124,7 @@ describe('createTool', () => {
     expect(tool.requiresApproval).toBeDefined()
 
     const recentPurchase = {
-      user: { id: '1', email: '[EMAIL]' },
+      user: { id: '1', email: 'test@example.com' },
       purchases: [
         {
           id: 'purchase-1',
@@ -137,8 +146,12 @@ describe('createTool', () => {
       ],
     }
 
-    expect(tool.requiresApproval!({ purchaseId: 'purchase-1' }, recentPurchase)).toBe(false)
-    expect(tool.requiresApproval!({ purchaseId: 'purchase-1' }, oldPurchase)).toBe(true)
+    expect(
+      tool.requiresApproval!({ purchaseId: 'purchase-1' }, recentPurchase)
+    ).toBe(false)
+    expect(
+      tool.requiresApproval!({ purchaseId: 'purchase-1' }, oldPurchase)
+    ).toBe(true)
   })
 
   it('calls audit hooks in order', async () => {
@@ -164,7 +177,7 @@ describe('createTool', () => {
     })
 
     const mockContext: ExecutionContext = {
-      user: { id: '1', email: '[EMAIL]' },
+      user: { id: '1', email: 'test@example.com' },
       purchases: [],
       appConfig: { id: 'app1', name: 'Test App' },
       traceId: 'trace-123',
@@ -198,7 +211,7 @@ describe('createTool', () => {
     })
 
     const mockContext: ExecutionContext = {
-      user: { id: '1', email: '[EMAIL]' },
+      user: { id: '1', email: 'test@example.com' },
       purchases: [],
       appConfig: { id: 'app1', name: 'Test App' },
       traceId: 'trace-123',
