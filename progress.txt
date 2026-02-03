@@ -27,3 +27,11 @@ Summary: Summary:
 - Implemented Slack status query handlers with Front data fetching, 30s caching, and Axiom logging in `packages/slack/src/intents/status.ts`.
 - Added Slack Block Kit formatter helpers and Front link builder in `packages/slack/src/formatters/status.ts`.
 - Added TDD coverage for urgent, pending, health, link generation, and cache behavior in `packages/slack/src/intents/__tests__/status.test
+
+---
+[2026-02-03T17:41:13.248Z]
+Completed: Epic 6.3: Draft Refinement in Threads (#158)
+Files: none
+Summary: **Summary**
+Implemented draft refinement intent parsing, versioned draft state, and Slack thread reply handling with Axiom logging. Added tests for intent parsing, version history, approvals, thread reply handling, and graceful ignore behavior.  
+Files: `packages/slack/src/intents/draft.ts`, `packages/slack/src/handlers/thread-reply.ts`, `packages/slack/src/intents/__tests__/draft.test.ts`, `packa

@@ -40,7 +40,7 @@
       "title": "Epic 6.3: Draft Refinement in Threads (#158)",
       "description": "Enable team members to refine AI-generated drafts by replying to bot notifications in Slack threads. Natural language feedback triggers draft revisions.\n\n## Files to Create\n```\npackages/slack/src/handlers/thread-reply.ts    # Reply handler\npackages/slack/src/intents/draft.ts            # Draft refinement logic\npackages/slack/src/intents/__tests__/draft.test.ts\npackages/slack/src/handlers/__tests__/thread-reply.test.ts\n```\n\n## Implementation\n\n### 1. Refinement Types\n```typescript\ntype RefinementIntent = \n  | { type: \"simplify\" }\n  | { type: \"formalize\" }\n  | { type: \"shorten\" }\n  | { type: \"add_content\"; content: string }\n  | { type: \"mention_topic\"; topic: string }\n  | { type: \"approve\" }\n  | { type: \"reject\"; reason?: string }\n```\n\n### 2. Thread Reply Handler\n- Listen for `message` events in threads where bot has posted\n- Parse refinement intent from reply text\n- Apply refinement to current draft\n- Post revised draft in same thread\n\n### 3. Draft Revision\n- Call LLM to apply refinement (simplify, formalize, etc.)\n- Track version history: original → v1 → v2 → sent\n- Show diff indicator in response\n\n### 4. Approval Flow\n- \"looks good\" / \"approve\" triggers send confirmation\n- Integration point for Epic 4 learning capture\n\n## TDD Tests to Write FIRST\n1. \"simplify\" refinement parses correctly\n2. \"add [link]\" extracts content\n3. Thread reply triggers handler\n4. Draft versioning tracks history\n5. Approval detection\n6. Non-refinement replies ignored gracefully\n\n## Depends On\nStory 1 (6.1) for intent handling",
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "validationCommand": "cd ~/Code/skillrecordings/support && bun run check-types && bun test packages/slack/src/intents/__tests__/draft.test.ts packages/slack/src/handlers/__tests__/thread-reply.test.ts 2>&1 | tail -30",
       "acceptanceCriteria": [
         "Reply to draft notification with feedback revises draft",
@@ -101,7 +101,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-03T17:10:51.448Z",
-    "totalIterations": 2,
-    "lastIteration": "2026-02-03T17:36:24.584Z"
+    "totalIterations": 3,
+    "lastIteration": "2026-02-03T17:41:13.247Z"
   }
 }
