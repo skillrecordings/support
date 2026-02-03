@@ -200,6 +200,9 @@ export async function applyRefinement(
   context?: DraftRefinementContext
 ): Promise<DraftRefinementResult> {
   const previous = state.versions[state.versions.length - 1]
+  if (!previous) {
+    throw new Error('Cannot refine draft: no versions exist')
+  }
   const model = deps?.model ?? DEFAULT_MODEL
   const generate = deps?.generateText ?? generateText
   const instruction = buildRefinementInstruction(intent)

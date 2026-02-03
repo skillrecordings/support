@@ -13,7 +13,7 @@ export {
   type Pagination,
   type PaginatedResponse,
   type ErrorResponse,
-} from './schemas/common.js'
+} from './schemas/common'
 
 // Conversation schemas
 export {
@@ -37,7 +37,7 @@ export {
   type Conversation,
   type ConversationList,
   type UpdateConversation,
-} from './schemas/conversation.js'
+} from './schemas/conversation'
 
 // Message schemas
 export {
@@ -53,7 +53,7 @@ export {
   type Message,
   type MessageList,
   type CreateMessage,
-} from './schemas/message.js'
+} from './schemas/message'
 
 // Draft schemas
 export {
@@ -65,7 +65,7 @@ export {
   type DraftList,
   type CreateDraft,
   type EditDraft,
-} from './schemas/draft.js'
+} from './schemas/draft'
 
 // Template schemas
 export {
@@ -81,7 +81,7 @@ export {
   type MessageTemplateFolderList,
   type CreateMessageTemplate,
   type UpdateMessageTemplate,
-} from './schemas/template.js'
+} from './schemas/template'
 
 // Tag schemas
 export {
@@ -92,7 +92,7 @@ export {
   UpdateTagSchema,
   type Tag,
   type TagList,
-} from './schemas/tag.js'
+} from './schemas/tag'
 
 // Inbox schemas
 export {
@@ -102,7 +102,7 @@ export {
   type Inbox,
   type InboxList,
   type CreateInbox,
-} from './schemas/inbox.js'
+} from './schemas/inbox'
 
 // Channel schemas
 export {
@@ -113,7 +113,7 @@ export {
   UpdateChannelSchema,
   type Channel,
   type ChannelList,
-} from './schemas/channel.js'
+} from './schemas/channel'
 
 // Contact schemas
 export {
@@ -127,7 +127,7 @@ export {
   type ContactHandle,
   type Contact,
   type ContactList,
-} from './schemas/contact.js'
+} from './schemas/contact'
 
 // Teammate schemas
 export {
@@ -136,7 +136,7 @@ export {
   UpdateTeammateSchema,
   type Teammate,
   type TeammateList,
-} from './schemas/teammate.js'
+} from './schemas/teammate'
 
 // Export base client utilities
 export {
@@ -145,30 +145,30 @@ export {
   createBaseClient,
   type FrontClientConfig,
   type BaseClient,
-} from './client/base.js'
+} from './client/base'
 
 // Export individual client factories (for instrumented clients)
-export { createChannelsClient } from './client/channels.js'
-export { createContactsClient } from './client/contacts.js'
-export { createConversationsClient } from './client/conversations.js'
-export { createDraftsClient } from './client/drafts.js'
-export { createInboxesClient } from './client/inboxes.js'
-export { createMessagesClient } from './client/messages.js'
-export { createTagsClient } from './client/tags.js'
-export { createTeammatesClient } from './client/teammates.js'
-export { createTemplatesClient } from './client/templates.js'
+export { createChannelsClient } from './client/channels'
+export { createContactsClient } from './client/contacts'
+export { createConversationsClient } from './client/conversations'
+export { createDraftsClient } from './client/drafts'
+export { createInboxesClient } from './client/inboxes'
+export { createMessagesClient } from './client/messages'
+export { createTagsClient } from './client/tags'
+export { createTeammatesClient } from './client/teammates'
+export { createTemplatesClient } from './client/templates'
 
 // Import client factories
-import { type FrontClientConfig, createBaseClient } from './client/base.js'
-import { createChannelsClient } from './client/channels.js'
-import { createContactsClient } from './client/contacts.js'
-import { createConversationsClient } from './client/conversations.js'
-import { createDraftsClient } from './client/drafts.js'
-import { createInboxesClient } from './client/inboxes.js'
-import { createMessagesClient } from './client/messages.js'
-import { createTagsClient } from './client/tags.js'
-import { createTeammatesClient } from './client/teammates.js'
-import { createTemplatesClient } from './client/templates.js'
+import { type FrontClientConfig, createBaseClient } from './client/base'
+import { createChannelsClient } from './client/channels'
+import { createContactsClient } from './client/contacts'
+import { createConversationsClient } from './client/conversations'
+import { createDraftsClient } from './client/drafts'
+import { createInboxesClient } from './client/inboxes'
+import { createMessagesClient } from './client/messages'
+import { createTagsClient } from './client/tags'
+import { createTeammatesClient } from './client/teammates'
+import { createTemplatesClient } from './client/templates'
 
 /**
  * Pagination helper that automatically follows _pagination.next links.
