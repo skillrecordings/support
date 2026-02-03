@@ -55,6 +55,18 @@ export async function POST(request: NextRequest) {
             event_id: body.event_id,
             event: event,
           })
+        } catch (handlerError) {
+          // Post error message to thread
+          console.error('App mention handler error:', handlerError)
+          const { getSlackClient } = await import(
+            '../../../../../../packages/core/src/slack/client'
+          )
+          const slackClient = getSlackClient()
+          await slackClient.chat.postMessage({
+            channel,
+            text: `⚠️ Something went wrong: ${handlerError instanceof Error ? handlerError.message : 'Unknown error'}`,
+            thread_ts: threadTs,
+          })
         } finally {
           // Clear feedback
           await Promise.all([

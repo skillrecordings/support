@@ -10,13 +10,14 @@ import {
 import { getSlackClient } from '../../../core/src/slack/client'
 import type { ParsedIntent } from './types'
 
-const FRONT_API_TOKEN = process.env.FRONT_API_TOKEN
-
 function getFrontClient() {
-  if (!FRONT_API_TOKEN) {
-    throw new Error('FRONT_API_TOKEN not configured')
+  const token = process.env.FRONT_API_TOKEN
+  if (!token) {
+    throw new Error(
+      'FRONT_API_TOKEN not configured - please add it to the Vercel environment variables'
+    )
   }
-  return createFrontClient({ apiToken: FRONT_API_TOKEN })
+  return createFrontClient({ apiToken: token })
 }
 
 export interface ExecutionContext {
