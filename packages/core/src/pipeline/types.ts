@@ -395,6 +395,8 @@ export type ValidationIssueType =
   | 'repeated_mistake' // Draft may repeat a known corrected mistake
   | 'relevance' // Draft doesn't address the customer's actual question
   | 'ground_truth_mismatch' // Draft contradicts retrieved skill content
+  | 'audience_inappropriate' // Draft uses technical jargon or internal references
+  | 'tool_failure' // Critical gather tool failed, cannot verify customer info
 
 // ============================================================================
 // Step 5b: Comment (for support_teammate action)

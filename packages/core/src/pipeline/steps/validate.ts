@@ -460,6 +460,131 @@ Is this draft response relevant to what the customer asked?`
 }
 
 // ============================================================================
+// Audience awareness check (LLM-based)
+// ============================================================================
+
+const audienceAwarenessSchema = z.object({
+  appropriate: z
+    .boolean()
+    .describe('Whether the draft uses customer-appropriate language'),
+  issues: z
+    .array(
+      z.object({
+        type: z
+          .enum([
+            'technical_jargon',
+            'internal_reference',
+            'confusing_language',
+            'inappropriate_tone',
+          ])
+          .describe('Type of audience issue'),
+        phrase: z.string().describe('The problematic phrase or term'),
+        suggestion: z.string().optional().describe('Suggested alternative'),
+      })
+    )
+    .describe('List of audience-inappropriate issues found'),
+  reasoning: z
+    .string()
+    .describe('Brief explanation of the audience assessment'),
+})
+
+const AUDIENCE_AWARENESS_PROMPT = `You are a quality assurance checker for customer support responses.
+
+Your job: determine whether the draft response uses appropriate language for customers.
+
+Flag as NOT appropriate if the draft:
+- Uses technical jargon without explanation (API, webhook, OAuth, endpoint, etc.)
+- References internal tools or processes (Stripe dashboard, Intercom, internal tickets, etc.)
+- Uses confusing or ambiguous language that a typical customer wouldn't understand
+- Has an inappropriate tone (condescending, overly casual, cold, etc.)
+
+Flag as appropriate if the draft:
+- Uses plain, everyday language
+- Explains technical concepts when necessary
+- Focuses on helping the customer, not internal processes
+- Maintains a warm, professional tone
+
+Be practical — some technical terms (like "browser" or "login") are fine. Flag only terms that typical customers wouldn't know.`
+
+/**
+ * Check if the draft uses customer-appropriate language.
+ * Uses an LLM call to detect jargon, internal references, and tone issues.
+ */
+async function checkAudienceAwareness(
+  draft: string,
+  model: string = 'anthropic/claude-haiku-4-5'
+): Promise<ValidationIssue[]> {
+  const prompt = `Draft response to customer:
+${draft}
+
+Is this draft appropriate for a typical customer? Check for technical jargon, internal references, and tone.`
+
+  const { object } = await generateObject({
+    model,
+    schema: audienceAwarenessSchema,
+    system: AUDIENCE_AWARENESS_PROMPT,
+    prompt,
+  })
+
+  const issues: ValidationIssue[] = []
+
+  if (!object.appropriate && object.issues.length > 0) {
+    for (const issue of object.issues) {
+      issues.push({
+        type: 'audience_inappropriate',
+        severity: 'warning',
+        message: `Draft contains ${issue.type.replace('_', ' ')}: "${issue.phrase}"${issue.suggestion ? ` (consider: "${issue.suggestion}")` : ''}`,
+        match: issue.phrase,
+      })
+    }
+  }
+
+  return issues
+}
+
+// ============================================================================
+// Tool failure check
+// ============================================================================
+
+/** Critical tools that must succeed for certain categories */
+const CRITICAL_TOOLS_BY_CATEGORY: Record<string, string[]> = {
+  support_refund: ['user', 'purchases'],
+  support_access: ['user'],
+  support_billing: ['user', 'purchases'],
+  support_transfer: ['user', 'purchases'],
+}
+
+/**
+ * Check if critical gather tools failed for this category.
+ * Returns an escalation decision if critical tools are unavailable.
+ */
+function checkToolFailures(
+  gatherErrors: Array<{ step: string; error: string }>,
+  category: MessageCategory | undefined
+): { shouldEscalate: boolean; reason: string } {
+  if (gatherErrors.length === 0) {
+    return { shouldEscalate: false, reason: '' }
+  }
+
+  const criticalTools = category
+    ? (CRITICAL_TOOLS_BY_CATEGORY[category] ?? ['user'])
+    : ['user']
+
+  const failedCriticalTools = gatherErrors
+    .filter((e) => criticalTools.includes(e.step))
+    .map((e) => e.step)
+
+  if (failedCriticalTools.length > 0) {
+    return {
+      shouldEscalate: true,
+      reason: `System unable to verify customer - manual lookup needed (failed: ${failedCriticalTools.join(', ')})`,
+    }
+  }
+
+  return { shouldEscalate: false, reason: '' }
+}
+
+// ============================================================================
 // Ground truth comparison (skill retrieval)
 // ============================================================================
 
@@ -538,6 +663,8 @@ export interface ValidateOptions {
   skipRelevanceCheck?: boolean
   /** Model to use for relevance check (default: 'anthropic/claude-haiku-4-5') */
   relevanceModel?: string
+  /** Check if draft uses customer-appropriate language (default: false) */
+  checkAudienceAwareness?: boolean
 }
 
 /**
@@ -626,6 +753,7 @@ export async function validate(
     correctionThreshold = 0.7,
     skipRelevanceCheck = false,
     relevanceModel = 'anthropic/claude-haiku-4-5',
+    checkAudienceAwareness: shouldCheckAudience = false,
   } = options
 
   const startTime = Date.now()
@@ -818,6 +946,50 @@ export async function validate(
     }
   }
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // Audience Awareness Check: Is this draft customer-appropriate?
+  // ─────────────────────────────────────────────────────────────────────────
+  let audienceCheckPerformed = false
+
+  if (shouldCheckAudience) {
+    try {
+      await log('info', 'audience awareness check starting', {
+        workflow: 'pipeline',
+        step: 'validate',
+        appId,
+        category,
+        draftLength: draft.length,
+      })
+
+      const audienceIssues = await checkAudienceAwareness(draft, relevanceModel)
+      audienceCheckPerformed = true
+      allIssues.push(...audienceIssues)
+
+      await log('info', 'audience awareness check completed', {
+        workflow: 'pipeline',
+        step: 'validate',
+        appId,
+        category,
+        audienceIssues: audienceIssues.length,
+        appropriate: audienceIssues.length === 0,
+      })
+    } catch (error) {
+      await log('warn', 'audience awareness check failed', {
+        workflow: 'pipeline',
+        step: 'validate',
+        appId,
+        category,
+        error: error instanceof Error ? error.message : String(error),
+      })
+      audienceCheckPerformed = false
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Tool Failure Check: Did critical gather tools fail?
+  // ─────────────────────────────────────────────────────────────────────────
+  const toolFailureResult = checkToolFailures(context.gatherErrors, category)
+
   // In strict mode, warnings are errors
   const hasErrors = allIssues.some((i) => i.severity === 'error')
   const confidence = calculateConfidenceScore(allIssues)
@@ -850,7 +1022,14 @@ export async function validate(
     issues: allIssues,
   }
 
-  if (threshold.escalateAlways) {
+  // Tool failure check takes priority — if critical tools failed, escalate
+  if (toolFailureResult.shouldEscalate) {
+    decision = {
+      action: 'escalate',
+      reason: toolFailureResult.reason,
+      urgency: 'normal',
+    }
+  } else if (threshold.escalateAlways) {
     decision = {
       action: 'escalate',
       reason: 'Category requires human review',
@@ -908,11 +1087,18 @@ export async function validate(
     hasGroundTruthMismatch: (issuesByType['ground_truth_mismatch'] ?? 0) > 0,
     hasRepeatedMistake: (issuesByType['repeated_mistake'] ?? 0) > 0,
     hasRelevanceIssue: (issuesByType['relevance'] ?? 0) > 0,
+    hasAudienceIssue: (issuesByType['audience_inappropriate'] ?? 0) > 0,
     // Validation checks performed
     patternCheckCount: patternIssueCount,
     memoryCheckPerformed,
     relevanceCheckPerformed,
+    audienceCheckPerformed,
     groundTruthCheckPerformed: relevantSkills.length > 0,
+    // Tool failure check
+    toolFailureEscalation: toolFailureResult.shouldEscalate,
+    toolFailureReason: toolFailureResult.reason || null,
+    gatherErrorCount: context.gatherErrors.length,
+    gatherErrorSteps: context.gatherErrors.map((e) => e.step),
     // Relevance details
     relevanceScore,
     relevanceThreshold: 0.5,
