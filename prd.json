@@ -1,84 +1,60 @@
 {
   "version": "1.0",
-  "projectName": "skills-enrichment-phase2",
-  "description": "Deep enrichment with Ollama embeddings, Qdrant vectors, expanded examples, trigger phrases, and anti-patterns",
+  "projectName": "epic3-validator-overhaul",
+  "description": "Epic 3: Validator Overhaul — Ground truth comparison, fabrication detection, four-tier response system",
   "stories": [
     {
-      "id": "story-ml4ql3nz",
-      "title": "Create Qdrant skills collection and embed all 41 skills",
-      "description": "Create a Qdrant collection for skills and embed all skill descriptions using Ollama.\n\n1. Create collection `skills` with 1024 dimensions (for mxbai-embed-large):\n```bash\ncurl -X PUT http://localhost:6333/collections/skills \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"vectors\": {\"size\": 1024, \"distance\": \"Cosine\"}}'\n```\n\n2. For each skill in skills/*/SKILL.md:\n   - Read name and description from frontmatter\n   - Generate embedding via Ollama:\n   ```bash\n   curl -s http://localhost:11434/api/embeddings \\\n     -d '{\"model\": \"mxbai-embed-large\", \"prompt\": \"DESCRIPTION\"}'\n   ```\n   - Upsert to Qdrant with payload: name, description, path, sample_size\n\n3. Create script `scripts/embed-skills-qdrant.ts` for repeatability\n\n4. Verify: curl http://localhost:6333/collections/skills should show 41 points",
+      "id": "story-ml61xjvm",
+      "title": "Epic 3.1: Ground Truth + Relevance Fix (#138)",
+      "description": "Wire skill retrieval into validator for ground truth comparison. Fix the broken LLM relevance check.\n\n## Files to modify\n- packages/core/src/pipeline/steps/validate.ts (main changes)\n- packages/core/src/pipeline/types.ts (if needed)\n\n## Implementation\n\n### 1. Import skill retrieval\n```typescript\nimport { retrieveSkills } from \"../../../scripts/skill-retrieval\";\n```\n\n### 2. In validate(), after pattern checks:\n```typescript\n// Retrieve relevant skills for ground truth\nconst customerMessage = input.originalMessage || input.draft.content;\nconst relevantSkills = await retrieveSkills(customerMessage, { topK: 3 });\n```\n\n### 3. Fix relevance check\n- Find why body assertion fails (look for relevanceCheck function)\n- Ensure customer message is passed correctly\n- Return numeric score 0.0-1.0\n\n### 4. Add ground truth comparison\n- Compare draft claims against skill content\n- Flag mismatches as validation issues\n\n## Tests to write FIRST (TDD)\nCreate in packages/core/src/pipeline/steps/__tests__/validate.test.ts:\n\n```typescript\ndescribe(\"ground truth comparison\", () => {\n  it(\"retrieves skills for customer message\", async () => {\n    // Mock retrieveSkills, verify called with message\n  });\n\n  it(\"passes when draft matches skill content\", async () => {\n    // Draft says \"30-day refund\" and skill confirms it\n  });\n\n  it(\"flags when draft contradicts skill content\", async () => {\n    // Draft says \"30-day refund\" but skill says \"60-day\"\n  });\n});\n\ndescribe(\"relevance check\", () => {\n  it(\"returns numeric score not N/A\", async () => {\n    // Verify relevance score is number between 0-1\n  });\n});\n```\n\n## Environment\nUpstash credentials needed - set before running:\n```bash\nexport UPSTASH_VECTOR_REST_URL=$(secrets lease upstash_vector_url --raw --ttl 2h --client-id \"ralph\")\nexport UPSTASH_VECTOR_REST_TOKEN=$(secrets lease upstash_vector_token --raw --ttl 2h --client-id \"ralph\")\nexport UPSTASH_REDIS_REST_URL=$(secrets lease upstash_redis_url --raw --ttl 2h --client-id \"ralph\")\nexport UPSTASH_REDIS_REST_TOKEN=$(secrets lease upstash_redis_token --raw --ttl 2h --client-id \"ralph\")\n```",
       "priority": 1,
-      "passes": true,
-      "validationCommand": "curl -s http://localhost:6333/collections/skills | jq -e '.result.points_count >= 40'"
+      "passes": false,
+      "validationCommand": "cd ~/Code/skillrecordings/support && bun test packages/core/src/pipeline/steps/__tests__/validate.test.ts 2>&1 | tail -20 && bun run check-types 2>&1 | tail -10",
+      "acceptanceCriteria": [
+        "retrieveSkills() called in validate step with customer message",
+        "Relevance check returns numeric score (not N/A)",
+        "Draft matching skill content passes validation",
+        "Draft contradicting skill content flagged as issue",
+        "All TypeScript type checks pass",
+        "Tests written BEFORE implementation (TDD)"
+      ]
     },
     {
-      "id": "story-ml4ql3oc",
-      "title": "Re-run gap analysis with real Ollama embeddings",
-      "description": "The previous gap analysis used fake hash embeddings. Re-run with real Ollama embeddings.\n\n1. Update scripts/gap-analysis.ts to use Ollama mxbai-embed-large:\n   - Remove any local hash fallback\n   - Call http://localhost:11434/api/embeddings for each conversation\n   - Use the skills collection in Qdrant to find nearest skill\n\n2. For each conversation in DuckDB (artifacts/phase-0/embeddings/v2/temp.duckdb):\n   - Get first_message text\n   - Generate embedding via Ollama\n   - Search Qdrant skills collection for nearest match\n   - Record similarity score\n\n3. Flag gaps: conversations with similarity < 0.5\n\n4. Cluster gaps to identify common uncovered patterns\n\n5. Output:\n   - artifacts/gap-analysis/report.md (human readable)\n   - artifacts/gap-analysis/gaps.json (machine readable)\n\n6. Report should show gaps < 30% (not 92% like before)",
+      "id": "story-ml61xw85",
+      "title": "Epic 3.2: Fabrication Detection (#139)",
+      "description": "Detect when drafts make specific claims without source data from skills.\n\n## Files to modify\n- packages/core/src/pipeline/steps/validate.ts\n- packages/core/src/pipeline/types.ts (add fabrication issue type)\n\n## Implementation\n\n### 1. Define claim patterns\n```typescript\nconst FABRICATION_PATTERNS = {\n  price: /\\$[\\d,]+(?:\\.\\d{2})?/g,\n  timeline: /within \\d+ (?:hours?|days?|weeks?)/gi,\n  percentage: /\\d+%/g,\n  guarantee: /guarantee|always|never|definitely|certainly/gi,\n};\n```\n\n### 2. Extract claims from draft\n```typescript\nfunction extractClaims(draft: string): Claim[] {\n  const claims: Claim[] = [];\n  for (const [type, pattern] of Object.entries(FABRICATION_PATTERNS)) {\n    const matches = draft.matchAll(pattern);\n    for (const match of matches) {\n      claims.push({ type, value: match[0], index: match.index });\n    }\n  }\n  return claims;\n}\n```\n\n### 3. Cross-reference against skills\n```typescript\nfunction checkClaimAgainstSkills(claim: Claim, skills: RetrievedSkill[]): boolean {\n  // Check if claim appears in any skill content\n  for (const skill of skills) {\n    if (skill.description.includes(claim.value) || skill.markdown?.includes(claim.value)) {\n      return true; // Claim is sourced\n    }\n  }\n  return false; // Potential fabrication\n}\n```\n\n### 4. Add to validation issues\n```typescript\n// New issue type in types.ts\ntype ValidationIssueType = ... | 'fabrication';\n\n// Flag unsourced claims\nif (!isSourced) {\n  issues.push({\n    type: 'fabrication',\n    severity: claim.type === 'price' ? 'error' : 'warning',\n    message: `Unsourced ${claim.type} claim: ${claim.value}`,\n  });\n}\n```\n\n## Tests to write FIRST (TDD)\n```typescript\ndescribe(\"fabrication detection\", () => {\n  it(\"passes when price matches skill content\", async () => {\n    // Draft says \"$99\" and skill has \"$99\"\n  });\n\n  it(\"flags price claim not in skills\", async () => {\n    // Draft says \"$149\" but no skill mentions this\n  });\n\n  it(\"flags timeline without source\", async () => {\n    // Draft says \"within 24 hours\" with no source\n  });\n\n  it(\"does not flag quoted customer text\", async () => {\n    // Customer said \"$50\" - draft quoting them is fine\n  });\n});\n```\n\n## Depends on\nStory 1 (Ground Truth) must pass first - provides skill retrieval.",
       "priority": 2,
-      "passes": true,
-      "validationCommand": "test -f artifacts/gap-analysis/report.md && grep -q 'Embedding strategy.*mxbai\\|ollama' artifacts/gap-analysis/report.md"
+      "passes": false,
+      "validationCommand": "cd ~/Code/skillrecordings/support && bun test packages/core/src/pipeline/steps/__tests__/validate.test.ts 2>&1 | tail -20 && bun run check-types 2>&1 | tail -10",
+      "acceptanceCriteria": [
+        "Price claims without skill source flagged as error",
+        "Timeline claims without source flagged as warning",
+        "Claims matching skill content pass validation",
+        "No false positives on quoted customer text",
+        "fabrication issue type added to types.ts",
+        "Tests written BEFORE implementation (TDD)"
+      ]
     },
     {
-      "id": "story-ml4ql3oe",
-      "title": "Expand all 20 thin skills with more examples",
-      "description": "20 skills have only 1 reference file. Expand ALL of them.\n\nThin skills to expand (with sample counts):\n- cohort-access-request (121)\n- student-discount-request (114)\n- outdated-course-content (105)\n- cohort-schedule-inquiry (83)\n- course-difficulty-concern (77)\n- learning-path-guidance (74)\n- installment-payment-option (70)\n- gift-purchase-option (47)\n- email-delivery-failure (47)\n- media-press-outreach (39)\n- event-sponsorship-request (35)\n- api-documentation-question (33)\n- security-vulnerability-report (32)\n- workshop-attendance-confirmation (29)\n- workshop-technical-setup (28)\n- nonprofit-government-discount (21)\n- password-reset-issue (14)\n- continuing-education-credits (7)\n- two-factor-auth-issue (4)\n- workshop-cancellation-notice (1)\n\nFor each:\n1. Query DuckDB for conversations tagged with this topic\n2. Create references/canonical.md (3-5 ideal response examples)\n3. Create references/edge-cases.md (unusual situations)\n4. Create references/variations.md (different wordings of same intent)\n\nEach file should have 3-5 examples with Customer/Agent format.",
+      "id": "story-ml61yb0c",
+      "title": "Epic 3.3: Four-Tier Response System (#140)",
+      "description": "Implement four-tier response system with category-specific thresholds.\n\n## Files to modify\n- packages/core/src/pipeline/steps/validate.ts\n- packages/core/src/pipeline/types.ts\n- NEW: packages/core/src/pipeline/thresholds.ts\n\n## Implementation\n\n### 1. New ValidatorDecision type (types.ts)\n```typescript\nexport type ValidatorDecision =\n  | { action: \"auto-send\"; draft: string; confidence: number }\n  | { action: \"draft\"; draft: string; issues?: ValidationIssue[] }\n  | { action: \"escalate\"; reason: string; urgency: \"normal\" | \"high\" | \"critical\" }\n  | { action: \"needs-review\"; draft: string; concerns: string[] };\n```\n\n### 2. Category thresholds (new file: thresholds.ts)\n```typescript\nexport interface CategoryThreshold {\n  autoSendMinConfidence: number;\n  autoSendMinVolume: number;\n  escalateAlways?: boolean;\n  escalateOnKeywords?: string[];\n}\n\nexport const CATEGORY_THRESHOLDS: Record<string, CategoryThreshold> = {\n  \"support_team-license\": {\n    autoSendMinConfidence: 0.98,\n    autoSendMinVolume: 50,\n    escalateAlways: true, // Nightmare #1: large team sales\n  },\n  \"support_bug-report\": {\n    autoSendMinConfidence: 0.95,\n    autoSendMinVolume: 30,\n    escalateOnKeywords: [\"multiple users\", \"widespread\", \"everyone\"],\n  },\n  \"support_refund\": {\n    autoSendMinConfidence: 0.95,\n    autoSendMinVolume: 100,\n  },\n  // Default for unspecified categories\n  default: {\n    autoSendMinConfidence: 0.95,\n    autoSendMinVolume: 50,\n  },\n};\n```\n\n### 3. Gradient scoring (validate.ts)\n```typescript\nfunction calculateConfidenceScore(issues: ValidationIssue[]): number {\n  let score = 1.0;\n  for (const issue of issues) {\n    switch (issue.severity) {\n      case 'error': score -= 0.3; break;\n      case 'warning': score -= 0.1; break;\n      case 'info': score -= 0.02; break;\n    }\n  }\n  return Math.max(0, score);\n}\n```\n\n### 4. Update validate() return\n```typescript\nexport async function validate(input: ValidateInput): Promise<ValidatorDecision> {\n  // ... existing checks ...\n\n  const confidence = calculateConfidenceScore(allIssues);\n  const threshold = CATEGORY_THRESHOLDS[category] || CATEGORY_THRESHOLDS.default;\n\n  // Check for escalation triggers\n  if (threshold.escalateAlways) {\n    return { action: \"escalate\", reason: \"Category requires human review\", urgency: \"normal\" };\n  }\n\n  // Check for auto-send eligibility (earned through RL)\n  const categoryStats = await getCategoryStats(category);\n  if (categoryStats.sentUnchangedRate >= threshold.autoSendMinConfidence \n      && categoryStats.volume >= threshold.autoSendMinVolume\n      && confidence >= 0.95) {\n    return { action: \"auto-send\", draft: input.draft.content, confidence };\n  }\n\n  // Default to draft\n  return { action: \"draft\", draft: input.draft.content, issues: allIssues };\n}\n```\n\n## Tests to write FIRST (TDD)\n```typescript\ndescribe(\"four-tier response system\", () => {\n  it(\"returns draft action by default\", async () => {});\n  it(\"escalates team-license category always\", async () => {});\n  it(\"calculates gradient score correctly\", async () => {});\n  it(\"auto-send only when category has earned it\", async () => {});\n});\n\ndescribe(\"category thresholds\", () => {\n  it(\"uses category-specific threshold when defined\", async () => {});\n  it(\"falls back to default threshold\", async () => {});\n});\n```",
       "priority": 3,
-      "passes": true,
-      "validationCommand": "count=0; for d in skills/cohort-access-request skills/student-discount-request skills/outdated-course-content skills/cohort-schedule-inquiry skills/course-difficulty-concern; do files=$(ls \"$d/references/\"*.md 2>/dev/null | wc -l); if [ \"$files\" -ge 3 ]; then count=$((count+1)); fi; done; [ \"$count\" -ge 4 ]"
-    },
-    {
-      "id": "story-ml4ql3oi",
-      "title": "Fill all 23 empty related_skills using Qdrant similarity",
-      "description": "23 skills have `related_skills: []`. Use Qdrant to find semantically similar skills.\n\nSkills with empty related_skills:\n- api-documentation-question\n- cohort-access-request\n- cohort-schedule-inquiry\n- continuing-education-credits\n- course-difficulty-concern\n- (18 more...)\n\nFor each skill with empty related_skills:\n1. Get the skill's embedding from Qdrant\n2. Search for top 5 similar skills (excluding self)\n3. Add skills with similarity > 0.6 to related_skills\n4. Update the SKILL.md frontmatter\n\nExample result:\n```yaml\nmetadata:\n  related_skills: [\"cohort-schedule-inquiry\", \"workshop-attendance-confirmation\"]\n```\n\nCreate script: scripts/fill-related-skills.ts",
-      "priority": 4,
-      "passes": true,
-      "validationCommand": "empty=$(grep -l 'related_skills: \\[\\]' skills/*/SKILL.md 2>/dev/null | wc -l); [ \"$empty\" -lt 10 ]"
-    },
-    {
-      "id": "story-ml4ql3ol",
-      "title": "Add trigger phrases to all 41 skills",
-      "description": "Mine common phrases from conversations that lead to each skill. Add trigger_phrases to metadata.\n\nFor each skill:\n1. Query DuckDB for conversations tagged with this topic\n2. Extract common n-grams (2-4 words) from first messages\n3. Filter for phrases that indicate intent (not generic greetings)\n4. Add top 5-10 trigger phrases to metadata\n\nExample:\n```yaml\nmetadata:\n  trigger_phrases:\n    - \"want a refund\"\n    - \"money back\"\n    - \"cancel my purchase\"\n    - \"get refunded\"\n    - \"return the course\"\n```\n\nFor skills with low sample counts, use semantic inference from the skill description.\n\nCreate script: scripts/extract-trigger-phrases.ts",
-      "priority": 5,
-      "passes": true,
-      "validationCommand": "count=$(grep -l 'trigger_phrases' skills/*/SKILL.md | wc -l); [ \"$count\" -ge 30 ]"
-    },
-    {
-      "id": "story-ml4ql3on",
-      "title": "Create template variations (formal, casual, brief)",
-      "description": "Each template should have 3 variations for different tones.\n\nCurrent templates in templates/:\n- refund-initiated.md\n- login-link-sent.md\n- greeting-apologetic.md\n- closing-friendly.md\n- check-spam-folder.md\n- license-transferred.md\n- invoice-ready.md\n- troubleshoot-relogin.md\n- apology-confusion.md\n- login-link-troubleshoot.md\n\nFor each template, create:\n- {name}-formal.md (professional, corporate tone)\n- {name}-brief.md (minimal, just the facts)\n\nUpdate templates/index.md to document all variations.\n\nExample for refund-initiated:\n```\n# refund-initiated.md (default)\nWe've initiated a refund. It can take 5-10 days for the banks to reconcile.\n\n# refund-initiated-formal.md\nYour refund has been processed and submitted to your financial institution. Please allow 5-10 business days for the funds to appear in your account.\n\n# refund-initiated-brief.md\nRefund initiated. 5-10 days to process.\n```",
-      "priority": 6,
-      "passes": true,
-      "validationCommand": "formal=$(ls templates/*-formal.md 2>/dev/null | wc -l); brief=$(ls templates/*-brief.md 2>/dev/null | wc -l); [ \"$formal\" -ge 8 ] && [ \"$brief\" -ge 8 ]"
-    },
-    {
-      "id": "story-ml4ql3or",
-      "title": "Add anti-patterns to top 10 skills by sample size",
-      "description": "Create references/anti-patterns.md for the top 10 skills showing what NOT to do.\n\nTop 10 skills by sample size:\n1. email-change (2920)\n2. refund-request (1433)\n3. login-link (999)\n4. access-locked-out (878)\n5. corporate-invoice (720)\n6. ppp-pricing (715)\n7. technical-issue-course-content (596)\n8. pricing-inquiry (523)\n9. course-content-locked (520)\n10. team-license-purchase (508)\n\nFor each, create references/anti-patterns.md with 3-5 examples:\n\n```markdown\n# Anti-Patterns for [Skill Name]\n\n## Anti-Pattern: [Name]\n\n❌ **BAD:**\n\"[bad response example]\"\n\n✅ **GOOD:**\n\"[correct response example]\"\n\n**Why it's wrong:** [explanation]\n\n---\n\n## Anti-Pattern: [Name]\n...\n```\n\nCommon anti-patterns to look for:\n- Asking unnecessary questions\n- Over-explaining policies\n- Promising things we can't deliver\n- Being too formal/robotic\n- Missing required information (like 5-10 days for refunds)",
-      "priority": 7,
-      "passes": true,
-      "validationCommand": "count=$(ls skills/*/references/anti-patterns.md 2>/dev/null | wc -l); [ \"$count\" -ge 8 ]"
-    },
-    {
-      "id": "story-ml4ql3ow",
-      "title": "Embed all 21k conversations into Qdrant",
-      "description": "Create a Qdrant collection with all conversations for semantic search and gap analysis.\n\n1. Create collection `conversations` with 1024 dimensions:\n```bash\ncurl -X PUT http://localhost:6333/collections/conversations \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"vectors\": {\"size\": 1024, \"distance\": \"Cosine\"}}'\n```\n\n2. Query all conversations from DuckDB:\n```sql\nSELECT conversation_id, inbox_id, tags, first_message, token_count\nFROM conversations\n```\n\n3. For each conversation (batch for efficiency):\n   - Generate embedding via Ollama mxbai-embed-large\n   - Upsert to Qdrant with payload: conversation_id, inbox_id, tags, first_message_preview\n\n4. Use batching (100 at a time) to avoid overwhelming Ollama\n\n5. Create script: scripts/embed-conversations-qdrant.ts\n\n6. Progress reporting via moltbot every 1000 conversations\n\nTarget: 21,588 points in conversations collection",
-      "priority": 8,
       "passes": false,
-      "validationCommand": "curl -s http://localhost:6333/collections/conversations | jq -e '.result.points_count >= 20000'"
-    },
-    {
-      "id": "story-ml4ql3oz",
-      "title": "Final validation and quality report",
-      "description": "Generate comprehensive quality report and validate all enrichments.\n\n1. Create scripts/quality-report.ts that checks:\n   - All 41 skills have 3+ reference files\n   - All 41 skills have non-empty related_skills\n   - All 41 skills have trigger_phrases\n   - All 41 skills have ## Validation section\n   - All templates have formal/brief variations\n   - Top 10 skills have anti-patterns.md\n   - Qdrant skills collection has 41+ points\n   - Qdrant conversations collection has 20k+ points\n   - Gap analysis shows < 30% gaps\n\n2. Output artifacts/quality-report.md with:\n   - Summary statistics\n   - Per-skill checklist\n   - Issues found\n   - Recommendations\n\n3. Update the Codex skill at ~/.codex/skills/skills-enrichment/SKILL.md:\n   - Update \"Current Status\" section with final numbers\n   - Update \"Loop Iteration\" count\n   - Document any remaining issues\n\n4. Commit all changes with message: \"feat: Phase 2 skills enrichment complete\"",
-      "priority": 9,
-      "passes": false,
-      "validationCommand": "test -f artifacts/quality-report.md && grep -q 'Phase 2\\|enrichment complete' artifacts/quality-report.md"
+      "validationCommand": "cd ~/Code/skillrecordings/support && bun test packages/core/src/pipeline/steps/__tests__/validate.test.ts 2>&1 | tail -20 && bun test packages/core/src/pipeline/__tests__/thresholds.test.ts 2>&1 | tail -10 && bun run check-types 2>&1 | tail -10",
+      "acceptanceCriteria": [
+        "ValidatorDecision type with 4 actions implemented",
+        "Default action is 'draft'",
+        "Team license category triggers escalate",
+        "Gradient scoring calculates 0.0-1.0",
+        "Category thresholds file created",
+        "Auto-send only for earned categories",
+        "Tests written BEFORE implementation (TDD)"
+      ]
     }
   ],
   "metadata": {
-    "createdAt": "2026-02-02T05:35:01.721Z",
-    "totalIterations": 2,
-    "lastIteration": "2026-02-02T15:11:22.634Z"
+    "createdAt": "2026-02-03T03:41:05.745Z",
+    "totalIterations": 0
   }
 }
