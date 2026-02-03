@@ -1,8 +1,14 @@
 import { generateObject } from 'ai'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { retrieveSkills } from '../../../skill-retrieval'
-import type { GatherOutput, ValidateInput } from '../../types'
-import { validate } from '../validate'
+import type {
+  GatherOutput,
+  MessageCategory,
+  ValidateInput,
+  ValidationIssue,
+} from '../../types'
+import { calculateConfidenceScore, validate } from '../validate'
+import * as validateModule from '../validate'
 
 vi.mock('ai', () => ({
   generateObject: vi.fn(),
@@ -37,6 +43,114 @@ function makeInput(
     originalMessage,
   }
 }
+
+describe('four-tier response system', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns draft action by default', async () => {
+    retrieveSkillsMock.mockResolvedValue([])
+    const getCategoryStatsMock = vi
+      .spyOn(validateModule, 'getCategoryStats')
+      .mockResolvedValue({ sentUnchangedRate: 0, volume: 0 })
+
+    const result = await validate(
+      makeInput(
+        'Thanks for reaching out. Here is what I found.',
+        { subject: 'Question', body: 'Need help.' },
+        'Need help.'
+      ),
+      {
+        skipMemoryQuery: true,
+        skipRelevanceCheck: true,
+      }
+    )
+
+    expect(result.action).toBe('draft')
+    if (result.action !== 'draft') {
+      throw new Error(`Expected draft action, got ${result.action}`)
+    }
+    expect(result.draft).toBe('Thanks for reaching out. Here is what I found.')
+    expect(getCategoryStatsMock).toHaveBeenCalled()
+  })
+
+  it('escalates team-license category always', async () => {
+    retrieveSkillsMock.mockResolvedValue([])
+    vi.spyOn(validateModule, 'getCategoryStats').mockResolvedValue({
+      sentUnchangedRate: 1,
+      volume: 999,
+    })
+
+    const result = await validate(
+      makeInput(
+        'We can help with your team license request.',
+        { subject: 'Team', body: 'Need a team license.' },
+        'Need a team license.'
+      ),
+      {
+        category: 'support_team-license' as MessageCategory,
+        skipMemoryQuery: true,
+        skipRelevanceCheck: true,
+      }
+    )
+
+    expect(result.action).toBe('escalate')
+    if (result.action !== 'escalate') {
+      throw new Error(`Expected escalate action, got ${result.action}`)
+    }
+    expect(result.urgency).toBe('normal')
+  })
+
+  it('calculates gradient score correctly', () => {
+    const issues: ValidationIssue[] = [
+      {
+        type: 'banned_phrase',
+        severity: 'error',
+        message: 'Bad phrase',
+      },
+      {
+        type: 'too_short',
+        severity: 'warning',
+        message: 'Short response',
+      },
+      {
+        type: 'relevance',
+        severity: 'info',
+        message: 'Minor relevance signal',
+      },
+    ]
+
+    expect(calculateConfidenceScore(issues)).toBeCloseTo(0.58, 5)
+  })
+
+  it('auto-send only when category has earned it', async () => {
+    retrieveSkillsMock.mockResolvedValue([])
+    vi.spyOn(validateModule, 'getCategoryStats').mockResolvedValue({
+      sentUnchangedRate: 0.99,
+      volume: 120,
+    })
+
+    const result = await validate(
+      makeInput(
+        'Your refund request is ready for review.',
+        { subject: 'Refund', body: 'Please refund.' },
+        'Please refund.'
+      ),
+      {
+        category: 'support_refund',
+        skipMemoryQuery: true,
+        skipRelevanceCheck: true,
+      }
+    )
+
+    expect(result.action).toBe('auto-send')
+    if (result.action !== 'auto-send') {
+      throw new Error(`Expected auto-send action, got ${result.action}`)
+    }
+    expect(result.confidence).toBe(1)
+  })
+})
 
 describe('ground truth comparison', () => {
   beforeEach(() => {

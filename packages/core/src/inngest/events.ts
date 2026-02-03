@@ -492,7 +492,7 @@ export type SupportDraftValidatedEvent = {
       /** Full structured validation issues with type/severity/match/position */
       structuredIssues?: Array<{
         type: string
-        severity: 'error' | 'warning'
+        severity: 'error' | 'warning' | 'info'
         message: string
         match?: string
         position?: number

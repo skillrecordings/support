@@ -366,9 +366,19 @@ export interface ValidateOutput {
   relevance?: number
 }
 
+export type ValidatorDecision =
+  | { action: 'auto-send'; draft: string; confidence: number }
+  | { action: 'draft'; draft: string; issues?: ValidationIssue[] }
+  | {
+      action: 'escalate'
+      reason: string
+      urgency: 'normal' | 'high' | 'critical'
+    }
+  | { action: 'needs-review'; draft: string; concerns: string[] }
+
 export interface ValidationIssue {
   type: ValidationIssueType
-  severity: 'error' | 'warning'
+  severity: 'error' | 'warning' | 'info'
   message: string
   match?: string
   position?: number

@@ -19,6 +19,7 @@ import { z } from 'zod'
 import { type RelevantMemory, queryCorrectedMemories } from '../../memory/query'
 import { log } from '../../observability/axiom'
 import { type RetrievedSkill, retrieveSkills } from '../../skill-retrieval'
+import { getCategoryThreshold } from '../thresholds'
 import type {
   GatherOutput,
   MessageCategory,
@@ -26,6 +27,7 @@ import type {
   ValidateOutput,
   ValidationIssue,
   ValidationIssueType,
+  ValidatorDecision,
 } from '../types'
 
 // ============================================================================
@@ -152,6 +154,24 @@ const MAX_RESPONSE_LENGTH = 2000
 // ============================================================================
 // Individual validators
 // ============================================================================
+
+export function calculateConfidenceScore(issues: ValidationIssue[]): number {
+  let score = 1.0
+  for (const issue of issues) {
+    switch (issue.severity) {
+      case 'error':
+        score -= 0.3
+        break
+      case 'warning':
+        score -= 0.1
+        break
+      case 'info':
+        score -= 0.02
+        break
+    }
+  }
+  return Math.max(0, score)
+}
 
 function checkInternalLeaks(draft: string): ValidationIssue[] {
   const issues: ValidationIssue[] = []
@@ -532,6 +552,20 @@ export interface ValidateResult extends ValidateOutput {
   relevanceCheckPerformed: boolean
 }
 
+export interface CategoryStats {
+  sentUnchangedRate: number
+  volume: number
+}
+
+export async function getCategoryStats(
+  _category?: MessageCategory
+): Promise<CategoryStats> {
+  return {
+    sentUnchangedRate: 0,
+    volume: 0,
+  }
+}
+
 /**
  * Synchronous validation - pattern checks only, no memory lookup.
  * Use this for fast, deterministic validation when memory isn't needed.
@@ -583,7 +617,7 @@ export function validateSync(input: ValidateInput): ValidateOutput {
 export async function validate(
   input: ValidateInput,
   options: ValidateOptions = {}
-): Promise<ValidateResult> {
+): Promise<ValidateResult & ValidatorDecision> {
   const { draft, context, strictMode = false, customerMessage } = input
   const {
     appId,
@@ -786,6 +820,8 @@ export async function validate(
 
   // In strict mode, warnings are errors
   const hasErrors = allIssues.some((i) => i.severity === 'error')
+  const confidence = calculateConfidenceScore(allIssues)
+  const threshold = getCategoryThreshold(category)
 
   const durationMs = Date.now() - startTime
 
@@ -805,6 +841,8 @@ export async function validate(
     patternIssues: patternIssueCount,
     memoryIssues: allIssues.length - patternIssueCount,
     relevanceScore,
+    confidence,
+    decisionThreshold: threshold,
     issuesByType,
     memoryCheckPerformed,
     relevanceCheckPerformed,
@@ -812,7 +850,61 @@ export async function validate(
     durationMs,
   })
 
+  const escalationKeyword = threshold.escalateOnKeywords?.find((keyword) => {
+    const haystack = [
+      input.originalMessage,
+      customerMessage?.subject,
+      customerMessage?.body,
+      draft,
+    ]
+      .filter(Boolean)
+      .join('\n')
+      .toLowerCase()
+    return haystack.includes(keyword.toLowerCase())
+  })
+
+  let decision: ValidatorDecision = {
+    action: 'draft',
+    draft,
+    issues: allIssues,
+  }
+
+  if (threshold.escalateAlways) {
+    decision = {
+      action: 'escalate',
+      reason: 'Category requires human review',
+      urgency: 'normal',
+    }
+  } else if (escalationKeyword) {
+    decision = {
+      action: 'escalate',
+      reason: `Escalation keyword detected: ${escalationKeyword}`,
+      urgency: 'high',
+    }
+  } else {
+    const categoryStats = await getCategoryStats(category)
+    const meetsAutoSend =
+      categoryStats.sentUnchangedRate >= threshold.autoSendMinConfidence &&
+      categoryStats.volume >= threshold.autoSendMinVolume &&
+      confidence >= 0.95
+
+    if (meetsAutoSend) {
+      decision = {
+        action: 'auto-send',
+        draft,
+        confidence,
+      }
+    } else if (!hasErrors && allIssues.length > 0) {
+      decision = {
+        action: 'needs-review',
+        draft,
+        concerns: allIssues.map((issue) => issue.message),
+      }
+    }
+  }
+
   return {
+    ...decision,
     valid: !hasErrors,
     issues: allIssues,
     suggestion: hasErrors

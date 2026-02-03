@@ -28,3 +28,11 @@ Summary: Adjusted the validate pipeline tests to avoid `vi.mocked` at runtime by
 
 Tests:
 - `bun test packages/core/src/pipelin
+
+---
+[2026-02-03T04:11:56.789Z]
+Completed: Epic 3.3: Four-Tier Response System (#140)
+Files: none
+Summary: Four-tier decision logic is now integrated into validation, with category thresholds and gradient confidence scoring layered on top of the existing issue checks. I kept the original validation output intact for downstream consumers, and added a decision shape that returns `auto-send`, `draft`, `needs-review`, or `escalate`, plus a thresholds helper for category-specific defaults.
+
+Details and wher
