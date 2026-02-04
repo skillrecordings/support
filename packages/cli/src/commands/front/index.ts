@@ -31,6 +31,7 @@ import { registerInboxCommand } from './inbox'
 import { registerPullCommand } from './pull-conversations'
 import { registerReplyCommand } from './reply'
 import { registerReportCommand } from './report'
+import { registerSearchCommand } from './search'
 import { registerTagCommands } from './tags'
 import { registerTriageCommand } from './triage'
 
@@ -433,9 +434,10 @@ export function registerFrontCommands(program: Command): void {
   // Register tag management commands
   registerTagCommands(front)
 
-  // Register assign, conversation tag/untag, reply, and API passthrough
+  // Register assign, conversation tag/untag, reply, search, and API passthrough
   registerAssignCommand(front)
   registerConversationTagCommands(front)
   registerReplyCommand(front)
+  registerSearchCommand(front)
   registerApiCommand(front)
 }
