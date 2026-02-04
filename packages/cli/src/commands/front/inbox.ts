@@ -10,7 +10,6 @@
  * - JSON output: skill front inbox <inbox> --json
  */
 
-import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
 import type {
   Conversation,
   ConversationList,
@@ -21,6 +20,7 @@ import type { Command } from 'commander'
 import { type CommandContext, createContext } from '../../core/context'
 import { CLIError, formatError } from '../../core/errors'
 import { isListOutputFormat, outputList } from '../../core/list-output'
+import { getFrontClient, normalizeId } from './client'
 import {
   conversationActions,
   conversationListActions,
@@ -29,24 +29,6 @@ import {
   inboxActions,
   inboxListLinks,
 } from './hateoas'
-
-/**
- * Get Front API client from environment (instrumented)
- */
-function getFrontClient() {
-  return createInstrumentedFrontClient({ apiToken: requireFrontToken() })
-}
-
-function requireFrontToken(): string {
-  const apiToken = process.env.FRONT_API_TOKEN
-  if (!apiToken) {
-    throw new CLIError({
-      userMessage: 'FRONT_API_TOKEN environment variable is required.',
-      suggestion: 'Set FRONT_API_TOKEN in your shell or .env.local.',
-    })
-  }
-  return apiToken
-}
 
 /**
  * Format timestamp to human-readable
@@ -66,13 +48,6 @@ function formatTimestamp(ts: number): string {
 function truncate(str: string, len: number): string {
   if (str.length <= len) return str
   return str.slice(0, len - 3) + '...'
-}
-
-/**
- * Normalize Front resource ID or URL to ID
- */
-function normalizeId(idOrUrl: string): string {
-  return idOrUrl.startsWith('http') ? idOrUrl.split('/').pop()! : idOrUrl
 }
 
 /**

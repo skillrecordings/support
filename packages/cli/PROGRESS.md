@@ -190,3 +190,9 @@ Initialized: 2026-02-04T15:13:09.231Z
 - Tests before: 118 passed, 4 skipped (122 total)
 - Tests after: 118 passed, 4 skipped (122 total)
 - Issues: none
+
+## Review Fix 1: Extract shared Front client helpers
+- Created `src/commands/front/client.ts` with requireFrontToken, getFrontClient, normalizeId
+- Updated 11+ files to import from shared module
+- Added unit tests for client.ts
+- Verified no duplicate copies remain

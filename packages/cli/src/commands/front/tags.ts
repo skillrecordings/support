@@ -10,7 +10,6 @@
  */
 
 import { confirm } from '@inquirer/prompts'
-import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
 import {
   type TagWithConversationCount,
   findCaseVariants,
@@ -21,31 +20,14 @@ import type { Command } from 'commander'
 import { type CommandContext, createContext } from '../../core/context'
 import { CLIError, formatError } from '../../core/errors'
 import { isListOutputFormat, outputList } from '../../core/list-output'
+import { getFrontClient } from './client'
 import { hateoasWrap, tagListActions, tagListLinks } from './hateoas'
 
 /**
  * Get Front SDK client from environment
  */
 function getFrontSdkClient() {
-  return createInstrumentedFrontClient({ apiToken: requireFrontToken() })
-}
-
-/**
- * Get Front API token
- */
-function getFrontApiToken() {
-  return requireFrontToken()
-}
-
-function requireFrontToken(): string {
-  const apiToken = process.env.FRONT_API_TOKEN
-  if (!apiToken) {
-    throw new CLIError({
-      userMessage: 'FRONT_API_TOKEN environment variable is required.',
-      suggestion: 'Set FRONT_API_TOKEN in your shell or .env.local.',
-    })
-  }
-  return apiToken
+  return getFrontClient()
 }
 
 /**
@@ -60,7 +42,6 @@ async function fetchTagsRaw(): Promise<
     description?: string | null
   }>
 > {
-  const apiToken = getFrontApiToken()
   const allTags: Array<{
     id: string
     name: string
@@ -70,7 +51,7 @@ async function fetchTagsRaw(): Promise<
   }> = []
 
   let nextUrl: string | null = 'https://api2.frontapp.com/tags'
-  const front = createInstrumentedFrontClient({ apiToken })
+  const front = getFrontClient()
 
   while (nextUrl) {
     const data = (await front.raw.get(nextUrl)) as {
@@ -99,12 +80,11 @@ async function createTagRaw(params: {
   highlight?: string | null
   description?: string | null
 }): Promise<void> {
-  const apiToken = getFrontApiToken()
   const body: Record<string, unknown> = { name: params.name }
   if (params.highlight) body.highlight = params.highlight
   if (params.description) body.description = params.description
 
-  const front = createInstrumentedFrontClient({ apiToken })
+  const front = getFrontClient()
   await front.raw.post('/tags', body)
 }
 
@@ -137,7 +117,7 @@ function sleep(ms: number): Promise<void> {
  * Uses the conversations endpoint and checks pagination
  */
 async function getConversationCount(
-  front: ReturnType<typeof createInstrumentedFrontClient>,
+  front: ReturnType<typeof getFrontClient>,
   tagId: string
 ): Promise<number> {
   try {
@@ -164,7 +144,7 @@ async function fetchConversationCountsRateLimited<
   T extends { id: string; name: string },
 >(
   tags: T[],
-  front: ReturnType<typeof createInstrumentedFrontClient>,
+  front: ReturnType<typeof getFrontClient>,
   options: {
     delayMs?: number
     batchSize?: number
@@ -523,7 +503,7 @@ interface CleanupPlan {
  * Build cleanup plan from current tags
  */
 async function buildCleanupPlan(
-  front: ReturnType<typeof createInstrumentedFrontClient>,
+  front: ReturnType<typeof getFrontClient>,
   tagsWithCounts: TagWithConversationCount[]
 ): Promise<CleanupPlan> {
   const plan: CleanupPlan = {
@@ -688,7 +668,7 @@ function printCleanupPlan(ctx: CommandContext, plan: CleanupPlan): void {
  */
 async function executeCleanupPlan(
   ctx: CommandContext,
-  front: ReturnType<typeof createInstrumentedFrontClient>,
+  front: ReturnType<typeof getFrontClient>,
   plan: CleanupPlan
 ): Promise<{ success: number; failed: number }> {
   const results = { success: 0, failed: 0 }

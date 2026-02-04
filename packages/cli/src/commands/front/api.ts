@@ -4,30 +4,15 @@
  * Allows raw Front API requests for power users.
  */
 
-import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
 import type { Command } from 'commander'
 import { type CommandContext, createContext } from '../../core/context'
 import { CLIError, formatError } from '../../core/errors'
+import { getFrontClient } from './client'
 import { hateoasWrap } from './hateoas'
 
 const ALLOWED_METHODS = ['GET', 'POST', 'PATCH', 'DELETE'] as const
 
 type AllowedMethod = (typeof ALLOWED_METHODS)[number]
-
-function requireFrontToken(): string {
-  const apiToken = process.env.FRONT_API_TOKEN
-  if (!apiToken) {
-    throw new CLIError({
-      userMessage: 'FRONT_API_TOKEN environment variable is required.',
-      suggestion: 'Set FRONT_API_TOKEN in your shell or .env.local.',
-    })
-  }
-  return apiToken
-}
-
-function getFrontClient() {
-  return createInstrumentedFrontClient({ apiToken: requireFrontToken() })
-}
 
 function normalizeMethod(method: string): AllowedMethod {
   const normalized = method.toUpperCase()

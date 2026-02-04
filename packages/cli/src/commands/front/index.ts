@@ -8,7 +8,6 @@
  * - Comparing webhook data vs API data
  */
 
-import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
 import type {
   Message as FrontMessage,
   MessageList,
@@ -22,6 +21,7 @@ import { registerArchiveCommand } from './archive'
 import { registerAssignCommand } from './assign'
 import { registerBulkArchiveCommand } from './bulk-archive'
 import { registerBulkAssignCommand } from './bulk-assign'
+import { getFrontClient, normalizeId } from './client'
 import { registerConversationTagCommands } from './conversation-tags'
 import {
   conversationActions,
@@ -39,31 +39,6 @@ import { registerTagCommands } from './tags'
 import { registerTriageCommand } from './triage'
 
 type Message = FrontMessage
-
-/**
- * Get Front API client from environment (instrumented)
- */
-function getFrontClient() {
-  return createInstrumentedFrontClient({ apiToken: requireFrontToken() })
-}
-
-/**
- * Get Front SDK client from environment (full typed client)
- */
-function getFrontSdkClient() {
-  return createInstrumentedFrontClient({ apiToken: requireFrontToken() })
-}
-
-function requireFrontToken(): string {
-  const apiToken = process.env.FRONT_API_TOKEN
-  if (!apiToken) {
-    throw new CLIError({
-      userMessage: 'FRONT_API_TOKEN environment variable is required.',
-      suggestion: 'Set FRONT_API_TOKEN in your shell or .env.local.',
-    })
-  }
-  return apiToken
-}
 
 /**
  * Format timestamp to human-readable
@@ -95,13 +70,6 @@ function normalizeMessageBody(message: {
     .replace(/<[^>]*>/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
-}
-
-/**
- * Normalize Front resource ID or URL to ID
- */
-function normalizeId(idOrUrl: string): string {
-  return idOrUrl.startsWith('http') ? idOrUrl.split('/').pop()! : idOrUrl
 }
 
 /**
@@ -302,7 +270,7 @@ async function listTeammates(
   const idsOnly = options.idsOnly === true
 
   try {
-    const front = getFrontSdkClient()
+    const front = getFrontClient()
     const result = await front.teammates.list()
 
     if (idsOnly) {
@@ -378,7 +346,7 @@ async function getTeammate(
   const outputJson = options.json === true || ctx.format === 'json'
 
   try {
-    const front = getFrontSdkClient()
+    const front = getFrontClient()
     const teammate = await front.teammates.get(id)
 
     if (outputJson) {

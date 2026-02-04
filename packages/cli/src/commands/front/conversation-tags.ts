@@ -4,10 +4,10 @@
  * Adds or removes tags on a conversation (case-insensitive tag lookup)
  */
 
-import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
 import type { Command } from 'commander'
 import { type CommandContext, createContext } from '../../core/context'
 import { CLIError, formatError } from '../../core/errors'
+import { getFrontClient, normalizeId } from './client'
 import { conversationActions, conversationLinks, hateoasWrap } from './hateoas'
 
 interface TagOptions {
@@ -21,28 +21,7 @@ interface FrontTag {
   name: string
 }
 
-function requireFrontToken(): string {
-  const apiToken = process.env.FRONT_API_TOKEN
-  if (!apiToken) {
-    throw new CLIError({
-      userMessage: 'FRONT_API_TOKEN environment variable is required.',
-      suggestion: 'Set FRONT_API_TOKEN in your shell or .env.local.',
-    })
-  }
-  return apiToken
-}
-
-function getFrontClient() {
-  return createInstrumentedFrontClient({ apiToken: requireFrontToken() })
-}
-
-function normalizeId(idOrUrl: string): string {
-  return idOrUrl.startsWith('http') ? idOrUrl.split('/').pop()! : idOrUrl
-}
-
-async function fetchTags(
-  front: ReturnType<typeof createInstrumentedFrontClient>
-) {
+async function fetchTags(front: ReturnType<typeof getFrontClient>) {
   const tags: FrontTag[] = []
   let nextUrl: string | null = '/tags'
 
@@ -59,7 +38,7 @@ async function fetchTags(
 }
 
 async function resolveTag(
-  front: ReturnType<typeof createInstrumentedFrontClient>,
+  front: ReturnType<typeof getFrontClient>,
   tagName: string
 ): Promise<FrontTag> {
   const tags = await fetchTags(front)

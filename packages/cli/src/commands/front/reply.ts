@@ -4,35 +4,16 @@
  * Creates a draft reply on a conversation (HITL-only, never sends).
  */
 
-import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
 import type { Command } from 'commander'
 import { type CommandContext, createContext } from '../../core/context'
 import { CLIError, formatError } from '../../core/errors'
+import { getFrontClient, normalizeId } from './client'
 import { conversationActions, conversationLinks, hateoasWrap } from './hateoas'
 
 interface ReplyOptions {
   message?: string
   dryRun?: boolean
   json?: boolean
-}
-
-function requireFrontToken(): string {
-  const apiToken = process.env.FRONT_API_TOKEN
-  if (!apiToken) {
-    throw new CLIError({
-      userMessage: 'FRONT_API_TOKEN environment variable is required.',
-      suggestion: 'Set FRONT_API_TOKEN in your shell or .env.local.',
-    })
-  }
-  return apiToken
-}
-
-function getFrontClient() {
-  return createInstrumentedFrontClient({ apiToken: requireFrontToken() })
-}
-
-function normalizeId(idOrUrl: string): string {
-  return idOrUrl.startsWith('http') ? idOrUrl.split('/').pop()! : idOrUrl
 }
 
 export async function replyToConversation(

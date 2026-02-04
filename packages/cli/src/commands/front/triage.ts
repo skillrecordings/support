@@ -8,7 +8,6 @@
  *   skill front triage --inbox <inbox-id> --json
  */
 
-import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
 import type {
   Conversation,
   ConversationList,
@@ -20,6 +19,7 @@ import type { Command } from 'commander'
 import { z } from 'zod'
 import { type CommandContext, createContext } from '../../core/context'
 import { CLIError, formatError } from '../../core/errors'
+import { getFrontClient } from './client'
 import { hateoasWrap, triageActions } from './hateoas'
 
 interface TriageOptions {
@@ -52,24 +52,6 @@ interface CategoryStats {
   actionable: number
   noise: number
   spam: number
-}
-
-/**
- * Get Front API client
- */
-function requireFrontToken(): string {
-  const apiToken = process.env.FRONT_API_TOKEN
-  if (!apiToken) {
-    throw new CLIError({
-      userMessage: 'FRONT_API_TOKEN environment variable is required.',
-      suggestion: 'Set FRONT_API_TOKEN in your shell or .env.local.',
-    })
-  }
-  return apiToken
-}
-
-function getFrontClient() {
-  return createInstrumentedFrontClient({ apiToken: requireFrontToken() })
 }
 
 const LLM_MODEL = 'anthropic/claude-haiku-4-5'

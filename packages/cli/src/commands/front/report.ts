@@ -7,10 +7,10 @@
  *   skill front report --inbox <inbox-id> --json
  */
 
-import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
 import type { Command } from 'commander'
 import { type CommandContext, createContext } from '../../core/context'
 import { CLIError, formatError } from '../../core/errors'
+import { getFrontClient } from './client'
 import { hateoasWrap, reportActions, reportLinks } from './hateoas'
 
 interface ReportOptions {
@@ -62,17 +62,6 @@ function getWeekKey(timestamp: number): string {
   return `${date.getFullYear()}-W${weekNum.toString().padStart(2, '0')}`
 }
 
-function requireFrontToken(): string {
-  const apiToken = process.env.FRONT_API_TOKEN
-  if (!apiToken) {
-    throw new CLIError({
-      userMessage: 'FRONT_API_TOKEN environment variable is required.',
-      suggestion: 'Set FRONT_API_TOKEN in your shell or .env.local.',
-    })
-  }
-  return apiToken
-}
-
 export async function generateReport(
   ctx: CommandContext,
   options: ReportOptions
@@ -80,8 +69,7 @@ export async function generateReport(
   const { inbox, days = 30 } = options
   const outputJson = options.json === true || ctx.format === 'json'
 
-  const frontToken = requireFrontToken()
-  const front = createInstrumentedFrontClient({ apiToken: frontToken })
+  const front = getFrontClient()
 
   try {
     if (!outputJson) {

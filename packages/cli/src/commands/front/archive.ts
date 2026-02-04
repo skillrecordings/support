@@ -4,42 +4,17 @@
  * Archives one or more conversations via Front API
  */
 
-import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
 import type { Command } from 'commander'
 import { type CommandContext, createContext } from '../../core/context'
 import { CLIError, formatError } from '../../core/errors'
+import { getFrontClient, normalizeId } from './client'
 import { hateoasWrap } from './hateoas'
-
-/**
- * Get Front API client from environment
- */
-function getFrontClient() {
-  return createInstrumentedFrontClient({ apiToken: requireFrontToken() })
-}
-
-function requireFrontToken(): string {
-  const apiToken = process.env.FRONT_API_TOKEN
-  if (!apiToken) {
-    throw new CLIError({
-      userMessage: 'FRONT_API_TOKEN environment variable is required.',
-      suggestion: 'Set FRONT_API_TOKEN in your shell or .env.local.',
-    })
-  }
-  return apiToken
-}
-
-/**
- * Normalize Front resource ID or URL to ID
- */
-function normalizeId(idOrUrl: string): string {
-  return idOrUrl.startsWith('http') ? idOrUrl.split('/').pop()! : idOrUrl
-}
 
 /**
  * Archive a single conversation
  */
 async function archiveConversation(
-  front: ReturnType<typeof createInstrumentedFrontClient>,
+  front: ReturnType<typeof getFrontClient>,
   convId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
