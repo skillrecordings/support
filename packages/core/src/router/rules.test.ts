@@ -60,11 +60,7 @@ describe('matchRules', () => {
         },
       ]
 
-      const result = matchRules(
-        'This is a testing message',
-        '[EMAIL]',
-        rules
-      )
+      const result = matchRules('This is a testing message', '[EMAIL]', rules)
 
       expect(result).toBeNull()
     })
@@ -107,18 +103,10 @@ describe('matchRules', () => {
         },
       ]
 
-      const result1 = matchRules(
-        'I am ooo this week',
-        '[EMAIL]',
-        rules
-      )
+      const result1 = matchRules('I am ooo this week', '[EMAIL]', rules)
       expect(result1?.ruleId).toBe('auto-reply')
 
-      const result2 = matchRules(
-        'Out of office until Monday',
-        '[EMAIL]',
-        rules
-      )
+      const result2 = matchRules('Out of office until Monday', '[EMAIL]', rules)
       expect(result2?.ruleId).toBe('auto-reply')
     })
 
@@ -152,7 +140,7 @@ describe('matchRules', () => {
 
       const result = matchRules(
         'Test message',
-        '[EMAIL]',
+        'joel@skillrecordings.com',
         rules
       )
 
@@ -178,7 +166,7 @@ describe('matchRules', () => {
 
       const result = matchRules(
         'Partner inquiry',
-        '[EMAIL]',
+        'support@partners.example.com',
         rules
       )
 
@@ -197,7 +185,7 @@ describe('matchRules', () => {
         },
       ]
 
-      const result = matchRules('Message', '[EMAIL]', rules)
+      const result = matchRules('Message', 'user@other.com', rules)
       expect(result).toBeNull()
     })
   })
@@ -272,11 +260,7 @@ describe('matchRules', () => {
         },
       ]
 
-      const result = matchRules(
-        'What are your hours?',
-        '[EMAIL]',
-        rules
-      )
+      const result = matchRules('What are your hours?', '[EMAIL]', rules)
 
       expect(result?.action).toBe('auto_respond')
       expect(result?.response).toBe('Our hours are 9-5 EST')
@@ -294,11 +278,7 @@ describe('matchRules', () => {
         },
       ]
 
-      const result = matchRules(
-        'How much does it cost?',
-        '[EMAIL]',
-        rules
-      )
+      const result = matchRules('How much does it cost?', '[EMAIL]', rules)
 
       expect(result?.action).toBe('route_to_canned')
       expect(result?.cannedResponseId).toBe('pricing-info')
@@ -319,7 +299,7 @@ describe('matchRules', () => {
 
       const result = matchRules(
         'Delivery Status Notification',
-        '[EMAIL]',
+        'mailer-daemon@gmail.com',
         rules
       )
 
@@ -337,7 +317,7 @@ describe('matchRules', () => {
         },
       ]
 
-      const result = matchRules('Notification', '[EMAIL]', rules)
+      const result = matchRules('Notification', 'noreply@company.com', rules)
       expect(result?.ruleId).toBe('noreply')
     })
 
@@ -352,7 +332,7 @@ describe('matchRules', () => {
         },
       ]
 
-      const result = matchRules('AWS Health', '[EMAIL]', rules)
+      const result = matchRules('AWS Health', 'notifications@health.aws', rules)
       expect(result?.ruleId).toBe('aws-health')
     })
 
@@ -367,7 +347,7 @@ describe('matchRules', () => {
         },
       ]
 
-      const result = matchRules('Bounce', '[EMAIL]', rules)
+      const result = matchRules('Bounce', 'POSTMASTER@mail.example.com', rules)
       expect(result?.ruleId).toBe('postmaster')
     })
 
@@ -384,7 +364,7 @@ describe('matchRules', () => {
 
       const result = matchRules(
         'Real customer message',
-        '[EMAIL]',
+        'customer@example.com',
         rules
       )
       expect(result).toBeNull()

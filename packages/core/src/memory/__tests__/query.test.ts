@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, mock } from 'bun:test'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Type for the search results
 interface MockSearchResult {
@@ -13,16 +13,23 @@ interface MockSearchResult {
   decay_factor: number
 }
 
-// Mock the memory service before importing query
-const mockFindSimilar = mock(() => Promise.resolve([] as MockSearchResult[]))
-const mockCite = mock(() => Promise.resolve())
-const mockRecordCitationOutcome = mock(() => Promise.resolve())
-const mockParseContent = mock((content: string) => ({
-  situation: 'test situation',
-  decision: 'test decision',
+// Use vi.hoisted for proper mock hoisting
+const {
+  mockFindSimilar,
+  mockCite,
+  mockRecordCitationOutcome,
+  mockParseContent,
+} = vi.hoisted(() => ({
+  mockFindSimilar: vi.fn(() => Promise.resolve([] as MockSearchResult[])),
+  mockCite: vi.fn(() => Promise.resolve()),
+  mockRecordCitationOutcome: vi.fn(() => Promise.resolve()),
+  mockParseContent: vi.fn((content: string) => ({
+    situation: 'test situation',
+    decision: 'test decision',
+  })),
 }))
 
-mock.module('@skillrecordings/memory/support-memory', () => ({
+vi.mock('@skillrecordings/memory/support-memory', () => ({
   SupportMemoryService: {
     findSimilar: mockFindSimilar,
     cite: mockCite,

@@ -8,7 +8,6 @@ import type {
   ValidationIssue,
 } from '../../types'
 import { calculateConfidenceScore, validate } from '../validate'
-import * as validateModule from '../validate'
 
 vi.mock('ai', () => ({
   generateObject: vi.fn(),
@@ -52,7 +51,7 @@ describe('four-tier response system', () => {
   it('returns draft action by default', async () => {
     retrieveSkillsMock.mockResolvedValue([])
     const getCategoryStatsMock = vi
-      .spyOn(validateModule, 'getCategoryStats')
+      .fn()
       .mockResolvedValue({ sentUnchangedRate: 0, volume: 0 })
 
     const result = await validate(
@@ -64,6 +63,7 @@ describe('four-tier response system', () => {
       {
         skipMemoryQuery: true,
         skipRelevanceCheck: true,
+        getCategoryStats: getCategoryStatsMock,
       }
     )
 
@@ -77,10 +77,6 @@ describe('four-tier response system', () => {
 
   it('escalates team-license category always', async () => {
     retrieveSkillsMock.mockResolvedValue([])
-    vi.spyOn(validateModule, 'getCategoryStats').mockResolvedValue({
-      sentUnchangedRate: 1,
-      volume: 999,
-    })
 
     const result = await validate(
       makeInput(
@@ -126,7 +122,7 @@ describe('four-tier response system', () => {
 
   it('auto-send only when category has earned it', async () => {
     retrieveSkillsMock.mockResolvedValue([])
-    vi.spyOn(validateModule, 'getCategoryStats').mockResolvedValue({
+    const getCategoryStatsMock = vi.fn().mockResolvedValue({
       sentUnchangedRate: 0.99,
       volume: 120,
     })
@@ -141,6 +137,7 @@ describe('four-tier response system', () => {
         category: 'support_refund',
         skipMemoryQuery: true,
         skipRelevanceCheck: true,
+        getCategoryStats: getCategoryStatsMock,
       }
     )
 
@@ -386,7 +383,7 @@ describe('tool failure escalation', () => {
 
   it('escalates when lookupUser tool failed', async () => {
     retrieveSkillsMock.mockResolvedValue([])
-    vi.spyOn(validateModule, 'getCategoryStats').mockResolvedValue({
+    const getCategoryStatsMock = vi.fn().mockResolvedValue({
       sentUnchangedRate: 0.99,
       volume: 120,
     })
@@ -407,6 +404,7 @@ describe('tool failure escalation', () => {
         skipMemoryQuery: true,
         skipRelevanceCheck: true,
         category: 'support_access',
+        getCategoryStats: getCategoryStatsMock,
       }
     )
 
@@ -420,7 +418,7 @@ describe('tool failure escalation', () => {
 
   it('does not escalate when non-critical tools fail', async () => {
     retrieveSkillsMock.mockResolvedValue([])
-    vi.spyOn(validateModule, 'getCategoryStats').mockResolvedValue({
+    const getCategoryStatsMock = vi.fn().mockResolvedValue({
       sentUnchangedRate: 0.99,
       volume: 120,
     })
@@ -442,6 +440,7 @@ describe('tool failure escalation', () => {
         skipMemoryQuery: true,
         skipRelevanceCheck: true,
         category: 'support_access',
+        getCategoryStats: getCategoryStatsMock,
       }
     )
 
@@ -451,7 +450,7 @@ describe('tool failure escalation', () => {
 
   it('escalates when multiple critical tools fail', async () => {
     retrieveSkillsMock.mockResolvedValue([])
-    vi.spyOn(validateModule, 'getCategoryStats').mockResolvedValue({
+    const getCategoryStatsMock = vi.fn().mockResolvedValue({
       sentUnchangedRate: 0,
       volume: 0,
     })
@@ -475,6 +474,7 @@ describe('tool failure escalation', () => {
         skipMemoryQuery: true,
         skipRelevanceCheck: true,
         category: 'support_refund',
+        getCategoryStats: getCategoryStatsMock,
       }
     )
 

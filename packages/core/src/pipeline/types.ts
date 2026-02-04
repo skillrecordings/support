@@ -409,6 +409,8 @@ export interface CommentInput {
   conversationId: string
   context: GatherOutput
   appId: string
+  category?: MessageCategory
+  action?: RouteAction
 }
 
 export interface CommentOutput {

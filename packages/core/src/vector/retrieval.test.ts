@@ -4,8 +4,12 @@ import * as redact from './redact'
 import { buildAgentContext } from './retrieval'
 import type { VectorQueryResult } from './types'
 
-vi.mock('./client')
-vi.mock('./redact')
+vi.mock('./client', () => ({
+  queryVectors: vi.fn(),
+}))
+vi.mock('./redact', () => ({
+  redactPII: vi.fn(),
+}))
 
 describe('buildAgentContext', () => {
   beforeEach(() => {
@@ -23,10 +27,7 @@ describe('buildAgentContext', () => {
       query: '[EMAIL] had an issue',
     })
 
-    expect(redactPIISpy).toHaveBeenCalledWith(
-      '[EMAIL] had an issue',
-      []
-    )
+    expect(redactPIISpy).toHaveBeenCalledWith('[EMAIL] had an issue', [])
   })
 
   it('should redact customer email from known names', async () => {
@@ -38,7 +39,7 @@ describe('buildAgentContext', () => {
     await buildAgentContext({
       appId: 'test-app',
       query: 'Customer John Smith contacted us',
-      customerEmail: '[EMAIL]',
+      customerEmail: 'john.smith@example.com',
     })
 
     expect(redactPIISpy).toHaveBeenCalledWith(

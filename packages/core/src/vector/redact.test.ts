@@ -3,28 +3,28 @@ import { redactPII } from './redact'
 
 describe('redactPII', () => {
   it('redacts email addresses', () => {
-    const text = 'Contact me at [EMAIL] for details'
+    const text = 'Contact me at john@example.com for details'
     const result = redactPII(text)
     expect(result).toBe('Contact me at [EMAIL] for details')
   })
 
   it('redacts multiple emails', () => {
-    const text = 'Send to [EMAIL] and [EMAIL]'
+    const text = 'Send to alice@test.com and bob@example.org'
     const result = redactPII(text)
     expect(result).toBe('Send to [EMAIL] and [EMAIL]')
   })
 
   it('redacts phone numbers in various formats', () => {
-    expect(redactPII('Call ([PHONE]')).toBe('Call [PHONE]')
-    expect(redactPII('Text [PHONE]')).toBe('Text [PHONE]')
-    expect(redactPII('Dial +[PHONE]')).toBe('Dial [PHONE]')
-    expect(redactPII('Try [PHONE]')).toBe('Try [PHONE]')
+    expect(redactPII('Call (555) 123-4567')).toBe('Call [PHONE]')
+    expect(redactPII('Text 555-123-4567')).toBe('Text [PHONE]')
+    expect(redactPII('Dial +1 555 123 4567')).toBe('Dial [PHONE]')
+    expect(redactPII('Try 5551234567')).toBe('Try [PHONE]')
   })
 
   it('redacts credit card numbers', () => {
-    expect(redactPII('Card: [PHONE]-[PHONE]')).toBe('Card: [CARD]')
-    expect(redactPII('Number [PHONE] [PHONE]')).toBe('Number [CARD]')
-    expect(redactPII('Pay with 4532123456789010')).toBe('Pay with [CARD]')
+    expect(redactPII('Card: 4532-1234-5678-9012')).toBe('Card: [CARD]')
+    expect(redactPII('Number 4532 1234 5678 9012')).toBe('Number [CARD]')
+    expect(redactPII('Pay with 4532123456789012')).toBe('Pay with [CARD]')
   })
 
   it('redacts known names (case insensitive)', () => {
@@ -41,7 +41,7 @@ describe('redactPII', () => {
 
   it('handles text with multiple PII types', () => {
     const text =
-      'Contact John Doe at [EMAIL] or [PHONE], card [PHONE]-[PHONE]'
+      'Contact John Doe at john@example.com or 555-123-4567, card 4532-1234-5678-9012'
     const result = redactPII(text, ['John Doe'])
     expect(result).toBe('Contact [NAME] at [EMAIL] or [PHONE], card [CARD]')
   })

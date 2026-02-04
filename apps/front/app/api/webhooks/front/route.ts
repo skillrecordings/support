@@ -285,97 +285,6 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  // Handle outbound message events (teammate sent a reply - RL feedback loop)
-  if (event.type === 'outbound_sent') {
-    const messageId = event.payload?.target?.data?.id
-    if (!messageId) {
-      console.log('[front-webhook] Missing message ID in outbound event')
-      return NextResponse.json({ received: true }) // Ack anyway, don't fail
-    }
-
-    // Extract author info from the payload
-    const author = event.payload?.target?.data?.author
-    const sentAt = event.payload?.emitted_at
-
-    // source.data can be an ARRAY of inboxes - find one that matches a registered app
-    const sourceData = event.payload?.source?.data
-    const inboxes = Array.isArray(sourceData) ? sourceData : []
-
-    console.log('[front-webhook] Outbound event extracted:', {
-      messageId,
-      authorId: author?.id,
-      authorEmail: author?.email,
-      inboxCount: inboxes.length,
-      inboxIds: inboxes.map((i: { id?: string }) => i?.id).filter(Boolean),
-    })
-
-    // Find the first inbox that matches a registered app
-    let appSlug = 'unknown'
-    let inboxId: string | undefined
-    for (const inbox of inboxes) {
-      if (inbox?.id) {
-        const app = await getAppByInboxId(inbox.id)
-        if (app) {
-          appSlug = app.slug
-          inboxId = inbox.id
-          console.log(
-            `[front-webhook] Matched inbox ${inbox.id} to app ${app.slug}`
-          )
-          break
-        }
-      }
-    }
-
-    // Bail if no registered app found - don't waste resources on unknown inboxes
-    if (!inboxId || appSlug === 'unknown') {
-      console.warn(
-        `[front-webhook] No registered app for outbound inboxes: ${inboxes.map((i: { id?: string }) => i?.id).join(', ')}`
-      )
-      return NextResponse.json({ received: true })
-    }
-
-    // Generate unique traceId for end-to-end pipeline correlation
-    const traceId = randomUUID()
-
-    // Build author name from first + last name if available
-    const authorName =
-      [author?.first_name, author?.last_name].filter(Boolean).join(' ') ||
-      undefined
-
-    const inngestPayload = {
-      conversationId,
-      messageId,
-      appId: appSlug,
-      inboxId,
-      author: {
-        id: author?.id,
-        email: author?.email,
-        name: authorName,
-      },
-      sentAt,
-      _links: {
-        conversation: event.payload?.conversation?._links?.self,
-        message: event.payload?.target?.data?._links?.self,
-      },
-      traceId,
-    }
-
-    console.log(
-      '[front-webhook] Sending outbound to Inngest:',
-      JSON.stringify(inngestPayload, null, 2)
-    )
-
-    await inngest.send({
-      name: SUPPORT_OUTBOUND_MESSAGE,
-      data: inngestPayload,
-    })
-
-    const elapsed = Date.now() - startTime
-    console.log(
-      `[front-webhook] ========== OUTBOUND DISPATCHED TO INNGEST (${elapsed}ms) ==========`
-    )
-  }
-
   // Handle comment events (internal notes/comments on conversations)
   if (event.type === 'new_comment_added') {
     const commentId = event.payload?.target?.data?.id
@@ -602,7 +511,7 @@ export async function POST(request: NextRequest) {
 
   // Handle outbound message events (message sent from Front)
   // This is THE core signal for the RL loop - comparing draft vs sent
-  if (event.type === 'outbound_sent') {
+  if (event.type === 'outbound' || event.type === 'outbound_sent') {
     const messageId = event.payload?.target?.data?.id
     if (!messageId) {
       console.log('[front-webhook] Missing message ID in outbound event')

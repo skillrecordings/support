@@ -112,6 +112,22 @@
         "TypeScript compiles clean",
         "All tests pass"
       ]
+    },
+    {
+      "id": "story-ml6qgu1x",
+      "title": "Bug Fix: Silent silence + collaborator allowlist (#146)",
+      "description": "Fix agent commenting on silenced conversations. When route action is `silence` or category is `system`, NO comment should be posted to Front.\n\n## Implementation\n1. Find where comments are posted for silence/system decisions\n2. Add conditional to skip comment posting when action is silence\n3. Add `collaboratorEmails` config array that bypasses classification entirely\n4. Suggested collaborators: `alex@indyhall.org`\n\n## Acceptance Criteria\n- When route action is `silence` or category is `system`, NO comment is posted to Front\n- Conversation is still tagged appropriately\n- Escalation and draft comments still work normally\n- Add collaborator email allowlist in config that skips processing entirely\n\n## Files Likely Involved\n- `packages/core/src/pipeline/steps/route.ts`\n- `packages/inngest/src/functions/route-message.ts`\n- Comment posting logic\n\nGitHub Issue: https://github.com/skillrecordings/support/issues/146",
+      "priority": 1,
+      "passes": false,
+      "validationCommand": "bun run check-types && bun run test"
+    },
+    {
+      "id": "story-ml6qgu23",
+      "title": "Bug Fix: Detect human response before drafting (#147)",
+      "description": "Agent drafted even when team already responded. Before drafting, check if a team member has already responded to the customer's latest message.\n\n## Implementation\n1. In gather or pre-draft step, fetch conversation messages from Front\n2. Find the last inbound (customer) message timestamp\n3. Check if any outbound message from a teammate (not bot API user) exists after that timestamp\n4. If yes, skip draft step and log reason\n\n## Acceptance Criteria\n- Agent does NOT draft if team member responded after customer's last inbound message\n- Agent DOES draft if customer sends a NEW message after team response\n- Skip reason is logged to Axiom (e.g., `skip_reason: \"human_responded\"`)\n- Works for any team member, not just specific emails\n\n## Files Likely Involved\n- `packages/core/src/pipeline/steps/gather.ts` or `draft.ts`\n- `packages/inngest/src/functions/` — draft triggering logic\n\nGitHub Issue: https://github.com/skillrecordings/support/issues/147",
+      "priority": 2,
+      "passes": false,
+      "validationCommand": "bun run check-types && bun run test"
     }
   ],
   "metadata": {

@@ -2,12 +2,17 @@
  * Direct classifier tests - run classifier on specific messages and verify output
  *
  * Run: bun test packages/core/src/evals/classifier-direct.test.ts
+ *
+ * NOTE: These tests require AI_GATEWAY_API_KEY to be set. They are skipped in CI.
  */
 
 import { describe, expect, it } from 'vitest'
 import { classifyMessage } from '../router/classifier'
 
-describe('Classifier', () => {
+const hasApiKey =
+  !!process.env.AI_GATEWAY_API_KEY || !!process.env.ANTHROPIC_API_KEY
+
+describe.skipIf(!hasApiKey)('Classifier', () => {
   describe('instructor_correspondence detection', () => {
     it('should classify reply to Matt personal email as instructor_correspondence', async () => {
       const message = `Hi Matt,

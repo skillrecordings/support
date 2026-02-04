@@ -16,6 +16,7 @@ vi.mock('../observability/axiom', () => ({
 
 // Mock Front SDK
 vi.mock('@skillrecordings/front-sdk', () => ({
+  FRONT_API_BASE: 'https://api2.frontapp.com',
   createFrontClient: vi.fn(() => ({
     raw: {
       get: vi.fn(),
@@ -40,37 +41,30 @@ vi.mock('@skillrecordings/front-sdk', () => ({
   },
 }))
 
-import { createFrontClient } from '@skillrecordings/front-sdk'
+// Mock the instrumented client (used by TagRegistry)
+const mockInstrumentedClient = {
+  raw: {
+    get: vi.fn(),
+  },
+  tags: {
+    create: vi.fn(),
+  },
+  conversations: {
+    addTag: vi.fn(),
+  },
+}
+
+vi.mock('../front/instrumented-client', () => ({
+  createInstrumentedFrontClient: vi.fn(() => mockInstrumentedClient),
+}))
 
 describe('TagRegistry', () => {
-  let mockFront: {
-    raw: {
-      get: Mock
-    }
-    tags: {
-      create: Mock
-      get: Mock
-    }
-    conversations: {
-      addTag: Mock
-    }
-  }
-
   beforeEach(() => {
     vi.clearAllMocks()
-    mockFront = {
-      raw: {
-        get: vi.fn(),
-      },
-      tags: {
-        create: vi.fn(),
-        get: vi.fn(),
-      },
-      conversations: {
-        addTag: vi.fn(),
-      },
-    }
-    ;(createFrontClient as Mock).mockReturnValue(mockFront)
+    // Reset mock implementations
+    mockInstrumentedClient.raw.get.mockReset()
+    mockInstrumentedClient.tags.create.mockReset()
+    mockInstrumentedClient.conversations.addTag.mockReset()
   })
 
   describe('getTagNameForCategory', () => {
@@ -109,7 +103,7 @@ describe('TagRegistry', () => {
 
   describe('getTagIdForCategory', () => {
     it('initializes and caches tag IDs', async () => {
-      mockFront.raw.get.mockResolvedValue({
+      mockInstrumentedClient.raw.get.mockResolvedValue({
         _results: [
           { id: 'tag_123', name: 'spam' },
           { id: 'tag_456', name: 'access-issue' },
@@ -124,18 +118,21 @@ describe('TagRegistry', () => {
       // Should be cached - list not called again
       const tagId2 = await registry.getTagIdForCategory('spam')
       expect(tagId2).toBe('tag_123')
-      expect(mockFront.raw.get).toHaveBeenCalledTimes(1)
+      expect(mockInstrumentedClient.raw.get).toHaveBeenCalledTimes(1)
     })
 
     it('creates missing tags', async () => {
-      mockFront.raw.get.mockResolvedValue({ _results: [] })
-      mockFront.tags.create.mockResolvedValue({ id: 'tag_new', name: 'spam' })
+      mockInstrumentedClient.raw.get.mockResolvedValue({ _results: [] })
+      mockInstrumentedClient.tags.create.mockResolvedValue({
+        id: 'tag_new',
+        name: 'spam',
+      })
 
       const registry = createTagRegistry({ frontApiToken: 'test-token' })
 
       const tagId = await registry.getTagIdForCategory('spam')
       expect(tagId).toBe('tag_new')
-      expect(mockFront.tags.create).toHaveBeenCalledWith({
+      expect(mockInstrumentedClient.tags.create).toHaveBeenCalledWith({
         name: 'spam',
         description: 'Spam or marketing',
         highlight: 'red',
@@ -143,12 +140,14 @@ describe('TagRegistry', () => {
     })
 
     it('handles create race condition by re-fetching', async () => {
-      mockFront.raw.get
+      mockInstrumentedClient.raw.get
         .mockResolvedValueOnce({ _results: [] })
         .mockResolvedValueOnce({
           _results: [{ id: 'tag_existing', name: 'spam' }],
         })
-      mockFront.tags.create.mockRejectedValue(new Error('Already exists'))
+      mockInstrumentedClient.tags.create.mockRejectedValue(
+        new Error('Already exists')
+      )
 
       const registry = createTagRegistry({ frontApiToken: 'test-token' })
 
@@ -177,19 +176,19 @@ describe('TagRegistry', () => {
 
   describe('clearCache', () => {
     it('clears the cache and requires re-initialization', async () => {
-      mockFront.raw.get.mockResolvedValue({
+      mockInstrumentedClient.raw.get.mockResolvedValue({
         _results: [{ id: 'tag_123', name: 'spam' }],
       })
 
       const registry = createTagRegistry({ frontApiToken: 'test-token' })
 
       await registry.getTagIdForCategory('spam')
-      expect(mockFront.raw.get).toHaveBeenCalledTimes(1)
+      expect(mockInstrumentedClient.raw.get).toHaveBeenCalledTimes(1)
 
       registry.clearCache()
 
       await registry.getTagIdForCategory('spam')
-      expect(mockFront.raw.get).toHaveBeenCalledTimes(2)
+      expect(mockInstrumentedClient.raw.get).toHaveBeenCalledTimes(2)
     })
   })
 })

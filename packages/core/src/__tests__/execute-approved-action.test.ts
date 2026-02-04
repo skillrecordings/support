@@ -16,7 +16,10 @@ vi.mock('@skillrecordings/database', () => ({
   getDb: vi.fn(() => mockDb),
   ActionsTable: {},
   ApprovalRequestsTable: {},
+  IdempotencyKeysTable: {},
   eq: vi.fn((field, value) => ({ field, value })),
+  gt: vi.fn((field, value) => ({ field, value })),
+  and: vi.fn((...conditions) => ({ conditions })),
 }))
 
 // Mock Front SDK for audit comments
@@ -60,6 +63,17 @@ vi.mock('../tools', () => ({
       execute: vi.fn(),
     },
   },
+}))
+
+// Mock the idempotency module
+vi.mock('../actions', () => ({
+  checkIdempotency: vi.fn().mockResolvedValue({
+    isDuplicate: false,
+    key: 'test-key',
+    status: 'pending',
+  }),
+  completeIdempotencyKey: vi.fn().mockResolvedValue(undefined),
+  failIdempotencyKey: vi.fn().mockResolvedValue(undefined),
 }))
 
 import * as instrumentedClient from '../front/instrumented-client'

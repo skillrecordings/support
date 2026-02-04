@@ -70,6 +70,7 @@ Total TypeScript offers a **30-day money-back guarantee** on all purchases.
 
 describe('full pipeline integration', () => {
   beforeEach(() => {
+    vi.restoreAllMocks()
     vi.clearAllMocks()
     vi.spyOn(validateModule, 'getCategoryStats').mockResolvedValue({
       sentUnchangedRate: 0,
@@ -205,10 +206,6 @@ describe('full pipeline integration', () => {
   describe('four-tier routing with all validators', () => {
     it('auto-sends high-confidence response for earned category', async () => {
       retrieveSkillsMock.mockResolvedValue([MOCK_SKILLS.refundPolicy])
-      vi.spyOn(validateModule, 'getCategoryStats').mockResolvedValue({
-        sentUnchangedRate: 0.99,
-        volume: 150,
-      })
 
       const result = await validate(
         {
@@ -242,6 +239,10 @@ describe('full pipeline integration', () => {
           skipRelevanceCheck: true,
           appId: 'total-typescript',
           category: 'support_refund',
+          getCategoryStats: async () => ({
+            sentUnchangedRate: 0.99,
+            volume: 150,
+          }),
         }
       )
 

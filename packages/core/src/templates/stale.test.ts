@@ -10,22 +10,20 @@ import {
   formatStaleReport,
 } from './stale'
 
+// Create mock query function that we can control
+const mockQuery = vi.fn()
+
 // Mock the vector client
 vi.mock('../vector/client', () => ({
   getVectorIndex: vi.fn(() => ({
-    query: vi.fn(),
+    query: mockQuery,
   })),
 }))
 
 describe('findStaleTemplates', () => {
-  const mockIndex = {
-    query: vi.fn(),
-  }
-
   beforeEach(() => {
     vi.clearAllMocks()
-    const { getVectorIndex } = require('../vector/client')
-    getVectorIndex.mockReturnValue(mockIndex)
+    mockQuery.mockReset()
   })
 
   it('should identify unused templates', async () => {
@@ -34,7 +32,7 @@ describe('findStaleTemplates', () => {
       now - 100 * 24 * 60 * 60 * 1000
     ).toISOString()
 
-    mockIndex.query.mockResolvedValue([
+    mockQuery.mockResolvedValue([
       {
         id: 'front_template_tmp_active',
         score: 0.95,
@@ -81,7 +79,7 @@ describe('findStaleTemplates', () => {
       Date.now() - 50 * 24 * 60 * 60 * 1000
     ).toISOString()
 
-    mockIndex.query.mockResolvedValue([
+    mockQuery.mockResolvedValue([
       {
         id: 'front_template_tmp_recent',
         score: 0.9,
@@ -111,7 +109,7 @@ describe('findStaleTemplates', () => {
       Date.now() - 100 * 24 * 60 * 60 * 1000
     ).toISOString()
 
-    mockIndex.query.mockResolvedValue([
+    mockQuery.mockResolvedValue([
       {
         id: 'front_template_tmp_used',
         score: 0.85,
@@ -139,7 +137,7 @@ describe('findStaleTemplates', () => {
   })
 
   it('should extract Front ID correctly', async () => {
-    mockIndex.query.mockResolvedValue([
+    mockQuery.mockResolvedValue([
       {
         id: 'front_template_rsp_abc123',
         score: 0.85,
@@ -167,7 +165,7 @@ describe('findStaleTemplates', () => {
   })
 
   it('should sort results by days since used (most stale first)', async () => {
-    mockIndex.query.mockResolvedValue([
+    mockQuery.mockResolvedValue([
       {
         id: 'front_template_tmp_1',
         score: 0.85,
@@ -211,7 +209,7 @@ describe('findStaleTemplates', () => {
   })
 
   it('should handle empty results', async () => {
-    mockIndex.query.mockResolvedValue([])
+    mockQuery.mockResolvedValue([])
 
     const result = await findStaleTemplates({
       appId: 'test-app',
@@ -224,7 +222,7 @@ describe('findStaleTemplates', () => {
   })
 
   it('should handle templates without lastUpdated metadata', async () => {
-    mockIndex.query.mockResolvedValue([
+    mockQuery.mockResolvedValue([
       {
         id: 'front_template_tmp_no_date',
         score: 0.85,

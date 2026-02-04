@@ -1,5 +1,13 @@
 import * as fs from 'node:fs/promises'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest'
 import { runEval } from './eval'
 
 // Mock process.exit to prevent test termination
@@ -8,7 +16,11 @@ const mockExit = vi.spyOn(process, 'exit').mockImplementation((code) => {
 })
 
 // Mock fs module
-vi.mock('node:fs/promises')
+vi.mock('node:fs/promises', () => ({
+  readFile: vi.fn(),
+  writeFile: vi.fn(),
+  access: vi.fn(),
+}))
 
 // Mock core evals module
 vi.mock('@skillrecordings/core/evals/routing', () => ({
@@ -23,6 +35,10 @@ describe('eval command', () => {
 
   afterEach(() => {
     mockExit.mockClear()
+  })
+
+  afterAll(() => {
+    mockExit.mockRestore()
   })
 
   it('should require dataset path', async () => {

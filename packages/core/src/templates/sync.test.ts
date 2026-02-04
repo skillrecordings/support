@@ -3,31 +3,48 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { syncTemplates } from './sync'
+
+// Use vi.hoisted for proper mock hoisting
+const { mockPaginate, mockUpsertVector, mockCreateInstrumentedFrontClient } =
+  vi.hoisted(() => ({
+    mockPaginate: vi.fn(),
+    mockUpsertVector: vi.fn(),
+    mockCreateInstrumentedFrontClient: vi.fn(() => ({
+      templates: {
+        list: vi.fn(),
+      },
+      raw: {
+        get: vi.fn(),
+      },
+    })),
+  }))
 
 // Mock the front-sdk
 vi.mock('@skillrecordings/front-sdk', () => ({
-  createFrontClient: vi.fn(() => ({
-    templates: {
-      list: vi.fn(),
-    },
-    raw: {
-      get: vi.fn(),
-    },
-  })),
-  paginate: vi.fn(),
+  FRONT_API_BASE: 'https://api2.frontapp.com',
+  paginate: mockPaginate,
+}))
+
+// Mock the instrumented client
+vi.mock('../front/instrumented-client', () => ({
+  createInstrumentedFrontClient: mockCreateInstrumentedFrontClient,
 }))
 
 // Mock the vector client
 vi.mock('../vector/client', () => ({
-  upsertVector: vi.fn().mockResolvedValue({}),
+  upsertVector: mockUpsertVector,
 }))
+
+import { syncTemplates } from './sync'
 
 describe('syncTemplates', () => {
   const mockApiKey = 'test-api-key'
 
   beforeEach(() => {
     vi.clearAllMocks()
+    mockPaginate.mockReset()
+    mockUpsertVector.mockReset()
+    mockUpsertVector.mockResolvedValue({})
     process.env.FRONT_API_KEY = mockApiKey
   })
 
@@ -44,24 +61,20 @@ describe('syncTemplates', () => {
   })
 
   it('should use provided API key over env var', async () => {
-    const { createFrontClient } = await import('@skillrecordings/front-sdk')
-    const { paginate } = await import('@skillrecordings/front-sdk')
-
     // Mock paginate to return empty array
-    vi.mocked(paginate).mockResolvedValue([])
+    mockPaginate.mockResolvedValue([])
 
     await syncTemplates({
       appId: 'test-app',
       frontApiKey: 'custom-key',
     })
 
-    expect(createFrontClient).toHaveBeenCalledWith({ apiToken: 'custom-key' })
+    expect(mockCreateInstrumentedFrontClient).toHaveBeenCalledWith({
+      apiToken: 'custom-key',
+    })
   })
 
   it('should sync templates from Front to vector store', async () => {
-    const { paginate } = await import('@skillrecordings/front-sdk')
-    const { upsertVector } = await import('../vector/client')
-
     const mockTemplates = [
       {
         id: 'rsp_123',
@@ -81,17 +94,17 @@ describe('syncTemplates', () => {
       },
     ]
 
-    vi.mocked(paginate).mockResolvedValue(mockTemplates)
+    mockPaginate.mockResolvedValue(mockTemplates)
 
     const result = await syncTemplates({ appId: 'test-app' })
 
     expect(result.synced).toBe(2)
     expect(result.skipped).toBe(0)
     expect(result.errors).toHaveLength(0)
-    expect(upsertVector).toHaveBeenCalledTimes(2)
+    expect(mockUpsertVector).toHaveBeenCalledTimes(2)
 
     // Verify the first template was transformed correctly
-    expect(upsertVector).toHaveBeenCalledWith(
+    expect(mockUpsertVector).toHaveBeenCalledWith(
       expect.objectContaining({
         id: 'front_template_rsp_123',
         data: 'Thank you for contacting us about a refund...',
@@ -108,9 +121,6 @@ describe('syncTemplates', () => {
   })
 
   it('should skip templates with empty body', async () => {
-    const { paginate } = await import('@skillrecordings/front-sdk')
-    const { upsertVector } = await import('../vector/client')
-
     const mockTemplates = [
       {
         id: 'rsp_123',
@@ -142,19 +152,16 @@ describe('syncTemplates', () => {
       },
     ]
 
-    vi.mocked(paginate).mockResolvedValue(mockTemplates)
+    mockPaginate.mockResolvedValue(mockTemplates)
 
     const result = await syncTemplates({ appId: 'test-app' })
 
     expect(result.synced).toBe(1)
     expect(result.skipped).toBe(2)
-    expect(upsertVector).toHaveBeenCalledTimes(1)
+    expect(mockUpsertVector).toHaveBeenCalledTimes(1)
   })
 
   it('should handle errors gracefully', async () => {
-    const { paginate } = await import('@skillrecordings/front-sdk')
-    const { upsertVector } = await import('../vector/client')
-
     const mockTemplates = [
       {
         id: 'rsp_123',
@@ -174,8 +181,8 @@ describe('syncTemplates', () => {
       },
     ]
 
-    vi.mocked(paginate).mockResolvedValue(mockTemplates)
-    vi.mocked(upsertVector)
+    mockPaginate.mockResolvedValue(mockTemplates)
+    mockUpsertVector
       .mockResolvedValueOnce({})
       .mockRejectedValueOnce(new Error('Vector store error'))
 
@@ -191,9 +198,6 @@ describe('syncTemplates', () => {
   })
 
   it('should strip HTML tags from template body', async () => {
-    const { paginate } = await import('@skillrecordings/front-sdk')
-    const { upsertVector } = await import('../vector/client')
-
     const mockTemplates = [
       {
         id: 'rsp_html',
@@ -205,11 +209,11 @@ describe('syncTemplates', () => {
       },
     ]
 
-    vi.mocked(paginate).mockResolvedValue(mockTemplates)
+    mockPaginate.mockResolvedValue(mockTemplates)
 
     await syncTemplates({ appId: 'test-app' })
 
-    expect(upsertVector).toHaveBeenCalledWith(
+    expect(mockUpsertVector).toHaveBeenCalledWith(
       expect.objectContaining({
         data: 'HelloThis is bold text.',
       })

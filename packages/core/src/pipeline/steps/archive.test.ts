@@ -9,16 +9,16 @@ import {
   shouldArchive,
 } from './archive'
 
-// Mock Front SDK
-vi.mock('@skillrecordings/front-sdk', () => ({
-  createFrontClient: vi.fn(() => ({
+// Mock instrumented Front client
+vi.mock('../../front/instrumented-client', () => ({
+  createInstrumentedFrontClient: vi.fn(() => ({
     conversations: {
       update: vi.fn(),
     },
   })),
 }))
 
-import { createFrontClient } from '@skillrecordings/front-sdk'
+import { createInstrumentedFrontClient } from '../../front/instrumented-client'
 
 describe('shouldArchive', () => {
   it('returns true for silence action', () => {
@@ -55,7 +55,7 @@ describe('archiveConversation', () => {
         update: vi.fn(),
       },
     }
-    ;(createFrontClient as Mock).mockReturnValue(mockFront)
+    ;(createInstrumentedFrontClient as Mock).mockReturnValue(mockFront)
   })
 
   it('archives conversation when action is silence', async () => {
@@ -150,7 +150,7 @@ describe('createArchiveStep', () => {
         update: vi.fn().mockResolvedValue(undefined),
       },
     }
-    ;(createFrontClient as Mock).mockReturnValue(mockFront)
+    ;(createInstrumentedFrontClient as Mock).mockReturnValue(mockFront)
 
     const archiveStep = createArchiveStep({ frontApiToken: 'test-token' })
     const result = await archiveStep({

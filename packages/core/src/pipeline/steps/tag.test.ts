@@ -20,12 +20,24 @@ vi.mock('../../tags/registry', () => ({
 
 // Mock Front SDK
 vi.mock('@skillrecordings/front-sdk', () => ({
+  createChannelsClient: vi.fn(() => ({})),
+  createContactsClient: vi.fn(() => ({})),
+  createConversationsClient: vi.fn(() => ({})),
+  createDraftsClient: vi.fn(() => ({})),
   createFrontClient: vi.fn(() => ({
     tags: {
       delete: vi.fn(),
       create: vi.fn(),
     },
   })),
+  createInboxesClient: vi.fn(() => ({})),
+  createMessagesClient: vi.fn(() => ({})),
+  createTagsClient: vi.fn(() => ({
+    delete: vi.fn(),
+    create: vi.fn(),
+  })),
+  createTeammatesClient: vi.fn(() => ({})),
+  createTemplatesClient: vi.fn(() => ({})),
   FRONT_API_BASE: 'https://api2.frontapp.com',
   ErrorResponseSchema: {
     safeParse: vi.fn(() => ({ success: false })),
@@ -71,6 +83,7 @@ describe('applyTag', () => {
       ok: true,
       status: 204,
       statusText: 'No Content',
+      headers: { get: vi.fn().mockReturnValue(null) },
     })
     vi.stubGlobal('fetch', fetchMock)
   })
@@ -150,6 +163,7 @@ describe('applyTag', () => {
       ok: false,
       status: 500,
       statusText: 'API Error',
+      headers: { get: vi.fn().mockReturnValue(null) },
       json: vi.fn().mockResolvedValue({}),
     })
 
@@ -174,6 +188,7 @@ describe('applyTag', () => {
       ok: false,
       status: 403,
       statusText: 'Forbidden',
+      headers: { get: vi.fn().mockReturnValue(null) },
       json: vi.fn().mockResolvedValue({}),
     })
 
@@ -217,6 +232,7 @@ describe('applyTag', () => {
       ok: false,
       status: 404,
       statusText: 'Not Found',
+      headers: { get: vi.fn().mockReturnValue(null) },
       json: vi.fn().mockResolvedValue({
         _error: {
           status: 404,
@@ -343,6 +359,7 @@ describe('applyTag', () => {
       ok: true,
       status: 204,
       statusText: 'No Content',
+      headers: { get: vi.fn().mockReturnValue(null) },
     })
     vi.stubGlobal('fetch', fetchMock)
     ;(createTagRegistry as Mock).mockReturnValue({
@@ -390,6 +407,7 @@ describe('applyTag', () => {
         ok: true,
         status: 204,
         statusText: 'No Content',
+        headers: { get: vi.fn().mockReturnValue(null) },
       })
       vi.stubGlobal('fetch', fetchMock)
       const mockReg = {
