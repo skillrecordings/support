@@ -13,6 +13,7 @@ import {
   ProductFabrication,
 } from '@skillrecordings/core/evals/scorers'
 import { readFile, writeFile } from 'fs/promises'
+import { type CommandContext } from '../../core/context'
 
 interface DatasetItem {
   id: string
@@ -59,15 +60,20 @@ interface ScoreOptions {
   json?: boolean
 }
 
-export async function scoreProduction(options: ScoreOptions): Promise<void> {
+export async function scoreProduction(
+  ctx: CommandContext,
+  options: ScoreOptions
+): Promise<void> {
   const { dataset: datasetPath, output, verbose, json } = options
+  const outputJson = json === true || ctx.format === 'json'
+  const log = (text: string): void => {
+    if (!outputJson) ctx.output.data(text)
+  }
 
   const datasetContent = await readFile(datasetPath, 'utf-8')
   const dataset: DatasetItem[] = JSON.parse(datasetContent)
 
-  if (!json) {
-    console.log(`\n📊 Scoring ${dataset.length} production responses\n`)
-  }
+  log(`\n📊 Scoring ${dataset.length} production responses\n`)
 
   const results: ScoreResult[] = []
   let passed = 0
@@ -178,9 +184,9 @@ export async function scoreProduction(options: ScoreOptions): Promise<void> {
     })
 
     if (verbose && !itemPassed) {
-      console.log(`❌ ${subject.slice(0, 60)}...`)
+      log(`❌ ${subject.slice(0, 60)}...`)
       for (const reason of failureReasons) {
-        console.log(`   └─ ${reason}`)
+        log(`   └─ ${reason}`)
       }
     }
   }
@@ -209,48 +215,43 @@ export async function scoreProduction(options: ScoreOptions): Promise<void> {
         2
       )
     )
-    if (!json) console.log(`Results saved to ${output}`)
+    log(`Results saved to ${output}`)
   }
 
-  if (json) {
-    console.log(
-      JSON.stringify(
-        {
-          summary: {
-            total: dataset.length,
-            withResponses,
-            noResponse,
-            passed,
-            failed,
-            passRate,
-            failures,
-          },
-          results,
-        },
-        null,
-        2
-      )
-    )
-  } else {
-    console.log('📊 Production Response Quality\n')
-    console.log(`Total conversations: ${dataset.length}`)
-    console.log(`  With response:   ${withResponses}`)
-    console.log(`  No response:     ${noResponse}`)
-    console.log('')
-    console.log(`Quality (responses only):`)
-    console.log(`  ✅ Passed: ${passed} (${passRate.toFixed(1)}%)`)
-    console.log(`  ❌ Failed: ${failed}`)
+  if (outputJson) {
+    ctx.output.data({
+      summary: {
+        total: dataset.length,
+        withResponses,
+        noResponse,
+        passed,
+        failed,
+        passRate,
+        failures,
+      },
+      results,
+    })
+    return
+  }
 
-    if (failed > 0) {
-      console.log('\nFailure breakdown:')
-      if (failures.internalLeaks > 0)
-        console.log(`  🚨 Internal leaks:    ${failures.internalLeaks}`)
-      if (failures.metaCommentary > 0)
-        console.log(`  💬 Meta-commentary:   ${failures.metaCommentary}`)
-      if (failures.bannedPhrases > 0)
-        console.log(`  🚫 Banned phrases:    ${failures.bannedPhrases}`)
-      if (failures.fabrication > 0)
-        console.log(`  🎭 Fabrication:       ${failures.fabrication}`)
-    }
+  ctx.output.data('📊 Production Response Quality\n')
+  ctx.output.data(`Total conversations: ${dataset.length}`)
+  ctx.output.data(`  With response:   ${withResponses}`)
+  ctx.output.data(`  No response:     ${noResponse}`)
+  ctx.output.data('')
+  ctx.output.data(`Quality (responses only):`)
+  ctx.output.data(`  ✅ Passed: ${passed} (${passRate.toFixed(1)}%)`)
+  ctx.output.data(`  ❌ Failed: ${failed}`)
+
+  if (failed > 0) {
+    ctx.output.data('\nFailure breakdown:')
+    if (failures.internalLeaks > 0)
+      ctx.output.data(`  🚨 Internal leaks:    ${failures.internalLeaks}`)
+    if (failures.metaCommentary > 0)
+      ctx.output.data(`  💬 Meta-commentary:   ${failures.metaCommentary}`)
+    if (failures.bannedPhrases > 0)
+      ctx.output.data(`  🚫 Banned phrases:    ${failures.bannedPhrases}`)
+    if (failures.fabrication > 0)
+      ctx.output.data(`  🎭 Fabrication:       ${failures.fabrication}`)
   }
 }

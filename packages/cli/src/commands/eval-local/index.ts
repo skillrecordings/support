@@ -5,10 +5,29 @@
  */
 
 import type { Command } from 'commander'
+import { type CommandContext, createContext } from '../../core/context'
 import { health } from './health'
 import { run } from './run'
 import { scoreProduction } from './score-production'
 import { seed } from './seed'
+
+const buildContext = async (
+  command: Command,
+  json?: boolean
+): Promise<CommandContext> => {
+  const opts =
+    typeof command.optsWithGlobals === 'function'
+      ? command.optsWithGlobals()
+      : {
+          ...command.parent?.opts(),
+          ...command.opts(),
+        }
+  return createContext({
+    format: json ? 'json' : opts.format,
+    verbose: opts.verbose,
+    quiet: opts.quiet,
+  })
+}
 
 export function registerEvalLocalCommands(program: Command): void {
   const evalLocal = program
@@ -19,7 +38,10 @@ export function registerEvalLocalCommands(program: Command): void {
     .command('health')
     .description('Check health of local eval environment services')
     .option('--json', 'Output as JSON')
-    .action(health)
+    .action(async (options, command) => {
+      const ctx = await buildContext(command, options.json)
+      await health(ctx, options)
+    })
 
   evalLocal
     .command('seed')
@@ -27,7 +49,10 @@ export function registerEvalLocalCommands(program: Command): void {
     .option('--clean', 'Drop and recreate all data before seeding')
     .option('--fixtures <path>', 'Path to fixtures directory', 'fixtures')
     .option('--json', 'Output as JSON')
-    .action(seed)
+    .action(async (options, command) => {
+      const ctx = await buildContext(command, options.json)
+      await seed(ctx, options)
+    })
 
   evalLocal
     .command('run')
@@ -47,7 +72,10 @@ export function registerEvalLocalCommands(program: Command): void {
     .option('--verbose', 'Show individual scenario results')
     .option('--json', 'JSON output for scripting')
     .option('--real-tools', 'Use real Docker services instead of mocks')
-    .action(run)
+    .action(async (options, command) => {
+      const ctx = await buildContext(command, options.json)
+      await run(ctx, options)
+    })
 
   evalLocal
     .command('score-production')
@@ -61,5 +89,8 @@ export function registerEvalLocalCommands(program: Command): void {
     .option('--output <file>', 'Save results to JSON file')
     .option('--verbose', 'Show individual failures')
     .option('--json', 'JSON output for scripting')
-    .action(scoreProduction)
+    .action(async (options, command) => {
+      const ctx = await buildContext(command, options.json)
+      await scoreProduction(ctx, options)
+    })
 }

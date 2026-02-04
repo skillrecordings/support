@@ -1,3 +1,4 @@
+import { type CommandContext } from '../../core/context'
 import { SECRET_REFS } from '../../core/secret-refs'
 import { createSecretsProvider } from '../../core/secrets'
 
@@ -48,7 +49,10 @@ const resolveSecretStatus = async (
 /**
  * Check auth configuration status
  */
-export async function statusAction(options: StatusOptions): Promise<void> {
+export async function statusAction(
+  ctx: CommandContext,
+  options: StatusOptions
+): Promise<void> {
   const provider = await createSecretsProvider()
   const entries = Object.entries(SECRET_REFS)
 
@@ -75,29 +79,31 @@ export async function statusAction(options: StatusOptions): Promise<void> {
     missingSecrets,
   }
 
-  if (options.json) {
-    console.log(JSON.stringify(status, null, 2))
+  const outputJson = options.json === true || ctx.format === 'json'
+
+  if (outputJson) {
+    ctx.output.data(status)
     return
   }
 
   // Human-readable output
-  console.log('Auth Status\n')
-  console.log(`Active Provider: ${status.activeProvider}`)
-  console.log(
+  ctx.output.data('Auth Status\n')
+  ctx.output.data(`Active Provider: ${status.activeProvider}`)
+  ctx.output.data(
     `OP_SERVICE_ACCOUNT_TOKEN: ${status.opServiceAccountToken.configured ? 'configured' : 'not set'}`
   )
 
-  console.log('\nSecrets:')
+  ctx.output.data('\nSecrets:')
   for (const secret of status.secrets) {
-    console.log(
+    ctx.output.data(
       `  ${secret.key}: ${secret.available ? '✓' : '✗'} (${secret.source})`
     )
   }
 
   if (status.missingSecrets.length > 0) {
-    console.log('\nMissing Secrets:')
+    ctx.output.data('\nMissing Secrets:')
     for (const secret of status.missingSecrets) {
-      console.log(`  - ${secret}`)
+      ctx.output.data(`  - ${secret}`)
     }
   }
 }

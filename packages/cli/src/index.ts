@@ -18,9 +18,11 @@ import { registerInngestCommands } from './commands/inngest/index'
 import { registerKbCommands } from './commands/kb-sync'
 import { registerMemoryCommands } from './commands/memory/index'
 import { registerPipelineCommands } from './commands/pipeline'
+import { registerPluginSyncCommand } from './commands/plugin-sync'
 import { registerResponseCommands } from './commands/responses'
 import { registerToolsCommands } from './commands/tools'
 import { wizard } from './commands/wizard'
+import { createContext } from './core/context'
 
 const program = new Command()
 
@@ -91,7 +93,23 @@ program
     'Maximum false negative rate (default: 0.02)',
     parseFloat
   )
-  .action((type, dataset, options) => {
+  .action(async (type, dataset, options, command) => {
+    const ctx = await createContext({
+      format:
+        options.json === true
+          ? 'json'
+          : typeof command.optsWithGlobals === 'function'
+            ? command.optsWithGlobals().format
+            : command.parent?.opts().format,
+      verbose:
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals().verbose
+          : command.parent?.opts().verbose,
+      quiet:
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals().quiet
+          : command.parent?.opts().quiet,
+    })
     const gates = {
       ...(options.minPrecision !== undefined && {
         minPrecision: options.minPrecision,
@@ -100,7 +118,7 @@ program
       ...(options.maxFpRate !== undefined && { maxFpRate: options.maxFpRate }),
       ...(options.maxFnRate !== undefined && { maxFnRate: options.maxFnRate }),
     }
-    runEval(type, dataset, {
+    runEval(ctx, type, dataset, {
       json: options.json,
       gates: Object.keys(gates).length > 0 ? gates : undefined,
     })
@@ -137,6 +155,9 @@ registerFaqCommands(program)
 registerDeployCommands(program)
 registerKbCommands(program)
 registerAuthCommands(program)
+
+// Plugin commands
+registerPluginSyncCommand(program)
 
 // Parse and cleanup DB connections when done
 program.parseAsync().finally(async () => {

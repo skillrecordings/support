@@ -12,6 +12,7 @@ import {
 import { tool } from 'ai'
 import { type Pool, createPool } from 'mysql2/promise'
 import { z } from 'zod'
+import { type OutputFormatter } from '../../core/output'
 
 let mysqlPool: Pool | null = null
 let qdrantClient: QdrantClient | null = null
@@ -84,7 +85,8 @@ export async function cleanupRealTools(): Promise<void> {
  */
 export function createRealTools(
   scenario: { appId?: string; customerEmail?: string },
-  embedFn?: (text: string) => Promise<number[]>
+  embedFn?: (text: string) => Promise<number[]>,
+  output?: OutputFormatter
 ) {
   const appId = scenario.appId || 'total-typescript'
   const customerEmail = scenario.customerEmail || '[EMAIL]'
@@ -143,7 +145,9 @@ export function createRealTools(
             purchases: [],
           }
         } catch (error) {
-          console.error('lookupUser error:', error)
+          output?.error(
+            `lookupUser error: ${error instanceof Error ? error.message : String(error)}`
+          )
           return { found: false, error: String(error) }
         }
       },
@@ -192,7 +196,9 @@ export function createRealTools(
               })),
           }
         } catch (error) {
-          console.error('searchKnowledge error:', error)
+          output?.error(
+            `searchKnowledge error: ${error instanceof Error ? error.message : String(error)}`
+          )
           return { similarTickets: [], knowledge: [], goodResponses: [] }
         }
       },

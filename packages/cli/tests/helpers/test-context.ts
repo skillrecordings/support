@@ -10,8 +10,8 @@ type TestContextResult = {
 export async function createTestContext(
   overrides: Partial<CommandContext> = {}
 ): Promise<TestContextResult> {
-  const stdout = new PassThrough() as NodeJS.WriteStream
-  const stderr = new PassThrough() as NodeJS.WriteStream
+  const stdout = new PassThrough() as unknown as NodeJS.WriteStream
+  const stderr = new PassThrough() as unknown as NodeJS.WriteStream
 
   let stdoutBuffer = ''
   let stderrBuffer = ''

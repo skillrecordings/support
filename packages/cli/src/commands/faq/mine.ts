@@ -23,6 +23,8 @@ import { createDuckDBSource } from '@skillrecordings/core/faq/duckdb-source'
 import type { DataSource } from '@skillrecordings/core/faq/types'
 import { closeDb } from '@skillrecordings/database'
 import type { Command } from 'commander'
+import { type CommandContext, createContext } from '../../core/context'
+import { CLIError, formatError } from '../../core/errors'
 
 /**
  * Format timestamp for display
@@ -61,43 +63,45 @@ const COLORS = {
 /**
  * Display human-readable mining results
  */
-function displayResults(result: MineResult): void {
-  console.log(`\n${COLORS.bold}📚 FAQ Mining Results${COLORS.reset}`)
-  console.log('='.repeat(60))
+function displayResults(ctx: CommandContext, result: MineResult): void {
+  ctx.output.data(`\n${COLORS.bold}📚 FAQ Mining Results${COLORS.reset}`)
+  ctx.output.data('='.repeat(60))
 
   // Stats
-  console.log(`\n${COLORS.cyan}Statistics:${COLORS.reset}`)
-  console.log(`  Total conversations:   ${result.stats.totalConversations}`)
-  console.log(`  Clustered:             ${result.stats.clusteredConversations}`)
-  console.log(`  Clusters formed:       ${result.stats.clusterCount}`)
-  console.log(`  FAQ candidates:        ${result.stats.candidateCount}`)
-  console.log(
+  ctx.output.data(`\n${COLORS.cyan}Statistics:${COLORS.reset}`)
+  ctx.output.data(`  Total conversations:   ${result.stats.totalConversations}`)
+  ctx.output.data(
+    `  Clustered:             ${result.stats.clusteredConversations}`
+  )
+  ctx.output.data(`  Clusters formed:       ${result.stats.clusterCount}`)
+  ctx.output.data(`  FAQ candidates:        ${result.stats.candidateCount}`)
+  ctx.output.data(
     `  Avg cluster size:      ${result.stats.averageClusterSize.toFixed(1)}`
   )
-  console.log(
+  ctx.output.data(
     `  ${COLORS.green}Avg unchanged rate:  ${(result.stats.averageUnchangedRate * 100).toFixed(1)}%${COLORS.reset}`
   )
 
   // Clusters
   if (result.clusters.length > 0) {
-    console.log(`\n${COLORS.bold}📊 Clusters:${COLORS.reset}`)
-    console.log('-'.repeat(60))
+    ctx.output.data(`\n${COLORS.bold}📊 Clusters:${COLORS.reset}`)
+    ctx.output.data('-'.repeat(60))
 
     for (const cluster of result.clusters.slice(0, 10)) {
       const unchangedPct = (cluster.unchangedRate * 100).toFixed(0)
-      console.log(
+      ctx.output.data(
         `\n${COLORS.cyan}Cluster ${cluster.id.slice(0, 8)}${COLORS.reset} (${cluster.conversations.length} convos, ${unchangedPct}% unchanged)`
       )
-      console.log(
+      ctx.output.data(
         `  ${COLORS.dim}Centroid: ${truncate(cluster.centroid, 150)}${COLORS.reset}`
       )
-      console.log(
+      ctx.output.data(
         `  ${COLORS.dim}Period: ${formatDate(cluster.oldest)} - ${formatDate(cluster.mostRecent)}${COLORS.reset}`
       )
     }
 
     if (result.clusters.length > 10) {
-      console.log(
+      ctx.output.data(
         `\n  ${COLORS.dim}... and ${result.clusters.length - 10} more clusters${COLORS.reset}`
       )
     }
@@ -105,8 +109,8 @@ function displayResults(result: MineResult): void {
 
   // Top candidates
   if (result.candidates.length > 0) {
-    console.log(`\n${COLORS.bold}🏆 Top FAQ Candidates:${COLORS.reset}`)
-    console.log('-'.repeat(60))
+    ctx.output.data(`\n${COLORS.bold}🏆 Top FAQ Candidates:${COLORS.reset}`)
+    ctx.output.data('-'.repeat(60))
 
     // Filter to auto-surface candidates
     const autoSurface = filterAutoSurfaceCandidates(result.candidates)
@@ -121,7 +125,7 @@ function displayResults(result: MineResult): void {
         ? `(${autoSurface.length} auto-surface ready)`
         : '(no auto-surface candidates)'
 
-    console.log(`${COLORS.dim}${label}${COLORS.reset}\n`)
+    ctx.output.data(`${COLORS.dim}${label}${COLORS.reset}\n`)
 
     for (const [i, candidate] of displayCandidates.entries()) {
       if (!candidate) continue
@@ -129,30 +133,30 @@ function displayResults(result: MineResult): void {
       const confPct = (candidate.confidence * 100).toFixed(0)
       const unchangedPct = (candidate.unchangedRate * 100).toFixed(0)
 
-      console.log(
+      ctx.output.data(
         `${COLORS.bold}#${i + 1}${COLORS.reset} ${COLORS.dim}Confidence: ${confPct}% | ${candidate.clusterSize} occurrences | ${unchangedPct}% unchanged${COLORS.reset}`
       )
-      console.log(
+      ctx.output.data(
         `  ${COLORS.bold}Q:${COLORS.reset} ${truncate(candidate.question, 200)}`
       )
-      console.log(
+      ctx.output.data(
         `  ${COLORS.green}A:${COLORS.reset} ${truncate(candidate.answer, 300)}`
       )
       if (candidate.suggestedCategory) {
-        console.log(
+        ctx.output.data(
           `  ${COLORS.cyan}Category: ${candidate.suggestedCategory}${COLORS.reset}`
         )
       }
       if (candidate.tags.length > 0) {
-        console.log(
+        ctx.output.data(
           `  ${COLORS.dim}Tags: ${candidate.tags.slice(0, 5).join(', ')}${COLORS.reset}`
         )
       }
-      console.log('')
+      ctx.output.data('')
     }
   }
 
-  console.log('')
+  ctx.output.data('')
 }
 
 /** Default DuckDB cache path */
@@ -162,12 +166,14 @@ const DEFAULT_CACHE_PATH = `${process.env.HOME}/skill/data/front-cache.db`
  * Create data source based on --source flag.
  */
 async function createSource(
+  ctx: CommandContext,
   sourceType: 'cache' | 'front' | undefined,
-  cachePath?: string
+  cachePath?: string,
+  outputJson?: boolean
 ): Promise<DataSource | undefined> {
   if (sourceType === 'cache') {
     const dbPath = cachePath ?? DEFAULT_CACHE_PATH
-    console.log(`📦 Using DuckDB cache: ${dbPath}`)
+    if (!outputJson) ctx.output.data(`📦 Using DuckDB cache: ${dbPath}`)
     return createDuckDBSource({ dbPath })
   }
 
@@ -178,63 +184,88 @@ async function createSource(
 /**
  * Main command handler
  */
-async function faqMine(options: {
-  app: string
-  since: string
-  limit?: number
-  unchangedOnly?: boolean
-  clusterThreshold?: number
-  json?: boolean
-  export?: string
-  raw?: boolean
-  source?: 'cache' | 'front'
-  cachePath?: string
-  dryRun?: boolean
-}): Promise<void> {
+async function faqMine(
+  ctx: CommandContext,
+  options: {
+    app: string
+    since: string
+    limit?: number
+    unchangedOnly?: boolean
+    clusterThreshold?: number
+    json?: boolean
+    export?: string
+    raw?: boolean
+    source?: 'cache' | 'front'
+    cachePath?: string
+    dryRun?: boolean
+  }
+): Promise<void> {
+  const outputJson = options.json === true || ctx.format === 'json'
   if (!options.app) {
-    console.error('Error: --app is required')
-    process.exit(1)
+    const cliError = new CLIError({
+      userMessage: 'App slug is required.',
+      suggestion: 'Provide --app <slug>.',
+    })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
+    return
   }
 
   if (!options.since) {
-    console.error('Error: --since is required (e.g., 30d, 7d, 90d)')
-    process.exit(1)
+    const cliError = new CLIError({
+      userMessage: 'Time window is required.',
+      suggestion: 'Provide --since <duration> (e.g., 30d).',
+    })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
+    return
   }
 
   let source: DataSource | undefined
 
   try {
     // Create data source
-    source = await createSource(options.source ?? 'cache', options.cachePath)
+    source = await createSource(
+      ctx,
+      options.source ?? 'cache',
+      options.cachePath,
+      outputJson
+    )
     // Dry run mode: show stats and sample data
     if (options.dryRun) {
-      console.log(`\n🧪 DRY RUN MODE - ${options.app}`)
-      console.log(`   Source: ${source?.name ?? 'front'}`)
-      console.log(`   Since: ${options.since}`)
-      console.log(`   Limit: ${options.limit ?? 500}`)
+      if (!outputJson) {
+        ctx.output.data(`\n🧪 DRY RUN MODE - ${options.app}`)
+        ctx.output.data(`   Source: ${source?.name ?? 'front'}`)
+        ctx.output.data(`   Since: ${options.since}`)
+        ctx.output.data(`   Limit: ${options.limit ?? 500}`)
+      }
 
       if (source?.getStats) {
         const stats = await source.getStats()
-        console.log(`\n📊 Cache Statistics:`)
-        console.log(
-          `   Total conversations: ${stats.totalConversations.toLocaleString()}`
-        )
-        console.log(
-          `   Filtered (matching criteria): ${stats.filteredConversations.toLocaleString()}`
-        )
-        console.log(
-          `   Total messages: ${stats.totalMessages.toLocaleString()}`
-        )
-        console.log(`   Inboxes: ${stats.inboxCount}`)
-        if (stats.dateRange.oldest && stats.dateRange.newest) {
-          console.log(
-            `   Date range: ${stats.dateRange.oldest.toLocaleDateString()} - ${stats.dateRange.newest.toLocaleDateString()}`
+        if (!outputJson) {
+          ctx.output.data(`\n📊 Cache Statistics:`)
+          ctx.output.data(
+            `   Total conversations: ${stats.totalConversations.toLocaleString()}`
           )
+          ctx.output.data(
+            `   Filtered (matching criteria): ${stats.filteredConversations.toLocaleString()}`
+          )
+          ctx.output.data(
+            `   Total messages: ${stats.totalMessages.toLocaleString()}`
+          )
+          ctx.output.data(`   Inboxes: ${stats.inboxCount}`)
+          if (stats.dateRange.oldest && stats.dateRange.newest) {
+            ctx.output.data(
+              `   Date range: ${stats.dateRange.oldest.toLocaleDateString()} - ${stats.dateRange.newest.toLocaleDateString()}`
+            )
+          }
         }
       }
 
       // Fetch a small sample
-      console.log(`\n📝 Sample conversations (limit 5):`)
+      if (!outputJson) {
+        ctx.output.data(`\n📝 Sample conversations (limit 5):`)
+      }
       const sample = await mineConversations({
         appId: options.app,
         since: options.since,
@@ -244,24 +275,41 @@ async function faqMine(options: {
       })
 
       for (const conv of sample) {
-        console.log(`\n   [${conv.conversationId}]`)
-        console.log(`   Q: ${truncate(conv.question, 100)}`)
-        console.log(`   A: ${truncate(conv.answer, 100)}`)
-        console.log(`   Tags: ${conv.tags.slice(0, 5).join(', ')}`)
+        if (outputJson) {
+          continue
+        }
+        ctx.output.data(`\n   [${conv.conversationId}]`)
+        ctx.output.data(`   Q: ${truncate(conv.question, 100)}`)
+        ctx.output.data(`   A: ${truncate(conv.answer, 100)}`)
+        ctx.output.data(`   Tags: ${conv.tags.slice(0, 5).join(', ')}`)
       }
 
-      console.log(
-        `\n✅ Dry run complete. ${sample.length} sample conversations loaded.`
-      )
+      if (outputJson) {
+        ctx.output.data({
+          dryRun: true,
+          sample: sample.map((conv) => ({
+            conversationId: conv.conversationId,
+            question: truncate(conv.question, 100),
+            answer: truncate(conv.answer, 100),
+            tags: conv.tags.slice(0, 5),
+          })),
+        })
+      } else {
+        ctx.output.data(
+          `\n✅ Dry run complete. ${sample.length} sample conversations loaded.`
+        )
+      }
       return
     }
 
     // Raw mode: just export Q&A pairs without clustering
     if (options.raw) {
-      console.log(`📚 Mining raw Q&A pairs for ${options.app}...`)
-      console.log(`   Source: ${source?.name ?? 'front'}`)
-      console.log(`   Since: ${options.since}`)
-      console.log(`   Unchanged only: ${options.unchangedOnly ?? false}`)
+      if (!outputJson) {
+        ctx.output.data(`📚 Mining raw Q&A pairs for ${options.app}...`)
+        ctx.output.data(`   Source: ${source?.name ?? 'front'}`)
+        ctx.output.data(`   Since: ${options.since}`)
+        ctx.output.data(`   Unchanged only: ${options.unchangedOnly ?? false}`)
+      }
 
       const conversations = await mineConversations({
         appId: options.app,
@@ -294,11 +342,19 @@ async function faqMine(options: {
 
       if (options.export) {
         writeFileSync(options.export, JSON.stringify(rawData, null, 2), 'utf-8')
-        console.log(
-          `\n✅ Exported ${conversations.length} raw Q&A pairs to ${options.export}`
-        )
+        if (outputJson) {
+          ctx.output.data({
+            success: true,
+            exportPath: options.export,
+            count: conversations.length,
+          })
+        } else {
+          ctx.output.data(
+            `\n✅ Exported ${conversations.length} raw Q&A pairs to ${options.export}`
+          )
+        }
       } else {
-        console.log(JSON.stringify(rawData, null, 2))
+        ctx.output.data(rawData)
       }
 
       return
@@ -314,7 +370,7 @@ async function faqMine(options: {
     })
 
     // JSON output
-    if (options.json) {
+    if (outputJson) {
       // Convert dates to ISO strings for JSON
       const jsonResult = {
         ...result,
@@ -338,7 +394,7 @@ async function faqMine(options: {
           generatedAt: c.generatedAt.toISOString(),
         })),
       }
-      console.log(JSON.stringify(jsonResult, null, 2))
+      ctx.output.data(jsonResult)
       return
     }
 
@@ -369,20 +425,25 @@ async function faqMine(options: {
         JSON.stringify(exportData, null, 2),
         'utf-8'
       )
-      console.log(
+      ctx.output.data(
         `\n✅ Exported ${result.candidates.length} FAQ candidates to ${options.export}`
       )
       return
     }
 
     // Human-readable output
-    displayResults(result)
+    displayResults(ctx, result)
   } catch (error) {
-    console.error(
-      'Error:',
-      error instanceof Error ? error.message : String(error)
-    )
-    process.exit(1)
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'FAQ mining failed.',
+            suggestion: 'Verify inputs and try again.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   } finally {
     // Close data source if needed
     if (source?.close) {
@@ -428,5 +489,19 @@ export function registerFaqMineCommands(program: Command): void {
     )
     .option('--cache-path <path>', 'Path to DuckDB cache file')
     .option('-d, --dry-run', 'Show stats and sample data without full mining')
-    .action(faqMine)
+    .action(async (options, command) => {
+      const globalOpts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: globalOpts.format,
+        verbose: globalOpts.verbose,
+        quiet: globalOpts.quiet,
+      })
+      await faqMine(ctx, options)
+    })
 }

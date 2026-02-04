@@ -17,6 +17,7 @@ import { tool } from 'ai'
 import type { Pool } from 'mysql2/promise'
 import { createPool } from 'mysql2/promise'
 import { z } from 'zod'
+import { type OutputFormatter } from '../../core/output'
 
 let mysqlPool: Pool | null = null
 let qdrantClient: QdrantClient | null = null
@@ -63,9 +64,15 @@ const DEFAULT_CONFIG: RealToolsConfig = {
  */
 export async function initRealTools(
   config: RealToolsConfig = DEFAULT_CONFIG,
+  output?: OutputFormatter,
   verbose = false
 ): Promise<{ mysql: boolean; qdrant: boolean; ollama: boolean }> {
   const status = { mysql: false, qdrant: false, ollama: false }
+  const log = (message: string): void => {
+    if (output && verbose) {
+      output.progress(message)
+    }
+  }
 
   // MySQL
   if (config.mysql) {
@@ -79,12 +86,9 @@ export async function initRealTools(
       await conn.ping()
       conn.release()
       status.mysql = true
-      if (verbose) console.log('  ✅ MySQL connected')
+      log('  ✅ MySQL connected')
     } catch (error) {
-      if (verbose)
-        console.log(
-          `  ❌ MySQL: ${error instanceof Error ? error.message : 'failed'}`
-        )
+      log(`  ❌ MySQL: ${error instanceof Error ? error.message : 'failed'}`)
     }
   }
 
@@ -94,13 +98,9 @@ export async function initRealTools(
       qdrantClient = createQdrantClient()
       const info = await qdrantClient.getCollectionInfo()
       status.qdrant = info.status !== 'not_found'
-      if (verbose)
-        console.log(`  ✅ Qdrant connected (${info.pointsCount} points)`)
+      log(`  ✅ Qdrant connected (${info.pointsCount} points)`)
     } catch (error) {
-      if (verbose)
-        console.log(
-          `  ❌ Qdrant: ${error instanceof Error ? error.message : 'failed'}`
-        )
+      log(`  ❌ Qdrant: ${error instanceof Error ? error.message : 'failed'}`)
     }
   }
 
@@ -113,16 +113,13 @@ export async function initRealTools(
         const available = await ollamaClient.isModelAvailable()
         if (available) {
           status.ollama = true
-          if (verbose) console.log('  ✅ Ollama connected')
+          log('  ✅ Ollama connected')
         } else {
-          if (verbose) console.log('  ⚠️ Ollama healthy but model not available')
+          log('  ⚠️ Ollama healthy but model not available')
         }
       }
     } catch (error) {
-      if (verbose)
-        console.log(
-          `  ❌ Ollama: ${error instanceof Error ? error.message : 'failed'}`
-        )
+      log(`  ❌ Ollama: ${error instanceof Error ? error.message : 'failed'}`)
     }
   }
 
@@ -213,7 +210,6 @@ export function createRealTools(scenario: {
             purchases: [],
           }
         } catch (error) {
-          console.error('lookupUser error:', error)
           return { found: false, error: String(error) }
         }
       },
@@ -267,7 +263,6 @@ export function createRealTools(scenario: {
               })),
           }
         } catch (error) {
-          console.error('searchKnowledge error:', error)
           return { similarTickets: [], knowledge: [], goodResponses: [] }
         }
       },

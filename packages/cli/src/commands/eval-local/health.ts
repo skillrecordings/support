@@ -4,6 +4,8 @@
 
 import { createOllamaClient } from '@skillrecordings/core/adapters/ollama'
 import { createQdrantClient } from '@skillrecordings/core/adapters/qdrant'
+import { type CommandContext } from '../../core/context'
+import { CLIError, formatError } from '../../core/errors'
 
 interface HealthResult {
   service: string
@@ -15,51 +17,67 @@ interface HealthOptions {
   json?: boolean
 }
 
-export async function health(options: HealthOptions): Promise<void> {
-  const results: HealthResult[] = []
+export async function health(
+  ctx: CommandContext,
+  options: HealthOptions
+): Promise<void> {
+  try {
+    const results: HealthResult[] = []
 
-  // Check MySQL
-  const mysqlResult = await checkMySQL()
-  results.push(mysqlResult)
+    // Check MySQL
+    const mysqlResult = await checkMySQL()
+    results.push(mysqlResult)
 
-  // Check Redis
-  const redisResult = await checkRedis()
-  results.push(redisResult)
+    // Check Redis
+    const redisResult = await checkRedis()
+    results.push(redisResult)
 
-  // Check Qdrant
-  const qdrantResult = await checkQdrant()
-  results.push(qdrantResult)
+    // Check Qdrant
+    const qdrantResult = await checkQdrant()
+    results.push(qdrantResult)
 
-  // Check Ollama
-  const ollamaResult = await checkOllama()
-  results.push(ollamaResult)
+    // Check Ollama
+    const ollamaResult = await checkOllama()
+    results.push(ollamaResult)
 
-  if (options.json) {
+    const outputJson = options.json === true || ctx.format === 'json'
     const allHealthy = results.every((r) => r.healthy)
-    console.log(
-      JSON.stringify({ healthy: allHealthy, services: results }, null, 2)
+
+    if (outputJson) {
+      ctx.output.data({ healthy: allHealthy, services: results })
+      process.exitCode = allHealthy ? 0 : 1
+      return
+    }
+
+    // Pretty print results
+    ctx.output.data('\n🏥 Local Eval Environment Health Check\n')
+
+    for (const result of results) {
+      const icon = result.healthy ? '✅' : '❌'
+      ctx.output.data(`${icon} ${result.service}: ${result.message}`)
+    }
+
+    ctx.output.data(
+      `\n${allHealthy ? '✅ All services healthy' : '❌ Some services unhealthy'}\n`
     )
-    process.exit(allHealthy ? 0 : 1)
-  }
 
-  // Pretty print results
-  console.log('\n🏥 Local Eval Environment Health Check\n')
-
-  for (const result of results) {
-    const icon = result.healthy ? '✅' : '❌'
-    console.log(`${icon} ${result.service}: ${result.message}`)
-  }
-
-  const allHealthy = results.every((r) => r.healthy)
-  console.log(
-    `\n${allHealthy ? '✅ All services healthy' : '❌ Some services unhealthy'}\n`
-  )
-
-  if (!allHealthy) {
-    console.log(
-      '💡 Tip: Run `docker compose -f docker/eval.yml up -d` to start services\n'
-    )
-    process.exit(1)
+    if (!allHealthy) {
+      ctx.output.data(
+        '💡 Tip: Run `docker compose -f docker/eval.yml up -d` to start services\n'
+      )
+      process.exitCode = 1
+    }
+  } catch (error) {
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Local eval health check failed.',
+            suggestion: 'Verify local services are running.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
 }
 

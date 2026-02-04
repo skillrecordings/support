@@ -1,19 +1,7 @@
 import * as fs from 'node:fs/promises'
-import {
-  afterAll,
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { createTestContext } from '../../tests/helpers/test-context'
 import { runEval } from './eval'
-
-// Mock process.exit to prevent test termination
-const mockExit = vi.spyOn(process, 'exit').mockImplementation((code) => {
-  throw new Error(`process.exit(${code})`)
-})
 
 // Mock fs module
 vi.mock('node:fs/promises', () => ({
@@ -27,61 +15,48 @@ vi.mock('@skillrecordings/core/evals/routing', () => ({
   evalRouting: vi.fn(),
 }))
 
+const parseLastJson = (stdout: string) => {
+  const lines = stdout.split('\n').filter((line) => line.trim().length > 0)
+  return JSON.parse(lines[lines.length - 1] ?? 'null')
+}
+
 describe('eval command', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockExit.mockClear()
-  })
-
-  afterEach(() => {
-    mockExit.mockClear()
-  })
-
-  afterAll(() => {
-    mockExit.mockRestore()
+    process.exitCode = undefined
   })
 
   it('should require dataset path', async () => {
-    const consoleErrorSpy = vi.spyOn(console, 'error')
+    const { ctx, getStderr } = await createTestContext({ format: 'json' })
 
-    await expect(runEval('routing', undefined)).rejects.toThrow(
-      'process.exit(1)'
-    )
+    await runEval(ctx, 'routing', undefined)
 
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Dataset path is required')
-    )
+    expect(getStderr()).toContain('Dataset path is required')
+    expect(process.exitCode).toBe(1)
   })
 
   it('should fail if dataset file does not exist', async () => {
-    const consoleErrorSpy = vi.spyOn(console, 'error')
     vi.mocked(fs.access).mockRejectedValue(new Error('File not found'))
+    const { ctx, getStderr } = await createTestContext({ format: 'json' })
 
-    await expect(
-      runEval('routing', '/path/to/nonexistent.json')
-    ).rejects.toThrow('process.exit(1)')
+    await runEval(ctx, 'routing', '/path/to/nonexistent.json')
 
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Dataset file not found')
-    )
+    expect(getStderr()).toContain('Dataset file not found')
+    expect(process.exitCode).toBe(1)
   })
 
   it('should fail if dataset is invalid JSON', async () => {
-    const consoleErrorSpy = vi.spyOn(console, 'error')
     vi.mocked(fs.access).mockResolvedValue(undefined)
     vi.mocked(fs.readFile).mockResolvedValue('invalid json')
+    const { ctx, getStderr } = await createTestContext({ format: 'json' })
 
-    await expect(runEval('routing', '/path/to/invalid.json')).rejects.toThrow(
-      'process.exit(1)'
-    )
+    await runEval(ctx, 'routing', '/path/to/invalid.json')
 
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Invalid JSON')
-    )
+    expect(getStderr()).toContain('Invalid JSON')
+    expect(process.exitCode).toBe(1)
   })
 
   it('should print pretty results table by default', async () => {
-    const consoleSpy = vi.spyOn(console, 'log')
     const mockDataset = [
       {
         message: 'Test message',
@@ -124,11 +99,11 @@ describe('eval command', () => {
     const { evalRouting } = await import('@skillrecordings/core/evals/routing')
     vi.mocked(evalRouting).mockResolvedValue(mockReport)
 
-    await expect(runEval('routing', '/path/to/dataset.json')).rejects.toThrow(
-      'process.exit(0)'
-    )
+    const { ctx, getStdout } = await createTestContext({ format: 'text' })
 
-    const output = consoleSpy.mock.calls.flat().join('\n')
+    await runEval(ctx, 'routing', '/path/to/dataset.json')
+
+    const output = getStdout()
     expect(output).toContain('Precision')
     expect(output).toContain('92.0%')
     expect(output).toContain('Recall')
@@ -138,7 +113,6 @@ describe('eval command', () => {
   })
 
   it('should output JSON when --json flag is used', async () => {
-    const consoleSpy = vi.spyOn(console, 'log')
     const mockDataset = [
       {
         message: 'Test message',
@@ -170,16 +144,18 @@ describe('eval command', () => {
     const { evalRouting } = await import('@skillrecordings/core/evals/routing')
     vi.mocked(evalRouting).mockResolvedValue(mockReport)
 
-    await expect(
-      runEval('routing', '/path/to/dataset.json', { json: true })
-    ).rejects.toThrow('process.exit(0)')
+    const { ctx, getStdout, getStderr } = await createTestContext({
+      format: 'json',
+    })
 
-    const output = consoleSpy.mock.calls.flat().join('\n')
-    const parsed = JSON.parse(output)
+    await runEval(ctx, 'routing', '/path/to/dataset.json', { json: true })
+
+    const parsed = parseLastJson(getStdout())
 
     expect(parsed.precision).toBe(0.92)
     expect(parsed.recall).toBe(0.95)
     expect(parsed.passed).toBe(true)
+    expect(getStderr()).toBe('')
   })
 
   it('should exit with code 1 when gates fail', async () => {
@@ -214,11 +190,13 @@ describe('eval command', () => {
     const { evalRouting } = await import('@skillrecordings/core/evals/routing')
     vi.mocked(evalRouting).mockResolvedValue(mockReport)
 
-    await expect(
-      runEval('routing', '/path/to/dataset.json', {
-        gates: { minPrecision: 0.92, minRecall: 0.95 },
-      })
-    ).rejects.toThrow('process.exit(1)')
+    const { ctx } = await createTestContext({ format: 'json' })
+
+    await runEval(ctx, 'routing', '/path/to/dataset.json', {
+      gates: { minPrecision: 0.92, minRecall: 0.95 },
+    })
+
+    expect(process.exitCode).toBe(1)
   })
 
   it('should accept custom gates', async () => {
@@ -254,11 +232,11 @@ describe('eval command', () => {
     vi.mocked(evalRouting).mockResolvedValue(mockReport)
 
     // Test with custom gates
-    await expect(
-      runEval('routing', '/path/to/dataset.json', {
-        gates: { minPrecision: 0.9, minRecall: 0.93, maxFpRate: 0.05 },
-      })
-    ).rejects.toThrow('process.exit(0)')
+    const { ctx } = await createTestContext({ format: 'json' })
+
+    await runEval(ctx, 'routing', '/path/to/dataset.json', {
+      gates: { minPrecision: 0.9, minRecall: 0.93, maxFpRate: 0.05 },
+    })
 
     expect(evalRouting).toHaveBeenCalledWith(mockDataset, {
       minPrecision: 0.9,

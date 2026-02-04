@@ -11,3 +11,4 @@ Initialized: 2026-02-04T15:13:09.231Z
 - Added OutputFormatter abstraction with JSON/text/table formatters, auto-detection, global format/verbose/quiet flags, and unit coverage.
 - Migrated Front + Inngest commands to CommandContext/OutputFormatter, replaced console output, and added integration coverage for happy + error paths.
 - Added integration coverage for Axiom + Tools + Memory commands and tightened tools app config typing.
+- Completed migration for eval, pipeline, deploys, FAQ, KB, health, wizard, responses, dataset, and init commands with OutputFormatter and added integration tests for each command group.

@@ -17,6 +17,8 @@ import {
   writeProductionArtifacts,
 } from '@skillrecordings/core/faq/production-clusterer'
 import type { Command } from 'commander'
+import { type CommandContext, createContext } from '../../core/context'
+import { CLIError, formatError } from '../../core/errors'
 
 /** Default paths relative to project root */
 const PROJECT_ROOT = resolve(__dirname, '../../../..')
@@ -32,48 +34,61 @@ function validatePaths(phase0Path: string): void {
   const metricsPath = join(phase0Path, 'clusters/v1/metrics.json')
 
   if (!existsSync(assignmentsPath)) {
-    throw new Error(
-      `Phase 0 assignments not found at ${assignmentsPath}\n` +
-        'Run Phase 0 clustering first or specify correct --phase0-path'
-    )
+    throw new CLIError({
+      userMessage: `Phase 0 assignments not found at ${assignmentsPath}.`,
+      suggestion:
+        'Run Phase 0 clustering first or specify the correct --phase0-path.',
+    })
   }
   if (!existsSync(labelsPath)) {
-    throw new Error(`Phase 0 labels not found at ${labelsPath}`)
+    throw new CLIError({
+      userMessage: `Phase 0 labels not found at ${labelsPath}.`,
+      suggestion: 'Verify the --phase0-path points to valid artifacts.',
+    })
   }
   if (!existsSync(metricsPath)) {
-    throw new Error(`Phase 0 metrics not found at ${metricsPath}`)
+    throw new CLIError({
+      userMessage: `Phase 0 metrics not found at ${metricsPath}.`,
+      suggestion: 'Verify the --phase0-path points to valid artifacts.',
+    })
   }
 }
 
 /**
  * Main command handler
  */
-async function faqCluster(options: {
-  phase0Path?: string
-  outputPath?: string
-  version?: string
-  dryRun?: boolean
-  json?: boolean
-}): Promise<void> {
+export async function faqCluster(
+  ctx: CommandContext,
+  options: {
+    phase0Path?: string
+    outputPath?: string
+    version?: string
+    dryRun?: boolean
+    json?: boolean
+  }
+): Promise<void> {
   const phase0Path = options.phase0Path ?? DEFAULT_PHASE0_PATH
   const outputPath = options.outputPath ?? DEFAULT_OUTPUT_PATH
   const version = options.version ?? 'v1'
+  const outputJson = options.json === true || ctx.format === 'json'
 
-  console.log('🔬 Production Clustering Pipeline')
-  console.log('='.repeat(60))
-  console.log(`   Phase 0 artifacts: ${phase0Path}`)
-  console.log(`   Output path:       ${outputPath}`)
-  console.log(`   Version:           ${version}`)
-  console.log(`   Dry run:           ${options.dryRun ?? false}`)
-  console.log('')
+  if (!outputJson) {
+    ctx.output.data('🔬 Production Clustering Pipeline')
+    ctx.output.data('='.repeat(60))
+    ctx.output.data(`   Phase 0 artifacts: ${phase0Path}`)
+    ctx.output.data(`   Output path:       ${outputPath}`)
+    ctx.output.data(`   Version:           ${version}`)
+    ctx.output.data(`   Dry run:           ${options.dryRun ?? false}`)
+    ctx.output.data('')
+  }
 
   try {
     // Validate Phase 0 artifacts exist
     validatePaths(phase0Path)
-    console.log('✅ Phase 0 artifacts found')
+    if (!outputJson) ctx.output.data('✅ Phase 0 artifacts found')
 
     // Generate production clustering
-    console.log('\n📊 Generating production clustering...')
+    if (!outputJson) ctx.output.data('\n📊 Generating production clustering...')
     const result = await generateProductionClustering({
       phase0Path,
       outputPath,
@@ -81,29 +96,37 @@ async function faqCluster(options: {
     })
 
     // Display summary
-    displayClusteringSummary(result)
+    if (!outputJson) {
+      displayClusteringSummary(result)
+    }
 
     // Write artifacts (unless dry run)
     if (!options.dryRun) {
-      console.log('\n📝 Writing artifacts...')
+      if (!outputJson) ctx.output.data('\n📝 Writing artifacts...')
       writeProductionArtifacts(result, outputPath)
-      console.log('\n✅ Production clustering complete!')
-      console.log(`   Artifacts written to: ${join(outputPath, version)}`)
+      if (!outputJson) {
+        ctx.output.data('\n✅ Production clustering complete!')
+        ctx.output.data(`   Artifacts written to: ${join(outputPath, version)}`)
+      }
     } else {
-      console.log('\n🧪 Dry run - no artifacts written')
+      if (!outputJson) ctx.output.data('\n🧪 Dry run - no artifacts written')
     }
 
     // JSON output if requested
-    if (options.json) {
-      console.log('\n📋 JSON Output:')
-      console.log(JSON.stringify(result.stats, null, 2))
+    if (outputJson) {
+      ctx.output.data(result.stats)
     }
   } catch (error) {
-    console.error(
-      '\n❌ Error:',
-      error instanceof Error ? error.message : String(error)
-    )
-    process.exit(1)
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'FAQ clustering failed.',
+            suggestion: 'Verify Phase 0 artifacts and try again.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
 }
 
@@ -131,5 +154,23 @@ export function registerFaqClusterCommands(program: Command): void {
     )
     .option('-d, --dry-run', 'Show summary without writing artifacts')
     .option('--json', 'Output stats as JSON')
-    .action(faqCluster)
+    .action(async (options, command) => {
+      const ctx = await createContext({
+        format:
+          options.json === true
+            ? 'json'
+            : typeof command.optsWithGlobals === 'function'
+              ? command.optsWithGlobals().format
+              : command.parent?.opts().format,
+        verbose:
+          typeof command.optsWithGlobals === 'function'
+            ? command.optsWithGlobals().verbose
+            : command.parent?.opts().verbose,
+        quiet:
+          typeof command.optsWithGlobals === 'function'
+            ? command.optsWithGlobals().quiet
+            : command.parent?.opts().quiet,
+      })
+      await faqCluster(ctx, options)
+    })
 }

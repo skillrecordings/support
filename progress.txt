@@ -131,3 +131,72 @@ Summary: Summary:
 - Fixed tools content-type validation and narrowed app config typing in `packages/cli/src/commands/tools.ts`.
 - Added integration tests for Axiom, Tools, and Memory commands in `packages/cli/tests/integration/commands/axiom.test.ts`, `packages/cli/tests/integration/commands/tools.test.ts`, `packages/cli/tests/integration/commands/memory.test.ts`.
 - Updated progress log entry in `packages/
+
+---
+[2026-02-04T17:11:10.812Z]
+Failed: Command Migration Batch 3 — Remaining Commands (Phase 2) — Issue #184
+Validation: src/commands/eval-local/index.ts(54,23): error TS2554: Expected 1 arguments, but got 2.
+src/commands/eval-local/index.ts(77,22): error TS2554: Expected 1 arguments, but got 2.
+src/commands/eval-local/index.ts(94,34): error TS2554: Expected 1 arguments, but got 2.
+src/commands/eval.test.ts(47,18): er
+Codex: 
+
+---
+[2026-02-04T17:21:18.438Z]
+Failed: Command Migration Batch 3 — Remaining Commands (Phase 2) — Issue #184
+Validation: src/commands/eval.test.ts(47,18): error TS2554: Expected 3-4 arguments, but got 2.
+src/commands/eval.test.ts(61,7): error TS2554: Expected 3-4 arguments, but got 2.
+src/commands/eval.test.ts(74,18): error TS2554: Expected 3-4 arguments, but got 2.
+src/commands/eval.test.ts(127,18): error TS2554: Exp
+Codex: 
+
+---
+[2026-02-04T17:31:25.873Z]
+Failed: Command Migration Batch 3 — Remaining Commands (Phase 2) — Issue #184
+Validation: src/commands/eval.test.ts(47,18): error TS2554: Expected 3-4 arguments, but got 2.
+src/commands/eval.test.ts(61,7): error TS2554: Expected 3-4 arguments, but got 2.
+src/commands/eval.test.ts(74,18): error TS2554: Expected 3-4 arguments, but got 2.
+src/commands/eval.test.ts(127,18): error TS2554: Exp
+Codex: 
+
+---
+[2026-02-04T17:41:33.676Z]
+Failed: Command Migration Batch 3 — Remaining Commands (Phase 2) — Issue #184
+Validation: src/commands/faq/classify.ts(406,20): error TS2304: Cannot find name 'createProgressBar'.
+src/commands/faq/classify.ts(412,39): error TS2554: Expected 6 arguments, but got 5.
+src/commands/faq/classify.ts(417,8): error TS7006: Parameter 'completed' implicitly has an 'any' type.
+tests/helpers/test-con
+Codex: 
+
+---
+[2026-02-04T17:51:05.430Z]
+Failed: Command Migration Batch 3 — Remaining Commands (Phase 2) — Issue #184
+Codex success: false
+Validation success: false
+Files touched: none
+Validation output: tests/helpers/test-context.ts(13,18): error TS2352: Conversion of type 'PassThrough' to type 'WriteStream' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type 'Transform' is missing the following properties from type 'WriteStream': clearLine, clearScreenDown, cursorTo, moveCursor, and 25 more.
+tests/helpers/test-context.ts(14,18): error TS2352: Conversion of type 'PassThrough' to type 'WriteStream'
+Codex message: 
+
+---
+[2026-02-04T17:51:40.811Z]
+Failed: Command Migration Batch 3 — Remaining Commands (Phase 2) — Issue #184
+Validation: tests/helpers/test-context.ts(13,18): error TS2352: Conversion of type 'PassThrough' to type 'WriteStream' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type 'Transform' is missing the following prope
+Codex: 
+
+---
+[2026-02-04T17:59:13.605Z]
+Completed: Command Migration Batch 3 — Remaining Commands (Phase 2) — Issue #184
+Files: none
+Summary: Summary:
+1. Added integration tests for eval, pipeline, deploys, FAQ, KB, health, wizard, responses, dataset, and init command groups; exported internal helpers where needed and fixed `createTestContext` stream typing.
+2. Updated `packages/cli/PROGRESS.md` with completion note.
+
+Tests:
+- `cd packages/cli && bun run check-types`
+- `cd packages/cli && bun run test`
+
+Commit:
+- `git add` failed due to

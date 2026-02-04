@@ -1,7 +1,23 @@
 import type { Command } from 'commander'
+import { createContext } from '../../core/context'
 import { loginAction } from './login'
 import { statusAction } from './status'
 import { whoamiAction } from './whoami'
+
+const buildContext = async (command: Command, json?: boolean) => {
+  const opts =
+    typeof command.optsWithGlobals === 'function'
+      ? command.optsWithGlobals()
+      : {
+          ...command.parent?.opts(),
+          ...command.opts(),
+        }
+  return createContext({
+    format: json ? 'json' : opts.format,
+    verbose: opts.verbose,
+    quiet: opts.quiet,
+  })
+}
 
 /**
  * Register auth commands with Commander
@@ -13,7 +29,10 @@ export function registerAuthCommands(program: Command): void {
     .command('status')
     .description('Show active auth provider and secret availability')
     .option('--json', 'Output as JSON')
-    .action(statusAction)
+    .action(async (options, command) => {
+      const ctx = await buildContext(command, options.json)
+      await statusAction(ctx, options)
+    })
 
   auth
     .command('login')
@@ -23,11 +42,17 @@ export function registerAuthCommands(program: Command): void {
       'Service account token (defaults to OP_SERVICE_ACCOUNT_TOKEN)'
     )
     .option('--json', 'Output as JSON')
-    .action(loginAction)
+    .action(async (options, command) => {
+      const ctx = await buildContext(command, options.json)
+      await loginAction(ctx, options)
+    })
 
   auth
     .command('whoami')
     .description('Show 1Password service account info')
     .option('--json', 'Output as JSON')
-    .action(whoamiAction)
+    .action(async (options, command) => {
+      const ctx = await buildContext(command, options.json)
+      await whoamiAction(ctx, options)
+    })
 }

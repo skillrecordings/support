@@ -22,6 +22,8 @@ import {
 } from '@skillrecordings/database'
 import { type Message } from '@skillrecordings/front-sdk'
 import type { Command } from 'commander'
+import { type CommandContext, createContext } from '../core/context'
+import { CLIError, formatError } from '../core/errors'
 
 type ActionRow = typeof ActionsTable.$inferSelect
 
@@ -213,6 +215,25 @@ function formatCustomerDisplay(email: string, name?: string): string {
   return name ?? email ?? 'unknown'
 }
 
+const handleResponsesError = (
+  ctx: CommandContext,
+  error: unknown,
+  message: string,
+  suggestion = 'Verify inputs and try again.'
+): void => {
+  const cliError =
+    error instanceof CLIError
+      ? error
+      : new CLIError({
+          userMessage: message,
+          suggestion,
+          cause: error,
+        })
+
+  ctx.output.error(formatError(cliError))
+  process.exitCode = cliError.exitCode
+}
+
 async function findResponseFallback(
   db: ReturnType<typeof getDb>,
   actionId: string,
@@ -246,15 +267,19 @@ async function findResponseFallback(
 /**
  * List recent agent responses
  */
-async function listResponses(options: {
-  app?: string
-  limit?: number
-  since?: string
-  rating?: 'good' | 'bad' | 'unrated'
-  json?: boolean
-}): Promise<void> {
+export async function listResponses(
+  ctx: CommandContext,
+  options: {
+    app?: string
+    limit?: number
+    since?: string
+    rating?: 'good' | 'bad' | 'unrated'
+    json?: boolean
+  }
+): Promise<void> {
   const db = getDb()
   const limit = options.limit || 20
+  const outputJson = options.json === true || ctx.format === 'json'
 
   try {
     // Build query conditions
@@ -276,8 +301,10 @@ async function listResponses(options: {
 
       const foundApp = appResults[0]
       if (!foundApp) {
-        console.error(`App not found: ${options.app}`)
-        process.exit(1)
+        throw new CLIError({
+          userMessage: `App not found: ${options.app}.`,
+          suggestion: 'Verify the app slug and try again.',
+        })
       }
       conditions.push(eq(ActionsTable.app_id, foundApp.id))
     }
@@ -385,59 +412,59 @@ async function listResponses(options: {
       filteredResponses = responses.filter((r) => !r.rating)
     }
 
-    if (options.json) {
-      console.log(JSON.stringify(filteredResponses, null, 2))
+    if (outputJson) {
+      ctx.output.data(filteredResponses)
       return
     }
 
     // Display table
-    console.log('\n📝 Agent Responses')
-    console.log('='.repeat(80))
+    ctx.output.data('\n📝 Agent Responses')
+    ctx.output.data('='.repeat(80))
 
     for (const r of filteredResponses) {
       const ratingIcon =
         r.rating === 'good' ? '👍' : r.rating === 'bad' ? '👎' : '⏳'
-      console.log(`\n${ratingIcon} [${formatDate(r.createdAt)}] ${r.appSlug}`)
-      console.log(`   Customer: ${r.customerDisplay}`)
-      console.log(`   Category: ${r.category}`)
-      console.log(
+      ctx.output.data(
+        `\n${ratingIcon} [${formatDate(r.createdAt)}] ${r.appSlug}`
+      )
+      ctx.output.data(`   Customer: ${r.customerDisplay}`)
+      ctx.output.data(`   Category: ${r.category}`)
+      ctx.output.data(
         `   Response: ${truncate(r.response.replace(/\n/g, ' '), 200)}`
       )
-      console.log(`   ID: ${r.actionId}`)
+      ctx.output.data(`   ID: ${r.actionId}`)
       if (r.rating) {
-        console.log(`   Rated: ${r.rating} by ${r.ratedBy}`)
+        ctx.output.data(`   Rated: ${r.rating} by ${r.ratedBy}`)
       }
     }
 
-    console.log('\n' + '-'.repeat(80))
-    console.log(`Total: ${filteredResponses.length} responses`)
-    console.log(
+    ctx.output.data('\n' + '-'.repeat(80))
+    ctx.output.data(`Total: ${filteredResponses.length} responses`)
+    ctx.output.data(
       `  👍 Good: ${filteredResponses.filter((r) => r.rating === 'good').length}`
     )
-    console.log(
+    ctx.output.data(
       `  👎 Bad: ${filteredResponses.filter((r) => r.rating === 'bad').length}`
     )
-    console.log(
+    ctx.output.data(
       `  ⏳ Unrated: ${filteredResponses.filter((r) => !r.rating).length}`
     )
-    console.log('')
+    ctx.output.data('')
   } catch (error) {
-    console.error(
-      'Error:',
-      error instanceof Error ? error.message : 'Unknown error'
-    )
-    process.exit(1)
+    handleResponsesError(ctx, error, 'Failed to list responses.')
   }
 }
 
 /**
  * Get a specific response with full context
  */
-async function getResponse(
+export async function getResponse(
+  ctx: CommandContext,
   actionId: string,
   options: { context?: boolean; json?: boolean }
 ): Promise<void> {
   const db = getDb()
+  const outputJson = options.json === true || ctx.format === 'json'
 
   try {
     // Fetch the action with related data
@@ -461,8 +488,10 @@ async function getResponse(
 
     const r = results[0]
     if (!r) {
-      console.error(`Response not found: ${actionId}`)
-      process.exit(1)
+      throw new CLIError({
+        userMessage: `Response not found: ${actionId}.`,
+        suggestion: 'Verify the response ID and try again.',
+      })
     }
 
     let params = normalizeParams(r.action.parameters)
@@ -566,15 +595,17 @@ async function getResponse(
             }
           }
         } catch (err) {
-          console.error('[warn] Failed to fetch Front context:', err)
+          ctx.output.warn(
+            `Failed to fetch Front context: ${err instanceof Error ? err.message : String(err)}`
+          )
         }
       } else {
-        console.error('[warn] FRONT_API_TOKEN not set, skipping context fetch')
+        ctx.output.warn('FRONT_API_TOKEN not set, skipping context fetch')
       }
     }
 
-    if (options.json) {
-      console.log(JSON.stringify(response, null, 2))
+    if (outputJson) {
+      ctx.output.data(response)
       return
     }
 
@@ -586,59 +617,59 @@ async function getResponse(
           ? '👎'
           : '⏳'
 
-    console.log('\n📝 Agent Response Details')
-    console.log('='.repeat(80))
-    console.log(`ID:         ${response.actionId}`)
-    console.log(`App:        ${response.appName} (${response.appSlug})`)
-    console.log(`Customer:   ${response.customerDisplay}`)
-    console.log(`Category:   ${response.category}`)
-    console.log(`Created:    ${formatDate(response.createdAt)}`)
-    console.log(`Rating:     ${ratingIcon} ${response.rating ?? 'unrated'}`)
+    ctx.output.data('\n📝 Agent Response Details')
+    ctx.output.data('='.repeat(80))
+    ctx.output.data(`ID:         ${response.actionId}`)
+    ctx.output.data(`App:        ${response.appName} (${response.appSlug})`)
+    ctx.output.data(`Customer:   ${response.customerDisplay}`)
+    ctx.output.data(`Category:   ${response.category}`)
+    ctx.output.data(`Created:    ${formatDate(response.createdAt)}`)
+    ctx.output.data(`Rating:     ${ratingIcon} ${response.rating ?? 'unrated'}`)
     if (response.ratedBy) {
-      console.log(`Rated by:   ${response.ratedBy}`)
+      ctx.output.data(`Rated by:   ${response.ratedBy}`)
     }
 
     if (response.triggerMessage) {
-      console.log('\n--- Trigger Message ---')
+      ctx.output.data('\n--- Trigger Message ---')
       if (response.triggerMessage.subject) {
-        console.log(`Subject: ${response.triggerMessage.subject}`)
+        ctx.output.data(`Subject: ${response.triggerMessage.subject}`)
       }
-      console.log(response.triggerMessage.body)
+      ctx.output.data(response.triggerMessage.body)
     }
 
-    console.log('\n--- Agent Response ---')
-    console.log(response.response)
+    ctx.output.data('\n--- Agent Response ---')
+    ctx.output.data(response.response)
 
     if (response.conversationHistory?.length) {
-      console.log('\n--- Conversation History ---')
+      ctx.output.data('\n--- Conversation History ---')
       for (const msg of response.conversationHistory) {
         const dir = msg.isInbound ? '← IN' : '→ OUT'
         const time = new Date(msg.createdAt * 1000).toLocaleString()
-        console.log(`\n[${dir}] ${time} - ${msg.author ?? 'unknown'}`)
-        console.log(truncate(msg.body, 500))
+        ctx.output.data(`\n[${dir}] ${time} - ${msg.author ?? 'unknown'}`)
+        ctx.output.data(truncate(msg.body, 500))
       }
     }
 
-    console.log('')
+    ctx.output.data('')
   } catch (error) {
-    console.error(
-      'Error:',
-      error instanceof Error ? error.message : 'Unknown error'
-    )
-    process.exit(1)
+    handleResponsesError(ctx, error, 'Failed to fetch response.')
   }
 }
 
 /**
  * Export responses to a file for eval/analysis
  */
-async function exportResponses(options: {
-  app?: string
-  since?: string
-  output?: string
-  rating?: 'good' | 'bad' | 'all'
-}): Promise<void> {
+async function exportResponses(
+  ctx: CommandContext,
+  options: {
+    app?: string
+    since?: string
+    output?: string
+    rating?: 'good' | 'bad' | 'all'
+  }
+): Promise<void> {
   const db = getDb()
+  const outputJsonFormat = ctx.format === 'json'
 
   try {
     // Build query conditions
@@ -659,8 +690,10 @@ async function exportResponses(options: {
 
       const foundApp = appResults[0]
       if (!foundApp) {
-        console.error(`App not found: ${options.app}`)
-        process.exit(1)
+        throw new CLIError({
+          userMessage: `App not found: ${options.app}.`,
+          suggestion: 'Verify the app slug and try again.',
+        })
       }
       conditions.push(eq(ActionsTable.app_id, foundApp.id))
     }
@@ -804,18 +837,16 @@ async function exportResponses(options: {
 
     if (options.output) {
       writeFileSync(options.output, outputJson, 'utf-8')
-      console.log(
-        `Exported ${exportData.length} responses to ${options.output}`
-      )
+      if (!outputJsonFormat) {
+        ctx.output.success(
+          `Exported ${exportData.length} responses to ${options.output}`
+        )
+      }
     } else {
-      console.log(outputJson)
+      ctx.output.data(exportData)
     }
   } catch (error) {
-    console.error(
-      'Error:',
-      error instanceof Error ? error.message : 'Unknown error'
-    )
-    process.exit(1)
+    handleResponsesError(ctx, error, 'Failed to export responses.')
   }
 }
 
@@ -835,7 +866,21 @@ export function registerResponseCommands(program: Command): void {
     .option('-s, --since <date>', 'Filter responses since date (YYYY-MM-DD)')
     .option('-r, --rating <type>', 'Filter by rating (good, bad, unrated)')
     .option('--json', 'Output as JSON')
-    .action(listResponses)
+    .action(async (options, command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: options.json ? 'json' : opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await listResponses(ctx, options)
+    })
 
   responses
     .command('get')
@@ -843,7 +888,21 @@ export function registerResponseCommands(program: Command): void {
     .argument('<actionId>', 'Action ID of the response')
     .option('-c, --context', 'Include conversation context from Front')
     .option('--json', 'Output as JSON')
-    .action(getResponse)
+    .action(async (actionId, options, command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: options.json ? 'json' : opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await getResponse(ctx, actionId, options)
+    })
 
   responses
     .command('export')
@@ -852,5 +911,19 @@ export function registerResponseCommands(program: Command): void {
     .option('-s, --since <date>', 'Filter responses since date (YYYY-MM-DD)')
     .option('-r, --rating <type>', 'Filter by rating (good, bad, all)')
     .option('-o, --output <file>', 'Output file path')
-    .action(exportResponses)
+    .action(async (options, command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await exportResponses(ctx, options)
+    })
 }

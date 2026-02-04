@@ -15,6 +15,8 @@ import { dirname, join, resolve } from 'path'
 import { generateObject } from 'ai'
 import type { Command } from 'commander'
 import { z } from 'zod'
+import { type CommandContext, createContext } from '../../core/context'
+import { CLIError, formatError } from '../../core/errors'
 
 /** Default paths relative to project root */
 const PROJECT_ROOT = resolve(__dirname, '../../../..')
@@ -38,6 +40,48 @@ const DELAY_BETWEEN_BATCHES_MS = 100
 
 /** Model for classification */
 const MODEL = 'anthropic/claude-haiku-4-5'
+
+const handleFaqClassifyError = (
+  ctx: CommandContext,
+  error: unknown,
+  message: string,
+  suggestion = 'Verify inputs and try again.'
+): void => {
+  const cliError =
+    error instanceof CLIError
+      ? error
+      : new CLIError({
+          userMessage: message,
+          suggestion,
+          cause: error,
+        })
+
+  ctx.output.error(formatError(cliError))
+  process.exitCode = cliError.exitCode
+}
+
+function createProgressReporter(
+  ctx: CommandContext,
+  total: number
+): {
+  update: (completed: number) => void
+  done: (completed: number) => void
+} {
+  const startTime = Date.now()
+  return {
+    update(completed: number) {
+      const percent = total > 0 ? Math.round((completed / total) * 100) : 0
+      ctx.output.progress(`Classified ${completed}/${total} (${percent}%)`)
+    },
+    done(completed: number) {
+      const elapsedMs = Date.now() - startTime
+      const rate = elapsedMs > 0 ? completed / (elapsedMs / 1000) : 0
+      ctx.output.message(
+        `Completed ${completed} classifications in ${formatETA(elapsedMs)} (${rate.toFixed(1)}/s)`
+      )
+    },
+  }
+}
 
 // ============================================================================
 // Types
@@ -197,6 +241,7 @@ async function processBatch(
   systemPrompt: string,
   validTopicIds: Set<string>,
   outputPath: string,
+  ctx: CommandContext,
   onProgress: (completed: number) => void
 ): Promise<{ success: number; failed: number }> {
   let success = 0
@@ -229,8 +274,8 @@ async function processBatch(
         }
         appendClassification(outputPath, fallback)
         failed++
-        console.error(
-          `\n  ❌ Failed: ${conv.conversation_id}: ${result.reason}`
+        ctx.output.warn(
+          `Failed: ${conv.conversation_id}: ${String(result.reason)}`
         )
       }
       onProgress(success + failed)
@@ -260,74 +305,60 @@ function formatETA(remainingMs: number): string {
   return `${minutes}m ${seconds % 60}s`
 }
 
-function createProgressBar(total: number): {
-  update: (completed: number) => void
-  done: () => void
-} {
-  const startTime = Date.now()
-  let lastCompleted = 0
-
-  return {
-    update(completed: number) {
-      lastCompleted = completed
-      const percent = Math.round((completed / total) * 100)
-      const elapsed = Date.now() - startTime
-      const rate = completed / (elapsed / 1000)
-      const remaining = (total - completed) / rate
-      const eta = formatETA(remaining * 1000)
-
-      const barWidth = 30
-      const filledWidth = Math.round((completed / total) * barWidth)
-      const bar = '█'.repeat(filledWidth) + '░'.repeat(barWidth - filledWidth)
-
-      process.stdout.write(
-        `\r  [${bar}] ${completed}/${total} (${percent}%) | ${rate.toFixed(1)}/s | ETA: ${eta}  `
-      )
-    },
-    done() {
-      const elapsed = Date.now() - startTime
-      const rate = lastCompleted / (elapsed / 1000)
-      console.log(
-        `\n  ✅ Completed ${lastCompleted} classifications in ${formatETA(elapsed)} (${rate.toFixed(1)}/s)`
-      )
-    },
-  }
-}
-
 // ============================================================================
 // Main Command Handler
 // ============================================================================
 
-async function faqClassify(options: {
-  parquetPath?: string
-  taxonomyPath?: string
-  outputPath?: string
-  batchSize?: number
-  dryRun?: boolean
-}): Promise<void> {
+export async function faqClassify(
+  ctx: CommandContext,
+  options: {
+    parquetPath?: string
+    taxonomyPath?: string
+    outputPath?: string
+    batchSize?: number
+    dryRun?: boolean
+  }
+): Promise<void> {
   const parquetPath = options.parquetPath ?? DEFAULT_PARQUET_PATH
   const taxonomyPath = options.taxonomyPath ?? DEFAULT_TAXONOMY_PATH
   const outputPath = options.outputPath ?? DEFAULT_OUTPUT_PATH
   const batchSize = options.batchSize ?? DEFAULT_BATCH_SIZE
+  const outputJson = ctx.format === 'json'
 
-  console.log('🏷️  FAQ Topic Classification Pipeline')
-  console.log('='.repeat(60))
-  console.log(`   Parquet source: ${parquetPath}`)
-  console.log(`   Taxonomy:       ${taxonomyPath}`)
-  console.log(`   Output:         ${outputPath}`)
-  console.log(`   Batch size:     ${batchSize}`)
-  console.log(`   Concurrency:    ${CONCURRENT_LIMIT}`)
-  console.log(`   Dry run:        ${options.dryRun ?? false}`)
-  console.log('')
+  if (!outputJson) {
+    ctx.output.data('🏷️  FAQ Topic Classification Pipeline')
+    ctx.output.data('='.repeat(60))
+    ctx.output.data(`   Parquet source: ${parquetPath}`)
+    ctx.output.data(`   Taxonomy:       ${taxonomyPath}`)
+    ctx.output.data(`   Output:         ${outputPath}`)
+    ctx.output.data(`   Batch size:     ${batchSize}`)
+    ctx.output.data(`   Concurrency:    ${CONCURRENT_LIMIT}`)
+    ctx.output.data(`   Dry run:        ${options.dryRun ?? false}`)
+    ctx.output.data('')
+  }
 
   // Validate inputs exist
   if (!existsSync(parquetPath)) {
-    console.error(`❌ Parquet file not found: ${parquetPath}`)
-    process.exit(1)
+    handleFaqClassifyError(
+      ctx,
+      new CLIError({
+        userMessage: `Parquet file not found: ${parquetPath}.`,
+        suggestion: 'Verify the parquet path and try again.',
+      }),
+      'Parquet file not found.'
+    )
+    return
   }
   if (!existsSync(taxonomyPath)) {
-    console.error(`❌ Taxonomy file not found: ${taxonomyPath}`)
-    process.exit(1)
+    handleFaqClassifyError(
+      ctx,
+      new CLIError({
+        userMessage: `Taxonomy file not found: ${taxonomyPath}.`,
+        suggestion: 'Verify the taxonomy path and try again.',
+      }),
+      'Taxonomy file not found.'
+    )
+    return
   }
 
   // Ensure output directory exists
@@ -337,37 +368,66 @@ async function faqClassify(options: {
   }
 
   // Load taxonomy
-  console.log('📚 Loading taxonomy...')
+  if (!outputJson) ctx.output.data('📚 Loading taxonomy...')
   const taxonomy: Taxonomy = JSON.parse(readFileSync(taxonomyPath, 'utf-8'))
   const validTopicIds = new Set(taxonomy.topics.map((t) => t.id))
   validTopicIds.add('unknown')
-  console.log(`   Found ${taxonomy.topics.length} topics`)
+  if (!outputJson) {
+    ctx.output.data(`   Found ${taxonomy.topics.length} topics`)
+  }
 
   // Load conversations from parquet
-  console.log('\n📦 Loading conversations from parquet...')
+  if (!outputJson) ctx.output.data('\n📦 Loading conversations from parquet...')
   const allConversations = await loadConversationsFromParquet(parquetPath)
-  console.log(`   Found ${allConversations.length} conversations`)
+  if (!outputJson) {
+    ctx.output.data(`   Found ${allConversations.length} conversations`)
+  }
 
   // Load existing classifications for resume
-  console.log('\n🔍 Checking for existing classifications...')
+  if (!outputJson) {
+    ctx.output.data('\n🔍 Checking for existing classifications...')
+  }
   const classifiedIds = loadExistingClassifications(outputPath)
-  console.log(`   Already classified: ${classifiedIds.size}`)
+  if (!outputJson) {
+    ctx.output.data(`   Already classified: ${classifiedIds.size}`)
+  }
 
   // Filter to unclassified conversations
   const remaining = allConversations.filter(
     (c) => !classifiedIds.has(c.conversation_id)
   )
-  console.log(`   Remaining to classify: ${remaining.length}`)
+  if (!outputJson) {
+    ctx.output.data(`   Remaining to classify: ${remaining.length}`)
+  }
 
   if (remaining.length === 0) {
-    console.log('\n✅ All conversations already classified!')
+    if (outputJson) {
+      ctx.output.data({
+        success: true,
+        total: allConversations.length,
+        alreadyClassified: classifiedIds.size,
+        remaining: 0,
+        outputPath,
+      })
+    } else {
+      ctx.output.data('\n✅ All conversations already classified!')
+    }
     return
   }
 
   if (options.dryRun) {
-    console.log('\n🧪 Dry run - showing sample classifications:')
+    if (!outputJson) {
+      ctx.output.data('\n🧪 Dry run - showing sample classifications:')
+    }
     const systemPrompt = buildClassifyPrompt(taxonomy)
     const sample = remaining.slice(0, 3)
+    const samples: Array<{
+      conversationId: string
+      topicId?: string
+      confidence?: number
+      messagePreview?: string
+      error?: string
+    }> = []
     for (const conv of sample) {
       try {
         const result = await classifyConversation(
@@ -375,16 +435,45 @@ async function faqClassify(options: {
           systemPrompt,
           validTopicIds
         )
-        console.log(`\n   ${conv.conversation_id}:`)
-        console.log(
-          `     Topic: ${result.topicId} (${(result.confidence * 100).toFixed(0)}%)`
-        )
-        console.log(`     Message: "${conv.first_message.slice(0, 100)}..."`)
+        if (!outputJson) {
+          ctx.output.data(`\n   ${conv.conversation_id}:`)
+          ctx.output.data(
+            `     Topic: ${result.topicId} (${(result.confidence * 100).toFixed(0)}%)`
+          )
+          ctx.output.data(
+            `     Message: "${conv.first_message.slice(0, 100)}..."`
+          )
+        } else {
+          samples.push({
+            conversationId: conv.conversation_id,
+            topicId: result.topicId,
+            confidence: result.confidence,
+            messagePreview: conv.first_message.slice(0, 100),
+          })
+        }
       } catch (error) {
-        console.log(`   ❌ ${conv.conversation_id}: ${error}`)
+        if (!outputJson) {
+          ctx.output.warn(`   ❌ ${conv.conversation_id}: ${String(error)}`)
+        } else {
+          samples.push({
+            conversationId: conv.conversation_id,
+            error: String(error),
+          })
+        }
       }
     }
-    console.log('\n🧪 Dry run complete - no classifications saved')
+    if (outputJson) {
+      ctx.output.data({
+        success: true,
+        dryRun: true,
+        total: allConversations.length,
+        alreadyClassified: classifiedIds.size,
+        remaining: remaining.length,
+        samples,
+      })
+    } else {
+      ctx.output.data('\n🧪 Dry run complete - no classifications saved')
+    }
     return
   }
 
@@ -392,8 +481,8 @@ async function faqClassify(options: {
   const systemPrompt = buildClassifyPrompt(taxonomy)
 
   // Process in batches
-  console.log('\n🚀 Starting classification...')
-  const progress = createProgressBar(remaining.length)
+  if (!outputJson) ctx.output.data('\n🚀 Starting classification...')
+  const progress = createProgressReporter(ctx, remaining.length)
   let totalSuccess = 0
   let totalFailed = 0
 
@@ -404,6 +493,7 @@ async function faqClassify(options: {
       systemPrompt,
       validTopicIds,
       outputPath,
+      ctx,
       (completed) => progress.update(i + completed)
     )
     totalSuccess += success
@@ -413,13 +503,23 @@ async function faqClassify(options: {
     progress.update(i + batch.length)
   }
 
-  progress.done()
+  progress.done(totalSuccess + totalFailed)
 
   // Summary
-  console.log('\n📊 Classification Summary:')
-  console.log(`   ✅ Successful: ${totalSuccess}`)
-  console.log(`   ❌ Failed:     ${totalFailed}`)
-  console.log(`   📁 Output:     ${outputPath}`)
+  if (outputJson) {
+    ctx.output.data({
+      success: true,
+      total: totalSuccess + totalFailed,
+      successful: totalSuccess,
+      failed: totalFailed,
+      outputPath,
+    })
+  } else {
+    ctx.output.data('\n📊 Classification Summary:')
+    ctx.output.data(`   ✅ Successful: ${totalSuccess}`)
+    ctx.output.data(`   ❌ Failed:     ${totalFailed}`)
+    ctx.output.data(`   📁 Output:     ${outputPath}`)
+  }
 }
 
 // ============================================================================
@@ -451,8 +551,20 @@ export function registerFaqClassifyCommands(program: Command): void {
       String(DEFAULT_BATCH_SIZE)
     )
     .option('-d, --dry-run', 'Show sample classifications without saving')
-    .action((opts) => {
-      faqClassify({
+    .action(async (opts, command) => {
+      const globalOpts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: globalOpts.format,
+        verbose: globalOpts.verbose,
+        quiet: globalOpts.quiet,
+      })
+      await faqClassify(ctx, {
         ...opts,
         batchSize: opts.batchSize ? parseInt(opts.batchSize, 10) : undefined,
       })

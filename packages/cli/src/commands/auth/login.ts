@@ -1,3 +1,4 @@
+import { type CommandContext } from '../../core/context'
 import { OnePasswordProvider } from '../../core/secrets'
 
 interface LoginOptions {
@@ -12,26 +13,35 @@ type LoginResult = {
   error?: string
 }
 
-const writeResult = (options: LoginOptions, result: LoginResult): void => {
-  if (options.json) {
-    console.log(JSON.stringify(result, null, 2))
+const writeResult = (
+  ctx: CommandContext,
+  options: LoginOptions,
+  result: LoginResult
+): void => {
+  const outputJson = options.json === true || ctx.format === 'json'
+
+  if (outputJson) {
+    ctx.output.data(result)
     return
   }
 
   if (!result.success) {
-    console.error(`Error: ${result.error ?? 'Failed to validate token.'}`)
+    ctx.output.error(result.error ?? 'Failed to validate token.')
     return
   }
 
-  console.log('1Password token validated.')
-  console.log(`Provider: ${result.provider}`)
+  ctx.output.data('1Password token validated.')
+  ctx.output.data(`Provider: ${result.provider}`)
 }
 
-export async function loginAction(options: LoginOptions): Promise<void> {
+export async function loginAction(
+  ctx: CommandContext,
+  options: LoginOptions
+): Promise<void> {
   const token = options.token ?? process.env.OP_SERVICE_ACCOUNT_TOKEN
 
   if (!token) {
-    writeResult(options, {
+    writeResult(ctx, options, {
       success: false,
       provider: '1password',
       tokenConfigured: false,
@@ -50,7 +60,7 @@ export async function loginAction(options: LoginOptions): Promise<void> {
   const available = await provider.isAvailable()
 
   if (!available) {
-    writeResult(options, {
+    writeResult(ctx, options, {
       success: false,
       provider: provider.name,
       tokenConfigured: true,
@@ -60,7 +70,7 @@ export async function loginAction(options: LoginOptions): Promise<void> {
     return
   }
 
-  writeResult(options, {
+  writeResult(ctx, options, {
     success: true,
     provider: provider.name,
     tokenConfigured: true,

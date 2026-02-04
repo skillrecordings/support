@@ -17,6 +17,7 @@ import { generateText, stepCountIs, tool } from 'ai'
 import { readFile, writeFile } from 'fs/promises'
 import { glob } from 'glob'
 import { z } from 'zod'
+import { type CommandContext } from '../../core/context'
 import { cleanupRealTools, createRealTools, initRealTools } from './real-tools'
 
 interface RunOptions {
@@ -599,7 +600,10 @@ function createMockTools(scenarioType: ScenarioType, scenario: Scenario) {
   }
 }
 
-export async function run(options: RunOptions): Promise<void> {
+export async function run(
+  ctx: CommandContext,
+  options: RunOptions
+): Promise<void> {
   const {
     scenarios: scenarioGlob,
     dataset: datasetPath,
@@ -613,19 +617,29 @@ export async function run(options: RunOptions): Promise<void> {
     limit,
     realTools = false,
   } = options
+  const outputJson = json || ctx.format === 'json'
+  const log = (text: string): void => {
+    if (!outputJson) ctx.output.data(text)
+  }
+  const logVerbose = (text: string): void => {
+    if (!outputJson && verbose) ctx.output.message(text)
+  }
 
   // Initialize real tools if flag is set
   if (realTools) {
-    if (!json) console.log('🔧 Using REAL tools (Docker services)...')
+    log('🔧 Using REAL tools (Docker services)...')
     try {
       await initRealTools()
-      if (!json) console.log('✅ Connected to MySQL and Qdrant')
+      log('✅ Connected to MySQL and Qdrant')
     } catch (error) {
-      console.error('❌ Failed to connect to Docker services:', error)
-      console.error(
-        '   Make sure services are running: docker compose -f docker/eval.yml up -d'
+      ctx.output.error(
+        `Failed to connect to Docker services: ${error instanceof Error ? error.message : String(error)}`
       )
-      process.exit(1)
+      ctx.output.message(
+        'Make sure services are running: docker compose -f docker/eval.yml up -d'
+      )
+      process.exitCode = 1
+      return
     }
   }
 
@@ -633,9 +647,9 @@ export async function run(options: RunOptions): Promise<void> {
   let systemPrompt = SUPPORT_AGENT_PROMPT
   if (promptPath) {
     systemPrompt = await readFile(promptPath, 'utf-8')
-    if (!json) console.log(`Using prompt from: ${promptPath}`)
+    log(`Using prompt from: ${promptPath}`)
   } else {
-    if (!json) console.log('Using production prompt')
+    log('Using production prompt')
   }
 
   // Load scenarios from either scenarios glob or dataset file
@@ -681,8 +695,9 @@ export async function run(options: RunOptions): Promise<void> {
     const scenarioFiles = await glob(glob_)
 
     if (scenarioFiles.length === 0) {
-      console.error('No scenarios found. Use --scenarios or --dataset')
-      process.exit(1)
+      ctx.output.error('No scenarios found. Use --scenarios or --dataset')
+      process.exitCode = 1
+      return
     }
 
     scenarios = await Promise.all(
@@ -698,28 +713,26 @@ export async function run(options: RunOptions): Promise<void> {
     scenarios = scenarios.slice(0, limit)
   }
 
-  if (!json) {
-    console.log(
-      `\n🧪 Running ${scenarios.length} scenarios (model: ${model})\n`
-    )
-  }
+  log(`\n🧪 Running ${scenarios.length} scenarios (model: ${model})\n`)
 
   const startTime = Date.now()
   const results: ScenarioResult[] = []
 
   for (let i = 0; i < scenarios.length; i++) {
-    if (!json) {
-      process.stdout.write(`\r  Processing ${i + 1}/${scenarios.length}...`)
+    if (!outputJson) {
+      ctx.output.progress(`Processing ${i + 1}/${scenarios.length}...`)
     }
 
     const scenario = scenarios[i]
     if (!scenario) continue
     const result = await runScenario(
+      ctx,
       scenario,
       systemPrompt,
       model,
       verbose,
-      realTools
+      realTools,
+      outputJson
     )
     results.push(result)
   }
@@ -729,9 +742,7 @@ export async function run(options: RunOptions): Promise<void> {
     await cleanupRealTools()
   }
 
-  if (!json) {
-    console.log('\n')
-  }
+  log('\n')
 
   const totalDuration = Date.now() - startTime
   const summary = aggregateResults(results, totalDuration)
@@ -741,39 +752,39 @@ export async function run(options: RunOptions): Promise<void> {
     try {
       const baselineContent = await readFile(baseline, 'utf-8')
       const baselineData = JSON.parse(baselineContent)
-      printComparison(summary, baselineData.summary || baselineData)
+      printComparison(ctx, summary, baselineData.summary || baselineData)
     } catch (e) {
-      console.error('Could not load baseline:', e)
+      ctx.output.error(
+        `Could not load baseline: ${e instanceof Error ? e.message : String(e)}`
+      )
     }
   }
 
   // Save results if output specified
   if (output) {
     await writeFile(output, JSON.stringify({ summary, results }, null, 2))
-    if (!json) {
-      console.log(`Results saved to ${output}`)
-    }
+    log(`Results saved to ${output}`)
   }
 
-  if (json) {
-    console.log(JSON.stringify({ summary, results }, null, 2))
+  if (outputJson) {
+    ctx.output.data({ summary, results })
   } else {
-    printSummary(summary, failThreshold)
+    printSummary(ctx, summary, failThreshold)
 
     // Show failures if verbose
     if (verbose) {
       const failures = results.filter((r) => !r.passed && !r.noDraft)
       if (failures.length > 0) {
-        console.log('\n--- FAILURES ---\n')
+        ctx.output.data('\n--- FAILURES ---\n')
         for (const f of failures.slice(0, 10)) {
-          console.log(`❌ ${f.name}`)
+          ctx.output.data(`❌ ${f.name}`)
           for (const reason of f.failureReasons) {
-            console.log(`   └─ ${reason}`)
+            ctx.output.data(`   └─ ${reason}`)
           }
           if (f.output) {
-            console.log(`   Output: ${f.output.slice(0, 150)}...`)
+            ctx.output.data(`   Output: ${f.output.slice(0, 150)}...`)
           }
-          console.log('')
+          ctx.output.data('')
         }
       }
     }
@@ -788,14 +799,19 @@ export async function run(options: RunOptions): Promise<void> {
 }
 
 async function runScenario(
+  ctx: CommandContext,
   scenario: Scenario,
   systemPrompt: string,
   model: string,
   verbose?: boolean,
-  useRealTools?: boolean
+  useRealTools?: boolean,
+  outputJson?: boolean
 ): Promise<ScenarioResult> {
   const startTime = Date.now()
   const failureReasons: string[] = []
+  const logVerbose = (text: string): void => {
+    if (!outputJson && verbose) ctx.output.message(text)
+  }
 
   // Build input message
   const trigger = scenario.trigger ||
@@ -806,22 +822,26 @@ async function runScenario(
   // Classify scenario and create appropriate tools (mock or real)
   const scenarioType = classifyScenario(trigger.subject, trigger.body)
   if (verbose) {
-    console.log(
+    logVerbose(
       `[CLASSIFY] "${trigger.subject.slice(0, 50)}..." → ${scenarioType}`
     )
     if (useRealTools) {
-      console.log(`[TOOLS] Using REAL Docker services`)
+      logVerbose(`[TOOLS] Using REAL Docker services`)
     }
   }
 
   // Use real tools if flag is set, otherwise use mocks
   const tools = useRealTools
-    ? createRealTools({
-        appId: scenario.appId,
-        customerEmail: trigger.body.match(
-          /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/
-        )?.[1],
-      })
+    ? createRealTools(
+        {
+          appId: scenario.appId,
+          customerEmail: trigger.body.match(
+            /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/
+          )?.[1],
+        },
+        undefined,
+        ctx.output
+      )
     : createMockTools(scenarioType, scenario)
 
   // Use scenarioType as category for better tracking
@@ -868,7 +888,7 @@ App: ${scenario.appId || 'total-typescript'}`
 
     // Debug all steps when verbose
     if (verbose) {
-      console.log(
+      logVerbose(
         `\n[TRACE] ${name} (${result.steps.length} steps, reason: ${result.finishReason})`
       )
       for (let i = 0; i < result.steps.length; i++) {
@@ -877,15 +897,15 @@ App: ${scenario.appId || 'total-typescript'}`
         const calls = (step.toolCalls || [])
           .map((tc) => `${tc.toolName}`)
           .join(', ')
-        console.log(
+        logVerbose(
           `  Step ${i + 1}: ${calls || 'no tool calls'} [reason: ${step.finishReason}]`
         )
         for (const tr of step.toolResults || []) {
           const preview = JSON.stringify(tr.output).slice(0, 300)
-          console.log(`    → ${preview}`)
+          logVerbose(`    → ${preview}`)
         }
         if (step.text) {
-          console.log(`    text: ${step.text.slice(0, 100)}...`)
+          logVerbose(`    text: ${step.text.slice(0, 100)}...`)
         }
       }
     }
@@ -900,16 +920,16 @@ App: ${scenario.appId || 'total-typescript'}`
       // Explicit draft call - this is a customer response
       output = (draftCall.input as { body: string }).body
       if (verbose) {
-        console.log(`  ✅ DRAFTED: ${output.slice(0, 100)}...`)
+        logVerbose(`  ✅ DRAFTED: ${output.slice(0, 100)}...`)
       }
     } else {
       // No draftResponse = correctly silent (even if there's reasoning text)
       noDraft = true
       if (verbose) {
         if (result.text && result.text.trim().length > 0) {
-          console.log(`  🚫 SILENT (reasoning): ${result.text.slice(0, 80)}...`)
+          logVerbose(`  🚫 SILENT (reasoning): ${result.text.slice(0, 80)}...`)
         } else {
-          console.log(`  🚫 SILENT (no output)`)
+          logVerbose(`  🚫 SILENT (no output)`)
         }
       }
     }
@@ -1110,59 +1130,73 @@ function aggregateResults(
   }
 }
 
-function printSummary(summary: RunSummary, threshold: number): void {
-  console.log('🧪 Eval Results\n')
-  console.log(`Scenarios: ${summary.total} total`)
-  console.log(
+function printSummary(
+  ctx: CommandContext,
+  summary: RunSummary,
+  threshold: number
+): void {
+  ctx.output.data('🧪 Eval Results\n')
+  ctx.output.data(`Scenarios: ${summary.total} total`)
+  ctx.output.data(
     `  ✅ Passed:    ${summary.passed} (${(summary.passRate * 100).toFixed(1)}%)`
   )
-  console.log(`  ❌ Failed:    ${summary.failed}`)
-  console.log(`  🚫 No draft:  ${summary.noDraft}`)
+  ctx.output.data(`  ❌ Failed:    ${summary.failed}`)
+  ctx.output.data(`  🚫 No draft:  ${summary.noDraft}`)
 
   if (summary.failed > 0) {
-    console.log('\nQuality Breakdown (drafts with issues):')
+    ctx.output.data('\nQuality Breakdown (drafts with issues):')
     if (summary.failures.internalLeaks > 0) {
-      console.log(`  🚨 Internal leaks:    ${summary.failures.internalLeaks}`)
+      ctx.output.data(
+        `  🚨 Internal leaks:    ${summary.failures.internalLeaks}`
+      )
     }
     if (summary.failures.metaCommentary > 0) {
-      console.log(`  💬 Meta-commentary:   ${summary.failures.metaCommentary}`)
+      ctx.output.data(
+        `  💬 Meta-commentary:   ${summary.failures.metaCommentary}`
+      )
     }
     if (summary.failures.bannedPhrases > 0) {
-      console.log(`  🚫 Banned phrases:    ${summary.failures.bannedPhrases}`)
+      ctx.output.data(
+        `  🚫 Banned phrases:    ${summary.failures.bannedPhrases}`
+      )
     }
     if (summary.failures.fabrication > 0) {
-      console.log(`  🎭 Fabrication:       ${summary.failures.fabrication}`)
+      ctx.output.data(`  🎭 Fabrication:       ${summary.failures.fabrication}`)
     }
   }
 
-  console.log('\nBy Category:')
+  ctx.output.data('\nBy Category:')
   for (const [cat, stats] of Object.entries(summary.byCategory)) {
     const total = stats.passed + stats.failed + stats.noDraft
-    console.log(
+    ctx.output.data(
       `  ${cat}: ${stats.passed}✅ ${stats.failed}❌ ${stats.noDraft}🚫 (${total} total)`
     )
   }
 
-  console.log('\nLatency:')
-  console.log(`  p50: ${summary.latency.p50}ms`)
-  console.log(`  p95: ${summary.latency.p95}ms`)
-  console.log(`  p99: ${summary.latency.p99}ms`)
+  ctx.output.data('\nLatency:')
+  ctx.output.data(`  p50: ${summary.latency.p50}ms`)
+  ctx.output.data(`  p95: ${summary.latency.p95}ms`)
+  ctx.output.data(`  p99: ${summary.latency.p99}ms`)
 
   const effectivePassRate =
     summary.passed / (summary.passed + summary.failed) || 1
   const passIcon = effectivePassRate >= threshold ? '✅' : '❌'
-  console.log(
+  ctx.output.data(
     `\nDraft quality: ${(effectivePassRate * 100).toFixed(1)}% (threshold: ${(threshold * 100).toFixed(1)}%) ${passIcon}`
   )
 }
 
-function printComparison(current: RunSummary, baseline: RunSummary): void {
-  console.log('\n🔬 Comparison to Baseline\n')
+function printComparison(
+  ctx: CommandContext,
+  current: RunSummary,
+  baseline: RunSummary
+): void {
+  ctx.output.data('\n🔬 Comparison to Baseline\n')
 
   const passRateDelta = current.passRate - baseline.passRate
   const passRateIcon = passRateDelta >= 0 ? '⬆️' : '⬇️'
 
-  console.log(
+  ctx.output.data(
     `Pass rate: ${(baseline.passRate * 100).toFixed(1)}% → ${(current.passRate * 100).toFixed(1)}%  ${passRateDelta > 0 ? '+' : ''}${(passRateDelta * 100).toFixed(1)}% ${passRateIcon}`
   )
 }

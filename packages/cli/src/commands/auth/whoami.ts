@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto'
+import { type CommandContext } from '../../core/context'
 import { OnePasswordProvider } from '../../core/secrets'
 
 interface WhoamiOptions {
@@ -95,40 +96,49 @@ const renderClaims = (claims: Record<string, unknown>): string[] => {
   })
 }
 
-const writeResult = (options: WhoamiOptions, result: WhoamiResult): void => {
-  if (options.json) {
-    console.log(JSON.stringify(result, null, 2))
+const writeResult = (
+  ctx: CommandContext,
+  options: WhoamiOptions,
+  result: WhoamiResult
+): void => {
+  const outputJson = options.json === true || ctx.format === 'json'
+
+  if (outputJson) {
+    ctx.output.data(result)
     return
   }
 
   if (!result.success) {
-    console.error(`Error: ${result.error ?? 'Failed to load account info.'}`)
+    ctx.output.error(result.error ?? 'Failed to load account info.')
     return
   }
 
-  console.log('Service Account')
-  console.log(`Provider: ${result.provider}`)
+  ctx.output.data('Service Account')
+  ctx.output.data(`Provider: ${result.provider}`)
 
   if (result.token) {
-    console.log(`Token format: ${result.token.format}`)
-    console.log(`Token fingerprint: ${result.token.fingerprint}`)
+    ctx.output.data(`Token format: ${result.token.format}`)
+    ctx.output.data(`Token fingerprint: ${result.token.fingerprint}`)
     if (result.token.claims && result.token.format === 'jwt') {
       const claims = renderClaims(result.token.claims)
       if (claims.length > 0) {
-        console.log('Claims:')
+        ctx.output.data('Claims:')
         for (const line of claims) {
-          console.log(`  ${line}`)
+          ctx.output.data(`  ${line}`)
         }
       }
     }
   }
 }
 
-export async function whoamiAction(options: WhoamiOptions): Promise<void> {
+export async function whoamiAction(
+  ctx: CommandContext,
+  options: WhoamiOptions
+): Promise<void> {
   const token = process.env.OP_SERVICE_ACCOUNT_TOKEN
 
   if (!token) {
-    writeResult(options, {
+    writeResult(ctx, options, {
       success: false,
       provider: '1password',
       tokenConfigured: false,
@@ -143,7 +153,7 @@ export async function whoamiAction(options: WhoamiOptions): Promise<void> {
   const available = await provider.isAvailable()
 
   if (!available) {
-    writeResult(options, {
+    writeResult(ctx, options, {
       success: false,
       provider: provider.name,
       tokenConfigured: true,
@@ -153,7 +163,7 @@ export async function whoamiAction(options: WhoamiOptions): Promise<void> {
     return
   }
 
-  writeResult(options, {
+  writeResult(ctx, options, {
     success: true,
     provider: provider.name,
     tokenConfigured: true,

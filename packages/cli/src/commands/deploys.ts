@@ -1,5 +1,7 @@
 import { execSync } from 'child_process'
 import { Command } from 'commander'
+import { type CommandContext, createContext } from '../core/context'
+import { CLIError, formatError } from '../core/errors'
 
 const VERCEL_SCOPE = 'skillrecordings'
 
@@ -36,17 +38,18 @@ function runVercel(args: string): string {
   }
 }
 
-function listApps() {
-  console.log('\n📦 Support Platform Apps\n')
+function listApps(ctx: CommandContext) {
+  ctx.output.data('\n📦 Support Platform Apps\n')
   for (const [name, app] of Object.entries(APPS)) {
-    console.log(
+    ctx.output.data(
       `  ${name.padEnd(10)} ${app.vercel.padEnd(35)} ${app.description}`
     )
   }
-  console.log()
+  ctx.output.data('')
 }
 
 function resolveApp(
+  ctx: CommandContext,
   nameOrAll: string | undefined
 ): [string, { vercel: string; description: string }][] {
   if (!nameOrAll || nameOrAll === 'all') {
@@ -54,138 +57,229 @@ function resolveApp(
   }
   const app = APPS[nameOrAll]
   if (!app) {
-    console.error(`❌ Unknown app: ${nameOrAll}`)
-    console.error(`   Available: ${Object.keys(APPS).join(', ')}, all`)
-    process.exit(1)
+    throw new CLIError({
+      userMessage: `Unknown app: ${nameOrAll}.`,
+      suggestion: `Available: ${Object.keys(APPS).join(', ')}, all.`,
+    })
   }
   return [[nameOrAll, app]]
 }
 
-async function deploysStatus(
+export async function deploysStatus(
+  ctx: CommandContext,
   appName: string | undefined,
   options: { limit?: string; json?: boolean }
 ) {
-  const apps = resolveApp(appName)
-  const limit = parseInt(options.limit || '5')
+  const outputJson = options.json === true || ctx.format === 'json'
+  try {
+    const apps = resolveApp(ctx, appName)
+    const limit = parseInt(options.limit || '5')
 
-  for (const [name, app] of apps) {
-    console.log(`\n🚀 ${name} (${app.vercel})`)
-    console.log(`   ${app.description}\n`)
+    if (outputJson) {
+      const results = apps.map(([name, app]) => ({
+        name,
+        vercel: app.vercel,
+        description: app.description,
+        status: runVercel(`ls ${app.vercel}`)
+          .split('\n')
+          .filter((l) => l.includes('https://'))
+          .slice(0, limit),
+      }))
+      ctx.output.data(results)
+      return
+    }
 
-    const output = runVercel(`ls ${app.vercel}`)
-    const lines = output.split('\n')
-    // Deploy lines contain https:// URLs
-    const deployLines = lines.filter((l) => l.includes('https://'))
+    for (const [name, app] of apps) {
+      ctx.output.data(`\n🚀 ${name} (${app.vercel})`)
+      ctx.output.data(`   ${app.description}\n`)
 
-    if (deployLines.length === 0) {
-      console.log('   No recent deployments found')
-    } else {
-      // Filter production-only for cleaner output, show all if few deploys
-      const prodLines = deployLines.filter((l) => l.includes('Production'))
-      const showLines = (
-        prodLines.length >= limit ? prodLines : deployLines
-      ).slice(0, limit)
+      const output = runVercel(`ls ${app.vercel}`)
+      const lines = output.split('\n')
+      // Deploy lines contain https:// URLs
+      const deployLines = lines.filter((l) => l.includes('https://'))
 
-      for (const line of showLines) {
-        const trimmed = line.trim()
-        // Extract known tokens from the line
-        const hasReady = trimmed.includes('Ready')
-        const hasError = trimmed.includes('Error')
-        const hasCanceled = trimmed.includes('Canceled')
-        const isProd = trimmed.includes('Production')
-        const isPreview = trimmed.includes('Preview')
-        const prefix = hasError
-          ? '❌'
-          : hasCanceled
-            ? '⚪'
-            : isProd
-              ? '🟢'
-              : '🔵'
+      if (deployLines.length === 0) {
+        ctx.output.data('   No recent deployments found')
+      } else {
+        // Filter production-only for cleaner output, show all if few deploys
+        const prodLines = deployLines.filter((l) => l.includes('Production'))
+        const showLines = (
+          prodLines.length >= limit ? prodLines : deployLines
+        ).slice(0, limit)
 
-        // Pull age (first token) and environment
-        const age = trimmed.split(/\s+/)[0] || ''
-        const status = hasError
-          ? 'Error'
-          : hasCanceled
-            ? 'Canceled'
-            : hasReady
-              ? 'Ready'
-              : 'Unknown'
-        const env = isProd ? 'Production' : isPreview ? 'Preview' : ''
+        for (const line of showLines) {
+          const trimmed = line.trim()
+          // Extract known tokens from the line
+          const hasReady = trimmed.includes('Ready')
+          const hasError = trimmed.includes('Error')
+          const hasCanceled = trimmed.includes('Canceled')
+          const isProd = trimmed.includes('Production')
+          const isPreview = trimmed.includes('Preview')
+          const prefix = hasError
+            ? '❌'
+            : hasCanceled
+              ? '⚪'
+              : isProd
+                ? '🟢'
+                : '🔵'
 
-        // Pull duration (pattern like "30s", "17s")
-        const durMatch = trimmed.match(/(\d+s)/)
-        const duration = durMatch ? durMatch[1] : ''
+          // Pull age (first token) and environment
+          const age = trimmed.split(/\s+/)[0] || ''
+          const status = hasError
+            ? 'Error'
+            : hasCanceled
+              ? 'Canceled'
+              : hasReady
+                ? 'Ready'
+                : 'Unknown'
+          const env = isProd ? 'Production' : isPreview ? 'Preview' : ''
 
-        console.log(
-          `   ${prefix} ${age.padEnd(6)} ${status.padEnd(10)} ${env.padEnd(12)} ${duration}`
-        )
+          // Pull duration (pattern like "30s", "17s")
+          const durMatch = trimmed.match(/(\d+s)/)
+          const duration = durMatch ? durMatch[1] : ''
+
+          ctx.output.data(
+            `   ${prefix} ${age.padEnd(6)} ${status.padEnd(10)} ${env.padEnd(12)} ${duration}`
+          )
+        }
       }
     }
+    ctx.output.data('')
+  } catch (error) {
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Failed to fetch deployments.',
+            suggestion: 'Verify Vercel CLI access and try again.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
-  console.log()
 }
 
-async function deploysLogs(appName: string, options: { lines?: string }) {
-  const apps = resolveApp(appName)
-  if (apps.length > 1) {
-    console.error('❌ Specify a single app for logs (front or slack)')
-    process.exit(1)
-  }
-
-  const [name, app] = apps[0]!
-  console.log(`\n📋 Recent logs for ${name} (${app.vercel})\n`)
-
-  // Get latest production deployment URL
-  const lsOutput = runVercel(`ls ${app.vercel} --limit 5`)
-  const prodLine = lsOutput
-    .split('\n')
-    .find((l) => l.includes('Production') && l.includes('Ready'))
-  const urlMatch = prodLine?.match(/https:\/\/\S+/)
-
-  if (!urlMatch) {
-    console.error('   Could not find latest production deployment')
-    process.exit(1)
-  }
-
-  const url = urlMatch[0]
-  console.log(`   Deployment: ${url}\n`)
-
+export async function deploysLogs(
+  ctx: CommandContext,
+  appName: string,
+  options: { lines?: string; json?: boolean }
+) {
+  const outputJson = options.json === true || ctx.format === 'json'
   try {
-    const logsOutput = execSync(
-      `vercel logs ${url} --scope ${VERCEL_SCOPE} --output short 2>&1 | tail -${options.lines || '30'}`,
-      { encoding: 'utf-8', timeout: 30000 }
-    )
-    console.log(logsOutput)
-  } catch (err: any) {
-    console.log(err.stdout || err.message)
+    const apps = resolveApp(ctx, appName)
+    if (apps.length > 1) {
+      throw new CLIError({
+        userMessage: 'Specify a single app for logs (front or slack).',
+        suggestion: 'Provide one app name.',
+      })
+    }
+
+    const [name, app] = apps[0]!
+    if (!outputJson) {
+      ctx.output.data(`\n📋 Recent logs for ${name} (${app.vercel})\n`)
+    }
+
+    // Get latest production deployment URL
+    const lsOutput = runVercel(`ls ${app.vercel} --limit 5`)
+    const prodLine = lsOutput
+      .split('\n')
+      .find((l) => l.includes('Production') && l.includes('Ready'))
+    const urlMatch = prodLine?.match(/https:\/\/\S+/)
+
+    if (!urlMatch) {
+      throw new CLIError({
+        userMessage: 'Could not find latest production deployment.',
+        suggestion: 'Verify Vercel deployment status.',
+      })
+    }
+
+    const url = urlMatch[0]
+
+    if (outputJson) {
+      const logsOutput = execSync(
+        `vercel logs ${url} --scope ${VERCEL_SCOPE} --output short 2>&1 | tail -${options.lines || '30'}`,
+        { encoding: 'utf-8', timeout: 30000 }
+      )
+      ctx.output.data({ app: name, deployment: url, logs: logsOutput.trim() })
+      return
+    }
+
+    ctx.output.data(`   Deployment: ${url}\n`)
+
+    try {
+      const logsOutput = execSync(
+        `vercel logs ${url} --scope ${VERCEL_SCOPE} --output short 2>&1 | tail -${options.lines || '30'}`,
+        { encoding: 'utf-8', timeout: 30000 }
+      )
+      ctx.output.data(logsOutput)
+    } catch (err: any) {
+      ctx.output.data(err.stdout || err.message)
+    }
+  } catch (error) {
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Failed to fetch logs.',
+            suggestion: 'Verify Vercel CLI access and try again.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
 }
 
-async function deploysInspect(appName: string) {
-  const apps = resolveApp(appName)
-  if (apps.length > 1) {
-    console.error('❌ Specify a single app for inspect (front or slack)')
-    process.exit(1)
+export async function deploysInspect(
+  ctx: CommandContext,
+  appName: string,
+  options: { json?: boolean }
+) {
+  const outputJson = options.json === true || ctx.format === 'json'
+  try {
+    const apps = resolveApp(ctx, appName)
+    if (apps.length > 1) {
+      throw new CLIError({
+        userMessage: 'Specify a single app for inspect (front or slack).',
+        suggestion: 'Provide one app name.',
+      })
+    }
+
+    const [name, app] = apps[0]!
+
+    // Get latest production deployment URL
+    const lsOutput = runVercel(`ls ${app.vercel} --limit 3`)
+    const prodLine = lsOutput
+      .split('\n')
+      .find((l) => l.includes('Production') && l.includes('Ready'))
+    const urlMatch = prodLine?.match(/https:\/\/\S+/)
+
+    if (!urlMatch) {
+      throw new CLIError({
+        userMessage: 'Could not find latest production deployment.',
+        suggestion: 'Verify Vercel deployment status.',
+      })
+    }
+
+    const output = runVercel(`inspect ${urlMatch[0]}`)
+    if (outputJson) {
+      ctx.output.data({ app: name, output })
+      return
+    }
+
+    ctx.output.data(`\n🔍 Inspecting ${name} latest production deploy\n`)
+    ctx.output.data(output)
+  } catch (error) {
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Failed to inspect deployment.',
+            suggestion: 'Verify Vercel CLI access and try again.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
-
-  const [name, app] = apps[0]!
-
-  // Get latest production deployment URL
-  const lsOutput = runVercel(`ls ${app.vercel} --limit 3`)
-  const prodLine = lsOutput
-    .split('\n')
-    .find((l) => l.includes('Production') && l.includes('Ready'))
-  const urlMatch = prodLine?.match(/https:\/\/\S+/)
-
-  if (!urlMatch) {
-    console.error('   Could not find latest production deployment')
-    process.exit(1)
-  }
-
-  console.log(`\n🔍 Inspecting ${name} latest production deploy\n`)
-  const output = runVercel(`inspect ${urlMatch[0]}`)
-  console.log(output)
 }
 
 export function registerDeployCommands(program: Command) {
@@ -199,21 +293,93 @@ export function registerDeployCommands(program: Command) {
     .argument('[app]', 'App name (front, slack, all)', 'all')
     .option('-n, --limit <number>', 'Number of deploys to show', '5')
     .option('--json', 'JSON output')
-    .action(deploysStatus)
+    .action(async (app, options, command) => {
+      const ctx = await createContext({
+        format:
+          options.json === true
+            ? 'json'
+            : typeof command.optsWithGlobals === 'function'
+              ? command.optsWithGlobals().format
+              : command.parent?.opts().format,
+        verbose:
+          typeof command.optsWithGlobals === 'function'
+            ? command.optsWithGlobals().verbose
+            : command.parent?.opts().verbose,
+        quiet:
+          typeof command.optsWithGlobals === 'function'
+            ? command.optsWithGlobals().quiet
+            : command.parent?.opts().quiet,
+      })
+      await deploysStatus(ctx, app, options)
+    })
 
   deploys
     .command('logs')
     .description('Show recent logs for an app')
     .argument('<app>', 'App name (front, slack)')
     .option('-n, --lines <number>', 'Number of log lines', '30')
-    .action(deploysLogs)
+    .option('--json', 'JSON output')
+    .action(async (app, options, command) => {
+      const ctx = await createContext({
+        format:
+          options.json === true
+            ? 'json'
+            : typeof command.optsWithGlobals === 'function'
+              ? command.optsWithGlobals().format
+              : command.parent?.opts().format,
+        verbose:
+          typeof command.optsWithGlobals === 'function'
+            ? command.optsWithGlobals().verbose
+            : command.parent?.opts().verbose,
+        quiet:
+          typeof command.optsWithGlobals === 'function'
+            ? command.optsWithGlobals().quiet
+            : command.parent?.opts().quiet,
+      })
+      await deploysLogs(ctx, app, options)
+    })
 
   deploys
     .command('inspect')
     .description('Inspect latest production deployment')
     .argument('<app>', 'App name (front, slack)')
-    .action(deploysInspect)
+    .option('--json', 'JSON output')
+    .action(async (app, options, command) => {
+      const ctx = await createContext({
+        format:
+          options.json === true
+            ? 'json'
+            : typeof command.optsWithGlobals === 'function'
+              ? command.optsWithGlobals().format
+              : command.parent?.opts().format,
+        verbose:
+          typeof command.optsWithGlobals === 'function'
+            ? command.optsWithGlobals().verbose
+            : command.parent?.opts().verbose,
+        quiet:
+          typeof command.optsWithGlobals === 'function'
+            ? command.optsWithGlobals().quiet
+            : command.parent?.opts().quiet,
+      })
+      await deploysInspect(ctx, app, options)
+    })
 
   // Default: `deploys` with no subcommand = status all
-  deploys.action(() => deploysStatus('all', { limit: '3' }))
+  deploys.action(async (_opts, command) => {
+    const ctx = await createContext({
+      format:
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals().format
+          : command.opts().format,
+      verbose:
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals().verbose
+          : command.opts().verbose,
+      quiet:
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals().quiet
+          : command.opts().quiet,
+    })
+    await deploysStatus(ctx, 'all', { limit: '3' })
+  })
 }

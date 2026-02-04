@@ -5,6 +5,7 @@
 
 import { join } from 'path'
 import { glob } from 'glob'
+import { type CommandContext } from '../../core/context'
 import {
   cleanDatabase,
   loadJsonFiles,
@@ -27,12 +28,17 @@ interface SeedResult {
   embeddings: number
 }
 
-export async function seed(options: SeedOptions): Promise<void> {
+export async function seed(
+  ctx: CommandContext,
+  options: SeedOptions
+): Promise<void> {
   const fixturesPath = options.fixtures || 'fixtures'
-
-  if (!options.json) {
-    console.log('\n🌱 Seeding local eval environment...\n')
+  const outputJson = options.json === true || ctx.format === 'json'
+  const log = (text: string): void => {
+    if (!outputJson) ctx.output.data(text)
   }
+
+  log('\n🌱 Seeding local eval environment...\n')
 
   const result: SeedResult = {
     apps: 0,
@@ -54,7 +60,7 @@ export async function seed(options: SeedOptions): Promise<void> {
     })
 
     if (options.clean) {
-      if (!options.json) console.log('🧹 Cleaning existing data...')
+      log('🧹 Cleaning existing data...')
       await cleanDatabase(connection)
 
       const qdrantUrl = process.env.QDRANT_URL || 'http://localhost:6333'
@@ -69,21 +75,21 @@ export async function seed(options: SeedOptions): Promise<void> {
     }
 
     // 1. Seed apps
-    if (!options.json) console.log('📦 Seeding apps...')
+    log('📦 Seeding apps...')
     const apps = await loadJsonFiles(join(fixturesPath, 'apps'))
     result.apps = await seedApps(connection, apps)
 
     // 2. Seed customers (stored as JSON for mock lookups)
-    if (!options.json) console.log('👥 Loading customer fixtures...')
+    log('👥 Loading customer fixtures...')
     const customers = await loadJsonFiles(join(fixturesPath, 'customers'))
     result.customers = customers.length
     // Customers are used by mock integration client, not stored in DB
 
     // 3. Seed knowledge base with embeddings
-    if (!options.json) console.log('📚 Seeding knowledge base...')
+    log('📚 Seeding knowledge base...')
     const knowledge = await loadKnowledgeFiles(join(fixturesPath, 'knowledge'))
     result.knowledge = knowledge.length
-    result.embeddings = await seedKnowledgeBase(knowledge, !options.json)
+    result.embeddings = await seedKnowledgeBase(knowledge, !outputJson)
 
     // 4. Count scenarios
     const scenarioFiles = await glob(join(fixturesPath, 'scenarios/**/*.json'))
@@ -91,27 +97,28 @@ export async function seed(options: SeedOptions): Promise<void> {
 
     await connection.end()
 
-    if (options.json) {
-      console.log(JSON.stringify({ success: true, result }, null, 2))
-    } else {
-      console.log('\n✅ Seeding complete!\n')
-      console.log(`   Apps:       ${result.apps}`)
-      console.log(`   Customers:  ${result.customers}`)
-      console.log(`   Knowledge:  ${result.knowledge} documents`)
-      console.log(`   Embeddings: ${result.embeddings}`)
-      console.log(`   Scenarios:  ${result.scenarios}\n`)
+    if (outputJson) {
+      ctx.output.data({ success: true, result })
+      return
     }
+
+    ctx.output.data('\n✅ Seeding complete!\n')
+    ctx.output.data(`   Apps:       ${result.apps}`)
+    ctx.output.data(`   Customers:  ${result.customers}`)
+    ctx.output.data(`   Knowledge:  ${result.knowledge} documents`)
+    ctx.output.data(`   Embeddings: ${result.embeddings}`)
+    ctx.output.data(`   Scenarios:  ${result.scenarios}\n`)
   } catch (error) {
-    if (options.json) {
-      console.log(
-        JSON.stringify({
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-        })
-      )
+    if (outputJson) {
+      ctx.output.data({
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
     } else {
-      console.error('❌ Seeding failed:', error)
+      ctx.output.error(
+        `Seeding failed: ${error instanceof Error ? error.message : String(error)}`
+      )
     }
-    process.exit(1)
+    process.exitCode = 1
   }
 }

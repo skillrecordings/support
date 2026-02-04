@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { SECRET_REFS } from '../../../src/core/secret-refs'
+import { createTestContext } from '../../helpers/test-context'
 
 const mockCreateSecretsProvider = vi.hoisted(() => vi.fn())
 const mockIsAvailable = vi.hoisted(() => vi.fn())
@@ -38,12 +39,7 @@ const buildJwt = (payload: Record<string, unknown>): string => {
 }
 
 describe('auth commands', () => {
-  let logSpy: ReturnType<typeof vi.spyOn>
-  let errorSpy: ReturnType<typeof vi.spyOn>
-
   beforeEach(() => {
-    logSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
-    errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
     mockCreateSecretsProvider.mockReset()
     mockIsAvailable.mockReset()
     mockResolve.mockReset()
@@ -52,10 +48,7 @@ describe('auth commands', () => {
     process.exitCode = undefined
   })
 
-  afterEach(() => {
-    logSpy.mockRestore()
-    errorSpy.mockRestore()
-  })
+  afterEach(() => {})
 
   it('auth status reports active provider and secrets', async () => {
     mockCreateSecretsProvider.mockResolvedValue({
@@ -67,12 +60,16 @@ describe('auth commands', () => {
 
     process.env.DATABASE_URL = 'postgres://test'
 
-    await statusAction({ json: true })
+    const { ctx, getStdout, getStderr } = await createTestContext({
+      format: 'json',
+    })
+
+    await statusAction(ctx, { json: true })
 
     expect(mockCreateSecretsProvider).toHaveBeenCalledTimes(1)
-    expect(logSpy).toHaveBeenCalledTimes(1)
+    expect(getStderr()).toBe('')
 
-    const payload = JSON.parse(String(logSpy.mock.calls[0][0])) as {
+    const payload = JSON.parse(getStdout()) as {
       activeProvider: string
       availableSecrets: string[]
       missingSecrets: string[]
@@ -89,12 +86,17 @@ describe('auth commands', () => {
   it('auth login validates a provided token', async () => {
     mockIsAvailable.mockResolvedValue(true)
 
-    await loginAction({ token: 'op_token', json: true })
+    const { ctx, getStdout, getStderr } = await createTestContext({
+      format: 'json',
+    })
+
+    await loginAction(ctx, { token: 'op_token', json: true })
 
     expect(mockIsAvailable).toHaveBeenCalledTimes(1)
     expect(process.env.OP_SERVICE_ACCOUNT_TOKEN).toBe('op_token')
+    expect(getStderr()).toBe('')
 
-    const payload = JSON.parse(String(logSpy.mock.calls[0][0])) as {
+    const payload = JSON.parse(getStdout()) as {
       success: boolean
       provider: string
       tokenConfigured: boolean
@@ -116,9 +118,14 @@ describe('auth commands', () => {
 
     process.env.OP_SERVICE_ACCOUNT_TOKEN = token
 
-    await whoamiAction({ json: true })
+    const { ctx, getStdout, getStderr } = await createTestContext({
+      format: 'json',
+    })
 
-    const payload = JSON.parse(String(logSpy.mock.calls[0][0])) as {
+    await whoamiAction(ctx, { json: true })
+    expect(getStderr()).toBe('')
+
+    const payload = JSON.parse(getStdout()) as {
       success: boolean
       tokenConfigured: boolean
       token?: {

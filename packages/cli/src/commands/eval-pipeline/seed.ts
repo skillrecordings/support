@@ -5,6 +5,8 @@
 
 import { join } from 'path'
 import { glob } from 'glob'
+import { type CommandContext } from '../../core/context'
+import { CLIError, formatError } from '../../core/errors'
 import {
   cleanDatabase,
   loadJsonFiles,
@@ -28,11 +30,15 @@ interface SeedResult {
   scenarios: number
 }
 
-export async function seed(options: SeedOptions): Promise<void> {
+export async function seed(
+  ctx: CommandContext,
+  options: SeedOptions
+): Promise<void> {
   const fixturesPath = options.fixtures || 'fixtures'
+  const outputJson = options.json === true || ctx.format === 'json'
 
-  if (!options.json) {
-    console.log('\n🌱 Seeding eval-pipeline environment...\n')
+  if (!outputJson) {
+    ctx.output.data('\n🌱 Seeding eval-pipeline environment...\n')
   }
 
   const result: SeedResult = {
@@ -56,13 +62,13 @@ export async function seed(options: SeedOptions): Promise<void> {
     })
 
     if (options.clean) {
-      if (!options.json) console.log('🧹 Cleaning existing data...')
+      if (!outputJson) ctx.output.message('🧹 Cleaning existing data...')
       await cleanDatabase(connection)
       await cleanQdrant()
     }
 
     // 1. Seed apps
-    if (!options.json) console.log('📦 Seeding apps...')
+    if (!outputJson) ctx.output.message('📦 Seeding apps...')
     const apps = await loadJsonFiles(join(fixturesPath, 'apps'))
     result.apps = await seedApps(connection, apps)
 
@@ -73,15 +79,15 @@ export async function seed(options: SeedOptions): Promise<void> {
     result.trustScores = (trustRows as any)[0].count
 
     // 3. Load customer fixtures (used by mock integration, not stored in DB)
-    if (!options.json) console.log('👥 Loading customer fixtures...')
+    if (!outputJson) ctx.output.message('👥 Loading customer fixtures...')
     const customers = await loadJsonFiles(join(fixturesPath, 'customers'))
     result.customers = customers.length
 
     // 4. Seed knowledge base with embeddings
-    if (!options.json) console.log('📚 Seeding knowledge base...')
+    if (!outputJson) ctx.output.message('📚 Seeding knowledge base...')
     const knowledge = await loadKnowledgeFiles(join(fixturesPath, 'knowledge'))
     result.knowledge = knowledge.length
-    result.embeddings = await seedKnowledgeBase(knowledge, !options.json)
+    result.embeddings = await seedKnowledgeBase(knowledge, !outputJson)
 
     // 5. Count scenarios
     const scenarioFiles = await glob(join(fixturesPath, 'scenarios/**/*.json'))
@@ -89,29 +95,36 @@ export async function seed(options: SeedOptions): Promise<void> {
 
     await connection.end()
 
-    if (options.json) {
-      console.log(JSON.stringify({ success: true, result }, null, 2))
+    if (outputJson) {
+      ctx.output.data({ success: true, result })
     } else {
-      console.log('\n✅ Seeding complete!\n')
-      console.log(`   Apps:         ${result.apps}`)
-      console.log(`   Trust Scores: ${result.trustScores}`)
-      console.log(`   Customers:    ${result.customers} (fixture files)`)
-      console.log(`   Knowledge:    ${result.knowledge} documents`)
-      console.log(`   Embeddings:   ${result.embeddings}`)
-      console.log(`   Scenarios:    ${result.scenarios}\n`)
+      ctx.output.success('Seeding complete!')
+      ctx.output.data(`   Apps:         ${result.apps}`)
+      ctx.output.data(`   Trust Scores: ${result.trustScores}`)
+      ctx.output.data(`   Customers:    ${result.customers} (fixture files)`)
+      ctx.output.data(`   Knowledge:    ${result.knowledge} documents`)
+      ctx.output.data(`   Embeddings:   ${result.embeddings}`)
+      ctx.output.data(`   Scenarios:    ${result.scenarios}\n`)
     }
   } catch (error) {
-    if (options.json) {
-      console.log(
-        JSON.stringify({
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-        })
-      )
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Seeding failed.',
+            suggestion: 'Verify database and Qdrant configuration.',
+            cause: error,
+          })
+
+    if (outputJson) {
+      ctx.output.data({
+        success: false,
+        error: cliError.message,
+      })
     } else {
-      console.error('❌ Seeding failed:', error)
+      ctx.output.error(formatError(cliError))
     }
-    process.exit(1)
+    process.exitCode = cliError.exitCode
   }
 }
 
