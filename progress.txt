@@ -9,3 +9,15 @@ Files: none
 Summary: **Summary**
 - Added core modules for `CommandContext`, `CLIError` hierarchy, and signal handling with cleanup registry in `packages/cli/src/core/context.ts`, `packages/cli/src/core/errors.ts`, `packages/cli/src/core/signals.ts`.
 - Added unit tests in `packages/cli/tests/unit/core/context.test.ts`, `packages/cli/tests/unit/core/errors.test.ts`, `packages/cli/tests/unit/core/signals.test.ts` and upd
+
+---
+[2026-02-04T15:26:50.545Z]
+Completed: db-status Migration PoC (Phase 0) — Issue #178
+Files: none
+Summary: Summary:
+- Added `createTestContext` helper to capture stdout/stderr with a mock secrets provider.
+- Migrated `db-status` to `CommandContext`, lazy `getDb()`, timeout-aware execution, and `DatabaseError` handling.
+- Added table-driven integration tests for success, connection failure, and timeout, and updated progress log.
+
+Learnings:
+- `AbortSignal.timeout` + `AbortSignal.any` works cleanly with 

@@ -26,7 +26,7 @@
       "title": "db-status Migration PoC (Phase 0) — Issue #178",
       "description": "Migrate the db-status command to use CommandContext as proof-of-concept. Create test helpers.\n\n## Context\n- Parent epic: #172, Issue: #178\n- Depends on: Story 1 (core types must exist)\n- Read packages/cli/PROGRESS.md for prior story status\n\n## Files to Create/Modify\n- `packages/cli/tests/helpers/test-context.ts` — createTestContext() that captures stdout/stderr buffers\n- `packages/cli/tests/integration/commands/db-status.test.ts` — Table-driven integration tests\n- `packages/cli/src/commands/db-status.ts` — MODIFY: accept CommandContext, use ctx.stdout, lazy getDb()\n\n## Task\n1. Create createTestContext() helper: returns CommandContext with captured stdout/stderr, getStdout()/getStderr() accessors, no-op AbortController, mock secrets\n2. Rewrite db-status: receive CommandContext param, replace console.log→ctx.stdout.write(), replace database singleton→lazy getDb(), add error handling with DatabaseError+suggestion, use ctx.signal for timeout\n3. Write table-driven integration tests: success, connection failure, timeout\n\n## TDD: Write failing tests first. Use createTestContext() to capture and assert output.\n\n## On Completion\nUpdate packages/cli/PROGRESS.md. Commit: `feat(cli): migrate db-status to CommandContext pattern`",
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "validationCommand": "cd packages/cli && bun run check-types && bun run test",
       "acceptanceCriteria": [
         "db-status uses CommandContext with no direct console.log or database singleton",
@@ -220,7 +220,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-04T15:13:09.231Z",
-    "totalIterations": 1,
-    "lastIteration": "2026-02-04T15:21:29.113Z"
+    "totalIterations": 2,
+    "lastIteration": "2026-02-04T15:26:50.544Z"
   }
 }
