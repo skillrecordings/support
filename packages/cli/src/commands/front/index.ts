@@ -17,7 +17,10 @@ import type { Command } from 'commander'
 import { type CommandContext, createContext } from '../../core/context'
 import { CLIError, formatError } from '../../core/errors'
 import { registerArchiveCommand } from './archive'
+import { registerAssignCommand } from './assign'
 import { registerBulkArchiveCommand } from './bulk-archive'
+import { registerBulkAssignCommand } from './bulk-assign'
+import { registerConversationTagCommands } from './conversation-tags'
 import {
   conversationActions,
   conversationLinks,
@@ -28,6 +31,7 @@ import {
 } from './hateoas'
 import { registerInboxCommand } from './inbox'
 import { registerPullCommand } from './pull-conversations'
+import { registerReplyCommand } from './reply'
 import { registerReportCommand } from './report'
 import { registerTagCommands } from './tags'
 import { registerTriageCommand } from './triage'
@@ -477,10 +481,14 @@ export function registerFrontCommands(program: Command): void {
 
   // Register inbox, archive, report, triage commands
   registerInboxCommand(front)
+  registerAssignCommand(front)
+  registerBulkAssignCommand(front)
   registerArchiveCommand(front)
   registerBulkArchiveCommand(front)
   registerReportCommand(front)
   registerTriageCommand(front)
+  registerConversationTagCommands(front)
+  registerReplyCommand(front)
 
   // Register pull command for building eval datasets
   registerPullCommand(front)

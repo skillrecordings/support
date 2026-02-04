@@ -125,7 +125,32 @@ export function conversationActions(convId: string): HateoasAction[] {
       destructive: true,
     },
     {
-      action: 'tags',
+      action: 'assign',
+      command: `skill front assign ${convId} --to <teammate-id>`,
+      description: 'Assign this conversation',
+    },
+    {
+      action: 'unassign',
+      command: `skill front assign ${convId} --unassign`,
+      description: 'Unassign this conversation',
+    },
+    {
+      action: 'tag',
+      command: `skill front tag ${convId} --tag "<tag-name>"`,
+      description: 'Add a tag to this conversation',
+    },
+    {
+      action: 'untag',
+      command: `skill front untag ${convId} --tag "<tag-name>"`,
+      description: 'Remove a tag from this conversation',
+    },
+    {
+      action: 'reply',
+      command: `skill front reply ${convId} --message "<text>"`,
+      description: 'Draft a reply (HITL, not sent)',
+    },
+    {
+      action: 'tags-list',
       command: `skill front tags list --json`,
       description: 'View available tags',
     },
@@ -155,6 +180,11 @@ export function conversationListActions(inboxId?: string): HateoasAction[] {
   const actions: HateoasAction[] = []
   if (inboxId) {
     actions.push(
+      {
+        action: 'report',
+        command: `skill front report --inbox ${inboxId} --json`,
+        description: 'Generate forensics report',
+      },
       {
         action: 'bulk-archive',
         command: `skill front bulk-archive --inbox ${inboxId} --dry-run --json`,

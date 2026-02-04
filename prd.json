@@ -273,7 +273,7 @@
       "title": "P1 Commands: Add assign, tag, reply operations",
       "description": "Add missing commands that are blockers for real triage workflows.\n\n## Progress Notification (MANDATORY)\nAfter completing this story, write a status update to `packages/cli/PROGRESS.md` with:\n- Story title and completion timestamp\n- Files created/modified\n- Test count before and after\n- Any issues encountered\n\n## Context from feat/front-cli-improvements (already on main)\nThese commands ALREADY EXIST on main. Port them to the rearchitect branch:\n\n### Existing Patterns to Follow\n- `registerAssignCommand(frontCommand)` — assign/unassign (optional teammate-id + --unassign flag)\n- `registerConversationTagCommands(frontCommand)` — tag + untag (case-insensitive name resolution via /tags endpoint)\n- `registerReplyCommand(frontCommand)` — draft reply only (HITL, never auto-send)\n- `registerApiCommand(frontCommand)` — raw passthrough escape hatch (method + endpoint + --data)\n\n### API Gotchas\n- `front.conversations.updateAssignee(convId, '')` works for unassigning — no separate raw PUT needed\n- CreateDraft schema requires channel_id but POST /conversations/{id}/drafts infers it — use `front.raw.post` to bypass typed method\n- TS7022 circular ref: use explicit type annotation on variable instead of generic parameter on `front.raw.get<>()`\n\n### HATEOAS Actions\n- `conversationActions(convId)` includes: archive, assign, unassign, tag, untag, reply, tags-list\n- `conversationListActions(inboxId)` includes: bulk-archive, triage, report\n\n## New Commands\n1. `skill front assign <conversation-id> --to <teammate-id>` + `--unassign`\n2. `skill front bulk-assign -i <inbox> --filter \"<query>\" --to <teammate-id>`\n3. `skill front tag <conversation-id> --tag <tag-name>` (case-insensitive name resolution)\n4. `skill front untag <conversation-id> --tag <tag-name>`\n5. `skill front reply <conversation-id> --message \"<text>\"` (draft only, HITL)\n\nAll commands: --dry-run, --json, CLIError handling, HATEOAS _actions.\n\n## On Completion\nCommit: `feat(cli): add assign, tag, reply commands`",
       "priority": 17,
-      "passes": false,
+      "passes": true,
       "validationCommand": "cd packages/cli && bun run check-types && bun run test",
       "acceptanceCriteria": [
         "assign command works",
@@ -321,7 +321,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-04T15:13:09.231Z",
-    "totalIterations": 16,
-    "lastIteration": "2026-02-04T20:46:49.107Z"
+    "totalIterations": 17,
+    "lastIteration": "2026-02-04T20:53:35.087Z"
   }
 }

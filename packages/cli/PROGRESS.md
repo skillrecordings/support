@@ -166,3 +166,11 @@ Initialized: 2026-02-04T15:13:09.231Z
 - Tests before: 118 passed, 4 skipped (122 total)
 - Tests after: 118 passed, 4 skipped (122 total)
 - Issues: none
+
+### P1 Commands: Add assign, tag, reply operations (ID: story-ml8cdgpf)
+- Completed: 2026-02-04T20:52:53Z
+- Files created: packages/cli/src/commands/front/assign.ts, packages/cli/src/commands/front/bulk-assign.ts, packages/cli/src/commands/front/conversation-tags.ts, packages/cli/src/commands/front/reply.ts
+- Files modified: packages/cli/src/commands/front/index.ts, packages/cli/src/commands/front/hateoas.ts, packages/cli/PROGRESS.md
+- Tests before: 118 passed, 4 skipped (122 total)
+- Tests after: 118 passed, 4 skipped (122 total)
+- Issues: none

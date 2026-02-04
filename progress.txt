@@ -1420,3 +1420,11 @@ Summary: **Summary**
 
 **Issues**
 
+
+---
+[2026-02-04T20:53:35.088Z]
+Completed: P1 Commands: Add assign, tag, reply operations
+Files: none
+Summary: **Summary**
+- Added Front CLI commands for assign, bulk-assign, tag/untag, and reply drafts with `--dry-run`, `--json`, CLIError handling, and HATEOAS actions. Files: `packages/cli/src/commands/front/assign.ts`, `packages/cli/src/commands/front/bulk-assign.ts`, `packages/cli/src/commands/front/conversation-tags.ts`, `packages/cli/src/commands/front/reply.ts`.
+- Registered new commands and expanded
