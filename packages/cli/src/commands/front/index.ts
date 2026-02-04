@@ -28,6 +28,7 @@ import {
   teammateListLinks,
 } from './hateoas'
 import { registerInboxCommand } from './inbox'
+import { writeJsonOutput } from './json-output'
 import { registerPullCommand } from './pull-conversations'
 import { registerReplyCommand } from './reply'
 import { registerReportCommand } from './report'
@@ -99,17 +100,13 @@ async function getMessage(
     const message = await front.messages.get(normalizeId(id))
 
     if (options.json) {
-      console.log(
-        JSON.stringify(
-          hateoasWrap({
-            type: 'message',
-            command: `skill front message ${normalizeId(id)} --json`,
-            data: message,
-            links: messageLinks(message.id),
-          }),
-          null,
-          2
-        )
+      writeJsonOutput(
+        hateoasWrap({
+          type: 'message',
+          command: `skill front message ${normalizeId(id)} --json`,
+          data: message,
+          links: messageLinks(message.id),
+        })
       )
       return
     }
@@ -190,18 +187,14 @@ async function getConversation(
 
     if (options.json) {
       const convId = normalizeId(id)
-      console.log(
-        JSON.stringify(
-          hateoasWrap({
-            type: 'conversation',
-            command: `skill front conversation ${convId} --json`,
-            data: { conversation, messages },
-            links: conversationLinks(conversation.id),
-            actions: conversationActions(conversation.id),
-          }),
-          null,
-          2
-        )
+      writeJsonOutput(
+        hateoasWrap({
+          type: 'conversation',
+          command: `skill front conversation ${convId} --json`,
+          data: { conversation, messages },
+          links: conversationLinks(conversation.id),
+          actions: conversationActions(conversation.id),
+        })
       )
       return
     }
@@ -276,19 +269,15 @@ async function listTeammates(options: { json?: boolean }): Promise<void> {
     const result = await front.teammates.list()
 
     if (options.json) {
-      console.log(
-        JSON.stringify(
-          hateoasWrap({
-            type: 'teammate-list',
-            command: 'skill front teammates --json',
-            data: result._results,
-            links: teammateListLinks(
-              result._results.map((t) => ({ id: t.id, email: t.email }))
-            ),
-          }),
-          null,
-          2
-        )
+      writeJsonOutput(
+        hateoasWrap({
+          type: 'teammate-list',
+          command: 'skill front teammates --json',
+          data: result._results,
+          links: teammateListLinks(
+            result._results.map((t) => ({ id: t.id, email: t.email }))
+          ),
+        })
       )
       return
     }
@@ -340,17 +329,13 @@ async function getTeammate(
     const teammate = await front.teammates.get(id)
 
     if (options.json) {
-      console.log(
-        JSON.stringify(
-          hateoasWrap({
-            type: 'teammate',
-            command: `skill front teammate ${id} --json`,
-            data: teammate,
-            links: teammateLinks(teammate.id),
-          }),
-          null,
-          2
-        )
+      writeJsonOutput(
+        hateoasWrap({
+          type: 'teammate',
+          command: `skill front teammate ${id} --json`,
+          data: teammate,
+          links: teammateLinks(teammate.id),
+        })
       )
       return
     }

@@ -7,6 +7,7 @@
 import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
 import type { Command } from 'commander'
 import { hateoasWrap } from './hateoas'
+import { writeJsonOutput } from './json-output'
 
 /**
  * Get Front API client from environment
@@ -77,21 +78,17 @@ async function tagConversation(
     await front.conversations.addTag(normalizedConvId, tag.id)
 
     if (options.json) {
-      console.log(
-        JSON.stringify(
-          hateoasWrap({
-            type: 'tag-result',
-            command: `skill front tag ${normalizedConvId} ${tagNameOrId} --json`,
-            data: {
-              conversationId: normalizedConvId,
-              tagId: tag.id,
-              tagName: tag.name,
-              action: 'added',
-            },
-          }),
-          null,
-          2
-        )
+      writeJsonOutput(
+        hateoasWrap({
+          type: 'tag-result',
+          command: `skill front tag ${normalizedConvId} ${tagNameOrId} --json`,
+          data: {
+            conversationId: normalizedConvId,
+            tagId: tag.id,
+            tagName: tag.name,
+            action: 'added',
+          },
+        })
       )
       return
     }
@@ -133,21 +130,17 @@ async function untagConversation(
     await front.conversations.removeTag(normalizedConvId, tag.id)
 
     if (options.json) {
-      console.log(
-        JSON.stringify(
-          hateoasWrap({
-            type: 'untag-result',
-            command: `skill front untag ${normalizedConvId} ${tagNameOrId} --json`,
-            data: {
-              conversationId: normalizedConvId,
-              tagId: tag.id,
-              tagName: tag.name,
-              action: 'removed',
-            },
-          }),
-          null,
-          2
-        )
+      writeJsonOutput(
+        hateoasWrap({
+          type: 'untag-result',
+          command: `skill front untag ${normalizedConvId} ${tagNameOrId} --json`,
+          data: {
+            conversationId: normalizedConvId,
+            tagId: tag.id,
+            tagName: tag.name,
+            action: 'removed',
+          },
+        })
       )
       return
     }

@@ -15,6 +15,7 @@ import {
   conversationListLinks,
   hateoasWrap,
 } from './hateoas'
+import { writeJsonOutput } from './json-output'
 
 function getFrontClient() {
   const apiToken = process.env.FRONT_API_TOKEN
@@ -121,26 +122,20 @@ async function searchConversations(
     }
 
     if (options.json) {
-      console.log(
-        JSON.stringify(
-          hateoasWrap({
-            type: 'search-results',
-            command: `skill front search ${JSON.stringify(fullQuery)} --json`,
-            data: {
-              query: fullQuery,
-              total: conversations.length,
-              conversations,
-            },
-            links: conversationListLinks(
-              conversations.map((c) => ({ id: c.id, subject: c.subject }))
-            ),
-            actions: options.inbox
-              ? conversationListActions(options.inbox)
-              : [],
-          }),
-          null,
-          2
-        )
+      writeJsonOutput(
+        hateoasWrap({
+          type: 'search-results',
+          command: `skill front search ${JSON.stringify(fullQuery)} --json`,
+          data: {
+            query: fullQuery,
+            total: conversations.length,
+            conversations,
+          },
+          links: conversationListLinks(
+            conversations.map((c) => ({ id: c.id, subject: c.subject }))
+          ),
+          actions: options.inbox ? conversationListActions(options.inbox) : [],
+        })
       )
       return
     }

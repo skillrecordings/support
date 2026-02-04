@@ -13,6 +13,7 @@
 import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
 import type { Command } from 'commander'
 import { hateoasWrap } from './hateoas'
+import { writeJsonOutput } from './json-output'
 
 interface BulkArchiveOptions {
   inbox?: string
@@ -283,16 +284,12 @@ export async function bulkArchiveConversations(
     // If dry run, just show matches
     if (dryRun) {
       if (json) {
-        console.log(
-          JSON.stringify(
-            hateoasWrap({
-              type: 'bulk-archive-result',
-              command: `skill front bulk-archive --inbox ${inbox} --dry-run --json`,
-              data: result,
-            }),
-            null,
-            2
-          )
+        writeJsonOutput(
+          hateoasWrap({
+            type: 'bulk-archive-result',
+            command: `skill front bulk-archive --inbox ${inbox} --dry-run --json`,
+            data: result,
+          })
         )
       } else {
         console.log('\nMatching conversations:')
@@ -313,16 +310,12 @@ export async function bulkArchiveConversations(
       if (!json) {
         console.log('\nNo conversations to archive.')
       } else {
-        console.log(
-          JSON.stringify(
-            hateoasWrap({
-              type: 'bulk-archive-result',
-              command: `skill front bulk-archive --inbox ${inbox} --json`,
-              data: result,
-            }),
-            null,
-            2
-          )
+        writeJsonOutput(
+          hateoasWrap({
+            type: 'bulk-archive-result',
+            command: `skill front bulk-archive --inbox ${inbox} --json`,
+            data: result,
+          })
         )
       }
       return
@@ -359,16 +352,12 @@ export async function bulkArchiveConversations(
 
     // Output results
     if (json) {
-      console.log(
-        JSON.stringify(
-          hateoasWrap({
-            type: 'bulk-archive-result',
-            command: `skill front bulk-archive --inbox ${inbox} --json`,
-            data: result,
-          }),
-          null,
-          2
-        )
+      writeJsonOutput(
+        hateoasWrap({
+          type: 'bulk-archive-result',
+          command: `skill front bulk-archive --inbox ${inbox} --json`,
+          data: result,
+        })
       )
     } else {
       console.log('\n\nBulk Archive Results:')

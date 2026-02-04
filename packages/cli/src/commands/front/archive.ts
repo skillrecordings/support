@@ -7,6 +7,7 @@
 import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
 import type { Command } from 'commander'
 import { hateoasWrap } from './hateoas'
+import { writeJsonOutput } from './json-output'
 
 /**
  * Get Front API client from environment
@@ -70,16 +71,12 @@ async function archiveConversations(
           }
         })
       )
-      console.log(
-        JSON.stringify(
-          hateoasWrap({
-            type: 'archive-result',
-            command: `skill front archive ${allIds.map(normalizeId).join(' ')} --json`,
-            data: results,
-          }),
-          null,
-          2
-        )
+      writeJsonOutput(
+        hateoasWrap({
+          type: 'archive-result',
+          command: `skill front archive ${allIds.map(normalizeId).join(' ')} --json`,
+          data: results,
+        })
       )
       return
     }

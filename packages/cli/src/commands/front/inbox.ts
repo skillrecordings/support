@@ -20,6 +20,7 @@ import {
   inboxActions,
   inboxListLinks,
 } from './hateoas'
+import { writeJsonOutput } from './json-output'
 
 /**
  * Get Front API client from environment (instrumented)
@@ -99,19 +100,15 @@ async function listInboxes(options: { json?: boolean }): Promise<void> {
     const inboxes = inboxList._results ?? []
 
     if (options.json) {
-      console.log(
-        JSON.stringify(
-          hateoasWrap({
-            type: 'inbox-list',
-            command: 'skill front inbox --json',
-            data: inboxes,
-            links: inboxListLinks(
-              inboxes.map((i) => ({ id: i.id, name: i.name }))
-            ),
-          }),
-          null,
-          2
-        )
+      writeJsonOutput(
+        hateoasWrap({
+          type: 'inbox-list',
+          command: 'skill front inbox --json',
+          data: inboxes,
+          links: inboxListLinks(
+            inboxes.map((i) => ({ id: i.id, name: i.name }))
+          ),
+        })
       )
       return
     }
@@ -225,24 +222,20 @@ async function listConversations(
     }
 
     if (options.json) {
-      console.log(
-        JSON.stringify(
-          hateoasWrap({
-            type: 'conversation-list',
-            command: `skill front inbox ${inbox.id} --json`,
-            data: {
-              total: conversations.length,
-              conversations,
-            },
-            links: conversationListLinks(
-              conversations.map((c) => ({ id: c.id, subject: c.subject })),
-              inbox.id
-            ),
-            actions: conversationListActions(inbox.id),
-          }),
-          null,
-          2
-        )
+      writeJsonOutput(
+        hateoasWrap({
+          type: 'conversation-list',
+          command: `skill front inbox ${inbox.id} --json`,
+          data: {
+            total: conversations.length,
+            conversations,
+          },
+          links: conversationListLinks(
+            conversations.map((c) => ({ id: c.id, subject: c.subject })),
+            inbox.id
+          ),
+          actions: conversationListActions(inbox.id),
+        })
       )
       return
     }

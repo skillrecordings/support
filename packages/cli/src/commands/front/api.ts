@@ -6,6 +6,7 @@
 
 import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
 import type { Command } from 'commander'
+import { writeJsonOutput } from './json-output'
 
 /**
  * Get Front API client from environment
@@ -66,7 +67,7 @@ async function apiPassthrough(
   }
 
   // Always JSON output for raw API
-  console.log(JSON.stringify(result, null, 2))
+  writeJsonOutput(result)
 }
 
 /**

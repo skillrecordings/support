@@ -10,6 +10,7 @@
 import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
 import type { Command } from 'commander'
 import { hateoasWrap, reportActions, reportLinks } from './hateoas'
+import { writeJsonOutput } from './json-output'
 
 interface ReportOptions {
   inbox: string
@@ -192,18 +193,14 @@ export async function generateReport(options: ReportOptions): Promise<void> {
     // Output
     if (json) {
       const unresolvedIds = report.unresolvedIssues.map((i) => i.id)
-      console.log(
-        JSON.stringify(
-          hateoasWrap({
-            type: 'report',
-            command: `skill front report --inbox ${inbox} --json`,
-            data: report,
-            links: reportLinks(inbox, unresolvedIds),
-            actions: reportActions(inbox),
-          }),
-          null,
-          2
-        )
+      writeJsonOutput(
+        hateoasWrap({
+          type: 'report',
+          command: `skill front report --inbox ${inbox} --json`,
+          data: report,
+          links: reportLinks(inbox, unresolvedIds),
+          actions: reportActions(inbox),
+        })
       )
     } else {
       printReport(report)

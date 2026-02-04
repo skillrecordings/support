@@ -12,6 +12,7 @@ import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instr
 import type { Conversation, ConversationList } from '@skillrecordings/front-sdk'
 import type { Command } from 'commander'
 import { hateoasWrap, triageActions } from './hateoas'
+import { writeJsonOutput } from './json-output'
 
 interface TriageOptions {
   inbox: string
@@ -210,21 +211,17 @@ export async function triageConversations(
 
     // Output results
     if (json) {
-      console.log(
-        JSON.stringify(
-          hateoasWrap({
-            type: 'triage-result',
-            command: `skill front triage --inbox ${inbox} --json`,
-            data: {
-              total: allConversations.length,
-              stats,
-              results,
-            },
-            actions: triageActions(inbox),
-          }),
-          null,
-          2
-        )
+      writeJsonOutput(
+        hateoasWrap({
+          type: 'triage-result',
+          command: `skill front triage --inbox ${inbox} --json`,
+          data: {
+            total: allConversations.length,
+            stats,
+            results,
+          },
+          actions: triageActions(inbox),
+        })
       )
       return
     }

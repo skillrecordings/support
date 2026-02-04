@@ -19,6 +19,7 @@ import {
 import { DEFAULT_CATEGORY_TAG_MAPPING } from '@skillrecordings/core/tags/registry'
 import type { Command } from 'commander'
 import { hateoasWrap, tagListActions, tagListLinks } from './hateoas'
+import { writeJsonOutput } from './json-output'
 
 /**
  * Get Front SDK client from environment
@@ -231,20 +232,16 @@ async function listTags(options: {
       : tagsWithCounts
 
     if (options.json) {
-      console.log(
-        JSON.stringify(
-          hateoasWrap({
-            type: 'tag-list',
-            command: `skill front tags list${options.unused ? ' --unused' : ''} --json`,
-            data: filteredTags,
-            links: tagListLinks(
-              filteredTags.map((t) => ({ id: t.id, name: t.name }))
-            ),
-            actions: tagListActions(),
-          }),
-          null,
-          2
-        )
+      writeJsonOutput(
+        hateoasWrap({
+          type: 'tag-list',
+          command: `skill front tags list${options.unused ? ' --unused' : ''} --json`,
+          data: filteredTags,
+          links: tagListLinks(
+            filteredTags.map((t) => ({ id: t.id, name: t.name }))
+          ),
+          actions: tagListActions(),
+        })
       )
       return
     }
