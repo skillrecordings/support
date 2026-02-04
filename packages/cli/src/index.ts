@@ -1,7 +1,11 @@
 #!/usr/bin/env bun
-import { closeDb } from '@skillrecordings/database'
 // Note: env is loaded via preload.ts before this file runs
+import { createRequire } from 'node:module'
+import { closeDb } from '@skillrecordings/database'
 import { Command } from 'commander'
+
+const require = createRequire(import.meta.url)
+const { version } = require('../package.json') as { version: string }
 import { registerAuthCommands } from './commands/auth/index'
 import { registerAxiomCommands } from './commands/axiom/index'
 import { registerDatasetCommands } from './commands/build-dataset'
@@ -28,7 +32,7 @@ const program = new Command()
 program
   .name('skill')
   .description('CLI tool for managing app integrations')
-  .version('0.0.0')
+  .version(version)
 
 // Core commands
 program
