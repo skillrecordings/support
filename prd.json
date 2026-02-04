@@ -157,7 +157,7 @@
       "title": "Compiled Binary Build Script (Phase 3) — Issue #186",
       "description": "## Progress Notification (MANDATORY)\nAfter completing this story, write a status update to `packages/cli/PROGRESS.md` with:\n- Story title and completion timestamp\n- Files created/modified\n- Test count before and after\n- Any issues encountered\n\nCreate build.ts for bun build --compile targeting 4 platforms. Handle native modules. Version embedding.\n\n## Context\n- Parent epic: #172, Issue: #186\n- Depends on: Story 9\n\n## Files to Create\n- packages/cli/build.ts — Programmatic Bun.build() for 4 targets\n- packages/cli/tests/e2e/binary.test.ts\n\n## Files to Modify\n- packages/cli/package.json — Add build:compile script\n\n## Key Details\n- Targets: bun-linux-x64, bun-linux-arm64, bun-darwin-x64, bun-darwin-arm64\n- CRITICAL: autoloadDotenv: false (never bake secrets)\n- Define BUILD_VERSION (from package.json) and BUILD_COMMIT (git rev-parse --short HEAD)\n- Minify + sourcemap + bytecode\n- Handle native modules: externalize/replace mysql2, duckdb, @mapbox/node-pre-gyp\n- skill --version prints: skill v1.2.3 (abc1234) bun-linux-x64\n- E2E: compile, run --version, run --help, verify no secrets in binary via strings\n\n## On Completion\nUpdate packages/cli/PROGRESS.md. Commit: `feat(cli): compiled binary build with bun build --compile`",
       "priority": 10,
-      "passes": false,
+      "passes": true,
       "validationCommand": "cd packages/cli && bun run check-types && bun run test",
       "acceptanceCriteria": [
         "bun run build:compile produces binaries in dist/",
@@ -321,7 +321,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-04T15:13:09.231Z",
-    "totalIterations": 9,
-    "lastIteration": "2026-02-04T18:07:25.567Z"
+    "totalIterations": 10,
+    "lastIteration": "2026-02-04T20:07:00.504Z"
   }
 }
