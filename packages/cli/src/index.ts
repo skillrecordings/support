@@ -11,11 +11,7 @@ import { runEval } from './commands/eval'
 import { registerEvalLocalCommands } from './commands/eval-local/index'
 import { registerEvalPipelineCommands } from './commands/eval-pipeline/index'
 import { registerEvalPromptCommands } from './commands/eval-prompt'
-import { registerFaqClassifyCommands } from './commands/faq-classify'
-import { registerFaqClusterCommands } from './commands/faq-cluster'
-import { registerFaqExtractCommands } from './commands/faq-extract'
-import { registerFaqMineCommands } from './commands/faq-mine'
-import { registerFaqReviewCommands } from './commands/faq-review'
+import { registerFaqCommands } from './commands/faq'
 import { registerFrontCommands } from './commands/front/index'
 import { health } from './commands/health'
 import { init } from './commands/init'
@@ -146,21 +142,9 @@ registerDeployCommands(program)
 // Register knowledge base commands (sync/stats)
 registerKbCommands(program)
 
-// Register FAQ mining commands (mine FAQ candidates from conversations)
-registerFaqMineCommands(program)
+// Register FAQ commands (mine/cluster/classify/extract/review)
+registerFaqCommands(program)
 registerDbStatusCommand(program)
-
-// Register FAQ clustering commands (production clustering from Phase 0)
-registerFaqClusterCommands(program)
-
-// Register FAQ classification commands (LLM topic classification)
-registerFaqClassifyCommands(program)
-
-// Register FAQ extraction commands (extract candidates from clusters)
-registerFaqExtractCommands(program)
-
-// Register FAQ review commands (human curation of FAQ candidates)
-registerFaqReviewCommands(program)
 
 // Parse and cleanup DB connections when done
 program.parseAsync().finally(async () => {

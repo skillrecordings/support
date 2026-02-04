@@ -5,9 +5,9 @@
  * Resumable - appends to JSONL and skips already-classified conversations.
  *
  * Usage:
- *   bun src/index.ts faq-classify
- *   bun src/index.ts faq-classify --batch-size 50
- *   bun src/index.ts faq-classify --dry-run
+ *   bun src/index.ts faq classify
+ *   bun src/index.ts faq classify --batch-size 50
+ *   bun src/index.ts faq classify --dry-run
  */
 
 import { appendFileSync, existsSync, mkdirSync, readFileSync } from 'fs'
@@ -428,7 +428,7 @@ async function faqClassify(options: {
 
 export function registerFaqClassifyCommands(program: Command): void {
   program
-    .command('faq-classify')
+    .command('classify')
     .description('Classify conversations into FAQ topics using LLM')
     .option(
       '--parquet-path <path>',

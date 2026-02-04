@@ -4,9 +4,9 @@
  * Generates production clustering from Phase 0 artifacts.
  *
  * Usage:
- *   bun src/index.ts faq-cluster
- *   bun src/index.ts faq-cluster --version v2
- *   bun src/index.ts faq-cluster --dry-run
+ *   bun src/index.ts faq cluster
+ *   bun src/index.ts faq cluster --version v2
+ *   bun src/index.ts faq cluster --dry-run
  */
 
 import { existsSync } from 'fs'
@@ -112,7 +112,7 @@ async function faqCluster(options: {
  */
 export function registerFaqClusterCommands(program: Command): void {
   program
-    .command('faq-cluster')
+    .command('cluster')
     .description('Generate production clustering from Phase 0 artifacts')
     .option(
       '--phase0-path <path>',

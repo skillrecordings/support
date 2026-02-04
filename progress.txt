@@ -25,3 +25,14 @@ Updated `packages/cli/src/index.ts` to call the single registration and removed 
 
 Files changed:
 - `packages/cli/src/commands/inngest/event
+
+---
+[2026-02-04T03:31:14.285Z]
+Completed: Group FAQ commands under faq subcommand
+Files: none
+Summary: **Summary**
+1. Added a new FAQ command group entrypoint at `packages/cli/src/commands/faq/index.ts` and wired `registerFaqCommands(program)` in `packages/cli/src/index.ts`.
+2. Moved FAQ command files into `packages/cli/src/commands/faq/` and updated their command names to `mine`, `cluster`, `classify`, `extract`, `review`.
+3. Updated inline usage strings to reflect `skill faq <subcommand>`.
+
+**Tes

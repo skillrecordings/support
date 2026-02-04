@@ -40,7 +40,7 @@
       "title": "Group FAQ commands under faq subcommand",
       "description": "Currently FAQ commands are registered as 5 separate top-level calls in packages/cli/src/index.ts:\n- registerFaqMineCommands(program)\n- registerFaqClusterCommands(program)\n- registerFaqClassifyCommands(program)\n- registerFaqExtractCommands(program)\n- registerFaqReviewCommands(program)\n\nCreate a single `packages/cli/src/commands/faq/index.ts` that:\n1. Creates a `faq` subcommand group on the program\n2. Registers mine, cluster, classify, extract, review as subcommands under it\n3. Exports a single `registerFaqCommands(program)` function\n4. Move the individual faq-*.ts files into the `packages/cli/src/commands/faq/` directory (rename faq-mine.ts → faq/mine.ts, etc.)\n5. Update packages/cli/src/index.ts to use the single registration\n\nThe commands should work as: `skill faq mine`, `skill faq cluster`, `skill faq classify`, `skill faq extract`, `skill faq review`\n\nKeep all existing functionality and flags unchanged. Purely structural reorganization.\n\nDo NOT create a changeset — will be included in the final changeset.",
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "validationCommand": "cd packages/cli && bun run check-types && bun run test",
       "acceptanceCriteria": [
         "Single registerFaqCommands(program) call in index.ts",
@@ -116,7 +116,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-04T03:24:28.522Z",
-    "totalIterations": 2,
-    "lastIteration": "2026-02-04T03:28:57.619Z"
+    "totalIterations": 3,
+    "lastIteration": "2026-02-04T03:31:14.284Z"
   }
 }
