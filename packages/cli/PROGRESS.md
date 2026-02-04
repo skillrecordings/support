@@ -203,3 +203,9 @@ Initialized: 2026-02-04T15:13:09.231Z
 - Tool execution bridges to existing command functions via captured context
 - Added `skill mcp` command
 - Tests for server handshake, tool listing, tool execution, error handling
+
+## Review Fix 3: CSV injection sanitization
+- Added formula-injection prefix sanitization to toCsvCell()
+- Handles =, +, -, @, tab, CR prefixes on string values
+- Numbers and booleans bypass sanitization (no formula risk)
+- Added comprehensive unit tests for CSV output

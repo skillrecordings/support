@@ -22,3 +22,16 @@ Summary: **Summary**
 - Appended the requested progress entry in `packages/cli/PROGRESS.md`.
 
 **T
+
+---
+[2026-02-04T22:13:30.353Z]
+Completed: CSV injection sanitization in list-output.ts
+Files: none
+Summary: **Summary**
+- Added CSV formula-injection sanitization for string values and exported `toCsvCell` for testability. (`packages/cli/src/core/list-output.ts`)
+- Added unit coverage for formula prefixes, quoting, and null handling. (`packages/cli/tests/unit/core/list-output.test.ts`)
+- Logged progress entry. (`packages/cli/PROGRESS.md`)
+
+**Tests**
+- `cd packages/cli && bun run check-types`
+- `cd packa

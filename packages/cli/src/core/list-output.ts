@@ -6,18 +6,27 @@ const writeLine = (ctx: CommandContext, line: string): void => {
   ctx.stdout.write(`${line}\n`)
 }
 
-const toCsvCell = (value: unknown): string => {
+const FORMULA_PREFIXES = ['=', '+', '-', '@', '\t', '\r']
+
+export const toCsvCell = (value: unknown): string => {
   if (value === null || value === undefined) return ''
-  const raw =
-    typeof value === 'string'
-      ? value
-      : typeof value === 'number' || typeof value === 'boolean'
-        ? String(value)
-        : JSON.stringify(value)
-  if (/[",\n]/.test(raw)) {
-    return `"${raw.replace(/"/g, '""')}"`
+
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return String(value)
   }
-  return raw
+
+  const raw = typeof value === 'string' ? value : (JSON.stringify(value) ?? '')
+
+  const sanitized =
+    typeof value === 'string' &&
+    FORMULA_PREFIXES.some((prefix) => raw.startsWith(prefix))
+      ? `'${raw}`
+      : raw
+
+  if (/[",\n]/.test(sanitized)) {
+    return `"${sanitized.replace(/"/g, '""')}"`
+  }
+  return sanitized
 }
 
 const normalizeRows = (
