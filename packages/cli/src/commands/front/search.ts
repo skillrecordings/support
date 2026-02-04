@@ -218,5 +218,33 @@ export function registerSearchCommand(frontCommand: Command): void {
     .option('--before <timestamp>', 'Filter before Unix timestamp')
     .option('--limit <n>', 'Max results (default 25)', '25')
     .option('--json', 'Output as JSON')
+    .addHelpText(
+      'after',
+      `
+Front Search Query Syntax:
+  Text search:    "exact phrase" or word1 word2 (AND logic)
+  inbox:inb_xxx   Filter by inbox
+  tag:tag_xxx     Filter by tag
+  from:email      Filter by sender
+  to:email        Filter by recipient
+  recipient:email Filter by email/handle
+  assignee:tea_x  Filter by assigned teammate
+  participant:t   Filter by participating teammate
+  is:open         Status: open, archived, assigned, unassigned,
+                  unreplied, snoozed, resolved, waiting
+  before:<ts>     Before Unix timestamp
+  after:<ts>      After Unix timestamp
+  during:<ts>     During day of Unix timestamp
+  custom_field:"Name=value"
+
+  Multiple filters = AND. Multiple from/to/cc/bcc = OR. Max 15 filters.
+
+Examples:
+  skill front search "payment failed" --inbox inb_4bj7r
+  skill front search "upgrade" --status unassigned --from user@example.com
+  skill front search "from:dale@a.com tag:tag_14nmdp" --limit 50
+  skill front search "is:unreplied" --inbox inb_4bj7r --after 1706745600
+`
+    )
     .action(searchConversations)
 }
