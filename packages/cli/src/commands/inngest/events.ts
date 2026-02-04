@@ -1,6 +1,5 @@
 import type { Command } from 'commander'
 import { type Event, InngestClient, type Run, parseTimeArg } from './client.js'
-import { registerInvestigateCommands } from './investigate.js'
 
 /**
  * Format a timestamp to human-readable format
@@ -262,9 +261,7 @@ async function replayEvent(
 /**
  * Register events commands with Commander
  */
-export function registerEventsCommands(program: Command): void {
-  const inngest = program.command('inngest').description('Inngest API commands')
-
+export function registerEventsCommands(inngest: Command): void {
   inngest
     .command('events')
     .description('List recent events')
@@ -290,7 +287,4 @@ export function registerEventsCommands(program: Command): void {
     .option('--json', 'Output as JSON')
     .option('--dev', 'Use dev server (localhost:8288)')
     .action(replayEvent)
-
-  // Register investigation/spelunking commands
-  registerInvestigateCommands(inngest)
 }

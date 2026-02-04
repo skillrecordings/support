@@ -14,3 +14,14 @@ Added changeset `/.changeset/cli-cleanup-dead-code.md`.
 Tests:
 - `cd packages/cli && bun run check-types`
 - `cd packages/cli && bun run test`
+
+---
+[2026-02-04T03:28:57.619Z]
+Completed: Group Inngest commands under inngest subcommand
+Files: none
+Summary: Summary:
+Moved all Inngest CLI registrations under a single `registerInngestCommands` entry point and wired `events`, `runs`, `signal`, and `investigate` to a shared `inngest` command group without changing flags or behavior.
+Updated `packages/cli/src/index.ts` to call the single registration and removed duplicate/implicit command lookups.
+
+Files changed:
+- `packages/cli/src/commands/inngest/event

@@ -19,9 +19,7 @@ import { registerFaqReviewCommands } from './commands/faq-review'
 import { registerFrontCommands } from './commands/front/index'
 import { health } from './commands/health'
 import { init } from './commands/init'
-import { registerEventsCommands } from './commands/inngest/events'
-import { registerRunsCommands } from './commands/inngest/runs'
-import { registerSignalCommand } from './commands/inngest/signal'
+import { registerInngestCommands } from './commands/inngest/index'
 import { registerKbCommands } from './commands/kb-sync'
 import { registerMemoryCommands } from './commands/memory/index'
 import { registerPipelineCommands } from './commands/pipeline'
@@ -109,9 +107,7 @@ program
   })
 
 // Register Inngest commands
-registerEventsCommands(program)
-registerRunsCommands(program)
-registerSignalCommand(program)
+registerInngestCommands(program)
 
 // Register Front commands
 registerFrontCommands(program)

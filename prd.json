@@ -24,7 +24,7 @@
       "title": "Group Inngest commands under inngest subcommand",
       "description": "Currently Inngest commands are registered as 3 separate top-level calls in packages/cli/src/index.ts:\n- registerEventsCommands(program)\n- registerRunsCommands(program)\n- registerSignalCommand(program)\n\nPlus `investigate` is in a separate file but registered via events.\n\nConsolidate into a single `packages/cli/src/commands/inngest/index.ts` that:\n1. Creates an `inngest` subcommand group on the program\n2. Registers events, runs, signal, and investigate as subcommands under it\n3. Exports a single `registerInngestCommands(program)` function\n4. Update packages/cli/src/index.ts to use the single registration\n\nThe commands should work as: `skill inngest events`, `skill inngest runs`, `skill inngest signal`, `skill inngest investigate`\n\nKeep all existing functionality and flags unchanged. This is purely a structural reorganization.\n\nDo NOT create a changeset for this story — it will be included in the final cleanup changeset.",
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "validationCommand": "cd packages/cli && bun run check-types && bun run test",
       "acceptanceCriteria": [
         "Single registerInngestCommands(program) call in index.ts",
@@ -116,7 +116,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-04T03:24:28.522Z",
-    "totalIterations": 1,
-    "lastIteration": "2026-02-04T03:27:09.087Z"
+    "totalIterations": 2,
+    "lastIteration": "2026-02-04T03:28:57.619Z"
   }
 }

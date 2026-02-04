@@ -116,16 +116,8 @@ async function signalCommand(
 /**
  * Register the signal command with Commander
  */
-export function registerSignalCommand(program: Command): void {
-  const inngestCommand = program.commands.find(
-    (cmd) => cmd.name() === 'inngest'
-  )
-
-  if (!inngestCommand) {
-    throw new Error('inngest command not found')
-  }
-
-  inngestCommand
+export function registerSignalCommand(inngest: Command): void {
+  inngest
     .command('signal')
     .description('Send a signal to resume a waiting function')
     .argument('<signal>', 'Signal name (e.g., "approval:draft_abc123")')
