@@ -1,5 +1,11 @@
 # @skillrecordings/cli
 
+## 0.10.0
+
+### Minor Changes
+
+- 9c4d627: Add comprehensive agent-optimized help text to all `skill front` commands. Every command now has a detailed cheat sheet accessible via `--help` with practical examples, filter/status values, jq patterns, related commands, and workflow guidance. Commands covered: inbox, conversation, message, teammates, teammate, assign, reply, tag, untag, tags (list/delete/rename/cleanup), archive, bulk-archive, report, triage, pull-conversations, and api.
+
 ## 0.9.0
 
 ### Minor Changes
