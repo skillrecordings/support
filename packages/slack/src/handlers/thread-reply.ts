@@ -102,7 +102,7 @@ export async function handleThreadReply(
   // If no draft context, fall back to general intent routing
   if (!intent || !state) {
     const slackClient = deps?.slackClient ?? getSlackClient()
-    const { intent: routedIntent, response } = routeIntent(event.text)
+    const { intent: routedIntent, response } = await routeIntent(event.text)
 
     // Execute the intent
     const executionResult = await executeIntent(routedIntent, {

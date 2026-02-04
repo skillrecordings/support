@@ -134,7 +134,7 @@ export async function handleAppMention(
     }
   }
 
-  const { intent, response } = routeIntent(rawText)
+  const { intent, response } = await routeIntent(rawText)
 
   // Only post the placeholder response for unknown intents
   // For known intents, the executor will handle messaging

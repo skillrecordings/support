@@ -1,3 +1,4 @@
+import { classifyIntent } from './llm-classifier'
 import type { ParsedIntent } from './types'
 
 export const HELP_RESPONSE = `I can help with:
@@ -5,6 +6,7 @@ export const HELP_RESPONSE = `I can help with:
 - Draft refinement: reply to my draft notifications with feedback
 - Quick actions: "approve and send", "escalate to [name]", "archive"
 - Customer lookup: "history with customer@email.com"
+- General questions: "what refund requests came in today?"
 
 Just @mention me with what you need!`
 
@@ -32,7 +34,27 @@ function buildIntent(
   return { category, confidence, entities, rawText }
 }
 
-export function routeIntent(rawText: string): {
+function getResponseForIntent(intent: ParsedIntent): string {
+  switch (intent.category) {
+    case 'status_query':
+      return "status noted — I'll check what's pending and report back in this thread."
+    case 'draft_action':
+      return 'Thanks — I captured your draft feedback and will apply it.'
+    case 'escalation':
+      return intent.entities.name
+        ? `Okay — I'll escalate to ${intent.entities.name}.`
+        : "Okay — I'll escalate this to the right teammate."
+    case 'context_lookup':
+      return 'On it — I will pull the customer context and share it here.'
+    case 'general_query':
+      return 'On it — I will search for relevant conversations and share what I find.'
+    case 'unknown':
+    default:
+      return HELP_RESPONSE
+  }
+}
+
+export function routeIntentByKeyword(rawText: string): {
   intent: ParsedIntent
   response: string
 } {
@@ -59,8 +81,9 @@ export function routeIntent(rawText: string): {
   if (statusHit) {
     return {
       intent: buildIntent('status_query', trimmed, 0.85),
-      response:
-        "status noted — I'll check what's pending and report back in this thread.",
+      response: getResponseForIntent(
+        buildIntent('status_query', trimmed, 0.85)
+      ),
     }
   }
 
@@ -74,7 +97,7 @@ export function routeIntent(rawText: string): {
   if (draftHit) {
     return {
       intent: buildIntent('draft_action', trimmed, 0.8),
-      response: 'Thanks — I captured your draft feedback and will apply it.',
+      response: getResponseForIntent(buildIntent('draft_action', trimmed, 0.8)),
     }
   }
 
@@ -85,9 +108,9 @@ export function routeIntent(rawText: string): {
     if (name) entities.name = name
     return {
       intent: buildIntent('escalation', trimmed, 0.8, entities),
-      response: name
-        ? `Okay — I'll escalate to ${name}.`
-        : "Okay — I'll escalate this to the right teammate.",
+      response: getResponseForIntent(
+        buildIntent('escalation', trimmed, 0.8, entities)
+      ),
     }
   }
 
@@ -104,12 +127,42 @@ export function routeIntent(rawText: string): {
     if (name && !entities.email) entities.name = name
     return {
       intent: buildIntent('context_lookup', trimmed, 0.78, entities),
-      response: 'On it — I will pull the customer context and share it here.',
+      response: getResponseForIntent(
+        buildIntent('context_lookup', trimmed, 0.78, entities)
+      ),
     }
   }
 
   return {
     intent: buildIntent('unknown', trimmed, 0.2),
-    response: HELP_RESPONSE,
+    response: getResponseForIntent(buildIntent('unknown', trimmed, 0.2)),
   }
+}
+
+export async function routeIntent(rawText: string): Promise<{
+  intent: ParsedIntent
+  response: string
+}> {
+  const keywordResult = routeIntentByKeyword(rawText)
+  if (keywordResult.intent.category !== 'unknown') {
+    return keywordResult
+  }
+
+  if (!rawText.trim()) {
+    return keywordResult
+  }
+
+  try {
+    const classified = await classifyIntent(rawText)
+    if (classified.confidence > 0.5) {
+      return {
+        intent: classified,
+        response: getResponseForIntent(classified),
+      }
+    }
+  } catch (error) {
+    console.error('LLM classification failed, falling back to unknown:', error)
+  }
+
+  return keywordResult
 }
