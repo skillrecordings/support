@@ -4,29 +4,50 @@ Age encryption system for distributing CLI secrets to team members via 1Password
 
 ## Overview
 
-The auth system uses [age encryption](https://github.com/FiloSottile/age) to distribute encrypted environment files to team members. Admins encrypt secrets once, share the encrypted file publicly (git, Slack, etc.), and store the decryption key in 1Password. Team members with 1Password Service Account tokens can decrypt automatically.
+The auth system uses [age encryption](https://github.com/FiloSottile/age) to distribute encrypted environment files to team members. Admins encrypt secrets once, commit the encrypted file to git, and store the decryption key in 1Password. Team members with the 1Password Service Account token file get **automatic, transparent decryption** - they just run `skill` and it works.
 
 **Key benefits:**
-- Encrypted files can be committed to git or shared in Slack
-- No manual copy/paste of credentials
+- Encrypted file committed to git (`.env.encrypted`)
+- **Zero-config for team** - just drop `~/.op-token` and run CLI
 - Automatic decryption via 1Password integration
 - Key rotation without redistributing encrypted files
+- Local `.env.local` overrides encrypted file for development
 
 ## Quick Start
 
-### Team Member Setup (Decrypt Secrets)
+### Team Member Setup (Zero-Config)
 
-1. Get 1Password Service Account token from admin
-2. Set token in your shell:
+1. Get `~/.op-token` file from admin (contains 1Password Service Account token)
+2. Place it at `~/.op-token`:
    ```bash
-   export OP_SERVICE_ACCOUNT_TOKEN="ops_xxx"
+   # File contents:
+   export OP_SERVICE_ACCOUNT_TOKEN="ops_xxx..."
    ```
-3. Decrypt the shared `.env.local.age` file:
+3. **That's it** - run any `skill` command:
    ```bash
-   skill auth decrypt .env.local.age --output .env.local
+   skill db-status  # Just works - secrets auto-loaded from 1Password
    ```
 
-The CLI automatically reads the age private key from 1Password using the reference stored in `AGE_SECRET_KEY` env var.
+The CLI automatically:
+1. Detects `~/.op-token` exists
+2. Reads the service account token
+3. Fetches the age private key from 1Password (`op://Support/skill-cli-age-key/private_key`)
+4. Decrypts `.env.encrypted` on the fly
+5. Injects secrets into the environment
+
+### Local Development (Priority Override)
+
+If you have a local `.env.local` file, it takes priority over the encrypted file:
+
+```bash
+# packages/cli/.env.local exists? → used directly, no decryption needed
+# packages/cli/.env.local missing? → auto-decrypt .env.encrypted via 1Password
+```
+
+This means:
+- Your local overrides always win
+- You can modify values without affecting team
+- Production secrets stay in sync via encrypted file
 
 ### Admin Setup (First Time)
 
@@ -34,18 +55,16 @@ The CLI automatically reads the age private key from 1Password using the referen
    ```bash
    skill auth keygen
    ```
-2. Store private key in 1Password vault
-3. Create secret reference in env:
+2. Store private key in 1Password:
+   - Vault: `Support`
+   - Item: `skill-cli-age-key`
+   - Field: `private_key`
+3. Encrypt current secrets:
    ```bash
-   # In your .env.local (DO NOT commit)
-   AGE_SECRET_KEY="op://Private/cli-age-key/private_key"
+   skill auth encrypt .env.local --recipient <public-key> --output .env.encrypted
    ```
-4. Encrypt secrets:
-   ```bash
-   skill auth encrypt .env.local
-   ```
-5. Share `.env.local.age` (safe to commit/share)
-6. Share the 1Password Service Account token with team
+4. Commit `.env.encrypted` to git
+5. Create and distribute `~/.op-token` file with service account token
 
 ## Commands Reference
 
@@ -174,7 +193,7 @@ skill auth status --json
 
 ## Distribution Workflow
 
-### Admin: Generate and Distribute Keys
+### Admin: Initial Setup
 
 1. **Generate keypair:**
    ```bash
@@ -182,132 +201,136 @@ skill auth status --json
    ```
 
 2. **Store private key in 1Password:**
-   - Open 1Password vault
-   - Create new item: "cli-age-key"
-   - Add field: `private_key` with value from `keypair.json`
-   - Note the secret reference: `op://Private/cli-age-key/private_key`
+   - Vault: `Support` (or your team's shared vault)
+   - Item name: `skill-cli-age-key`
+   - Add field: `private_key` with value `AGE-SECRET-KEY-1...`
+   - Reference becomes: `op://Support/skill-cli-age-key/private_key`
 
-3. **Configure local environment:**
-   ```bash
-   # In packages/cli/.env.local (DO NOT commit)
-   AGE_PUBLIC_KEY="age1ql3z7hjy54pw3hyww5ayyfg7zqgvc7w3j2elw8zmrj2kg5sfn9aqmcac8p"
-   AGE_SECRET_KEY="op://Private/cli-age-key/private_key"
-   ```
-
-4. **Encrypt secrets:**
+3. **Encrypt secrets:**
    ```bash
    cd packages/cli
-   skill auth encrypt .env.local
-   # Creates .env.local.age
+   skill auth encrypt .env.local --recipient <public-key> --output .env.encrypted
    ```
 
-5. **Distribute:**
-   - Share `.env.local.age` (safe to commit or share via Slack)
-   - Share 1Password Service Account token with team (securely)
-   - Document the setup in team docs
-
-### Team: Decrypt Secrets
-
-1. **Set 1Password Service Account token:**
+4. **Commit encrypted file:**
    ```bash
-   # Add to ~/.bashrc or ~/.zshrc
-   export OP_SERVICE_ACCOUNT_TOKEN="ops_xxx"
+   git add .env.encrypted
+   git commit -m "Add encrypted env for team distribution"
    ```
 
-2. **Configure environment to use 1Password reference:**
+5. **Create ~/.op-token template:**
    ```bash
-   # In packages/cli/.env.local
-   AGE_SECRET_KEY="op://Private/cli-age-key/private_key"
+   # Create file with service account token
+   echo 'export OP_SERVICE_ACCOUNT_TOKEN="ops_xxx..."' > op-token-template.txt
    ```
 
-3. **Decrypt secrets:**
+6. **Distribute token file securely:**
+   - Share `op-token-template.txt` via secure channel (1Password itself, secure Slack DM)
+   - Team members save as `~/.op-token`
+
+### Team: Zero-Config Setup
+
+1. **Get the token file from admin** (via secure channel)
+
+2. **Save as ~/.op-token:**
    ```bash
-   cd packages/cli
-   skill auth decrypt .env.local.age --output .env.local
+   # File should contain:
+   export OP_SERVICE_ACCOUNT_TOKEN="ops_xxx..."
    ```
 
-4. **Verify:**
+3. **Use the CLI** - that's it:
    ```bash
-   cat .env.local | head -5
+   skill db-status    # Secrets auto-loaded
+   skill front message abc123  # Just works
    ```
+
+### How Auto-Decryption Works
+
+The CLI's env loader (`src/lib/env-loader.ts`) follows this priority:
+
+1. **Local .env.local exists?** → Use it directly (no decryption)
+2. **~/.op-token exists?** → Auto-decrypt `.env.encrypted`:
+   - Parse token from `~/.op-token`
+   - Set `OP_SERVICE_ACCOUNT_TOKEN` in environment
+   - Fetch age private key from `op://Support/skill-cli-age-key/private_key`
+   - Decrypt `.env.encrypted` on the fly
+   - Inject secrets into `process.env`
+3. **AGE_SECRET_KEY set?** → Decrypt using that key directly
+4. **None of the above?** → Error with clear instructions
 
 ## 1Password Service Account Setup
 
-Service accounts enable headless authentication for CI/CD and team automation.
+Service accounts enable headless authentication for CLI and team automation.
 
 ### Create Service Account
 
 1. **Open 1Password:**
    - Go to Integrations > Service Accounts
    - Click "Create Service Account"
-   - Name it: "CLI Secrets Distribution"
+   - Name it: "skill-cli" or "CLI Secrets Distribution"
 
 2. **Configure Access:**
-   - Grant read access to the vault containing age keys
+   - Grant read access to the `Support` vault (or wherever age key is stored)
    - Note: Service accounts can't use 2FA or sign in to apps
 
 3. **Generate Token:**
    - Copy the token (`ops_xxx...`)
    - Store it securely (only shown once)
 
-4. **Share with Team:**
-   - Send token securely (avoid Slack/email if possible)
-   - Document in team setup guide
+### Create ~/.op-token File
 
-### Set Token
+The CLI auto-loads tokens from `~/.op-token` - no shell profile changes needed.
 
 ```bash
-# Temporary (current shell session)
-export OP_SERVICE_ACCOUNT_TOKEN="ops_xxx"
+# Create the token file
+cat > ~/.op-token << 'EOF'
+export OP_SERVICE_ACCOUNT_TOKEN="ops_xxx..."
+EOF
 
-# Permanent (add to shell profile)
-echo 'export OP_SERVICE_ACCOUNT_TOKEN="ops_xxx"' >> ~/.bashrc
-source ~/.bashrc
+# Secure the file
+chmod 600 ~/.op-token
 ```
 
-### Store Age Key in Vault
+**Why this file format?**
+- Can be sourced manually: `source ~/.op-token`
+- Auto-parsed by CLI without sourcing
+- Same format works in shell profiles if you prefer that
+
+### Store Age Key in 1Password
 
 1. **Create Item:**
-   - Open 1Password vault
-   - Create new item (type: "Secure Note" or "Password")
-   - Title: "cli-age-key"
+   - Vault: `Support` (must be accessible to service account)
+   - Item type: "Secure Note" or "Password"
+   - Title: `skill-cli-age-key`
 
 2. **Add Private Key Field:**
    - Add custom field: `private_key`
-   - Paste age private key: `AGE-SECRET-KEY-1...`
+   - Value: `AGE-SECRET-KEY-1...`
 
-3. **Note Reference:**
-   - Reference format: `op://VaultName/ItemName/FieldName`
-   - Example: `op://Private/cli-age-key/private_key`
-
-### Use 1Password Reference
-
-```bash
-# In environment file (safe to commit)
-AGE_SECRET_KEY="op://Private/cli-age-key/private_key"
-
-# Decrypt will automatically resolve the reference
-skill auth decrypt .env.local.age --output .env.local
-```
+3. **Verify Reference:**
+   - Reference: `op://Support/skill-cli-age-key/private_key`
+   - Test: `source ~/.op-token && op read "op://Support/skill-cli-age-key/private_key"`
 
 ### Troubleshooting 1Password
 
 **"op: command not found"**
 - Install 1Password CLI: https://developer.1password.com/docs/cli/get-started/
+- Linux: `curl -sS https://downloads.1password.com/linux/keys/1password.asc | sudo gpg --dearmor --output /usr/share/keyrings/1password-archive-keyring.gpg`
 
-**"OP_SERVICE_ACCOUNT_TOKEN not set"**
-- Export token: `export OP_SERVICE_ACCOUNT_TOKEN="ops_xxx"`
-- Verify: `echo $OP_SERVICE_ACCOUNT_TOKEN`
+**CLI not loading secrets automatically**
+- Check `~/.op-token` exists and has correct format
+- Verify token starts with `ops_`
+- Test manually: `source ~/.op-token && op whoami`
 
 **"Failed to read secret from 1Password"**
 - Check token has access to vault: `op vault list`
-- Verify reference format: `op://VaultName/ItemName/FieldName`
-- Test read directly: `op read "op://Private/cli-age-key/private_key"`
+- Verify item exists: `op item get skill-cli-age-key --vault Support`
+- Test read directly: `op read "op://Support/skill-cli-age-key/private_key"`
 
-**"Invalid secret reference format"**
-- Reference must start with `op://`
-- Format: `op://VaultName/ItemName/FieldName`
-- Use exact vault/item/field names (case-sensitive)
+**"No accounts configured for use with 1Password CLI"**
+- This means `OP_SERVICE_ACCOUNT_TOKEN` isn't set
+- Check `~/.op-token` file exists and is readable
+- Verify the token value is correct (single line, no extra quotes)
 
 ## Key Rotation
 
@@ -352,6 +375,20 @@ Send notification with:
 
 ## Troubleshooting
 
+### "Found .env.encrypted but cannot decrypt"
+
+**Cause:** No decryption key available. Neither `~/.op-token` nor `AGE_SECRET_KEY` is configured.
+
+**Fix (recommended - use 1Password):**
+1. Get `~/.op-token` file from admin
+2. Place at `~/.op-token`
+3. Retry the CLI command
+
+**Fix (alternative - manual key):**
+```bash
+export AGE_SECRET_KEY="AGE-SECRET-KEY-1..."
+```
+
 ### "No recipient key specified"
 
 **Cause:** `AGE_PUBLIC_KEY` env var not set and `--recipient` not provided.
@@ -368,7 +405,7 @@ export AGE_PUBLIC_KEY="age1ql3z7hjy54pw3hyww5ayyfg7zqgvc7w3j2elw8zmrj2kg5sfn9aqm
 
 **Fix:**
 ```bash
-export AGE_SECRET_KEY="op://Private/cli-age-key/private_key"
+export AGE_SECRET_KEY="op://Support/skill-cli-age-key/private_key"
 # Or use --identity flag
 ```
 
@@ -390,6 +427,10 @@ export AGE_SECRET_KEY="op://Private/cli-age-key/private_key"
 
 **Fix:**
 ```bash
+# Create ~/.op-token (preferred)
+echo 'export OP_SERVICE_ACCOUNT_TOKEN="ops_xxx"' > ~/.op-token
+
+# Or export directly
 export OP_SERVICE_ACCOUNT_TOKEN="ops_xxx"
 ```
 
@@ -399,9 +440,9 @@ export OP_SERVICE_ACCOUNT_TOKEN="ops_xxx"
 
 **Fix:**
 1. Verify reference format: `op://VaultName/ItemName/FieldName`
-2. Test direct read: `op read "op://Private/cli-age-key/private_key"`
+2. Test direct read: `source ~/.op-token && op read "op://Support/skill-cli-age-key/private_key"`
 3. Check vault access: `op vault list`
-4. Verify service account permissions
+4. Verify service account has read access to the vault
 
 ### Decryption fails with "bad ciphertext"
 
@@ -411,6 +452,22 @@ export OP_SERVICE_ACCOUNT_TOKEN="ops_xxx"
 - Verify you're using the correct private key
 - Check if key rotation occurred (get new encrypted file)
 - Ensure private key wasn't truncated or modified
+
+### "~/.op-token exists but not working"
+
+**Cause:** File format incorrect or token expired.
+
+**Fix:**
+1. Check file format:
+   ```bash
+   cat ~/.op-token
+   # Should be: export OP_SERVICE_ACCOUNT_TOKEN="ops_..."
+   ```
+2. Test token manually:
+   ```bash
+   source ~/.op-token && op whoami
+   ```
+3. Get new token from admin if expired
 
 ## Security Best Practices
 
