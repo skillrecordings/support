@@ -197,13 +197,13 @@ async function searchConversations(
 }
 
 export function registerSearchCommand(frontCommand: Command): void {
-  frontCommand
+  const searchCmd = frontCommand
     .command('search')
     .description(
       'Search conversations (text, subject, filters). See https://dev.frontapp.com/docs/search-1'
     )
     .argument(
-      '<query>',
+      '[query]',
       'Search query (text, "exact phrase", or filter syntax)'
     )
     .option('--inbox <id>', 'Filter by inbox ID (inb_xxx)')
@@ -221,30 +221,97 @@ export function registerSearchCommand(frontCommand: Command): void {
     .addHelpText(
       'after',
       `
-Front Search Query Syntax:
-  Text search:    "exact phrase" or word1 word2 (AND logic)
-  inbox:inb_xxx   Filter by inbox
-  tag:tag_xxx     Filter by tag
-  from:email      Filter by sender
-  to:email        Filter by recipient
-  recipient:email Filter by email/handle
-  assignee:tea_x  Filter by assigned teammate
-  participant:t   Filter by participating teammate
-  is:open         Status: open, archived, assigned, unassigned,
-                  unreplied, snoozed, resolved, waiting
-  before:<ts>     Before Unix timestamp
-  after:<ts>      After Unix timestamp
-  during:<ts>     During day of Unix timestamp
-  custom_field:"Name=value"
+━━━ Front Search Query Syntax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  Multiple filters = AND. Multiple from/to/cc/bcc = OR. Max 15 filters.
+  The <query> argument accepts free text and/or inline Front filters.
+  CLI flags (--inbox, --status, etc.) are appended as filters automatically.
+  You can mix both: skill front search "refund" --inbox inb_4bj7r --status open
 
-Examples:
-  skill front search "payment failed" --inbox inb_4bj7r
-  skill front search "upgrade" --status unassigned --from user@example.com
-  skill front search "from:dale@a.com tag:tag_14nmdp" --limit 50
-  skill front search "is:unreplied" --inbox inb_4bj7r --after 1706745600
+TEXT SEARCH
+  word1 word2             AND — both words must appear in subject or body
+  "exact phrase"          Phrase match (quote the phrase)
+
+FILTERS (use inline in query OR via CLI flags)
+  Filter              CLI flag              What it matches
+  ─────────────────── ───────────────────── ──────────────────────────────────
+  inbox:inb_xxx       --inbox <id>          Conversations in inbox
+  tag:tag_xxx         --tag <id>            Conversations with tag
+  from:email          --from <email>        Sender address
+  to:email            (inline only)         Recipient address
+  cc:email            (inline only)         CC'd address
+  bcc:email           (inline only)         BCC'd address
+  recipient:email     (inline only)         Any role (from/to/cc/bcc)
+  contact:crd_xxx     (inline only)         Contact ID in any role
+  assignee:tea_xxx    --assignee <id>       Assigned teammate
+  author:tea_xxx      (inline only)         Message author (teammate)
+  participant:tea_xxx (inline only)         Any teammate involvement
+  mention:tea_xxx     (inline only)         Mentioned teammate
+  commenter:tea_xxx   (inline only)         Commenting teammate
+  link:top_xxx        (inline only)         Linked topic
+  is:<status>         --status <status>     Conversation status (see below)
+  before:<unix_ts>    --before <timestamp>  Messages before timestamp
+  after:<unix_ts>     --after <timestamp>   Messages after timestamp
+  during:<unix_ts>    (inline only)         Messages on same day as timestamp
+  custom_field:"K=V"  (inline only)         Custom field value
+
+STATUS VALUES (is: filter / --status flag)
+  open         In the Open tab (not archived, not trashed, not snoozed)
+  archived     In the Archived tab
+  assigned     Has an assignee (can combine: is:open is:assigned)
+  unassigned   No assignee
+  unreplied    Last message was inbound (no teammate reply yet)
+  snoozed      Snoozed (will reopen later; API status shows "archived")
+  trashed      In Trash
+  waiting      Waiting for response
+
+  Status combos:  is:open + is:unassigned = open & unassigned
+                  is:archived + is:assigned = archived & assigned
+  Conflicts:      open vs archived vs trashed vs snoozed are mutually exclusive
+                  assigned vs unassigned are mutually exclusive
+
+FILTER LOGIC
+  All filters combine with AND (results must match every filter).
+  Exception: multiple from/to/cc/bcc use OR within the same filter type.
+    from:a@x.com from:b@x.com   →  from A OR from B
+    from:a@x.com to:b@x.com     →  from A AND to B
+  Max 15 filters per query.
+
+EXAMPLES
+  # Find unresolved payment issues in AI Hero inbox
+  skill front search "payment failed" --inbox inb_4bj7r --status unassigned
+
+  # Unreplied conversations from a specific sender
+  skill front search "upgrade" --from user@example.com --status unreplied
+
+  # Complex inline query (filters in the query string itself)
+  skill front search "from:dale@a.com from:laura@a.com tag:tag_14nmdp before:1650364200"
+
+  # All snoozed conversations assigned to a teammate
+  skill front search "is:snoozed assignee:tea_2thf" --inbox inb_4bj7r
+
+  # Search by custom field
+  skill front search 'custom_field:"External ID=12345"'
+
+  # Pipe JSON to jq for IDs only
+  skill front search "is:unassigned" --inbox inb_4bj7r --json | jq '.data.conversations[].id'
+
+  Full docs: https://dev.frontapp.com/docs/search-1
 `
     )
-    .action(searchConversations)
+    .action((query: string | undefined, options: SearchOptions) => {
+      // Show help if no query and no filter flags provided
+      const hasFilters =
+        options.inbox ||
+        options.tag ||
+        options.assignee ||
+        options.status ||
+        options.from ||
+        options.after ||
+        options.before
+      if (!query && !hasFilters) {
+        searchCmd.help()
+        return
+      }
+      return searchConversations(query || '', options)
+    })
 }
