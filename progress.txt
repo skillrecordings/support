@@ -113,3 +113,21 @@ Summary: Summary:
 - Front + Inngest command migrations and OutputFormatter usage are already in place, with integration coverage for happy/error paths in `packages/cli/tests/integration/commands/front.test.ts` and `packages/cli/tests/integration/commands/inngest.test.ts`.
 - Added progress log entry for this story in `packages/cli/PROGRESS.md`.
 - Validation ran cleanly for `bun run check-types` and `bun run
+
+---
+[2026-02-04T16:55:22.033Z]
+Failed: Command Migration Batch 2 — Axiom + Tools + Memory (Phase 2) — Issue #183
+Validation: src/commands/tools.ts(150,7): error TS2322: Type 'string | null' is not assignable to type 'string'.
+  Type 'null' is not assignable to type 'string'.
+src/commands/tools.ts(151,7): error TS2322: Type 'string | null' is not assignable to type 'string'.
+  Type 'null' is not assignable to type 'string'
+Codex: 
+
+---
+[2026-02-04T17:00:53.428Z]
+Completed: Command Migration Batch 2 — Axiom + Tools + Memory (Phase 2) — Issue #183
+Files: none
+Summary: Summary:
+- Fixed tools content-type validation and narrowed app config typing in `packages/cli/src/commands/tools.ts`.
+- Added integration tests for Axiom, Tools, and Memory commands in `packages/cli/tests/integration/commands/axiom.test.ts`, `packages/cli/tests/integration/commands/tools.test.ts`, `packages/cli/tests/integration/commands/memory.test.ts`.
+- Updated progress log entry in `packages/

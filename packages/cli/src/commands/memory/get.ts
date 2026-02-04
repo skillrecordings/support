@@ -1,16 +1,40 @@
 import { calculateConfidence } from '@skillrecordings/memory/decay'
 import { MemoryService } from '@skillrecordings/memory/memory'
+import { type CommandContext } from '../../core/context'
+import { CLIError, formatError } from '../../core/errors'
+
+const handleMemoryError = (
+  ctx: CommandContext,
+  error: unknown,
+  message: string,
+  suggestion = 'Verify memory service configuration and try again.'
+): void => {
+  const cliError =
+    error instanceof CLIError
+      ? error
+      : new CLIError({
+          userMessage: message,
+          suggestion,
+          cause: error,
+        })
+
+  ctx.output.error(formatError(cliError))
+  process.exitCode = cliError.exitCode
+}
 
 /**
  * Get a specific memory by ID
  */
 export async function get(
+  ctx: CommandContext,
   id: string,
   options: {
     collection?: string
     json?: boolean
   }
 ): Promise<void> {
+  const outputJson = options.json === true || ctx.format === 'json'
+
   try {
     const memory = await MemoryService.get(
       id,
@@ -18,16 +42,14 @@ export async function get(
     )
 
     if (!memory) {
-      if (options.json) {
-        console.error(JSON.stringify({ error: 'Memory not found' }))
-      } else {
-        console.error('Error: Memory not found')
-      }
-      process.exit(1)
+      throw new CLIError({
+        userMessage: 'Memory not found.',
+        suggestion: 'Verify the memory ID and collection.',
+      })
     }
 
-    if (options.json) {
-      console.log(JSON.stringify(memory, null, 2))
+    if (outputJson) {
+      ctx.output.data(memory)
       return
     }
 
@@ -37,51 +59,41 @@ export async function get(
       ? new Date(memory.metadata.last_validated_at)
       : null
 
-    console.log('\n📋 Memory Details:')
-    console.log(`   ID:         ${memory.id}`)
-    console.log(`   Collection: ${memory.metadata.collection}`)
-    console.log(`   Source:     ${memory.metadata.source}`)
-    console.log(`   Confidence: ${(confidence * 100).toFixed(0)}%`)
-    console.log(`   Created:    ${createdAt.toLocaleString()}`)
+    ctx.output.data('\n📋 Memory Details:')
+    ctx.output.data(`   ID:         ${memory.id}`)
+    ctx.output.data(`   Collection: ${memory.metadata.collection}`)
+    ctx.output.data(`   Source:     ${memory.metadata.source}`)
+    ctx.output.data(`   Confidence: ${(confidence * 100).toFixed(0)}%`)
+    ctx.output.data(`   Created:    ${createdAt.toLocaleString()}`)
     if (lastValidated) {
-      console.log(`   Validated:  ${lastValidated.toLocaleString()}`)
+      ctx.output.data(`   Validated:  ${lastValidated.toLocaleString()}`)
     }
 
     if (memory.metadata.app_slug) {
-      console.log(`   App:        ${memory.metadata.app_slug}`)
+      ctx.output.data(`   App:        ${memory.metadata.app_slug}`)
     }
 
     if (memory.metadata.tags && memory.metadata.tags.length > 0) {
-      console.log(`   Tags:       ${memory.metadata.tags.join(', ')}`)
+      ctx.output.data(`   Tags:       ${memory.metadata.tags.join(', ')}`)
     }
 
-    console.log('\n📝 Content:')
-    console.log(`   ${memory.content}\n`)
+    ctx.output.data('\n📝 Content:')
+    ctx.output.data(`   ${memory.content}\n`)
 
     if (memory.metadata.votes) {
       const { upvotes, downvotes, citations, success_rate } =
         memory.metadata.votes
       if (upvotes > 0 || downvotes > 0 || citations > 0) {
-        console.log('📊 Votes:')
-        console.log(`   Upvotes:      ${upvotes}`)
-        console.log(`   Downvotes:    ${downvotes}`)
-        console.log(`   Citations:    ${citations}`)
-        console.log(`   Success Rate: ${(success_rate * 100).toFixed(0)}%\n`)
+        ctx.output.data('📊 Votes:')
+        ctx.output.data(`   Upvotes:      ${upvotes}`)
+        ctx.output.data(`   Downvotes:    ${downvotes}`)
+        ctx.output.data(`   Citations:    ${citations}`)
+        ctx.output.data(
+          `   Success Rate: ${(success_rate * 100).toFixed(0)}%\n`
+        )
       }
     }
   } catch (error) {
-    if (options.json) {
-      console.error(
-        JSON.stringify({
-          error: error instanceof Error ? error.message : 'Unknown error',
-        })
-      )
-    } else {
-      console.error(
-        'Error:',
-        error instanceof Error ? error.message : 'Unknown error'
-      )
-    }
-    process.exit(1)
+    handleMemoryError(ctx, error, 'Failed to fetch memory.')
   }
 }

@@ -109,7 +109,7 @@
       "title": "Command Migration Batch 2 — Axiom + Tools + Memory (Phase 2) — Issue #183",
       "description": "Migrate Axiom, Tools, and Memory commands to CommandContext + OutputFormatter.\n\n## Context\n- Parent epic: #172, Issue: #183\n- Depends on: Story 6\n\n## Files to Modify\n- packages/cli/src/commands/axiom/*.ts\n- packages/cli/src/commands/tools/*.ts (list, search, lookup)\n- packages/cli/src/commands/memory/*.ts\n\n## Files to Create\n- packages/cli/tests/integration/commands/axiom.test.ts\n- packages/cli/tests/integration/commands/tools.test.ts\n- packages/cli/tests/integration/commands/memory.test.ts\n\n## Commands\nAxiom: query, agents, errors, conversation, classifications, workflow-steps, approvals, pipeline-trace, step-timings, error-rate, data-flow-check, tag-health, approval-stats, pipeline-health\nTools: list, search, lookup\nMemory: store, find, get, validate, upvote, downvote, delete, stats, stale\n\nSame pattern: accept CommandContext, replace console.log, use CLIError, write tests.\n\n## On Completion\nUpdate packages/cli/PROGRESS.md. Commit: `feat(cli): migrate axiom + tools + memory commands`",
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "validationCommand": "cd packages/cli && bun run check-types && bun run test",
       "acceptanceCriteria": [
         "Zero console.log in axiom/ tools/ memory/ command files",
@@ -220,7 +220,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-04T15:13:09.231Z",
-    "totalIterations": 6,
-    "lastIteration": "2026-02-04T16:45:05.959Z"
+    "totalIterations": 7,
+    "lastIteration": "2026-02-04T17:00:53.427Z"
   }
 }

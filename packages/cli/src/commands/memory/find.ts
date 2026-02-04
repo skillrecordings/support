@@ -1,5 +1,26 @@
 import { calculateConfidence } from '@skillrecordings/memory/decay'
 import { MemoryService } from '@skillrecordings/memory/memory'
+import { type CommandContext } from '../../core/context'
+import { CLIError, formatError } from '../../core/errors'
+
+const handleMemoryError = (
+  ctx: CommandContext,
+  error: unknown,
+  message: string,
+  suggestion = 'Verify memory service configuration and try again.'
+): void => {
+  const cliError =
+    error instanceof CLIError
+      ? error
+      : new CLIError({
+          userMessage: message,
+          suggestion,
+          cause: error,
+        })
+
+  ctx.output.error(formatError(cliError))
+  process.exitCode = cliError.exitCode
+}
 
 /**
  * Pad string to fixed width
@@ -19,6 +40,7 @@ function formatConfidence(confidence: number): string {
  * Find memories by semantic search
  */
 export async function find(
+  ctx: CommandContext,
   query: string,
   options: {
     limit?: string
@@ -28,20 +50,26 @@ export async function find(
     json?: boolean
   }
 ): Promise<void> {
+  const outputJson = options.json === true || ctx.format === 'json'
+
   try {
     const limit = options.limit ? parseInt(options.limit, 10) : 10
     const threshold = options.minConfidence
       ? parseFloat(options.minConfidence)
       : 0.5
 
-    if (limit < 1 || limit > 100) {
-      console.error('Error: --limit must be between 1 and 100')
-      process.exit(1)
+    if (limit < 1 || limit > 100 || Number.isNaN(limit)) {
+      throw new CLIError({
+        userMessage: '--limit must be between 1 and 100.',
+        suggestion: 'Choose a value between 1 and 100 (default: 10).',
+      })
     }
 
-    if (threshold < 0 || threshold > 1) {
-      console.error('Error: --min-confidence must be between 0 and 1')
-      process.exit(1)
+    if (threshold < 0 || threshold > 1 || Number.isNaN(threshold)) {
+      throw new CLIError({
+        userMessage: '--min-confidence must be between 0 and 1.',
+        suggestion: 'Choose a value between 0 and 1 (default: 0.5).',
+      })
     }
 
     const results = await MemoryService.find(query, {
@@ -51,18 +79,18 @@ export async function find(
       app_slug: options.app,
     })
 
-    if (options.json) {
-      console.log(JSON.stringify(results, null, 2))
+    if (outputJson) {
+      ctx.output.data(results)
       return
     }
 
     if (results.length === 0) {
-      console.log('No memories found.')
+      ctx.output.data('No memories found.')
       return
     }
 
-    console.log(`\nFound ${results.length} memories:\n`)
-    console.log(
+    ctx.output.data(`\nFound ${results.length} memories:\n`)
+    ctx.output.data(
       pad('ID', 36) +
         ' ' +
         pad('SCORE', 8) +
@@ -73,7 +101,7 @@ export async function find(
         ' ' +
         'CONTENT'
     )
-    console.log('-'.repeat(100))
+    ctx.output.data('-'.repeat(100))
 
     for (const result of results) {
       const confidence = calculateConfidence(result.memory)
@@ -86,7 +114,7 @@ export async function find(
           ? result.memory.content.slice(0, 37) + '...'
           : result.memory.content
 
-      console.log(
+      ctx.output.data(
         pad(result.memory.id, 36) +
           ' ' +
           pad(result.score.toFixed(2), 8) +
@@ -102,7 +130,7 @@ export async function find(
         result.memory.metadata.tags &&
         result.memory.metadata.tags.length > 0
       ) {
-        console.log(
+        ctx.output.data(
           pad('', 36) +
             ' ' +
             pad('', 8) +
@@ -116,20 +144,8 @@ export async function find(
       }
     }
 
-    console.log('')
+    ctx.output.data('')
   } catch (error) {
-    if (options.json) {
-      console.error(
-        JSON.stringify({
-          error: error instanceof Error ? error.message : 'Unknown error',
-        })
-      )
-    } else {
-      console.error(
-        'Error:',
-        error instanceof Error ? error.message : 'Unknown error'
-      )
-    }
-    process.exit(1)
+    handleMemoryError(ctx, error, 'Failed to search memories.')
   }
 }

@@ -1,9 +1,28 @@
 import type { Command } from 'commander'
+import { type CommandContext, createContext } from '../../core/context'
 import { find } from './find'
 import { get } from './get'
 import { stale, stats } from './stats'
 import { store } from './store'
 import { deleteMemory, downvote, upvote, validate } from './vote'
+
+const buildContext = async (
+  command: Command,
+  json?: boolean
+): Promise<CommandContext> => {
+  const opts =
+    typeof command.optsWithGlobals === 'function'
+      ? command.optsWithGlobals()
+      : {
+          ...command.parent?.opts(),
+          ...command.opts(),
+        }
+  return createContext({
+    format: json ? 'json' : opts.format,
+    verbose: opts.verbose,
+    quiet: opts.quiet,
+  })
+}
 
 /**
  * Register memory commands with Commander
@@ -21,7 +40,10 @@ export function registerMemoryCommands(program: Command): void {
     .option('--collection <collection>', 'Collection name (default: learnings)')
     .option('--app <app>', 'App slug to associate with memory')
     .option('--json', 'Output as JSON')
-    .action(store)
+    .action(async (content, options, command) => {
+      const ctx = await buildContext(command, options.json)
+      await store(ctx, content, options)
+    })
 
   memory
     .command('find')
@@ -35,7 +57,10 @@ export function registerMemoryCommands(program: Command): void {
       'Minimum confidence threshold (0-1, default: 0.5)'
     )
     .option('--json', 'Output as JSON')
-    .action(find)
+    .action(async (query, options, command) => {
+      const ctx = await buildContext(command, options.json)
+      await find(ctx, query, options)
+    })
 
   memory
     .command('get')
@@ -43,7 +68,10 @@ export function registerMemoryCommands(program: Command): void {
     .argument('<id>', 'Memory ID')
     .option('--collection <collection>', 'Collection name (default: learnings)')
     .option('--json', 'Output as JSON')
-    .action(get)
+    .action(async (id, options, command) => {
+      const ctx = await buildContext(command, options.json)
+      await get(ctx, id, options)
+    })
 
   memory
     .command('validate')
@@ -51,7 +79,10 @@ export function registerMemoryCommands(program: Command): void {
     .argument('<id>', 'Memory ID')
     .option('--collection <collection>', 'Collection name (default: learnings)')
     .option('--json', 'Output as JSON')
-    .action(validate)
+    .action(async (id, options, command) => {
+      const ctx = await buildContext(command, options.json)
+      await validate(ctx, id, options)
+    })
 
   memory
     .command('upvote')
@@ -60,7 +91,10 @@ export function registerMemoryCommands(program: Command): void {
     .option('--collection <collection>', 'Collection name (default: learnings)')
     .option('--reason <reason>', 'Optional reason for upvote')
     .option('--json', 'Output as JSON')
-    .action(upvote)
+    .action(async (id, options, command) => {
+      const ctx = await buildContext(command, options.json)
+      await upvote(ctx, id, options)
+    })
 
   memory
     .command('downvote')
@@ -69,7 +103,10 @@ export function registerMemoryCommands(program: Command): void {
     .option('--collection <collection>', 'Collection name (default: learnings)')
     .option('--reason <reason>', 'Optional reason for downvote')
     .option('--json', 'Output as JSON')
-    .action(downvote)
+    .action(async (id, options, command) => {
+      const ctx = await buildContext(command, options.json)
+      await downvote(ctx, id, options)
+    })
 
   memory
     .command('delete')
@@ -77,7 +114,10 @@ export function registerMemoryCommands(program: Command): void {
     .argument('<id>', 'Memory ID')
     .option('--collection <collection>', 'Collection name (default: learnings)')
     .option('--json', 'Output as JSON')
-    .action(deleteMemory)
+    .action(async (id, options, command) => {
+      const ctx = await buildContext(command, options.json)
+      await deleteMemory(ctx, id, options)
+    })
 
   memory
     .command('stats')
@@ -85,7 +125,10 @@ export function registerMemoryCommands(program: Command): void {
     .option('--collection <collection>', 'Filter by collection')
     .option('--app <app>', 'Filter by app slug')
     .option('--json', 'Output as JSON')
-    .action(stats)
+    .action(async (options, command) => {
+      const ctx = await buildContext(command, options.json)
+      await stats(ctx, options)
+    })
 
   memory
     .command('stale')
@@ -93,5 +136,8 @@ export function registerMemoryCommands(program: Command): void {
     .option('--collection <collection>', 'Filter by collection')
     .option('--threshold <threshold>', 'Confidence threshold (default: 0.25)')
     .option('--json', 'Output as JSON')
-    .action(stale)
+    .action(async (options, command) => {
+      const ctx = await buildContext(command, options.json)
+      await stale(ctx, options)
+    })
 }

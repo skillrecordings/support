@@ -15,6 +15,8 @@
  */
 
 import type { Command } from 'commander'
+import { type CommandContext, createContext } from '../../core/context'
+import { CLIError, formatError } from '../../core/errors'
 import {
   formatDuration,
   formatTime,
@@ -25,6 +27,25 @@ import {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyBucket = any
+
+const handleAxiomError = (
+  ctx: CommandContext,
+  error: unknown,
+  message: string,
+  suggestion = 'Verify AXIOM_TOKEN and query parameters.'
+): void => {
+  const cliError =
+    error instanceof CLIError
+      ? error
+      : new CLIError({
+          userMessage: message,
+          suggestion,
+          cause: error,
+        })
+
+  ctx.output.error(formatError(cliError))
+  process.exitCode = cliError.exitCode
+}
 
 /** Safely extract a numeric aggregation value from an Axiom bucket */
 function aggVal(bucket: AnyBucket, index: number): number {
@@ -42,13 +63,15 @@ function groupVal(bucket: AnyBucket, field: string): string {
 // 1. pipeline-trace — Full trace for a single conversation
 // ---------------------------------------------------------------------------
 
-async function pipelineTrace(
+export async function pipelineTrace(
+  ctx: CommandContext,
   conversationId: string,
   options: { since?: string; json?: boolean }
 ): Promise<void> {
   const client = getAxiomClient()
   const ds = getDataset()
   const { startTime, endTime } = parseTimeRange(options.since ?? '7d')
+  const outputJson = options.json === true || ctx.format === 'json'
   const timeOpts = {
     startTime: startTime.toISOString(),
     endTime: endTime.toISOString(),
@@ -58,44 +81,40 @@ async function pipelineTrace(
     '_time, name, step, level, message, category, confidence, durationMs, tagged'
   const baseQuery = `['${ds}'] | where conversationId == '${conversationId}' | sort by _time asc`
 
-  // traceId may not exist yet (T0.3 adds it). Try with it, fall back without.
-  let result
   try {
-    result = await client.query(
-      `${baseQuery} | project ${baseProjection}, traceId`,
-      timeOpts
-    )
-  } catch {
-    result = await client.query(
-      `${baseQuery} | project ${baseProjection}`,
-      timeOpts
-    )
-  }
+    // traceId may not exist yet (T0.3 adds it). Try with it, fall back without.
+    let result
+    try {
+      result = await client.query(
+        `${baseQuery} | project ${baseProjection}, traceId`,
+        timeOpts
+      )
+    } catch {
+      result = await client.query(
+        `${baseQuery} | project ${baseProjection}`,
+        timeOpts
+      )
+    }
 
-  try {
     const matches = result.matches ?? []
 
-    if (options.json) {
-      console.log(
-        JSON.stringify(
-          matches.map((m) => ({ _time: m._time, ...(m.data as object) })),
-          null,
-          2
-        )
+    if (outputJson) {
+      ctx.output.data(
+        matches.map((m) => ({ _time: m._time, ...(m.data as object) }))
       )
       return
     }
 
     if (matches.length === 0) {
-      console.log(`No events found for conversation: ${conversationId}`)
+      ctx.output.data(`No events found for conversation: ${conversationId}`)
       return
     }
 
-    console.log(`\n🔍 Pipeline Trace: ${conversationId}`)
-    console.log(
+    ctx.output.data(`\n🔍 Pipeline Trace: ${conversationId}`)
+    ctx.output.data(
       `   Events: ${matches.length} | Window: ${options.since ?? '7d'}`
     )
-    console.log('═'.repeat(90))
+    ctx.output.data('═'.repeat(90))
 
     for (const match of matches) {
       const d = match.data as Record<string, unknown>
@@ -109,22 +128,18 @@ async function pipelineTrace(
       const tag = d.tagged != null ? ` tagged=${d.tagged}` : ''
       const trace = d.traceId ? ` trace=${d.traceId}` : ''
 
-      console.log(
+      ctx.output.data(
         `  ${time}  ${name}${step}${level}${dur}${cat}${conf}${tag}${trace}`
       )
       if (d.message) {
-        console.log(`           ${String(d.message).slice(0, 120)}`)
+        ctx.output.data(`           ${String(d.message).slice(0, 120)}`)
       }
     }
 
-    console.log('─'.repeat(90))
-    console.log(`Total: ${matches.length} events`)
+    ctx.output.data('─'.repeat(90))
+    ctx.output.data(`Total: ${matches.length} events`)
   } catch (error) {
-    console.error(
-      'Query failed:',
-      error instanceof Error ? error.message : error
-    )
-    process.exit(1)
+    handleAxiomError(ctx, error, 'Failed to fetch pipeline trace.')
   }
 }
 
@@ -132,13 +147,17 @@ async function pipelineTrace(
 // 2. step-timings — P50/P95 duration by step name
 // ---------------------------------------------------------------------------
 
-async function stepTimings(options: {
-  since?: string
-  json?: boolean
-}): Promise<void> {
+export async function stepTimings(
+  ctx: CommandContext,
+  options: {
+    since?: string
+    json?: boolean
+  }
+): Promise<void> {
   const client = getAxiomClient()
   const ds = getDataset()
   const { startTime, endTime } = parseTimeRange(options.since ?? '7d')
+  const outputJson = options.json === true || ctx.format === 'json'
 
   const apl = `['${ds}']
 | where isnotnull(durationMs) and durationMs > 0
@@ -153,34 +172,30 @@ async function stepTimings(options: {
 
     const buckets = result.buckets?.totals ?? []
 
-    if (options.json) {
-      console.log(
-        JSON.stringify(
-          buckets.map((b) => ({
-            name: groupVal(b, 'name'),
-            p50: aggVal(b, 0),
-            p95: aggVal(b, 1),
-            avg: aggVal(b, 2),
-            count: aggVal(b, 3),
-          })),
-          null,
-          2
-        )
+    if (outputJson) {
+      ctx.output.data(
+        buckets.map((b) => ({
+          name: groupVal(b, 'name'),
+          p50: aggVal(b, 0),
+          p95: aggVal(b, 1),
+          avg: aggVal(b, 2),
+          count: aggVal(b, 3),
+        }))
       )
       return
     }
 
     if (buckets.length === 0) {
-      console.log('No timing data found')
+      ctx.output.data('No timing data found')
       return
     }
 
-    console.log(`\n⏱  Step Timings (${options.since ?? '7d'})`)
-    console.log('═'.repeat(90))
-    console.log(
+    ctx.output.data(`\n⏱  Step Timings (${options.since ?? '7d'})`)
+    ctx.output.data('═'.repeat(90))
+    ctx.output.data(
       `${'Step'.padEnd(30)} ${'P50'.padStart(10)} ${'P95'.padStart(10)} ${'Avg'.padStart(10)} ${'Count'.padStart(8)}`
     )
-    console.log('─'.repeat(90))
+    ctx.output.data('─'.repeat(90))
 
     for (const bucket of buckets) {
       const name = groupVal(bucket, 'name') || '—'
@@ -189,18 +204,14 @@ async function stepTimings(options: {
       const avg = formatDuration(aggVal(bucket, 2))
       const count = String(aggVal(bucket, 3))
 
-      console.log(
+      ctx.output.data(
         `${name.padEnd(30)} ${p50.padStart(10)} ${p95.padStart(10)} ${avg.padStart(10)} ${count.padStart(8)}`
       )
     }
 
-    console.log('─'.repeat(90))
+    ctx.output.data('─'.repeat(90))
   } catch (error) {
-    console.error(
-      'Query failed:',
-      error instanceof Error ? error.message : error
-    )
-    process.exit(1)
+    handleAxiomError(ctx, error, 'Failed to fetch step timings.')
   }
 }
 
@@ -208,13 +219,17 @@ async function stepTimings(options: {
 // 3. error-rate — Failure rate by step over time window
 // ---------------------------------------------------------------------------
 
-async function errorRate(options: {
-  since?: string
-  json?: boolean
-}): Promise<void> {
+export async function errorRate(
+  ctx: CommandContext,
+  options: {
+    since?: string
+    json?: boolean
+  }
+): Promise<void> {
   const client = getAxiomClient()
   const ds = getDataset()
   const { startTime, endTime } = parseTimeRange(options.since ?? '7d')
+  const outputJson = options.json === true || ctx.format === 'json'
 
   // Note: Using extend + where after summarize causes Axiom to return results
   // in matches (not buckets.totals), so we read from matches.
@@ -232,36 +247,32 @@ async function errorRate(options: {
 
     const matches = result.matches ?? []
 
-    if (options.json) {
-      console.log(
-        JSON.stringify(
-          matches.map((m) => {
-            const d = m.data as Record<string, unknown>
-            return {
-              name: d.name ?? '—',
-              errors: Number(d.errors ?? 0),
-              total: Number(d.total ?? 0),
-              rate: Number(Number(d.rate ?? 0).toFixed(2)),
-            }
-          }),
-          null,
-          2
-        )
+    if (outputJson) {
+      ctx.output.data(
+        matches.map((m) => {
+          const d = m.data as Record<string, unknown>
+          return {
+            name: d.name ?? '—',
+            errors: Number(d.errors ?? 0),
+            total: Number(d.total ?? 0),
+            rate: Number(Number(d.rate ?? 0).toFixed(2)),
+          }
+        })
       )
       return
     }
 
     if (matches.length === 0) {
-      console.log('No errors found — pipeline is clean 🎉')
+      ctx.output.data('No errors found — pipeline is clean 🎉')
       return
     }
 
-    console.log(`\n🚨 Error Rate by Step (${options.since ?? '7d'})`)
-    console.log('═'.repeat(80))
-    console.log(
+    ctx.output.data(`\n🚨 Error Rate by Step (${options.since ?? '7d'})`)
+    ctx.output.data('═'.repeat(80))
+    ctx.output.data(
       `${'Step'.padEnd(30)} ${'Errors'.padStart(8)} ${'Total'.padStart(8)} ${'Rate'.padStart(8)}`
     )
-    console.log('─'.repeat(80))
+    ctx.output.data('─'.repeat(80))
 
     for (const match of matches) {
       const d = match.data as Record<string, unknown>
@@ -271,18 +282,14 @@ async function errorRate(options: {
       const rate = Number(d.rate ?? 0)
 
       const indicator = rate > 10 ? '🔴' : rate > 5 ? '🟡' : '🟢'
-      console.log(
+      ctx.output.data(
         `${indicator} ${name.padEnd(28)} ${String(errors).padStart(8)} ${String(total).padStart(8)} ${rate.toFixed(1).padStart(7)}%`
       )
     }
 
-    console.log('─'.repeat(80))
+    ctx.output.data('─'.repeat(80))
   } catch (error) {
-    console.error(
-      'Query failed:',
-      error instanceof Error ? error.message : error
-    )
-    process.exit(1)
+    handleAxiomError(ctx, error, 'Failed to fetch error rates.')
   }
 }
 
@@ -290,13 +297,17 @@ async function errorRate(options: {
 // 4. data-flow-check — Verify field presence at each boundary
 // ---------------------------------------------------------------------------
 
-async function dataFlowCheck(options: {
-  since?: string
-  json?: boolean
-}): Promise<void> {
+export async function dataFlowCheck(
+  ctx: CommandContext,
+  options: {
+    since?: string
+    json?: boolean
+  }
+): Promise<void> {
   const client = getAxiomClient()
   const ds = getDataset()
   const { startTime, endTime } = parseTimeRange(options.since ?? '7d')
+  const outputJson = options.json === true || ctx.format === 'json'
   const timeOpts = {
     startTime: startTime.toISOString(),
     endTime: endTime.toISOString(),
@@ -336,60 +347,58 @@ async function dataFlowCheck(options: {
     const fieldNames = hasTraceIdField
       ? ['convId', 'appId', 'msgId', 'step', 'traceId']
       : ['convId', 'appId', 'msgId', 'step']
-    if (options.json) {
-      console.log(
-        JSON.stringify(
-          buckets.map((b: AnyBucket) => {
-            const total = aggVal(b, totalIdx)
-            const entry: Record<string, unknown> = {
-              name: groupVal(b, 'name'),
-              conversationId: {
-                present: aggVal(b, 0),
-                pct: total ? Math.round((aggVal(b, 0) * 100) / total) : 0,
-              },
-              appId: {
-                present: aggVal(b, 1),
-                pct: total ? Math.round((aggVal(b, 1) * 100) / total) : 0,
-              },
-              messageId: {
-                present: aggVal(b, 2),
-                pct: total ? Math.round((aggVal(b, 2) * 100) / total) : 0,
-              },
-              step: {
-                present: aggVal(b, 3),
-                pct: total ? Math.round((aggVal(b, 3) * 100) / total) : 0,
-              },
-              total,
+    if (outputJson) {
+      ctx.output.data(
+        buckets.map((b: AnyBucket) => {
+          const total = aggVal(b, totalIdx)
+          const entry: Record<string, unknown> = {
+            name: groupVal(b, 'name'),
+            conversationId: {
+              present: aggVal(b, 0),
+              pct: total ? Math.round((aggVal(b, 0) * 100) / total) : 0,
+            },
+            appId: {
+              present: aggVal(b, 1),
+              pct: total ? Math.round((aggVal(b, 1) * 100) / total) : 0,
+            },
+            messageId: {
+              present: aggVal(b, 2),
+              pct: total ? Math.round((aggVal(b, 2) * 100) / total) : 0,
+            },
+            step: {
+              present: aggVal(b, 3),
+              pct: total ? Math.round((aggVal(b, 3) * 100) / total) : 0,
+            },
+            total,
+          }
+          if (hasTraceIdField) {
+            entry.traceId = {
+              present: aggVal(b, 4),
+              pct: total ? Math.round((aggVal(b, 4) * 100) / total) : 0,
             }
-            if (hasTraceIdField) {
-              entry.traceId = {
-                present: aggVal(b, 4),
-                pct: total ? Math.round((aggVal(b, 4) * 100) / total) : 0,
-              }
-            }
-            return entry
-          }),
-          null,
-          2
-        )
+          }
+          return entry
+        })
       )
       return
     }
 
     if (buckets.length === 0) {
-      console.log('No workflow/log events found')
+      ctx.output.data('No workflow/log events found')
       return
     }
 
     const headerFields = fieldNames.map((f) => f.padStart(8)).join(' ')
     const lineWidth = 28 + fieldNames.length * 9 + 9
 
-    console.log(`\n🔗 Data Flow Check (${options.since ?? '7d'})`)
+    ctx.output.data(`\n🔗 Data Flow Check (${options.since ?? '7d'})`)
     if (!hasTraceIdField)
-      console.log('   ⚠ traceId field not yet in schema (T0.3 pending)')
-    console.log('═'.repeat(lineWidth))
-    console.log(`${'Step'.padEnd(28)} ${headerFields} ${'total'.padStart(8)}`)
-    console.log('─'.repeat(lineWidth))
+      ctx.output.data('   ⚠ traceId field not yet in schema (T0.3 pending)')
+    ctx.output.data('═'.repeat(lineWidth))
+    ctx.output.data(
+      `${'Step'.padEnd(28)} ${headerFields} ${'total'.padStart(8)}`
+    )
+    ctx.output.data('─'.repeat(lineWidth))
 
     for (const bucket of buckets) {
       const name = groupVal(bucket, 'name') || '—'
@@ -402,19 +411,15 @@ async function dataFlowCheck(options: {
         return `${indicator}${String(pct).padStart(3)}%`
       })
 
-      console.log(
+      ctx.output.data(
         `${name.padEnd(28)} ${fields.map((f) => f.padStart(8)).join(' ')} ${String(total).padStart(8)}`
       )
     }
 
-    console.log('─'.repeat(lineWidth))
-    console.log('Legend: ✓=100% | ~=>80% | !=partial | ✗=0%')
+    ctx.output.data('─'.repeat(lineWidth))
+    ctx.output.data('Legend: ✓=100% | ~=>80% | !=partial | ✗=0%')
   } catch (error) {
-    console.error(
-      'Query failed:',
-      error instanceof Error ? error.message : error
-    )
-    process.exit(1)
+    handleAxiomError(ctx, error, 'Failed to run data flow check.')
   }
 }
 
@@ -422,13 +427,17 @@ async function dataFlowCheck(options: {
 // 5. tag-health — Tag application success/failure breakdown
 // ---------------------------------------------------------------------------
 
-async function tagHealth(options: {
-  since?: string
-  json?: boolean
-}): Promise<void> {
+export async function tagHealth(
+  ctx: CommandContext,
+  options: {
+    since?: string
+    json?: boolean
+  }
+): Promise<void> {
   const client = getAxiomClient()
   const ds = getDataset()
   const { startTime, endTime } = parseTimeRange(options.since ?? '7d')
+  const outputJson = options.json === true || ctx.format === 'json'
 
   // Note: The spec suggested grouping by errorType, but that field doesn't exist
   // in the dataset. We group by appId + name instead (which separates log events
@@ -445,37 +454,33 @@ async function tagHealth(options: {
 
     const buckets = result.buckets?.totals ?? []
 
-    if (options.json) {
-      console.log(
-        JSON.stringify(
-          buckets.map((b) => ({
-            appId: groupVal(b, 'appId'),
-            name: groupVal(b, 'name'),
-            success: aggVal(b, 0),
-            failure: aggVal(b, 1),
-            total: aggVal(b, 2),
-            successRate: aggVal(b, 2)
-              ? Number(((aggVal(b, 0) * 100) / aggVal(b, 2)).toFixed(1))
-              : 0,
-          })),
-          null,
-          2
-        )
+    if (outputJson) {
+      ctx.output.data(
+        buckets.map((b) => ({
+          appId: groupVal(b, 'appId'),
+          name: groupVal(b, 'name'),
+          success: aggVal(b, 0),
+          failure: aggVal(b, 1),
+          total: aggVal(b, 2),
+          successRate: aggVal(b, 2)
+            ? Number(((aggVal(b, 0) * 100) / aggVal(b, 2)).toFixed(1))
+            : 0,
+        }))
       )
       return
     }
 
     if (buckets.length === 0) {
-      console.log('No tagging events found')
+      ctx.output.data('No tagging events found')
       return
     }
 
-    console.log(`\n🏷  Tag Health (${options.since ?? '7d'})`)
-    console.log('═'.repeat(90))
-    console.log(
+    ctx.output.data(`\n🏷  Tag Health (${options.since ?? '7d'})`)
+    ctx.output.data('═'.repeat(90))
+    ctx.output.data(
       `${'App'.padEnd(25)} ${'Event'.padEnd(25)} ${'OK'.padStart(6)} ${'Fail'.padStart(6)} ${'Total'.padStart(6)} ${'Rate'.padStart(8)}`
     )
-    console.log('─'.repeat(90))
+    ctx.output.data('─'.repeat(90))
 
     for (const bucket of buckets) {
       const appId = groupVal(bucket, 'appId') || '—'
@@ -487,18 +492,14 @@ async function tagHealth(options: {
 
       const indicator =
         Number(rate) >= 95 ? '🟢' : Number(rate) >= 80 ? '🟡' : '🔴'
-      console.log(
+      ctx.output.data(
         `${indicator} ${appId.padEnd(23)} ${name.padEnd(25)} ${String(success).padStart(6)} ${String(failure).padStart(6)} ${String(total).padStart(6)} ${String(rate).padStart(7)}%`
       )
     }
 
-    console.log('─'.repeat(90))
+    ctx.output.data('─'.repeat(90))
   } catch (error) {
-    console.error(
-      'Query failed:',
-      error instanceof Error ? error.message : error
-    )
-    process.exit(1)
+    handleAxiomError(ctx, error, 'Failed to fetch tag health metrics.')
   }
 }
 
@@ -506,13 +507,17 @@ async function tagHealth(options: {
 // 6. approval-stats — Auto-approval vs manual review breakdown
 // ---------------------------------------------------------------------------
 
-async function approvalStats(options: {
-  since?: string
-  json?: boolean
-}): Promise<void> {
+export async function approvalStats(
+  ctx: CommandContext,
+  options: {
+    since?: string
+    json?: boolean
+  }
+): Promise<void> {
   const client = getAxiomClient()
   const ds = getDataset()
   const { startTime, endTime } = parseTimeRange(options.since ?? '7d')
+  const outputJson = options.json === true || ctx.format === 'json'
 
   const apl = `['${ds}']
 | where name == 'log' and (message contains 'auto-approv' or message contains 'approval')
@@ -526,39 +531,35 @@ async function approvalStats(options: {
 
     const buckets = result.buckets?.totals ?? []
 
-    if (options.json) {
-      console.log(
-        JSON.stringify(
-          buckets.map((b) => {
-            const total = aggVal(b, 2)
-            return {
-              appId: groupVal(b, 'appId'),
-              auto: aggVal(b, 0),
-              manual: aggVal(b, 1),
-              total,
-              autoRate: total
-                ? Number(((aggVal(b, 0) * 100) / total).toFixed(1))
-                : 0,
-            }
-          }),
-          null,
-          2
-        )
+    if (outputJson) {
+      ctx.output.data(
+        buckets.map((b) => {
+          const total = aggVal(b, 2)
+          return {
+            appId: groupVal(b, 'appId'),
+            auto: aggVal(b, 0),
+            manual: aggVal(b, 1),
+            total,
+            autoRate: total
+              ? Number(((aggVal(b, 0) * 100) / total).toFixed(1))
+              : 0,
+          }
+        })
       )
       return
     }
 
     if (buckets.length === 0) {
-      console.log('No approval events found')
+      ctx.output.data('No approval events found')
       return
     }
 
-    console.log(`\n✅ Approval Stats (${options.since ?? '7d'})`)
-    console.log('═'.repeat(70))
-    console.log(
+    ctx.output.data(`\n✅ Approval Stats (${options.since ?? '7d'})`)
+    ctx.output.data('═'.repeat(70))
+    ctx.output.data(
       `${'App'.padEnd(30)} ${'Auto'.padStart(8)} ${'Manual'.padStart(8)} ${'Total'.padStart(8)} ${'Auto %'.padStart(8)}`
     )
-    console.log('─'.repeat(70))
+    ctx.output.data('─'.repeat(70))
 
     for (const bucket of buckets) {
       const appId = groupVal(bucket, 'appId') || '—'
@@ -567,18 +568,14 @@ async function approvalStats(options: {
       const total = aggVal(bucket, 2)
       const autoRate = total ? ((auto * 100) / total).toFixed(1) : '—'
 
-      console.log(
+      ctx.output.data(
         `${appId.padEnd(30)} ${String(auto).padStart(8)} ${String(manual).padStart(8)} ${String(total).padStart(8)} ${String(autoRate).padStart(7)}%`
       )
     }
 
-    console.log('─'.repeat(70))
+    ctx.output.data('─'.repeat(70))
   } catch (error) {
-    console.error(
-      'Query failed:',
-      error instanceof Error ? error.message : error
-    )
-    process.exit(1)
+    handleAxiomError(ctx, error, 'Failed to fetch approval stats.')
   }
 }
 
@@ -586,13 +583,17 @@ async function approvalStats(options: {
 // 7. pipeline-health — Overall pipeline health dashboard
 // ---------------------------------------------------------------------------
 
-async function pipelineHealth(options: {
-  since?: string
-  json?: boolean
-}): Promise<void> {
+export async function pipelineHealth(
+  ctx: CommandContext,
+  options: {
+    since?: string
+    json?: boolean
+  }
+): Promise<void> {
   const client = getAxiomClient()
   const ds = getDataset()
   const { startTime, endTime } = parseTimeRange(options.since ?? '7d')
+  const outputJson = options.json === true || ctx.format === 'json'
 
   const timeOpts = {
     startTime: startTime.toISOString(),
@@ -705,8 +706,8 @@ async function pipelineHealth(options: {
       topErrors,
     }
 
-    if (options.json) {
-      console.log(JSON.stringify(dashboard, null, 2))
+    if (outputJson) {
+      ctx.output.data(dashboard)
       return
     }
 
@@ -714,46 +715,42 @@ async function pipelineHealth(options: {
     const statusIcon =
       overallErrorRate > 5 ? '🔴' : overallErrorRate > 2 ? '🟡' : '🟢'
 
-    console.log(
+    ctx.output.data(
       `\n${statusIcon} Pipeline Health Dashboard (${options.since ?? '7d'})`
     )
-    console.log('═'.repeat(60))
-    console.log()
-    console.log(`  📬 Messages processed:  ${totalProcessed}`)
-    console.log(`  📊 Total events:        ${totalEvents}`)
-    console.log()
-    console.log(
+    ctx.output.data('═'.repeat(60))
+    ctx.output.data('')
+    ctx.output.data(`  📬 Messages processed:  ${totalProcessed}`)
+    ctx.output.data(`  📊 Total events:        ${totalEvents}`)
+    ctx.output.data('')
+    ctx.output.data(
       `  🚨 Error rate:          ${overallErrorRate.toFixed(2)}% (${totalErrors} errors)`
     )
-    console.log()
-    console.log(`  ⏱  Pipeline duration:`)
-    console.log(`     Avg:  ${formatDuration(avgDuration)}`)
-    console.log(`     P50:  ${formatDuration(p50Duration)}`)
-    console.log(`     P95:  ${formatDuration(p95Duration)}`)
-    console.log()
-    console.log(
+    ctx.output.data('')
+    ctx.output.data('  ⏱  Pipeline duration:')
+    ctx.output.data(`     Avg:  ${formatDuration(avgDuration)}`)
+    ctx.output.data(`     P50:  ${formatDuration(p50Duration)}`)
+    ctx.output.data(`     P95:  ${formatDuration(p95Duration)}`)
+    ctx.output.data('')
+    ctx.output.data(
       `  🏷  Tag success rate:    ${tagRate.toFixed(1)}% (${tagSuccess}/${tagTotal})`
     )
-    console.log(
+    ctx.output.data(
       `  ✅ Auto-approval rate:  ${autoRate.toFixed(1)}% (${autoApproval}/${approvalTotal})`
     )
 
     if (topErrors.length > 0) {
-      console.log()
-      console.log('  🔥 Top Error Sources:')
+      ctx.output.data('')
+      ctx.output.data('  🔥 Top Error Sources:')
       for (const e of topErrors) {
-        console.log(`     ${String(e.count).padStart(5)}  ${e.name}`)
+        ctx.output.data(`     ${String(e.count).padStart(5)}  ${e.name}`)
       }
     }
 
-    console.log()
-    console.log('─'.repeat(60))
+    ctx.output.data('')
+    ctx.output.data('─'.repeat(60))
   } catch (error) {
-    console.error(
-      'Query failed:',
-      error instanceof Error ? error.message : error
-    )
-    process.exit(1)
+    handleAxiomError(ctx, error, 'Failed to fetch pipeline health data.')
   }
 }
 
@@ -768,47 +765,145 @@ export function registerForensicCommands(axiom: Command): void {
     .argument('<conversationId>', 'Conversation ID to trace')
     .option('-s, --since <time>', 'Time range (e.g., 1h, 24h, 7d)', '7d')
     .option('--json', 'Output as JSON')
-    .action(pipelineTrace)
+    .action(async (conversationId, options, command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: options.json ? 'json' : opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await pipelineTrace(ctx, conversationId, options)
+    })
 
   axiom
     .command('step-timings')
     .description('P50/P95 duration by step name')
     .option('-s, --since <time>', 'Time range (e.g., 1h, 24h, 7d)', '7d')
     .option('--json', 'Output as JSON')
-    .action(stepTimings)
+    .action(async (options, command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: options.json ? 'json' : opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await stepTimings(ctx, options)
+    })
 
   axiom
     .command('error-rate')
     .description('Failure rate by step over time window')
     .option('-s, --since <time>', 'Time range (e.g., 1h, 24h, 7d)', '7d')
     .option('--json', 'Output as JSON')
-    .action(errorRate)
+    .action(async (options, command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: options.json ? 'json' : opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await errorRate(ctx, options)
+    })
 
   axiom
     .command('data-flow-check')
     .description('Verify field presence at each pipeline boundary')
     .option('-s, --since <time>', 'Time range (e.g., 1h, 24h, 7d)', '7d')
     .option('--json', 'Output as JSON')
-    .action(dataFlowCheck)
+    .action(async (options, command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: options.json ? 'json' : opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await dataFlowCheck(ctx, options)
+    })
 
   axiom
     .command('tag-health')
     .description('Tag application success/failure breakdown')
     .option('-s, --since <time>', 'Time range (e.g., 1h, 24h, 7d)', '7d')
     .option('--json', 'Output as JSON')
-    .action(tagHealth)
+    .action(async (options, command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: options.json ? 'json' : opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await tagHealth(ctx, options)
+    })
 
   axiom
     .command('approval-stats')
     .description('Auto-approval vs manual review breakdown')
     .option('-s, --since <time>', 'Time range (e.g., 1h, 24h, 7d)', '7d')
     .option('--json', 'Output as JSON')
-    .action(approvalStats)
+    .action(async (options, command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: options.json ? 'json' : opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await approvalStats(ctx, options)
+    })
 
   axiom
     .command('pipeline-health')
     .description('Overall pipeline health dashboard (agent-readable)')
     .option('-s, --since <time>', 'Time range (e.g., 1h, 24h, 7d)', '7d')
     .option('--json', 'Output as JSON')
-    .action(pipelineHealth)
+    .action(async (options, command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: options.json ? 'json' : opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await pipelineHealth(ctx, options)
+    })
 }

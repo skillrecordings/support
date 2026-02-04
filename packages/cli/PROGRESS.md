@@ -10,3 +10,4 @@ Initialized: 2026-02-04T15:13:09.231Z
 - Migrated auth commands to native 1Password secrets, added auth integration tests, and fixed token decoding.
 - Added OutputFormatter abstraction with JSON/text/table formatters, auto-detection, global format/verbose/quiet flags, and unit coverage.
 - Migrated Front + Inngest commands to CommandContext/OutputFormatter, replaced console output, and added integration coverage for happy + error paths.
+- Added integration coverage for Axiom + Tools + Memory commands and tightened tools app config typing.
