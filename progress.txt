@@ -200,3 +200,11 @@ Tests:
 
 Commit:
 - `git add` failed due to
+
+---
+[2026-02-04T18:07:25.567Z]
+Completed: Dead Code Removal + Deduplication (Phase 5) — Issue #185
+Files: none
+Summary: **Summary**
+- Centralized Qdrant cleanup in `packages/cli/src/lib/eval-seed.ts` and reused it in `packages/cli/src/commands/eval-local/seed.ts` and `packages/cli/src/commands/eval-pipeline/seed.ts`.
+- Removed the CLI’s direct SDK dependency by introducing a minimal local client in `packages/cli/src/lib/integration-client.ts` and updating `packages/cli/src/commands/tools.ts` plus `packages/cli/test

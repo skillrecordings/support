@@ -8,6 +8,7 @@ import { glob } from 'glob'
 import { type CommandContext } from '../../core/context'
 import {
   cleanDatabase,
+  cleanQdrant,
   loadJsonFiles,
   loadKnowledgeFiles,
   seedApps,
@@ -62,16 +63,7 @@ export async function seed(
     if (options.clean) {
       log('🧹 Cleaning existing data...')
       await cleanDatabase(connection)
-
-      const qdrantUrl = process.env.QDRANT_URL || 'http://localhost:6333'
-      const collection = process.env.QDRANT_COLLECTION || 'knowledge'
-      try {
-        await fetch(`${qdrantUrl}/collections/${collection}`, {
-          method: 'DELETE',
-        })
-      } catch {
-        // Collection might not exist yet, ignore
-      }
+      await cleanQdrant()
     }
 
     // 1. Seed apps

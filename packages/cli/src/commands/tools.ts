@@ -8,10 +8,10 @@
  */
 
 import { AppsTable, eq, getDb } from '@skillrecordings/database'
-import { IntegrationClient } from '@skillrecordings/sdk/client'
 import type { Command } from 'commander'
 import { type CommandContext, createContext } from '../core/context'
 import { CLIError, formatError } from '../core/errors'
+import { IntegrationClient } from '../lib/integration-client'
 
 type AppConfig = {
   slug: string

@@ -83,7 +83,28 @@ bun src/index.ts <command>
 skill <command>
 ```
 
+**Global flags (all commands):**
+- `-f, --format <format>` Output format: `json`, `text`, or `table`
+- `-v, --verbose` Enable verbose output
+- `-q, --quiet` Suppress non-error output
+
 ### Key Commands
+
+**Core:**
+```bash
+skill init [name] --json
+skill wizard --json
+skill health [slug|url] -s <secret> --list --json
+skill db-status --json
+```
+
+**Front (conversation data + triage):**
+```bash
+skill front message <id>                  # Full message with body
+skill front conversation <id> -m          # Conversation + history
+skill front inbox [inbox-name-or-id] --limit 20
+skill front triage <inbox-id> --limit 20
+```
 
 **Inngest (workflow debugging):**
 ```bash
@@ -97,10 +118,12 @@ skill inngest trace <run-id>              # Full workflow trace
 skill inngest search "email@example"      # Search event data
 ```
 
-**Front (conversation data):**
+**Axiom (logs + forensic):**
 ```bash
-skill front message <id>                  # Full message with body
-skill front conversation <id> -m          # Conversation + history
+skill axiom query "<APL>" --since 24h --json
+skill axiom agents --app <app> --limit 20
+skill axiom errors --since 1h
+skill axiom pipeline-trace <conversationId> --since 7d
 ```
 
 **Apps & integrations:**
@@ -108,6 +131,7 @@ skill front conversation <id> -m          # Conversation + history
 skill tools list                          # List registered apps
 skill tools search <app> <query>          # Test content search
 skill tools lookup <app> <email>          # Test user lookup
+skill tools purchases <app> <user-id>     # Test purchases lookup
 skill health <app-slug>                   # Check integration health
 skill wizard                              # Interactive app setup
 ```
@@ -119,6 +143,13 @@ skill responses list --rating bad         # Only bad-rated
 skill responses get <id> --context        # Response + conversation
 skill dataset build --output data.json    # Build eval dataset from Front
 skill eval routing dataset.json           # Run routing eval
+skill eval-local health                   # Local eval services
+skill eval-local seed --clean             # Seed local eval DB/Qdrant
+skill eval-local run --scenarios "fixtures/scenarios/**/*.json"
+skill eval-pipeline run --step classify   # Pipeline step evals
+skill eval-pipeline seed --clean
+skill eval-prompt run --dataset data.json
+skill pipeline run --subject "Subj" --body "Body text"
 ```
 
 All commands support `--json` for machine-readable output.

@@ -21,7 +21,7 @@ vi.mock('@skillrecordings/database', () => ({
   getDb: mockGetDb,
 }))
 
-vi.mock('@skillrecordings/sdk/client', () => ({
+vi.mock('../../../src/lib/integration-client', () => ({
   IntegrationClient: mockIntegrationClient,
 }))
 

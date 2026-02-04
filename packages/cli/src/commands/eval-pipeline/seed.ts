@@ -9,6 +9,7 @@ import { type CommandContext } from '../../core/context'
 import { CLIError, formatError } from '../../core/errors'
 import {
   cleanDatabase,
+  cleanQdrant,
   loadJsonFiles,
   loadKnowledgeFiles,
   seedApps,
@@ -125,18 +126,5 @@ export async function seed(
       ctx.output.error(formatError(cliError))
     }
     process.exitCode = cliError.exitCode
-  }
-}
-
-async function cleanQdrant(): Promise<void> {
-  const qdrantUrl = process.env.QDRANT_URL || 'http://localhost:6333'
-  const collection = process.env.QDRANT_COLLECTION || 'knowledge'
-
-  try {
-    await fetch(`${qdrantUrl}/collections/${collection}`, {
-      method: 'DELETE',
-    })
-  } catch {
-    // Collection might not exist, ignore
   }
 }

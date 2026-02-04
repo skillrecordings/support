@@ -12,3 +12,4 @@ Initialized: 2026-02-04T15:13:09.231Z
 - Migrated Front + Inngest commands to CommandContext/OutputFormatter, replaced console output, and added integration coverage for happy + error paths.
 - Added integration coverage for Axiom + Tools + Memory commands and tightened tools app config typing.
 - Completed migration for eval, pipeline, deploys, FAQ, KB, health, wizard, responses, dataset, and init commands with OutputFormatter and added integration tests for each command group.
+- Centralized eval/Qdrant cleanup, added local integration client for tools, updated CLI docs, and removed the CLI SDK dependency.

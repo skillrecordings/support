@@ -16,7 +16,6 @@ export default defineConfig({
     '@skillrecordings/database',
     '@skillrecordings/front-sdk',
     '@skillrecordings/memory',
-    '@skillrecordings/sdk',
   ],
   // Native modules must be installed at runtime
   external: [

@@ -139,7 +139,7 @@
       "title": "Dead Code Removal + Deduplication (Phase 5) — Issue #185",
       "description": "Delete dead code, deduplicate shared helpers, update docs.\n\n## Context\n- Parent epic: #172, Issue: #185\n- Depends on: Story 8\n\n## Files to Delete\n- packages/cli/src/commands/front-stats.ts (unregistered standalone script)\n- packages/cli/src/commands/front-cache.ts (unregistered, never wired)\n- packages/cli/src/commands/eval-local/compare.ts (hardcoded fake data stub)\n\n## Files to Create\n- packages/cli/src/lib/eval-seed.ts — Shared seed logic (from eval-pipeline version)\n- packages/cli/src/lib/axiom-client.ts — Deduplicated axiom helpers (getAxiomClient, getDataset, parseTimeRange, formatDuration, formatTime)\n\n## Files to Modify\n- packages/cli/src/commands/eval-local/seed.ts — Import from shared eval-seed.ts\n- packages/cli/src/commands/eval-pipeline/seed.ts — Import from shared eval-seed.ts\n- packages/cli/src/commands/axiom/index.ts — Import from shared axiom-client.ts\n- packages/cli/src/commands/axiom/forensic.ts — Import from shared axiom-client.ts\n- packages/cli/package.json — Remove @skillrecordings/sdk\n- CLAUDE.md — Update with accurate command list and new flags\n\n## On Completion\nUpdate packages/cli/PROGRESS.md. Commit: `chore(cli): remove dead code and deduplicate helpers`",
       "priority": 9,
-      "passes": false,
+      "passes": true,
       "validationCommand": "cd packages/cli && bun run check-types && bun run test",
       "acceptanceCriteria": [
         "front-stats.ts front-cache.ts deleted",
@@ -257,7 +257,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-04T15:13:09.231Z",
-    "totalIterations": 8,
-    "lastIteration": "2026-02-04T17:59:13.604Z"
+    "totalIterations": 9,
+    "lastIteration": "2026-02-04T18:07:25.567Z"
   }
 }
