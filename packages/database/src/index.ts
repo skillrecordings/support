@@ -10,8 +10,13 @@ let pool: Pool | null = null
 
 export function getDb(): Database {
   if (!db) {
+    // Strip ?sslaccept=strict from PlanetScale URLs -- mysql2 doesn't recognize it
+    // and SSL is already configured via the ssl option below
+    const url = new URL(env.DATABASE_URL)
+    url.searchParams.delete('sslaccept')
+
     pool = mysql.createPool({
-      uri: env.DATABASE_URL,
+      uri: url.toString(),
       ssl: {
         rejectUnauthorized: true,
       },
