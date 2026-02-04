@@ -30,6 +30,7 @@ program
   .description('CLI tool for managing app integrations')
   .version('0.0.0')
 
+// Core commands
 program
   .command('init')
   .description('Initialize a new app integration (quick mode)')
@@ -61,6 +62,7 @@ program
   .option('--json', 'Output result as JSON (machine-readable)')
   .action(health)
 
+// Eval commands
 program
   .command('eval')
   .description('Run evals against a dataset')
@@ -102,49 +104,37 @@ program
     })
   })
 
-// Register Inngest commands
-registerInngestCommands(program)
+// Core command registrations
+registerDbStatusCommand(program)
 
-// Register Front commands
+// Front commands
 registerFrontCommands(program)
 
-// Register Memory commands
-registerMemoryCommands(program)
+// Inngest commands
+registerInngestCommands(program)
 
-// Register Auth commands (encrypted secrets for CLI distribution)
-registerAuthCommands(program)
-
-// Register Response commands (for analysis)
-registerResponseCommands(program)
-
-// Register Tools commands (test agent tools)
-registerToolsCommands(program)
-
-// Register Dataset commands (eval dataset building)
-registerDatasetCommands(program)
-registerEvalPromptCommands(program)
-
-// Register Axiom commands (log querying)
+// Axiom commands
 registerAxiomCommands(program)
 
-// Register eval-local commands (local eval environment)
+// Eval commands
 registerEvalLocalCommands(program)
-
-// Register eval-pipeline commands (step-by-step pipeline eval)
 registerEvalPipelineCommands(program)
-
-// Register pipeline commands (new step-based architecture)
+registerEvalPromptCommands(program)
 registerPipelineCommands(program)
 
-// Register deploy commands (Vercel status/logs/inspect)
-registerDeployCommands(program)
+// Data commands
+registerDatasetCommands(program)
+registerResponseCommands(program)
+registerToolsCommands(program)
+registerMemoryCommands(program)
 
-// Register knowledge base commands (sync/stats)
-registerKbCommands(program)
-
-// Register FAQ commands (mine/cluster/classify/extract/review)
+// FAQ commands
 registerFaqCommands(program)
-registerDbStatusCommand(program)
+
+// Infra commands
+registerDeployCommands(program)
+registerKbCommands(program)
+registerAuthCommands(program)
 
 // Parse and cleanup DB connections when done
 program.parseAsync().finally(async () => {

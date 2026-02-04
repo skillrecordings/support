@@ -73,3 +73,21 @@ Summary: **Summary**
 2. `bun run test` (packages/cli)
 
 **L
+
+---
+[2026-02-04T03:40:40.752Z]
+Completed: Final cleanup: slim index.ts and add changeset
+Files: none
+Summary: Summary:
+- Reorganized `packages/cli/src/index.ts` command registrations into the requested groups with clear section comments and reordered registrations accordingly.
+- Replaced the previous changeset with the comprehensive `.changeset/cli-cleanup-command-hygiene.md` file.
+
+Learnings:
+- None.
+
+Tests:
+- `cd packages/cli && bun run check-types`
+- `cd packages/cli && bun run test`
+
+Files:
+- `package

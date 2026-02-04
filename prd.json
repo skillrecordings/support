@@ -102,7 +102,7 @@
       "title": "Final cleanup: slim index.ts and add changeset",
       "description": "Final cleanup pass on packages/cli/src/index.ts after all previous stories have landed:\n\n1. Review index.ts and ensure all command registrations are clean and grouped logically\n2. Remove any stale imports that reference deleted files\n3. Ensure the command tree is organized into clear groups:\n   - Core: init, wizard, health, db-status\n   - Front: front (with subcommands)\n   - Inngest: inngest (with subcommands) \n   - Axiom: axiom (with subcommands)\n   - Eval: eval, eval-local, eval-pipeline, eval-prompt, pipeline\n   - Data: dataset, responses, tools, memory\n   - FAQ: faq (with subcommands)\n   - Infra: deploys, kb, auth\n4. Add comments grouping the registrations logically\n5. Create the final changeset file `.changeset/cli-cleanup-command-hygiene.md`:\n```\n---\n\"@skillrecordings/cli\": minor\n---\nrefactor: CLI command tree hygiene\n\n- Delete ~1,800 lines of dead code (front-cache, front-stats, alignment-test, test-agent-local, check-apps, eval-local compare stub)\n- Group Inngest commands under `inngest` subcommand\n- Group FAQ commands under `faq` subcommand\n- Deduplicate eval seed logic into shared module\n- Deduplicate Axiom helpers into shared module\n- Remove dead auth commands (keygen, encrypt, decrypt) and age crypto\n- Clean up index.ts with logical command grouping\n```\n\nNote: if Story 1 already created a changeset, remove it and replace with this comprehensive one.",
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "validationCommand": "cd packages/cli && bun run check-types && bun run test",
       "acceptanceCriteria": [
         "index.ts has clean grouped registrations",
@@ -116,7 +116,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-04T03:24:28.522Z",
-    "totalIterations": 6,
-    "lastIteration": "2026-02-04T03:38:53.202Z"
+    "totalIterations": 7,
+    "lastIteration": "2026-02-04T03:40:40.751Z"
   }
 }
