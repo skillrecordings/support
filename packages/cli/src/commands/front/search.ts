@@ -290,6 +290,17 @@ EXAMPLES
   # Pipe JSON to jq for IDs only
   skill front search "is:unassigned" --inbox inb_4bj7r --json | jq '.data.conversations[].id'
 
+LARGE RESULTS
+  When --json output exceeds 64KB (common with 25+ conversations), results are
+  automatically written to a temp file. Stdout gets a summary with the file path:
+    { "_file": "/tmp/skill-front/1738692000.json", "total": 50, ... }
+
+  To always get the full file:
+    skill front search "..." --json > results.json
+
+  To process the spilled file:
+    cat /tmp/skill-front/*.json | jq '.data.conversations[].id'
+
   Full docs: https://dev.frontapp.com/docs/search-1
 `
     )
