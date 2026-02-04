@@ -5,15 +5,9 @@ import { dirname, join } from 'node:path'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const cliDir = join(__dirname, '..')
 
-// Commands that don't need database/secrets
-const noSecretsNeeded = process.argv.some((a) =>
-	['--help', '-h', '--version', '-V', 'auth'].includes(a)
-)
-
-// Skip env validation for commands that don't need it
-if (noSecretsNeeded) {
-	process.env.SKIP_ENV_VALIDATION = '1'
-}
+// Skip env validation at import time - let commands fail at runtime if they need missing vars
+// This allows help, auth, and other non-db commands to work without DATABASE_URL
+process.env.SKIP_ENV_VALIDATION = '1'
 
 // Load env from CLI package directory
 try {
