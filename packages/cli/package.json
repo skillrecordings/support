@@ -5,13 +5,14 @@
   "bin": {
     "skill": "./bin/skill.mjs"
   },
-  "files": ["dist", "bin"],
+  "files": ["dist", "bin", "plugin"],
   "scripts": {
     "dev": "bun src/index.ts",
     "build": "tsup",
     "build:compile": "bun build.ts",
     "check-types": "tsc --noEmit",
-    "test": "vitest --run"
+    "test": "vitest --run",
+    "plugin:sync": "bun src/index.ts plugin sync"
   },
   "devDependencies": {
     "@repo/typescript-config": "*",

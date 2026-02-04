@@ -150,3 +150,11 @@ Initialized: 2026-02-04T15:13:09.231Z
 - Tests before: 131 passed, 4 skipped (135 total)
 - Tests after: 135 passed, 4 skipped (139 total)
 - Issues: none
+
+### Claude Code Plugin: skill-cli Front Inbox Manager (ID: story-ml8bd0sg)
+- Completed: 2026-02-04T20:44:03Z
+- Files created: packages/cli/plugin/.claude-plugin/plugin.json, packages/cli/plugin/skills/front-inbox/SKILL.md, packages/cli/plugin/skills/front-inbox/examples/triage-tt.md, packages/cli/plugin/skills/front-inbox/examples/bulk-archive.md, packages/cli/src/core/fs-extra.ts
+- Files modified: packages/cli/src/commands/plugin-sync.ts, packages/cli/src/index.ts, packages/cli/package.json, packages/cli/tests/integration/commands/plugin-sync.test.ts, packages/cli/PROGRESS.md
+- Tests before: 118 passed, 4 skipped (122 total)
+- Tests after: 118 passed, 4 skipped (122 total)
+- Issues: none

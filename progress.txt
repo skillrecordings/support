@@ -1383,3 +1383,25 @@ Files: none
 Summary: Summary:
 - Added `skill auth setup` wizard with op CLI checks, 1Password deep-link helpers, secret fetch/validation, and optional persistence (`.env.local`) plus export instructions. Files: `packages/cli/src/commands/auth/setup.ts`, `packages/cli/src/core/onepassword-links.ts`.
 - Registered the new subcommand and added `AGE_SECRET_KEY` reference. Files: `packages/cli/src/commands/auth/index.ts`, `
+
+---
+[2026-02-04T20:41:43.368Z]
+Failed: Claude Code Plugin: skill-cli Front Inbox Manager
+Validation: 
+ RUN  v3.2.4 /home/joel/Code/skillrecordings/support-cli-rearchitect/packages/cli
+
+ ✓ tests/e2e/install.test.ts (1 test) 40ms
+ ✓ tests/integration/commands/plugin-sync.test.ts (5 tests) 15ms
+ ✓ src/commands/eval.test.ts (7 tests) 34ms
+ ✓ tests/unit/core/output.test.ts (8 tests) 15ms
+ ✓ tests/integr
+Codex: 
+
+---
+[2026-02-04T20:44:47.739Z]
+Completed: Claude Code Plugin: skill-cli Front Inbox Manager
+Files: none
+Summary: Summary:
+- Added the `skill-cli` Claude Code plugin bundle under `packages/cli/plugin/` (manifest, front-inbox skill, examples) and included it in publishable files via `packages/cli/package.json`.
+- Implemented/validated `skill plugin sync` with version-aware copying and a small `packages/cli/src/core/fs-extra.ts` helper plus integration tests.
+- Logged completion details in `packages/cli/PROGRES
