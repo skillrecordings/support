@@ -361,13 +361,16 @@ describe('applyTag', () => {
     expect(failResult.durationMs).toBeGreaterThanOrEqual(0)
   })
 
-  it('handles all 17 message categories', async () => {
+  it('handles all 19 message categories', async () => {
     const categories = [
       'support_access',
       'support_refund',
       'support_transfer',
       'support_technical',
       'support_billing',
+      'technical_support',
+      'feedback',
+      'sales_pricing',
       'fan_mail',
       'spam',
       'system',
