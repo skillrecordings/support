@@ -146,5 +146,46 @@ export function registerArchiveCommand(frontCommand: Command): void {
     .argument('<id>', 'Conversation ID (e.g., cnv_xxx)')
     .argument('[ids...]', 'Additional conversation IDs to archive')
     .option('--json', 'Output as JSON')
+    .addHelpText(
+      'after',
+      `
+━━━ Archive Conversations ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Sets the status of one or more conversations to 'archived' in Front.
+  Accepts conversation IDs (cnv_xxx) or full Front API URLs.
+
+SINGLE CONVERSATION
+  skill front archive cnv_abc123
+
+MULTIPLE CONVERSATIONS
+  skill front archive cnv_abc123 cnv_def456 cnv_ghi789
+
+  All IDs are archived concurrently. The summary shows success/failure counts.
+
+JSON OUTPUT (for scripting)
+  skill front archive cnv_abc123 --json
+  skill front archive cnv_abc123 cnv_def456 --json
+
+  JSON envelope includes per-conversation success/error status.
+
+BATCH PIPELINE (search → archive)
+  # Archive all snoozed conversations in an inbox
+  skill front search "is:snoozed" --inbox inb_4bj7r --json \\
+    | jq -r '.data.conversations[].id' \\
+    | xargs -I{} skill front archive {}
+
+  # Archive unassigned conversations older than 30 days
+  skill front search "is:unassigned" --inbox inb_4bj7r --json \\
+    | jq -r '.data.conversations[].id' \\
+    | xargs -I{} skill front archive {}
+
+  For filter-based bulk archiving with built-in safety, use bulk-archive instead.
+
+RELATED COMMANDS
+  skill front bulk-archive   Filter-based bulk archive (--dry-run, rate limiting)
+  skill front conversation    View conversation details before archiving
+  skill front search          Find conversations by query / filters
+`
+    )
     .action(archiveConversations)
 }

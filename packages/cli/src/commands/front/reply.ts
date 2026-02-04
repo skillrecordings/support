@@ -109,5 +109,61 @@ export function registerReplyCommand(frontCommand: Command): void {
     .requiredOption('--body <text>', 'Reply body text')
     .option('--author <teammate-id>', 'Author teammate ID')
     .option('--json', 'Output as JSON')
+    .addHelpText(
+      'after',
+      `
+━━━ Draft Reply (HITL — Human-in-the-Loop) ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ⚠️  SAFETY: This command creates a DRAFT only. It NEVER auto-sends.
+  The draft appears in Front for a human to review, edit, and send manually.
+  This is by design — the HITL principle ensures no message goes out without
+  human approval.
+
+USAGE
+  skill front reply <conversation-id> --body "Your reply text here"
+
+OPTIONS
+  --body <text>              Required. The reply body text.
+                             Accepts plain text or HTML.
+  --author <teammate-id>     Optional. Teammate ID (tea_xxx) to set as sender.
+                             Defaults to the API token owner.
+  --json                     Output as JSON.
+
+BODY FORMAT
+  Plain text:   --body "Thanks for reaching out. We'll look into this."
+  HTML:         --body "<p>Hi there,</p><p>Your refund has been processed.</p>"
+
+  For multi-line plain text, the body will render as-is in the Front draft.
+
+JSON OUTPUT (--json)
+  Returns a HATEOAS-wrapped object:
+    { type: "draft-reply", data: { id, ... } }
+
+WORKFLOW
+  1. Read the conversation first:
+       skill front conversation cnv_abc123 -m
+  2. Draft a reply:
+       skill front reply cnv_abc123 --body "We've processed your request."
+  3. Open Front → review the draft → edit if needed → click Send.
+
+EXAMPLES
+  # Simple draft reply
+  skill front reply cnv_abc123 --body "Thanks, we're looking into this now."
+
+  # HTML reply with specific author
+  skill front reply cnv_abc123 \\
+    --body "<p>Hi! Your license has been transferred.</p>" \\
+    --author tea_def456
+
+  # Draft reply and capture the draft ID
+  skill front reply cnv_abc123 --body "Processing your refund." --json \\
+    | jq '.data.id'
+
+RELATED COMMANDS
+  skill front conversation <id> -m    View conversation + message history
+  skill front message <id>            View a specific message body
+  skill front search                  Find conversations to reply to
+`
+    )
     .action(replyToConversation)
 }

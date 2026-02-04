@@ -810,12 +810,75 @@ export function registerTagCommands(frontCommand: Command): void {
   const tags = frontCommand
     .command('tags')
     .description('List, rename, delete, and clean up Front tags')
+    .addHelpText(
+      'after',
+      `
+━━━ Tag Management ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Manage Front tags: list with usage counts, delete unused, rename,
+  and bulk-clean duplicates / case variants / obsolete tags.
+
+SUBCOMMANDS
+  list      List all tags with conversation counts (--unused, --json)
+  delete    Delete a tag by ID (tag_xxx)
+  rename    Rename a tag (tag_xxx → new name)
+  cleanup   Find and fix duplicate, case-variant, and obsolete tags
+
+EXAMPLES
+  skill front tags list
+  skill front tags list --unused --json
+  skill front tags delete tag_abc123 --force
+  skill front tags rename tag_abc123 "billing-issue"
+  skill front tags cleanup
+  skill front tags cleanup --execute
+
+RELATED COMMANDS
+  skill front tag <cnv_xxx> <tag_xxx>       Apply a tag to a conversation
+  skill front untag <cnv_xxx> <tag_xxx>     Remove a tag from a conversation
+`
+    )
 
   tags
     .command('list')
     .description('List all tags with conversation counts')
     .option('--json', 'Output as JSON')
     .option('--unused', 'Show only tags with 0 conversations')
+    .addHelpText(
+      'after',
+      `
+━━━ Tag List ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Lists every tag in the Front workspace with its conversation count.
+  Conversation counts are fetched per-tag (rate-limited, ~5 concurrent).
+
+OPTIONS
+  --unused    Show only tags with 0 conversations (candidates for deletion)
+  --json      Output as JSON (HATEOAS-wrapped with links and actions)
+
+OUTPUT COLUMNS (table mode)
+  ID          Tag ID (tag_xxx)
+  Name        Tag display name
+  Color       Highlight color
+  Convos      Number of conversations using this tag (0 shows warning)
+
+JSON + jq PATTERNS
+  # All unused tags
+  skill front tags list --json | jq '.data[] | select(.conversation_count == 0)'
+
+  # Tag names only
+  skill front tags list --json | jq '.data[].name'
+
+  # Tags sorted by usage (most → least)
+  skill front tags list --json | jq '.data | sort_by(-.conversation_count)'
+
+  # Count of unused tags
+  skill front tags list --json | jq '[.data[] | select(.conversation_count == 0)] | length'
+
+NOTE
+  Fetching counts for many tags can take a while due to Front API rate limits.
+  The command batches requests (5 at a time, 100ms between batches).
+`
+    )
     .action(listTags)
 
   tags
@@ -823,6 +886,30 @@ export function registerTagCommands(frontCommand: Command): void {
     .description('Delete a tag by ID')
     .argument('<id>', 'Tag ID (e.g., tag_xxx)')
     .option('-f, --force', 'Skip confirmation prompt')
+    .addHelpText(
+      'after',
+      `
+━━━ Tag Delete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Delete a single tag by its Front ID.
+
+ARGUMENTS
+  <id>    Tag ID in tag_xxx format (find IDs via: skill front tags list --json)
+
+OPTIONS
+  -f, --force    Skip the confirmation prompt (use in scripts)
+
+BEHAVIOR
+  - Shows tag name, ID, and conversation count before prompting
+  - Warns if the tag is still applied to conversations
+  - Deleting a tag removes it from all conversations that use it
+  - This action is irreversible
+
+EXAMPLES
+  skill front tags delete tag_abc123
+  skill front tags delete tag_abc123 --force
+`
+    )
     .action(deleteTag)
 
   tags
@@ -830,6 +917,26 @@ export function registerTagCommands(frontCommand: Command): void {
     .description('Rename a tag')
     .argument('<id>', 'Tag ID (e.g., tag_xxx)')
     .argument('<name>', 'New tag name')
+    .addHelpText(
+      'after',
+      `
+━━━ Tag Rename ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Rename a tag. The tag keeps its ID and stays applied to all conversations.
+
+ARGUMENTS
+  <id>      Tag ID in tag_xxx format
+  <name>    New display name for the tag
+
+EXAMPLES
+  skill front tags rename tag_abc123 "billing-issue"
+  skill front tags rename tag_abc123 "refund-request"
+
+NOTE
+  If a tag with the new name already exists, the API will return an error.
+  Use "skill front tags cleanup" to merge duplicates and case variants.
+`
+    )
     .action(renameTag)
 
   tags
@@ -838,5 +945,36 @@ export function registerTagCommands(frontCommand: Command): void {
       'Clean up tags: delete duplicates, merge case variants, remove obsolete, create missing standard tags'
     )
     .option('--execute', 'Actually apply changes (default is dry-run)', false)
+    .addHelpText(
+      'after',
+      `
+━━━ Tag Cleanup ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Analyze all tags for issues and optionally fix them. Default is dry-run.
+
+WHAT IT FINDS
+  - Exact duplicates (same name, multiple tag IDs)
+  - Case variants ("Refund" vs "refund" vs "REFUND")
+  - Obsolete tags (date-based like "jan-2022", Gmail imports like "INBOX")
+  - Missing standard tags from the category registry
+
+WHAT IT DOES (with --execute)
+  - Deletes duplicate tags (keeps the one with most conversations)
+  - Renames case variants to canonical lowercase-hyphenated form
+  - Deletes obsolete/imported tags
+  - Creates missing standard category tags
+
+OPTIONS
+  --execute    Apply the cleanup plan. Without this flag, only a dry-run
+               report is printed (safe to run anytime).
+
+EXAMPLES
+  # See what would be changed (safe, read-only)
+  skill front tags cleanup
+
+  # Actually apply changes (prompts for confirmation)
+  skill front tags cleanup --execute
+`
+    )
     .action(cleanupTags)
 }

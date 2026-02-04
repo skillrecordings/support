@@ -393,14 +393,76 @@ export function registerFrontCommands(program: Command): void {
     .command('front')
     .description('Front conversations, inboxes, tags, archival, and reporting')
 
-  front
+  const messageCmd = front
     .command('message')
     .description('Get a message by ID (body, author, recipients, attachments)')
     .argument('<id>', 'Message ID (e.g., msg_xxx)')
     .option('--json', 'Output as JSON')
     .action(getMessage)
 
-  front
+  messageCmd.addHelpText(
+    'after',
+    `
+━━━ Message Details ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Fetches a single message from Front by its ID. Returns the full message
+  including HTML body, plaintext body, author, recipients, attachments,
+  and metadata.
+
+ID FORMAT
+  msg_xxx     Front message ID (prefixed with msg_)
+              You can find message IDs from conversation message lists.
+
+WHAT'S RETURNED
+  Field        Description
+  ──────────── ──────────────────────────────────────────────────────────
+  id           Message ID (msg_xxx)
+  type         Message type (email, sms, custom, etc.)
+  subject      Message subject line
+  body         Full HTML body
+  text         Plaintext body (stripped HTML)
+  author       Author object (email, id) — teammate or contact
+  recipients   Array of {role, handle} — from/to/cc/bcc
+  attachments  Array of {filename, content_type, size, url}
+  created_at   Unix timestamp of message creation
+  metadata     Headers, external references
+
+JSON + jq PATTERNS
+  # Get the HTML body
+  skill front message msg_xxx --json | jq '.data.body'
+
+  # Get the plaintext body
+  skill front message msg_xxx --json | jq '.data.text'
+
+  # Get the author email
+  skill front message msg_xxx --json | jq '.data.author.email'
+
+  # List all recipients
+  skill front message msg_xxx --json | jq '.data.recipients[] | {role, handle}'
+
+  # List attachment filenames
+  skill front message msg_xxx --json | jq '.data.attachments[].filename'
+
+RELATED COMMANDS
+  skill front conversation <id> -m   Find message IDs from a conversation
+  skill front search <query>         Search conversations to find threads
+
+EXAMPLES
+  # Get full message details (human-readable)
+  skill front message msg_1a2b3c
+
+  # Get message as JSON for piping
+  skill front message msg_1a2b3c --json
+
+  # Extract just the body text
+  skill front message msg_1a2b3c --json | jq -r '.data.text'
+
+  # Check who sent a message
+  skill front message msg_1a2b3c --json | jq '{author: .data.author.email, recipients: [.data.recipients[].handle]}'
+`
+  )
+
+  const conversationCmd = front
     .command('conversation')
     .description('Get a conversation by ID (status, tags, assignee, messages)')
     .argument('<id>', 'Conversation ID (e.g., cnv_xxx)')
@@ -408,18 +470,195 @@ export function registerFrontCommands(program: Command): void {
     .option('-m, --messages', 'Include message history')
     .action(getConversation)
 
-  front
+  conversationCmd.addHelpText(
+    'after',
+    `
+━━━ Conversation Details ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Fetches a conversation from Front by its ID. Returns metadata, tags,
+  assignee, recipient, and optionally the full message history.
+
+ID FORMAT
+  cnv_xxx     Front conversation ID (prefixed with cnv_)
+              Find conversation IDs via search or inbox listing.
+
+FLAGS
+  -m, --messages    Include full message history in the response.
+                    Without this flag, only conversation metadata is returned.
+
+WHAT'S RETURNED
+  Field        Description
+  ──────────── ──────────────────────────────────────────────────────────
+  id           Conversation ID (cnv_xxx)
+  subject      Conversation subject line
+  status       Current status (see below)
+  created_at   Unix timestamp
+  recipient    Primary recipient {handle, role}
+  assignee     Assigned teammate {id, email} or null
+  tags         Array of {id, name} tags on this conversation
+  messages     (with -m) Array of full message objects
+
+STATUS VALUES
+  archived     Conversation is archived
+  unassigned   Open, no assignee
+  assigned     Open, has an assignee
+  deleted      In trash
+  waiting      Waiting for response
+
+JSON + jq PATTERNS
+  # Get conversation metadata
+  skill front conversation cnv_xxx --json | jq '.data.conversation'
+
+  # Get all messages (requires -m flag)
+  skill front conversation cnv_xxx -m --json | jq '.data.messages[]'
+
+  # Get just message bodies as plaintext
+  skill front conversation cnv_xxx -m --json | jq -r '.data.messages[].text'
+
+  # Extract tag names
+  skill front conversation cnv_xxx --json | jq '[.data.conversation.tags[].name]'
+
+  # Get assignee email
+  skill front conversation cnv_xxx --json | jq '.data.conversation.assignee.email'
+
+  # Get message count
+  skill front conversation cnv_xxx -m --json | jq '.data.messages | length'
+
+  # Get inbound messages only
+  skill front conversation cnv_xxx -m --json | jq '[.data.messages[] | select(.is_inbound)]'
+
+RELATED COMMANDS
+  skill front message <id>           Get full details for a specific message
+  skill front assign <cnv> <tea>     Assign conversation to a teammate
+  skill front tag <cnv> <tag>        Add a tag to a conversation
+  skill front reply <cnv>            Send a reply to a conversation
+  skill front search <query>         Search for conversations
+
+EXAMPLES
+  # Get conversation overview
+  skill front conversation cnv_abc123
+
+  # Get conversation with full message history
+  skill front conversation cnv_abc123 -m
+
+  # Pipe to jq to extract tags and assignee
+  skill front conversation cnv_abc123 --json | jq '{tags: [.data.conversation.tags[].name], assignee: .data.conversation.assignee.email}'
+
+  # Get the latest message text from a conversation
+  skill front conversation cnv_abc123 -m --json | jq -r '.data.messages[-1].text'
+`
+  )
+
+  const teammatesCmd = front
     .command('teammates')
     .description('List all teammates in the workspace')
     .option('--json', 'Output as JSON')
     .action(listTeammates)
 
-  front
+  teammatesCmd.addHelpText(
+    'after',
+    `
+━━━ List Teammates ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Lists all teammates in the Front workspace. Returns each teammate's ID,
+  email, name, username, and availability status.
+
+WHAT'S RETURNED (per teammate)
+  Field          Description
+  ────────────── ──────────────────────────────────────────────────────────
+  id             Teammate ID (tea_xxx)
+  email          Teammate email address
+  first_name     First name
+  last_name      Last name
+  username       Front username
+  is_available   Whether teammate is currently available (true/false)
+
+JSON + jq PATTERNS
+  # Get all teammate IDs
+  skill front teammates --json | jq '[.data[].id]'
+
+  # Get ID + email pairs
+  skill front teammates --json | jq '.data[] | {id, email}'
+
+  # Find a teammate by email
+  skill front teammates --json | jq '.data[] | select(.email == "joel@example.com")'
+
+  # List only available teammates
+  skill front teammates --json | jq '[.data[] | select(.is_available)]'
+
+  # Get a count of teammates
+  skill front teammates --json | jq '.data | length'
+
+RELATED COMMANDS
+  skill front teammate <id>          Get details for a specific teammate
+  skill front assign <cnv> <tea>     Assign a conversation to a teammate
+
+EXAMPLES
+  # List all teammates (human-readable table)
+  skill front teammates
+
+  # List as JSON for scripting
+  skill front teammates --json
+
+  # Find teammate ID by email for use in assign
+  skill front teammates --json | jq -r '.data[] | select(.email | contains("joel")) | .id'
+`
+  )
+
+  const teammateCmd = front
     .command('teammate')
     .description('Get teammate details by ID')
     .argument('<id>', 'Teammate ID (e.g., tea_xxx or username)')
     .option('--json', 'Output as JSON')
     .action(getTeammate)
+
+  teammateCmd.addHelpText(
+    'after',
+    `
+━━━ Teammate Details ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Fetches details for a single teammate by their ID. Returns email, name,
+  username, and current availability.
+
+ID FORMAT
+  tea_xxx     Front teammate ID (prefixed with tea_)
+              Find teammate IDs via: skill front teammates
+
+WHAT'S RETURNED
+  Field          Description
+  ────────────── ──────────────────────────────────────────────────────────
+  id             Teammate ID (tea_xxx)
+  email          Teammate email address
+  first_name     First name
+  last_name      Last name
+  username       Front username
+  is_available   Whether teammate is currently available (true/false)
+
+JSON + jq PATTERNS
+  # Get teammate email
+  skill front teammate tea_xxx --json | jq '.data.email'
+
+  # Get full name
+  skill front teammate tea_xxx --json | jq '(.data.first_name + " " + .data.last_name)'
+
+  # Check availability
+  skill front teammate tea_xxx --json | jq '.data.is_available'
+
+RELATED COMMANDS
+  skill front teammates              List all teammates (to find IDs)
+  skill front assign <cnv> <tea>     Assign a conversation to this teammate
+
+EXAMPLES
+  # Get teammate details (human-readable)
+  skill front teammate tea_1a2b3c
+
+  # Get as JSON
+  skill front teammate tea_1a2b3c --json
+
+  # Quick check if teammate is available
+  skill front teammate tea_1a2b3c --json | jq -r 'if .data.is_available then "available" else "away" end'
+`
+  )
 
   // Register inbox, archive, report, triage commands
   registerInboxCommand(front)
