@@ -360,5 +360,71 @@ export function registerTriageCommand(front: Command): void {
     )
     .option('--auto-archive', 'Automatically archive noise and spam')
     .option('--json', 'JSON output')
+    .addHelpText(
+      'after',
+      `
+━━━ AI-Powered Triage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Categorize inbox conversations into actionable, noise, or spam using
+  heuristic rules. Optionally auto-archive the junk.
+
+OPTIONS
+  -i, --inbox <id>       (required) Inbox ID to triage (inb_xxx)
+  -s, --status <status>  Conversation status to filter (default: unassigned)
+                         Values: unassigned, assigned, archived
+  --auto-archive         Archive all noise + spam conversations automatically
+  --json                 Output as JSON (HATEOAS-wrapped)
+
+CATEGORIZATION RULES
+  Category      Signals
+  ───────────── ──────────────────────────────────────────────────────────
+  Noise         mailer-daemon, noreply, no-reply, postmaster, newsletter
+                delivery failures, auto-replies, out-of-office,
+                automated reports (daily/weekly/monthly), cert notifications
+  Spam          partnership/sponsorship pitches, guest post / link exchange,
+                backlink requests, marketing opportunities
+  Actionable    Everything else (real support issues)
+
+WORKFLOW
+  1. Triage to see the breakdown:
+     skill front triage --inbox inb_4bj7r
+
+  2. Review categories in the output (actionable / noise / spam)
+
+  3. If satisfied, auto-archive the junk:
+     skill front triage --inbox inb_4bj7r --auto-archive
+
+JSON + jq PATTERNS
+  # Just the stats
+  skill front triage --inbox inb_4bj7r --json | jq '.data.stats'
+
+  # All noise conversation IDs
+  skill front triage --inbox inb_4bj7r --json | jq '[.data.results[] | select(.category == "noise") | .id]'
+
+  # Spam sender emails
+  skill front triage --inbox inb_4bj7r --json | jq '[.data.results[] | select(.category == "spam") | .senderEmail]'
+
+  # Actionable count
+  skill front triage --inbox inb_4bj7r --json | jq '.data.stats.actionable'
+
+EXAMPLES
+  # Triage unassigned conversations (default)
+  skill front triage --inbox inb_4bj7r
+
+  # Triage assigned conversations
+  skill front triage --inbox inb_4bj7r --status assigned
+
+  # Triage and auto-archive noise + spam
+  skill front triage --inbox inb_4bj7r --auto-archive
+
+  # Pipe JSON for downstream processing
+  skill front triage --inbox inb_4bj7r --json | jq '.data.results[] | select(.category == "actionable")'
+
+RELATED COMMANDS
+  skill front bulk-archive    Bulk-archive conversations by query
+  skill front report          Inbox activity report
+  skill front search          Search conversations with filters
+`
+    )
     .action(triageConversations)
 }

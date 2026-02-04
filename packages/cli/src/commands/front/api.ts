@@ -82,6 +82,85 @@ export function registerApiCommand(frontCommand: Command): void {
       'API endpoint path (e.g., /me, /conversations/cnv_xxx)'
     )
     .option('--data <json>', 'Request body as JSON string')
+    .addHelpText(
+      'after',
+      `
+━━━ Raw Front API Passthrough ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Escape hatch for making arbitrary Front API calls. Use this when no
+  typed CLI command exists for what you need.
+
+ARGUMENTS
+  <method>      HTTP method: GET, POST, PATCH, PUT, DELETE
+  <endpoint>    API path (leading / is optional — both work)
+
+OPTIONS
+  --data <json>   Request body as a valid JSON string (for POST, PATCH, PUT)
+
+COMMON ENDPOINTS
+  Endpoint                          What it returns
+  ─────────────────────────────── ──────────────────────────────────────
+  /me                               Authenticated identity
+  /inboxes                          All inboxes
+  /conversations/cnv_xxx            Conversation details
+  /conversations/cnv_xxx/messages   Messages in a conversation
+  /tags                             All tags
+  /teammates                        All teammates
+  /contacts                         All contacts
+  /accounts                         All accounts
+  /channels                         All channels
+  /rules                            All rules
+
+ENDPOINT NORMALIZATION
+  Leading slash is optional. These are equivalent:
+    skill front api GET /me
+    skill front api GET me
+
+OUTPUT
+  Always JSON. Pipe to jq for filtering.
+
+EXAMPLES
+  # Check authenticated identity
+  skill front api GET /me
+
+  # List all inboxes
+  skill front api GET /inboxes
+
+  # Get a specific conversation
+  skill front api GET /conversations/cnv_abc123
+
+  # Archive a conversation
+  skill front api PATCH /conversations/cnv_abc123 --data '{"status":"archived"}'
+
+  # Apply a tag to a conversation
+  skill front api POST /conversations/cnv_abc123/tags --data '{"tag_ids":["tag_xxx"]}'
+
+  # Create a new tag
+  skill front api POST /tags --data '{"name":"my-new-tag","highlight":"blue"}'
+
+  # Delete a tag
+  skill front api DELETE /tags/tag_xxx
+
+  # List teammates and extract emails
+  skill front api GET /teammates | jq '._results[].email'
+
+  # Get conversation + pipe to jq for specific fields
+  skill front api GET /conversations/cnv_abc123 | jq '{subject, status, assignee: .assignee.email}'
+
+WHEN TO USE THIS vs TYPED COMMANDS
+  Prefer typed commands when available — they have better error handling,
+  pagination, and output formatting:
+    skill front search        (not: skill front api GET /conversations/search/...)
+    skill front inbox         (not: skill front api GET /inboxes)
+    skill front tags list     (not: skill front api GET /tags)
+    skill front conversation  (not: skill front api GET /conversations/cnv_xxx)
+
+  Use "skill front api" for endpoints without a dedicated command, or when
+  you need the raw response shape.
+
+  Full API docs: https://dev.frontapp.com/reference
+`
+    )
     .action(
       async (method: string, endpoint: string, options: { data?: string }) => {
         try {
