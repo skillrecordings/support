@@ -1,14 +1,36 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createTestContext } from '../../helpers/test-context'
 
-const mockCreateInstrumentedFrontClient = vi.hoisted(() => vi.fn())
+const mockCreateInstrumentedBaseClient = vi.hoisted(() => vi.fn())
+const mockCreateConversationsClient = vi.hoisted(() => vi.fn())
+const mockCreateMessagesClient = vi.hoisted(() => vi.fn())
+const mockCreateDraftsClient = vi.hoisted(() => vi.fn())
+const mockCreateTemplatesClient = vi.hoisted(() => vi.fn())
+const mockCreateTagsClient = vi.hoisted(() => vi.fn())
+const mockCreateInboxesClient = vi.hoisted(() => vi.fn())
+const mockCreateChannelsClient = vi.hoisted(() => vi.fn())
+const mockCreateContactsClient = vi.hoisted(() => vi.fn())
+const mockCreateTeammatesClient = vi.hoisted(() => vi.fn())
 
 vi.mock('@skillrecordings/core/front/instrumented-client', () => ({
-  createInstrumentedFrontClient: mockCreateInstrumentedFrontClient,
+  createInstrumentedBaseClient: mockCreateInstrumentedBaseClient,
+}))
+
+vi.mock('@skillrecordings/front-sdk', () => ({
+  createConversationsClient: mockCreateConversationsClient,
+  createMessagesClient: mockCreateMessagesClient,
+  createDraftsClient: mockCreateDraftsClient,
+  createTemplatesClient: mockCreateTemplatesClient,
+  createTagsClient: mockCreateTagsClient,
+  createInboxesClient: mockCreateInboxesClient,
+  createChannelsClient: mockCreateChannelsClient,
+  createContactsClient: mockCreateContactsClient,
+  createTeammatesClient: mockCreateTeammatesClient,
 }))
 
 import { archiveConversations } from '../../../src/commands/front/archive'
 import { bulkArchiveConversations } from '../../../src/commands/front/bulk-archive'
+import { resetFrontCache } from '../../../src/commands/front/client'
 import {
   listConversations,
   listInboxes,
@@ -17,6 +39,14 @@ import { getConversation, getMessage } from '../../../src/commands/front/index'
 import { pullConversations } from '../../../src/commands/front/pull-conversations'
 import { listTags } from '../../../src/commands/front/tags'
 
+type MockFrontBaseClient = {
+  get: ReturnType<typeof vi.fn>
+  post: ReturnType<typeof vi.fn>
+  patch: ReturnType<typeof vi.fn>
+  put: ReturnType<typeof vi.fn>
+  delete: ReturnType<typeof vi.fn>
+}
+
 type MockFrontClient = {
   messages: { get: ReturnType<typeof vi.fn> }
   conversations: {
@@ -24,31 +54,59 @@ type MockFrontClient = {
     listMessages: ReturnType<typeof vi.fn>
   }
   inboxes: { list: ReturnType<typeof vi.fn> }
-  raw: {
-    get: ReturnType<typeof vi.fn>
-    patch: ReturnType<typeof vi.fn>
-    post: ReturnType<typeof vi.fn>
-  }
   tags: {
     listConversations: ReturnType<typeof vi.fn>
     get: ReturnType<typeof vi.fn>
     delete: ReturnType<typeof vi.fn>
     update: ReturnType<typeof vi.fn>
   }
+  drafts: Record<string, never>
+  templates: Record<string, never>
+  channels: Record<string, never>
+  contacts: Record<string, never>
+  teammates: Record<string, never>
 }
+
+const createBaseClient = (): MockFrontBaseClient => ({
+  get: vi.fn(),
+  post: vi.fn(),
+  patch: vi.fn(),
+  put: vi.fn(),
+  delete: vi.fn(),
+})
 
 const createFrontMock = (): MockFrontClient => ({
   messages: { get: vi.fn() },
   conversations: { get: vi.fn(), listMessages: vi.fn() },
   inboxes: { list: vi.fn() },
-  raw: { get: vi.fn(), patch: vi.fn(), post: vi.fn() },
   tags: {
     listConversations: vi.fn(),
     get: vi.fn(),
     delete: vi.fn(),
     update: vi.fn(),
   },
+  drafts: {},
+  templates: {},
+  channels: {},
+  contacts: {},
+  teammates: {},
 })
+
+const wireFrontMocks = (
+  front: MockFrontClient,
+  baseClient: MockFrontBaseClient
+) => {
+  mockCreateInstrumentedBaseClient.mockReturnValue(baseClient)
+  mockCreateConversationsClient.mockReturnValue(front.conversations)
+  mockCreateMessagesClient.mockReturnValue(front.messages)
+  mockCreateDraftsClient.mockReturnValue(front.drafts)
+  mockCreateTemplatesClient.mockReturnValue(front.templates)
+  mockCreateTagsClient.mockReturnValue(front.tags)
+  mockCreateInboxesClient.mockReturnValue(front.inboxes)
+  mockCreateChannelsClient.mockReturnValue(front.channels)
+  mockCreateContactsClient.mockReturnValue(front.contacts)
+  mockCreateTeammatesClient.mockReturnValue(front.teammates)
+}
 
 const parseLastJson = (stdout: string) => {
   const lines = stdout.split('\n').filter((line) => line.trim().length > 0)
@@ -61,10 +119,21 @@ describe('front commands', () => {
   beforeEach(() => {
     process.env.FRONT_API_TOKEN = 'test-front-token'
     process.exitCode = undefined
-    mockCreateInstrumentedFrontClient.mockReset()
+    resetFrontCache()
+    mockCreateInstrumentedBaseClient.mockReset()
+    mockCreateConversationsClient.mockReset()
+    mockCreateMessagesClient.mockReset()
+    mockCreateDraftsClient.mockReset()
+    mockCreateTemplatesClient.mockReset()
+    mockCreateTagsClient.mockReset()
+    mockCreateInboxesClient.mockReset()
+    mockCreateChannelsClient.mockReset()
+    mockCreateContactsClient.mockReset()
+    mockCreateTeammatesClient.mockReset()
   })
 
   afterEach(() => {
+    resetFrontCache()
     if (originalFrontToken === undefined) {
       delete process.env.FRONT_API_TOKEN
     } else {
@@ -74,6 +143,7 @@ describe('front commands', () => {
 
   it('message outputs JSON payload', async () => {
     const front = createFrontMock()
+    const baseClient = createBaseClient()
     front.messages.get.mockResolvedValue({
       id: 'msg_1',
       type: 'email',
@@ -82,7 +152,7 @@ describe('front commands', () => {
       recipients: [],
       attachments: [],
     })
-    mockCreateInstrumentedFrontClient.mockReturnValue(front)
+    wireFrontMocks(front, baseClient)
 
     const { ctx, getStdout, getStderr } = await createTestContext({
       format: 'json',
@@ -101,8 +171,9 @@ describe('front commands', () => {
 
   it('message reports errors', async () => {
     const front = createFrontMock()
+    const baseClient = createBaseClient()
     front.messages.get.mockRejectedValue(new Error('boom'))
-    mockCreateInstrumentedFrontClient.mockReturnValue(front)
+    wireFrontMocks(front, baseClient)
 
     const { ctx, getStderr } = await createTestContext({
       format: 'json',
@@ -118,6 +189,7 @@ describe('front commands', () => {
 
   it('conversation outputs JSON payload', async () => {
     const front = createFrontMock()
+    const baseClient = createBaseClient()
     front.conversations.get.mockResolvedValue({
       id: 'cnv_1',
       subject: 'Support',
@@ -144,7 +216,7 @@ describe('front commands', () => {
       body: '<p>Hello there</p>',
       author: { email: 'user@example.com' },
     })
-    mockCreateInstrumentedFrontClient.mockReturnValue(front)
+    wireFrontMocks(front, baseClient)
 
     const { ctx, getStdout } = await createTestContext({ format: 'json' })
 
@@ -161,8 +233,9 @@ describe('front commands', () => {
 
   it('conversation reports errors', async () => {
     const front = createFrontMock()
+    const baseClient = createBaseClient()
     front.conversations.get.mockRejectedValue(new Error('not found'))
-    mockCreateInstrumentedFrontClient.mockReturnValue(front)
+    wireFrontMocks(front, baseClient)
 
     const { ctx, getStderr } = await createTestContext({ format: 'json' })
 
@@ -176,7 +249,8 @@ describe('front commands', () => {
 
   it('tags list outputs JSON payload', async () => {
     const front = createFrontMock()
-    front.raw.get.mockResolvedValue({
+    const baseClient = createBaseClient()
+    baseClient.get.mockResolvedValue({
       _results: [{ id: 'tag_1', name: 'VIP', is_private: false }],
       _pagination: { next: null },
     })
@@ -184,7 +258,7 @@ describe('front commands', () => {
       _results: [],
       _pagination: { total: 2 },
     })
-    mockCreateInstrumentedFrontClient.mockReturnValue(front)
+    wireFrontMocks(front, baseClient)
 
     const { ctx, getStdout } = await createTestContext({ format: 'json' })
 
@@ -200,8 +274,9 @@ describe('front commands', () => {
 
   it('tags list reports errors', async () => {
     const front = createFrontMock()
-    front.raw.get.mockRejectedValue(new Error('down'))
-    mockCreateInstrumentedFrontClient.mockReturnValue(front)
+    const baseClient = createBaseClient()
+    baseClient.get.mockRejectedValue(new Error('down'))
+    wireFrontMocks(front, baseClient)
 
     const { ctx, getStderr } = await createTestContext({ format: 'json' })
 
@@ -215,10 +290,11 @@ describe('front commands', () => {
 
   it('inbox list outputs JSON payload', async () => {
     const front = createFrontMock()
+    const baseClient = createBaseClient()
     front.inboxes.list.mockResolvedValue({
       _results: [{ id: 'inbox_1', name: 'Support', is_private: false }],
     })
-    mockCreateInstrumentedFrontClient.mockReturnValue(front)
+    wireFrontMocks(front, baseClient)
 
     const { ctx, getStdout } = await createTestContext({ format: 'json' })
 
@@ -234,11 +310,12 @@ describe('front commands', () => {
 
   it('inbox conversations report errors', async () => {
     const front = createFrontMock()
+    const baseClient = createBaseClient()
     front.inboxes.list.mockResolvedValue({
       _results: [{ id: 'inbox_1', name: 'Support', is_private: false }],
     })
-    front.raw.get.mockRejectedValue(new Error('nope'))
-    mockCreateInstrumentedFrontClient.mockReturnValue(front)
+    baseClient.get.mockRejectedValue(new Error('nope'))
+    wireFrontMocks(front, baseClient)
 
     const { ctx, getStderr } = await createTestContext({ format: 'json' })
 
@@ -252,8 +329,9 @@ describe('front commands', () => {
 
   it('archive outputs JSON payload', async () => {
     const front = createFrontMock()
-    front.raw.patch.mockResolvedValue({})
-    mockCreateInstrumentedFrontClient.mockReturnValue(front)
+    const baseClient = createBaseClient()
+    baseClient.patch.mockResolvedValue({})
+    wireFrontMocks(front, baseClient)
 
     const { ctx, getStdout } = await createTestContext({ format: 'json' })
 
@@ -284,7 +362,8 @@ describe('front commands', () => {
 
   it('bulk archive outputs JSON payload', async () => {
     const front = createFrontMock()
-    front.raw.get.mockResolvedValueOnce({
+    const baseClient = createBaseClient()
+    baseClient.get.mockResolvedValueOnce({
       _results: [
         {
           id: 'cnv_1',
@@ -296,7 +375,7 @@ describe('front commands', () => {
       ],
       _pagination: { next: null },
     })
-    mockCreateInstrumentedFrontClient.mockReturnValue(front)
+    wireFrontMocks(front, baseClient)
 
     const { ctx, getStdout } = await createTestContext({ format: 'json' })
 
@@ -317,8 +396,9 @@ describe('front commands', () => {
 
   it('bulk archive reports errors', async () => {
     const front = createFrontMock()
-    front.raw.get.mockRejectedValue(new Error('timeout'))
-    mockCreateInstrumentedFrontClient.mockReturnValue(front)
+    const baseClient = createBaseClient()
+    baseClient.get.mockRejectedValue(new Error('timeout'))
+    wireFrontMocks(front, baseClient)
 
     const { ctx, getStderr } = await createTestContext({ format: 'json' })
 
@@ -337,6 +417,7 @@ describe('front commands', () => {
 
   it('pull outputs JSON payload', async () => {
     const front = createFrontMock()
+    const baseClient = createBaseClient()
     front.messages.get.mockResolvedValue({
       id: 'msg_1',
       is_inbound: true,
@@ -345,7 +426,7 @@ describe('front commands', () => {
       body: '<p>Please help with my refund request.</p>',
       author: { email: 'user@example.com' },
     })
-    front.raw.get.mockImplementation(async (path: string) => {
+    baseClient.get.mockImplementation(async (path: string) => {
       if (path.startsWith('/inboxes/')) {
         return {
           _results: [
@@ -378,7 +459,7 @@ describe('front commands', () => {
 
       return { _results: [], _pagination: { next: null } }
     })
-    mockCreateInstrumentedFrontClient.mockReturnValue(front)
+    wireFrontMocks(front, baseClient)
 
     const { ctx, getStdout } = await createTestContext({ format: 'json' })
 
@@ -394,8 +475,9 @@ describe('front commands', () => {
 
   it('pull reports errors', async () => {
     const front = createFrontMock()
-    front.raw.get.mockRejectedValue(new Error('bad gateway'))
-    mockCreateInstrumentedFrontClient.mockReturnValue(front)
+    const baseClient = createBaseClient()
+    baseClient.get.mockRejectedValue(new Error('bad gateway'))
+    wireFrontMocks(front, baseClient)
 
     const { ctx, getStderr } = await createTestContext({ format: 'json' })
 

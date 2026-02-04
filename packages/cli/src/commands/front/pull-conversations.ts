@@ -6,10 +6,10 @@
  */
 
 import { writeFileSync } from 'fs'
-import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
 import type { Command } from 'commander'
 import { type CommandContext, createContext } from '../../core/context'
 import { CLIError, formatError } from '../../core/errors'
+import { getFrontClient } from './client'
 import { hateoasWrap } from './hateoas'
 
 interface PullOptions {
@@ -71,17 +71,8 @@ export async function pullConversations(
   const { inbox, limit = 50, output, filter } = options
   const outputJson = options.json === true || ctx.format === 'json'
 
-  const frontToken = process.env.FRONT_API_TOKEN
-  if (!frontToken) {
-    throw new CLIError({
-      userMessage: 'FRONT_API_TOKEN environment variable required.',
-      suggestion: 'Set FRONT_API_TOKEN in your shell or .env.local.',
-    })
-  }
-
-  const front = createInstrumentedFrontClient({ apiToken: frontToken })
-
   try {
+    const front = getFrontClient()
     // If no inbox specified, list available inboxes
     if (!inbox) {
       ctx.output.data('Fetching available inboxes...\n')

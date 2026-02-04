@@ -57,3 +57,25 @@ Files changed:
 - `packages/cli/src/commands/front/with-context.ts`
 - `packages/cli/src/commands/front/assign.ts`
 - `packages/
+
+---
+[2026-02-04T23:20:53.042Z]
+Failed: Intelligent Front API response caching with TTL tiers and mutation invalidation
+Validation: 
+ RUN  v3.2.4 /home/joel/Code/skillrecordings/support-cli-rearchitect/packages/cli
+
+ ✓ tests/e2e/install.test.ts (1 test) 46ms
+ ✓ src/commands/eval.test.ts (7 tests) 59ms
+ ✓ tests/unit/core/output.test.ts (8 tests) 17ms
+ ✓ tests/integration/commands/inngest.test.ts (16 tests) 16ms
+ ✓ tests/integrati
+Codex: 
+
+---
+[2026-02-04T23:22:38.007Z]
+Completed: Intelligent Front API response caching with TTL tiers and mutation invalidation
+Files: none
+Summary: Summary:
+- Added HTTP-level Front response caching with TTL tiers, classification, invalidation, and stats. (`packages/cli/src/commands/front/cache.ts`)
+- Wrapped the base Front client so all sub-clients share cached GETs and invalidate on mutations; added cache reset/stats helpers. (`packages/cli/src/commands/front/client.ts`)
+- Added cache unit tests and cached-client integration tests; ensured 

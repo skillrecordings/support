@@ -10,10 +10,10 @@
  *   skill front bulk-archive ... --json             # JSON output
  */
 
-import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
 import type { Command } from 'commander'
 import { type CommandContext, createContext } from '../../core/context'
 import { CLIError, formatError } from '../../core/errors'
+import { getFrontClient } from './client'
 import { hateoasWrap } from './hateoas'
 
 interface BulkArchiveOptions {
@@ -96,7 +96,7 @@ function parseDuration(duration: string): number {
  * Check if conversation matches filter criteria
  */
 async function matchesFilters(
-  front: ReturnType<typeof createInstrumentedFrontClient>,
+  front: ReturnType<typeof getFrontClient>,
   conv: FrontConversation,
   options: BulkArchiveOptions
 ): Promise<{ matches: boolean; reason: string }> {
@@ -179,17 +179,8 @@ export async function bulkArchiveConversations(
   const { inbox, dryRun = false } = options
   const outputJson = options.json === true || ctx.format === 'json'
 
-  const frontToken = process.env.FRONT_API_TOKEN
-  if (!frontToken) {
-    throw new CLIError({
-      userMessage: 'FRONT_API_TOKEN environment variable required.',
-      suggestion: 'Set FRONT_API_TOKEN in your shell or .env.local.',
-    })
-  }
-
-  const front = createInstrumentedFrontClient({ apiToken: frontToken })
-
   try {
+    const front = getFrontClient()
     // If no inbox specified, list available inboxes
     if (!inbox) {
       ctx.output.data('Fetching available inboxes...\n')

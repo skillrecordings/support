@@ -1,10 +1,31 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { CLIError } from '../../../../src/core/errors'
 
-const mockCreateInstrumentedFrontClient = vi.hoisted(() => vi.fn())
+const mockCreateInstrumentedBaseClient = vi.hoisted(() => vi.fn())
+const mockCreateConversationsClient = vi.hoisted(() => vi.fn())
+const mockCreateMessagesClient = vi.hoisted(() => vi.fn())
+const mockCreateDraftsClient = vi.hoisted(() => vi.fn())
+const mockCreateTemplatesClient = vi.hoisted(() => vi.fn())
+const mockCreateTagsClient = vi.hoisted(() => vi.fn())
+const mockCreateInboxesClient = vi.hoisted(() => vi.fn())
+const mockCreateChannelsClient = vi.hoisted(() => vi.fn())
+const mockCreateContactsClient = vi.hoisted(() => vi.fn())
+const mockCreateTeammatesClient = vi.hoisted(() => vi.fn())
 
 vi.mock('@skillrecordings/core/front/instrumented-client', () => ({
-  createInstrumentedFrontClient: mockCreateInstrumentedFrontClient,
+  createInstrumentedBaseClient: mockCreateInstrumentedBaseClient,
+}))
+
+vi.mock('@skillrecordings/front-sdk', () => ({
+  createConversationsClient: mockCreateConversationsClient,
+  createMessagesClient: mockCreateMessagesClient,
+  createDraftsClient: mockCreateDraftsClient,
+  createTemplatesClient: mockCreateTemplatesClient,
+  createTagsClient: mockCreateTagsClient,
+  createInboxesClient: mockCreateInboxesClient,
+  createChannelsClient: mockCreateChannelsClient,
+  createContactsClient: mockCreateContactsClient,
+  createTeammatesClient: mockCreateTeammatesClient,
 }))
 
 import {
@@ -17,7 +38,16 @@ describe('front client helpers', () => {
   const originalFrontToken = process.env.FRONT_API_TOKEN
 
   beforeEach(() => {
-    mockCreateInstrumentedFrontClient.mockReset()
+    mockCreateInstrumentedBaseClient.mockReset()
+    mockCreateConversationsClient.mockReset()
+    mockCreateMessagesClient.mockReset()
+    mockCreateDraftsClient.mockReset()
+    mockCreateTemplatesClient.mockReset()
+    mockCreateTagsClient.mockReset()
+    mockCreateInboxesClient.mockReset()
+    mockCreateChannelsClient.mockReset()
+    mockCreateContactsClient.mockReset()
+    mockCreateTeammatesClient.mockReset()
     delete process.env.FRONT_API_TOKEN
   })
 
@@ -41,15 +71,30 @@ describe('front client helpers', () => {
 
   it('getFrontClient uses the Front token', () => {
     process.env.FRONT_API_TOKEN = 'front-token'
-    const mockClient = { raw: {} }
-    mockCreateInstrumentedFrontClient.mockReturnValue(mockClient)
+    const baseClient = {
+      get: vi.fn(),
+      post: vi.fn(),
+      patch: vi.fn(),
+      put: vi.fn(),
+      delete: vi.fn(),
+    }
+    mockCreateInstrumentedBaseClient.mockReturnValue(baseClient)
+    mockCreateConversationsClient.mockReturnValue({})
+    mockCreateMessagesClient.mockReturnValue({})
+    mockCreateDraftsClient.mockReturnValue({})
+    mockCreateTemplatesClient.mockReturnValue({})
+    mockCreateTagsClient.mockReturnValue({})
+    mockCreateInboxesClient.mockReturnValue({})
+    mockCreateChannelsClient.mockReturnValue({})
+    mockCreateContactsClient.mockReturnValue({})
+    mockCreateTeammatesClient.mockReturnValue({})
 
     const client = getFrontClient()
 
-    expect(mockCreateInstrumentedFrontClient).toHaveBeenCalledWith({
+    expect(mockCreateInstrumentedBaseClient).toHaveBeenCalledWith({
       apiToken: 'front-token',
     })
-    expect(client).toBe(mockClient)
+    expect(client.raw).toBeTruthy()
   })
 
   afterEach(() => {

@@ -2,10 +2,31 @@ import { PassThrough } from 'node:stream'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createMcpServer } from '../../../src/mcp/server'
 
-const mockCreateInstrumentedFrontClient = vi.hoisted(() => vi.fn())
+const mockCreateInstrumentedBaseClient = vi.hoisted(() => vi.fn())
+const mockCreateInboxesClient = vi.hoisted(() => vi.fn())
+const mockCreateConversationsClient = vi.hoisted(() => vi.fn())
+const mockCreateMessagesClient = vi.hoisted(() => vi.fn())
+const mockCreateDraftsClient = vi.hoisted(() => vi.fn())
+const mockCreateTemplatesClient = vi.hoisted(() => vi.fn())
+const mockCreateTagsClient = vi.hoisted(() => vi.fn())
+const mockCreateChannelsClient = vi.hoisted(() => vi.fn())
+const mockCreateContactsClient = vi.hoisted(() => vi.fn())
+const mockCreateTeammatesClient = vi.hoisted(() => vi.fn())
 
 vi.mock('@skillrecordings/core/front/instrumented-client', () => ({
-  createInstrumentedFrontClient: mockCreateInstrumentedFrontClient,
+  createInstrumentedBaseClient: mockCreateInstrumentedBaseClient,
+}))
+
+vi.mock('@skillrecordings/front-sdk', () => ({
+  createInboxesClient: mockCreateInboxesClient,
+  createConversationsClient: mockCreateConversationsClient,
+  createMessagesClient: mockCreateMessagesClient,
+  createDraftsClient: mockCreateDraftsClient,
+  createTemplatesClient: mockCreateTemplatesClient,
+  createTagsClient: mockCreateTagsClient,
+  createChannelsClient: mockCreateChannelsClient,
+  createContactsClient: mockCreateContactsClient,
+  createTeammatesClient: mockCreateTeammatesClient,
 }))
 
 type MockFrontClient = {
@@ -69,7 +90,16 @@ describe('mcp server', () => {
 
   beforeEach(() => {
     process.env.FRONT_API_TOKEN = 'test-front-token'
-    mockCreateInstrumentedFrontClient.mockReset()
+    mockCreateInstrumentedBaseClient.mockReset()
+    mockCreateInboxesClient.mockReset()
+    mockCreateConversationsClient.mockReset()
+    mockCreateMessagesClient.mockReset()
+    mockCreateDraftsClient.mockReset()
+    mockCreateTemplatesClient.mockReset()
+    mockCreateTagsClient.mockReset()
+    mockCreateChannelsClient.mockReset()
+    mockCreateContactsClient.mockReset()
+    mockCreateTeammatesClient.mockReset()
   })
 
   afterEach(() => {
@@ -135,7 +165,22 @@ describe('mcp server', () => {
     front.inboxes.list.mockResolvedValue({
       _results: [{ id: 'inb_1', name: 'Support', is_private: false }],
     })
-    mockCreateInstrumentedFrontClient.mockReturnValue(front)
+    mockCreateInstrumentedBaseClient.mockReturnValue({
+      get: vi.fn(),
+      post: vi.fn(),
+      patch: vi.fn(),
+      put: vi.fn(),
+      delete: vi.fn(),
+    })
+    mockCreateInboxesClient.mockReturnValue(front.inboxes)
+    mockCreateConversationsClient.mockReturnValue({})
+    mockCreateMessagesClient.mockReturnValue({})
+    mockCreateDraftsClient.mockReturnValue({})
+    mockCreateTemplatesClient.mockReturnValue({})
+    mockCreateTagsClient.mockReturnValue({})
+    mockCreateChannelsClient.mockReturnValue({})
+    mockCreateContactsClient.mockReturnValue({})
+    mockCreateTeammatesClient.mockReturnValue({})
 
     const { stdin, stdout, stderr, send } = createRpcHarness()
     const server = createMcpServer({ stdin, stdout, stderr })

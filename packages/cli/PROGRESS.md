@@ -215,3 +215,14 @@ Initialized: 2026-02-04T15:13:09.231Z
 - Updated 5+ command registration functions to use shared helper
 - Added unit tests for contextFromCommand
 - Pure refactor — no behavior changes
+
+## Intelligent Front API Response Caching
+- Created FrontResponseCache with 3-tier TTL (static/warm/hot)
+- Static (∞): inbox list, teammates
+- Warm (5min): tags
+- Hot (30s): conversations, messages
+- Mutation invalidation: POST/PATCH/DELETE invalidate related cache entries
+- Cache wraps at base client level — all sub-clients (conversations, tags, etc.) get caching transparently
+- Module-level singleton: dies with CLI process, persists in MCP mode
+- Fixed bulk-archive.ts and pull-conversations.ts to use shared getFrontClient()
+- Added comprehensive tests for cache behavior, TTL, invalidation
