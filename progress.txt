@@ -1375,3 +1375,11 @@ Tests run:
 
 Issues:
 - `bun install 
+
+---
+[2026-02-04T20:31:17.218Z]
+Completed: Interactive Auth Setup Wizard with 1Password Deep Links — Issue #177 appendix
+Files: none
+Summary: Summary:
+- Added `skill auth setup` wizard with op CLI checks, 1Password deep-link helpers, secret fetch/validation, and optional persistence (`.env.local`) plus export instructions. Files: `packages/cli/src/commands/auth/setup.ts`, `packages/cli/src/core/onepassword-links.ts`.
+- Registered the new subcommand and added `AGE_SECRET_KEY` reference. Files: `packages/cli/src/commands/auth/index.ts`, `

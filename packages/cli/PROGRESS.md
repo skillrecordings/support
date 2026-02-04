@@ -142,3 +142,11 @@ Initialized: 2026-02-04T15:13:09.231Z
 - Tests before: 130 passed, 1 failed, 4 skipped (135 total)
 - Tests after: 131 passed, 4 skipped (135 total)
 - Issues: `bun install --frozen-lockfile` and `bun run test --coverage` failed locally with "AccessDenied" when Bun attempted to write to tempdir.
+
+### Interactive Auth Setup Wizard with 1Password Deep Links — Issue #177 appendix (ID: story-ml8a0ylh)
+- Completed: 2026-02-04T20:30:43Z
+- Files created: packages/cli/src/commands/auth/setup.ts, packages/cli/src/core/onepassword-links.ts, packages/cli/tests/integration/commands/auth-setup.test.ts
+- Files modified: packages/cli/src/commands/auth/index.ts, packages/cli/src/core/secret-refs.ts, packages/cli/PROGRESS.md
+- Tests before: 131 passed, 4 skipped (135 total)
+- Tests after: 135 passed, 4 skipped (139 total)
+- Issues: none

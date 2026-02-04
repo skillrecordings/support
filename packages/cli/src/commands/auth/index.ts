@@ -1,6 +1,7 @@
 import type { Command } from 'commander'
 import { createContext } from '../../core/context'
 import { loginAction } from './login'
+import { authSetupAction } from './setup'
 import { statusAction } from './status'
 import { whoamiAction } from './whoami'
 
@@ -54,5 +55,19 @@ export function registerAuthCommands(program: Command): void {
     .action(async (options, command) => {
       const ctx = await buildContext(command, options.json)
       await whoamiAction(ctx, options)
+    })
+
+  auth
+    .command('setup')
+    .description('Interactive wizard to configure 1Password secrets')
+    .option(
+      '--token <token>',
+      'Service account token (defaults to 1Password op read)'
+    )
+    .option('--age-key <ageKey>', 'AGE secret key (defaults to op read)')
+    .option('--json', 'Output as JSON')
+    .action(async (options, command) => {
+      const ctx = await buildContext(command, options.json)
+      await authSetupAction(ctx, options)
     })
 }

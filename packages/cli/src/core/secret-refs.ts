@@ -28,6 +28,7 @@ export const SECRET_REFS = {
   QDRANT_COLLECTION: 'op://Support/skill-cli/QDRANT_COLLECTION',
   OLLAMA_BASE_URL: 'op://Support/skill-cli/OLLAMA_BASE_URL',
   EMBEDDING_MODEL: 'op://Support/skill-cli/EMBEDDING_MODEL',
+  AGE_SECRET_KEY: 'op://Support/skill-cli-age-key/password',
 } as const
 
 export type SecretRefKey = keyof typeof SECRET_REFS
