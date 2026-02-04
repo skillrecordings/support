@@ -73,6 +73,22 @@ describe('SecretsProvider', () => {
     )
   })
 
+  it('throws when env mapping is missing', async () => {
+    const provider = new EnvProvider()
+
+    await expect(provider.resolve('op://missing/secret')).rejects.toThrow(
+      'No env mapping found for secret ref: op://missing/secret'
+    )
+  })
+
+  it('throws when env secret is missing', async () => {
+    const provider = new EnvProvider()
+
+    await expect(provider.resolve(SECRET_REFS.DATABASE_URL)).rejects.toThrow(
+      'Missing environment secret for DATABASE_URL'
+    )
+  })
+
   it('resolves batches from env fallback', async () => {
     process.env.DATABASE_URL = 'env-secret'
 
@@ -103,5 +119,28 @@ describe('SecretsProvider', () => {
     const provider = await createSecretsProvider()
 
     expect(provider.name).toBe('1password')
+  })
+
+  it('normalizes 1Password resolveAll array responses', async () => {
+    process.env.OP_SERVICE_ACCOUNT_TOKEN = 'token'
+
+    vi.mocked(createClient).mockResolvedValue({
+      secrets: {
+        resolve: vi.fn(),
+        resolveAll: vi
+          .fn()
+          .mockResolvedValue([
+            { reference: SECRET_REFS.DATABASE_URL, value: 'shh' },
+          ]),
+      },
+    })
+
+    const provider = new OnePasswordProvider()
+
+    await expect(
+      provider.resolveAll([SECRET_REFS.DATABASE_URL])
+    ).resolves.toEqual({
+      [SECRET_REFS.DATABASE_URL]: 'shh',
+    })
   })
 })

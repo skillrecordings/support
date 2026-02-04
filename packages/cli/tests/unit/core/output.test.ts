@@ -5,6 +5,7 @@ import {
   TableFormatter,
   TextFormatter,
   createOutputFormatter,
+  resolveOutputFormat,
 } from '../../../src/core/output'
 
 const createCapture = () => {
@@ -122,5 +123,38 @@ describe('OutputFormatter', () => {
 
     await new Promise((resolve) => setImmediate(resolve))
     expect(stdout.read()).toBe('{"ok":true}\n')
+  })
+
+  it('prefers explicit output format over TTY detection', () => {
+    const stdout = createCapture()
+    ;(stdout.stream as NodeJS.WriteStream & { isTTY?: boolean }).isTTY = false
+
+    const format = resolveOutputFormat('table', stdout.stream)
+
+    expect(format).toBe('table')
+  })
+
+  it('renders table payloads with explicit columns', async () => {
+    const stdout = createCapture()
+    const stderr = createCapture()
+    const formatter = new TableFormatter({
+      stdout: stdout.stream,
+      stderr: stderr.stream,
+    })
+
+    formatter.data({
+      columns: [{ key: 'name', label: 'Name' }],
+      rows: [{ name: 'alpha', count: 2 }],
+    })
+
+    await new Promise((resolve) => setImmediate(resolve))
+    const output = stdout
+      .read()
+      .trimEnd()
+      .split('\n')
+      .map((line) => line.trimEnd())
+    expect(output[0]).toBe('Name')
+    expect(output[1]).toBe('alpha')
+    expect(stderr.read()).toBe('')
   })
 })

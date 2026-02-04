@@ -206,7 +206,7 @@
       "title": "Test Coverage Gap Fill + CI (Phase 6) — Issue #189",
       "description": "## Progress Notification (MANDATORY)\nAfter completing this story, write a status update to `packages/cli/PROGRESS.md` with:\n- Story title and completion timestamp\n- Files created/modified\n- Test count before and after\n- Any issues encountered\n\nFill test coverage gaps. Set up coverage reporting and CI thresholds.\n\n## Context\n- Parent epic: #172, Issue: #189\n- Depends on: Stories 8+10\n\n## Files to Create/Modify\n- packages/cli/vitest.config.ts — Add coverage configuration (@vitest/coverage-v8)\n- .github/workflows/cli-test.yml — CI for tests on every PR touching packages/cli/\n- packages/cli/tests/ — Fill gaps\n\n## Details\nCoverage config: @vitest/coverage-v8, thresholds 80% overall + 90% on src/core/, formats text+lcov+json\nCI: runs on PR, steps: install, check-types, test --coverage, fails below threshold\nGap analysis: run coverage, identify untested paths, add missing tests for edge cases (error handling, config precedence, output format)\n\n## On Completion\nUpdate packages/cli/PROGRESS.md with final summary. Commit: `feat(cli): test coverage CI with 80%+ threshold`",
       "priority": 13,
-      "passes": false,
+      "passes": true,
       "validationCommand": "cd packages/cli && bun run check-types && bun run test",
       "acceptanceCriteria": [
         "Coverage report generates with bun vitest run --coverage",
@@ -321,7 +321,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-04T15:13:09.231Z",
-    "totalIterations": 12,
-    "lastIteration": "2026-02-04T20:12:28.442Z"
+    "totalIterations": 13,
+    "lastIteration": "2026-02-04T20:23:21.381Z"
   }
 }

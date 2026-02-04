@@ -126,3 +126,19 @@ Initialized: 2026-02-04T15:13:09.231Z
 - Tests before: 125 passed, 4 skipped (129 total)
 - Tests after: 126 passed, 4 skipped (130 total)
 - Issues: E2E binary tests skipped (no bun runtime available to the test harness).
+
+### Test Coverage Gap Fill + CI (Phase 6) — Issue #189
+- Completed: 2026-02-04T20:15:46Z
+- Files created: .github/workflows/cli-test.yml
+- Files modified: packages/cli/vitest.config.ts, packages/cli/package.json, packages/cli/tests/unit/core/output.test.ts, packages/cli/tests/unit/core/secrets.test.ts, packages/cli/PROGRESS.md
+- Tests before: 122 (counted via `rg -g"*.test.ts" -o "\bit\(" packages/cli | wc -l` minus 5 new tests)
+- Tests after: 127 (counted via `rg -g"*.test.ts" -o "\bit\(" packages/cli | wc -l`)
+- Issues: Unable to run `bun install` or `bun run test --coverage` locally due to tempdir AccessDenied for Bun.
+
+### Test Coverage Gap Fill + CI (Phase 6) — Issue #189
+- Completed: 2026-02-04T20:22:47Z
+- Files created: none
+- Files modified: packages/cli/tests/unit/core/output.test.ts, packages/cli/PROGRESS.md
+- Tests before: 130 passed, 1 failed, 4 skipped (135 total)
+- Tests after: 131 passed, 4 skipped (135 total)
+- Issues: `bun install --frozen-lockfile` and `bun run test --coverage` failed locally with "AccessDenied" when Bun attempted to write to tempdir.
