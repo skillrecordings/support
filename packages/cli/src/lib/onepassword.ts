@@ -1,21 +1,64 @@
 import { execSync, spawn } from 'node:child_process'
 
-/**
- * 1Password Service Account integration for headless Linux environments
- *
- * Authenticates using OP_SERVICE_ACCOUNT_TOKEN environment variable.
- * Provides functions to read secrets and execute commands with injected secrets.
- */
+// 1Password coordinates for the egghead team vault
+export const OP_ACCOUNT = 'egghead.1password.com'
+export const OP_VAULT_ID = 'u3ujzar6l3nahlahsuzfvg7vcq'
+export const OP_AGE_KEY_ITEM_ID = 'lxndka3exn475vqdiqq5heg2wm'
+export const OP_SERVICE_ACCOUNT_TOKEN_ID = '3e4ip354ps3mhq2wwt6vmtm2zu'
+
+export const OP_AGE_KEY_LINK = `https://start.1password.com/open/i?a=GCTJE4MRGFHKRAYXCEXKZKCEFU&v=${OP_VAULT_ID}&i=${OP_AGE_KEY_ITEM_ID}&h=${OP_ACCOUNT}`
 
 /**
  * Check if the `op` CLI is installed and available
  */
-export async function isOpAvailable(): Promise<boolean> {
+export function isOpCliAvailable(): boolean {
   try {
-    execSync('which op', { stdio: 'ignore' })
+    execSync('which op', { stdio: 'pipe' })
     return true
   } catch {
     return false
+  }
+}
+
+/**
+ * Check if user is signed in to the egghead 1Password account
+ */
+export function isOpSignedIn(): boolean {
+  try {
+    execSync(`op account get --account ${OP_ACCOUNT}`, {
+      stdio: 'pipe',
+      timeout: 5000,
+    })
+    return true
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Fetch a field from a 1Password item in the egghead vault
+ */
+export function fetchFromOp(itemId: string, field: string): string | null {
+  try {
+    const result = execSync(
+      `op item get ${itemId} --vault ${OP_VAULT_ID} --account ${OP_ACCOUNT} --fields ${field} --reveal`,
+      { stdio: 'pipe', timeout: 15000 }
+    )
+    const value = result.toString().trim()
+    return value || null
+  } catch {
+    return null
+  }
+}
+
+export function getOpInstallInstructions(): string {
+  switch (process.platform) {
+    case 'darwin':
+      return 'brew install 1password-cli'
+    case 'linux':
+      return 'https://developer.1password.com/docs/cli/get-started/#install'
+    default:
+      return 'https://developer.1password.com/docs/cli/get-started/#install'
   }
 }
 
@@ -37,7 +80,7 @@ export function isServiceAccountConfigured(): boolean {
  * const apiKey = await readSecret('op://Private/Stripe/api_key')
  */
 export async function readSecret(reference: string): Promise<string> {
-  if (!(await isOpAvailable())) {
+  if (!isOpCliAvailable()) {
     throw new Error(
       '1Password CLI not installed. Install from https://developer.1password.com/docs/cli/get-started/'
     )
@@ -85,7 +128,7 @@ export async function readSecret(reference: string): Promise<string> {
 export async function runWithSecrets(
   cmd: string[]
 ): Promise<{ stdout: string; stderr: string }> {
-  if (!(await isOpAvailable())) {
+  if (!isOpCliAvailable()) {
     throw new Error(
       '1Password CLI not installed. Install from https://developer.1password.com/docs/cli/get-started/'
     )
