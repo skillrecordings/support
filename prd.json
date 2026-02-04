@@ -188,7 +188,7 @@
       "title": "MCP Server Mode (Phase 4) — Issue #188",
       "description": "## Progress Notification (MANDATORY)\nAfter completing this story, write a status update to `packages/cli/PROGRESS.md` with:\n- Story title and completion timestamp\n- Files created/modified\n- Test count before and after\n- Any issues encountered\n\nCreate MCP server entrypoint exposing CLI commands as MCP tools over stdio.\n\n## Context\n- Parent epic: #172, Issue: #188\n- Depends on: Story 5\n\n## Files to Create\n- packages/cli/src/mcp.ts — MCP server entrypoint with StdioServerTransport\n- packages/cli/tests/integration/mcp.test.ts\n\n## Files to Modify\n- packages/cli/src/index.ts — Add --mcp flag\n- packages/cli/package.json — Add @modelcontextprotocol/sdk dep\n\n## Key Details\n- Uses @modelcontextprotocol/sdk with StdioServerTransport\n- Auto-generate tool registrations by walking Commander command tree\n- Tool names: front-conversation, axiom-query, tools-search, etc.\n- Zod schemas from Commander option definitions\n- CRITICAL: No console.log in MCP mode (stdout = protocol channel), all logging via console.error\n- Tool annotations: readOnlyHint for reads, destructiveHint for destructive ops\n- --mcp flag skips Commander parsing, launches MCP server\n- Exits when stdin closes\n\n## On Completion\nUpdate packages/cli/PROGRESS.md. Commit: `feat(cli): MCP server mode for agent integration`",
       "priority": 12,
-      "passes": false,
+      "passes": true,
       "validationCommand": "cd packages/cli && bun run check-types && bun run test",
       "acceptanceCriteria": [
         "skill --mcp launches MCP server on stdio",
@@ -321,7 +321,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-04T15:13:09.231Z",
-    "totalIterations": 11,
-    "lastIteration": "2026-02-04T20:12:01.622Z"
+    "totalIterations": 12,
+    "lastIteration": "2026-02-04T20:12:28.442Z"
   }
 }
