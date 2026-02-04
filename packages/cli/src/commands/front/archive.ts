@@ -62,13 +62,36 @@ export async function archiveConversations(
   ctx: CommandContext,
   convId: string,
   additionalIds: string[],
-  options: { json?: boolean }
+  options: { json?: boolean; dryRun?: boolean }
 ): Promise<void> {
   const outputJson = options.json === true || ctx.format === 'json'
 
   try {
     const front = getFrontClient()
     const allIds = [convId, ...additionalIds]
+    const normalizedIds = allIds.map(normalizeId)
+
+    if (options.dryRun) {
+      if (outputJson) {
+        ctx.output.data(
+          hateoasWrap({
+            type: 'archive-preview',
+            command: `skill front archive ${normalizedIds.join(' ')} --dry-run --json`,
+            data: { dryRun: true, ids: normalizedIds },
+          })
+        )
+        return
+      }
+
+      ctx.output.data(
+        `\n🧪 DRY RUN: Would archive ${allIds.length} conversation(s):`
+      )
+      for (const id of normalizedIds) {
+        ctx.output.data(`   - ${id}`)
+      }
+      ctx.output.data('')
+      return
+    }
 
     if (outputJson) {
       // JSON output: show results for each conversation
@@ -85,7 +108,7 @@ export async function archiveConversations(
       ctx.output.data(
         hateoasWrap({
           type: 'archive-result',
-          command: `skill front archive ${allIds.map(normalizeId).join(' ')} --json`,
+          command: `skill front archive ${normalizedIds.join(' ')} --json`,
           data: results,
         })
       )
@@ -155,12 +178,13 @@ export function registerArchiveCommand(frontCommand: Command): void {
     .description('Archive one or more conversations by ID')
     .argument('<id>', 'Conversation ID (e.g., cnv_xxx)')
     .argument('[ids...]', 'Additional conversation IDs to archive')
+    .option('--dry-run', 'Preview without archiving')
     .option('--json', 'Output as JSON')
     .action(
       async (
         id: string,
         ids: string[],
-        options: { json?: boolean },
+        options: { json?: boolean; dryRun?: boolean },
         command: Command
       ) => {
         const opts =

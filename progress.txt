@@ -1450,3 +1450,23 @@ Summary: Note: I noticed pre-existing modified files I didn’t touch: `packages
 
 **Summary**
 - Hydrated fu
+
+---
+[2026-02-04T21:23:16.567Z]
+Failed: P3 SDK Access: API passthrough and composability
+Validation: src/commands/front/api.ts(134,57): error TS2345: Argument of type '{}' is not assignable to parameter of type 'ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>'.
+  Type '{}' is missing the following properties from type 'ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>': 
+Codex: 
+
+---
+[2026-02-04T21:26:45.857Z]
+Completed: P3 SDK Access: API passthrough and composability
+Files: none
+Summary: Summary:
+- Fixed Front API passthrough to reject `--data` on `GET`/`DELETE` and to call `raw.delete` without a body in `packages/cli/src/commands/front/api.ts`.
+- Fixed message command context format selection in `packages/cli/src/commands/front/index.ts`.
+- Logged completion in `packages/cli/PROGRESS.md`.
+
+Tests:
+- `cd packages/cli && bun run check-types`
+- `cd packages/cli && bun run test` (118 

@@ -20,7 +20,9 @@ import type {
 import type { Command } from 'commander'
 import { type CommandContext, createContext } from '../../core/context'
 import { CLIError, formatError } from '../../core/errors'
+import { isListOutputFormat, outputList } from '../../core/list-output'
 import {
+  conversationActions,
   conversationListActions,
   conversationListLinks,
   hateoasWrap,
@@ -108,15 +110,41 @@ async function findInbox(nameOrId: string): Promise<Inbox | null> {
  */
 export async function listInboxes(
   ctx: CommandContext,
-  options: { json?: boolean; idsOnly?: boolean }
+  options: { json?: boolean; idsOnly?: boolean; outputFormat?: string }
 ): Promise<void> {
-  const outputJson = options.json === true || ctx.format === 'json'
-  const idsOnly = options.idsOnly === true && !outputJson
+  const outputFormat = isListOutputFormat(options.outputFormat)
+    ? options.outputFormat
+    : undefined
+  if (options.outputFormat && !outputFormat) {
+    throw new CLIError({
+      userMessage: 'Invalid --output-format value.',
+      suggestion: 'Use json, ndjson, or csv.',
+    })
+  }
+  const outputJson =
+    options.json === true || ctx.format === 'json' || outputFormat === 'json'
+  const idsOnly = options.idsOnly === true
 
   try {
     const front = getFrontClient()
     const inboxList = (await front.inboxes.list()) as InboxList
     const inboxes = inboxList._results ?? []
+
+    if (idsOnly) {
+      for (const inbox of inboxes) {
+        ctx.output.data(inbox.id)
+      }
+      return
+    }
+
+    if (outputFormat && outputFormat !== 'json') {
+      const rows = inboxes.map((inbox) => ({
+        ...inbox,
+        _actions: inboxActions(inbox.id),
+      }))
+      outputList(ctx, rows, outputFormat)
+      return
+    }
 
     if (outputJson) {
       ctx.output.data(
@@ -129,13 +157,6 @@ export async function listInboxes(
           ),
         })
       )
-      return
-    }
-
-    if (idsOnly) {
-      for (const inbox of inboxes) {
-        ctx.output.data(inbox.id)
-      }
       return
     }
 
@@ -177,13 +198,24 @@ export async function listConversations(
   options: {
     json?: boolean
     idsOnly?: boolean
+    outputFormat?: string
     status?: 'unassigned' | 'assigned' | 'archived'
     tag?: string
     limit?: string
   }
 ): Promise<void> {
-  const outputJson = options.json === true || ctx.format === 'json'
-  const idsOnly = options.idsOnly === true && !outputJson
+  const outputFormat = isListOutputFormat(options.outputFormat)
+    ? options.outputFormat
+    : undefined
+  if (options.outputFormat && !outputFormat) {
+    throw new CLIError({
+      userMessage: 'Invalid --output-format value.',
+      suggestion: 'Use json, ndjson, or csv.',
+    })
+  }
+  const outputJson =
+    options.json === true || ctx.format === 'json' || outputFormat === 'json'
+  const idsOnly = options.idsOnly === true
 
   try {
     const front = getFrontClient()
@@ -244,6 +276,22 @@ export async function listConversations(
       nextUrl = response._pagination?.next || null
     }
 
+    if (idsOnly) {
+      for (const conv of conversations) {
+        ctx.output.data(conv.id)
+      }
+      return
+    }
+
+    if (outputFormat && outputFormat !== 'json') {
+      const rows = conversations.map((conv) => ({
+        ...conv,
+        _actions: conversationActions(conv.id),
+      }))
+      outputList(ctx, rows, outputFormat)
+      return
+    }
+
     if (outputJson) {
       ctx.output.data(
         hateoasWrap({
@@ -257,13 +305,6 @@ export async function listConversations(
           actions: conversationListActions(inbox.id),
         })
       )
-      return
-    }
-
-    if (idsOnly) {
-      for (const conv of conversations) {
-        ctx.output.data(conv.id)
-      }
       return
     }
 
@@ -344,6 +385,10 @@ export function registerInboxCommand(front: Command): void {
     .option('--json', 'Output as JSON')
     .option('--ids-only', 'Output only IDs (one per line)')
     .option(
+      '--output-format <format>',
+      'Output format for lists (json|ndjson|csv)'
+    )
+    .option(
       '--status <status>',
       'Filter by status (unassigned, assigned, archived)'
     )
@@ -359,7 +404,10 @@ export function registerInboxCommand(front: Command): void {
                 ...command?.opts(),
               }
         const ctx = await createContext({
-          format: options?.json ? 'json' : opts?.format,
+          format:
+            options?.json || options?.outputFormat === 'json'
+              ? 'json'
+              : opts?.format,
           verbose: opts?.verbose,
           quiet: opts?.quiet,
         })

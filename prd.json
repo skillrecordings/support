@@ -306,7 +306,7 @@
       "title": "P3 SDK Access: API passthrough and composability",
       "description": "Advanced features for power users.\n\n## Progress Notification (MANDATORY)\nAfter completing this story, write a status update to `packages/cli/PROGRESS.md` with:\n- Story title and completion timestamp\n- Files created/modified\n- Test count before and after\n\n## Context from main branch\n- `registerApiCommand` already exists on main — raw passthrough with method + endpoint + --data\n- HATEOAS actions framework: conversationActions() and conversationListActions() already return action arrays\n- Front query syntax reference available via `skill front search --help`\n\n## Features\n1. `skill front api GET/POST/PATCH/DELETE <path>` — raw Front SDK passthrough (--allow-destructive for writes)\n2. --ids-only for all list commands (one ID per line)\n3. --output-format json|ndjson|csv\n4. --dry-run for all destructive operations\n5. HATEOAS _actions in all responses (use existing conversationActions/conversationListActions helpers)\n\n## On Completion\nCommit: `feat(cli): API passthrough, improved piping, complete HATEOAS`",
       "priority": 19,
-      "passes": false,
+      "passes": true,
       "validationCommand": "cd packages/cli && bun run check-types && bun run test",
       "acceptanceCriteria": [
         "API passthrough works",
@@ -321,7 +321,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-04T15:13:09.231Z",
-    "totalIterations": 18,
-    "lastIteration": "2026-02-04T21:12:58.593Z"
+    "totalIterations": 19,
+    "lastIteration": "2026-02-04T21:26:45.856Z"
   }
 }

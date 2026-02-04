@@ -16,6 +16,8 @@ import type {
 import type { Command } from 'commander'
 import { type CommandContext, createContext } from '../../core/context'
 import { CLIError, formatError } from '../../core/errors'
+import { isListOutputFormat, outputList } from '../../core/list-output'
+import { registerApiCommand } from './api'
 import { registerArchiveCommand } from './archive'
 import { registerAssignCommand } from './assign'
 import { registerBulkArchiveCommand } from './bulk-archive'
@@ -284,14 +286,40 @@ export async function getConversation(
  */
 async function listTeammates(
   ctx: CommandContext,
-  options: { json?: boolean; idsOnly?: boolean }
+  options: { json?: boolean; idsOnly?: boolean; outputFormat?: string }
 ): Promise<void> {
-  const outputJson = options.json === true || ctx.format === 'json'
-  const idsOnly = options.idsOnly === true && !outputJson
+  const outputFormat = isListOutputFormat(options.outputFormat)
+    ? options.outputFormat
+    : undefined
+  if (options.outputFormat && !outputFormat) {
+    throw new CLIError({
+      userMessage: 'Invalid --output-format value.',
+      suggestion: 'Use json, ndjson, or csv.',
+    })
+  }
+  const outputJson =
+    options.json === true || ctx.format === 'json' || outputFormat === 'json'
+  const idsOnly = options.idsOnly === true
 
   try {
     const front = getFrontSdkClient()
     const result = await front.teammates.list()
+
+    if (idsOnly) {
+      for (const teammate of result._results) {
+        ctx.output.data(teammate.id)
+      }
+      return
+    }
+
+    if (outputFormat && outputFormat !== 'json') {
+      const rows = result._results.map((teammate) => ({
+        ...teammate,
+        _actions: [],
+      }))
+      outputList(ctx, rows, outputFormat)
+      return
+    }
 
     if (outputJson) {
       ctx.output.data(
@@ -304,13 +332,6 @@ async function listTeammates(
           ),
         })
       )
-      return
-    }
-
-    if (idsOnly) {
-      for (const teammate of result._results) {
-        ctx.output.data(teammate.id)
-      }
       return
     }
 
@@ -463,6 +484,10 @@ export function registerFrontCommands(program: Command): void {
     .command('teammates')
     .description('List all teammates in the workspace')
     .option('--ids-only', 'Output only IDs (one per line)')
+    .option(
+      '--output-format <format>',
+      'Output format for lists (json|ndjson|csv)'
+    )
     .option('--json', 'Output as JSON')
     .action(
       async (
@@ -513,6 +538,7 @@ export function registerFrontCommands(program: Command): void {
   registerAssignCommand(front)
   registerBulkAssignCommand(front)
   registerArchiveCommand(front)
+  registerApiCommand(front)
   registerBulkArchiveCommand(front)
   registerReportCommand(front)
   registerTriageCommand(front)

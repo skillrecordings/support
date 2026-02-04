@@ -24,6 +24,7 @@ import { type Message } from '@skillrecordings/front-sdk'
 import type { Command } from 'commander'
 import { type CommandContext, createContext } from '../core/context'
 import { CLIError, formatError } from '../core/errors'
+import { isListOutputFormat, outputList } from '../core/list-output'
 
 type ActionRow = typeof ActionsTable.$inferSelect
 
@@ -276,12 +277,23 @@ export async function listResponses(
     rating?: 'good' | 'bad' | 'unrated'
     json?: boolean
     idsOnly?: boolean
+    outputFormat?: string
   }
 ): Promise<void> {
   const db = getDb()
   const limit = options.limit || 20
-  const outputJson = options.json === true || ctx.format === 'json'
-  const idsOnly = options.idsOnly === true && !outputJson
+  const outputFormat = isListOutputFormat(options.outputFormat)
+    ? options.outputFormat
+    : undefined
+  if (options.outputFormat && !outputFormat) {
+    throw new CLIError({
+      userMessage: 'Invalid --output-format value.',
+      suggestion: 'Use json, ndjson, or csv.',
+    })
+  }
+  const outputJson =
+    options.json === true || ctx.format === 'json' || outputFormat === 'json'
+  const idsOnly = options.idsOnly === true
 
   try {
     // Build query conditions
@@ -414,15 +426,20 @@ export async function listResponses(
       filteredResponses = responses.filter((r) => !r.rating)
     }
 
-    if (outputJson) {
-      ctx.output.data(filteredResponses)
-      return
-    }
-
     if (idsOnly) {
       for (const response of filteredResponses) {
         ctx.output.data(response.actionId)
       }
+      return
+    }
+
+    if (outputFormat && outputFormat !== 'json') {
+      outputList(ctx, filteredResponses, outputFormat)
+      return
+    }
+
+    if (outputJson) {
+      ctx.output.data(filteredResponses)
       return
     }
 
@@ -875,22 +892,38 @@ export function registerResponseCommands(program: Command): void {
     .option('-s, --since <date>', 'Filter responses since date (YYYY-MM-DD)')
     .option('-r, --rating <type>', 'Filter by rating (good, bad, unrated)')
     .option('--ids-only', 'Output only IDs (one per line)')
+    .option(
+      '--output-format <format>',
+      'Output format for lists (json|ndjson|csv)'
+    )
     .option('--json', 'Output as JSON')
-    .action(async (options: { json?: boolean; idsOnly?: boolean }, command) => {
-      const opts =
-        typeof command.optsWithGlobals === 'function'
-          ? command.optsWithGlobals()
-          : {
-              ...command.parent?.opts(),
-              ...command.opts(),
-            }
-      const ctx = await createContext({
-        format: options.json ? 'json' : opts.format,
-        verbose: opts.verbose,
-        quiet: opts.quiet,
-      })
-      await listResponses(ctx, options)
-    })
+    .action(
+      async (
+        options: {
+          json?: boolean
+          idsOnly?: boolean
+          outputFormat?: string
+        },
+        command
+      ) => {
+        const opts =
+          typeof command.optsWithGlobals === 'function'
+            ? command.optsWithGlobals()
+            : {
+                ...command.parent?.opts(),
+                ...command.opts(),
+              }
+        const ctx = await createContext({
+          format:
+            options.json || options.outputFormat === 'json'
+              ? 'json'
+              : opts.format,
+          verbose: opts.verbose,
+          quiet: opts.quiet,
+        })
+        await listResponses(ctx, options)
+      }
+    )
 
   responses
     .command('get')

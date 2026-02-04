@@ -182,3 +182,11 @@ Initialized: 2026-02-04T15:13:09.231Z
 - Tests before: 118 passed, 4 skipped (122 total)
 - Tests after: 118 passed, 4 skipped (122 total)
 - Issues: none
+
+### P3 SDK Access: API passthrough and composability (ID: story-ml8cdsmr)
+- Completed: 2026-02-04T21:25:51Z
+- Files created: none
+- Files modified: packages/cli/src/commands/front/api.ts, packages/cli/src/commands/front/index.ts, packages/cli/PROGRESS.md
+- Tests before: 118 passed, 4 skipped (122 total)
+- Tests after: 118 passed, 4 skipped (122 total)
+- Issues: none

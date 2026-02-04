@@ -11,6 +11,7 @@ import { AppsTable, eq, getDb } from '@skillrecordings/database'
 import type { Command } from 'commander'
 import { type CommandContext, createContext } from '../core/context'
 import { CLIError, formatError } from '../core/errors'
+import { isListOutputFormat, outputList } from '../core/list-output'
 import { IntegrationClient } from '../lib/integration-client'
 
 type AppConfig = {
@@ -118,10 +119,20 @@ async function resolveAppConfig(slug: string): Promise<AppConfig> {
  */
 export async function listApps(
   ctx: CommandContext,
-  options: { json?: boolean; idsOnly?: boolean }
+  options: { json?: boolean; idsOnly?: boolean; outputFormat?: string }
 ): Promise<void> {
-  const outputJson = options.json === true || ctx.format === 'json'
-  const idsOnly = options.idsOnly === true && !outputJson
+  const outputFormat = isListOutputFormat(options.outputFormat)
+    ? options.outputFormat
+    : undefined
+  if (options.outputFormat && !outputFormat) {
+    throw new CLIError({
+      userMessage: 'Invalid --output-format value.',
+      suggestion: 'Use json, ndjson, or csv.',
+    })
+  }
+  const outputJson =
+    options.json === true || ctx.format === 'json' || outputFormat === 'json'
+  const idsOnly = options.idsOnly === true
 
   try {
     const db = getDb()
@@ -133,15 +144,20 @@ export async function listApps(
       })
       .from(AppsTable)
 
-    if (outputJson) {
-      ctx.output.data(apps)
-      return
-    }
-
     if (idsOnly) {
       for (const app of apps) {
         ctx.output.data(app.slug)
       }
+      return
+    }
+
+    if (outputFormat && outputFormat !== 'json') {
+      outputList(ctx, apps, outputFormat)
+      return
+    }
+
+    if (outputJson) {
+      ctx.output.data(apps)
       return
     }
 
@@ -352,22 +368,34 @@ export function registerToolsCommands(program: Command) {
     .command('list')
     .description('List all registered apps')
     .option('--ids-only', 'Output only IDs (one per line)')
+    .option(
+      '--output-format <format>',
+      'Output format for lists (json|ndjson|csv)'
+    )
     .option('--json', 'Output as JSON')
-    .action(async (options: { json?: boolean; idsOnly?: boolean }, command) => {
-      const opts =
-        typeof command.optsWithGlobals === 'function'
-          ? command.optsWithGlobals()
-          : {
-              ...command.parent?.opts(),
-              ...command.opts(),
-            }
-      const ctx = await createContext({
-        format: options.json ? 'json' : opts.format,
-        verbose: opts.verbose,
-        quiet: opts.quiet,
-      })
-      await listApps(ctx, options)
-    })
+    .action(
+      async (
+        options: { json?: boolean; idsOnly?: boolean; outputFormat?: string },
+        command
+      ) => {
+        const opts =
+          typeof command.optsWithGlobals === 'function'
+            ? command.optsWithGlobals()
+            : {
+                ...command.parent?.opts(),
+                ...command.opts(),
+              }
+        const ctx = await createContext({
+          format:
+            options.json || options.outputFormat === 'json'
+              ? 'json'
+              : opts.format,
+          verbose: opts.verbose,
+          quiet: opts.quiet,
+        })
+        await listApps(ctx, options)
+      }
+    )
 
   tools
     .command('search')

@@ -26,6 +26,7 @@ interface TriageOptions {
   inbox: string
   status?: 'unassigned' | 'assigned' | 'archived'
   autoArchive?: boolean
+  dryRun?: boolean
   json?: boolean
 }
 
@@ -265,7 +266,7 @@ export async function triageConversations(
   ctx: CommandContext,
   options: TriageOptions
 ): Promise<void> {
-  const { inbox, status = 'unassigned', autoArchive = false } = options
+  const { inbox, status = 'unassigned', autoArchive = false, dryRun } = options
   const outputJson = options.json === true || ctx.format === 'json'
 
   try {
@@ -440,6 +441,17 @@ export async function triageConversations(
         return
       }
 
+      if (dryRun) {
+        ctx.output.data(
+          `\n🧪 DRY RUN: Would archive ${toArchive.length} conversations:`
+        )
+        for (const item of toArchive) {
+          ctx.output.data(`   - ${item.id}`)
+        }
+        ctx.output.data('')
+        return
+      }
+
       ctx.output.data(`\n📦 Archiving ${toArchive.length} conversations...`)
 
       let archived = 0
@@ -490,6 +502,7 @@ export function registerTriageCommand(front: Command): void {
       'unassigned'
     )
     .option('--auto-archive', 'Automatically archive noise and spam')
+    .option('--dry-run', 'Preview auto-archive without making changes')
     .option('--json', 'JSON output')
     .action(async (options: TriageOptions, command: Command) => {
       const opts =

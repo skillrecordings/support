@@ -20,6 +20,7 @@ import { DEFAULT_CATEGORY_TAG_MAPPING } from '@skillrecordings/core/tags/registr
 import type { Command } from 'commander'
 import { type CommandContext, createContext } from '../../core/context'
 import { CLIError, formatError } from '../../core/errors'
+import { isListOutputFormat, outputList } from '../../core/list-output'
 import { hateoasWrap, tagListActions, tagListLinks } from './hateoas'
 
 /**
@@ -213,10 +214,21 @@ export async function listTags(
     json?: boolean
     unused?: boolean
     idsOnly?: boolean
+    outputFormat?: string
   }
 ): Promise<void> {
-  const outputJson = options.json === true || ctx.format === 'json'
-  const idsOnly = options.idsOnly === true && !outputJson
+  const outputFormat = isListOutputFormat(options.outputFormat)
+    ? options.outputFormat
+    : undefined
+  if (options.outputFormat && !outputFormat) {
+    throw new CLIError({
+      userMessage: 'Invalid --output-format value.',
+      suggestion: 'Use json, ndjson, or csv.',
+    })
+  }
+  const outputJson =
+    options.json === true || ctx.format === 'json' || outputFormat === 'json'
+  const idsOnly = options.idsOnly === true
 
   try {
     const front = getFrontSdkClient()
@@ -242,6 +254,22 @@ export async function listTags(
       ? tagsWithCounts.filter((t) => t.conversation_count === 0)
       : tagsWithCounts
 
+    if (idsOnly) {
+      for (const tag of filteredTags) {
+        ctx.output.data(tag.id)
+      }
+      return
+    }
+
+    if (outputFormat && outputFormat !== 'json') {
+      const rows = filteredTags.map((tag) => ({
+        ...tag,
+        _actions: tagListActions(),
+      }))
+      outputList(ctx, rows, outputFormat)
+      return
+    }
+
     if (outputJson) {
       ctx.output.data(
         hateoasWrap({
@@ -254,13 +282,6 @@ export async function listTags(
           actions: tagListActions(),
         })
       )
-      return
-    }
-
-    if (idsOnly) {
-      for (const tag of filteredTags) {
-        ctx.output.data(tag.id)
-      }
       return
     }
 
@@ -326,7 +347,7 @@ export async function listTags(
 export async function deleteTag(
   ctx: CommandContext,
   id: string,
-  options: { force?: boolean }
+  options: { force?: boolean; dryRun?: boolean }
 ): Promise<void> {
   try {
     const front = getFrontSdkClient()
@@ -334,6 +355,15 @@ export async function deleteTag(
     // Fetch tag details first
     const tag = await front.tags.get(id)
     const convCount = await getConversationCount(front, id)
+
+    if (options.dryRun) {
+      ctx.output.data(
+        `\n🧪 DRY RUN: Would delete tag "${tag.name}" (${tag.id})`
+      )
+      ctx.output.data(`   Conversations: ${convCount}`)
+      ctx.output.data('')
+      return
+    }
 
     if (!options.force) {
       ctx.output.data(`\n🏷️  Tag: ${tag.name}`)
@@ -383,7 +413,8 @@ export async function deleteTag(
 export async function renameTag(
   ctx: CommandContext,
   id: string,
-  newName: string
+  newName: string,
+  options: { dryRun?: boolean }
 ): Promise<void> {
   try {
     const front = getFrontSdkClient()
@@ -391,6 +422,13 @@ export async function renameTag(
     // Fetch current tag details
     const oldTag = await front.tags.get(id)
     const oldName = oldTag.name
+
+    if (options.dryRun) {
+      ctx.output.data(`\n🧪 DRY RUN: Would rename tag:`)
+      ctx.output.data(`   "${oldName}" → "${newName}"`)
+      ctx.output.data(`   ID: ${id}\n`)
+      return
+    }
 
     // Update the tag
     const updatedTag = await front.tags.update(id, { name: newName })
@@ -859,9 +897,18 @@ export function registerTagCommands(frontCommand: Command): void {
     .option('--json', 'Output as JSON')
     .option('--unused', 'Show only tags with 0 conversations')
     .option('--ids-only', 'Output only IDs (one per line)')
+    .option(
+      '--output-format <format>',
+      'Output format for lists (json|ndjson|csv)'
+    )
     .action(
       async (
-        options: { json?: boolean; unused?: boolean; idsOnly?: boolean },
+        options: {
+          json?: boolean
+          unused?: boolean
+          idsOnly?: boolean
+          outputFormat?: string
+        },
         command
       ) => {
         const opts =
@@ -872,7 +919,10 @@ export function registerTagCommands(frontCommand: Command): void {
                 ...command.opts(),
               }
         const ctx = await createContext({
-          format: options.json ? 'json' : opts.format,
+          format:
+            options.json || options.outputFormat === 'json'
+              ? 'json'
+              : opts.format,
           verbose: opts.verbose,
           quiet: opts.quiet,
         })
@@ -885,28 +935,36 @@ export function registerTagCommands(frontCommand: Command): void {
     .description('Delete a tag by ID')
     .argument('<id>', 'Tag ID (e.g., tag_xxx)')
     .option('-f, --force', 'Skip confirmation prompt')
-    .action(async (id: string, options: { force?: boolean }, command) => {
-      const opts =
-        typeof command.optsWithGlobals === 'function'
-          ? command.optsWithGlobals()
-          : {
-              ...command.parent?.opts(),
-              ...command.opts(),
-            }
-      const ctx = await createContext({
-        format: opts.format,
-        verbose: opts.verbose,
-        quiet: opts.quiet,
-      })
-      await deleteTag(ctx, id, options)
-    })
+    .option('--dry-run', 'Preview without deleting')
+    .action(
+      async (
+        id: string,
+        options: { force?: boolean; dryRun?: boolean },
+        command
+      ) => {
+        const opts =
+          typeof command.optsWithGlobals === 'function'
+            ? command.optsWithGlobals()
+            : {
+                ...command.parent?.opts(),
+                ...command.opts(),
+              }
+        const ctx = await createContext({
+          format: opts.format,
+          verbose: opts.verbose,
+          quiet: opts.quiet,
+        })
+        await deleteTag(ctx, id, options)
+      }
+    )
 
   tags
     .command('rename')
     .description('Rename a tag')
     .argument('<id>', 'Tag ID (e.g., tag_xxx)')
     .argument('<name>', 'New tag name')
-    .action(async (id: string, name: string, command) => {
+    .option('--dry-run', 'Preview without renaming')
+    .action(async (id: string, name: string, options, command) => {
       const opts =
         typeof command.optsWithGlobals === 'function'
           ? command.optsWithGlobals()
@@ -919,7 +977,7 @@ export function registerTagCommands(frontCommand: Command): void {
         verbose: opts.verbose,
         quiet: opts.quiet,
       })
-      await renameTag(ctx, id, name)
+      await renameTag(ctx, id, name, options)
     })
 
   tags

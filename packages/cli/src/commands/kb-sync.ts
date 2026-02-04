@@ -25,6 +25,7 @@ import {
 import type { Command } from 'commander'
 import { type CommandContext, createContext } from '../core/context'
 import { CLIError, formatError } from '../core/errors'
+import { isListOutputFormat, outputList } from '../core/list-output'
 
 /**
  * Hash content to enable idempotent updates
@@ -446,21 +447,36 @@ export async function stats(
  */
 export async function list(
   ctx: CommandContext,
-  options: { json?: boolean; idsOnly?: boolean }
+  options: { json?: boolean; idsOnly?: boolean; outputFormat?: string }
 ): Promise<void> {
   const sources = listProductSources()
-  const outputJson = options.json === true || ctx.format === 'json'
-  const idsOnly = options.idsOnly === true && !outputJson
-
-  if (outputJson) {
-    ctx.output.data(sources)
-    return
+  const outputFormat = isListOutputFormat(options.outputFormat)
+    ? options.outputFormat
+    : undefined
+  if (options.outputFormat && !outputFormat) {
+    throw new CLIError({
+      userMessage: 'Invalid --output-format value.',
+      suggestion: 'Use json, ndjson, or csv.',
+    })
   }
+  const outputJson =
+    options.json === true || ctx.format === 'json' || outputFormat === 'json'
+  const idsOnly = options.idsOnly === true
 
   if (idsOnly) {
     for (const source of sources) {
       ctx.output.data(source.appId)
     }
+    return
+  }
+
+  if (outputFormat && outputFormat !== 'json') {
+    outputList(ctx, sources, outputFormat)
+    return
+  }
+
+  if (outputJson) {
+    ctx.output.data(sources)
     return
   }
 
@@ -499,7 +515,7 @@ export function registerKbCommands(program: Command): void {
     .action(async (options, command) => {
       const ctx = await createContext({
         format:
-          options.json === true
+          options.json === true || options.outputFormat === 'json'
             ? 'json'
             : typeof command.optsWithGlobals === 'function'
               ? command.optsWithGlobals().format
@@ -543,6 +559,10 @@ export function registerKbCommands(program: Command): void {
   kb.command('list')
     .description('List configured knowledge sources')
     .option('--ids-only', 'Output only IDs (one per line)')
+    .option(
+      '--output-format <format>',
+      'Output format for lists (json|ndjson|csv)'
+    )
     .option('--json', 'Output as JSON')
     .action(async (options, command) => {
       const ctx = await createContext({
