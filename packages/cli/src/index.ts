@@ -77,6 +77,7 @@ program
     'Webhook secret (required for direct URL mode)'
   )
   .option('-l, --list', 'List all registered apps')
+  .option('--ids-only', 'Output only IDs (one per line)')
   .option('--json', 'Output result as JSON (machine-readable)')
   .action(health)
 

@@ -44,6 +44,7 @@ interface Report {
     createdAt: string
     tags: string[]
   }>
+  unresolved_ids: string[]
   topSenders: Array<{ email: string; count: number }>
 }
 
@@ -147,6 +148,7 @@ export async function generateReport(
       volumeByWeek: [],
       tagBreakdown: {},
       unresolvedIssues: [],
+      unresolved_ids: [],
       topSenders: [],
     }
 
@@ -200,16 +202,16 @@ export async function generateReport(
     report.unresolvedIssues.sort((a, b) =>
       b.createdAt.localeCompare(a.createdAt)
     )
+    report.unresolved_ids = report.unresolvedIssues.map((issue) => issue.id)
 
     // Output
     if (outputJson) {
-      const unresolvedIds = report.unresolvedIssues.map((i) => i.id)
       ctx.output.data(
         hateoasWrap({
           type: 'report',
           command: `skill front report --inbox ${inbox} --json`,
           data: report,
-          links: reportLinks(inbox, unresolvedIds),
+          links: reportLinks(inbox, report.unresolved_ids),
           actions: reportActions(inbox),
         })
       )

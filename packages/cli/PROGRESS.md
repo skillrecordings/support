@@ -174,3 +174,11 @@ Initialized: 2026-02-04T15:13:09.231Z
 - Tests before: 118 passed, 4 skipped (122 total)
 - Tests after: 118 passed, 4 skipped (122 total)
 - Issues: none
+
+### P2 Improvements: pull bodies, triage LLM, report IDs (ID: story-ml8cdmrg)
+- Completed: 2026-02-04T21:11:55Z
+- Files created: none
+- Files modified: packages/cli/src/commands/front/pull-conversations.ts, packages/cli/src/commands/front/index.ts, packages/cli/src/commands/front/triage.ts, packages/cli/src/commands/health.ts, packages/cli/src/index.ts, packages/cli/tests/integration/commands/front.test.ts, packages/cli/PROGRESS.md
+- Tests before: 118 passed, 4 skipped (122 total)
+- Tests after: 118 passed, 4 skipped (122 total)
+- Issues: none

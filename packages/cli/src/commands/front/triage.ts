@@ -9,8 +9,15 @@
  */
 
 import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
-import type { Conversation, ConversationList } from '@skillrecordings/front-sdk'
+import type {
+  Conversation,
+  ConversationList,
+  Message,
+  MessageList,
+} from '@skillrecordings/front-sdk'
+import { generateObject } from 'ai'
 import type { Command } from 'commander'
+import { z } from 'zod'
 import { type CommandContext, createContext } from '../../core/context'
 import { CLIError, formatError } from '../../core/errors'
 import { hateoasWrap, triageActions } from './hateoas'
@@ -23,6 +30,7 @@ interface TriageOptions {
 }
 
 type Category = 'actionable' | 'noise' | 'spam'
+type Urgency = 'low' | 'medium' | 'high'
 
 interface TriageResult {
   id: string
@@ -32,6 +40,11 @@ interface TriageResult {
   category: Category
   reason: string
   created_at: number
+  llm?: {
+    urgency: Urgency
+    category: string
+    suggested_action: string
+  } | null
 }
 
 interface CategoryStats {
@@ -56,6 +69,69 @@ function requireFrontToken(): string {
 
 function getFrontClient() {
   return createInstrumentedFrontClient({ apiToken: requireFrontToken() })
+}
+
+const LLM_MODEL = 'anthropic/claude-haiku-4-5'
+
+const llmTriageSchema = z.object({
+  urgency: z.enum(['low', 'medium', 'high']),
+  category: z.string(),
+  suggested_action: z.string(),
+})
+
+function normalizeMessageBody(message: Message | null): string {
+  if (!message) return ''
+  const rawBody = message.text || message.body || ''
+  if (!rawBody) return ''
+  return rawBody
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function buildLlmPrompt(
+  conversation: Conversation,
+  messageBody: string
+): string {
+  const subject = conversation.subject || '(no subject)'
+  const senderEmail = conversation.recipient?.handle || 'unknown'
+  const senderName = conversation.recipient?.name || 'unknown'
+  const tags =
+    conversation.tags && conversation.tags.length > 0
+      ? conversation.tags.map((t) => t.name).join(', ')
+      : 'none'
+  const messageSection = messageBody
+    ? `\nLatest inbound message:\n${messageBody}\n`
+    : '\nLatest inbound message: (not available)\n'
+
+  return `Classify this support conversation for triage.
+
+Subject: ${subject}
+Sender: ${senderName} <${senderEmail}>
+Tags: ${tags}
+${messageSection}
+
+Return urgency (low/medium/high), a short category label, and a suggested next action.`
+}
+
+async function classifyWithLlm(
+  conversation: Conversation,
+  message: Message | null
+): Promise<{
+  urgency: Urgency
+  category: string
+  suggested_action: string
+} | null> {
+  try {
+    const { object } = await generateObject({
+      model: LLM_MODEL,
+      schema: llmTriageSchema,
+      prompt: buildLlmPrompt(conversation, normalizeMessageBody(message)),
+    })
+    return object
+  } catch {
+    return null
+  }
 }
 
 /**
@@ -154,6 +230,34 @@ function formatTimestamp(ts: number): string {
   })
 }
 
+async function fetchLatestInboundMessage(
+  front: ReturnType<typeof getFrontClient>,
+  conversationId: string
+): Promise<Message | null> {
+  try {
+    const messageList = (await front.conversations.listMessages(
+      conversationId
+    )) as MessageList
+    const messages = messageList._results ?? []
+    const latestInbound = messages
+      .filter((message) => message.is_inbound)
+      .sort((a, b) => b.created_at - a.created_at)[0]
+
+    if (!latestInbound) return null
+
+    try {
+      const fullMessage = (await front.messages.get(
+        latestInbound.id
+      )) as Message
+      return fullMessage
+    } catch {
+      return latestInbound
+    }
+  } catch {
+    return null
+  }
+}
+
 /**
  * Main triage function
  */
@@ -203,6 +307,8 @@ export async function triageConversations(
 
     for (const conv of allConversations) {
       const { category, reason } = categorizeConversation(conv)
+      const latestMessage = await fetchLatestInboundMessage(front, conv.id)
+      const llm = await classifyWithLlm(conv, latestMessage)
       stats[category]++
 
       results.push({
@@ -213,6 +319,7 @@ export async function triageConversations(
         category,
         reason,
         created_at: conv.created_at,
+        llm,
       })
     }
 
@@ -269,6 +376,11 @@ export async function triageConversations(
         ctx.output.data(`      From: ${r.senderEmail}`)
         ctx.output.data(`      Subject: ${r.subject}`)
         ctx.output.data(`      → ${r.reason}`)
+        if (r.llm) {
+          ctx.output.data(
+            `      LLM: ${r.llm.urgency} · ${r.llm.category} · ${r.llm.suggested_action}`
+          )
+        }
         ctx.output.data('')
       }
       if (byCategory.actionable.length > 10) {
@@ -288,6 +400,11 @@ export async function triageConversations(
           `   ${r.id} - ${r.senderEmail} - ${r.subject.slice(0, 60)}`
         )
         ctx.output.data(`      → ${r.reason}`)
+        if (r.llm) {
+          ctx.output.data(
+            `      LLM: ${r.llm.urgency} · ${r.llm.category} · ${r.llm.suggested_action}`
+          )
+        }
       }
       if (byCategory.noise.length > 5) {
         ctx.output.data(`   ... and ${byCategory.noise.length - 5} more\n`)
@@ -304,6 +421,11 @@ export async function triageConversations(
           `   ${r.id} - ${r.senderEmail} - ${r.subject.slice(0, 60)}`
         )
         ctx.output.data(`      → ${r.reason}`)
+        if (r.llm) {
+          ctx.output.data(
+            `      LLM: ${r.llm.urgency} · ${r.llm.category} · ${r.llm.suggested_action}`
+          )
+        }
       }
       if (byCategory.spam.length > 5) {
         ctx.output.data(`   ... and ${byCategory.spam.length - 5} more\n`)

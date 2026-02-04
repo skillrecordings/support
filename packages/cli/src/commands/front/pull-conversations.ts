@@ -142,6 +142,15 @@ export async function pullConversations(
     const samples: EvalSample[] = []
     let processed = 0
 
+    const normalizeBody = (message: FrontMessage): string => {
+      const rawBody = message.text || message.body || ''
+      if (!rawBody) return ''
+      return rawBody
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+    }
+
     for (const conv of allConversations) {
       processed++
       ctx.output.progress(
@@ -154,9 +163,21 @@ export async function pullConversations(
           `/conversations/${conv.id}/messages`
         )) as { _results: FrontMessage[] }
         const messages = messagesData._results || []
+        const hydratedMessages: FrontMessage[] = []
+
+        for (const message of messages) {
+          try {
+            const fullMessage = (await front.messages.get(
+              message.id
+            )) as FrontMessage
+            hydratedMessages.push(fullMessage)
+          } catch {
+            hydratedMessages.push(message)
+          }
+        }
 
         // Find the most recent inbound message as trigger
-        const inboundMessages = messages
+        const inboundMessages = hydratedMessages
           .filter((m) => m.is_inbound)
           .sort((a, b) => b.created_at - a.created_at)
 
@@ -164,29 +185,17 @@ export async function pullConversations(
         if (!triggerMessage) continue // Skip if no inbound messages
 
         // Extract body text
-        const bodyText =
-          triggerMessage.text ||
-          triggerMessage.body
-            ?.replace(/<[^>]*>/g, ' ')
-            .replace(/\s+/g, ' ')
-            .trim() ||
-          ''
+        const bodyText = normalizeBody(triggerMessage)
 
         // Skip very short messages
         if (bodyText.length < 20) continue
 
         // Build conversation history
-        const history = messages
+        const history = hydratedMessages
           .sort((a, b) => a.created_at - b.created_at)
           .map((m) => ({
             direction: (m.is_inbound ? 'in' : 'out') as 'in' | 'out',
-            body:
-              m.text ||
-              m.body
-                ?.replace(/<[^>]*>/g, ' ')
-                .replace(/\s+/g, ' ')
-                .trim() ||
-              '',
+            body: normalizeBody(m),
             timestamp: m.created_at,
             author: m.author?.email,
           }))

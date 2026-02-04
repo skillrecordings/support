@@ -275,11 +275,13 @@ export async function listResponses(
     since?: string
     rating?: 'good' | 'bad' | 'unrated'
     json?: boolean
+    idsOnly?: boolean
   }
 ): Promise<void> {
   const db = getDb()
   const limit = options.limit || 20
   const outputJson = options.json === true || ctx.format === 'json'
+  const idsOnly = options.idsOnly === true && !outputJson
 
   try {
     // Build query conditions
@@ -414,6 +416,13 @@ export async function listResponses(
 
     if (outputJson) {
       ctx.output.data(filteredResponses)
+      return
+    }
+
+    if (idsOnly) {
+      for (const response of filteredResponses) {
+        ctx.output.data(response.actionId)
+      }
       return
     }
 
@@ -865,8 +874,9 @@ export function registerResponseCommands(program: Command): void {
     .option('-l, --limit <n>', 'Number of responses (default: 20)', parseInt)
     .option('-s, --since <date>', 'Filter responses since date (YYYY-MM-DD)')
     .option('-r, --rating <type>', 'Filter by rating (good, bad, unrated)')
+    .option('--ids-only', 'Output only IDs (one per line)')
     .option('--json', 'Output as JSON')
-    .action(async (options, command) => {
+    .action(async (options: { json?: boolean; idsOnly?: boolean }, command) => {
       const opts =
         typeof command.optsWithGlobals === 'function'
           ? command.optsWithGlobals()

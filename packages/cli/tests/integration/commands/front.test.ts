@@ -136,6 +136,14 @@ describe('front commands', () => {
         },
       ],
     })
+    front.messages.get.mockResolvedValue({
+      id: 'msg_1',
+      is_inbound: true,
+      created_at: 1700000001,
+      text: 'Hello there',
+      body: '<p>Hello there</p>',
+      author: { email: 'user@example.com' },
+    })
     mockCreateInstrumentedFrontClient.mockReturnValue(front)
 
     const { ctx, getStdout } = await createTestContext({ format: 'json' })
@@ -329,6 +337,14 @@ describe('front commands', () => {
 
   it('pull outputs JSON payload', async () => {
     const front = createFrontMock()
+    front.messages.get.mockResolvedValue({
+      id: 'msg_1',
+      is_inbound: true,
+      created_at: 1700000001,
+      text: 'Please help with my refund request.',
+      body: '<p>Please help with my refund request.</p>',
+      author: { email: 'user@example.com' },
+    })
     front.raw.get.mockImplementation(async (path: string) => {
       if (path.startsWith('/inboxes/')) {
         return {

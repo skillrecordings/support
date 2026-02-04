@@ -212,9 +212,11 @@ export async function listTags(
   options: {
     json?: boolean
     unused?: boolean
+    idsOnly?: boolean
   }
 ): Promise<void> {
   const outputJson = options.json === true || ctx.format === 'json'
+  const idsOnly = options.idsOnly === true && !outputJson
 
   try {
     const front = getFrontSdkClient()
@@ -252,6 +254,13 @@ export async function listTags(
           actions: tagListActions(),
         })
       )
+      return
+    }
+
+    if (idsOnly) {
+      for (const tag of filteredTags) {
+        ctx.output.data(tag.id)
+      }
       return
     }
 
@@ -849,21 +858,27 @@ export function registerTagCommands(frontCommand: Command): void {
     .description('List all tags with conversation counts')
     .option('--json', 'Output as JSON')
     .option('--unused', 'Show only tags with 0 conversations')
-    .action(async (options: { json?: boolean; unused?: boolean }, command) => {
-      const opts =
-        typeof command.optsWithGlobals === 'function'
-          ? command.optsWithGlobals()
-          : {
-              ...command.parent?.opts(),
-              ...command.opts(),
-            }
-      const ctx = await createContext({
-        format: options.json ? 'json' : opts.format,
-        verbose: opts.verbose,
-        quiet: opts.quiet,
-      })
-      await listTags(ctx, options)
-    })
+    .option('--ids-only', 'Output only IDs (one per line)')
+    .action(
+      async (
+        options: { json?: boolean; unused?: boolean; idsOnly?: boolean },
+        command
+      ) => {
+        const opts =
+          typeof command.optsWithGlobals === 'function'
+            ? command.optsWithGlobals()
+            : {
+                ...command.parent?.opts(),
+                ...command.opts(),
+              }
+        const ctx = await createContext({
+          format: options.json ? 'json' : opts.format,
+          verbose: opts.verbose,
+          quiet: opts.quiet,
+        })
+        await listTags(ctx, options)
+      }
+    )
 
   tags
     .command('delete')

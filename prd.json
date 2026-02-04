@@ -290,7 +290,7 @@
       "title": "P2 Improvements: pull bodies, triage LLM, report IDs",
       "description": "Usability improvements from real triage session.\n\n## Progress Notification (MANDATORY)\nAfter completing this story, write a status update to `packages/cli/PROGRESS.md` with:\n- Story title and completion timestamp\n- Files created/modified\n- Test count before and after\n\n## Context from main branch\n- `skill front search` available with full Front query syntax (optional query + filter flags)\n- Front query syntax: inbox:inb_xxx, tag:tag_xxx, is:status, from:email, after/before:<ts>\n- Pagination: always limit=50 page size, loop on _pagination.next cursors\n- Use registerXxxCommand pattern for new commands\n\n## Improvements\n1. `pull` command: include full message bodies (currently empty)\n2. `conversation` display: remove 200-char truncation, add --no-truncate\n3. `triage` command: add LLM classification (urgency/category/suggested_action via generateObject)\n4. `report` command: include unresolved_ids array with all conversation IDs\n5. All list commands: add --ids-only flag (one ID per line)\n\n## On Completion\nCommit: `feat(cli): improve pull, conversation, triage, report commands`",
       "priority": 18,
-      "passes": false,
+      "passes": true,
       "validationCommand": "cd packages/cli && bun run check-types && bun run test",
       "acceptanceCriteria": [
         "pull includes message bodies",
@@ -321,7 +321,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-04T15:13:09.231Z",
-    "totalIterations": 17,
-    "lastIteration": "2026-02-04T20:53:35.087Z"
+    "totalIterations": 18,
+    "lastIteration": "2026-02-04T21:12:58.593Z"
   }
 }

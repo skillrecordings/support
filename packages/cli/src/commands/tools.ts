@@ -118,9 +118,10 @@ async function resolveAppConfig(slug: string): Promise<AppConfig> {
  */
 export async function listApps(
   ctx: CommandContext,
-  options: { json?: boolean }
+  options: { json?: boolean; idsOnly?: boolean }
 ): Promise<void> {
   const outputJson = options.json === true || ctx.format === 'json'
+  const idsOnly = options.idsOnly === true && !outputJson
 
   try {
     const db = getDb()
@@ -134,6 +135,13 @@ export async function listApps(
 
     if (outputJson) {
       ctx.output.data(apps)
+      return
+    }
+
+    if (idsOnly) {
+      for (const app of apps) {
+        ctx.output.data(app.slug)
+      }
       return
     }
 
@@ -343,8 +351,9 @@ export function registerToolsCommands(program: Command) {
   tools
     .command('list')
     .description('List all registered apps')
+    .option('--ids-only', 'Output only IDs (one per line)')
     .option('--json', 'Output as JSON')
-    .action(async (options, command) => {
+    .action(async (options: { json?: boolean; idsOnly?: boolean }, command) => {
       const opts =
         typeof command.optsWithGlobals === 'function'
           ? command.optsWithGlobals()

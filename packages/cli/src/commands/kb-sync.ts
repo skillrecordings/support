@@ -446,13 +446,21 @@ export async function stats(
  */
 export async function list(
   ctx: CommandContext,
-  options: { json?: boolean }
+  options: { json?: boolean; idsOnly?: boolean }
 ): Promise<void> {
   const sources = listProductSources()
   const outputJson = options.json === true || ctx.format === 'json'
+  const idsOnly = options.idsOnly === true && !outputJson
 
   if (outputJson) {
     ctx.output.data(sources)
+    return
+  }
+
+  if (idsOnly) {
+    for (const source of sources) {
+      ctx.output.data(source.appId)
+    }
     return
   }
 
@@ -534,6 +542,7 @@ export function registerKbCommands(program: Command): void {
 
   kb.command('list')
     .description('List configured knowledge sources')
+    .option('--ids-only', 'Output only IDs (one per line)')
     .option('--json', 'Output as JSON')
     .action(async (options, command) => {
       const ctx = await createContext({

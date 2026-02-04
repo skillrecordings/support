@@ -108,9 +108,10 @@ async function findInbox(nameOrId: string): Promise<Inbox | null> {
  */
 export async function listInboxes(
   ctx: CommandContext,
-  options: { json?: boolean }
+  options: { json?: boolean; idsOnly?: boolean }
 ): Promise<void> {
   const outputJson = options.json === true || ctx.format === 'json'
+  const idsOnly = options.idsOnly === true && !outputJson
 
   try {
     const front = getFrontClient()
@@ -128,6 +129,13 @@ export async function listInboxes(
           ),
         })
       )
+      return
+    }
+
+    if (idsOnly) {
+      for (const inbox of inboxes) {
+        ctx.output.data(inbox.id)
+      }
       return
     }
 
@@ -168,12 +176,14 @@ export async function listConversations(
   inboxNameOrId: string,
   options: {
     json?: boolean
+    idsOnly?: boolean
     status?: 'unassigned' | 'assigned' | 'archived'
     tag?: string
     limit?: string
   }
 ): Promise<void> {
   const outputJson = options.json === true || ctx.format === 'json'
+  const idsOnly = options.idsOnly === true && !outputJson
 
   try {
     const front = getFrontClient()
@@ -247,6 +257,13 @@ export async function listConversations(
           actions: conversationListActions(inbox.id),
         })
       )
+      return
+    }
+
+    if (idsOnly) {
+      for (const conv of conversations) {
+        ctx.output.data(conv.id)
+      }
       return
     }
 
@@ -325,6 +342,7 @@ export function registerInboxCommand(front: Command): void {
       'Inbox name or ID (omit to list all inboxes)'
     )
     .option('--json', 'Output as JSON')
+    .option('--ids-only', 'Output only IDs (one per line)')
     .option(
       '--status <status>',
       'Filter by status (unassigned, assigned, archived)'

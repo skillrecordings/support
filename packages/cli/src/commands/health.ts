@@ -133,7 +133,8 @@ async function lookupApp(
  */
 async function listApps(
   ctx: CommandContext,
-  outputJson: boolean
+  outputJson: boolean,
+  idsOnly: boolean
 ): Promise<void> {
   try {
     const db = getDb()
@@ -158,6 +159,13 @@ async function listApps(
     if (outputJson) {
       ctx.output.data(apps)
     } else {
+      if (idsOnly) {
+        for (const app of apps) {
+          ctx.output.data(app.slug)
+        }
+        await closeDb()
+        return
+      }
       ctx.output.data('\nRegistered apps:\n')
       for (const app of apps) {
         ctx.output.data(`  ${app.slug}`)
@@ -187,14 +195,19 @@ async function listApps(
 export async function health(
   ctx: CommandContext,
   slugOrUrl: string | undefined,
-  options: { secret?: string; list?: boolean; json?: boolean }
+  options: {
+    secret?: string
+    list?: boolean
+    json?: boolean
+    idsOnly?: boolean
+  }
 ): Promise<void> {
   const outputJson = options.json === true || ctx.format === 'json'
 
   try {
     // Handle --list flag
     if (options.list) {
-      await listApps(ctx, outputJson)
+      await listApps(ctx, outputJson, options.idsOnly === true && !outputJson)
       return
     }
 

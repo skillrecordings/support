@@ -1428,3 +1428,25 @@ Files: none
 Summary: **Summary**
 - Added Front CLI commands for assign, bulk-assign, tag/untag, and reply drafts with `--dry-run`, `--json`, CLIError handling, and HATEOAS actions. Files: `packages/cli/src/commands/front/assign.ts`, `packages/cli/src/commands/front/bulk-assign.ts`, `packages/cli/src/commands/front/conversation-tags.ts`, `packages/cli/src/commands/front/reply.ts`.
 - Registered new commands and expanded
+
+---
+[2026-02-04T21:03:59.160Z]
+Failed: P2 Improvements: pull bodies, triage LLM, report IDs
+Validation: 
+ RUN  v3.2.4 /home/joel/Code/skillrecordings/support-cli-rearchitect/packages/cli
+
+ ✓ tests/e2e/install.test.ts (1 test) 48ms
+ ✓ src/commands/eval.test.ts (7 tests) 67ms
+ ✓ tests/unit/core/secrets.test.ts (9 tests) 13ms
+ ✓ tests/integration/commands/db-status.test.ts (3 tests) 19ms
+ ✓ tests/integra
+Codex: 
+
+---
+[2026-02-04T21:12:58.594Z]
+Completed: P2 Improvements: pull bodies, triage LLM, report IDs
+Files: none
+Summary: Note: I noticed pre-existing modified files I didn’t touch: `packages/cli/src/commands/front/inbox.ts`, `packages/cli/src/commands/front/report.ts`, `packages/cli/src/commands/front/tags.ts`, `packages/cli/src/commands/kb-sync.ts`, `packages/cli/src/commands/responses.ts`, `packages/cli/src/commands/tools.ts`, and `progress.txt`. How would you like to proceed with those?
+
+**Summary**
+- Hydrated fu

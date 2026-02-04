@@ -83,6 +83,18 @@ function truncate(str: string, len: number): string {
   return str.slice(0, len - 3) + '...'
 }
 
+function normalizeMessageBody(message: {
+  text?: string | null
+  body?: string | null
+}): string {
+  const rawBody = message.text || message.body || ''
+  if (!rawBody) return ''
+  return rawBody
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
 /**
  * Normalize Front resource ID or URL to ID
  */
@@ -136,14 +148,9 @@ export async function getMessage(
 
     ctx.output.data('\n📝 Body:')
     // Strip HTML and show preview
-    const textBody =
-      message.text ||
-      message.body
-        .replace(/<[^>]*>/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim()
+    const textBody = normalizeMessageBody(message)
     ctx.output.data(
-      `   Length: ${message.body.length} chars (HTML), ${textBody.length} chars (text)`
+      `   Length: ${(message.body ?? '').length} chars (HTML), ${textBody.length} chars (text)`
     )
     ctx.output.data(`   Preview: ${truncate(textBody, 500)}`)
 
@@ -176,7 +183,7 @@ export async function getMessage(
 export async function getConversation(
   ctx: CommandContext,
   id: string,
-  options: { json?: boolean; messages?: boolean }
+  options: { json?: boolean; messages?: boolean; truncate?: boolean }
 ): Promise<void> {
   const outputJson = options.json === true || ctx.format === 'json'
 
@@ -190,7 +197,19 @@ export async function getConversation(
       const messageList = (await front.conversations.listMessages(
         normalizeId(id)
       )) as MessageList
-      messages = messageList._results ?? []
+      const rawMessages = messageList._results ?? []
+      const hydratedMessages: Message[] = []
+
+      for (const message of rawMessages) {
+        try {
+          const fullMessage = (await front.messages.get(message.id)) as Message
+          hydratedMessages.push(fullMessage)
+        } catch {
+          hydratedMessages.push(message)
+        }
+      }
+
+      messages = hydratedMessages
     }
 
     if (outputJson) {
@@ -235,15 +254,10 @@ export async function getConversation(
         const direction = msg.is_inbound ? '← IN' : '→ OUT'
         const author = msg.author?.email || 'unknown'
         const time = formatTimestamp(msg.created_at)
-        const textBody =
-          msg.text ||
-          msg.body
-            .replace(/<[^>]*>/g, ' ')
-            .replace(/\s+/g, ' ')
-            .trim()
+        const textBody = normalizeMessageBody(msg)
 
         ctx.output.data(`\n[${direction}] ${time} - ${author}`)
-        ctx.output.data(`   ${truncate(textBody, 200)}`)
+        ctx.output.data(`   ${textBody}`)
       }
     } else if (!options.messages) {
       ctx.output.data('\n   (use --messages to see message history)')
@@ -270,9 +284,10 @@ export async function getConversation(
  */
 async function listTeammates(
   ctx: CommandContext,
-  options: { json?: boolean }
+  options: { json?: boolean; idsOnly?: boolean }
 ): Promise<void> {
   const outputJson = options.json === true || ctx.format === 'json'
+  const idsOnly = options.idsOnly === true && !outputJson
 
   try {
     const front = getFrontSdkClient()
@@ -289,6 +304,13 @@ async function listTeammates(
           ),
         })
       )
+      return
+    }
+
+    if (idsOnly) {
+      for (const teammate of result._results) {
+        ctx.output.data(teammate.id)
+      }
       return
     }
 
@@ -414,10 +436,11 @@ export function registerFrontCommands(program: Command): void {
     .argument('<id>', 'Conversation ID (e.g., cnv_xxx)')
     .option('--json', 'Output as JSON')
     .option('-m, --messages', 'Include message history')
+    .option('--no-truncate', 'Do not truncate message bodies', false)
     .action(
       async (
         id: string,
-        options: { json?: boolean; messages?: boolean },
+        options: { json?: boolean; messages?: boolean; truncate?: boolean },
         command: Command
       ) => {
         const opts =
@@ -439,22 +462,28 @@ export function registerFrontCommands(program: Command): void {
   front
     .command('teammates')
     .description('List all teammates in the workspace')
+    .option('--ids-only', 'Output only IDs (one per line)')
     .option('--json', 'Output as JSON')
-    .action(async (options: { json?: boolean }, command: Command) => {
-      const opts =
-        typeof command.optsWithGlobals === 'function'
-          ? command.optsWithGlobals()
-          : {
-              ...command.parent?.opts(),
-              ...command.opts(),
-            }
-      const ctx = await createContext({
-        format: options.json ? 'json' : opts.format,
-        verbose: opts.verbose,
-        quiet: opts.quiet,
-      })
-      await listTeammates(ctx, options)
-    })
+    .action(
+      async (
+        options: { json?: boolean; idsOnly?: boolean },
+        command: Command
+      ) => {
+        const opts =
+          typeof command.optsWithGlobals === 'function'
+            ? command.optsWithGlobals()
+            : {
+                ...command.parent?.opts(),
+                ...command.opts(),
+              }
+        const ctx = await createContext({
+          format: options.json ? 'json' : opts.format,
+          verbose: opts.verbose,
+          quiet: opts.quiet,
+        })
+        await listTeammates(ctx, options)
+      }
+    )
 
   front
     .command('teammate')
