@@ -10,12 +10,15 @@ import {
   createQdrantClient,
 } from '@skillrecordings/core/adapters/qdrant'
 import { tool } from 'ai'
-import { type Pool, createPool } from 'mysql2/promise'
+import type { Pool } from 'mysql2/promise'
 import { z } from 'zod'
 import { type OutputFormatter } from '../../core/output'
 
+type Mysql2Module = typeof import('mysql2/promise')
+
 let mysqlPool: Pool | null = null
 let qdrantClient: QdrantClient | null = null
+let mysqlModule: Mysql2Module | null = null
 
 export interface RealToolsConfig {
   mysql?: {
@@ -46,6 +49,21 @@ const DEFAULT_CONFIG: RealToolsConfig = {
   },
 }
 
+const loadMysqlModule = async (): Promise<Mysql2Module> => {
+  if (mysqlModule) {
+    return mysqlModule
+  }
+
+  try {
+    mysqlModule = await import('mysql2/promise')
+    return mysqlModule
+  } catch (error) {
+    throw new Error(
+      `mysql2 is required for real tools. Install it before using --real-tools. ${error instanceof Error ? error.message : ''}`.trim()
+    )
+  }
+}
+
 /**
  * Initialize connections to Docker services
  */
@@ -53,6 +71,7 @@ export async function initRealTools(
   config: RealToolsConfig = DEFAULT_CONFIG
 ): Promise<void> {
   if (config.mysql) {
+    const { createPool } = await loadMysqlModule()
     mysqlPool = createPool({
       ...config.mysql,
       waitForConnections: true,

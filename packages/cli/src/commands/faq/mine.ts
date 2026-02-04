@@ -19,7 +19,6 @@ import {
   mineConversations,
   mineFaqCandidates,
 } from '@skillrecordings/core/faq'
-import { createDuckDBSource } from '@skillrecordings/core/faq/duckdb-source'
 import type { DataSource } from '@skillrecordings/core/faq/types'
 import { closeDb } from '@skillrecordings/database'
 import type { Command } from 'commander'
@@ -174,6 +173,9 @@ async function createSource(
   if (sourceType === 'cache') {
     const dbPath = cachePath ?? DEFAULT_CACHE_PATH
     if (!outputJson) ctx.output.data(`📦 Using DuckDB cache: ${dbPath}`)
+    const { createDuckDBSource } = await import(
+      '@skillrecordings/core/faq/duckdb-source'
+    )
     return createDuckDBSource({ dbPath })
   }
 

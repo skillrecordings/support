@@ -24,12 +24,26 @@ import { registerToolsCommands } from './commands/tools'
 import { wizard } from './commands/wizard'
 import { createContext } from './core/context'
 
+declare const BUILD_VERSION: string | undefined
+declare const BUILD_COMMIT: string | undefined
+declare const BUILD_TARGET: string | undefined
+
+const resolveBuildValue = (value: string | undefined, fallback: string) =>
+  typeof value !== 'undefined' && value.length > 0 ? value : fallback
+
+const runtimeTarget = `bun-${process.platform}-${process.arch}`
+const buildVersion = resolveBuildValue(BUILD_VERSION, '0.0.0')
+const buildCommit = resolveBuildValue(BUILD_COMMIT, 'dev')
+const buildTarget = resolveBuildValue(BUILD_TARGET, runtimeTarget)
+
+const versionLabel = `skill v${buildVersion} (${buildCommit}) ${buildTarget}`
+
 const program = new Command()
 
 program
   .name('skill')
   .description('CLI tool for managing app integrations')
-  .version('0.0.0')
+  .version(versionLabel)
   .option('-f, --format <format>', 'Output format (json|text|table)')
   .option('-v, --verbose', 'Enable verbose output')
   .option('-q, --quiet', 'Suppress non-error output')

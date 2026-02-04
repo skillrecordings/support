@@ -13,7 +13,6 @@
 
 import { existsSync } from 'fs'
 import { join, resolve } from 'path'
-import { createDuckDBSource } from '@skillrecordings/core/faq/duckdb-source'
 import {
   type ExtractionOptions,
   extractFaqCandidates,
@@ -125,6 +124,9 @@ async function faqExtract(
   let source
 
   try {
+    const { createDuckDBSource } = await import(
+      '@skillrecordings/core/faq/duckdb-source'
+    )
     // Create DuckDB source
     if (!outputJson) ctx.output.data('📦 Connecting to DuckDB cache...')
     source = await createDuckDBSource({ dbPath: cachePath })
