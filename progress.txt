@@ -1405,3 +1405,18 @@ Summary: Summary:
 - Added the `skill-cli` Claude Code plugin bundle under `packages/cli/plugin/` (manifest, front-inbox skill, examples) and included it in publishable files via `packages/cli/package.json`.
 - Implemented/validated `skill plugin sync` with version-aware copying and a small `packages/cli/src/core/fs-extra.ts` helper plus integration tests.
 - Logged completion details in `packages/cli/PROGRES
+
+---
+[2026-02-04T20:46:49.109Z]
+Completed: P0 Bugs: Fix inbox filtering and pagination
+Files: none
+Summary: **Summary**
+- Fixed `skill front inbox` status filtering to use `q[statuses][]` and moved pagination to cursor-based fetching with a fixed `limit=50` page size and client-side `--limit` cap in `packages/cli/src/commands/front/inbox.ts`.
+- Logged completion details in `packages/cli/PROGRESS.md`.
+
+**Tests**
+- `bun run check-types` (in `packages/cli`)
+- `bun run test` (in `packages/cli`)
+
+**Issues**
+

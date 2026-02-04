@@ -11,7 +11,12 @@
  */
 
 import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
-import type { Conversation, Inbox, InboxList } from '@skillrecordings/front-sdk'
+import type {
+  Conversation,
+  ConversationList,
+  Inbox,
+  InboxList,
+} from '@skillrecordings/front-sdk'
 import type { Command } from 'commander'
 import { type CommandContext, createContext } from '../../core/context'
 import { CLIError, formatError } from '../../core/errors'
@@ -182,7 +187,7 @@ export async function listConversations(
       })
     }
 
-    // Build query filter
+    // Build query filters
     const filters: string[] = []
     if (options.status) {
       filters.push(`status:${options.status}`)
@@ -191,23 +196,43 @@ export async function listConversations(
       filters.push(`tag:"${options.tag}"`)
     }
 
-    // Build query string
-    const queryParts: string[] = []
-    if (filters.length > 0) {
-      queryParts.push(`q=${encodeURIComponent(filters.join(' '))}`)
-    }
-    if (options.limit) {
-      queryParts.push(`limit=${options.limit}`)
-    }
-    const queryString = queryParts.length > 0 ? `?${queryParts.join('&')}` : ''
+    const parsedLimit = options.limit ? Number.parseInt(options.limit, 10) : 50
+    const requestedLimit =
+      Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 50
+    const pageSize = 50
 
-    // Fetch conversations
-    const response = await front.raw.get<{
-      _results: Conversation[]
-      _pagination?: { next?: string }
-    }>(`/inboxes/${inbox.id}/conversations${queryString}`)
+    // Build query URL
+    const queryParts: string[] = [`limit=${pageSize}`]
+    if (options.status) {
+      queryParts.push(`q[statuses][]=${encodeURIComponent(options.status)}`)
+    }
+    if (options.tag) {
+      queryParts.push(`q=${encodeURIComponent(`tag:"${options.tag}"`)}`)
+    }
+    const queryString = `?${queryParts.join('&')}`
 
-    const conversations = response._results ?? []
+    // Fetch conversations with pagination
+    const conversations: Conversation[] = []
+    let nextUrl: string | null =
+      `/inboxes/${inbox.id}/conversations${queryString}`
+    let hasMore = false
+
+    while (nextUrl) {
+      const response = (await front.raw.get(nextUrl)) as ConversationList
+      conversations.push(...(response._results ?? []))
+
+      if (conversations.length >= requestedLimit) {
+        conversations.length = requestedLimit
+        hasMore = Boolean(response._pagination?.next)
+        nextUrl = null
+        break
+      }
+
+      if (response._pagination?.next) {
+        hasMore = true
+      }
+      nextUrl = response._pagination?.next || null
+    }
 
     if (outputJson) {
       ctx.output.data(
@@ -266,7 +291,7 @@ export async function listConversations(
     ctx.output.data('')
 
     // Show pagination hint
-    if (response._pagination?.next) {
+    if (hasMore) {
       ctx.output.data(
         `   💡 More conversations available. Use --limit to adjust results.`
       )

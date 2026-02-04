@@ -158,3 +158,11 @@ Initialized: 2026-02-04T15:13:09.231Z
 - Tests before: 118 passed, 4 skipped (122 total)
 - Tests after: 118 passed, 4 skipped (122 total)
 - Issues: none
+
+### P0 Bugs: Fix inbox filtering and pagination (ID: story-ml8cda7j)
+- Completed: 2026-02-04T20:46:14Z
+- Files created: none
+- Files modified: packages/cli/src/commands/front/inbox.ts, packages/cli/PROGRESS.md
+- Tests before: 118 passed, 4 skipped (122 total)
+- Tests after: 118 passed, 4 skipped (122 total)
+- Issues: none

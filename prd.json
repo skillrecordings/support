@@ -259,7 +259,7 @@
       "title": "P0 Bugs: Fix inbox filtering and pagination",
       "description": "Fix critical bugs blocking triage workflows (from real AI Hero inbox session).\n\n## Progress Notification (MANDATORY)\nAfter completing this story, write a status update to `packages/cli/PROGRESS.md` with:\n- Story title and completion timestamp\n- Files created/modified\n- Test count before and after\n- Any issues encountered\n\n## Context from feat/front-cli-improvements (4ad51f7, 66ffb6a, 916bf14 on main)\nThese learnings ALREADY SHIPPED on main. Use them as reference:\n\n### Status Filtering Fix\n- Must use `q[statuses][]=unassigned` query param format\n- Free-text `q=status:unassigned` does NOT work for status filtering\n- Confirmed by comparing working triage.ts vs broken inbox.ts\n\n### Pagination Fix\n- Always use `limit=50` as page size (hardcoded), loop on `_pagination.next` cursor URLs\n- User's `--limit` flag should be a client-side cap only, not passed as the API page size\n\n### Search Command Available\n- `skill front search` now available with optional query + filter flags\n- Filters compose: `--status unassigned --inbox inb_4bj7r` works without text query\n- Full Front query syntax: inbox:inb_xxx, tag:tag_xxx, is:open/archived/assigned/unassigned/unreplied/snoozed/resolved, from:email, after/before:<unix_ts>\n\n## Bugs to Fix\n1. `skill front inbox --status <status>` doesn't filter — apply the q[statuses][] fix\n2. `skill front inbox --limit 200` pagination broken — implement cursor-based pagination with limit=50 page size\n\n## On Completion\nCommit: `fix(cli): inbox status filtering and pagination`",
       "priority": 16,
-      "passes": false,
+      "passes": true,
       "validationCommand": "cd packages/cli && bun run check-types && bun run test",
       "acceptanceCriteria": [
         "--status filter works correctly",
@@ -321,7 +321,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-04T15:13:09.231Z",
-    "totalIterations": 15,
-    "lastIteration": "2026-02-04T20:44:47.738Z"
+    "totalIterations": 16,
+    "lastIteration": "2026-02-04T20:46:49.107Z"
   }
 }
