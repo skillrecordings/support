@@ -1,5 +1,11 @@
 # @skillrecordings/cli
 
+## 0.7.0
+
+### Minor Changes
+
+- 66ffb6a: Add `skill front search` command with full Front query syntax support (text, inbox, tag, assignee, status, from, date range filters).
+
 ## 0.6.0
 
 ### Minor Changes
