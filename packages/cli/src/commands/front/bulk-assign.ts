@@ -5,7 +5,7 @@
  */
 
 import type { Command } from 'commander'
-import { type CommandContext, createContext } from '../../core/context'
+import { type CommandContext } from '../../core/context'
 import { CLIError, formatError } from '../../core/errors'
 import { getFrontClient } from './client'
 import {
@@ -13,6 +13,7 @@ import {
   conversationListLinks,
   hateoasWrap,
 } from './hateoas'
+import { contextFromCommand } from './with-context'
 
 interface BulkAssignOptions {
   inbox?: string
@@ -238,18 +239,7 @@ export function registerBulkAssignCommand(frontCommand: Command): void {
     .option('--dry-run', 'Preview without making changes')
     .option('--json', 'Output as JSON')
     .action(async (options: BulkAssignOptions, command: Command) => {
-      const opts =
-        typeof command.optsWithGlobals === 'function'
-          ? command.optsWithGlobals()
-          : {
-              ...command.parent?.opts(),
-              ...command.opts(),
-            }
-      const ctx = await createContext({
-        format: options.json ? 'json' : opts.format,
-        verbose: opts.verbose,
-        quiet: opts.quiet,
-      })
+      const ctx = await contextFromCommand(command, options)
       await bulkAssignConversations(ctx, options)
     })
 }

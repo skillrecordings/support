@@ -5,10 +5,11 @@
  */
 
 import type { Command } from 'commander'
-import { type CommandContext, createContext } from '../../core/context'
+import { type CommandContext } from '../../core/context'
 import { CLIError, formatError } from '../../core/errors'
 import { getFrontClient } from './client'
 import { hateoasWrap } from './hateoas'
+import { contextFromCommand } from './with-context'
 
 const ALLOWED_METHODS = ['GET', 'POST', 'PATCH', 'DELETE'] as const
 
@@ -177,18 +178,7 @@ export function registerApiCommand(front: Command): void {
         },
         command: Command
       ) => {
-        const opts =
-          typeof command.optsWithGlobals === 'function'
-            ? command.optsWithGlobals()
-            : {
-                ...command.parent?.opts(),
-                ...command.opts(),
-              }
-        const ctx = await createContext({
-          format: options.json ? 'json' : opts.format,
-          verbose: opts.verbose,
-          quiet: opts.quiet,
-        })
+        const ctx = await contextFromCommand(command, options)
         await runFrontApi(ctx, method, path, options)
       }
     )

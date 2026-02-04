@@ -209,3 +209,9 @@ Initialized: 2026-02-04T15:13:09.231Z
 - Handles =, +, -, @, tab, CR prefixes on string values
 - Numbers and booleans bypass sanitization (no formula risk)
 - Added comprehensive unit tests for CSV output
+
+## Review Fix 5: Deduplicate command registration boilerplate
+- Created contextFromCommand() helper in front/with-context.ts
+- Updated 5+ command registration functions to use shared helper
+- Added unit tests for contextFromCommand
+- Pure refactor — no behavior changes

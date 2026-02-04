@@ -5,10 +5,11 @@
  */
 
 import type { Command } from 'commander'
-import { type CommandContext, createContext } from '../../core/context'
+import { type CommandContext } from '../../core/context'
 import { CLIError, formatError } from '../../core/errors'
 import { getFrontClient, normalizeId } from './client'
 import { conversationActions, conversationLinks, hateoasWrap } from './hateoas'
+import { contextFromCommand } from './with-context'
 
 interface ReplyOptions {
   message?: string
@@ -102,18 +103,7 @@ export function registerReplyCommand(frontCommand: Command): void {
         options: ReplyOptions,
         command: Command
       ) => {
-        const opts =
-          typeof command.optsWithGlobals === 'function'
-            ? command.optsWithGlobals()
-            : {
-                ...command.parent?.opts(),
-                ...command.opts(),
-              }
-        const ctx = await createContext({
-          format: options.json ? 'json' : opts.format,
-          verbose: opts.verbose,
-          quiet: opts.quiet,
-        })
+        const ctx = await contextFromCommand(command, options)
         await replyToConversation(ctx, conversationId, options)
       }
     )

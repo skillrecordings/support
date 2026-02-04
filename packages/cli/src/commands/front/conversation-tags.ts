@@ -5,10 +5,11 @@
  */
 
 import type { Command } from 'commander'
-import { type CommandContext, createContext } from '../../core/context'
+import { type CommandContext } from '../../core/context'
 import { CLIError, formatError } from '../../core/errors'
 import { getFrontClient, normalizeId } from './client'
 import { conversationActions, conversationLinks, hateoasWrap } from './hateoas'
+import { contextFromCommand } from './with-context'
 
 interface TagOptions {
   tag?: string
@@ -206,18 +207,7 @@ export function registerConversationTagCommands(frontCommand: Command): void {
     .option('--json', 'Output as JSON')
     .action(
       async (conversationId: string, options: TagOptions, command: Command) => {
-        const opts =
-          typeof command.optsWithGlobals === 'function'
-            ? command.optsWithGlobals()
-            : {
-                ...command.parent?.opts(),
-                ...command.opts(),
-              }
-        const ctx = await createContext({
-          format: options.json ? 'json' : opts.format,
-          verbose: opts.verbose,
-          quiet: opts.quiet,
-        })
+        const ctx = await contextFromCommand(command, options)
         await tagConversation(ctx, conversationId, options)
       }
     )
@@ -231,18 +221,7 @@ export function registerConversationTagCommands(frontCommand: Command): void {
     .option('--json', 'Output as JSON')
     .action(
       async (conversationId: string, options: TagOptions, command: Command) => {
-        const opts =
-          typeof command.optsWithGlobals === 'function'
-            ? command.optsWithGlobals()
-            : {
-                ...command.parent?.opts(),
-                ...command.opts(),
-              }
-        const ctx = await createContext({
-          format: options.json ? 'json' : opts.format,
-          verbose: opts.verbose,
-          quiet: opts.quiet,
-        })
+        const ctx = await contextFromCommand(command, options)
         await untagConversation(ctx, conversationId, options)
       }
     )

@@ -44,3 +44,16 @@ Summary: I have a conflict in instructions: the story requires resetting `progre
 Do you want me to proceed with replacing `progress.txt` contents as specified?
 
 Once confirmed, I’ll run the coverage checks, adjust thresholds/tests if needed, add `test:coverage`, and update `packages/cli/PROGRESS.md`.
+
+---
+[2026-02-04T22:16:44.040Z]
+Completed: Deduplicate command registration pattern + createContext boilerplate
+Files: none
+Summary: Summary:
+- Added shared `contextFromCommand()` helper and replaced repeated context-creation boilerplate in `front` command registrations for assign, reply, conversation tags, bulk-assign, and api.
+- Added unit coverage for `contextFromCommand()` and logged progress entry.
+
+Files changed:
+- `packages/cli/src/commands/front/with-context.ts`
+- `packages/cli/src/commands/front/assign.ts`
+- `packages/
