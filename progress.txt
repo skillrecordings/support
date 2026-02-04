@@ -58,3 +58,18 @@ Summary: Summary:
 
 Notes:
 - `formatDuration` now uses the shared implementation (previously `forensic.ts` rounded sub-1000ms values). If you want to keep rounding, say the word and I’ll adj
+
+---
+[2026-02-04T03:38:53.203Z]
+Completed: Remove dead auth commands and crypto infrastructure
+Files: none
+Summary: **Summary**
+1. Removed dead auth command registrations so `auth` only exposes `status` and updated its description.  
+2. Deleted age-based auth/crypto files and stripped encrypted `.env.encrypted` support from `packages/cli/src/lib/env-loader.ts`.  
+3. Removed `age-encryption` from `packages/cli/package.json`.
+
+**Tests**
+1. `bun run check-types` (packages/cli)
+2. `bun run test` (packages/cli)
+
+**L

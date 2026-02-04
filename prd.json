@@ -86,7 +86,7 @@
       "title": "Remove dead auth commands and crypto infrastructure",
       "description": "The age-based encryption auth commands are being replaced by 1Password native integration. Remove the dead infrastructure:\n\n1. Delete `packages/cli/src/commands/auth/keygen.ts` (41 lines) — age key generation, no longer needed\n2. Delete `packages/cli/src/commands/auth/encrypt.ts` (81 lines) — age encryption, no longer needed\n3. Delete `packages/cli/src/commands/auth/decrypt.ts` (123 lines) — age decryption, no longer needed\n4. Delete `packages/cli/src/lib/crypto.ts` (56 lines) — age encryption wrapper, no longer needed\n5. Update `packages/cli/src/commands/auth/index.ts` to remove keygen, encrypt, decrypt registrations\n6. Keep `auth status` command (still useful)\n7. Remove `age-encryption` from dependencies in packages/cli/package.json if no other file imports it (check first!)\n\nDo NOT create a changeset — will be included in the final changeset.",
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "validationCommand": "cd packages/cli && bun run check-types && bun run test",
       "acceptanceCriteria": [
         "keygen.ts, encrypt.ts, decrypt.ts deleted",
@@ -116,7 +116,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-04T03:24:28.522Z",
-    "totalIterations": 5,
-    "lastIteration": "2026-02-04T03:36:43.195Z"
+    "totalIterations": 6,
+    "lastIteration": "2026-02-04T03:38:53.202Z"
   }
 }
