@@ -56,7 +56,7 @@
       "title": "Deduplicate eval seed logic",
       "description": "Two near-identical seed files exist:\n- `packages/cli/src/commands/eval-local/seed.ts` (276 lines)\n- `packages/cli/src/commands/eval-pipeline/seed.ts` (395 lines)\n\nThey share functions like: cleanDatabase(), loadJsonFiles(), loadKnowledgeFiles(), seedApps(), seedKnowledgeBase(), generateUUID().\n\nExtract the shared logic into `packages/cli/src/lib/eval-seed.ts`:\n1. Use the eval-pipeline version as the base (it's more polished: env var support, batch upsert, title extraction)\n2. Extract common functions: cleanDatabase, loadJsonFiles, loadKnowledgeFiles, seedApps, seedKnowledgeBase, generateUUID\n3. Update both eval-local/seed.ts and eval-pipeline/seed.ts to import from the shared module\n4. Remove duplicated code from both files — they should only contain their command-specific logic\n\nDo NOT create a changeset — will be included in the final changeset.",
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "validationCommand": "cd packages/cli && bun run check-types && bun run test",
       "acceptanceCriteria": [
         "Shared eval-seed.ts created in src/lib/",
@@ -116,7 +116,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-04T03:24:28.522Z",
-    "totalIterations": 3,
-    "lastIteration": "2026-02-04T03:31:14.284Z"
+    "totalIterations": 4,
+    "lastIteration": "2026-02-04T03:35:07.236Z"
   }
 }

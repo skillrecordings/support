@@ -4,11 +4,14 @@
  */
 
 import { join } from 'path'
-import { createOllamaClient } from '@skillrecordings/core/adapters/ollama'
-import { createQdrantClient } from '@skillrecordings/core/adapters/qdrant'
-import { readFile, readdir } from 'fs/promises'
 import { glob } from 'glob'
-import matter from 'gray-matter'
+import {
+  cleanDatabase,
+  loadJsonFiles,
+  loadKnowledgeFiles,
+  seedApps,
+  seedKnowledgeBase,
+} from '../../lib/eval-seed'
 
 interface SeedOptions {
   clean?: boolean
@@ -54,9 +57,15 @@ export async function seed(options: SeedOptions): Promise<void> {
       if (!options.json) console.log('🧹 Cleaning existing data...')
       await cleanDatabase(connection)
 
-      // Also clean Qdrant
-      const qdrant = createQdrantClient()
-      await qdrant.deleteCollection()
+      const qdrantUrl = process.env.QDRANT_URL || 'http://localhost:6333'
+      const collection = process.env.QDRANT_COLLECTION || 'knowledge'
+      try {
+        await fetch(`${qdrantUrl}/collections/${collection}`, {
+          method: 'DELETE',
+        })
+      } catch {
+        // Collection might not exist yet, ignore
+      }
     }
 
     // 1. Seed apps
@@ -74,7 +83,7 @@ export async function seed(options: SeedOptions): Promise<void> {
     if (!options.json) console.log('📚 Seeding knowledge base...')
     const knowledge = await loadKnowledgeFiles(join(fixturesPath, 'knowledge'))
     result.knowledge = knowledge.length
-    result.embeddings = await seedKnowledgeBase(knowledge)
+    result.embeddings = await seedKnowledgeBase(knowledge, !options.json)
 
     // 4. Count scenarios
     const scenarioFiles = await glob(join(fixturesPath, 'scenarios/**/*.json'))
@@ -105,172 +114,4 @@ export async function seed(options: SeedOptions): Promise<void> {
     }
     process.exit(1)
   }
-}
-
-async function cleanDatabase(connection: any): Promise<void> {
-  // Disable foreign key checks temporarily
-  await connection.execute('SET FOREIGN_KEY_CHECKS = 0')
-
-  const tables = [
-    'SUPPORT_trust_scores',
-    'SUPPORT_audit_log',
-    'SUPPORT_approval_requests',
-    'SUPPORT_actions',
-    'SUPPORT_conversations',
-    'SUPPORT_apps',
-  ]
-
-  for (const table of tables) {
-    await connection.execute(`TRUNCATE TABLE ${table}`)
-  }
-
-  await connection.execute('SET FOREIGN_KEY_CHECKS = 1')
-}
-
-async function loadJsonFiles(dirPath: string): Promise<any[]> {
-  try {
-    const files = await readdir(dirPath)
-    const jsonFiles = files.filter((f) => f.endsWith('.json'))
-
-    const items = await Promise.all(
-      jsonFiles.map(async (file) => {
-        const content = await readFile(join(dirPath, file), 'utf-8')
-        return JSON.parse(content)
-      })
-    )
-
-    return items
-  } catch (error) {
-    return []
-  }
-}
-
-interface KnowledgeDoc {
-  id: string
-  content: string
-  type: string
-  app: string
-  tags: string[]
-  filePath: string
-}
-
-function generateUUID(): string {
-  // Simple UUID v4 generation
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0
-    const v = c === 'x' ? r : (r & 0x3) | 0x8
-    return v.toString(16)
-  })
-}
-
-async function loadKnowledgeFiles(basePath: string): Promise<KnowledgeDoc[]> {
-  const files = await glob(join(basePath, '**/*.md'))
-  const docs: KnowledgeDoc[] = []
-
-  for (const filePath of files) {
-    const content = await readFile(filePath, 'utf-8')
-    const { data: frontmatter, content: body } = matter(content)
-
-    // Generate UUID for Qdrant compatibility
-    const id = generateUUID()
-
-    docs.push({
-      id,
-      content: body.trim(),
-      type: frontmatter.type || 'general',
-      app: frontmatter.app || 'unknown',
-      tags: frontmatter.tags || [],
-      filePath,
-    })
-  }
-
-  return docs
-}
-
-async function seedApps(connection: any, apps: any[]): Promise<number> {
-  for (const app of apps) {
-    await connection.execute(
-      `INSERT INTO SUPPORT_apps (
-        id, slug, name, front_inbox_id, instructor_teammate_id,
-        stripe_account_id, stripe_connected, integration_base_url,
-        webhook_secret, capabilities
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      ON DUPLICATE KEY UPDATE
-        name = VALUES(name),
-        integration_base_url = VALUES(integration_base_url)`,
-      [
-        app.id,
-        app.slug,
-        app.name,
-        app.front_inbox_id,
-        app.instructor_teammate_id || null,
-        app.stripe_account_id || null,
-        app.stripe_connected || false,
-        app.integration_base_url,
-        app.webhook_secret,
-        JSON.stringify(app.capabilities || []),
-      ]
-    )
-
-    // Seed default trust scores for this app
-    const categories = ['refund', 'access', 'technical', 'general']
-    for (const category of categories) {
-      const id = `ts_${app.id}_${category}`
-      await connection.execute(
-        `INSERT INTO SUPPORT_trust_scores (id, app_id, category, trust_score, sample_count)
-         VALUES (?, ?, ?, 0.75, 25)
-         ON DUPLICATE KEY UPDATE id = id`,
-        [id, app.id, category]
-      )
-    }
-  }
-
-  return apps.length
-}
-
-async function seedKnowledgeBase(docs: KnowledgeDoc[]): Promise<number> {
-  if (docs.length === 0) return 0
-
-  const qdrant = createQdrantClient()
-  const ollama = createOllamaClient()
-
-  // Ensure model is available
-  await ollama.ensureModel()
-
-  // Ensure collection exists
-  // Use 1024 for mxbai-embed-large, 768 for nomic-embed-text
-  const embeddingModel = process.env.EMBEDDING_MODEL || 'mxbai-embed-large'
-  const vectorSize = embeddingModel.includes('mxbai') ? 1024 : 768
-  await qdrant.ensureCollection(vectorSize)
-
-  let embeddedCount = 0
-
-  for (const doc of docs) {
-    try {
-      // Generate embedding
-      const embedding = await ollama.embed(doc.content)
-
-      // Store in Qdrant
-      await qdrant.upsert([
-        {
-          id: doc.id,
-          vector: embedding,
-          payload: {
-            content: doc.content,
-            type: doc.type,
-            app: doc.app,
-            tags: doc.tags,
-          },
-        },
-      ])
-
-      embeddedCount++
-      process.stdout.write(`\r   Embedded: ${embeddedCount}/${docs.length}`)
-    } catch (error) {
-      console.error(`\n   Failed to embed ${doc.id}:`, error)
-    }
-  }
-
-  console.log('') // New line after progress
-  return embeddedCount
 }

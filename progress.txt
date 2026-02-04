@@ -36,3 +36,15 @@ Summary: **Summary**
 3. Updated inline usage strings to reflect `skill faq <subcommand>`.
 
 **Tes
+
+---
+[2026-02-04T03:35:07.236Z]
+Completed: Deduplicate eval seed logic
+Files: none
+Summary: Summary:
+- Added shared eval seeding utilities in `packages/cli/src/lib/eval-seed.ts` (based on eval-pipeline implementation).
+- Updated `packages/cli/src/commands/eval-pipeline/seed.ts` and `packages/cli/src/commands/eval-local/seed.ts` to import shared helpers and removed duplicate logic.
+- Kept eval-local’s Qdrant cleanup inline while using shared seed logic and progress control.
+
+Learnings:
+- 
