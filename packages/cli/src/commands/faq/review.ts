@@ -5,8 +5,8 @@
  * Approve, edit, reject, or skip candidates before publishing to KB.
  *
  * Usage:
- *   skill faq-review --app total-typescript
- *   skill faq-review --app epic-react --stats
+ *   skill faq review --app total-typescript
+ *   skill faq review --app epic-react --stats
  */
 
 import { spawnSync } from 'node:child_process'
@@ -198,7 +198,7 @@ async function runReviewSession(options: {
       `${COLORS.yellow}No pending FAQ candidates found.${COLORS.reset}`
     )
     console.log(
-      `Run ${COLORS.cyan}skill faq-mine --app ${options.app} --since 30d${COLORS.reset} to generate candidates.`
+      `Run ${COLORS.cyan}skill faq mine --app ${options.app} --since 30d${COLORS.reset} to generate candidates.`
     )
     return
   }
@@ -417,7 +417,7 @@ async function faqReview(options: {
  */
 export function registerFaqReviewCommands(program: Command): void {
   program
-    .command('faq-review')
+    .command('review')
     .description('Interactive review of FAQ candidates')
     .requiredOption('-a, --app <slug>', 'App slug to review (required)')
     .option('--stats', 'Show review statistics instead of interactive review')

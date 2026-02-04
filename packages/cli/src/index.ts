@@ -11,17 +11,11 @@ import { runEval } from './commands/eval'
 import { registerEvalLocalCommands } from './commands/eval-local/index'
 import { registerEvalPipelineCommands } from './commands/eval-pipeline/index'
 import { registerEvalPromptCommands } from './commands/eval-prompt'
-import { registerFaqClassifyCommands } from './commands/faq-classify'
-import { registerFaqClusterCommands } from './commands/faq-cluster'
-import { registerFaqExtractCommands } from './commands/faq-extract'
-import { registerFaqMineCommands } from './commands/faq-mine'
-import { registerFaqReviewCommands } from './commands/faq-review'
+import { registerFaqCommands } from './commands/faq'
 import { registerFrontCommands } from './commands/front/index'
 import { health } from './commands/health'
 import { init } from './commands/init'
-import { registerEventsCommands } from './commands/inngest/events'
-import { registerRunsCommands } from './commands/inngest/runs'
-import { registerSignalCommand } from './commands/inngest/signal'
+import { registerInngestCommands } from './commands/inngest/index'
 import { registerKbCommands } from './commands/kb-sync'
 import { registerMemoryCommands } from './commands/memory/index'
 import { registerPipelineCommands } from './commands/pipeline'
@@ -36,6 +30,7 @@ program
   .description('CLI tool for managing app integrations')
   .version('0.0.0')
 
+// Core commands
 program
   .command('init')
   .description('Initialize a new app integration (quick mode)')
@@ -67,6 +62,7 @@ program
   .option('--json', 'Output result as JSON (machine-readable)')
   .action(health)
 
+// Eval commands
 program
   .command('eval')
   .description('Run evals against a dataset')
@@ -108,63 +104,37 @@ program
     })
   })
 
-// Register Inngest commands
-registerEventsCommands(program)
-registerRunsCommands(program)
-registerSignalCommand(program)
-
-// Register Front commands
-registerFrontCommands(program)
-
-// Register Memory commands
-registerMemoryCommands(program)
-
-// Register Auth commands (encrypted secrets for CLI distribution)
-registerAuthCommands(program)
-
-// Register Response commands (for analysis)
-registerResponseCommands(program)
-
-// Register Tools commands (test agent tools)
-registerToolsCommands(program)
-
-// Register Dataset commands (eval dataset building)
-registerDatasetCommands(program)
-registerEvalPromptCommands(program)
-
-// Register Axiom commands (log querying)
-registerAxiomCommands(program)
-
-// Register eval-local commands (local eval environment)
-registerEvalLocalCommands(program)
-
-// Register eval-pipeline commands (step-by-step pipeline eval)
-registerEvalPipelineCommands(program)
-
-// Register pipeline commands (new step-based architecture)
-registerPipelineCommands(program)
-
-// Register deploy commands (Vercel status/logs/inspect)
-registerDeployCommands(program)
-
-// Register knowledge base commands (sync/stats)
-registerKbCommands(program)
-
-// Register FAQ mining commands (mine FAQ candidates from conversations)
-registerFaqMineCommands(program)
+// Core command registrations
 registerDbStatusCommand(program)
 
-// Register FAQ clustering commands (production clustering from Phase 0)
-registerFaqClusterCommands(program)
+// Front commands
+registerFrontCommands(program)
 
-// Register FAQ classification commands (LLM topic classification)
-registerFaqClassifyCommands(program)
+// Inngest commands
+registerInngestCommands(program)
 
-// Register FAQ extraction commands (extract candidates from clusters)
-registerFaqExtractCommands(program)
+// Axiom commands
+registerAxiomCommands(program)
 
-// Register FAQ review commands (human curation of FAQ candidates)
-registerFaqReviewCommands(program)
+// Eval commands
+registerEvalLocalCommands(program)
+registerEvalPipelineCommands(program)
+registerEvalPromptCommands(program)
+registerPipelineCommands(program)
+
+// Data commands
+registerDatasetCommands(program)
+registerResponseCommands(program)
+registerToolsCommands(program)
+registerMemoryCommands(program)
+
+// FAQ commands
+registerFaqCommands(program)
+
+// Infra commands
+registerDeployCommands(program)
+registerKbCommands(program)
+registerAuthCommands(program)
 
 // Parse and cleanup DB connections when done
 program.parseAsync().finally(async () => {

@@ -14,7 +14,6 @@ import type {
   MessageList,
 } from '@skillrecordings/front-sdk'
 import type { Command } from 'commander'
-import { registerCacheCommand } from '../front-cache'
 import { registerArchiveCommand } from './archive'
 import { registerBulkArchiveCommand } from './bulk-archive'
 import {
@@ -415,5 +414,4 @@ export function registerFrontCommands(program: Command): void {
   registerTagCommands(front)
 
   // Register cache command for DuckDB sync
-  registerCacheCommand(front)
 }

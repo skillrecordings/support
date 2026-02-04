@@ -116,21 +116,10 @@ async function cancelCommand(
 }
 
 /**
- * Register run and cancel commands with the existing inngest command group
- * Must be called after registerEventsCommands to use the existing inngest command
+ * Register run and cancel commands with the inngest command group
  */
-export function registerRunsCommands(program: Command): void {
-  const inngestCommand = program.commands.find(
-    (cmd) => cmd.name() === 'inngest'
-  )
-
-  if (!inngestCommand) {
-    throw new Error(
-      'inngest command not found - ensure registerEventsCommands is called first'
-    )
-  }
-
-  inngestCommand
+export function registerRunsCommands(inngest: Command): void {
+  inngest
     .command('run')
     .description('Get function run details')
     .argument('<id>', 'Run ID')
@@ -139,7 +128,7 @@ export function registerRunsCommands(program: Command): void {
     .option('--dev', 'Use local dev server (localhost:8288)')
     .action(runCommand)
 
-  inngestCommand
+  inngest
     .command('cancel')
     .description('Cancel a running function')
     .argument('<id>', 'Run ID')

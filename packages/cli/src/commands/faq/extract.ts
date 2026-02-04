@@ -5,10 +5,10 @@
  * Part of Phase 1.3 of the FAQ Mining pipeline.
  *
  * Usage:
- *   bun src/index.ts faq-extract
- *   bun src/index.ts faq-extract --app total-typescript --push-redis
- *   bun src/index.ts faq-extract --dry-run
- *   bun src/index.ts faq-extract --version v2
+ *   bun src/index.ts faq extract
+ *   bun src/index.ts faq extract --app total-typescript --push-redis
+ *   bun src/index.ts faq extract --dry-run
+ *   bun src/index.ts faq extract --version v2
  */
 
 import { existsSync } from 'fs'
@@ -43,7 +43,7 @@ function validatePaths(clusteringPath: string, goldenPath?: string): void {
   if (!existsSync(clusteringPath)) {
     throw new Error(
       `Clustering result not found at ${clusteringPath}\n` +
-        'Run `bun src/index.ts faq-cluster` first to generate clustering.'
+        'Run `bun src/index.ts faq cluster` first to generate clustering.'
     )
   }
 
@@ -195,7 +195,7 @@ async function faqExtract(options: {
  */
 export function registerFaqExtractCommands(program: Command): void {
   program
-    .command('faq-extract')
+    .command('extract')
     .description('Extract FAQ candidates from clustered conversations')
     .option(
       '--clustering-path <path>',

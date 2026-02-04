@@ -5,7 +5,6 @@
  */
 
 import type { Command } from 'commander'
-import { compare } from './compare'
 import { health } from './health'
 import { run } from './run'
 import { scoreProduction } from './score-production'
@@ -49,16 +48,6 @@ export function registerEvalLocalCommands(program: Command): void {
     .option('--json', 'JSON output for scripting')
     .option('--real-tools', 'Use real Docker services instead of mocks')
     .action(run)
-
-  evalLocal
-    .command('compare')
-    .description('Compare two prompts against scenarios')
-    .requiredOption('--candidate <file>', 'Candidate prompt file')
-    .option('--baseline <file>', 'Baseline prompt file (default: production)')
-    .option('--scenarios <glob>', 'Scenario files glob pattern')
-    .option('--output <file>', 'Save comparison to JSON')
-    .option('--json', 'JSON output')
-    .action(compare)
 
   evalLocal
     .command('score-production')

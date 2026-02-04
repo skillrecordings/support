@@ -1,61 +1,93 @@
-# Progress Log for epic6-slack-conversational
+# Progress Log for cli-cleanup-tree-hygiene
 
-Initialized: 2026-02-03T17:10:51.448Z
-
----
-[2026-02-03T17:22:12.069Z]
-Failed: Epic 6.1: @Mention Handling + Intent Router (#156)
-Validation: • Packages in scope: @repo/eslint-config, @repo/typescript-config, @repo/ui, @skillrecordings/cli, @skillrecordings/core, @skillrecordings/database, @skillrecordings/front-sdk, @skillrecordings/memory, @skillrecordings/review-tui, @skillrecordings/sdk, front, slack, web
-• Running check-types in 13 p
-Codex: 
+Initialized: 2026-02-04T03:24:28.525Z
 
 ---
-[2026-02-03T17:28:00.610Z]
-Completed: Epic 6.1: @Mention Handling + Intent Router (#156)
-Files: none
-Summary: Skill note: `tdd-red-green-refactor` skill file was not found at `/home/joel/.codex/skills/tdd-red-green-refactor/SKILL.md`, so I proceeded without it.
-
-**Summary**
-1. Added a `scripts/test.mjs` wrapper and updated `package.json` so `bun run test <paths>` runs `vitest --run` with file arguments.
-2. Updated `packages/slack/src/handlers/__tests__/mention.test.ts` to stub Slack/Axiom dependencies via
-
----
-[2026-02-03T17:36:24.584Z]
-Completed: Epic 6.2: Status Queries (#157)
+[2026-02-04T03:27:09.087Z]
+Completed: Delete dead CLI code
 Files: none
 Summary: Summary:
-- Implemented Slack status query handlers with Front data fetching, 30s caching, and Axiom logging in `packages/slack/src/intents/status.ts`.
-- Added Slack Block Kit formatter helpers and Front link builder in `packages/slack/src/formatters/status.ts`.
-- Added TDD coverage for urgent, pending, health, link generation, and cache behavior in `packages/slack/src/intents/__tests__/status.test
+Removed dead CLI files and the `eval-local compare` subcommand registration, plus its import in `packages/cli/src/commands/front/index.ts`.
+Dropped `@skillrecordings/sdk` from `packages/cli/package.json`.
+Added changeset `/.changeset/cli-cleanup-dead-code.md`.
+
+Tests:
+- `cd packages/cli && bun run check-types`
+- `cd packages/cli && bun run test`
 
 ---
-[2026-02-03T17:41:13.248Z]
-Completed: Epic 6.3: Draft Refinement in Threads (#158)
-Files: none
-Summary: **Summary**
-Implemented draft refinement intent parsing, versioned draft state, and Slack thread reply handling with Axiom logging. Added tests for intent parsing, version history, approvals, thread reply handling, and graceful ignore behavior.  
-Files: `packages/slack/src/intents/draft.ts`, `packages/slack/src/handlers/thread-reply.ts`, `packages/slack/src/intents/__tests__/draft.test.ts`, `packa
-
----
-[2026-02-03T17:50:39.925Z]
-Completed: Epic 6.4: Quick Actions (#159)
+[2026-02-04T03:28:57.619Z]
+Completed: Group Inngest commands under inngest subcommand
 Files: none
 Summary: Summary:
-1. Added quick action intent parsing and handlers with Front API execution, confirmation prompts, and Axiom logging in `packages/slack/src/intents/action.ts` and `packages/slack/src/confirmations/action.ts`.
-2. Wired quick action flow into Slack mention + thread-reply handlers with confirmation handling and minimal context derivation in `packages/slack/src/handlers/mention.ts` and `packag
+Moved all Inngest CLI registrations under a single `registerInngestCommands` entry point and wired `events`, `runs`, `signal`, and `investigate` to a shared `inngest` command group without changing flags or behavior.
+Updated `packages/cli/src/index.ts` to call the single registration and removed duplicate/implicit command lookups.
+
+Files changed:
+- `packages/cli/src/commands/inngest/event
 
 ---
-[2026-02-03T17:57:41.326Z]
-Completed: Epic 6.5: Customer Context Lookup (#160)
+[2026-02-04T03:31:14.285Z]
+Completed: Group FAQ commands under faq subcommand
 Files: none
 Summary: **Summary**
-- Added customer context intent parsing and handlers with Front history lookup, purchase aggregation, support stats derivation, and Axiom logging in `packages/slack/src/intents/context.ts`.
-- Implemented Slack Block Kit formatting for customer profile, purchases, and history in `packages/slack/src/formatters/customer.ts`.
-- Added TDD coverage for parsing, profile assembly, empty states
+1. Added a new FAQ command group entrypoint at `packages/cli/src/commands/faq/index.ts` and wired `registerFaqCommands(program)` in `packages/cli/src/index.ts`.
+2. Moved FAQ command files into `packages/cli/src/commands/faq/` and updated their command names to `mine`, `cluster`, `classify`, `extract`, `review`.
+3. Updated inline usage strings to reflect `skill faq <subcommand>`.
+
+**Tes
 
 ---
-[2026-02-03T18:02:34.568Z]
-Completed: Epic 6.6: Thread State Management + Epic 4 Integration (#161)
+[2026-02-04T03:35:07.236Z]
+Completed: Deduplicate eval seed logic
+Files: none
+Summary: Summary:
+- Added shared eval seeding utilities in `packages/cli/src/lib/eval-seed.ts` (based on eval-pipeline implementation).
+- Updated `packages/cli/src/commands/eval-pipeline/seed.ts` and `packages/cli/src/commands/eval-local/seed.ts` to import shared helpers and removed duplicate logic.
+- Kept eval-local’s Qdrant cleanup inline while using shared seed logic and progress control.
+
+Learnings:
+- 
+
+---
+[2026-02-04T03:36:43.195Z]
+Completed: Deduplicate Axiom helpers
+Files: none
+Summary: Summary:
+- Added shared Axiom helpers in `packages/cli/src/lib/axiom-client.ts` and wired `packages/cli/src/commands/axiom/index.ts` + `packages/cli/src/commands/axiom/forensic.ts` to import them, removing duplicate definitions.
+
+Notes:
+- `formatDuration` now uses the shared implementation (previously `forensic.ts` rounded sub-1000ms values). If you want to keep rounding, say the word and I’ll adj
+
+---
+[2026-02-04T03:38:53.203Z]
+Completed: Remove dead auth commands and crypto infrastructure
 Files: none
 Summary: **Summary**
-Implemented Redis-backed thread context state with TTL, stale detection, reset-language helper, and Axiom logging in `packages/slack/src/state/thread-context.ts`. Added correction event capture + query helpers with Axiom logging in `packages/slack/src/learning/corrections.ts`. Added TDD coverage in `packages/slack/src/state/__tests__/thread-context.test.ts` and `packages/slack/src/lear
+1. Removed dead auth command registrations so `auth` only exposes `status` and updated its description.  
+2. Deleted age-based auth/crypto files and stripped encrypted `.env.encrypted` support from `packages/cli/src/lib/env-loader.ts`.  
+3. Removed `age-encryption` from `packages/cli/package.json`.
+
+**Tests**
+1. `bun run check-types` (packages/cli)
+2. `bun run test` (packages/cli)
+
+**L
+
+---
+[2026-02-04T03:40:40.752Z]
+Completed: Final cleanup: slim index.ts and add changeset
+Files: none
+Summary: Summary:
+- Reorganized `packages/cli/src/index.ts` command registrations into the requested groups with clear section comments and reordered registrations accordingly.
+- Replaced the previous changeset with the comprehensive `.changeset/cli-cleanup-command-hygiene.md` file.
+
+Learnings:
+- None.
+
+Tests:
+- `cd packages/cli && bun run check-types`
+- `cd packages/cli && bun run test`
+
+Files:
+- `package

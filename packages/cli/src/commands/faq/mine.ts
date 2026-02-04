@@ -5,10 +5,10 @@
  * Uses semantic clustering to identify recurring questions.
  *
  * Usage:
- *   skill faq-mine --app total-typescript --since 30d
- *   skill faq-mine --app epic-react --since 7d --unchanged-only
- *   skill faq-mine --app total-typescript --since 90d --json
- *   skill faq-mine --app epic-web --since 30d --export faq-candidates.json
+ *   skill faq mine --app total-typescript --since 30d
+ *   skill faq mine --app epic-react --since 7d --unchanged-only
+ *   skill faq mine --app total-typescript --since 90d --json
+ *   skill faq mine --app epic-web --since 30d --export faq-candidates.json
  */
 
 import { writeFileSync } from 'fs'
@@ -397,7 +397,7 @@ async function faqMine(options: {
  */
 export function registerFaqMineCommands(program: Command): void {
   program
-    .command('faq-mine')
+    .command('mine')
     .description('Mine FAQ candidates from resolved support conversations')
     .requiredOption('-a, --app <slug>', 'App slug to mine from (required)')
     .requiredOption(
