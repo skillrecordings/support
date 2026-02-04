@@ -196,3 +196,10 @@ Initialized: 2026-02-04T15:13:09.231Z
 - Updated 11+ files to import from shared module
 - Added unit tests for client.ts
 - Verified no duplicate copies remain
+
+## Review Fix 2: MCP Server Mode (Phase 4 redo)
+- Created MCP JSON-RPC server over stdio (no external deps)
+- Registered 9 Front tools with JSON Schema input validation
+- Tool execution bridges to existing command functions via captured context
+- Added `skill mcp` command
+- Tests for server handshake, tool listing, tool execution, error handling

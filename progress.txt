@@ -11,3 +11,14 @@ Summary: **Summary**
 - Appended progress entry in `packages/cli/PROGRESS.md`.
 
 **Tests
+
+---
+[2026-02-04T22:11:27.180Z]
+Completed: Implement MCP Server Mode (Phase 4 redo)
+Files: none
+Summary: **Summary**
+- Added MCP JSON-RPC stdio server plus tool registry/bridge in `packages/cli/src/mcp/server.ts` and `packages/cli/src/mcp/tools.ts`.
+- Wired `skill mcp` command in `packages/cli/src/index.ts` and added unit coverage in `packages/cli/tests/unit/mcp/server.test.ts` and `packages/cli/tests/unit/mcp/tools.test.ts`.
+- Appended the requested progress entry in `packages/cli/PROGRESS.md`.
+
+**T

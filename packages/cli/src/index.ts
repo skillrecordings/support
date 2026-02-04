@@ -23,6 +23,7 @@ import { registerResponseCommands } from './commands/responses'
 import { registerToolsCommands } from './commands/tools'
 import { wizard } from './commands/wizard'
 import { createContext } from './core/context'
+import { createMcpServer } from './mcp/server'
 
 declare const BUILD_VERSION: string | undefined
 declare const BUILD_COMMIT: string | undefined
@@ -173,6 +174,14 @@ registerAuthCommands(program)
 
 // Plugin commands
 registerPluginSyncCommand(program)
+
+program
+  .command('mcp')
+  .description('Start MCP server for AI coding agent integration')
+  .action(async () => {
+    const server = createMcpServer()
+    await server.start()
+  })
 
 // Parse and cleanup DB connections when done
 program.parseAsync().finally(async () => {
