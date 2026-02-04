@@ -11,11 +11,14 @@ CLI tool for the Skill Recordings support platform. Named `skill` after Skill Re
 ## Quick start
 
 ```bash
-skill inngest events --after 1h     # Recent events
-skill inngest event <id>            # Event details + runs
-skill front message <id>            # Full message with body
-skill front conversation <id> -m    # Conversation with history
-skill skills list                   # Available skills
+skill front search "refund" --inbox inb_4bj7r  # Search conversations
+skill front search --status unassigned          # Filter-only search
+skill front conversation <id> -m                # Conversation with history
+skill front assign cnv_xxx tea_xxx              # Assign to teammate
+skill front reply cnv_xxx --body "On it"        # Draft reply (never auto-sends)
+skill front api GET /me                         # Raw API escape hatch
+skill inngest events --after 1h                 # Recent workflow events
+skill inngest failures --after 2h               # Aggregate failure analysis
 ```
 
 ## Inngest Commands
@@ -102,17 +105,28 @@ skill inngest signal <name> --data '{"approved":true}'  # With payload
 
 ## Front Commands
 
+### Search conversations
+```bash
+skill front search "payment failed"                              # Text search (subject + body)
+skill front search "refund" --inbox inb_4bj7r --status unassigned  # With filters
+skill front search "is:unreplied" --inbox inb_4bj7r --after 1706745600
+skill front search --status unassigned --inbox inb_4bj7r         # Filters only, no text
+skill front search "from:dale@a.com tag:tag_14nmdp" --limit 50  # Inline Front syntax
+skill front search                                                # Shows full query syntax help
+```
+
+**Filters (CLI flags):** `--inbox`, `--tag`, `--assignee`, `--status`, `--from`, `--after`, `--before`, `--limit`, `--json`
+
+**Inline Front syntax (in the query arg):** `inbox:inb_xxx`, `tag:tag_xxx`, `from:email`, `to:email`, `cc:email`, `recipient:email`, `assignee:tea_xxx`, `participant:tea_xxx`, `author:tea_xxx`, `mention:tea_xxx`, `commenter:tea_xxx`, `is:<status>`, `before:<ts>`, `after:<ts>`, `during:<ts>`, `custom_field:"Key=Value"`
+
+**Status values:** open, archived, assigned, unassigned, unreplied, snoozed, trashed, waiting
+
+**Logic:** Multiple filters = AND. Multiple from/to/cc/bcc = OR. Max 15 filters.
+
 ### Get message
 ```bash
-skill front message <id>                  # Full message details
+skill front message <id>                  # Full message details (body, author, recipients)
 skill front message msg_xxx --json        # JSON output
-
-# Output includes:
-# - ID, type, subject, created timestamp
-# - Author email
-# - Recipients (from, to, cc, bcc)
-# - Body (HTML length, text length, preview)
-# - Attachments
 ```
 
 ### Get conversation
@@ -120,12 +134,83 @@ skill front message msg_xxx --json        # JSON output
 skill front conversation <id>             # Conversation details
 skill front conversation cnv_xxx -m       # Include message history
 skill front conversation <id> --json      # JSON output
+```
 
-# Output includes:
-# - ID, subject, status, created timestamp
-# - Recipient, assignee
-# - Tags
-# - Message history (with -m flag)
+### Inbox & conversations
+```bash
+skill front inbox                         # List all inboxes
+skill front inbox inb_xxx                 # List conversations in inbox
+skill front inbox inb_xxx --status unassigned  # Filter by status
+skill front inbox "AI Hero"               # Lookup by name
+skill front inbox inb_xxx --tag "500 Error" --limit 100 --json
+```
+
+### Assign / unassign conversations
+```bash
+skill front assign cnv_xxx tea_xxx        # Assign to teammate
+skill front assign cnv_xxx --unassign     # Remove assignee
+skill front assign cnv_xxx tea_xxx --json # JSON output
+```
+
+### Tag / untag conversations
+```bash
+skill front tag cnv_xxx "bug report"      # Add tag by name (case-insensitive)
+skill front tag cnv_xxx tag_xxx           # Add tag by ID
+skill front untag cnv_xxx "bug report"    # Remove tag by name
+skill front untag cnv_xxx tag_xxx --json  # JSON output
+```
+
+### Reply (draft only — HITL)
+```bash
+skill front reply cnv_xxx --body "Thanks for reporting this"
+skill front reply cnv_xxx --body "We're looking into it" --author tea_xxx
+skill front reply cnv_xxx --body "..." --json
+# NEVER auto-sends. Creates a draft. Review and send from Front.
+```
+
+### Tag management
+```bash
+skill front tags list                     # All tags with conversation counts
+skill front tags list --unused            # Tags with 0 conversations
+skill front tags delete tag_xxx           # Delete a tag
+skill front tags rename tag_xxx "New Name"
+skill front tags cleanup                  # Interactive: dedup, fix variants, remove obsolete
+```
+
+### Teammates
+```bash
+skill front teammates                     # List all teammates
+skill front teammates --json
+skill front teammate tea_xxx              # Get teammate details
+skill front teammate tea_xxx --json
+```
+
+### Archive & bulk operations
+```bash
+skill front archive cnv_xxx               # Archive single conversation
+skill front bulk-archive --inbox inb_xxx --dry-run  # Preview bulk archive
+skill front bulk-archive --inbox inb_xxx --tag "spam" --execute
+```
+
+### Report & triage
+```bash
+skill front report --inbox inb_xxx        # Inbox forensics report
+skill front triage --inbox inb_xxx        # AI-powered triage
+skill front triage --inbox inb_xxx --auto-archive  # Auto-archive noise
+```
+
+### Raw API passthrough
+```bash
+skill front api GET /me                   # Escape hatch for any endpoint
+skill front api GET /conversations/cnv_xxx
+skill front api PATCH /conversations/cnv_xxx --data '{"status":"archived"}'
+skill front api POST /conversations/cnv_xxx/tags --data '{"tag_ids":["tag_xxx"]}'
+# Always outputs JSON. Supports GET, POST, PATCH, PUT, DELETE.
+```
+
+### Pull conversations (eval datasets)
+```bash
+skill front pull-conversations --inbox inb_xxx --output data.json
 ```
 
 ## Other Commands
@@ -192,6 +277,29 @@ skill responses export -o bad-responses.json  # Output to file
 
 ## Common Workflows
 
+### Triage an inbox
+```bash
+# 1. Search for unassigned conversations
+skill front search --inbox inb_4bj7r --status unassigned --json
+
+# 2. Get details on a specific conversation
+skill front conversation cnv_xxx -m
+
+# 3. Assign, tag, and reply
+skill front assign cnv_xxx tea_xxx
+skill front tag cnv_xxx "needs-investigation"
+skill front reply cnv_xxx --body "Looking into this now"
+
+# 4. Or bulk triage with AI
+skill front triage --inbox inb_4bj7r
+```
+
+### Find conversations from a specific sender
+```bash
+skill front search "from:user@example.com" --inbox inb_4bj7r
+skill front search "from:user@example.com is:unreplied"
+```
+
 ### Debug empty message body
 ```bash
 # 1. Find recent inbound events
@@ -208,8 +316,8 @@ skill front message msg_xxx
 
 ### Investigate failed workflow
 ```bash
-# 1. Find function.finished events
-skill inngest events --after 2h | grep function.finished
+# 1. Find failures
+skill inngest failures --after 2h
 
 # 2. Get run details
 skill inngest run 01KFxxx
@@ -218,13 +326,13 @@ skill inngest run 01KFxxx
 skill inngest event <event_id>
 ```
 
-### Check conversation context
+### Pipe search results to other commands
 ```bash
-# Get full conversation with message history
-skill front conversation cnv_xxx -m
+# Get all unassigned conversation IDs
+skill front search --inbox inb_4bj7r --status unassigned --json | jq '.data.conversations[].id'
 
-# Or just the conversation metadata
-skill front conversation cnv_xxx
+# Archive all snoozed conversations (careful!)
+skill front search "is:snoozed" --inbox inb_4bj7r --json | jq -r '.data.conversations[].id' | xargs -I{} skill front archive {}
 ```
 
 ## Environment Variables
