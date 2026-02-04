@@ -71,7 +71,7 @@
       "title": "Deduplicate Axiom helpers",
       "description": "Axiom helper functions are duplicated between:\n- `packages/cli/src/commands/axiom/index.ts` (697 lines)\n- `packages/cli/src/commands/axiom/forensic.ts` (868 lines)\n\nShared functions include: getAxiomClient(), getDataset(), parseTimeRange(), formatDuration(), formatTime(), and other utility functions.\n\nExtract shared helpers into `packages/cli/src/lib/axiom-client.ts`:\n1. Move getAxiomClient(), getDataset(), parseTimeRange(), formatDuration(), formatTime() to the shared module\n2. Update both axiom/index.ts and axiom/forensic.ts to import from the shared module\n3. Remove duplicated definitions\n\nDo NOT create a changeset — will be included in the final changeset.",
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "validationCommand": "cd packages/cli && bun run check-types && bun run test",
       "acceptanceCriteria": [
         "Shared axiom-client.ts created in src/lib/",
@@ -116,7 +116,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-04T03:24:28.522Z",
-    "totalIterations": 4,
-    "lastIteration": "2026-02-04T03:35:07.236Z"
+    "totalIterations": 5,
+    "lastIteration": "2026-02-04T03:36:43.195Z"
   }
 }

@@ -48,3 +48,13 @@ Summary: Summary:
 
 Learnings:
 - 
+
+---
+[2026-02-04T03:36:43.195Z]
+Completed: Deduplicate Axiom helpers
+Files: none
+Summary: Summary:
+- Added shared Axiom helpers in `packages/cli/src/lib/axiom-client.ts` and wired `packages/cli/src/commands/axiom/index.ts` + `packages/cli/src/commands/axiom/forensic.ts` to import them, removing duplicate definitions.
+
+Notes:
+- `formatDuration` now uses the shared implementation (previously `forensic.ts` rounded sub-1000ms values). If you want to keep rounding, say the word and I’ll adj
