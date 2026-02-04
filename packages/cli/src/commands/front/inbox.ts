@@ -323,6 +323,100 @@ export function registerInboxCommand(front: Command): void {
     )
     .option('--tag <tag>', 'Filter by tag name')
     .option('--limit <n>', 'Limit number of results', '50')
+    .addHelpText(
+      'after',
+      `
+━━━ Front Inbox Command ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Two modes: list all inboxes, or list conversations in a specific inbox.
+
+MODE 1: LIST ALL INBOXES (no argument)
+  skill front inbox                     Show all inboxes (ID, name, privacy)
+  skill front inbox --json              JSON output with HATEOAS links
+
+MODE 2: LIST CONVERSATIONS IN AN INBOX (with argument)
+  skill front inbox <inbox-name-or-id>  List conversations in an inbox
+  skill front inbox inb_4bj7r           By inbox ID
+  skill front inbox "AI Hero"           By name (case-insensitive exact match)
+
+INBOX NAME LOOKUP
+  Pass a human-readable name instead of inb_xxx. The command fetches all
+  inboxes and matches case-insensitively against the full name.
+  Example: "ai hero" matches "AI Hero", "Total TypeScript" matches exactly.
+  If no match is found, an error is thrown with the name you provided.
+
+OPTIONS
+  Flag                    Default   Description
+  ─────────────────────── ───────── ──────────────────────────────────────────
+  --status <status>       (none)    Filter conversations by status
+  --tag <tag>             (none)    Filter by tag name or tag_xxx ID
+  --limit <n>             50        Max conversations to return (pages auto)
+  --json                  false     Output as JSON (HATEOAS envelope)
+
+STATUS VALUES (--status flag)
+  open          In the Open tab (not archived, trashed, or snoozed)
+  archived      In the Archived tab
+  assigned      Has an assignee
+  unassigned    No assignee
+  unreplied     Last message was inbound (no teammate reply yet)
+  snoozed       Snoozed (will reopen later)
+  trashed       In Trash
+  waiting       Waiting for response
+
+TAG FILTER (--tag flag)
+  Filter by tag name (human-readable) or tag ID (tag_xxx).
+  The tag value is passed as a Front query filter: tag:"<value>"
+  Examples:
+    --tag "500 Error"       Filter by tag name
+    --tag tag_14nmdp        Filter by tag ID
+
+PAGINATION
+  Page size is always 50. If --limit is higher than 50, the command
+  automatically paginates through results until the limit is reached.
+  Progress is shown in the terminal (e.g., "Fetched 150 conversations...").
+
+JSON + jq PATTERNS
+  # List all inbox IDs
+  skill front inbox --json | jq '.data[].id'
+
+  # Get inbox names and IDs as a table
+  skill front inbox --json | jq '.data[] | {id, name}'
+
+  # Get conversation IDs from an inbox
+  skill front inbox inb_4bj7r --json | jq '.data.conversations[].id'
+
+  # Get conversation summaries
+  skill front inbox inb_4bj7r --json | jq '.data.conversations[] | {id, subject, status}'
+
+  # Count conversations by status
+  skill front inbox inb_4bj7r --json | jq '[.data.conversations[].status] | group_by(.) | map({status: .[0], count: length})'
+
+EXAMPLES
+  # Step 1: Find inbox IDs
+  skill front inbox
+
+  # Step 2: Look up inbox by name
+  skill front inbox "Total TypeScript"
+
+  # Step 3: Filter unassigned conversations
+  skill front inbox inb_4bj7r --status unassigned
+
+  # Step 4: Filter by tag
+  skill front inbox inb_4bj7r --tag "500 Error"
+
+  # Step 5: Pipe to jq for conversation IDs
+  skill front inbox inb_4bj7r --status open --json | jq '.data.conversations[].id'
+
+  # Limit results to 10
+  skill front inbox inb_4bj7r --limit 10
+
+RELATED COMMANDS
+  skill front conversation <id>    View full conversation with messages
+  skill front search <query>       Search across all inboxes with filters
+  skill front report               Generate support metrics report
+  skill front triage               Triage unassigned conversations
+`
+    )
     .action(async (inboxNameOrId?: string, options?: any) => {
       if (!inboxNameOrId) {
         await listInboxes(options || {})
