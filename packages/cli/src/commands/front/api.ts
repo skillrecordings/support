@@ -106,7 +106,7 @@ export async function runFrontApi(
       return
     }
 
-    const front = getFrontClient()
+    const front = getFrontClient(ctx)
     let result: unknown
 
     switch (normalizedMethod) {

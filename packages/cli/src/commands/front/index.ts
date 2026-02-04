@@ -84,7 +84,7 @@ export async function getMessage(
   const outputJson = options.json === true || ctx.format === 'json'
 
   try {
-    const front = getFrontClient()
+    const front = getFrontClient(ctx)
     const message = await front.messages.get(normalizeId(id))
 
     if (outputJson) {
@@ -158,7 +158,7 @@ export async function getConversation(
   const outputJson = options.json === true || ctx.format === 'json'
 
   try {
-    const front = getFrontClient()
+    const front = getFrontClient(ctx)
     const conversation = await front.conversations.get(normalizeId(id))
 
     // Fetch messages if requested
@@ -270,7 +270,7 @@ async function listTeammates(
   const idsOnly = options.idsOnly === true
 
   try {
-    const front = getFrontClient()
+    const front = getFrontClient(ctx)
     const result = await front.teammates.list()
 
     if (idsOnly) {
@@ -346,7 +346,7 @@ async function getTeammate(
   const outputJson = options.json === true || ctx.format === 'json'
 
   try {
-    const front = getFrontClient()
+    const front = getFrontClient(ctx)
     const teammate = await front.teammates.get(id)
 
     if (outputJson) {

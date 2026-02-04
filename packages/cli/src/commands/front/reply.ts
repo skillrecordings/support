@@ -33,7 +33,7 @@ export async function replyToConversation(
       })
     }
 
-    const front = getFrontClient()
+    const front = getFrontClient(ctx)
     const normalizedId = normalizeId(conversationId)
 
     let draft: unknown = null

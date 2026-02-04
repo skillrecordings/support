@@ -69,7 +69,7 @@ export async function generateReport(
   const { inbox, days = 30 } = options
   const outputJson = options.json === true || ctx.format === 'json'
 
-  const front = getFrontClient()
+  const front = getFrontClient(ctx)
 
   try {
     if (!outputJson) {

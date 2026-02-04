@@ -57,7 +57,7 @@ export async function bulkAssignConversations(
       })
     }
 
-    const front = getFrontClient()
+    const front = getFrontClient(ctx)
     const query = encodeURIComponent(options.filter)
 
     if (!outputJson) {

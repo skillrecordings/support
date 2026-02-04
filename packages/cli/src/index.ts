@@ -84,6 +84,20 @@ program
   .option('-f, --format <format>', 'Output format (json|text|table)')
   .option('-v, --verbose', 'Enable verbose output')
   .option('-q, --quiet', 'Suppress non-error output')
+  .option('--rate-limit <n>', 'Override Front API rate limit per minute', (v) =>
+    Number.parseInt(v, 10)
+  )
+
+program.hook('preAction', (thisCommand, actionCommand) => {
+  const opts =
+    typeof actionCommand.optsWithGlobals === 'function'
+      ? actionCommand.optsWithGlobals()
+      : thisCommand.opts()
+  const rateLimit = opts.rateLimit
+  if (typeof rateLimit === 'number' && Number.isFinite(rateLimit)) {
+    process.env.SKILL_RATE_LIMIT = String(rateLimit)
+  }
+})
 
 // Core commands
 program

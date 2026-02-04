@@ -72,7 +72,7 @@ export async function pullConversations(
   const outputJson = options.json === true || ctx.format === 'json'
 
   try {
-    const front = getFrontClient()
+    const front = getFrontClient(ctx)
     // If no inbox specified, list available inboxes
     if (!inbox) {
       ctx.output.data('Fetching available inboxes...\n')

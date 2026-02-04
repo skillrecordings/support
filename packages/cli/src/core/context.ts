@@ -30,6 +30,14 @@ export async function createContext(
   const verbose = overrides.verbose ?? false
   const quiet = overrides.quiet ?? false
   const format = overrides.format ?? (stdout.isTTY ? 'text' : 'json')
+  const config = { ...(overrides.config ?? {}) }
+  const envRateLimit = process.env.SKILL_RATE_LIMIT
+  if (envRateLimit && config.frontRateLimit === undefined) {
+    const parsed = Number.parseInt(envRateLimit, 10)
+    if (Number.isFinite(parsed) && parsed > 0) {
+      config.frontRateLimit = parsed
+    }
+  }
   const output =
     overrides.output ??
     createOutputFormatter({
@@ -44,7 +52,7 @@ export async function createContext(
     stdin: overrides.stdin ?? process.stdin,
     stdout,
     stderr,
-    config: overrides.config ?? {},
+    config,
     signal,
     secrets,
     format,

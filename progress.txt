@@ -79,3 +79,37 @@ Summary: Summary:
 - Added HTTP-level Front response caching with TTL tiers, classification, invalidation, and stats. (`packages/cli/src/commands/front/cache.ts`)
 - Wrapped the base Front client so all sub-clients share cached GETs and invalidate on mutations; added cache reset/stats helpers. (`packages/cli/src/commands/front/client.ts`)
 - Added cache unit tests and cached-client integration tests; ensured 
+
+---
+[2026-02-04T23:32:55.567Z]
+Failed: Proactive rate limiter with token bucket for Front API (100 req/min shared budget)
+Validation: src/commands/front/inbox.ts(57,32): error TS2304: Cannot find name 'ctx'.
+
+Codex: 
+
+---
+[2026-02-04T23:43:12.057Z]
+Failed: Proactive rate limiter with token bucket for Front API (100 req/min shared budget)
+Validation: 
+ RUN  v3.2.4 /home/joel/Code/skillrecordings/support-cli-rearchitect/packages/cli
+
+ ❯ tests/unit/commands/front/rate-limiter.test.ts (11 tests | 1 failed) 49ms
+   ✓ FrontRateLimiter > allows requests under budget 12ms
+   ✓ FrontRateLimiter > queues requests over budget 5ms
+   ✓ FrontRateLimiter > r
+Codex: 
+
+---
+[2026-02-04T23:47:06.987Z]
+Completed: Proactive rate limiter with token bucket for Front API (100 req/min shared budget)
+Files: none
+Summary: **Summary**
+Updated `packages/cli/src/commands/front/rate-limiter.ts` to allow immediate acquires when under budget and no queue is pending, while still honoring pause/min-gap and abort signals.
+Appended the progress entry in `packages/cli/PROGRESS.md` per the story instructions.
+
+**Tests**
+`cd packages/cli && bun run check-types`
+`cd packages/cli && bun run test`
+
+**Learnings**
+Vitest’s concurren

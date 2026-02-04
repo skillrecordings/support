@@ -252,7 +252,7 @@ export async function triageConversations(
   const outputJson = options.json === true || ctx.format === 'json'
 
   try {
-    const front = getFrontClient()
+    const front = getFrontClient(ctx)
 
     if (!outputJson) {
       ctx.output.data(

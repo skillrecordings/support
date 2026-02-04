@@ -32,6 +32,7 @@ import {
   getFrontClient,
   normalizeId,
   requireFrontToken,
+  resetFrontRateLimiter,
 } from '../../../../src/commands/front/client'
 
 describe('front client helpers', () => {
@@ -49,6 +50,7 @@ describe('front client helpers', () => {
     mockCreateContactsClient.mockReset()
     mockCreateTeammatesClient.mockReset()
     delete process.env.FRONT_API_TOKEN
+    resetFrontRateLimiter()
   })
 
   it('requireFrontToken throws when FRONT_API_TOKEN is missing', () => {

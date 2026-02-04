@@ -26,14 +26,14 @@ import { hateoasWrap, tagListActions, tagListLinks } from './hateoas'
 /**
  * Get Front SDK client from environment
  */
-function getFrontSdkClient() {
-  return getFrontClient()
+function getFrontSdkClient(ctx: CommandContext) {
+  return getFrontClient(ctx)
 }
 
 /**
  * Raw fetch for tags - bypasses SDK validation which chokes on Front's messy data
  */
-async function fetchTagsRaw(): Promise<
+async function fetchTagsRaw(front: ReturnType<typeof getFrontClient>): Promise<
   Array<{
     id: string
     name: string
@@ -51,8 +51,6 @@ async function fetchTagsRaw(): Promise<
   }> = []
 
   let nextUrl: string | null = 'https://api2.frontapp.com/tags'
-  const front = getFrontClient()
-
   while (nextUrl) {
     const data = (await front.raw.get(nextUrl)) as {
       _results: Array<{
@@ -75,16 +73,18 @@ async function fetchTagsRaw(): Promise<
 /**
  * Raw create tag - bypasses SDK response validation
  */
-async function createTagRaw(params: {
-  name: string
-  highlight?: string | null
-  description?: string | null
-}): Promise<void> {
+async function createTagRaw(
+  front: ReturnType<typeof getFrontClient>,
+  params: {
+    name: string
+    highlight?: string | null
+    description?: string | null
+  }
+): Promise<void> {
   const body: Record<string, unknown> = { name: params.name }
   if (params.highlight) body.highlight = params.highlight
   if (params.description) body.description = params.description
 
-  const front = getFrontClient()
   await front.raw.post('/tags', body)
 }
 
@@ -211,8 +211,8 @@ export async function listTags(
   const idsOnly = options.idsOnly === true
 
   try {
-    const front = getFrontSdkClient()
-    const tags = await fetchTagsRaw()
+    const front = getFrontSdkClient(ctx)
+    const tags = await fetchTagsRaw(front)
 
     // Fetch conversation counts for each tag
     const tagsWithCounts: TagWithCount[] = await Promise.all(
@@ -330,7 +330,7 @@ export async function deleteTag(
   options: { force?: boolean; dryRun?: boolean }
 ): Promise<void> {
   try {
-    const front = getFrontSdkClient()
+    const front = getFrontSdkClient(ctx)
 
     // Fetch tag details first
     const tag = await front.tags.get(id)
@@ -397,7 +397,7 @@ export async function renameTag(
   options: { dryRun?: boolean }
 ): Promise<void> {
   try {
-    const front = getFrontSdkClient()
+    const front = getFrontSdkClient(ctx)
 
     // Fetch current tag details
     const oldTag = await front.tags.get(id)
@@ -740,7 +740,7 @@ async function executeCleanupPlan(
   for (const item of plan.missingToCreate) {
     try {
       ctx.output.data(`   Creating "${item.name}"...`)
-      await createTagRaw({
+      await createTagRaw(front, {
         name: item.name,
         highlight: item.highlight,
         description: item.description,
@@ -767,12 +767,12 @@ export async function cleanupTags(
   options: { execute?: boolean }
 ): Promise<void> {
   try {
-    const front = getFrontSdkClient()
+    const front = getFrontSdkClient(ctx)
 
     ctx.output.data('\n🔍 Analyzing tags...')
 
     // Fetch all tags (raw fetch to avoid SDK validation issues)
-    const tags = await fetchTagsRaw()
+    const tags = await fetchTagsRaw(front)
     ctx.output.data(`   Found ${tags.length} tags`)
     ctx.output.data('   Fetching conversation counts (rate-limited)...')
 

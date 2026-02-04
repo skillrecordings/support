@@ -198,6 +198,16 @@ Initialized: 2026-02-04T15:13:09.231Z
 - Verified no duplicate copies remain
 
 ## Review Fix 2: MCP Server Mode (Phase 4 redo)
+
+## Proactive Rate Limiter (100 req/min shared budget)
+- Token bucket with 80 req/min default (20% headroom for other consumers)
+- 200ms minimum gap between requests (smooths bursts to ~5 req/sec)
+- Queue-based overflow with configurable depth (50 default)
+- Integrates with cache: cache hits don't consume rate limit budget
+- 429 handling: record429() pauses all requests for Retry-After duration
+- Module-level singleton: shared across all client instances
+- Utilization stats for monitoring and agent awareness
+- --rate-limit CLI flag for manual override
 - Created MCP JSON-RPC server over stdio (no external deps)
 - Registered 9 Front tools with JSON Schema input validation
 - Tool execution bridges to existing command functions via captured context
@@ -226,3 +236,13 @@ Initialized: 2026-02-04T15:13:09.231Z
 - Module-level singleton: dies with CLI process, persists in MCP mode
 - Fixed bulk-archive.ts and pull-conversations.ts to use shared getFrontClient()
 - Added comprehensive tests for cache behavior, TTL, invalidation
+
+## Proactive Rate Limiter (100 req/min shared budget)
+- Token bucket with 80 req/min default (20% headroom for other consumers)
+- 200ms minimum gap between requests (smooths bursts to ~5 req/sec)
+- Queue-based overflow with configurable depth (50 default)
+- Integrates with cache: cache hits don't consume rate limit budget
+- 429 handling: record429() pauses all requests for Retry-After duration
+- Module-level singleton: shared across all client instances
+- Utilization stats for monitoring and agent awareness
+- --rate-limit CLI flag for manual override

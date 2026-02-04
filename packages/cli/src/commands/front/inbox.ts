@@ -53,8 +53,11 @@ function truncate(str: string, len: number): string {
 /**
  * Find inbox by ID or name
  */
-async function findInbox(nameOrId: string): Promise<Inbox | null> {
-  const front = getFrontClient()
+async function findInbox(
+  ctx: CommandContext,
+  nameOrId: string
+): Promise<Inbox | null> {
+  const front = getFrontClient(ctx)
   const normalizedId = normalizeId(nameOrId)
 
   // Try direct ID lookup first
@@ -101,7 +104,7 @@ export async function listInboxes(
   const idsOnly = options.idsOnly === true
 
   try {
-    const front = getFrontClient()
+    const front = getFrontClient(ctx)
     const inboxList = (await front.inboxes.list()) as InboxList
     const inboxes = inboxList._results ?? []
 
@@ -193,10 +196,10 @@ export async function listConversations(
   const idsOnly = options.idsOnly === true
 
   try {
-    const front = getFrontClient()
+    const front = getFrontClient(ctx)
 
     // Find inbox
-    const inbox = await findInbox(inboxNameOrId)
+    const inbox = await findInbox(ctx, inboxNameOrId)
     if (!inbox) {
       throw new CLIError({
         userMessage: `Inbox not found: ${inboxNameOrId}`,

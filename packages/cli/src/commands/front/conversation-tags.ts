@@ -79,7 +79,7 @@ export async function tagConversation(
       })
     }
 
-    const front = getFrontClient()
+    const front = getFrontClient(ctx)
     const normalizedId = normalizeId(conversationId)
     const tag = await resolveTag(front, options.tag)
 
@@ -146,7 +146,7 @@ export async function untagConversation(
       })
     }
 
-    const front = getFrontClient()
+    const front = getFrontClient(ctx)
     const normalizedId = normalizeId(conversationId)
     const tag = await resolveTag(front, options.tag)
 

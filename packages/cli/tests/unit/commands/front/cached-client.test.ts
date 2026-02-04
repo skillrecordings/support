@@ -16,6 +16,14 @@ vi.mock('@skillrecordings/core/front/instrumented-client', () => ({
 }))
 
 vi.mock('@skillrecordings/front-sdk', () => ({
+  FrontApiError: class FrontApiError extends Error {
+    status: number
+    constructor(status: number, title: string, message: string) {
+      super(message)
+      this.name = 'FrontApiError'
+      this.status = status
+    }
+  },
   createConversationsClient: mockCreateConversationsClient,
   createMessagesClient: mockCreateMessagesClient,
   createDraftsClient: mockCreateDraftsClient,
@@ -30,6 +38,7 @@ vi.mock('@skillrecordings/front-sdk', () => ({
 import {
   createCachedInstrumentedFrontClient,
   resetFrontCache,
+  resetFrontRateLimiter,
 } from '../../../../src/commands/front/client'
 
 type BaseClient = {
@@ -73,10 +82,12 @@ describe('getFrontClient with cache', () => {
     mockCreateContactsClient.mockReset()
     mockCreateTeammatesClient.mockReset()
     resetFrontCache()
+    resetFrontRateLimiter()
   })
 
   afterEach(() => {
     resetFrontCache()
+    resetFrontRateLimiter()
   })
 
   it('caches GET responses', async () => {

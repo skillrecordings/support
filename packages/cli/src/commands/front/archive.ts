@@ -42,7 +42,7 @@ export async function archiveConversations(
   const outputJson = options.json === true || ctx.format === 'json'
 
   try {
-    const front = getFrontClient()
+    const front = getFrontClient(ctx)
     const allIds = [convId, ...additionalIds]
     const normalizedIds = allIds.map(normalizeId)
 

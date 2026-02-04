@@ -2,6 +2,7 @@ import { PassThrough } from 'node:stream'
 import { runFrontApi } from '../commands/front/api'
 import { archiveConversations } from '../commands/front/archive'
 import { assignConversation } from '../commands/front/assign'
+import { getFrontRateLimiterStats } from '../commands/front/client'
 import {
   tagConversation,
   untagConversation,
@@ -326,6 +327,10 @@ function formatErrorContent(message: string): McpToolResult {
   }
 }
 
+function isFrontTool(name: string): boolean {
+  return name.startsWith('front_')
+}
+
 export function listTools(): McpTool[] {
   return tools
 }
@@ -380,15 +385,25 @@ export async function callTool(
 
   const parsed = parseJsonOutput(stdoutBuffer)
   if (parsed !== null) {
-    return {
-      content: [{ type: 'json', json: parsed }],
+    const content: McpToolContent[] = [{ type: 'json', json: parsed }]
+    if (isFrontTool(name)) {
+      content.push({
+        type: 'json',
+        json: { rateLimiter: getFrontRateLimiterStats() },
+      })
     }
+    return { content }
   }
 
   const fallback = stderrBuffer.trim() || 'No output captured from tool.'
-  return {
-    content: [{ type: 'text', text: fallback }],
+  const content: McpToolContent[] = [{ type: 'text', text: fallback }]
+  if (isFrontTool(name)) {
+    content.push({
+      type: 'json',
+      json: { rateLimiter: getFrontRateLimiterStats() },
+    })
   }
+  return { content }
 }
 
 export function hasTool(name: string): boolean {

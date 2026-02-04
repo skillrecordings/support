@@ -43,7 +43,7 @@ export async function assignConversation(
       })
     }
 
-    const front = getFrontClient()
+    const front = getFrontClient(ctx)
     const assigneeId = options.unassign ? '' : options.to!
 
     if (!dryRun) {
