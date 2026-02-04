@@ -43,3 +43,6 @@ artifacts/
 
 # Mined conversation data (contains PII)
 data/mined/
+
+# Claude Code session state (not project config)
+.claude/.worker-tracking/
