@@ -125,6 +125,31 @@ export function conversationActions(convId: string): HateoasAction[] {
       destructive: true,
     },
     {
+      action: 'assign',
+      command: `skill front assign ${convId} <teammate-id> --json`,
+      description: 'Assign to a teammate',
+    },
+    {
+      action: 'unassign',
+      command: `skill front assign ${convId} --unassign --json`,
+      description: 'Remove assignee',
+    },
+    {
+      action: 'tag',
+      command: `skill front tag ${convId} <tag-name-or-id> --json`,
+      description: 'Add a tag',
+    },
+    {
+      action: 'untag',
+      command: `skill front untag ${convId} <tag-name-or-id> --json`,
+      description: 'Remove a tag',
+    },
+    {
+      action: 'reply',
+      command: `skill front reply ${convId} --body "<text>" --json`,
+      description: 'Create a draft reply',
+    },
+    {
       action: 'tags',
       command: `skill front tags list --json`,
       description: 'View available tags',
@@ -165,6 +190,11 @@ export function conversationListActions(inboxId?: string): HateoasAction[] {
         action: 'triage',
         command: `skill front triage --inbox ${inboxId} --json`,
         description: 'Triage conversations',
+      },
+      {
+        action: 'report',
+        command: `skill front report --inbox ${inboxId} --json`,
+        description: 'Generate inbox report',
       }
     )
   }
