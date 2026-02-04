@@ -15,9 +15,11 @@ const OP_AGE_KEY_REF = 'op://Support/skill-cli-age-key/private_key'
  * 3. Fail with clear instructions
  *
  * Injects secrets into process.env
+ *
+ * @param cliDirOverride - Optional path to CLI package root (use when calling from bundled code)
  */
-export async function loadSecrets(): Promise<void> {
-  const cliDir = path.resolve(import.meta.dirname, '../..')
+export async function loadSecrets(cliDirOverride?: string): Promise<void> {
+  const cliDir = cliDirOverride ?? path.resolve(import.meta.dirname, '../..')
 
   // Layer 1: Check for local .env files
   const localEnvExists = await checkLocalEnv(cliDir)

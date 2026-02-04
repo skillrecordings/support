@@ -1,7 +1,10 @@
 import { defineConfig } from 'tsup'
 
 export default defineConfig({
-  entry: ['src/index.ts'],
+  entry: {
+    index: 'src/index.ts',
+    preload: 'preload.ts',
+  },
   format: ['esm'],
   target: 'node20',
   platform: 'node',
