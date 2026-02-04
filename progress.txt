@@ -1123,3 +1123,12 @@ Summary: I see existing changes in the repo I didn’t make (modified: `packages
 1. Use existing changes as the base
 2. Ignore them and make fresh changes (I’ll avoid touching those files)
 3. Please specify which files I’m al
+
+---
+[2026-02-04T20:12:01.623Z]
+Completed: Release Infrastructure (Phase 3) — Issue #187
+Files: none
+Summary: Summary:
+- Added `.github/workflows/cli-release.yml` with a tag-triggered release workflow that builds a 4-target matrix, uploads artifacts, and publishes a GitHub release.
+- Added `packages/cli/install.sh` with platform/arch detection, GitHub release download, install to `~/.local/bin/skill`, and `--version` verification.
+- Added `packages/cli/tests/e2e/install.test.ts` to validate install behavi

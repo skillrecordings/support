@@ -173,7 +173,7 @@
       "title": "Release Infrastructure (Phase 3) — Issue #187",
       "description": "## Progress Notification (MANDATORY)\nAfter completing this story, write a status update to `packages/cli/PROGRESS.md` with:\n- Story title and completion timestamp\n- Files created/modified\n- Test count before and after\n- Any issues encountered\n\nCreate GitHub Actions release workflow and curl install script.\n\n## Context\n- Parent epic: #172, Issue: #187\n- Depends on: Story 10\n\n## Files to Create\n- .github/workflows/cli-release.yml — Build + release on cli-v* tag push\n- packages/cli/install.sh — Platform-detecting install script\n- packages/cli/tests/e2e/install.test.ts\n\n## Details\nGH Actions: trigger on push tags cli-v*, matrix 4 targets, oven-sh/setup-bun@v2, compile + release + upload\nInstall script: detect platform/arch, download from latest GH release, install to ~/.local/bin/skill, chmod +x, verify --version\n\n## On Completion\nUpdate packages/cli/PROGRESS.md. Commit: `feat(cli): release workflow and install script`",
       "priority": 11,
-      "passes": false,
+      "passes": true,
       "validationCommand": "cd packages/cli && bun run check-types && bun run test",
       "acceptanceCriteria": [
         "GitHub Actions workflow is valid YAML",
@@ -321,7 +321,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-04T15:13:09.231Z",
-    "totalIterations": 10,
-    "lastIteration": "2026-02-04T20:07:00.504Z"
+    "totalIterations": 11,
+    "lastIteration": "2026-02-04T20:12:01.622Z"
   }
 }

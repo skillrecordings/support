@@ -6,12 +6,33 @@ const rootDir = fileURLToPath(new URL('.', import.meta.url))
 const distDir = join(rootDir, 'dist')
 const entrypoint = join(rootDir, 'src', 'index.ts')
 
-const targets = [
+const defaultTargets = [
   'bun-linux-x64',
   'bun-linux-arm64',
   'bun-darwin-x64',
   'bun-darwin-arm64',
 ] as const
+type Target = (typeof defaultTargets)[number]
+
+const resolveTargets = (): Target[] => {
+  const rawTargets = process.env.BUILD_TARGETS ?? process.env.BUILD_TARGET
+  if (!rawTargets) {
+    return [...defaultTargets]
+  }
+
+  const requested = rawTargets
+    .split(',')
+    .map((target) => target.trim())
+    .filter(Boolean) as Target[]
+
+  const allowed = new Set<Target>(defaultTargets)
+  const unknown = requested.filter((target) => !allowed.has(target))
+  if (unknown.length > 0) {
+    throw new Error(`Unknown build targets: ${unknown.join(', ')}`)
+  }
+
+  return requested
+}
 
 const external = [
   // MySQL — mysql2 has dynamic requires that bypass bundler externals
@@ -53,7 +74,7 @@ const getGitCommit = async () => {
   return result.stdout.toString().trim() || 'unknown'
 }
 
-const buildTarget = async (target: (typeof targets)[number]) => {
+const buildTarget = async (target: Target) => {
   const version = await getPackageVersion()
   const commit = await getGitCommit()
   const outfile = join(distDir, `skill-${target}`)
@@ -105,7 +126,7 @@ const main = async () => {
   const commit = await getGitCommit()
   console.log(`\n🔨 Building skill-cli v${version} (${commit})\n`)
 
-  for (const target of targets) {
+  for (const target of resolveTargets()) {
     await buildTarget(target)
   }
 

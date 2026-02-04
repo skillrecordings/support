@@ -118,3 +118,11 @@ Initialized: 2026-02-04T15:13:09.231Z
 - Tests before: 125 passed, 4 skipped (129 total)
 - Tests after: 125 passed, 4 skipped (129 total)
 - Issues: E2E binary tests skipped (no bun runtime available to the test harness).
+
+### Release Infrastructure (Phase 3) — Issue #187
+- Completed: 2026-02-04T20:11:17Z
+- Files created: .github/workflows/cli-release.yml, packages/cli/install.sh, packages/cli/tests/e2e/install.test.ts
+- Files modified: packages/cli/build.ts, packages/cli/PROGRESS.md
+- Tests before: 125 passed, 4 skipped (129 total)
+- Tests after: 126 passed, 4 skipped (130 total)
+- Issues: E2E binary tests skipped (no bun runtime available to the test harness).
