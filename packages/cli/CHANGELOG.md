@@ -1,5 +1,11 @@
 # @skillrecordings/cli
 
+## 0.10.1
+
+### Patch Changes
+
+- 22b3af7: Fix JSON output truncation for large result sets. `--json` output exceeding 64KB is now written to `/tmp/skill-front/<timestamp>.json` with a summary envelope on stdout. Affects all `skill front` commands.
+
 ## 0.10.0
 
 ### Minor Changes
