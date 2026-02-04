@@ -5,6 +5,8 @@
  */
 
 import type { Command } from 'commander'
+import { type CommandContext, createContext } from '../../core/context'
+import { CLIError, formatError } from '../../core/errors'
 import { type Event, InngestClient, parseTimeArg } from './client.js'
 
 interface FunctionFinishedData {
@@ -20,10 +22,13 @@ interface FunctionFinishedData {
  * Command: skill inngest inspect <event-id>
  * Deep dive into an event - returns structured data for agent analysis
  */
-async function inspect(
+export async function inspect(
+  ctx: CommandContext,
   eventId: string,
   options: { json?: boolean; dev?: boolean }
 ): Promise<void> {
+  const outputJson = options.json === true || ctx.format === 'json'
+
   try {
     const client = new InngestClient({ dev: options.dev })
 
@@ -66,15 +71,22 @@ async function inspect(
       runs: runResults,
     }
 
-    if (options.json) {
-      console.log(JSON.stringify(output, null, 2))
+    if (outputJson) {
+      ctx.output.data(output)
     } else {
-      console.log('\n' + JSON.stringify(output, null, 2))
+      ctx.output.data('\n' + JSON.stringify(output, null, 2))
     }
   } catch (error) {
-    const err = { error: error instanceof Error ? error.message : 'Unknown' }
-    console.error(options.json ? JSON.stringify(err) : `Error: ${err.error}`)
-    process.exit(1)
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Failed to inspect Inngest event.',
+            suggestion: 'Verify event ID and INNGEST_SIGNING_KEY.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
 }
 
@@ -82,12 +94,15 @@ async function inspect(
  * Command: skill inngest failures
  * Aggregate failure analysis
  */
-async function failures(options: {
-  after?: string
-  limit?: string
-  json?: boolean
-  dev?: boolean
-}): Promise<void> {
+export async function failures(
+  ctx: CommandContext,
+  options: {
+    after?: string
+    limit?: string
+    json?: boolean
+    dev?: boolean
+  }
+): Promise<void> {
   try {
     const client = new InngestClient({ dev: options.dev })
     const limit = options.limit ? parseInt(options.limit, 10) : 20
@@ -134,14 +149,18 @@ async function failures(options: {
       failures: failureList,
     }
 
-    console.log(JSON.stringify(output, null, 2))
+    ctx.output.data(output)
   } catch (error) {
-    console.error(
-      JSON.stringify({
-        error: error instanceof Error ? error.message : 'Unknown',
-      })
-    )
-    process.exit(1)
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Failed to aggregate Inngest failures.',
+            suggestion: 'Verify INNGEST_SIGNING_KEY and time window.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
 }
 
@@ -149,11 +168,14 @@ async function failures(options: {
  * Command: skill inngest stats
  * Aggregate statistics optimized for pattern detection
  */
-async function stats(options: {
-  after?: string
-  json?: boolean
-  dev?: boolean
-}): Promise<void> {
+export async function stats(
+  ctx: CommandContext,
+  options: {
+    after?: string
+    json?: boolean
+    dev?: boolean
+  }
+): Promise<void> {
   try {
     const client = new InngestClient({ dev: options.dev })
 
@@ -218,14 +240,18 @@ async function stats(options: {
       output.anomalies.push('More skipped than completed workflows')
     }
 
-    console.log(JSON.stringify(output, null, 2))
+    ctx.output.data(output)
   } catch (error) {
-    console.error(
-      JSON.stringify({
-        error: error instanceof Error ? error.message : 'Unknown',
-      })
-    )
-    process.exit(1)
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Failed to compute Inngest stats.',
+            suggestion: 'Verify INNGEST_SIGNING_KEY and time window.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
 }
 
@@ -233,7 +259,8 @@ async function stats(options: {
  * Command: skill inngest trace <run-id>
  * Full trace of a workflow run
  */
-async function trace(
+export async function trace(
+  ctx: CommandContext,
   runId: string,
   options: { json?: boolean; dev?: boolean }
 ): Promise<void> {
@@ -270,14 +297,18 @@ async function trace(
       error: data?.error || null,
     }
 
-    console.log(JSON.stringify(output, null, 2))
+    ctx.output.data(output)
   } catch (error) {
-    console.error(
-      JSON.stringify({
-        error: error instanceof Error ? error.message : 'Unknown',
-      })
-    )
-    process.exit(1)
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Failed to fetch Inngest trace.',
+            suggestion: 'Verify run ID and INNGEST_SIGNING_KEY.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
 }
 
@@ -285,7 +316,8 @@ async function trace(
  * Command: skill inngest search
  * Search event data for patterns
  */
-async function search(
+export async function search(
+  ctx: CommandContext,
   pattern: string,
   options: { after?: string; field?: string; limit?: string; dev?: boolean }
 ): Promise<void> {
@@ -322,14 +354,18 @@ async function search(
       })),
     }
 
-    console.log(JSON.stringify(output, null, 2))
+    ctx.output.data(output)
   } catch (error) {
-    console.error(
-      JSON.stringify({
-        error: error instanceof Error ? error.message : 'Unknown',
-      })
-    )
-    process.exit(1)
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Failed to search Inngest events.',
+            suggestion: 'Verify INNGEST_SIGNING_KEY and search pattern.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
 }
 
@@ -343,7 +379,21 @@ export function registerInvestigateCommands(inngest: Command): void {
     .argument('<event-id>', 'Event internal ID')
     .option('--json', 'Output as JSON (default)')
     .option('--dev', 'Use dev server')
-    .action(inspect)
+    .action(async (eventId, options, command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: options.json ? 'json' : opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await inspect(ctx, eventId, options)
+    })
 
   inngest
     .command('failures')
@@ -352,7 +402,21 @@ export function registerInvestigateCommands(inngest: Command): void {
     .option('--limit <n>', 'Max failures (default: 20)')
     .option('--json', 'Output as JSON (default)')
     .option('--dev', 'Use dev server')
-    .action(failures)
+    .action(async (options, command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: options.json ? 'json' : opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await failures(ctx, options)
+    })
 
   inngest
     .command('stats')
@@ -360,7 +424,21 @@ export function registerInvestigateCommands(inngest: Command): void {
     .option('--after <time>', 'Time window (e.g., "2h", "1d")')
     .option('--json', 'Output as JSON (default)')
     .option('--dev', 'Use dev server')
-    .action(stats)
+    .action(async (options, command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: options.json ? 'json' : opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await stats(ctx, options)
+    })
 
   inngest
     .command('trace')
@@ -368,7 +446,21 @@ export function registerInvestigateCommands(inngest: Command): void {
     .argument('<run-id>', 'Run ID')
     .option('--json', 'Output as JSON (default)')
     .option('--dev', 'Use dev server')
-    .action(trace)
+    .action(async (runId, options, command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: options.json ? 'json' : opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await trace(ctx, runId, options)
+    })
 
   inngest
     .command('search')
@@ -378,5 +470,19 @@ export function registerInvestigateCommands(inngest: Command): void {
     .option('--field <name>', 'Search specific field only')
     .option('--limit <n>', 'Max events to search (default: 50)')
     .option('--dev', 'Use dev server')
-    .action(search)
+    .action(async (pattern, options, command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await search(ctx, pattern, options)
+    })
 }

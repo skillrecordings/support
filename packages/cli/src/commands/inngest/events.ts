@@ -1,4 +1,6 @@
 import type { Command } from 'commander'
+import { type CommandContext, createContext } from '../../core/context'
+import { CLIError, formatError } from '../../core/errors'
 import { type Event, InngestClient, type Run, parseTimeArg } from './client.js'
 
 /**
@@ -25,19 +27,19 @@ function pad(str: string, width: number): string {
 /**
  * Print events as a table
  */
-function printEventsTable(events: Event[]): void {
+function printEventsTable(ctx: CommandContext, events: Event[]): void {
   if (events.length === 0) {
-    console.log('No events found.')
+    ctx.output.data('No events found.')
     return
   }
 
-  console.log(
+  ctx.output.data(
     '\n' + pad('ID', 24) + ' ' + pad('NAME', 40) + ' ' + pad('RECEIVED', 20)
   )
-  console.log('-'.repeat(86))
+  ctx.output.data('-'.repeat(86))
 
   for (const event of events) {
-    console.log(
+    ctx.output.data(
       pad(event.internal_id, 24) +
         ' ' +
         pad(event.name, 40) +
@@ -46,19 +48,19 @@ function printEventsTable(events: Event[]): void {
     )
   }
 
-  console.log('')
+  ctx.output.data('')
 }
 
 /**
  * Print runs as a table
  */
-function printRunsTable(runs: Run[]): void {
+function printRunsTable(ctx: CommandContext, runs: Run[]): void {
   if (runs.length === 0) {
-    console.log('No runs triggered by this event.')
+    ctx.output.data('No runs triggered by this event.')
     return
   }
 
-  console.log(
+  ctx.output.data(
     '\n' +
       pad('RUN ID', 30) +
       ' ' +
@@ -68,10 +70,10 @@ function printRunsTable(runs: Run[]): void {
       ' ' +
       pad('STARTED', 20)
   )
-  console.log('-'.repeat(94))
+  ctx.output.data('-'.repeat(94))
 
   for (const run of runs) {
-    console.log(
+    ctx.output.data(
       pad(run.run_id, 30) +
         ' ' +
         pad(run.function_id, 30) +
@@ -82,20 +84,25 @@ function printRunsTable(runs: Run[]): void {
     )
   }
 
-  console.log('')
+  ctx.output.data('')
 }
 
 /**
  * Command: skill inngest events
  * List recent events
  */
-async function listEvents(options: {
-  name?: string
-  after?: string
-  limit?: string
-  json?: boolean
-  dev?: boolean
-}): Promise<void> {
+export async function listEvents(
+  ctx: CommandContext,
+  options: {
+    name?: string
+    after?: string
+    limit?: string
+    json?: boolean
+    dev?: boolean
+  }
+): Promise<void> {
+  const outputJson = options.json === true || ctx.format === 'json'
+
   try {
     const client = new InngestClient({ dev: options.dev })
 
@@ -115,35 +122,34 @@ async function listEvents(options: {
 
     const limit = options.limit ? parseInt(options.limit, 10) : 20
     if (limit < 1 || limit > 100) {
-      console.error('Error: --limit must be between 1 and 100')
-      process.exit(1)
+      throw new CLIError({
+        userMessage: '--limit must be between 1 and 100.',
+        suggestion: 'Choose a value between 1 and 100 (default: 20).',
+      })
     }
     params.limit = limit
 
     const response = await client.listEvents(params)
 
-    if (options.json) {
-      console.log(JSON.stringify(response.data, null, 2))
+    if (outputJson) {
+      ctx.output.data(response.data)
     } else {
-      printEventsTable(response.data)
+      printEventsTable(ctx, response.data)
       if (response.cursor) {
-        console.log('More events available. Use pagination for full list.')
+        ctx.output.data('More events available. Use pagination for full list.')
       }
     }
   } catch (error) {
-    if (options.json) {
-      console.error(
-        JSON.stringify({
-          error: error instanceof Error ? error.message : 'Unknown error',
-        })
-      )
-    } else {
-      console.error(
-        'Error:',
-        error instanceof Error ? error.message : 'Unknown error'
-      )
-    }
-    process.exit(1)
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Failed to list Inngest events.',
+            suggestion: 'Verify INNGEST_SIGNING_KEY and try again.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
 }
 
@@ -151,10 +157,13 @@ async function listEvents(options: {
  * Command: skill inngest event <id>
  * Get event details and runs it triggered
  */
-async function getEvent(
+export async function getEvent(
+  ctx: CommandContext,
   id: string,
   options: { json?: boolean; dev?: boolean }
 ): Promise<void> {
+  const outputJson = options.json === true || ctx.format === 'json'
+
   try {
     const client = new InngestClient({ dev: options.dev })
 
@@ -163,42 +172,39 @@ async function getEvent(
       client.getEventRuns(id),
     ])
 
-    if (options.json) {
-      console.log(JSON.stringify({ event, runs }, null, 2))
+    if (outputJson) {
+      ctx.output.data({ event, runs })
     } else {
       if (!event) {
-        console.log(`\n⚠️  Event ${id} data unavailable (may be archived)`)
+        ctx.output.data(`\n⚠️  Event ${id} data unavailable (may be archived)`)
       } else {
-        console.log('\n📋 Event Details:')
-        console.log(`   ID:       ${event.internal_id}`)
-        console.log(`   Name:     ${event.name}`)
-        console.log(`   Received: ${formatTimestamp(event.received_at)}`)
-        console.log(
+        ctx.output.data('\n📋 Event Details:')
+        ctx.output.data(`   ID:       ${event.internal_id}`)
+        ctx.output.data(`   Name:     ${event.name}`)
+        ctx.output.data(`   Received: ${formatTimestamp(event.received_at)}`)
+        ctx.output.data(
           `   Data:     ${event.data ? JSON.stringify(event.data, null, 2) : '(null)'}`
         )
       }
 
       if (runs.length > 0) {
-        console.log('\n🔄 Triggered Runs:')
-        printRunsTable(runs)
+        ctx.output.data('\n🔄 Triggered Runs:')
+        printRunsTable(ctx, runs)
       } else {
-        console.log('\n🔄 Triggered Runs: None')
+        ctx.output.data('\n🔄 Triggered Runs: None')
       }
     }
   } catch (error) {
-    if (options.json) {
-      console.error(
-        JSON.stringify({
-          error: error instanceof Error ? error.message : 'Unknown error',
-        })
-      )
-    } else {
-      console.error(
-        'Error:',
-        error instanceof Error ? error.message : 'Unknown error'
-      )
-    }
-    process.exit(1)
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Failed to fetch Inngest event.',
+            suggestion: 'Verify event ID and INNGEST_SIGNING_KEY.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
 }
 
@@ -206,55 +212,51 @@ async function getEvent(
  * Command: skill inngest replay <id>
  * Replay an event by re-emitting with the same name and data
  */
-async function replayEvent(
+export async function replayEvent(
+  ctx: CommandContext,
   id: string,
   options: { json?: boolean; dev?: boolean }
 ): Promise<void> {
+  const outputJson = options.json === true || ctx.format === 'json'
+
   try {
     const client = new InngestClient({ dev: options.dev })
 
-    console.log(`\n🔄 Replaying event ${id}...`)
+    if (!outputJson) {
+      ctx.output.data(`\n🔄 Replaying event ${id}...`)
+    }
 
     const { newEventId, event } = await client.replayEvent(id)
 
-    if (options.json) {
-      console.log(
-        JSON.stringify(
-          {
-            success: true,
-            originalEventId: id,
-            newEventId,
-            eventName: event.name,
-            eventData: event.data,
-          },
-          null,
-          2
-        )
-      )
+    if (outputJson) {
+      ctx.output.data({
+        success: true,
+        originalEventId: id,
+        newEventId,
+        eventName: event.name,
+        eventData: event.data,
+      })
     } else {
-      console.log(`\n✅ Event replayed successfully!`)
-      console.log(`   Original ID: ${id}`)
-      console.log(`   New ID:      ${newEventId}`)
-      console.log(`   Name:        ${event.name}`)
-      console.log(`   Data:        ${JSON.stringify(event.data, null, 2)}`)
-      console.log(
+      ctx.output.data(`\n✅ Event replayed successfully!`)
+      ctx.output.data(`   Original ID: ${id}`)
+      ctx.output.data(`   New ID:      ${newEventId}`)
+      ctx.output.data(`   Name:        ${event.name}`)
+      ctx.output.data(`   Data:        ${JSON.stringify(event.data, null, 2)}`)
+      ctx.output.data(
         `\nUse 'skill inngest event ${newEventId}' to check triggered runs.`
       )
     }
   } catch (error) {
-    if (options.json) {
-      console.error(
-        JSON.stringify({
-          error: error instanceof Error ? error.message : 'Unknown error',
-        })
-      )
-    } else {
-      console.error(
-        '❌ Replay failed:',
-        error instanceof Error ? error.message : 'Unknown error'
-      )
-    }
-    process.exit(1)
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Failed to replay Inngest event.',
+            suggestion: 'Verify event ID and INNGEST_SIGNING_KEY.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
 }
 
@@ -270,7 +272,21 @@ export function registerEventsCommands(inngest: Command): void {
     .option('--limit <number>', 'Max events to return (1-100, default: 20)')
     .option('--json', 'Output as JSON')
     .option('--dev', 'Use dev server (localhost:8288)')
-    .action(listEvents)
+    .action(async (options, command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: options.json ? 'json' : opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await listEvents(ctx, options)
+    })
 
   inngest
     .command('event')
@@ -278,7 +294,21 @@ export function registerEventsCommands(inngest: Command): void {
     .argument('<id>', 'Event internal ID')
     .option('--json', 'Output as JSON')
     .option('--dev', 'Use dev server (localhost:8288)')
-    .action(getEvent)
+    .action(async (id, options, command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: options.json ? 'json' : opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await getEvent(ctx, id, options)
+    })
 
   inngest
     .command('replay')
@@ -286,5 +316,19 @@ export function registerEventsCommands(inngest: Command): void {
     .argument('<id>', 'Event internal ID to replay')
     .option('--json', 'Output as JSON')
     .option('--dev', 'Use dev server (localhost:8288)')
-    .action(replayEvent)
+    .action(async (id, options, command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: options.json ? 'json' : opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await replayEvent(ctx, id, options)
+    })
 }

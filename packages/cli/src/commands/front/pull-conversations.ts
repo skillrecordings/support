@@ -8,6 +8,8 @@
 import { writeFileSync } from 'fs'
 import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
 import type { Command } from 'commander'
+import { type CommandContext, createContext } from '../../core/context'
+import { CLIError, formatError } from '../../core/errors'
 import { hateoasWrap } from './hateoas'
 
 interface PullOptions {
@@ -62,13 +64,19 @@ interface EvalSample {
   category: string // inferred from tags/content
 }
 
-export async function pullConversations(options: PullOptions): Promise<void> {
-  const { inbox, limit = 50, output, filter, json = false } = options
+export async function pullConversations(
+  ctx: CommandContext,
+  options: PullOptions
+): Promise<void> {
+  const { inbox, limit = 50, output, filter } = options
+  const outputJson = options.json === true || ctx.format === 'json'
 
   const frontToken = process.env.FRONT_API_TOKEN
   if (!frontToken) {
-    console.error('Error: FRONT_API_TOKEN environment variable required')
-    process.exit(1)
+    throw new CLIError({
+      userMessage: 'FRONT_API_TOKEN environment variable required.',
+      suggestion: 'Set FRONT_API_TOKEN in your shell or .env.local.',
+    })
   }
 
   const front = createInstrumentedFrontClient({ apiToken: frontToken })
@@ -76,22 +84,24 @@ export async function pullConversations(options: PullOptions): Promise<void> {
   try {
     // If no inbox specified, list available inboxes
     if (!inbox) {
-      console.log('Fetching available inboxes...\n')
+      ctx.output.data('Fetching available inboxes...\n')
       const inboxesData = (await front.raw.get('/inboxes')) as {
         _results: Array<{ id: string; name: string; address?: string }>
       }
 
-      console.log('Available inboxes:')
+      ctx.output.data('Available inboxes:')
       for (const ib of inboxesData._results || []) {
-        console.log(`  ${ib.id}: ${ib.name} (${ib.address || 'no address'})`)
+        ctx.output.data(
+          `  ${ib.id}: ${ib.name} (${ib.address || 'no address'})`
+        )
       }
-      console.log(
+      ctx.output.data(
         '\nUse --inbox <id> to pull conversations from a specific inbox'
       )
       return
     }
 
-    console.log(`Pulling conversations from inbox ${inbox}...`)
+    ctx.output.data(`Pulling conversations from inbox ${inbox}...`)
 
     // Get conversations from inbox
     let allConversations: FrontConversation[] = []
@@ -106,13 +116,13 @@ export async function pullConversations(options: PullOptions): Promise<void> {
       allConversations = allConversations.concat(data._results || [])
       nextUrl = data._pagination?.next || null
 
-      process.stdout.write(
-        `\r  Fetched ${allConversations.length} conversations...`
+      ctx.output.progress(
+        `Fetched ${allConversations.length} conversations from inbox`
       )
     }
 
     allConversations = allConversations.slice(0, limit)
-    console.log(`\n  Total: ${allConversations.length} conversations`)
+    ctx.output.data(`\n  Total: ${allConversations.length} conversations`)
 
     // Filter if specified
     if (filter) {
@@ -122,20 +132,20 @@ export async function pullConversations(options: PullOptions): Promise<void> {
         const tags = c.tags.map((t) => t.name.toLowerCase()).join(' ')
         return subject.includes(filterLower) || tags.includes(filterLower)
       })
-      console.log(
+      ctx.output.data(
         `  After filter "${filter}": ${allConversations.length} conversations`
       )
     }
 
     // Build eval samples
-    console.log('\nFetching message details...')
+    ctx.output.data('\nFetching message details...')
     const samples: EvalSample[] = []
     let processed = 0
 
     for (const conv of allConversations) {
       processed++
-      process.stdout.write(
-        `\r  Processing ${processed}/${allConversations.length}...`
+      ctx.output.progress(
+        `Processing ${processed}/${allConversations.length} conversations`
       )
 
       try {
@@ -233,43 +243,44 @@ export async function pullConversations(options: PullOptions): Promise<void> {
       }
     }
 
-    console.log(`\n\nBuilt ${samples.length} eval samples`)
+    ctx.output.data(`\n\nBuilt ${samples.length} eval samples`)
 
     // Category breakdown
     const byCategory: Record<string, number> = {}
     for (const s of samples) {
       byCategory[s.category] = (byCategory[s.category] || 0) + 1
     }
-    console.log('\nBy category:')
+    ctx.output.data('\nBy category:')
     for (const [cat, count] of Object.entries(byCategory).sort(
       (a, b) => b[1] - a[1]
     )) {
-      console.log(`  ${cat}: ${count}`)
+      ctx.output.data(`  ${cat}: ${count}`)
     }
 
     // Output
     if (output) {
       writeFileSync(output, JSON.stringify(samples, null, 2))
-      console.log(`\nSaved to ${output}`)
-    } else if (json) {
-      console.log(
-        JSON.stringify(
-          hateoasWrap({
-            type: 'eval-dataset',
-            command: `skill front pull --inbox ${inbox} --json`,
-            data: samples,
-          }),
-          null,
-          2
-        )
+      ctx.output.data(`\nSaved to ${output}`)
+    } else if (outputJson) {
+      ctx.output.data(
+        hateoasWrap({
+          type: 'eval-dataset',
+          command: `skill front pull --inbox ${inbox} --json`,
+          data: samples,
+        })
       )
     }
   } catch (error) {
-    console.error(
-      '\nError:',
-      error instanceof Error ? error.message : 'Unknown error'
-    )
-    process.exit(1)
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Failed to pull Front conversations.',
+            suggestion: 'Verify inbox ID, filters, and FRONT_API_TOKEN.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
 }
 
@@ -282,5 +293,19 @@ export function registerPullCommand(parent: Command): void {
     .option('-o, --output <file>', 'Output file path')
     .option('-f, --filter <term>', 'Filter by subject/tag containing term')
     .option('--json', 'JSON output')
-    .action(pullConversations)
+    .action(async (options: PullOptions, command: Command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: options.json ? 'json' : opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await pullConversations(ctx, options)
+    })
 }

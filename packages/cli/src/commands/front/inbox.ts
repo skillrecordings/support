@@ -13,6 +13,8 @@
 import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
 import type { Conversation, Inbox, InboxList } from '@skillrecordings/front-sdk'
 import type { Command } from 'commander'
+import { type CommandContext, createContext } from '../../core/context'
+import { CLIError, formatError } from '../../core/errors'
 import {
   conversationListActions,
   conversationListLinks,
@@ -25,11 +27,18 @@ import {
  * Get Front API client from environment (instrumented)
  */
 function getFrontClient() {
+  return createInstrumentedFrontClient({ apiToken: requireFrontToken() })
+}
+
+function requireFrontToken(): string {
   const apiToken = process.env.FRONT_API_TOKEN
   if (!apiToken) {
-    throw new Error('FRONT_API_TOKEN environment variable is required')
+    throw new CLIError({
+      userMessage: 'FRONT_API_TOKEN environment variable is required.',
+      suggestion: 'Set FRONT_API_TOKEN in your shell or .env.local.',
+    })
   }
-  return createInstrumentedFrontClient({ apiToken })
+  return apiToken
 }
 
 /**
@@ -92,58 +101,56 @@ async function findInbox(nameOrId: string): Promise<Inbox | null> {
  * Command: skill front inbox
  * List all inboxes
  */
-async function listInboxes(options: { json?: boolean }): Promise<void> {
+export async function listInboxes(
+  ctx: CommandContext,
+  options: { json?: boolean }
+): Promise<void> {
+  const outputJson = options.json === true || ctx.format === 'json'
+
   try {
     const front = getFrontClient()
     const inboxList = (await front.inboxes.list()) as InboxList
     const inboxes = inboxList._results ?? []
 
-    if (options.json) {
-      console.log(
-        JSON.stringify(
-          hateoasWrap({
-            type: 'inbox-list',
-            command: 'skill front inbox --json',
-            data: inboxes,
-            links: inboxListLinks(
-              inboxes.map((i) => ({ id: i.id, name: i.name }))
-            ),
-          }),
-          null,
-          2
-        )
+    if (outputJson) {
+      ctx.output.data(
+        hateoasWrap({
+          type: 'inbox-list',
+          command: 'skill front inbox --json',
+          data: inboxes,
+          links: inboxListLinks(
+            inboxes.map((i) => ({ id: i.id, name: i.name }))
+          ),
+        })
       )
       return
     }
 
-    console.log('\n📥 Inboxes:')
-    console.log('-'.repeat(80))
+    ctx.output.data('\n📥 Inboxes:')
+    ctx.output.data('-'.repeat(80))
 
     for (const inbox of inboxes) {
       const privacy = inbox.is_private ? '🔒 Private' : '🌐 Public'
-      console.log(`\n   ${inbox.name}`)
-      console.log(`      ID:      ${inbox.id}`)
-      console.log(`      Privacy: ${privacy}`)
+      ctx.output.data(`\n   ${inbox.name}`)
+      ctx.output.data(`      ID:      ${inbox.id}`)
+      ctx.output.data(`      Privacy: ${privacy}`)
       if (inbox.address) {
-        console.log(`      Address: ${inbox.address}`)
+        ctx.output.data(`      Address: ${inbox.address}`)
       }
     }
 
-    console.log('')
+    ctx.output.data('')
   } catch (error) {
-    if (options.json) {
-      console.error(
-        JSON.stringify({
-          error: error instanceof Error ? error.message : 'Unknown error',
-        })
-      )
-    } else {
-      console.error(
-        'Error:',
-        error instanceof Error ? error.message : 'Unknown error'
-      )
-    }
-    process.exit(1)
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Failed to list Front inboxes.',
+            suggestion: 'Verify FRONT_API_TOKEN.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
 }
 
@@ -151,7 +158,8 @@ async function listInboxes(options: { json?: boolean }): Promise<void> {
  * Command: skill front inbox <inbox-name-or-id>
  * List conversations in an inbox with optional filtering
  */
-async function listConversations(
+export async function listConversations(
+  ctx: CommandContext,
   inboxNameOrId: string,
   options: {
     json?: boolean
@@ -160,13 +168,18 @@ async function listConversations(
     limit?: string
   }
 ): Promise<void> {
+  const outputJson = options.json === true || ctx.format === 'json'
+
   try {
     const front = getFrontClient()
 
     // Find inbox
     const inbox = await findInbox(inboxNameOrId)
     if (!inbox) {
-      throw new Error(`Inbox not found: ${inboxNameOrId}`)
+      throw new CLIError({
+        userMessage: `Inbox not found: ${inboxNameOrId}`,
+        suggestion: 'Run `skill front inbox` to list available inboxes.',
+      })
     }
 
     // Build query filter
@@ -196,35 +209,31 @@ async function listConversations(
 
     const conversations = response._results ?? []
 
-    if (options.json) {
-      console.log(
-        JSON.stringify(
-          hateoasWrap({
-            type: 'conversation-list',
-            command: `skill front inbox ${inbox.id} --json`,
-            data: conversations,
-            links: conversationListLinks(
-              conversations.map((c) => ({ id: c.id, subject: c.subject })),
-              inbox.id
-            ),
-            actions: conversationListActions(inbox.id),
-          }),
-          null,
-          2
-        )
+    if (outputJson) {
+      ctx.output.data(
+        hateoasWrap({
+          type: 'conversation-list',
+          command: `skill front inbox ${inbox.id} --json`,
+          data: conversations,
+          links: conversationListLinks(
+            conversations.map((c) => ({ id: c.id, subject: c.subject })),
+            inbox.id
+          ),
+          actions: conversationListActions(inbox.id),
+        })
       )
       return
     }
 
-    console.log(`\n📬 Conversations in "${inbox.name}":`)
+    ctx.output.data(`\n📬 Conversations in "${inbox.name}":`)
     if (filters.length > 0) {
-      console.log(`   Filters: ${filters.join(', ')}`)
+      ctx.output.data(`   Filters: ${filters.join(', ')}`)
     }
-    console.log('-'.repeat(80))
+    ctx.output.data('-'.repeat(80))
 
     if (conversations.length === 0) {
-      console.log('   (no conversations found)')
-      console.log('')
+      ctx.output.data('   (no conversations found)')
+      ctx.output.data('')
       return
     }
 
@@ -245,38 +254,35 @@ async function listConversations(
           ? conv.tags.map((t) => t.name).join(', ')
           : '(no tags)'
 
-      console.log(`\n[${statusIcon}] ${conv.subject || '(no subject)'}`)
-      console.log(`   ID:        ${conv.id}`)
-      console.log(`   Status:    ${conv.status}`)
-      console.log(`   Recipient: ${recipient}`)
-      console.log(`   ${assignee}`)
-      console.log(`   Tags:      ${tags}`)
-      console.log(`   Created:   ${time}`)
+      ctx.output.data(`\n[${statusIcon}] ${conv.subject || '(no subject)'}`)
+      ctx.output.data(`   ID:        ${conv.id}`)
+      ctx.output.data(`   Status:    ${conv.status}`)
+      ctx.output.data(`   Recipient: ${recipient}`)
+      ctx.output.data(`   ${assignee}`)
+      ctx.output.data(`   Tags:      ${tags}`)
+      ctx.output.data(`   Created:   ${time}`)
     }
 
-    console.log('')
+    ctx.output.data('')
 
     // Show pagination hint
     if (response._pagination?.next) {
-      console.log(
+      ctx.output.data(
         `   💡 More conversations available. Use --limit to adjust results.`
       )
-      console.log('')
+      ctx.output.data('')
     }
   } catch (error) {
-    if (options.json) {
-      console.error(
-        JSON.stringify({
-          error: error instanceof Error ? error.message : 'Unknown error',
-        })
-      )
-    } else {
-      console.error(
-        'Error:',
-        error instanceof Error ? error.message : 'Unknown error'
-      )
-    }
-    process.exit(1)
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Failed to list Front inbox conversations.',
+            suggestion: 'Verify inbox ID, filters, and FRONT_API_TOKEN.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
 }
 
@@ -300,11 +306,25 @@ export function registerInboxCommand(front: Command): void {
     )
     .option('--tag <tag>', 'Filter by tag name')
     .option('--limit <n>', 'Limit number of results', '50')
-    .action(async (inboxNameOrId?: string, options?: any) => {
-      if (!inboxNameOrId) {
-        await listInboxes(options || {})
-      } else {
-        await listConversations(inboxNameOrId, options || {})
+    .action(
+      async (inboxNameOrId?: string, options?: any, command?: Command) => {
+        const opts =
+          command && typeof command.optsWithGlobals === 'function'
+            ? command.optsWithGlobals()
+            : {
+                ...command?.parent?.opts(),
+                ...command?.opts(),
+              }
+        const ctx = await createContext({
+          format: options?.json ? 'json' : opts?.format,
+          verbose: opts?.verbose,
+          quiet: opts?.quiet,
+        })
+        if (!inboxNameOrId) {
+          await listInboxes(ctx, options || {})
+        } else {
+          await listConversations(ctx, inboxNameOrId, options || {})
+        }
       }
-    })
+    )
 }

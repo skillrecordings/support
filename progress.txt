@@ -64,3 +64,52 @@ Summary: Summary:
 - Added `OutputFormatter` abstraction with JSON/text/table formatters, auto-detection, and quiet/verbose handling in `packages/cli/src/core/output.ts`.
 - Extended `CommandContext` with output/format/verbosity, and wired global `--format`, `--verbose`, `--quiet` flags plus db-status global option passthrough.
 - Added unit tests for formatters and updated context tests; logged progress entr
+
+---
+[2026-02-04T16:22:45.314Z]
+Failed: Command Migration Batch 1 — Front + Inngest (Phase 2) — Issue #182
+Validation: src/commands/front/bulk-archive.ts(292,10): error TS2552: Cannot find name 'json'. Did you mean 'JSON'?
+src/commands/front/tags.ts(773,5): error TS2554: Expected 2 arguments, but got 1.
+
+Codex: 
+
+---
+[2026-02-04T16:32:54.935Z]
+Failed: Command Migration Batch 1 — Front + Inngest (Phase 2) — Issue #182
+Validation: 
+ RUN  v3.2.4 /home/joel/Code/skillrecordings/support-cli-rearchitect/packages/cli
+
+stdout | src/commands/eval.test.ts > eval command > should print pretty results table by default
+
+📊 Evaluation Results
+
+Overall Metrics:
+  Precision:           92.0%
+  Recall:              95.0%
+  False Positive Rat
+Codex: 
+
+---
+[2026-02-04T16:43:04.772Z]
+Failed: Command Migration Batch 1 — Front + Inngest (Phase 2) — Issue #182
+Validation: 
+ RUN  v3.2.4 /home/joel/Code/skillrecordings/support-cli-rearchitect/packages/cli
+
+stdout | src/commands/eval.test.ts > eval command > should print pretty results table by default
+
+📊 Evaluation Results
+
+Overall Metrics:
+  Precision:           92.0%
+  Recall:              95.0%
+  False Positive Rat
+Codex: 
+
+---
+[2026-02-04T16:45:05.960Z]
+Completed: Command Migration Batch 1 — Front + Inngest (Phase 2) — Issue #182
+Files: none
+Summary: Summary:
+- Front + Inngest command migrations and OutputFormatter usage are already in place, with integration coverage for happy/error paths in `packages/cli/tests/integration/commands/front.test.ts` and `packages/cli/tests/integration/commands/inngest.test.ts`.
+- Added progress log entry for this story in `packages/cli/PROGRESS.md`.
+- Validation ran cleanly for `bun run check-types` and `bun run

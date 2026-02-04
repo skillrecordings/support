@@ -93,7 +93,7 @@
       "title": "Command Migration Batch 1 — Front + Inngest (Phase 2) — Issue #182",
       "description": "Migrate Front and Inngest commands to CommandContext + OutputFormatter. Replace all console.log.\n\n## Context\n- Parent epic: #172, Issue: #182\n- Depends on: Story 5\n\n## Files to Modify\n- packages/cli/src/commands/front/*.ts — All front commands\n- packages/cli/src/commands/inngest/*.ts — All inngest commands (now under inngest subcommand)\n\n## Files to Create\n- packages/cli/tests/integration/commands/front.test.ts\n- packages/cli/tests/integration/commands/inngest.test.ts\n\n## Commands to migrate\nFront: message, conversation, tags, inbox, archive, bulk-archive, pull\nInngest: events, runs, run, signal, investigate, stats, failures, search\n\nFor each command:\n1. Accept CommandContext parameter\n2. Replace console.log→ctx.output.data() or ctx.output.message()\n3. Replace console.error→ctx.output.error()\n4. Use CLIError for error handling with suggestions\n5. Write happy-path + error-path test\n\n## On Completion\nUpdate packages/cli/PROGRESS.md. Commit: `feat(cli): migrate front + inngest commands to OutputFormatter`",
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "validationCommand": "cd packages/cli && bun run check-types && bun run test",
       "acceptanceCriteria": [
         "Zero console.log in front/ and inngest/ command files",
@@ -220,7 +220,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-04T15:13:09.231Z",
-    "totalIterations": 5,
-    "lastIteration": "2026-02-04T16:12:29.347Z"
+    "totalIterations": 6,
+    "lastIteration": "2026-02-04T16:45:05.959Z"
   }
 }

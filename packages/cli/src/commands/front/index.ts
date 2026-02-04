@@ -14,6 +14,8 @@ import type {
   MessageList,
 } from '@skillrecordings/front-sdk'
 import type { Command } from 'commander'
+import { type CommandContext, createContext } from '../../core/context'
+import { CLIError, formatError } from '../../core/errors'
 import { registerArchiveCommand } from './archive'
 import { registerBulkArchiveCommand } from './bulk-archive'
 import {
@@ -36,22 +38,25 @@ type Message = FrontMessage
  * Get Front API client from environment (instrumented)
  */
 function getFrontClient() {
-  const apiToken = process.env.FRONT_API_TOKEN
-  if (!apiToken) {
-    throw new Error('FRONT_API_TOKEN environment variable is required')
-  }
-  return createInstrumentedFrontClient({ apiToken })
+  return createInstrumentedFrontClient({ apiToken: requireFrontToken() })
 }
 
 /**
  * Get Front SDK client from environment (full typed client)
  */
 function getFrontSdkClient() {
+  return createInstrumentedFrontClient({ apiToken: requireFrontToken() })
+}
+
+function requireFrontToken(): string {
   const apiToken = process.env.FRONT_API_TOKEN
   if (!apiToken) {
-    throw new Error('FRONT_API_TOKEN environment variable is required')
+    throw new CLIError({
+      userMessage: 'FRONT_API_TOKEN environment variable is required.',
+      suggestion: 'Set FRONT_API_TOKEN in your shell or .env.local.',
+    })
   }
-  return createInstrumentedFrontClient({ apiToken })
+  return apiToken
 }
 
 /**
@@ -85,46 +90,47 @@ function normalizeId(idOrUrl: string): string {
  * Command: skill front message <id>
  * Fetch full message details from Front API
  */
-async function getMessage(
+export async function getMessage(
+  ctx: CommandContext,
   id: string,
   options: { json?: boolean }
 ): Promise<void> {
+  const outputJson = options.json === true || ctx.format === 'json'
+
   try {
     const front = getFrontClient()
     const message = await front.messages.get(normalizeId(id))
 
-    if (options.json) {
-      console.log(
-        JSON.stringify(
-          hateoasWrap({
-            type: 'message',
-            command: `skill front message ${normalizeId(id)} --json`,
-            data: message,
-            links: messageLinks(message.id),
-          }),
-          null,
-          2
-        )
+    if (outputJson) {
+      ctx.output.data(
+        hateoasWrap({
+          type: 'message',
+          command: `skill front message ${normalizeId(id)} --json`,
+          data: message,
+          links: messageLinks(message.id),
+        })
       )
       return
     }
 
-    console.log('\n📧 Message Details:')
-    console.log(`   ID:       ${message.id}`)
-    console.log(`   Type:     ${message.type}`)
-    console.log(`   Subject:  ${message.subject || '(none)'}`)
-    console.log(`   Created:  ${formatTimestamp(message.created_at)}`)
+    ctx.output.data('\n📧 Message Details:')
+    ctx.output.data(`   ID:       ${message.id}`)
+    ctx.output.data(`   Type:     ${message.type}`)
+    ctx.output.data(`   Subject:  ${message.subject || '(none)'}`)
+    ctx.output.data(`   Created:  ${formatTimestamp(message.created_at)}`)
 
     if (message.author) {
-      console.log(`   Author:   ${message.author.email || message.author.id}`)
+      ctx.output.data(
+        `   Author:   ${message.author.email || message.author.id}`
+      )
     }
 
-    console.log('\n📬 Recipients:')
+    ctx.output.data('\n📬 Recipients:')
     for (const r of message.recipients) {
-      console.log(`   ${r.role}: ${r.handle}`)
+      ctx.output.data(`   ${r.role}: ${r.handle}`)
     }
 
-    console.log('\n📝 Body:')
+    ctx.output.data('\n📝 Body:')
     // Strip HTML and show preview
     const textBody =
       message.text ||
@@ -132,33 +138,30 @@ async function getMessage(
         .replace(/<[^>]*>/g, ' ')
         .replace(/\s+/g, ' ')
         .trim()
-    console.log(
+    ctx.output.data(
       `   Length: ${message.body.length} chars (HTML), ${textBody.length} chars (text)`
     )
-    console.log(`   Preview: ${truncate(textBody, 500)}`)
+    ctx.output.data(`   Preview: ${truncate(textBody, 500)}`)
 
     if (message.attachments && message.attachments.length > 0) {
-      console.log(`\n📎 Attachments: ${message.attachments.length}`)
+      ctx.output.data(`\n📎 Attachments: ${message.attachments.length}`)
       for (const a of message.attachments) {
-        console.log(`   - ${a.filename} (${a.content_type})`)
+        ctx.output.data(`   - ${a.filename} (${a.content_type})`)
       }
     }
 
-    console.log('')
+    ctx.output.data('')
   } catch (error) {
-    if (options.json) {
-      console.error(
-        JSON.stringify({
-          error: error instanceof Error ? error.message : 'Unknown error',
-        })
-      )
-    } else {
-      console.error(
-        'Error:',
-        error instanceof Error ? error.message : 'Unknown error'
-      )
-    }
-    process.exit(1)
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Failed to fetch Front message.',
+            suggestion: 'Verify the message ID and FRONT_API_TOKEN.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
 }
 
@@ -166,10 +169,13 @@ async function getMessage(
  * Command: skill front conversation <id>
  * Fetch conversation details and optionally messages
  */
-async function getConversation(
+export async function getConversation(
+  ctx: CommandContext,
   id: string,
   options: { json?: boolean; messages?: boolean }
 ): Promise<void> {
+  const outputJson = options.json === true || ctx.format === 'json'
+
   try {
     const front = getFrontClient()
     const conversation = await front.conversations.get(normalizeId(id))
@@ -183,47 +189,43 @@ async function getConversation(
       messages = messageList._results ?? []
     }
 
-    if (options.json) {
+    if (outputJson) {
       const convId = normalizeId(id)
-      console.log(
-        JSON.stringify(
-          hateoasWrap({
-            type: 'conversation',
-            command: `skill front conversation ${convId} --json`,
-            data: { conversation, messages },
-            links: conversationLinks(conversation.id),
-            actions: conversationActions(conversation.id),
-          }),
-          null,
-          2
-        )
+      ctx.output.data(
+        hateoasWrap({
+          type: 'conversation',
+          command: `skill front conversation ${convId} --json`,
+          data: { conversation, messages },
+          links: conversationLinks(conversation.id),
+          actions: conversationActions(conversation.id),
+        })
       )
       return
     }
 
-    console.log('\n💬 Conversation Details:')
-    console.log(`   ID:       ${conversation.id}`)
-    console.log(`   Subject:  ${conversation.subject || '(none)'}`)
-    console.log(`   Status:   ${conversation.status}`)
-    console.log(`   Created:  ${formatTimestamp(conversation.created_at)}`)
+    ctx.output.data('\n💬 Conversation Details:')
+    ctx.output.data(`   ID:       ${conversation.id}`)
+    ctx.output.data(`   Subject:  ${conversation.subject || '(none)'}`)
+    ctx.output.data(`   Status:   ${conversation.status}`)
+    ctx.output.data(`   Created:  ${formatTimestamp(conversation.created_at)}`)
 
     if (conversation.recipient) {
-      console.log(`   Recipient: ${conversation.recipient.handle}`)
+      ctx.output.data(`   Recipient: ${conversation.recipient.handle}`)
     }
 
     if (conversation.assignee) {
-      console.log(`   Assignee: ${conversation.assignee.email}`)
+      ctx.output.data(`   Assignee: ${conversation.assignee.email}`)
     }
 
     if (conversation.tags && conversation.tags.length > 0) {
-      console.log(
+      ctx.output.data(
         `   Tags:     ${conversation.tags.map((t: { name: string }) => t.name).join(', ')}`
       )
     }
 
     if (options.messages && messages) {
-      console.log(`\n📨 Messages (${messages.length}):`)
-      console.log('-'.repeat(80))
+      ctx.output.data(`\n📨 Messages (${messages.length}):`)
+      ctx.output.data('-'.repeat(80))
 
       for (const msg of messages) {
         const direction = msg.is_inbound ? '← IN' : '→ OUT'
@@ -236,28 +238,25 @@ async function getConversation(
             .replace(/\s+/g, ' ')
             .trim()
 
-        console.log(`\n[${direction}] ${time} - ${author}`)
-        console.log(`   ${truncate(textBody, 200)}`)
+        ctx.output.data(`\n[${direction}] ${time} - ${author}`)
+        ctx.output.data(`   ${truncate(textBody, 200)}`)
       }
     } else if (!options.messages) {
-      console.log('\n   (use --messages to see message history)')
+      ctx.output.data('\n   (use --messages to see message history)')
     }
 
-    console.log('')
+    ctx.output.data('')
   } catch (error) {
-    if (options.json) {
-      console.error(
-        JSON.stringify({
-          error: error instanceof Error ? error.message : 'Unknown error',
-        })
-      )
-    } else {
-      console.error(
-        'Error:',
-        error instanceof Error ? error.message : 'Unknown error'
-      )
-    }
-    process.exit(1)
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Failed to fetch Front conversation.',
+            suggestion: 'Verify the conversation ID and FRONT_API_TOKEN.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
 }
 
@@ -265,52 +264,58 @@ async function getConversation(
  * Command: skill front teammates
  * List all teammates in the workspace
  */
-async function listTeammates(options: { json?: boolean }): Promise<void> {
+async function listTeammates(
+  ctx: CommandContext,
+  options: { json?: boolean }
+): Promise<void> {
+  const outputJson = options.json === true || ctx.format === 'json'
+
   try {
     const front = getFrontSdkClient()
     const result = await front.teammates.list()
 
-    if (options.json) {
-      console.log(
-        JSON.stringify(
-          hateoasWrap({
-            type: 'teammate-list',
-            command: 'skill front teammates --json',
-            data: result._results,
-            links: teammateListLinks(
-              result._results.map((t) => ({ id: t.id, email: t.email }))
-            ),
-          }),
-          null,
-          2
-        )
+    if (outputJson) {
+      ctx.output.data(
+        hateoasWrap({
+          type: 'teammate-list',
+          command: 'skill front teammates --json',
+          data: result._results,
+          links: teammateListLinks(
+            result._results.map((t) => ({ id: t.id, email: t.email }))
+          ),
+        })
       )
       return
     }
 
-    console.log('\n👥 Teammates:')
-    console.log('-'.repeat(60))
+    ctx.output.data('\n👥 Teammates:')
+    ctx.output.data('-'.repeat(60))
 
     for (const teammate of result._results) {
       const available = teammate.is_available ? '✓' : '✗'
-      console.log(`   ${available} ${teammate.id}`)
-      console.log(`      Email: ${teammate.email}`)
+      ctx.output.data(`   ${available} ${teammate.id}`)
+      ctx.output.data(`      Email: ${teammate.email}`)
       if (teammate.first_name || teammate.last_name) {
-        console.log(
+        ctx.output.data(
           `      Name:  ${teammate.first_name || ''} ${teammate.last_name || ''}`.trim()
         )
       }
       if (teammate.username) {
-        console.log(`      Username: ${teammate.username}`)
+        ctx.output.data(`      Username: ${teammate.username}`)
       }
-      console.log('')
+      ctx.output.data('')
     }
   } catch (error) {
-    console.error(
-      'Error:',
-      error instanceof Error ? error.message : 'Unknown error'
-    )
-    process.exit(1)
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Failed to list Front teammates.',
+            suggestion: 'Verify FRONT_API_TOKEN.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
 }
 
@@ -319,48 +324,52 @@ async function listTeammates(options: { json?: boolean }): Promise<void> {
  * Get a specific teammate by ID
  */
 async function getTeammate(
+  ctx: CommandContext,
   id: string,
   options: { json?: boolean }
 ): Promise<void> {
+  const outputJson = options.json === true || ctx.format === 'json'
+
   try {
     const front = getFrontSdkClient()
     const teammate = await front.teammates.get(id)
 
-    if (options.json) {
-      console.log(
-        JSON.stringify(
-          hateoasWrap({
-            type: 'teammate',
-            command: `skill front teammate ${id} --json`,
-            data: teammate,
-            links: teammateLinks(teammate.id),
-          }),
-          null,
-          2
-        )
+    if (outputJson) {
+      ctx.output.data(
+        hateoasWrap({
+          type: 'teammate',
+          command: `skill front teammate ${id} --json`,
+          data: teammate,
+          links: teammateLinks(teammate.id),
+        })
       )
       return
     }
 
-    console.log('\n👤 Teammate Details:')
-    console.log(`   ID:        ${teammate.id}`)
-    console.log(`   Email:     ${teammate.email}`)
+    ctx.output.data('\n👤 Teammate Details:')
+    ctx.output.data(`   ID:        ${teammate.id}`)
+    ctx.output.data(`   Email:     ${teammate.email}`)
     if (teammate.first_name || teammate.last_name) {
-      console.log(
+      ctx.output.data(
         `   Name:      ${teammate.first_name || ''} ${teammate.last_name || ''}`.trim()
       )
     }
     if (teammate.username) {
-      console.log(`   Username:  ${teammate.username}`)
+      ctx.output.data(`   Username:  ${teammate.username}`)
     }
-    console.log(`   Available: ${teammate.is_available ? 'Yes' : 'No'}`)
-    console.log('')
+    ctx.output.data(`   Available: ${teammate.is_available ? 'Yes' : 'No'}`)
+    ctx.output.data('')
   } catch (error) {
-    console.error(
-      'Error:',
-      error instanceof Error ? error.message : 'Unknown error'
-    )
-    process.exit(1)
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Failed to fetch Front teammate.',
+            suggestion: 'Verify the teammate ID and FRONT_API_TOKEN.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
 }
 
@@ -377,7 +386,23 @@ export function registerFrontCommands(program: Command): void {
     .description('Get a message by ID (body, author, recipients, attachments)')
     .argument('<id>', 'Message ID (e.g., msg_xxx)')
     .option('--json', 'Output as JSON')
-    .action(getMessage)
+    .action(
+      async (id: string, options: { json?: boolean }, command: Command) => {
+        const opts =
+          typeof command.optsWithGlobals === 'function'
+            ? command.optsWithGlobals()
+            : {
+                ...command.parent?.opts(),
+                ...command.opts(),
+              }
+        const ctx = await createContext({
+          format: options.json ? 'json' : opts.format,
+          verbose: opts.verbose,
+          quiet: opts.quiet,
+        })
+        await getMessage(ctx, id, options)
+      }
+    )
 
   front
     .command('conversation')
@@ -385,20 +410,70 @@ export function registerFrontCommands(program: Command): void {
     .argument('<id>', 'Conversation ID (e.g., cnv_xxx)')
     .option('--json', 'Output as JSON')
     .option('-m, --messages', 'Include message history')
-    .action(getConversation)
+    .action(
+      async (
+        id: string,
+        options: { json?: boolean; messages?: boolean },
+        command: Command
+      ) => {
+        const opts =
+          typeof command.optsWithGlobals === 'function'
+            ? command.optsWithGlobals()
+            : {
+                ...command.parent?.opts(),
+                ...command.opts(),
+              }
+        const ctx = await createContext({
+          format: options.json ? 'json' : opts.format,
+          verbose: opts.verbose,
+          quiet: opts.quiet,
+        })
+        await getConversation(ctx, id, options)
+      }
+    )
 
   front
     .command('teammates')
     .description('List all teammates in the workspace')
     .option('--json', 'Output as JSON')
-    .action(listTeammates)
+    .action(async (options: { json?: boolean }, command: Command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: options.json ? 'json' : opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await listTeammates(ctx, options)
+    })
 
   front
     .command('teammate')
     .description('Get teammate details by ID')
     .argument('<id>', 'Teammate ID (e.g., tea_xxx or username)')
     .option('--json', 'Output as JSON')
-    .action(getTeammate)
+    .action(
+      async (id: string, options: { json?: boolean }, command: Command) => {
+        const opts =
+          typeof command.optsWithGlobals === 'function'
+            ? command.optsWithGlobals()
+            : {
+                ...command.parent?.opts(),
+                ...command.opts(),
+              }
+        const ctx = await createContext({
+          format: options.json ? 'json' : opts.format,
+          verbose: opts.verbose,
+          quiet: opts.quiet,
+        })
+        await getTeammate(ctx, id, options)
+      }
+    )
 
   // Register inbox, archive, report, triage commands
   registerInboxCommand(front)

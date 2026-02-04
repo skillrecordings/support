@@ -6,17 +6,26 @@
 
 import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
 import type { Command } from 'commander'
+import { type CommandContext, createContext } from '../../core/context'
+import { CLIError, formatError } from '../../core/errors'
 import { hateoasWrap } from './hateoas'
 
 /**
  * Get Front API client from environment
  */
 function getFrontClient() {
+  return createInstrumentedFrontClient({ apiToken: requireFrontToken() })
+}
+
+function requireFrontToken(): string {
   const apiToken = process.env.FRONT_API_TOKEN
   if (!apiToken) {
-    throw new Error('FRONT_API_TOKEN environment variable is required')
+    throw new CLIError({
+      userMessage: 'FRONT_API_TOKEN environment variable is required.',
+      suggestion: 'Set FRONT_API_TOKEN in your shell or .env.local.',
+    })
   }
-  return createInstrumentedFrontClient({ apiToken })
+  return apiToken
 }
 
 /**
@@ -49,16 +58,19 @@ async function archiveConversation(
  * Command: skill front archive <id> [ids...]
  * Archive one or more conversations
  */
-async function archiveConversations(
+export async function archiveConversations(
+  ctx: CommandContext,
   convId: string,
   additionalIds: string[],
   options: { json?: boolean }
 ): Promise<void> {
+  const outputJson = options.json === true || ctx.format === 'json'
+
   try {
     const front = getFrontClient()
     const allIds = [convId, ...additionalIds]
 
-    if (options.json) {
+    if (outputJson) {
       // JSON output: show results for each conversation
       const results = await Promise.all(
         allIds.map(async (id) => {
@@ -70,22 +82,18 @@ async function archiveConversations(
           }
         })
       )
-      console.log(
-        JSON.stringify(
-          hateoasWrap({
-            type: 'archive-result',
-            command: `skill front archive ${allIds.map(normalizeId).join(' ')} --json`,
-            data: results,
-          }),
-          null,
-          2
-        )
+      ctx.output.data(
+        hateoasWrap({
+          type: 'archive-result',
+          command: `skill front archive ${allIds.map(normalizeId).join(' ')} --json`,
+          data: results,
+        })
       )
       return
     }
 
     // Human-readable output
-    console.log(`\n📦 Archiving ${allIds.length} conversation(s)...\n`)
+    ctx.output.data(`\n📦 Archiving ${allIds.length} conversation(s)...\n`)
 
     const results = await Promise.all(
       allIds.map(async (id) => {
@@ -93,9 +101,9 @@ async function archiveConversations(
         const result = await archiveConversation(front, id)
 
         if (result.success) {
-          console.log(`   ✅ Archived ${normalizedId}`)
+          ctx.output.data(`   ✅ Archived ${normalizedId}`)
         } else {
-          console.log(
+          ctx.output.data(
             `   ❌ Failed to archive ${normalizedId}: ${result.error}`
           )
         }
@@ -107,32 +115,34 @@ async function archiveConversations(
     const successCount = results.filter((r) => r.success).length
     const failureCount = results.filter((r) => !r.success).length
 
-    console.log('')
-    console.log(`📊 Summary:`)
-    console.log(`   ✅ Successful: ${successCount}`)
+    ctx.output.data('')
+    ctx.output.data(`📊 Summary:`)
+    ctx.output.data(`   ✅ Successful: ${successCount}`)
     if (failureCount > 0) {
-      console.log(`   ❌ Failed: ${failureCount}`)
+      ctx.output.data(`   ❌ Failed: ${failureCount}`)
     }
-    console.log('')
+    ctx.output.data('')
 
     // Exit with error code if any failed
     if (failureCount > 0) {
-      process.exit(1)
+      const cliError = new CLIError({
+        userMessage: 'One or more conversations failed to archive.',
+        suggestion: 'Review the output above for failed IDs.',
+      })
+      ctx.output.error(formatError(cliError))
+      process.exitCode = cliError.exitCode
     }
   } catch (error) {
-    if (options.json) {
-      console.error(
-        JSON.stringify({
-          error: error instanceof Error ? error.message : 'Unknown error',
-        })
-      )
-    } else {
-      console.error(
-        'Error:',
-        error instanceof Error ? error.message : 'Unknown error'
-      )
-    }
-    process.exit(1)
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Failed to archive Front conversations.',
+            suggestion: 'Verify the conversation IDs and FRONT_API_TOKEN.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
 }
 
@@ -146,5 +156,26 @@ export function registerArchiveCommand(frontCommand: Command): void {
     .argument('<id>', 'Conversation ID (e.g., cnv_xxx)')
     .argument('[ids...]', 'Additional conversation IDs to archive')
     .option('--json', 'Output as JSON')
-    .action(archiveConversations)
+    .action(
+      async (
+        id: string,
+        ids: string[],
+        options: { json?: boolean },
+        command: Command
+      ) => {
+        const opts =
+          typeof command.optsWithGlobals === 'function'
+            ? command.optsWithGlobals()
+            : {
+                ...command.parent?.opts(),
+                ...command.opts(),
+              }
+        const ctx = await createContext({
+          format: options.json ? 'json' : opts.format,
+          verbose: opts.verbose,
+          quiet: opts.quiet,
+        })
+        await archiveConversations(ctx, id, ids ?? [], options)
+      }
+    )
 }
