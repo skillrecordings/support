@@ -14,8 +14,11 @@ import type {
   MessageList,
 } from '@skillrecordings/front-sdk'
 import type { Command } from 'commander'
+import { registerApiCommand } from './api'
 import { registerArchiveCommand } from './archive'
+import { registerAssignCommand } from './assign'
 import { registerBulkArchiveCommand } from './bulk-archive'
+import { registerConversationTagCommands } from './conversation-tag'
 import {
   conversationActions,
   conversationLinks,
@@ -26,6 +29,7 @@ import {
 } from './hateoas'
 import { registerInboxCommand } from './inbox'
 import { registerPullCommand } from './pull-conversations'
+import { registerReplyCommand } from './reply'
 import { registerReportCommand } from './report'
 import { registerTagCommands } from './tags'
 import { registerTriageCommand } from './triage'
@@ -306,10 +310,18 @@ async function listTeammates(options: { json?: boolean }): Promise<void> {
       console.log('')
     }
   } catch (error) {
-    console.error(
-      'Error:',
-      error instanceof Error ? error.message : 'Unknown error'
-    )
+    if (options.json) {
+      console.error(
+        JSON.stringify({
+          error: error instanceof Error ? error.message : 'Unknown error',
+        })
+      )
+    } else {
+      console.error(
+        'Error:',
+        error instanceof Error ? error.message : 'Unknown error'
+      )
+    }
     process.exit(1)
   }
 }
@@ -356,10 +368,18 @@ async function getTeammate(
     console.log(`   Available: ${teammate.is_available ? 'Yes' : 'No'}`)
     console.log('')
   } catch (error) {
-    console.error(
-      'Error:',
-      error instanceof Error ? error.message : 'Unknown error'
-    )
+    if (options.json) {
+      console.error(
+        JSON.stringify({
+          error: error instanceof Error ? error.message : 'Unknown error',
+        })
+      )
+    } else {
+      console.error(
+        'Error:',
+        error instanceof Error ? error.message : 'Unknown error'
+      )
+    }
     process.exit(1)
   }
 }
@@ -413,5 +433,9 @@ export function registerFrontCommands(program: Command): void {
   // Register tag management commands
   registerTagCommands(front)
 
-  // Register cache command for DuckDB sync
+  // Register assign, conversation tag/untag, reply, and API passthrough
+  registerAssignCommand(front)
+  registerConversationTagCommands(front)
+  registerReplyCommand(front)
+  registerApiCommand(front)
 }

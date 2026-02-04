@@ -169,32 +169,60 @@ async function listConversations(
       throw new Error(`Inbox not found: ${inboxNameOrId}`)
     }
 
-    // Build query filter
+    const totalLimit = parseInt(String(options.limit ?? '50'), 10)
+    const resolvedLimit =
+      Number.isFinite(totalLimit) && totalLimit > 0 ? totalLimit : undefined
+
+    // Build display filters (for human output)
     const filters: string[] = []
     if (options.status) {
-      filters.push(`status:${options.status}`)
+      filters.push(`status: ${options.status}`)
     }
     if (options.tag) {
-      filters.push(`tag:"${options.tag}"`)
+      filters.push(`tag: "${options.tag}"`)
     }
 
-    // Build query string
-    const queryParts: string[] = []
-    if (filters.length > 0) {
-      queryParts.push(`q=${encodeURIComponent(filters.join(' '))}`)
+    // Build query string — use q[statuses][] for status (Front API format)
+    // and q= for free-text/tag filters. Page size is always 50.
+    const queryParts: string[] = ['limit=50']
+    if (options.status) {
+      queryParts.push(`q[statuses][]=${encodeURIComponent(options.status)}`)
     }
-    if (options.limit) {
-      queryParts.push(`limit=${options.limit}`)
+    if (options.tag) {
+      queryParts.push(`q=${encodeURIComponent(`tag:"${options.tag}"`)}`)
     }
-    const queryString = queryParts.length > 0 ? `?${queryParts.join('&')}` : ''
+    const queryString = `?${queryParts.join('&')}`
 
-    // Fetch conversations
-    const response = await front.raw.get<{
-      _results: Conversation[]
-      _pagination?: { next?: string }
-    }>(`/inboxes/${inbox.id}/conversations${queryString}`)
+    // Fetch conversations with pagination
+    const conversations: Conversation[] = []
+    let nextUrl: string | null =
+      `/inboxes/${inbox.id}/conversations${queryString}`
 
-    const conversations = response._results ?? []
+    while (nextUrl) {
+      const response: {
+        _results: Conversation[]
+        _pagination?: { next?: string }
+      } = await front.raw.get(nextUrl)
+
+      conversations.push(...(response._results ?? []))
+
+      if (!options.json) {
+        process.stdout.write(
+          `\r  Fetched ${conversations.length} conversations...`
+        )
+      }
+
+      nextUrl = response._pagination?.next || null
+
+      if (resolvedLimit && conversations.length >= resolvedLimit) {
+        conversations.splice(resolvedLimit)
+        break
+      }
+    }
+
+    if (!options.json) {
+      console.log(`\n  Total: ${conversations.length} conversations\n`)
+    }
 
     if (options.json) {
       console.log(
@@ -202,7 +230,10 @@ async function listConversations(
           hateoasWrap({
             type: 'conversation-list',
             command: `skill front inbox ${inbox.id} --json`,
-            data: conversations,
+            data: {
+              total: conversations.length,
+              conversations,
+            },
             links: conversationListLinks(
               conversations.map((c) => ({ id: c.id, subject: c.subject })),
               inbox.id
@@ -255,14 +286,6 @@ async function listConversations(
     }
 
     console.log('')
-
-    // Show pagination hint
-    if (response._pagination?.next) {
-      console.log(
-        `   💡 More conversations available. Use --limit to adjust results.`
-      )
-      console.log('')
-    }
   } catch (error) {
     if (options.json) {
       console.error(
