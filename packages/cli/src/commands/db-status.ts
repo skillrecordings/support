@@ -111,7 +111,7 @@ export const registerDbStatusCommand = (prog: typeof program) => {
     .command('db-status')
     .description('Check database status and conversation counts')
     .action(async () => {
-      const ctx = createContext()
+      const ctx = await createContext()
       await dbStatus(ctx)
     })
 }

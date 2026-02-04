@@ -4,8 +4,8 @@ import { createContext } from '../../../src/core/context'
 import { type SecretsProvider } from '../../../src/core/secrets'
 
 describe('createContext', () => {
-  it('provides defaults', () => {
-    const context = createContext()
+  it('provides defaults', async () => {
+    const context = await createContext()
 
     expect(context.stdin).toBe(process.stdin)
     expect(context.stdout).toBe(process.stdout)
@@ -13,11 +13,11 @@ describe('createContext', () => {
     expect(context.config).toEqual({})
     expect(context.format).toBe('text')
     expect(context.signal.aborted).toBe(false)
-    expect(context.secrets.name).toBe('none')
+    expect(context.secrets.name).toBe('env')
     expect(typeof context.onCleanup).toBe('function')
   })
 
-  it('accepts overrides', () => {
+  it('accepts overrides', async () => {
     const stdin = new PassThrough() as NodeJS.ReadStream
     const stdout = new PassThrough() as NodeJS.WriteStream
     const stderr = new PassThrough() as NodeJS.WriteStream
@@ -36,7 +36,7 @@ describe('createContext', () => {
       },
     }
 
-    const context = createContext({
+    const context = await createContext({
       stdin,
       stdout,
       stderr,

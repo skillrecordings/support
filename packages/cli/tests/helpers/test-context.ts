@@ -7,9 +7,9 @@ type TestContextResult = {
   getStderr: () => string
 }
 
-export function createTestContext(
+export async function createTestContext(
   overrides: Partial<CommandContext> = {}
-): TestContextResult {
+): Promise<TestContextResult> {
   const stdout = new PassThrough() as NodeJS.WriteStream
   const stderr = new PassThrough() as NodeJS.WriteStream
 
@@ -39,7 +39,7 @@ export function createTestContext(
     },
   }
 
-  const ctx = createContext({
+  const ctx = await createContext({
     stdout,
     stderr,
     signal: controller.signal,

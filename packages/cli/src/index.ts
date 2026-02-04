@@ -1,6 +1,5 @@
 #!/usr/bin/env bun
 import { closeDb } from '@skillrecordings/database'
-// Note: env is loaded via preload.ts before this file runs
 import { Command } from 'commander'
 import { registerAuthCommands } from './commands/auth/index'
 import { registerAxiomCommands } from './commands/axiom/index'

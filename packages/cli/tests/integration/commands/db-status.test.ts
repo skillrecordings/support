@@ -69,7 +69,7 @@ describe('db-status command', () => {
 
         mockGetDb.mockReturnValue(db)
 
-        const { ctx, getStdout, getStderr } = createTestContext()
+        const { ctx, getStdout, getStderr } = await createTestContext()
 
         await dbStatus(ctx)
 
@@ -96,7 +96,7 @@ describe('db-status command', () => {
 
         mockGetDb.mockReturnValue(db)
 
-        const { ctx, getStderr } = createTestContext()
+        const { ctx, getStderr } = await createTestContext()
 
         await dbStatus(ctx)
 
@@ -121,7 +121,7 @@ describe('db-status command', () => {
 
         mockGetDb.mockReturnValue(db)
 
-        const { ctx, getStderr } = createTestContext({
+        const { ctx, getStderr } = await createTestContext({
           config: { dbStatusTimeoutMs: 5 },
         })
 

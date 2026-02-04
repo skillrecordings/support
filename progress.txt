@@ -30,3 +30,28 @@ Summary: Summary:
 - Made `@1password/sdk` a lazy runtime import in `packages/cli/src/core/secrets.ts` to avoid hard module resolution during tests.
 - Added a local type stub at `packages/cli/src/types/1password-sdk.d.ts` and marked the Vitest mock as virtual in `packages/cli/tests/unit/core/secrets.test.ts` so tests pass without the package installed.
 - Updated progress log entry in `packages/cli/PROGRESS.
+
+---
+[2026-02-04T16:03:21.046Z]
+Failed: Secret Loading Migration (Phase 1) — Issue #180
+Validation: src/commands/auth/whoami.ts(35,19): error TS2769: No overload matches this call.
+  Overload 1 of 4, '(arrayBuffer: WithImplicitCoercion<ArrayBufferLike>, byteOffset?: number | undefined, length?: number | undefined): Buffer<ArrayBufferLike>', gave the following error.
+    Argument of type 'string | 
+Codex: 
+
+---
+[2026-02-04T16:06:53.317Z]
+Completed: Secret Loading Migration (Phase 1) — Issue #180
+Files: none
+Summary: Summary:
+- Fixed `auth whoami` token decoding to handle base64url safely and avoid type errors.
+- Added integration tests for `auth status`, `auth login`, and `auth whoami`.
+- Updated progress log entry.
+
+Files changed:
+- `packages/cli/src/commands/auth/whoami.ts`
+- `packages/cli/tests/integration/commands/auth.test.ts`
+- `packages/cli/PROGRESS.md`
+
+Tests:
+- `cd packages/cli && bun run check-types

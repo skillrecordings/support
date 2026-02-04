@@ -1,4 +1,4 @@
-import { DEFAULT_SECRETS_PROVIDER, type SecretsProvider } from './secrets'
+import { type SecretsProvider, createSecretsProvider } from './secrets'
 import type { CleanupFn } from './signals'
 
 export type OutputFormat = 'json' | 'text' | 'table'
@@ -14,10 +14,11 @@ export interface CommandContext {
   onCleanup: (fn: CleanupFn) => void
 }
 
-export function createContext(
+export async function createContext(
   overrides: Partial<CommandContext> = {}
-): CommandContext {
+): Promise<CommandContext> {
   const signal = overrides.signal ?? new AbortController().signal
+  const secrets = overrides.secrets ?? (await createSecretsProvider())
 
   return {
     stdin: overrides.stdin ?? process.stdin,
@@ -25,7 +26,7 @@ export function createContext(
     stderr: overrides.stderr ?? process.stderr,
     config: overrides.config ?? {},
     signal,
-    secrets: overrides.secrets ?? DEFAULT_SECRETS_PROVIDER,
+    secrets,
     format: overrides.format ?? 'text',
     onCleanup: overrides.onCleanup ?? (() => {}),
   }

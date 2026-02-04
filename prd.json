@@ -58,7 +58,7 @@
       "title": "Secret Loading Migration (Phase 1) — Issue #180",
       "description": "Remove old secret loading infrastructure. Wire SecretsProvider into createContext(). Update auth commands.\n\n## Context\n- Parent epic: #172, Issue: #180\n- Depends on: Stories 2+3\n\n## Files to Delete\n- packages/cli/src/preload.ts\n- packages/cli/src/lib/env-loader.ts\n- packages/cli/src/lib/crypto.ts\n\n## Files to Modify\n- packages/cli/src/core/context.ts — Wire SecretsProvider into createContext()\n- packages/cli/src/commands/auth/ — Remove keygen/encrypt/decrypt, add login/status/whoami\n- packages/cli/src/index.ts — Remove preload, update command registration\n\n## Files to Create\n- packages/cli/tests/integration/commands/auth.test.ts\n\n## Key Points\n- Commands that dont need secrets (--help, --version) must never trigger resolution\n- auth status: show active provider + available secrets\n- auth login: validate 1Password token\n- auth whoami: show service account info\n- DELETE: auth keygen, auth encrypt, auth decrypt\n\n## On Completion\nUpdate packages/cli/PROGRESS.md. Commit: `feat(cli): migrate to native 1Password secrets`",
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "validationCommand": "cd packages/cli && bun run check-types && bun run test",
       "acceptanceCriteria": [
         "preload.ts env-loader.ts crypto.ts deleted",
@@ -220,7 +220,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-04T15:13:09.231Z",
-    "totalIterations": 3,
-    "lastIteration": "2026-02-04T15:53:05.288Z"
+    "totalIterations": 4,
+    "lastIteration": "2026-02-04T16:06:53.316Z"
   }
 }

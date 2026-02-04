@@ -19,7 +19,7 @@ describe('SecretsProvider', () => {
   beforeEach(() => {
     vi.mocked(createClient).mockReset()
     delete process.env.OP_SERVICE_ACCOUNT_TOKEN
-    delete process.env.AGE_SECRET_KEY
+    delete process.env.DATABASE_URL
   })
 
   it('resolves secrets with 1Password and caches results', async () => {
@@ -30,17 +30,17 @@ describe('SecretsProvider', () => {
       secrets: {
         resolve,
         resolveAll: vi.fn().mockResolvedValue({
-          [SECRET_REFS.AGE_SECRET_KEY]: 'shh',
+          [SECRET_REFS.DATABASE_URL]: 'shh',
         }),
       },
     })
 
     const provider = new OnePasswordProvider()
 
-    await expect(provider.resolve(SECRET_REFS.AGE_SECRET_KEY)).resolves.toBe(
+    await expect(provider.resolve(SECRET_REFS.DATABASE_URL)).resolves.toBe(
       'shh'
     )
-    await expect(provider.resolve(SECRET_REFS.AGE_SECRET_KEY)).resolves.toBe(
+    await expect(provider.resolve(SECRET_REFS.DATABASE_URL)).resolves.toBe(
       'shh'
     )
 
@@ -58,30 +58,30 @@ describe('SecretsProvider', () => {
 
     const provider = new OnePasswordProvider()
 
-    await expect(provider.resolve(SECRET_REFS.AGE_SECRET_KEY)).rejects.toThrow(
+    await expect(provider.resolve(SECRET_REFS.DATABASE_URL)).rejects.toThrow(
       'missing secret'
     )
   })
 
   it('resolves secrets from env fallback', async () => {
-    process.env.AGE_SECRET_KEY = 'env-secret'
+    process.env.DATABASE_URL = 'env-secret'
 
     const provider = new EnvProvider()
 
-    await expect(provider.resolve(SECRET_REFS.AGE_SECRET_KEY)).resolves.toBe(
+    await expect(provider.resolve(SECRET_REFS.DATABASE_URL)).resolves.toBe(
       'env-secret'
     )
   })
 
   it('resolves batches from env fallback', async () => {
-    process.env.AGE_SECRET_KEY = 'env-secret'
+    process.env.DATABASE_URL = 'env-secret'
 
     const provider = new EnvProvider()
 
     await expect(
-      provider.resolveAll([SECRET_REFS.AGE_SECRET_KEY])
+      provider.resolveAll([SECRET_REFS.DATABASE_URL])
     ).resolves.toEqual({
-      [SECRET_REFS.AGE_SECRET_KEY]: 'env-secret',
+      [SECRET_REFS.DATABASE_URL]: 'env-secret',
     })
   })
 
