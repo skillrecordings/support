@@ -1,5 +1,11 @@
 # @skillrecordings/cli
 
+## 0.1.0
+
+### Minor Changes
+
+- 5734b19: Make CLI public for npm publishing
+
 ## 0.0.4
 
 ### Patch Changes

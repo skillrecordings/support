@@ -1,6 +1,6 @@
 {
   "name": "@skillrecordings/cli",
-  "version": "0.0.4",
+  "version": "0.1.0",
   "type": "module",
   "bin": {
     "skill": "./bin/skill.ts"
