@@ -1,5 +1,11 @@
 # @skillrecordings/cli
 
+## 0.10.2
+
+### Patch Changes
+
+- 0279153: Rotate Axiom API token in encrypted environment.
+
 ## 0.10.1
 
 ### Patch Changes
