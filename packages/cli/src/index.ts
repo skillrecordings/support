@@ -1,4 +1,32 @@
 #!/usr/bin/env bun
+
+// Load .env.local before any module that validates env vars (e.g., @skillrecordings/database)
+// Bun auto-loads .env in the cwd, but CLI may run from anywhere — explicitly load from package root.
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+
+const cliRoot = resolve(import.meta.dirname, '../..')
+for (const envFile of ['.env.local', '.env']) {
+  try {
+    const content = readFileSync(resolve(cliRoot, envFile), 'utf8')
+    for (const line of content.split('\n')) {
+      const trimmed = line.trim()
+      if (!trimmed || trimmed.startsWith('#')) continue
+      const eqIdx = trimmed.indexOf('=')
+      if (eqIdx === -1) continue
+      const key = trimmed.slice(0, eqIdx).trim()
+      const raw = trimmed.slice(eqIdx + 1).trim()
+      // Strip surrounding quotes
+      const value = raw.replace(/^["'](.*)["']$/, '$1')
+      if (!process.env[key]) {
+        process.env[key] = value
+      }
+    }
+  } catch {
+    // File doesn't exist — skip
+  }
+}
+
 import { closeDb } from '@skillrecordings/database'
 import { Command } from 'commander'
 import { registerAuthCommands } from './commands/auth/index'
@@ -25,17 +53,25 @@ import { wizard } from './commands/wizard'
 import { createContext } from './core/context'
 import { createMcpServer } from './mcp/server'
 
-declare const BUILD_VERSION: string | undefined
-declare const BUILD_COMMIT: string | undefined
-declare const BUILD_TARGET: string | undefined
-
-const resolveBuildValue = (value: string | undefined, fallback: string) =>
-  typeof value !== 'undefined' && value.length > 0 ? value : fallback
-
+// BUILD_* are injected at compile time via bun --define.
+// In dev mode they don't exist, so we use typeof checks to avoid ReferenceError.
 const runtimeTarget = `bun-${process.platform}-${process.arch}`
-const buildVersion = resolveBuildValue(BUILD_VERSION, '0.0.0')
-const buildCommit = resolveBuildValue(BUILD_COMMIT, 'dev')
-const buildTarget = resolveBuildValue(BUILD_TARGET, runtimeTarget)
+const buildVersion =
+  typeof BUILD_VERSION !== 'undefined' && BUILD_VERSION.length > 0
+    ? BUILD_VERSION
+    : '0.0.0-dev'
+const buildCommit =
+  typeof BUILD_COMMIT !== 'undefined' && BUILD_COMMIT.length > 0
+    ? BUILD_COMMIT
+    : 'dev'
+const buildTarget =
+  typeof BUILD_TARGET !== 'undefined' && BUILD_TARGET.length > 0
+    ? BUILD_TARGET
+    : runtimeTarget
+
+declare const BUILD_VERSION: string
+declare const BUILD_COMMIT: string
+declare const BUILD_TARGET: string
 
 const versionLabel = `skill v${buildVersion} (${buildCommit}) ${buildTarget}`
 
