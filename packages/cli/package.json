@@ -18,7 +18,6 @@
     "@skillrecordings/database": "workspace:*",
     "@skillrecordings/front-sdk": "workspace:*",
     "@skillrecordings/memory": "workspace:*",
-    "@skillrecordings/sdk": "workspace:*",
     "@types/node": "^22.15.3",
     "tsup": "^8.5.0",
     "typescript": "5.9.2"

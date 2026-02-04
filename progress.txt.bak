@@ -1,0 +1,61 @@
+# Progress Log for epic6-slack-conversational
+
+Initialized: 2026-02-03T17:10:51.448Z
+
+---
+[2026-02-03T17:22:12.069Z]
+Failed: Epic 6.1: @Mention Handling + Intent Router (#156)
+Validation: • Packages in scope: @repo/eslint-config, @repo/typescript-config, @repo/ui, @skillrecordings/cli, @skillrecordings/core, @skillrecordings/database, @skillrecordings/front-sdk, @skillrecordings/memory, @skillrecordings/review-tui, @skillrecordings/sdk, front, slack, web
+• Running check-types in 13 p
+Codex: 
+
+---
+[2026-02-03T17:28:00.610Z]
+Completed: Epic 6.1: @Mention Handling + Intent Router (#156)
+Files: none
+Summary: Skill note: `tdd-red-green-refactor` skill file was not found at `/home/joel/.codex/skills/tdd-red-green-refactor/SKILL.md`, so I proceeded without it.
+
+**Summary**
+1. Added a `scripts/test.mjs` wrapper and updated `package.json` so `bun run test <paths>` runs `vitest --run` with file arguments.
+2. Updated `packages/slack/src/handlers/__tests__/mention.test.ts` to stub Slack/Axiom dependencies via
+
+---
+[2026-02-03T17:36:24.584Z]
+Completed: Epic 6.2: Status Queries (#157)
+Files: none
+Summary: Summary:
+- Implemented Slack status query handlers with Front data fetching, 30s caching, and Axiom logging in `packages/slack/src/intents/status.ts`.
+- Added Slack Block Kit formatter helpers and Front link builder in `packages/slack/src/formatters/status.ts`.
+- Added TDD coverage for urgent, pending, health, link generation, and cache behavior in `packages/slack/src/intents/__tests__/status.test
+
+---
+[2026-02-03T17:41:13.248Z]
+Completed: Epic 6.3: Draft Refinement in Threads (#158)
+Files: none
+Summary: **Summary**
+Implemented draft refinement intent parsing, versioned draft state, and Slack thread reply handling with Axiom logging. Added tests for intent parsing, version history, approvals, thread reply handling, and graceful ignore behavior.  
+Files: `packages/slack/src/intents/draft.ts`, `packages/slack/src/handlers/thread-reply.ts`, `packages/slack/src/intents/__tests__/draft.test.ts`, `packa
+
+---
+[2026-02-03T17:50:39.925Z]
+Completed: Epic 6.4: Quick Actions (#159)
+Files: none
+Summary: Summary:
+1. Added quick action intent parsing and handlers with Front API execution, confirmation prompts, and Axiom logging in `packages/slack/src/intents/action.ts` and `packages/slack/src/confirmations/action.ts`.
+2. Wired quick action flow into Slack mention + thread-reply handlers with confirmation handling and minimal context derivation in `packages/slack/src/handlers/mention.ts` and `packag
+
+---
+[2026-02-03T17:57:41.326Z]
+Completed: Epic 6.5: Customer Context Lookup (#160)
+Files: none
+Summary: **Summary**
+- Added customer context intent parsing and handlers with Front history lookup, purchase aggregation, support stats derivation, and Axiom logging in `packages/slack/src/intents/context.ts`.
+- Implemented Slack Block Kit formatting for customer profile, purchases, and history in `packages/slack/src/formatters/customer.ts`.
+- Added TDD coverage for parsing, profile assembly, empty states
+
+---
+[2026-02-03T18:02:34.568Z]
+Completed: Epic 6.6: Thread State Management + Epic 4 Integration (#161)
+Files: none
+Summary: **Summary**
+Implemented Redis-backed thread context state with TTL, stale detection, reset-language helper, and Axiom logging in `packages/slack/src/state/thread-context.ts`. Added correction event capture + query helpers with Axiom logging in `packages/slack/src/learning/corrections.ts`. Added TDD coverage in `packages/slack/src/state/__tests__/thread-context.test.ts` and `packages/slack/src/lear
