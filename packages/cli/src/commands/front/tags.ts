@@ -18,6 +18,7 @@ import {
 } from '@skillrecordings/core/tags/audit'
 import { DEFAULT_CATEGORY_TAG_MAPPING } from '@skillrecordings/core/tags/registry'
 import type { Command } from 'commander'
+import { hateoasWrap, tagListActions, tagListLinks } from './hateoas'
 
 /**
  * Get Front SDK client from environment
@@ -230,7 +231,21 @@ async function listTags(options: {
       : tagsWithCounts
 
     if (options.json) {
-      console.log(JSON.stringify(filteredTags, null, 2))
+      console.log(
+        JSON.stringify(
+          hateoasWrap({
+            type: 'tag-list',
+            command: `skill front tags list${options.unused ? ' --unused' : ''} --json`,
+            data: filteredTags,
+            links: tagListLinks(
+              filteredTags.map((t) => ({ id: t.id, name: t.name }))
+            ),
+            actions: tagListActions(),
+          }),
+          null,
+          2
+        )
+      )
       return
     }
 
@@ -792,7 +807,9 @@ async function cleanupTags(options: { execute?: boolean }): Promise<void> {
  * Register tag commands with Commander
  */
 export function registerTagCommands(frontCommand: Command): void {
-  const tags = frontCommand.command('tags').description('Manage Front tags')
+  const tags = frontCommand
+    .command('tags')
+    .description('List, rename, delete, and clean up Front tags')
 
   tags
     .command('list')

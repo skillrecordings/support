@@ -15,8 +15,21 @@ import type {
 } from '@skillrecordings/front-sdk'
 import type { Command } from 'commander'
 import { registerCacheCommand } from '../front-cache'
+import { registerArchiveCommand } from './archive'
+import { registerBulkArchiveCommand } from './bulk-archive'
+import {
+  conversationActions,
+  conversationLinks,
+  hateoasWrap,
+  messageLinks,
+  teammateLinks,
+  teammateListLinks,
+} from './hateoas'
+import { registerInboxCommand } from './inbox'
 import { registerPullCommand } from './pull-conversations'
+import { registerReportCommand } from './report'
 import { registerTagCommands } from './tags'
+import { registerTriageCommand } from './triage'
 
 type Message = FrontMessage
 
@@ -82,7 +95,18 @@ async function getMessage(
     const message = await front.messages.get(normalizeId(id))
 
     if (options.json) {
-      console.log(JSON.stringify(message, null, 2))
+      console.log(
+        JSON.stringify(
+          hateoasWrap({
+            type: 'message',
+            command: `skill front message ${normalizeId(id)} --json`,
+            data: message,
+            links: messageLinks(message.id),
+          }),
+          null,
+          2
+        )
+      )
       return
     }
 
@@ -161,7 +185,20 @@ async function getConversation(
     }
 
     if (options.json) {
-      console.log(JSON.stringify({ conversation, messages }, null, 2))
+      const convId = normalizeId(id)
+      console.log(
+        JSON.stringify(
+          hateoasWrap({
+            type: 'conversation',
+            command: `skill front conversation ${convId} --json`,
+            data: { conversation, messages },
+            links: conversationLinks(conversation.id),
+            actions: conversationActions(conversation.id),
+          }),
+          null,
+          2
+        )
+      )
       return
     }
 
@@ -235,7 +272,20 @@ async function listTeammates(options: { json?: boolean }): Promise<void> {
     const result = await front.teammates.list()
 
     if (options.json) {
-      console.log(JSON.stringify(result._results, null, 2))
+      console.log(
+        JSON.stringify(
+          hateoasWrap({
+            type: 'teammate-list',
+            command: 'skill front teammates --json',
+            data: result._results,
+            links: teammateListLinks(
+              result._results.map((t) => ({ id: t.id, email: t.email }))
+            ),
+          }),
+          null,
+          2
+        )
+      )
       return
     }
 
@@ -278,7 +328,18 @@ async function getTeammate(
     const teammate = await front.teammates.get(id)
 
     if (options.json) {
-      console.log(JSON.stringify(teammate, null, 2))
+      console.log(
+        JSON.stringify(
+          hateoasWrap({
+            type: 'teammate',
+            command: `skill front teammate ${id} --json`,
+            data: teammate,
+            links: teammateLinks(teammate.id),
+          }),
+          null,
+          2
+        )
+      )
       return
     }
 
@@ -310,18 +371,18 @@ async function getTeammate(
 export function registerFrontCommands(program: Command): void {
   const front = program
     .command('front')
-    .description('Front API commands for debugging')
+    .description('Front conversations, inboxes, tags, archival, and reporting')
 
   front
     .command('message')
-    .description('Get message details from Front API')
+    .description('Get a message by ID (body, author, recipients, attachments)')
     .argument('<id>', 'Message ID (e.g., msg_xxx)')
     .option('--json', 'Output as JSON')
     .action(getMessage)
 
   front
     .command('conversation')
-    .description('Get conversation details from Front API')
+    .description('Get a conversation by ID (status, tags, assignee, messages)')
     .argument('<id>', 'Conversation ID (e.g., cnv_xxx)')
     .option('--json', 'Output as JSON')
     .option('-m, --messages', 'Include message history')
@@ -339,6 +400,13 @@ export function registerFrontCommands(program: Command): void {
     .argument('<id>', 'Teammate ID (e.g., tea_xxx or username)')
     .option('--json', 'Output as JSON')
     .action(getTeammate)
+
+  // Register inbox, archive, report, triage commands
+  registerInboxCommand(front)
+  registerArchiveCommand(front)
+  registerBulkArchiveCommand(front)
+  registerReportCommand(front)
+  registerTriageCommand(front)
 
   // Register pull command for building eval datasets
   registerPullCommand(front)

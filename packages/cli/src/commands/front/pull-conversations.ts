@@ -8,6 +8,7 @@
 import { writeFileSync } from 'fs'
 import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
 import type { Command } from 'commander'
+import { hateoasWrap } from './hateoas'
 
 interface PullOptions {
   inbox?: string
@@ -251,7 +252,17 @@ export async function pullConversations(options: PullOptions): Promise<void> {
       writeFileSync(output, JSON.stringify(samples, null, 2))
       console.log(`\nSaved to ${output}`)
     } else if (json) {
-      console.log(JSON.stringify(samples, null, 2))
+      console.log(
+        JSON.stringify(
+          hateoasWrap({
+            type: 'eval-dataset',
+            command: `skill front pull --inbox ${inbox} --json`,
+            data: samples,
+          }),
+          null,
+          2
+        )
+      )
     }
   } catch (error) {
     console.error(
@@ -265,7 +276,7 @@ export async function pullConversations(options: PullOptions): Promise<void> {
 export function registerPullCommand(parent: Command): void {
   parent
     .command('pull')
-    .description('Pull conversations from Front for eval dataset')
+    .description('Export conversations to JSON for eval datasets')
     .option('-i, --inbox <id>', 'Inbox ID to pull from')
     .option('-l, --limit <n>', 'Max conversations to pull', parseInt)
     .option('-o, --output <file>', 'Output file path')
