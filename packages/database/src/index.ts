@@ -38,7 +38,15 @@ export async function closeDb(): Promise<void> {
   }
 }
 
-export const database = getDb()
+/**
+ * Lazy database accessor — only connects on first property access.
+ * This prevents CI/build failures when DATABASE_URL is not set.
+ */
+export const database: Database = new Proxy({} as Database, {
+  get(_target, prop, receiver) {
+    return Reflect.get(getDb(), prop, receiver)
+  },
+})
 
 // Re-export schema and types for convenience
 export * from './schema'
