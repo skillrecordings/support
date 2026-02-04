@@ -1,5 +1,5 @@
 import { ConversationsTable, desc, getDb, sql } from '@skillrecordings/database'
-import { program } from 'commander'
+import { type Command, program } from 'commander'
 import { type CommandContext, createContext } from '../core/context'
 import { DatabaseError, formatError } from '../core/errors'
 
@@ -110,8 +110,19 @@ export const registerDbStatusCommand = (prog: typeof program) => {
   prog
     .command('db-status')
     .description('Check database status and conversation counts')
-    .action(async () => {
-      const ctx = await createContext()
+    .action(async (_options, command: Command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
       await dbStatus(ctx)
     })
 }

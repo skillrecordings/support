@@ -28,6 +28,9 @@ program
   .name('skill')
   .description('CLI tool for managing app integrations')
   .version('0.0.0')
+  .option('-f, --format <format>', 'Output format (json|text|table)')
+  .option('-v, --verbose', 'Enable verbose output')
+  .option('-q, --quiet', 'Suppress non-error output')
 
 // Core commands
 program

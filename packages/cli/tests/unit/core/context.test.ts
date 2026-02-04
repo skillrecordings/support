@@ -6,12 +6,16 @@ import { type SecretsProvider } from '../../../src/core/secrets'
 describe('createContext', () => {
   it('provides defaults', async () => {
     const context = await createContext()
+    const expectedFormat = process.stdout.isTTY ? 'text' : 'json'
 
     expect(context.stdin).toBe(process.stdin)
     expect(context.stdout).toBe(process.stdout)
     expect(context.stderr).toBe(process.stderr)
     expect(context.config).toEqual({})
-    expect(context.format).toBe('text')
+    expect(context.format).toBe(expectedFormat)
+    expect(context.output).toBeDefined()
+    expect(context.verbose).toBe(false)
+    expect(context.quiet).toBe(false)
     expect(context.signal.aborted).toBe(false)
     expect(context.secrets.name).toBe('env')
     expect(typeof context.onCleanup).toBe('function')
@@ -44,6 +48,8 @@ describe('createContext', () => {
       signal,
       secrets,
       format: 'json',
+      verbose: true,
+      quiet: true,
       onCleanup,
     })
 
@@ -54,6 +60,9 @@ describe('createContext', () => {
     expect(context.signal).toBe(signal)
     expect(context.secrets).toBe(secrets)
     expect(context.format).toBe('json')
+    expect(context.output).toBeDefined()
+    expect(context.verbose).toBe(true)
+    expect(context.quiet).toBe(true)
     expect(context.onCleanup).toBe(onCleanup)
   })
 })

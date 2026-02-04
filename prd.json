@@ -75,7 +75,7 @@
       "title": "OutputFormatter Abstraction (Phase 2) — Issue #181",
       "description": "Create OutputFormatter with JSON/text/table formatters. Add global --format, --verbose, --quiet flags.\n\n## Context\n- Parent epic: #172, Issue: #181\n- Depends on: Story 2\n\n## Files to Create\n- packages/cli/src/core/output.ts — OutputFormatter interface + JsonFormatter + TextFormatter + TableFormatter\n- packages/cli/tests/unit/core/output.test.ts\n\n## Files to Modify\n- packages/cli/src/core/context.ts — Add output: OutputFormatter to CommandContext\n- packages/cli/src/index.ts — Add global flags\n\n## Key Design\nOutputFormatter: { data(value), table(rows, columns), message(text), success(text), warn(text), error(text), progress(label) }\n- data() → stdout (primary output)\n- message/success/warn/error → stderr\n- JsonFormatter: data() = JSON.stringify to stdout\n- TextFormatter: data() = human-readable to stdout\n- TableFormatter: data() = aligned columns to stdout\n- Auto-detect: if !process.stdout.isTTY, default to JSON\n- Global flags: --format json|text|table (persistent), --verbose/-v, --quiet/-q\n\n## On Completion\nUpdate packages/cli/PROGRESS.md. Commit: `feat(cli): OutputFormatter abstraction with dual output`",
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "validationCommand": "cd packages/cli && bun run check-types && bun run test",
       "acceptanceCriteria": [
         "OutputFormatter interface exported",
@@ -220,7 +220,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-04T15:13:09.231Z",
-    "totalIterations": 4,
-    "lastIteration": "2026-02-04T16:06:53.316Z"
+    "totalIterations": 5,
+    "lastIteration": "2026-02-04T16:12:29.347Z"
   }
 }
