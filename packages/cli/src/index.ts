@@ -2,6 +2,7 @@
 import { closeDb } from '@skillrecordings/database'
 // Note: env is loaded via preload.ts before this file runs
 import { Command } from 'commander'
+import { registerAuthCommands } from './commands/auth/index'
 import { registerAxiomCommands } from './commands/axiom/index'
 import { registerDatasetCommands } from './commands/build-dataset'
 import { registerDbStatusCommand } from './commands/db-status'
@@ -117,6 +118,9 @@ registerFrontCommands(program)
 
 // Register Memory commands
 registerMemoryCommands(program)
+
+// Register Auth commands (encrypted secrets for CLI distribution)
+registerAuthCommands(program)
 
 // Register Response commands (for analysis)
 registerResponseCommands(program)
