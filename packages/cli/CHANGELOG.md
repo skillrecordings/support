@@ -1,5 +1,11 @@
 # @skillrecordings/cli
 
+## 0.6.0
+
+### Minor Changes
+
+- 9297996: Add assign, tag/untag, reply, and api passthrough commands to `skill front`. Fix inbox status filter and pagination bugs. Add HATEOAS actions for new commands.
+
 ## 0.5.0
 
 ### Minor Changes
