@@ -1,138 +1,226 @@
 {
   "version": "1.0",
-  "projectName": "cli-cleanup-tree-hygiene",
-  "description": "Clean up CLI command sprawl: delete dead code, group commands into proper subcommand trees, deduplicate shared logic. This is prep work for the full CLI rearchitect (Epic #172). All changes in packages/cli/.",
+  "projectName": "cli-rearchitect",
+  "description": "Rearchitect @skillrecordings/cli as agent-first compiled binary. Parent epic: skillrecordings/support#172. All work in packages/cli/.",
   "stories": [
     {
-      "id": "story-ml7gryfa",
-      "title": "Delete dead CLI code",
-      "description": "Delete all dead/unreachable CLI files that are never imported in packages/cli/src/index.ts. These files are confirmed dead — they have zero imports anywhere:\n\n1. `packages/cli/src/commands/front-stats.ts` (75 lines) — standalone script, never registered\n2. `packages/cli/src/commands/front-cache.ts` (1,277 lines) — never wired up, massive dead weight\n3. `packages/cli/src/alignment-test.ts` (64 lines) — standalone test script, never imported\n4. `packages/cli/src/test-agent-local.ts` (115 lines) — standalone test script, never imported\n5. `packages/cli/src/check-apps.ts` (16 lines) — standalone script, never imported\n6. `packages/cli/src/commands/eval-local/compare.ts` (171 lines) — hardcoded fake data placeholder, remove from eval-local/index.ts registration too\n\nAlso remove `@skillrecordings/sdk` from devDependencies in packages/cli/package.json — it has zero imports in the CLI package.\n\nAdd a changeset file (`.changeset/cli-cleanup-dead-code.md`) with:\n```\n---\n\"@skillrecordings/cli\": patch\n---\nchore: remove dead CLI code (front-cache, front-stats, alignment-test, test-agent-local, check-apps, eval-local compare stub)\n```\n\nTotal: approximately -1,718 lines of dead code removed.",
+      "id": "story-ml863g76",
+      "title": "Core Infrastructure Types (Phase 0) — Issue #177",
+      "description": "Create the foundational CommandContext, CLIError hierarchy, and signal handling modules with full test coverage.\n\n## Context\n- Parent epic: https://github.com/skillrecordings/support/issues/172\n- Full issue: https://github.com/skillrecordings/support/issues/177\n- Read `packages/cli/PROGRESS.md` if it exists for prior story status\n\n## Files to Create\n- `packages/cli/src/core/context.ts` — CommandContext interface + createContext() factory\n- `packages/cli/src/core/errors.ts` — CLIError base + AuthError(10), NetworkError(11), DatabaseError(12)\n- `packages/cli/src/core/signals.ts` — AbortController wrapper + SIGINT/SIGTERM + cleanup registry\n- `packages/cli/tests/unit/core/context.test.ts`\n- `packages/cli/tests/unit/core/errors.test.ts`\n- `packages/cli/tests/unit/core/signals.test.ts`\n- `packages/cli/PROGRESS.md`\n\n## Key Design\nCommandContext carries: stdin, stdout, stderr, config, signal (AbortSignal), secrets (SecretsProvider), format ('json'|'text'|'table'), onCleanup(fn).\nExit codes: 0=success, 1=error, 2=usage, 10=auth, 11=network, 12=db.\nCLIError has: userMessage, exitCode, suggestion?, debugMessage?.\nSignal handling: trap SIGINT(130)/SIGTERM(143), run cleanup registry in reverse, second SIGINT force-exits.\n\n## TDD: Write failing tests first, then implement. Table-driven tests preferred.\n\n## On Completion\nUpdate packages/cli/PROGRESS.md with completion summary. Commit: `feat(cli): core infrastructure types - context, errors, signals`",
       "priority": 1,
       "passes": true,
       "validationCommand": "cd packages/cli && bun run check-types && bun run test",
       "acceptanceCriteria": [
-        "All 6 dead files deleted",
-        "eval-local compare subcommand removed from registration",
-        "@skillrecordings/sdk removed from devDependencies",
-        "Changeset file created",
-        "TypeScript compiles clean",
-        "All existing tests pass"
+        "CommandContext interface exported with stdin/stdout/stderr/config/signal/secrets/format/onCleanup",
+        "createContext() returns valid context with defaults and accepts partial overrides",
+        "CLIError AuthError NetworkError DatabaseError all exported with correct exit codes",
+        "formatError() renders user message + suggestion and handles unknown errors",
+        "Signal handlers trap SIGINT and SIGTERM",
+        "Cleanup registry runs callbacks in reverse order",
+        "Second SIGINT force-exits",
+        "All new tests pass"
       ]
     },
     {
-      "id": "story-ml7gs6nw",
-      "title": "Group Inngest commands under inngest subcommand",
-      "description": "Currently Inngest commands are registered as 3 separate top-level calls in packages/cli/src/index.ts:\n- registerEventsCommands(program)\n- registerRunsCommands(program)\n- registerSignalCommand(program)\n\nPlus `investigate` is in a separate file but registered via events.\n\nConsolidate into a single `packages/cli/src/commands/inngest/index.ts` that:\n1. Creates an `inngest` subcommand group on the program\n2. Registers events, runs, signal, and investigate as subcommands under it\n3. Exports a single `registerInngestCommands(program)` function\n4. Update packages/cli/src/index.ts to use the single registration\n\nThe commands should work as: `skill inngest events`, `skill inngest runs`, `skill inngest signal`, `skill inngest investigate`\n\nKeep all existing functionality and flags unchanged. This is purely a structural reorganization.\n\nDo NOT create a changeset for this story — it will be included in the final cleanup changeset.",
+      "id": "story-ml863q07",
+      "title": "db-status Migration PoC (Phase 0) — Issue #178",
+      "description": "Migrate the db-status command to use CommandContext as proof-of-concept. Create test helpers.\n\n## Context\n- Parent epic: #172, Issue: #178\n- Depends on: Story 1 (core types must exist)\n- Read packages/cli/PROGRESS.md for prior story status\n\n## Files to Create/Modify\n- `packages/cli/tests/helpers/test-context.ts` — createTestContext() that captures stdout/stderr buffers\n- `packages/cli/tests/integration/commands/db-status.test.ts` — Table-driven integration tests\n- `packages/cli/src/commands/db-status.ts` — MODIFY: accept CommandContext, use ctx.stdout, lazy getDb()\n\n## Task\n1. Create createTestContext() helper: returns CommandContext with captured stdout/stderr, getStdout()/getStderr() accessors, no-op AbortController, mock secrets\n2. Rewrite db-status: receive CommandContext param, replace console.log→ctx.stdout.write(), replace database singleton→lazy getDb(), add error handling with DatabaseError+suggestion, use ctx.signal for timeout\n3. Write table-driven integration tests: success, connection failure, timeout\n\n## TDD: Write failing tests first. Use createTestContext() to capture and assert output.\n\n## On Completion\nUpdate packages/cli/PROGRESS.md. Commit: `feat(cli): migrate db-status to CommandContext pattern`",
       "priority": 2,
-      "passes": true,
+      "passes": false,
       "validationCommand": "cd packages/cli && bun run check-types && bun run test",
       "acceptanceCriteria": [
-        "Single registerInngestCommands(program) call in index.ts",
-        "All inngest subcommands work under inngest parent",
-        "Events, runs, signal, investigate all accessible",
-        "No duplicate command registrations",
-        "TypeScript compiles clean",
+        "db-status uses CommandContext with no direct console.log or database singleton",
+        "db-status handles connection failure with DatabaseError and suggestion",
+        "createTestContext() helper captures stdout/stderr for assertions",
+        "Table-driven integration tests cover success and error paths",
         "All tests pass"
       ]
     },
     {
-      "id": "story-ml7gsbmk",
-      "title": "Group FAQ commands under faq subcommand",
-      "description": "Currently FAQ commands are registered as 5 separate top-level calls in packages/cli/src/index.ts:\n- registerFaqMineCommands(program)\n- registerFaqClusterCommands(program)\n- registerFaqClassifyCommands(program)\n- registerFaqExtractCommands(program)\n- registerFaqReviewCommands(program)\n\nCreate a single `packages/cli/src/commands/faq/index.ts` that:\n1. Creates a `faq` subcommand group on the program\n2. Registers mine, cluster, classify, extract, review as subcommands under it\n3. Exports a single `registerFaqCommands(program)` function\n4. Move the individual faq-*.ts files into the `packages/cli/src/commands/faq/` directory (rename faq-mine.ts → faq/mine.ts, etc.)\n5. Update packages/cli/src/index.ts to use the single registration\n\nThe commands should work as: `skill faq mine`, `skill faq cluster`, `skill faq classify`, `skill faq extract`, `skill faq review`\n\nKeep all existing functionality and flags unchanged. Purely structural reorganization.\n\nDo NOT create a changeset — will be included in the final changeset.",
+      "id": "story-ml863y75",
+      "title": "SecretsProvider Abstraction (Phase 1) — Issue #179",
+      "description": "Create SecretsProvider interface with 1Password SDK and env var implementations.\n\n## Context\n- Parent epic: #172, Issue: #179\n- Depends on: Story 1 (core types)\n- Read packages/cli/PROGRESS.md\n\n## Files to Create\n- `packages/cli/src/core/secrets.ts` — SecretsProvider interface + OnePasswordProvider + EnvProvider + factory\n- `packages/cli/src/core/secret-refs.ts` — Central manifest of all op:// secret references\n- `packages/cli/tests/unit/core/secrets.test.ts`\n\n## Key Design\nSecretsProvider: { resolve(ref): Promise<string>, resolveAll(refs): Promise<Record>, isAvailable(): Promise<boolean>, name: string }\nOnePasswordProvider: uses @1password/sdk with OP_SERVICE_ACCOUNT_TOKEN, caches resolved secrets\nEnvProvider: extracts key from op:// ref, looks up process.env\nFactory: createSecretsProvider() tries 1Password first, falls back to env\n\n## TDD: Mock @1password/sdk in tests. Test: successful resolution, missing secret, provider fallback, batch resolution.\n\n## On Completion\nUpdate packages/cli/PROGRESS.md. Commit: `feat(cli): SecretsProvider abstraction with 1Password SDK`",
       "priority": 3,
-      "passes": true,
+      "passes": false,
       "validationCommand": "cd packages/cli && bun run check-types && bun run test",
       "acceptanceCriteria": [
-        "Single registerFaqCommands(program) call in index.ts",
-        "All FAQ subcommands work under faq parent",
-        "Individual faq-*.ts files moved to faq/ directory",
-        "No duplicate command registrations",
-        "TypeScript compiles clean",
+        "SecretsProvider interface exported",
+        "OnePasswordProvider resolves secrets via @1password/sdk (mocked in tests)",
+        "EnvProvider falls back to process.env",
+        "Factory tries 1Password first then env",
+        "Secret refs manifest contains all required secrets",
+        "Unit tests cover resolution, missing secret, fallback, batch",
         "All tests pass"
       ]
     },
     {
-      "id": "story-ml7gsi9z",
-      "title": "Deduplicate eval seed logic",
-      "description": "Two near-identical seed files exist:\n- `packages/cli/src/commands/eval-local/seed.ts` (276 lines)\n- `packages/cli/src/commands/eval-pipeline/seed.ts` (395 lines)\n\nThey share functions like: cleanDatabase(), loadJsonFiles(), loadKnowledgeFiles(), seedApps(), seedKnowledgeBase(), generateUUID().\n\nExtract the shared logic into `packages/cli/src/lib/eval-seed.ts`:\n1. Use the eval-pipeline version as the base (it's more polished: env var support, batch upsert, title extraction)\n2. Extract common functions: cleanDatabase, loadJsonFiles, loadKnowledgeFiles, seedApps, seedKnowledgeBase, generateUUID\n3. Update both eval-local/seed.ts and eval-pipeline/seed.ts to import from the shared module\n4. Remove duplicated code from both files — they should only contain their command-specific logic\n\nDo NOT create a changeset — will be included in the final changeset.",
+      "id": "story-ml8646k3",
+      "title": "Secret Loading Migration (Phase 1) — Issue #180",
+      "description": "Remove old secret loading infrastructure. Wire SecretsProvider into createContext(). Update auth commands.\n\n## Context\n- Parent epic: #172, Issue: #180\n- Depends on: Stories 2+3\n\n## Files to Delete\n- packages/cli/src/preload.ts\n- packages/cli/src/lib/env-loader.ts\n- packages/cli/src/lib/crypto.ts\n\n## Files to Modify\n- packages/cli/src/core/context.ts — Wire SecretsProvider into createContext()\n- packages/cli/src/commands/auth/ — Remove keygen/encrypt/decrypt, add login/status/whoami\n- packages/cli/src/index.ts — Remove preload, update command registration\n\n## Files to Create\n- packages/cli/tests/integration/commands/auth.test.ts\n\n## Key Points\n- Commands that dont need secrets (--help, --version) must never trigger resolution\n- auth status: show active provider + available secrets\n- auth login: validate 1Password token\n- auth whoami: show service account info\n- DELETE: auth keygen, auth encrypt, auth decrypt\n\n## On Completion\nUpdate packages/cli/PROGRESS.md. Commit: `feat(cli): migrate to native 1Password secrets`",
       "priority": 4,
-      "passes": true,
+      "passes": false,
       "validationCommand": "cd packages/cli && bun run check-types && bun run test",
       "acceptanceCriteria": [
-        "Shared eval-seed.ts created in src/lib/",
-        "Both eval-local/seed.ts and eval-pipeline/seed.ts import from shared module",
-        "No duplicated function definitions between the two seed files",
-        "TypeScript compiles clean",
+        "preload.ts env-loader.ts crypto.ts deleted",
+        "No references to age encryption remain",
+        "SecretsProvider wired into createContext()",
+        "skill --help works without secrets configured",
+        "auth status shows active provider",
+        "Old auth commands removed",
         "All tests pass"
       ]
     },
     {
-      "id": "story-ml7gsmn2",
-      "title": "Deduplicate Axiom helpers",
-      "description": "Axiom helper functions are duplicated between:\n- `packages/cli/src/commands/axiom/index.ts` (697 lines)\n- `packages/cli/src/commands/axiom/forensic.ts` (868 lines)\n\nShared functions include: getAxiomClient(), getDataset(), parseTimeRange(), formatDuration(), formatTime(), and other utility functions.\n\nExtract shared helpers into `packages/cli/src/lib/axiom-client.ts`:\n1. Move getAxiomClient(), getDataset(), parseTimeRange(), formatDuration(), formatTime() to the shared module\n2. Update both axiom/index.ts and axiom/forensic.ts to import from the shared module\n3. Remove duplicated definitions\n\nDo NOT create a changeset — will be included in the final changeset.",
+      "id": "story-ml864fd7",
+      "title": "OutputFormatter Abstraction (Phase 2) — Issue #181",
+      "description": "Create OutputFormatter with JSON/text/table formatters. Add global --format, --verbose, --quiet flags.\n\n## Context\n- Parent epic: #172, Issue: #181\n- Depends on: Story 2\n\n## Files to Create\n- packages/cli/src/core/output.ts — OutputFormatter interface + JsonFormatter + TextFormatter + TableFormatter\n- packages/cli/tests/unit/core/output.test.ts\n\n## Files to Modify\n- packages/cli/src/core/context.ts — Add output: OutputFormatter to CommandContext\n- packages/cli/src/index.ts — Add global flags\n\n## Key Design\nOutputFormatter: { data(value), table(rows, columns), message(text), success(text), warn(text), error(text), progress(label) }\n- data() → stdout (primary output)\n- message/success/warn/error → stderr\n- JsonFormatter: data() = JSON.stringify to stdout\n- TextFormatter: data() = human-readable to stdout\n- TableFormatter: data() = aligned columns to stdout\n- Auto-detect: if !process.stdout.isTTY, default to JSON\n- Global flags: --format json|text|table (persistent), --verbose/-v, --quiet/-q\n\n## On Completion\nUpdate packages/cli/PROGRESS.md. Commit: `feat(cli): OutputFormatter abstraction with dual output`",
       "priority": 5,
-      "passes": true,
+      "passes": false,
       "validationCommand": "cd packages/cli && bun run check-types && bun run test",
       "acceptanceCriteria": [
-        "Shared axiom-client.ts created in src/lib/",
-        "Both axiom/index.ts and axiom/forensic.ts import from shared module",
-        "No duplicated helper functions between the two axiom files",
-        "TypeScript compiles clean",
+        "OutputFormatter interface exported",
+        "JsonFormatter produces valid JSON on stdout",
+        "TextFormatter produces human-readable output",
+        "Auto-detection: piped output defaults to JSON",
+        "--format flag works and inherited by subcommands",
+        "--verbose and --quiet work correctly",
+        "Unit tests cover all formatters",
         "All tests pass"
       ]
     },
     {
-      "id": "story-ml7gssmt",
-      "title": "Remove dead auth commands and crypto infrastructure",
-      "description": "The age-based encryption auth commands are being replaced by 1Password native integration. Remove the dead infrastructure:\n\n1. Delete `packages/cli/src/commands/auth/keygen.ts` (41 lines) — age key generation, no longer needed\n2. Delete `packages/cli/src/commands/auth/encrypt.ts` (81 lines) — age encryption, no longer needed\n3. Delete `packages/cli/src/commands/auth/decrypt.ts` (123 lines) — age decryption, no longer needed\n4. Delete `packages/cli/src/lib/crypto.ts` (56 lines) — age encryption wrapper, no longer needed\n5. Update `packages/cli/src/commands/auth/index.ts` to remove keygen, encrypt, decrypt registrations\n6. Keep `auth status` command (still useful)\n7. Remove `age-encryption` from dependencies in packages/cli/package.json if no other file imports it (check first!)\n\nDo NOT create a changeset — will be included in the final changeset.",
+      "id": "story-ml864mze",
+      "title": "Command Migration Batch 1 — Front + Inngest (Phase 2) — Issue #182",
+      "description": "Migrate Front and Inngest commands to CommandContext + OutputFormatter. Replace all console.log.\n\n## Context\n- Parent epic: #172, Issue: #182\n- Depends on: Story 5\n\n## Files to Modify\n- packages/cli/src/commands/front/*.ts — All front commands\n- packages/cli/src/commands/inngest/*.ts — All inngest commands (now under inngest subcommand)\n\n## Files to Create\n- packages/cli/tests/integration/commands/front.test.ts\n- packages/cli/tests/integration/commands/inngest.test.ts\n\n## Commands to migrate\nFront: message, conversation, tags, inbox, archive, bulk-archive, pull\nInngest: events, runs, run, signal, investigate, stats, failures, search\n\nFor each command:\n1. Accept CommandContext parameter\n2. Replace console.log→ctx.output.data() or ctx.output.message()\n3. Replace console.error→ctx.output.error()\n4. Use CLIError for error handling with suggestions\n5. Write happy-path + error-path test\n\n## On Completion\nUpdate packages/cli/PROGRESS.md. Commit: `feat(cli): migrate front + inngest commands to OutputFormatter`",
       "priority": 6,
-      "passes": true,
+      "passes": false,
       "validationCommand": "cd packages/cli && bun run check-types && bun run test",
       "acceptanceCriteria": [
-        "keygen.ts, encrypt.ts, decrypt.ts deleted",
-        "crypto.ts deleted",
-        "auth/index.ts only registers status command",
-        "age-encryption removed from dependencies if unused elsewhere",
-        "TypeScript compiles clean",
+        "Zero console.log in front/ and inngest/ command files",
+        "All front commands use CommandContext + OutputFormatter",
+        "All inngest commands use CommandContext + OutputFormatter",
+        "skill front conversation <id> --format json outputs valid JSON",
+        "Integration tests cover happy + error paths",
         "All tests pass"
       ]
     },
     {
-      "id": "story-ml7gt5ex",
-      "title": "Final cleanup: slim index.ts and add changeset",
-      "description": "Final cleanup pass on packages/cli/src/index.ts after all previous stories have landed:\n\n1. Review index.ts and ensure all command registrations are clean and grouped logically\n2. Remove any stale imports that reference deleted files\n3. Ensure the command tree is organized into clear groups:\n   - Core: init, wizard, health, db-status\n   - Front: front (with subcommands)\n   - Inngest: inngest (with subcommands) \n   - Axiom: axiom (with subcommands)\n   - Eval: eval, eval-local, eval-pipeline, eval-prompt, pipeline\n   - Data: dataset, responses, tools, memory\n   - FAQ: faq (with subcommands)\n   - Infra: deploys, kb, auth\n4. Add comments grouping the registrations logically\n5. Create the final changeset file `.changeset/cli-cleanup-command-hygiene.md`:\n```\n---\n\"@skillrecordings/cli\": minor\n---\nrefactor: CLI command tree hygiene\n\n- Delete ~1,800 lines of dead code (front-cache, front-stats, alignment-test, test-agent-local, check-apps, eval-local compare stub)\n- Group Inngest commands under `inngest` subcommand\n- Group FAQ commands under `faq` subcommand\n- Deduplicate eval seed logic into shared module\n- Deduplicate Axiom helpers into shared module\n- Remove dead auth commands (keygen, encrypt, decrypt) and age crypto\n- Clean up index.ts with logical command grouping\n```\n\nNote: if Story 1 already created a changeset, remove it and replace with this comprehensive one.",
+      "id": "story-ml864tat",
+      "title": "Command Migration Batch 2 — Axiom + Tools + Memory (Phase 2) — Issue #183",
+      "description": "Migrate Axiom, Tools, and Memory commands to CommandContext + OutputFormatter.\n\n## Context\n- Parent epic: #172, Issue: #183\n- Depends on: Story 6\n\n## Files to Modify\n- packages/cli/src/commands/axiom/*.ts\n- packages/cli/src/commands/tools/*.ts (list, search, lookup)\n- packages/cli/src/commands/memory/*.ts\n\n## Files to Create\n- packages/cli/tests/integration/commands/axiom.test.ts\n- packages/cli/tests/integration/commands/tools.test.ts\n- packages/cli/tests/integration/commands/memory.test.ts\n\n## Commands\nAxiom: query, agents, errors, conversation, classifications, workflow-steps, approvals, pipeline-trace, step-timings, error-rate, data-flow-check, tag-health, approval-stats, pipeline-health\nTools: list, search, lookup\nMemory: store, find, get, validate, upvote, downvote, delete, stats, stale\n\nSame pattern: accept CommandContext, replace console.log, use CLIError, write tests.\n\n## On Completion\nUpdate packages/cli/PROGRESS.md. Commit: `feat(cli): migrate axiom + tools + memory commands`",
       "priority": 7,
-      "passes": true,
+      "passes": false,
       "validationCommand": "cd packages/cli && bun run check-types && bun run test",
       "acceptanceCriteria": [
-        "index.ts has clean grouped registrations",
-        "No stale imports remain",
-        "Changeset file exists with minor bump",
-        "Previous partial changeset removed if present",
-        "TypeScript compiles clean",
+        "Zero console.log in axiom/ tools/ memory/ command files",
+        "All commands use CommandContext + OutputFormatter",
+        "--format json outputs valid JSON for all commands",
+        "Integration tests cover happy + error paths",
         "All tests pass"
       ]
     },
     {
-      "id": "story-ml6qgu1x",
-      "title": "Bug Fix: Silent silence + collaborator allowlist (#146)",
-      "description": "Fix agent commenting on silenced conversations. When route action is `silence` or category is `system`, NO comment should be posted to Front.\n\n## Implementation\n1. Find where comments are posted for silence/system decisions\n2. Add conditional to skip comment posting when action is silence\n3. Add `collaboratorEmails` config array that bypasses classification entirely\n4. Suggested collaborators: `alex@indyhall.org`\n\n## Acceptance Criteria\n- When route action is `silence` or category is `system`, NO comment is posted to Front\n- Conversation is still tagged appropriately\n- Escalation and draft comments still work normally\n- Add collaborator email allowlist in config that skips processing entirely\n\n## Files Likely Involved\n- `packages/core/src/pipeline/steps/route.ts`\n- `packages/inngest/src/functions/route-message.ts`\n- Comment posting logic\n\nGitHub Issue: https://github.com/skillrecordings/support/issues/146",
-      "priority": 1,
+      "id": "story-ml864ys3",
+      "title": "Command Migration Batch 3 — Remaining Commands (Phase 2) — Issue #184",
+      "description": "Migrate all remaining commands: eval, pipeline, deploy, FAQ, KB, health, wizard, responses, dataset, init.\n\n## Context\n- Parent epic: #172, Issue: #184\n- Depends on: Story 7\n\n## Files to Modify\n- packages/cli/src/commands/eval/*.ts\n- packages/cli/src/commands/pipeline/*.ts\n- packages/cli/src/commands/deploys/*.ts\n- packages/cli/src/commands/faq/*.ts\n- packages/cli/src/commands/kb/*.ts\n- packages/cli/src/commands/health.ts\n- packages/cli/src/commands/wizard.ts\n- packages/cli/src/commands/responses/*.ts\n- packages/cli/src/commands/dataset/*.ts\n- packages/cli/src/commands/init.ts\n\n## Goal\nZero console.log calls remain in ANY command file across the entire CLI. Every command uses CommandContext + OutputFormatter.\n\n## On Completion\nUpdate packages/cli/PROGRESS.md. Commit: `feat(cli): complete command migration to OutputFormatter`",
+      "priority": 8,
       "passes": false,
-      "validationCommand": "bun run check-types && bun run test"
+      "validationCommand": "cd packages/cli && bun run check-types && bun run test",
+      "acceptanceCriteria": [
+        "Zero console.log in ANY command file",
+        "Every command uses CommandContext + OutputFormatter",
+        "--format json works for all commands",
+        "Integration tests exist for all command groups",
+        "All tests pass"
+      ]
     },
     {
-      "id": "story-ml6qgu23",
-      "title": "Bug Fix: Detect human response before drafting (#147)",
-      "description": "Agent drafted even when team already responded. Before drafting, check if a team member has already responded to the customer's latest message.\n\n## Implementation\n1. In gather or pre-draft step, fetch conversation messages from Front\n2. Find the last inbound (customer) message timestamp\n3. Check if any outbound message from a teammate (not bot API user) exists after that timestamp\n4. If yes, skip draft step and log reason\n\n## Acceptance Criteria\n- Agent does NOT draft if team member responded after customer's last inbound message\n- Agent DOES draft if customer sends a NEW message after team response\n- Skip reason is logged to Axiom (e.g., `skip_reason: \"human_responded\"`)\n- Works for any team member, not just specific emails\n\n## Files Likely Involved\n- `packages/core/src/pipeline/steps/gather.ts` or `draft.ts`\n- `packages/inngest/src/functions/` — draft triggering logic\n\nGitHub Issue: https://github.com/skillrecordings/support/issues/147",
-      "priority": 2,
+      "id": "story-ml8657n3",
+      "title": "Dead Code Removal + Deduplication (Phase 5) — Issue #185",
+      "description": "Delete dead code, deduplicate shared helpers, update docs.\n\n## Context\n- Parent epic: #172, Issue: #185\n- Depends on: Story 8\n\n## Files to Delete\n- packages/cli/src/commands/front-stats.ts (unregistered standalone script)\n- packages/cli/src/commands/front-cache.ts (unregistered, never wired)\n- packages/cli/src/commands/eval-local/compare.ts (hardcoded fake data stub)\n\n## Files to Create\n- packages/cli/src/lib/eval-seed.ts — Shared seed logic (from eval-pipeline version)\n- packages/cli/src/lib/axiom-client.ts — Deduplicated axiom helpers (getAxiomClient, getDataset, parseTimeRange, formatDuration, formatTime)\n\n## Files to Modify\n- packages/cli/src/commands/eval-local/seed.ts — Import from shared eval-seed.ts\n- packages/cli/src/commands/eval-pipeline/seed.ts — Import from shared eval-seed.ts\n- packages/cli/src/commands/axiom/index.ts — Import from shared axiom-client.ts\n- packages/cli/src/commands/axiom/forensic.ts — Import from shared axiom-client.ts\n- packages/cli/package.json — Remove @skillrecordings/sdk\n- CLAUDE.md — Update with accurate command list and new flags\n\n## On Completion\nUpdate packages/cli/PROGRESS.md. Commit: `chore(cli): remove dead code and deduplicate helpers`",
+      "priority": 9,
       "passes": false,
-      "validationCommand": "bun run check-types && bun run test"
+      "validationCommand": "cd packages/cli && bun run check-types && bun run test",
+      "acceptanceCriteria": [
+        "front-stats.ts front-cache.ts deleted",
+        "eval-local compare stub deleted",
+        "@skillrecordings/sdk removed from dependencies",
+        "Eval seed logic in shared src/lib/eval-seed.ts",
+        "Axiom helpers in shared src/lib/axiom-client.ts",
+        "CLAUDE.md updated",
+        "No dead imports or unused exports",
+        "All tests pass"
+      ]
+    },
+    {
+      "id": "story-ml865gzq",
+      "title": "Compiled Binary Build Script (Phase 3) — Issue #186",
+      "description": "Create build.ts for bun build --compile targeting 4 platforms. Handle native modules. Version embedding.\n\n## Context\n- Parent epic: #172, Issue: #186\n- Depends on: Story 9\n\n## Files to Create\n- packages/cli/build.ts — Programmatic Bun.build() for 4 targets\n- packages/cli/tests/e2e/binary.test.ts\n\n## Files to Modify\n- packages/cli/package.json — Add build:compile script\n\n## Key Details\n- Targets: bun-linux-x64, bun-linux-arm64, bun-darwin-x64, bun-darwin-arm64\n- CRITICAL: autoloadDotenv: false (never bake secrets)\n- Define BUILD_VERSION (from package.json) and BUILD_COMMIT (git rev-parse --short HEAD)\n- Minify + sourcemap + bytecode\n- Handle native modules: externalize/replace mysql2, duckdb, @mapbox/node-pre-gyp\n- skill --version prints: skill v1.2.3 (abc1234) bun-linux-x64\n- E2E: compile, run --version, run --help, verify no secrets in binary via strings\n\n## On Completion\nUpdate packages/cli/PROGRESS.md. Commit: `feat(cli): compiled binary build with bun build --compile`",
+      "priority": 10,
+      "passes": false,
+      "validationCommand": "cd packages/cli && bun run check-types && bun run test",
+      "acceptanceCriteria": [
+        "bun run build:compile produces binaries in dist/",
+        "--version outputs correct format",
+        "--help works without env vars",
+        "No secrets baked into binary",
+        "E2E tests verify binary behavior",
+        "All tests pass"
+      ]
+    },
+    {
+      "id": "story-ml865on5",
+      "title": "Release Infrastructure (Phase 3) — Issue #187",
+      "description": "Create GitHub Actions release workflow and curl install script.\n\n## Context\n- Parent epic: #172, Issue: #187\n- Depends on: Story 10\n\n## Files to Create\n- .github/workflows/cli-release.yml — Build + release on cli-v* tag push\n- packages/cli/install.sh — Platform-detecting install script\n- packages/cli/tests/e2e/install.test.ts\n\n## Details\nGH Actions: trigger on push tags cli-v*, matrix 4 targets, oven-sh/setup-bun@v2, compile + release + upload\nInstall script: detect platform/arch, download from latest GH release, install to ~/.local/bin/skill, chmod +x, verify --version\n\n## On Completion\nUpdate packages/cli/PROGRESS.md. Commit: `feat(cli): release workflow and install script`",
+      "priority": 11,
+      "passes": false,
+      "validationCommand": "cd packages/cli && bun run check-types && bun run test",
+      "acceptanceCriteria": [
+        "GitHub Actions workflow is valid YAML",
+        "Workflow builds all 4 platform targets",
+        "Install script detects platform and arch",
+        "Install script downloads and installs binary",
+        "All tests pass"
+      ]
+    },
+    {
+      "id": "story-ml865xas",
+      "title": "MCP Server Mode (Phase 4) — Issue #188",
+      "description": "Create MCP server entrypoint exposing CLI commands as MCP tools over stdio.\n\n## Context\n- Parent epic: #172, Issue: #188\n- Depends on: Story 5\n\n## Files to Create\n- packages/cli/src/mcp.ts — MCP server entrypoint with StdioServerTransport\n- packages/cli/tests/integration/mcp.test.ts\n\n## Files to Modify\n- packages/cli/src/index.ts — Add --mcp flag\n- packages/cli/package.json — Add @modelcontextprotocol/sdk dep\n\n## Key Details\n- Uses @modelcontextprotocol/sdk with StdioServerTransport\n- Auto-generate tool registrations by walking Commander command tree\n- Tool names: front-conversation, axiom-query, tools-search, etc.\n- Zod schemas from Commander option definitions\n- CRITICAL: No console.log in MCP mode (stdout = protocol channel), all logging via console.error\n- Tool annotations: readOnlyHint for reads, destructiveHint for destructive ops\n- --mcp flag skips Commander parsing, launches MCP server\n- Exits when stdin closes\n\n## On Completion\nUpdate packages/cli/PROGRESS.md. Commit: `feat(cli): MCP server mode for agent integration`",
+      "priority": 12,
+      "passes": false,
+      "validationCommand": "cd packages/cli && bun run check-types && bun run test",
+      "acceptanceCriteria": [
+        "skill --mcp launches MCP server on stdio",
+        "MCP tools match Commander command tree",
+        "Tools have Zod input schemas",
+        "Tool annotations set correctly",
+        "JSON-RPC via stdin returns valid response",
+        "No console.log in MCP mode",
+        "Integration tests pass",
+        "All tests pass"
+      ]
+    },
+    {
+      "id": "story-ml8665cd",
+      "title": "Test Coverage Gap Fill + CI (Phase 6) — Issue #189",
+      "description": "Fill test coverage gaps. Set up coverage reporting and CI thresholds.\n\n## Context\n- Parent epic: #172, Issue: #189\n- Depends on: Stories 8+10\n\n## Files to Create/Modify\n- packages/cli/vitest.config.ts — Add coverage configuration (@vitest/coverage-v8)\n- .github/workflows/cli-test.yml — CI for tests on every PR touching packages/cli/\n- packages/cli/tests/ — Fill gaps\n\n## Details\nCoverage config: @vitest/coverage-v8, thresholds 80% overall + 90% on src/core/, formats text+lcov+json\nCI: runs on PR, steps: install, check-types, test --coverage, fails below threshold\nGap analysis: run coverage, identify untested paths, add missing tests for edge cases (error handling, config precedence, output format)\n\n## On Completion\nUpdate packages/cli/PROGRESS.md with final summary. Commit: `feat(cli): test coverage CI with 80%+ threshold`",
+      "priority": 13,
+      "passes": false,
+      "validationCommand": "cd packages/cli && bun run check-types && bun run test",
+      "acceptanceCriteria": [
+        "Coverage report generates with bun vitest run --coverage",
+        "Overall coverage >= 80% lines",
+        "Core module coverage >= 90% lines",
+        "CI workflow runs tests on PR",
+        "CI fails if coverage drops below threshold",
+        "All tests pass"
+      ]
     }
   ],
   "metadata": {
-    "createdAt": "2026-02-04T03:24:28.522Z",
-    "totalIterations": 7,
-    "lastIteration": "2026-02-04T03:40:40.751Z"
+    "createdAt": "2026-02-04T15:13:09.231Z",
+    "totalIterations": 1,
+    "lastIteration": "2026-02-04T15:21:29.113Z"
   }
 }
