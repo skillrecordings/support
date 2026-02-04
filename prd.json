@@ -41,7 +41,7 @@
       "title": "SecretsProvider Abstraction (Phase 1) — Issue #179",
       "description": "Create SecretsProvider interface with 1Password SDK and env var implementations.\n\n## Context\n- Parent epic: #172, Issue: #179\n- Depends on: Story 1 (core types)\n- Read packages/cli/PROGRESS.md\n\n## Files to Create\n- `packages/cli/src/core/secrets.ts` — SecretsProvider interface + OnePasswordProvider + EnvProvider + factory\n- `packages/cli/src/core/secret-refs.ts` — Central manifest of all op:// secret references\n- `packages/cli/tests/unit/core/secrets.test.ts`\n\n## Key Design\nSecretsProvider: { resolve(ref): Promise<string>, resolveAll(refs): Promise<Record>, isAvailable(): Promise<boolean>, name: string }\nOnePasswordProvider: uses @1password/sdk with OP_SERVICE_ACCOUNT_TOKEN, caches resolved secrets\nEnvProvider: extracts key from op:// ref, looks up process.env\nFactory: createSecretsProvider() tries 1Password first, falls back to env\n\n## TDD: Mock @1password/sdk in tests. Test: successful resolution, missing secret, provider fallback, batch resolution.\n\n## On Completion\nUpdate packages/cli/PROGRESS.md. Commit: `feat(cli): SecretsProvider abstraction with 1Password SDK`",
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "validationCommand": "cd packages/cli && bun run check-types && bun run test",
       "acceptanceCriteria": [
         "SecretsProvider interface exported",
@@ -220,7 +220,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-04T15:13:09.231Z",
-    "totalIterations": 2,
-    "lastIteration": "2026-02-04T15:26:50.544Z"
+    "totalIterations": 3,
+    "lastIteration": "2026-02-04T15:53:05.288Z"
   }
 }

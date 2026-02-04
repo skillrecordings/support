@@ -1,6 +1,7 @@
 import { PassThrough } from 'node:stream'
 import { describe, expect, it, vi } from 'vitest'
-import { type SecretsProvider, createContext } from '../../../src/core/context'
+import { createContext } from '../../../src/core/context'
+import { type SecretsProvider } from '../../../src/core/secrets'
 
 describe('createContext', () => {
   it('provides defaults', () => {

@@ -21,3 +21,12 @@ Summary: Summary:
 
 Learnings:
 - `AbortSignal.timeout` + `AbortSignal.any` works cleanly with 
+
+---
+[2026-02-04T15:53:05.289Z]
+Completed: SecretsProvider Abstraction (Phase 1) — Issue #179
+Files: none
+Summary: Summary:
+- Made `@1password/sdk` a lazy runtime import in `packages/cli/src/core/secrets.ts` to avoid hard module resolution during tests.
+- Added a local type stub at `packages/cli/src/types/1password-sdk.d.ts` and marked the Vitest mock as virtual in `packages/cli/tests/unit/core/secrets.test.ts` so tests pass without the package installed.
+- Updated progress log entry in `packages/cli/PROGRESS.

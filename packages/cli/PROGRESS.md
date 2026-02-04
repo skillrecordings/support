@@ -5,3 +5,5 @@ Initialized: 2026-02-04T15:13:09.231Z
 ## 2026-02-04
 - Completed core infrastructure types: CommandContext, CLIError hierarchy, signal handling, and unit tests.
 - Migrated db-status to CommandContext, added db-status integration tests, and introduced test context helper.
+- Added SecretsProvider abstraction with 1Password + env providers, secret refs manifest, and unit tests.
+- Completed SecretsProvider abstraction (Phase 1, Issue #179) with 1Password SDK integration, env fallback, secret refs manifest, and unit coverage.
