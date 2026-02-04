@@ -106,5 +106,57 @@ export function registerAssignCommand(frontCommand: Command): void {
     .argument('[teammate-id]', 'Teammate ID (tea_xxx) - omit with --unassign')
     .option('--unassign', 'Remove assignee')
     .option('--json', 'Output as JSON')
+    .addHelpText(
+      'after',
+      `
+━━━ Assign / Unassign Conversations ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Assign a conversation to a teammate, or remove the current assignee.
+  Accepts conversation IDs (cnv_xxx) and teammate IDs (tea_xxx).
+
+ASSIGN
+  skill front assign <conversation-id> <teammate-id>
+
+  The teammate must exist in your Front workspace.
+
+UNASSIGN
+  skill front assign <conversation-id> --unassign
+
+  Removes the current assignee. Cannot be combined with a teammate ID.
+
+FINDING IDs
+  Teammate IDs:
+    skill front teammates                                 # Human-readable list
+    skill front teammates --json | jq '.[].id'            # Just the IDs
+
+  Conversation IDs:
+    skill front search --inbox inb_xxx --json | jq '.data.conversations[].id'
+    skill front conversation <cnv_xxx>                    # Verify a conversation
+
+JSON OUTPUT (--json)
+  Returns a HATEOAS-wrapped object:
+    { type: "assign-result", data: { id, assignee, success } }
+
+EXAMPLES
+  # Assign a conversation to a teammate
+  skill front assign cnv_abc123 tea_def456
+
+  # Unassign (remove assignee)
+  skill front assign cnv_abc123 --unassign
+
+  # Assign and get JSON output
+  skill front assign cnv_abc123 tea_def456 --json
+
+  # Pipeline: assign all unassigned convos in an inbox to a teammate
+  skill front search --inbox inb_4bj7r --status unassigned --json \\
+    | jq -r '.data.conversations[].id' \\
+    | xargs -I{} skill front assign {} tea_def456
+
+RELATED COMMANDS
+  skill front teammates              List teammates and their IDs
+  skill front conversation <id>      View conversation details + current assignee
+  skill front search                 Find conversations by filters
+`
+    )
     .action(assignConversation)
 }
