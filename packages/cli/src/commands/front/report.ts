@@ -315,5 +315,63 @@ export function registerReportCommand(front: Command): void {
       30
     )
     .option('--json', 'Output as JSON')
+    .addHelpText(
+      'after',
+      `
+━━━ Inbox Forensics Report ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Generates a comprehensive report for a Front inbox covering the last N days.
+  --inbox is required. --days defaults to 30.
+
+WHAT THE REPORT INCLUDES
+  - Overview: total conversations, status breakdown with percentages
+  - Volume by week: bar chart of conversation volume per ISO week
+  - Tag breakdown: top 15 tags by frequency
+  - Top senders: top 10 sender email addresses
+  - Unresolved issues: unassigned conversations (newest first, up to 10 shown)
+
+BASIC USAGE
+  skill front report --inbox inb_4bj7r
+  skill front report --inbox inb_4bj7r --days 60
+  skill front report --inbox inb_4bj7r --days 7
+
+JSON OUTPUT (for scripting)
+  skill front report --inbox inb_4bj7r --json
+
+  # Extract unresolved issues
+  skill front report --inbox inb_4bj7r --json | jq '.data.unresolvedIssues'
+
+  # Top senders
+  skill front report --inbox inb_4bj7r --json | jq '.data.topSenders'
+
+  # Volume by week
+  skill front report --inbox inb_4bj7r --json | jq '.data.volumeByWeek'
+
+  # Status breakdown
+  skill front report --inbox inb_4bj7r --json | jq '.data.overview.byStatus'
+
+  # Count of unassigned conversations
+  skill front report --inbox inb_4bj7r --json | jq '.data.unresolvedIssues | length'
+
+  # Senders with more than 5 conversations
+  skill front report --inbox inb_4bj7r --json \\
+    | jq '[.data.topSenders[] | select(.count > 5)]'
+
+WORKFLOW: REPORT → TRIAGE → ARCHIVE
+  # 1. Run report to understand inbox state
+  skill front report --inbox inb_4bj7r
+
+  # 2. Triage to categorize conversations
+  skill front triage --inbox inb_4bj7r
+
+  # 3. Bulk archive the noise
+  skill front bulk-archive --inbox inb_4bj7r --sender "noreply@" --dry-run
+
+RELATED COMMANDS
+  skill front triage          Categorize conversations by intent
+  skill front inbox           List and inspect inboxes
+  skill front bulk-archive    Archive conversations matching filters
+`
+    )
     .action(generateReport)
 }

@@ -426,5 +426,66 @@ export function registerBulkArchiveCommand(parent: Command): void {
     )
     .option('--dry-run', 'Preview without archiving')
     .option('--json', 'JSON output')
+    .addHelpText(
+      'after',
+      `
+━━━ Bulk Archive Conversations ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Archive conversations matching filter criteria from a specific inbox.
+  Requires --inbox and at least one filter. Filters are AND-combined.
+  Rate limiting is built in (100-150ms between API calls).
+
+  ⚠️  ALWAYS use --dry-run first to preview what would be archived.
+
+FILTER OPTIONS
+  --sender <email>        Sender email (substring match, case-insensitive)
+  --subject <text>        Subject line (substring match, case-insensitive)
+  --status <status>       Conversation status (unassigned, assigned, archived)
+  --tag <name>            Tag name (substring match, case-insensitive)
+  --older-than <duration> Age filter — duration format: 30d, 7d, 24h, 60m
+
+  Filters combine with AND: --status unassigned --older-than 30d means
+  conversations that are BOTH unassigned AND older than 30 days.
+
+DRY RUN (preview first!)
+  skill front bulk-archive --inbox inb_4bj7r --sender "mailer-daemon" --dry-run
+
+  Shows matching count + each conversation ID/subject/reason. No changes made.
+
+EXECUTE (after verifying dry run)
+  skill front bulk-archive --inbox inb_4bj7r --sender "mailer-daemon"
+
+PRACTICAL EXAMPLES
+  # Archive all noise from mailer-daemon
+  skill front bulk-archive --inbox inb_4bj7r --sender "mailer-daemon" --dry-run
+  skill front bulk-archive --inbox inb_4bj7r --sender "mailer-daemon"
+
+  # Archive unassigned conversations older than 30 days
+  skill front bulk-archive --inbox inb_4bj7r --status unassigned --older-than 30d --dry-run
+
+  # Archive everything tagged "spam"
+  skill front bulk-archive --inbox inb_4bj7r --tag "spam" --dry-run
+
+  # Archive old daily report emails
+  skill front bulk-archive --inbox inb_4bj7r --subject "Daily Report" --older-than 7d --dry-run
+
+  # List available inboxes (omit --inbox)
+  skill front bulk-archive
+
+JSON OUTPUT (for scripting)
+  skill front bulk-archive --inbox inb_4bj7r --status unassigned --dry-run --json
+
+  # Count matches
+  skill front bulk-archive ... --dry-run --json | jq '.data.matches | length'
+
+  # Extract matched IDs
+  skill front bulk-archive ... --dry-run --json | jq -r '.data.matches[].id'
+
+RELATED COMMANDS
+  skill front triage          Categorize conversations before archiving
+  skill front archive         Archive specific conversations by ID
+  skill front search          Find conversations by query / filters
+`
+    )
     .action(bulkArchiveConversations)
 }
