@@ -182,6 +182,23 @@ non-interactive operation:
 - Check exit codes: 0 = success, 1 = error
 - Never interactive in non-TTY environments (CI/CD safe)
 
+## Auth (Encrypted Secrets)
+
+Distribute CLI secrets to team members via age encryption + 1Password.
+
+```bash
+# Generate keypair (admin)
+skill auth keygen
+
+# Encrypt secrets (admin)
+skill auth encrypt .env.local
+
+# Decrypt secrets (team)
+skill auth decrypt .env.local.age --output .env.local
+```
+
+See [docs/CLI-AUTH.md](./docs/CLI-AUTH.md) for complete setup guide.
+
 ## Implementation
 
 - `packages/cli/src/commands/` - Command implementations
