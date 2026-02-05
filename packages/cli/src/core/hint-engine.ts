@@ -66,7 +66,7 @@ export const DEFAULT_HINT_RULES: HintRule[] = [
   {
     id: 'onboarding.auth',
     audience: 'onboarding',
-    message: 'Set up credentials with `skill auth setup` (requires 1Password).',
+    message: 'Set up your own API keys with `skill keys`.',
     showWhen: (state) =>
       state.totalRuns >= 1 && !hasMilestone(state, 'auth_configured'),
     retireWhen: (state) => hasMilestone(state, 'auth_configured'),
@@ -101,6 +101,19 @@ export const DEFAULT_HINT_RULES: HintRule[] = [
     showWhen: (state) =>
       state.totalRuns >= 3 && !hasCommandPrefix(state, 'axiom.'),
     retireWhen: (state) => hasCommandPrefix(state, 'axiom.'),
+  },
+  {
+    id: 'discovery.keys',
+    audience: 'discovery',
+    message: 'Override shared credentials with your own: `skill keys add`',
+    showWhen: (state) =>
+      state.totalRuns >= 3 &&
+      !hasCommand(state, 'keys') &&
+      !hasMilestone(state, 'auth_configured'),
+    retireWhen: (state) =>
+      hasCommand(state, 'keys') ||
+      hasCommand(state, 'keys.add') ||
+      hasMilestone(state, 'auth_configured'),
   },
   {
     id: 'context.front.triage',

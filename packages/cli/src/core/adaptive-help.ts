@@ -10,8 +10,8 @@ const ROOT_DESCRIPTIONS: Record<ProficiencyLevel, string> = {
   full:
     'Skill Recordings support agent CLI — triage, investigate, and manage customer conversations.\n\n' +
     '  Getting Started:\n' +
-    '    1. skill auth setup        Configure 1Password secrets (Front API token, DB, etc.)\n' +
-    '    2. skill auth status        Verify your credentials are working\n' +
+    '    1. skill wizard            Interactive app setup wizard\n' +
+    '    2. skill keys              Manage your personal API keys\n' +
     '    3. skill front inbox        See what needs attention right now\n\n' +
     '  Common Workflows:\n' +
     '    Triage inbox          skill front inbox → skill front triage\n' +
@@ -26,7 +26,8 @@ const ROOT_DESCRIPTIONS: Record<ProficiencyLevel, string> = {
   abbreviated:
     'Skill Recordings support agent CLI — triage and investigate support conversations.\n\n' +
     '  Start here:\n' +
-    '    skill auth setup        Configure 1Password + secrets\n' +
+    '    skill wizard            Set up a new product\n' +
+    '    skill keys              Manage API keys\n' +
     '    skill front inbox       See what needs attention\n' +
     '    skill front triage      Auto-categorize conversations\n\n' +
     '  Common:\n' +
@@ -35,7 +36,7 @@ const ROOT_DESCRIPTIONS: Record<ProficiencyLevel, string> = {
     '    skill deploys\n' +
     '    skill mcp\n',
   minimal:
-    'Skill Recordings support agent CLI. Try: skill front inbox, skill front triage, skill auth status. Use --help for details.',
+    'Skill Recordings support agent CLI. Try: skill wizard, skill keys, skill front inbox, skill front triage. Use --help for details.',
 }
 
 const FRONT_DESCRIPTIONS: Record<ProficiencyLevel, string> = {

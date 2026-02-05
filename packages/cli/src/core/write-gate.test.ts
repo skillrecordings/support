@@ -60,7 +60,7 @@ describe('write-gate', () => {
         expect(error).toBeInstanceOf(CLIError)
         expect((error as CLIError).exitCode).toBe(EXIT_CODES.auth)
         expect((error as CLIError).userMessage).toContain('personal API key')
-        expect((error as CLIError).suggestion).toContain('skill config init')
+        expect((error as CLIError).suggestion).toContain('skill keys add')
       }
     })
 
@@ -86,7 +86,7 @@ describe('write-gate', () => {
         const cliError = error as CLIError
         expect(cliError.userMessage).toContain('STRIPE_SECRET_KEY')
         expect(cliError.userMessage).toContain('Write operations')
-        expect(cliError.suggestion).toContain('skill config init')
+        expect(cliError.suggestion).toContain('skill keys add')
       }
     })
   })

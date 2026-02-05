@@ -205,7 +205,7 @@ export async function getIssue(ctx: CommandContext, id: string): Promise<void> {
     ctx.output.data(`     • Close:    skill linear close ${issue.identifier}`)
     ctx.output.data('')
     ctx.output.data('   ⚠️  Write operations require a personal LINEAR_API_KEY.')
-    ctx.output.data('       Run `skill config init` to set up your keys.')
+    ctx.output.data('       Run `skill keys add` to set up your keys.')
     ctx.output.data('')
   } catch (error) {
     const cliError =

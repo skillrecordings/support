@@ -48,6 +48,7 @@ import { health } from './commands/health'
 import { init } from './commands/init'
 import { registerInngestCommands } from './commands/inngest/index'
 import { registerKbCommands } from './commands/kb-sync'
+import { registerKeysCommands } from './commands/keys/index'
 import { registerLinearCommands } from './commands/linear/index'
 import { registerMemoryCommands } from './commands/memory/index'
 import { registerPipelineCommands } from './commands/pipeline'
@@ -413,6 +414,7 @@ registerDeployCommands(program)
 registerKbCommands(program)
 registerAuthCommands(program, usageState)
 registerConfigCommands(program)
+registerKeysCommands(program)
 
 // Plugin commands
 registerPluginSyncCommand(program)
