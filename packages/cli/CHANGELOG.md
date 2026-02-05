@@ -1,5 +1,24 @@
 # @skillrecordings/cli
 
+## 0.16.1
+
+### Patch Changes
+
+- 7a1dc16: fix(cli): require personal LINEAR_API_KEY for user-specific operations
+
+  Linear operations that are user-specific now require a personal API key:
+  - `my` - shows YOUR issues (requires your key)
+  - Write operations: create, update, assign, state, close, label, link, comment
+
+  Read operations that don't involve user identity (issues, search, teams, etc.)
+  continue to work with the shipped key.
+
+- 5712b51: fix(cli): remove misleading prerequisite text from help
+
+  Keys ship encrypted with the CLI, so telling users they need to set
+  FRONT_API_TOKEN or INNGEST keys is confusing. Updated all adaptive
+  help descriptions to reflect reality.
+
 ## 0.16.0
 
 ### Minor Changes
