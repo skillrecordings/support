@@ -72,23 +72,46 @@ async function decryptEnvFile(
 }
 
 /**
- * Get age private key from 1Password
+ * Get age private key.
+ * Priority:
+ * 1. SKILL_AGE_KEY env var (set from keychain via shell export)
+ * 2. 1Password SDK (if OP_SERVICE_ACCOUNT_TOKEN available)
+ * 3. Direct keychain lookup (macOS only)
  */
 async function getAgeKeyFrom1Password(): Promise<string | null> {
-  if (!process.env.OP_SERVICE_ACCOUNT_TOKEN) {
-    return null
+  // 1. Check env var (fast path when shell integration is set up)
+  if (process.env.SKILL_AGE_KEY) {
+    return process.env.SKILL_AGE_KEY
   }
 
-  try {
-    const { OnePasswordProvider } = await import('./secrets')
-    const op = new OnePasswordProvider()
-    if (!(await op.isAvailable())) {
-      return null
+  // 2. Try 1Password SDK
+  if (process.env.OP_SERVICE_ACCOUNT_TOKEN) {
+    try {
+      const { OnePasswordProvider } = await import('./secrets')
+      const op = new OnePasswordProvider()
+      if (await op.isAvailable()) {
+        const key = await op.resolve(
+          'op://Support/skill-cli-age-key/private_key'
+        )
+        if (key) return key
+      }
+    } catch {
+      // Fall through to keychain
     }
-    return await op.resolve('op://Support/skill-cli-age-key/private_key')
-  } catch {
-    return null
   }
+
+  // 3. Try keychain directly (macOS)
+  if (process.platform === 'darwin') {
+    try {
+      const { getFromKeychain } = await import('./keychain')
+      const key = getFromKeychain('age-private-key')
+      if (key) return key
+    } catch {
+      // Keychain not available
+    }
+  }
+
+  return null
 }
 
 /**
