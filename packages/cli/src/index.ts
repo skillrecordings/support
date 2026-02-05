@@ -5,6 +5,7 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
+let envLoaded = false
 const cliRoot = resolve(import.meta.dirname, '../..')
 for (const envFile of ['.env.local', '.env']) {
   try {
@@ -22,12 +23,18 @@ for (const envFile of ['.env.local', '.env']) {
         process.env[key] = value
       }
     }
+    envLoaded = true
   } catch {
     // File doesn't exist — skip
   }
 }
 
-import { closeDb } from '@skillrecordings/database'
+// Skip env validation when no .env file found (e.g., global npm install, --help, --version)
+// Commands that need DATABASE_URL will fail at runtime with a clear error instead.
+if (!envLoaded && !process.env.DATABASE_URL) {
+  process.env.SKIP_ENV_VALIDATION = '1'
+}
+
 import { Command } from 'commander'
 import { registerAuthCommands } from './commands/auth/index'
 import { registerAxiomCommands } from './commands/axiom/index'
@@ -235,5 +242,7 @@ program
 
 // Parse and cleanup DB connections when done
 program.parseAsync().finally(async () => {
+  // Lazy import — avoid triggering env validation for non-DB commands (--help, --version, front)
+  const { closeDb } = await import('@skillrecordings/database')
   await closeDb()
 })
