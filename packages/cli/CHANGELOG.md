@@ -1,5 +1,11 @@
 # @skillrecordings/cli
 
+## 0.12.0
+
+### Minor Changes
+
+- 6ce0356: Add adaptive onboarding/discovery hints with telemetry polish and docs.
+
 ## 0.11.2
 
 ### Patch Changes
