@@ -14,7 +14,7 @@
 import { resolve } from 'node:path'
 import { loadPlaintextEnv } from './core/config-loader'
 
-const cliRoot = resolve(import.meta.dirname, '../..')
+const cliRoot = resolve(import.meta.dirname, '..')
 const plaintextEnv = loadPlaintextEnv(cliRoot)
 
 let envLoaded = false
