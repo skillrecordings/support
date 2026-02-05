@@ -38,6 +38,7 @@ import { registerDatasetCommands } from './commands/build-dataset'
 import { registerConfigCommands } from './commands/config/index'
 import { registerDbStatusCommand } from './commands/db-status'
 import { registerDeployCommands } from './commands/deploys'
+import { registerDoctorCommand } from './commands/doctor'
 import { runEval } from './commands/eval'
 import { registerEvalLocalCommands } from './commands/eval-local/index'
 import { registerEvalPipelineCommands } from './commands/eval-pipeline/index'
@@ -50,6 +51,7 @@ import { registerInngestCommands } from './commands/inngest/index'
 import { registerKbCommands } from './commands/kb-sync'
 import { registerKeysCommands } from './commands/keys/index'
 import { registerLinearCommands } from './commands/linear/index'
+import { registerListCommand } from './commands/list'
 import { registerMemoryCommands } from './commands/memory/index'
 import { registerPipelineCommands } from './commands/pipeline'
 import { registerPluginSyncCommand } from './commands/plugin-sync'
@@ -402,6 +404,10 @@ registerKbCommands(program)
 registerAuthCommands(program, usageState)
 registerConfigCommands(program)
 registerKeysCommands(program)
+
+// Discovery + diagnostics
+registerDoctorCommand(program)
+registerListCommand(program)
 
 // Plugin commands
 registerPluginSyncCommand(program)

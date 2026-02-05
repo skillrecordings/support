@@ -571,7 +571,9 @@ export async function listApprovals(
 export function registerAxiomCommands(program: Command): void {
   const axiom = program
     .command('axiom')
-    .description('Query Axiom logs and traces')
+    .description(
+      'Query Axiom logs and traces.\n  Environment: AXIOM_TOKEN required. Run `skill doctor` to check.'
+    )
 
   axiom
     .command('query')

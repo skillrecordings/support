@@ -90,6 +90,13 @@ Quick start:
   skill linear create "Title"        Create issue
   skill linear search "query"        Search issues
 
+Bulk queries:
+  skill linear issues --older-than 90d          Stale issues
+  skill linear issues --older-than 2w --export  Full data export
+
+Environment:
+  LINEAR_API_KEY required. Run 'skill doctor' to check.
+
 All commands support --json for machine-readable output.
 
 ⚠️  Write operations require personal LINEAR_API_KEY (run 'skill keys add').`
@@ -109,7 +116,9 @@ Examples:
   skill linear issues --team ENG              Filter by team
   skill linear issues --state "In Progress"   Filter by state
   skill linear issues --assignee me           Your issues
-  skill linear issues --priority 0            Urgent only`
+  skill linear issues --priority 0            Urgent only
+  skill linear issues --older-than 90d        Stale issues (90+ days)
+  skill linear issues --older-than 2w --export  Full export`
     )
     .option('--limit <number>', 'Maximum results (default: 20)', '20')
     .option('--team <key>', 'Filter by team key (e.g., ENG)')
@@ -117,6 +126,8 @@ Examples:
     .option('--assignee <email>', 'Filter by assignee (or "me")')
     .option('--project <name>', 'Filter by project name')
     .option('--priority <0-4>', 'Filter by priority (0=urgent)')
+    .option('--older-than <time>', 'Filter by last update (90d, 2w, 24h, 3m)')
+    .option('--export', 'Include full details (description, labels, comments)')
     .option('--json', 'Output as JSON with HATEOAS links')
     .action(async (options, command: Command) => {
       const ctx = await contextFromCommand(command, options)
@@ -130,6 +141,8 @@ Examples:
           options.priority !== undefined
             ? parseInt(options.priority, 10)
             : undefined,
+        olderThan: options.olderThan,
+        export: options.export,
       })
     })
 

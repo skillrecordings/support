@@ -32,7 +32,7 @@ describe('adaptive help descriptions', () => {
   it('falls back to static descriptions when usage is unavailable', () => {
     const description = getFrontAdaptiveDescription(null)
     expect(description).toContain('Front conversations')
-    expect(description).toContain('Prerequisites')
+    expect(description).toContain('Environment')
   })
 
   it('collapses root help from full to abbreviated to minimal', () => {
@@ -69,7 +69,7 @@ describe('adaptive help descriptions', () => {
 
     expect(frontFull).toContain('Start here')
     expect(frontAbbrev).toContain('Common')
-    expect(frontMinimal).toContain('Requires FRONT_API_TOKEN')
+    expect(frontMinimal).toContain('Front API commands')
 
     const authFull = getAuthAdaptiveDescription(
       createState({
@@ -88,9 +88,9 @@ describe('adaptive help descriptions', () => {
       })
     )
 
-    expect(authFull).toContain('First time? Start here')
-    expect(authAbbrev).toContain('Start:')
-    expect(authMinimal).toContain('Auth and 1Password')
+    expect(authFull).toContain('Check your setup')
+    expect(authAbbrev).toContain('Commands')
+    expect(authMinimal).toContain('Auth status commands')
 
     const inngestFull = getInngestAdaptiveDescription(
       createState({

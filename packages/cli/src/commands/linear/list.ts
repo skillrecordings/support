@@ -41,6 +41,34 @@ interface ListOptions {
   assignee?: string
   project?: string
   priority?: number
+  olderThan?: string
+  export?: boolean
+}
+
+/**
+ * Parse relative time string (e.g., '90d', '2w', '24h', '3m') into Date
+ */
+function parseRelativeTime(timeStr: string): Date {
+  const match = timeStr.match(/^(\d+)(d|w|h|m)$/)
+  if (!match || !match[1] || !match[2]) {
+    throw new CLIError({
+      userMessage: `Invalid time format: ${timeStr}`,
+      suggestion: 'Use format like 90d, 2w, 24h, or 3m',
+    })
+  }
+
+  const value = parseInt(match[1], 10)
+  const unit = match[2] as 'd' | 'w' | 'h' | 'm'
+
+  const msMap: Record<'d' | 'w' | 'h' | 'm', number> = {
+    h: 60 * 60 * 1000,
+    d: 24 * 60 * 60 * 1000,
+    w: 7 * 24 * 60 * 60 * 1000,
+    m: 30 * 24 * 60 * 60 * 1000,
+  }
+
+  const ms = value * msMap[unit]
+  return new Date(Date.now() - ms)
 }
 
 /**
@@ -63,6 +91,12 @@ export async function listIssues(
           neq: 'canceled',
         },
       },
+    }
+
+    // Time filter
+    if (options.olderThan) {
+      const date = parseRelativeTime(options.olderThan)
+      filter.updatedAt = { lt: date }
     }
 
     // Team filter
@@ -148,31 +182,65 @@ export async function listIssues(
 
     // Resolve states and teams for all issues (LinearFetch<T> must be awaited)
     const issuesWithDetails = await Promise.all(
-      issues.map(async (issue) => ({
-        issue,
-        state: await issue.state,
-        assignee: await issue.assignee,
-        team: await issue.team,
-      }))
+      issues.map(async (issue) => {
+        const labels = options.export ? await issue.labels() : null
+        const comments = options.export ? await issue.comments() : null
+
+        return {
+          issue,
+          state: await issue.state,
+          assignee: await issue.assignee,
+          team: await issue.team,
+          labels: labels?.nodes || null,
+          comments: comments?.nodes || null,
+        }
+      })
     )
 
     if (ctx.format === 'json') {
-      const issueData = issuesWithDetails.map(
-        ({ issue, state, assignee, team }) => ({
-          id: issue.id,
-          identifier: issue.identifier,
-          title: issue.title,
-          state: state?.name || null,
-          stateType: state?.type || null,
-          priority: issue.priority,
-          assignee: assignee
-            ? { id: assignee.id, name: assignee.name, email: assignee.email }
-            : null,
-          team: team ? { key: team.key, name: team.name } : null,
-          url: issue.url,
-          createdAt: issue.createdAt,
-          updatedAt: issue.updatedAt,
-        })
+      const issueData = await Promise.all(
+        issuesWithDetails.map(
+          async ({ issue, state, assignee, team, labels, comments }) => {
+            const baseData = {
+              id: issue.id,
+              identifier: issue.identifier,
+              title: issue.title,
+              state: state?.name || null,
+              stateType: state?.type || null,
+              priority: issue.priority,
+              assignee: assignee
+                ? {
+                    id: assignee.id,
+                    name: assignee.name,
+                    email: assignee.email,
+                  }
+                : null,
+              team: team ? { key: team.key, name: team.name } : null,
+              url: issue.url,
+              createdAt: issue.createdAt,
+              updatedAt: issue.updatedAt,
+            }
+
+            if (options.export) {
+              return {
+                ...baseData,
+                description: issue.description,
+                labels: labels ? labels.map((l) => l.name) : [],
+                comments: comments
+                  ? await Promise.all(
+                      comments.map(async (c) => ({
+                        body: c.body,
+                        user: (await c.user)?.name || 'Unknown',
+                        createdAt: c.createdAt,
+                      }))
+                    )
+                  : [],
+              }
+            }
+
+            return baseData
+          }
+        )
       )
 
       ctx.output.data(
@@ -226,7 +294,14 @@ export async function listIssues(
       return
     }
 
-    for (const { issue, state, assignee, team } of issuesWithDetails) {
+    for (const {
+      issue,
+      state,
+      assignee,
+      team,
+      labels,
+      comments,
+    } of issuesWithDetails) {
       const emoji = PRIORITY_EMOJI[issue.priority] || '⚪'
       const assigneeName = assignee ? `@${assignee.name}` : ''
       const teamBadge = team ? `[${team.key}]` : ''
@@ -238,6 +313,20 @@ export async function listIssues(
       ctx.output.data(
         `      Status: ${state?.name || 'unknown'}${assigneeName ? ` | Assignee: ${assigneeName}` : ''}`
       )
+
+      if (options.export) {
+        if (issue.description) {
+          ctx.output.data(`      Description: ${issue.description}`)
+        }
+        if (labels && labels.length > 0) {
+          ctx.output.data(
+            `      Labels: ${labels.map((l) => l.name).join(', ')}`
+          )
+        }
+        if (comments && comments.length > 0) {
+          ctx.output.data(`      Comments: ${comments.length}`)
+        }
+      }
     }
 
     ctx.output.data('')
