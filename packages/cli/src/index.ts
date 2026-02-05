@@ -103,7 +103,6 @@ const usageState = await (async () => {
     return null
   }
 })()
-const hintCounts = new WeakMap<Command, number>()
 const commandStartTimes = new WeakMap<Command, number>()
 
 const resolveCommandName = (command: Command): string => {
@@ -186,17 +185,8 @@ program.hook('preAction', (_thisCommand, actionCommand) => {
   commandStartTimes.set(actionCommand, Date.now())
 })
 
-program.hook('preAction', async (_thisCommand, actionCommand) => {
-  try {
-    const context = resolveHintContext(actionCommand)
-    const state = await usageTracker.getUsage()
-    const hints = hintEngine.getHints(state, context)
-    writeHints(hints, process.stderr)
-    hintCounts.set(actionCommand, hints.length)
-  } catch {
-    // Never let hint rendering break the CLI.
-  }
-})
+// Hints are now only shown after command output (postAction).
+// No more random hints before you see your results.
 
 program.hook('postAction', async (_thisCommand, actionCommand) => {
   try {
@@ -206,11 +196,8 @@ program.hook('postAction', async (_thisCommand, actionCommand) => {
     for (const milestone of milestones) {
       await usageTracker.setMilestone(milestone)
     }
-    const previouslyShown = hintCounts.get(actionCommand) ?? 0
-    const postHint = hintEngine.getPostRunHint(state, {
-      ...context,
-      previouslyShown,
-    })
+    // Show contextual hint after command output
+    const postHint = hintEngine.getPostRunHint(state, context)
     if (postHint) writeHints([postHint], process.stderr)
   } catch {
     // Never let usage tracking break the CLI.

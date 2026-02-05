@@ -54,73 +54,23 @@ const toHint = (rule: HintRule): Hint => ({
   audience: rule.audience,
 })
 
+/**
+ * Check if command is in a specific group (e.g., 'front' matches 'front.inbox')
+ */
+const isCommandGroup = (command: string, group: string): boolean =>
+  command === group || command.startsWith(`${group}.`)
+
+/**
+ * All hints are now contextual and shown AFTER command output.
+ * No more random discovery hints before you even see your results.
+ */
 export const DEFAULT_HINT_RULES: HintRule[] = [
-  {
-    id: 'onboarding.wizard',
-    audience: 'onboarding',
-    message: 'New here? Run `skill wizard` to set up your first product.',
-    showWhen: (state) => state.totalRuns <= 2 && !hasCommand(state, 'wizard'),
-    retireWhen: (state) =>
-      hasCommand(state, 'wizard') || hasMilestone(state, 'wizard_completed'),
-  },
-  {
-    id: 'onboarding.auth',
-    audience: 'onboarding',
-    message: 'Set up your own API keys with `skill keys`.',
-    showWhen: (state) =>
-      state.totalRuns >= 1 && !hasMilestone(state, 'auth_configured'),
-    retireWhen: (state) => hasMilestone(state, 'auth_configured'),
-  },
-  {
-    id: 'discovery.health',
-    audience: 'discovery',
-    message: 'Check integrations fast with `skill health <app-slug>`.',
-    showWhen: (state) => state.totalRuns >= 2 && !hasCommand(state, 'health'),
-    retireWhen: (state) => hasCommand(state, 'health'),
-  },
-  {
-    id: 'discovery.front.inbox',
-    audience: 'discovery',
-    message: 'List recent conversations via `skill front inbox <name-or-id>`.',
-    showWhen: (state) =>
-      state.totalRuns >= 1 && !hasCommand(state, 'front.inbox'),
-    retireWhen: (state) => hasCommand(state, 'front.inbox'),
-  },
-  {
-    id: 'discovery.inngest',
-    audience: 'discovery',
-    message: 'Inspect workflows with `skill inngest stats --after 1d`.',
-    showWhen: (state) =>
-      state.totalRuns >= 3 && !hasCommandPrefix(state, 'inngest.'),
-    retireWhen: (state) => hasCommandPrefix(state, 'inngest.'),
-  },
-  {
-    id: 'discovery.axiom',
-    audience: 'discovery',
-    message: 'Query logs quickly with `skill axiom query "<APL>" --since 24h`.',
-    showWhen: (state) =>
-      state.totalRuns >= 3 && !hasCommandPrefix(state, 'axiom.'),
-    retireWhen: (state) => hasCommandPrefix(state, 'axiom.'),
-  },
-  {
-    id: 'discovery.keys',
-    audience: 'discovery',
-    message: 'Override shared credentials with your own: `skill keys add`',
-    showWhen: (state) =>
-      state.totalRuns >= 3 &&
-      !hasCommand(state, 'keys') &&
-      !hasMilestone(state, 'auth_configured'),
-    retireWhen: (state) =>
-      hasCommand(state, 'keys') ||
-      hasCommand(state, 'keys.add') ||
-      hasMilestone(state, 'auth_configured'),
-  },
+  // Front contextual hints
   {
     id: 'context.front.triage',
     audience: 'contextual',
     postRun: true,
-    message:
-      'Tip: `skill front triage <inbox-id>` surfaces unassigned threads.',
+    message: 'Tip: `skill front triage` to auto-categorize unassigned threads.',
     showWhen: (state, context) =>
       context.command === 'front.inbox' && !hasCommand(state, 'front.triage'),
     retireWhen: (state) => hasCommand(state, 'front.triage'),
@@ -136,17 +86,74 @@ export const DEFAULT_HINT_RULES: HintRule[] = [
     retireWhen: (state) => hasCommand(state, 'front.conversation'),
   },
   {
+    id: 'context.front.reply',
+    audience: 'contextual',
+    postRun: true,
+    message: 'Tip: `skill front reply <id>` to draft a response.',
+    showWhen: (state, context) =>
+      context.command === 'front.conversation' &&
+      !hasCommand(state, 'front.reply'),
+    retireWhen: (state) => hasCommand(state, 'front.reply'),
+  },
+
+  // Inngest contextual hints
+  {
     id: 'context.inngest.run',
     audience: 'contextual',
     postRun: true,
-    message:
-      'Tip: drill in with `skill inngest run <id>` or `skill inngest trace <run-id>`.',
+    message: 'Tip: `skill inngest run <id>` to inspect a specific run.',
     showWhen: (state, context) =>
-      context.command === 'inngest.failures' &&
-      !hasCommand(state, 'inngest.run') &&
-      !hasCommand(state, 'inngest.trace'),
+      (context.command === 'inngest.failures' ||
+        context.command === 'inngest.runs') &&
+      !hasCommand(state, 'inngest.run'),
+    retireWhen: (state) => hasCommand(state, 'inngest.run'),
+  },
+  {
+    id: 'context.inngest.trace',
+    audience: 'contextual',
+    postRun: true,
+    message: 'Tip: `skill inngest trace <run-id>` for full workflow trace.',
+    showWhen: (state, context) =>
+      context.command === 'inngest.run' && !hasCommand(state, 'inngest.trace'),
+    retireWhen: (state) => hasCommand(state, 'inngest.trace'),
+  },
+
+  // Linear contextual hints
+  {
+    id: 'context.linear.my',
+    audience: 'contextual',
+    postRun: true,
+    message: 'Tip: `skill linear my` to see your assigned issues.',
+    showWhen: (state, context) =>
+      isCommandGroup(context.command, 'linear') &&
+      context.command !== 'linear.my' &&
+      !hasCommand(state, 'linear.my'),
+    retireWhen: (state) => hasCommand(state, 'linear.my'),
+  },
+
+  // Axiom contextual hints
+  {
+    id: 'context.axiom.errors',
+    audience: 'contextual',
+    postRun: true,
+    message: 'Tip: `skill axiom errors --since 1h` to see recent errors.',
+    showWhen: (state, context) =>
+      context.command === 'axiom.query' && !hasCommand(state, 'axiom.errors'),
+    retireWhen: (state) => hasCommand(state, 'axiom.errors'),
+  },
+
+  // Keys hint - only when auth issues are likely
+  {
+    id: 'context.keys',
+    audience: 'contextual',
+    postRun: true,
+    message: 'Tip: `skill keys setup` to configure keychain integration.',
+    showWhen: (state, context) =>
+      context.command === 'auth.status' &&
+      !hasCommand(state, 'keys.setup') &&
+      !hasMilestone(state, 'auth_configured'),
     retireWhen: (state) =>
-      hasCommand(state, 'inngest.run') || hasCommand(state, 'inngest.trace'),
+      hasCommand(state, 'keys.setup') || hasMilestone(state, 'auth_configured'),
   },
 ]
 
