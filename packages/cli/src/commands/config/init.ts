@@ -1,7 +1,5 @@
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
-import { dirname, join } from 'node:path'
-import { generateIdentity, identityToRecipient } from 'age-encryption'
+import { join } from 'node:path'
 import type { CommandContext } from '../../core/context'
 import { EXIT_CODES } from '../../core/errors'
 
@@ -33,78 +31,38 @@ export function getAgeKeyPath(): string {
 
 /**
  * Initialize user config with age keypair
+ *
+ * @deprecated This command is obsolete. The CLI now uses the 1Password age key directly.
+ * Use `skill keys` to manage personal API keys.
  */
 export async function configInitAction(
   ctx: CommandContext,
   options: ConfigInitOptions = {}
 ): Promise<void> {
   const outputJson = options.json === true || ctx.format === 'json'
-  const keyPath = getAgeKeyPath()
-  const configDir = getUserConfigDir()
 
-  // Check if key already exists
-  if (existsSync(keyPath) && !options.force) {
-    const result: ConfigInitResult = {
-      success: false,
-      error: `Age key already exists at ${keyPath}. Use --force to overwrite.`,
-    }
-
-    if (outputJson) {
-      ctx.output.data(result)
-    } else {
-      ctx.output.error(result.error!)
-      ctx.output.data(`\nTo view your public key: skill config public-key`)
-    }
-
-    process.exitCode = EXIT_CODES.usage
-    return
+  // This command is deprecated - redirect to skill keys
+  const result: ConfigInitResult = {
+    success: false,
+    error:
+      'DEPRECATED: skill config init is no longer needed.\n' +
+      'The CLI now uses the 1Password age key for encryption.\n' +
+      'Use `skill keys` to manage your personal API keys.',
   }
 
-  try {
-    // Ensure config directory exists
-    if (!existsSync(configDir)) {
-      mkdirSync(configDir, { recursive: true, mode: 0o700 })
-    }
-
-    // Generate age identity
-    const identity = await generateIdentity()
-    const recipient = await identityToRecipient(identity)
-
-    // Write private key to file with restricted permissions
-    writeFileSync(keyPath, identity, { encoding: 'utf8', mode: 0o600 })
-
-    const result: ConfigInitResult = {
-      success: true,
-      keyPath,
-      publicKey: recipient,
-    }
-
-    if (outputJson) {
-      ctx.output.data(result)
-    } else {
-      ctx.output.success('Age keypair generated successfully!')
-      ctx.output.data(`\nPrivate key saved to: ${keyPath}`)
-      ctx.output.data(`Public key (age recipient): ${recipient}`)
-      ctx.output.data(
-        '\n⚠️  Keep your private key secure. Anyone with access can decrypt your config.'
-      )
-      ctx.output.data('\nNext steps:')
-      ctx.output.data('  1. Set config values: skill config set KEY=value')
-      ctx.output.data('  2. View config: skill config list')
-    }
-  } catch (error) {
-    const result: ConfigInitResult = {
-      success: false,
-      error:
-        error instanceof Error ? error.message : 'Failed to generate keypair',
-    }
-
-    if (outputJson) {
-      ctx.output.data(result)
-    } else {
-      ctx.output.error(`Failed to generate keypair: ${result.error}`)
-    }
-
-    process.exitCode = EXIT_CODES.error
+  if (outputJson) {
+    ctx.output.data(result)
+  } else {
+    ctx.output.error('⚠️  DEPRECATED: skill config init is no longer needed.')
+    ctx.output.data('')
+    ctx.output.data('The CLI now uses the 1Password age key for encryption.')
+    ctx.output.data('Local age keypairs are no longer required.')
+    ctx.output.data('')
+    ctx.output.data('To manage your personal API keys:')
+    ctx.output.data('  skill keys           Interactive setup')
+    ctx.output.data('  skill keys add       Add a personal API key')
+    ctx.output.data('  skill keys status    Show key provenance')
   }
+
+  process.exitCode = EXIT_CODES.usage
 }

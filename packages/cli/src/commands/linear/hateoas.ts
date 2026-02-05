@@ -63,8 +63,8 @@ export function hateoasWrap<T>(opts: {
  */
 export const WRITE_ACTION_META: HateoasMeta = {
   personal_key_hint:
-    '⚠️ Write operations require a personal LINEAR_API_KEY. Run `skill config init` to set up your keys.',
-  setup_command: 'skill config init',
+    '⚠️ Write operations require a personal LINEAR_API_KEY. Run `skill keys add` to set up your keys.',
+  setup_command: 'skill keys add',
 }
 
 // ── Link/action builders for each resource type ──

@@ -30,7 +30,7 @@ export function registerConfigCommands(program: Command): void {
 
   config
     .command('init')
-    .description('Generate age keypair for user config encryption')
+    .description('[DEPRECATED] No longer needed - use `skill keys` instead')
     .option('--force', 'Overwrite existing keypair')
     .option('--json', 'Output as JSON')
     .action(async (options, command) => {

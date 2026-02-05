@@ -40,7 +40,7 @@ export function requirePersonalKey(keyName: string): void {
   throw new CLIError({
     userMessage: `Write operations require a personal API key for ${keyName}.`,
     exitCode: EXIT_CODES.auth,
-    suggestion: "Run 'skill config init' to set up your personal keys.",
+    suggestion: "Run 'skill keys add' to set up your personal keys.",
     debugMessage: `Key provenance for ${keyName}: ${provenance ?? 'undefined'}`,
   })
 }
