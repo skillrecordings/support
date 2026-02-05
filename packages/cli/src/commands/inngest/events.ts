@@ -1,6 +1,7 @@
 import type { Command } from 'commander'
 import { type CommandContext, createContext } from '../../core/context'
 import { CLIError, formatError } from '../../core/errors'
+import { withSpinner } from '../../core/spinner'
 import { type Event, InngestClient, type Run, parseTimeArg } from './client.js'
 
 /**
@@ -129,7 +130,9 @@ export async function listEvents(
     }
     params.limit = limit
 
-    const response = await client.listEvents(params)
+    const response = await withSpinner('Loading events...', () =>
+      client.listEvents(params)
+    )
 
     if (outputJson) {
       ctx.output.data(response.data)
@@ -167,10 +170,9 @@ export async function getEvent(
   try {
     const client = new InngestClient({ dev: options.dev })
 
-    const [event, runs] = await Promise.all([
-      client.getEvent(id),
-      client.getEventRuns(id),
-    ])
+    const [event, runs] = await withSpinner('Loading event...', () =>
+      Promise.all([client.getEvent(id), client.getEventRuns(id)])
+    )
 
     if (outputJson) {
       ctx.output.data({ event, runs })

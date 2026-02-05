@@ -20,6 +20,7 @@ import type { Command } from 'commander'
 import { type CommandContext, createContext } from '../../core/context'
 import { CLIError, formatError } from '../../core/errors'
 import { isListOutputFormat, outputList } from '../../core/list-output'
+import { withSpinner } from '../../core/spinner'
 import { getFrontClient, normalizeId } from './client'
 import {
   conversationActions,
@@ -105,7 +106,9 @@ export async function listInboxes(
 
   try {
     const front = getFrontClient(ctx)
-    const inboxList = (await front.inboxes.list()) as InboxList
+    const inboxList = (await withSpinner('Loading inboxes...', () =>
+      front.inboxes.list()
+    )) as InboxList
     const inboxes = inboxList._results ?? []
 
     if (idsOnly) {
@@ -199,7 +202,9 @@ export async function listConversations(
     const front = getFrontClient(ctx)
 
     // Find inbox
-    const inbox = await findInbox(ctx, inboxNameOrId)
+    const inbox = await withSpinner('Finding inbox...', () =>
+      findInbox(ctx, inboxNameOrId)
+    )
     if (!inbox) {
       throw new CLIError({
         userMessage: `Inbox not found: ${inboxNameOrId}`,

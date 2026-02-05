@@ -11,6 +11,7 @@
 
 import type { CommandContext } from '../../core/context'
 import { CLIError, formatError } from '../../core/errors'
+import { withSpinner } from '../../core/spinner'
 import { getLinearClient } from './client'
 import { hateoasWrap, issueListActions, issueListLinks } from './hateoas'
 
@@ -52,9 +53,11 @@ export async function searchIssues(
     const client = getLinearClient()
 
     // Use searchIssues for full-text search
-    const response = await client.searchIssues(query.trim(), {
-      first: limit,
-    })
+    const response = await withSpinner('Searching issues...', () =>
+      client.searchIssues(query.trim(), {
+        first: limit,
+      })
+    )
 
     const issues = response.nodes || []
 

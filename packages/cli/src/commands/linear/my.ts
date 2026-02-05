@@ -12,6 +12,7 @@
 
 import type { CommandContext } from '../../core/context'
 import { CLIError, formatError } from '../../core/errors'
+import { withSpinner } from '../../core/spinner'
 import { getLinearClient } from './client'
 import { hateoasWrap, issueListActions, issueListLinks } from './hateoas'
 
@@ -44,32 +45,37 @@ export async function listMyIssues(
   try {
     const client = getLinearClient()
 
-    // Get current user
-    const viewer = await client.viewer
+    // Get current user and issues
+    const { viewer, issues } = await withSpinner(
+      'Loading issues...',
+      async () => {
+        const viewer = await client.viewer
 
-    // Build filter
-    const filter: Record<string, unknown> = {
-      assignee: { id: { eq: viewer.id } },
-      state: {
-        type: {
-          nin: ['canceled', 'completed'],
-        },
-      },
-    }
+        // Build filter
+        const filter: Record<string, unknown> = {
+          assignee: { id: { eq: viewer.id } },
+          state: {
+            type: {
+              nin: ['canceled', 'completed'],
+            },
+          },
+        }
 
-    if (options.state) {
-      filter.state = {
-        ...((filter.state as Record<string, unknown>) || {}),
-        name: { eqIgnoreCase: options.state },
+        if (options.state) {
+          filter.state = {
+            ...((filter.state as Record<string, unknown>) || {}),
+            name: { eqIgnoreCase: options.state },
+          }
+        }
+
+        const response = await client.issues({
+          first: limit,
+          filter,
+        })
+
+        return { viewer, issues: response.nodes || [] }
       }
-    }
-
-    const response = await client.issues({
-      first: limit,
-      filter,
-    })
-
-    const issues = response.nodes || []
+    )
 
     // Resolve details
     const issuesWithDetails = await Promise.all(

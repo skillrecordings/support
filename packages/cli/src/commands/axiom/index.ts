@@ -11,6 +11,7 @@
 import type { Command } from 'commander'
 import { type CommandContext, createContext } from '../../core/context'
 import { CLIError, formatError } from '../../core/errors'
+import { withSpinner } from '../../core/spinner'
 import {
   formatDuration,
   formatTime,
@@ -52,10 +53,12 @@ export async function runQuery(
   const outputJson = options.json === true || ctx.format === 'json'
 
   try {
-    const result = await client.query(apl, {
-      startTime: startTime.toISOString(),
-      endTime: endTime.toISOString(),
-    })
+    const result = await withSpinner('Running query...', () =>
+      client.query(apl, {
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString(),
+      })
+    )
 
     if (outputJson) {
       ctx.output.data(result)
@@ -119,10 +122,12 @@ export async function listAgentRuns(
 | limit ${limit}`
 
   try {
-    const result = await client.query(apl, {
-      startTime: startTime.toISOString(),
-      endTime: endTime.toISOString(),
-    })
+    const result = await withSpinner('Loading agent runs...', () =>
+      client.query(apl, {
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString(),
+      })
+    )
 
     const matches = result.matches ?? []
 
@@ -197,10 +202,12 @@ export async function listErrors(
 | limit ${limit}`
 
   try {
-    const result = await client.query(apl, {
-      startTime: startTime.toISOString(),
-      endTime: endTime.toISOString(),
-    })
+    const result = await withSpinner('Loading errors...', () =>
+      client.query(apl, {
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString(),
+      })
+    )
 
     const matches = result.matches ?? []
 
@@ -257,10 +264,12 @@ export async function getConversation(
 | sort by _time asc`
 
   try {
-    const result = await client.query(apl, {
-      startTime: startTime.toISOString(),
-      endTime: endTime.toISOString(),
-    })
+    const result = await withSpinner('Loading conversation...', () =>
+      client.query(apl, {
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString(),
+      })
+    )
 
     const matches = result.matches ?? []
 
@@ -340,10 +349,12 @@ export async function getClassificationStats(
 | summarize count = count() by category, complexity`
 
   try {
-    const result = await client.query(apl, {
-      startTime: startTime.toISOString(),
-      endTime: endTime.toISOString(),
-    })
+    const result = await withSpinner('Loading classifications...', () =>
+      client.query(apl, {
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString(),
+      })
+    )
 
     const buckets = result.buckets?.totals ?? []
 
@@ -438,10 +449,12 @@ export async function listWorkflowSteps(
 | limit ${limit}`
 
   try {
-    const result = await client.query(apl, {
-      startTime: startTime.toISOString(),
-      endTime: endTime.toISOString(),
-    })
+    const result = await withSpinner('Loading workflow steps...', () =>
+      client.query(apl, {
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString(),
+      })
+    )
 
     const matches = result.matches ?? []
 
@@ -503,10 +516,12 @@ export async function listApprovals(
 | limit ${limit}`
 
   try {
-    const result = await client.query(apl, {
-      startTime: startTime.toISOString(),
-      endTime: endTime.toISOString(),
-    })
+    const result = await withSpinner('Loading approvals...', () =>
+      client.query(apl, {
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString(),
+      })
+    )
 
     const matches = result.matches ?? []
 

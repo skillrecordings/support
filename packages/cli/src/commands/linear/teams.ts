@@ -1,5 +1,6 @@
 import type { CommandContext } from '../../core/context'
 import { CLIError, formatError } from '../../core/errors'
+import { withSpinner } from '../../core/spinner'
 import { getLinearClient } from './client'
 
 /**
@@ -12,7 +13,7 @@ export async function listTeams(
 ): Promise<void> {
   try {
     const client = getLinearClient()
-    const response = await client.teams()
+    const response = await withSpinner('Loading teams...', () => client.teams())
 
     const teams = response.nodes || []
 

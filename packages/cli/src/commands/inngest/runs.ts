@@ -2,6 +2,7 @@ import { confirm } from '@inquirer/prompts'
 import { Command } from 'commander'
 import { type CommandContext, createContext } from '../../core/context'
 import { CLIError, formatError } from '../../core/errors'
+import { withSpinner } from '../../core/spinner'
 import { InngestClient, detectDevServer } from './client'
 
 interface RunCommandOptions {
@@ -59,7 +60,7 @@ export async function runCommand(
     const isDev = options.dev ?? (await detectDevServer())
     const client = new InngestClient({ dev: isDev })
 
-    const run = await client.getRun(id)
+    const run = await withSpinner('Loading run...', () => client.getRun(id))
 
     if (outputJson) {
       ctx.output.data(run)
