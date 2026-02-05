@@ -15,3 +15,17 @@ Summary: Summary: The `UsageTracker` module and the unit tests already exist and
 Tests: `bun run test` (in `packages/cli`) ✅
 
 Progress log: I did not update `progress.txt` because your instructions say “Do not modify progress.txt directly,” which c
+
+---
+[2026-02-05T01:17:36.659Z]
+Completed: Hint engine — rules for showing and retiring contextual hints
+Files: none
+Summary: **Summary**
+- Added `packages/cli/src/core/hint-engine.ts` with a rule-based hint engine, default onboarding/discovery/contextual rules, and stderr hint writer.
+- Added `packages/cli/tests/unit/core/hint-engine.test.ts` covering rule counts, suppression, retire logic, max caps, contextual hints, and stderr output.
+
+**Tests**
+- `bun run test` (in `packages/cli`)
+
+**Notes**
+- The `tdd-red-green-refa

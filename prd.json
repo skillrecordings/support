@@ -23,7 +23,7 @@
       "title": "Hint engine — rules for showing and retiring contextual hints",
       "description": "Create `packages/cli/src/core/hint-engine.ts` — a rule-based engine that decides which hints to show based on usage state.\n\n**Files:** `packages/cli/src/core/hint-engine.ts`, `packages/cli/tests/unit/core/hint-engine.test.ts`\n\n**Validation:** (cd packages/cli && bun run test)",
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "validationCommand": "(cd packages/cli && bun run test)",
       "acceptanceCriteria": [
         "HintRule type with show/retire conditions",
@@ -119,7 +119,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-04T22:10:00.000Z",
-    "totalIterations": 1,
-    "lastIteration": "2026-02-05T01:13:32.875Z"
+    "totalIterations": 2,
+    "lastIteration": "2026-02-05T01:17:36.658Z"
   }
 }
