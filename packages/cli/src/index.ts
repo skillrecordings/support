@@ -57,7 +57,17 @@ import { registerPluginSyncCommand } from './commands/plugin-sync'
 import { registerResponseCommands } from './commands/responses'
 import { registerToolsCommands } from './commands/tools'
 import { wizard } from './commands/wizard'
+import {
+  getAuthAdaptiveDescription,
+  getFrontAdaptiveDescription,
+  getInngestAdaptiveDescription,
+  getRootAdaptiveDescription,
+} from './core/adaptive-help'
+import { autoUpdateAfterCommand } from './core/auto-update'
 import { createContext } from './core/context'
+import { HintEngine, writeHints } from './core/hint-engine'
+import { resolveTelemetryUser, sendTelemetryEvent } from './core/telemetry'
+import { getUsageTracker } from './core/usage-tracker'
 import { createMcpServer } from './mcp/server'
 
 // BUILD_* are injected at compile time via bun --define.
@@ -75,6 +85,7 @@ const buildTarget =
   typeof BUILD_TARGET !== 'undefined' && BUILD_TARGET.length > 0
     ? BUILD_TARGET
     : runtimeTarget
+const isDevBuild = buildVersion.includes('dev') || buildCommit === 'dev'
 
 declare const BUILD_VERSION: string
 declare const BUILD_COMMIT: string
@@ -83,26 +94,66 @@ declare const BUILD_TARGET: string
 const versionLabel = `skill v${buildVersion} (${buildCommit}) ${buildTarget}`
 
 const program = new Command()
+const hintEngine = new HintEngine()
+const usageTracker = getUsageTracker()
+const usageState = await (async () => {
+  try {
+    return await usageTracker.getUsage()
+  } catch {
+    return null
+  }
+})()
+const hintCounts = new WeakMap<Command, number>()
+const commandStartTimes = new WeakMap<Command, number>()
+
+const resolveCommandName = (command: Command): string => {
+  const names: string[] = []
+  let current: Command | null | undefined = command
+  while (current) {
+    const name = current.name()
+    if (name) names.unshift(name)
+    current = current.parent
+  }
+  if (names[0] === 'skill') names.shift()
+  return names.join('.')
+}
+
+const resolveHintContext = (command: Command) => {
+  const opts =
+    typeof command.optsWithGlobals === 'function'
+      ? command.optsWithGlobals()
+      : {
+          ...command.parent?.opts(),
+          ...command.opts(),
+        }
+  const outputJson = opts.json === true || opts.format === 'json'
+  const suppressForPipe =
+    process.env.SKILL_CLI_FORCE_HINTS === '1'
+      ? false
+      : process.stdout.isTTY !== true
+
+  return {
+    command: resolveCommandName(command),
+    format: outputJson ? 'json' : opts.format,
+    quiet: opts.quiet === true || suppressForPipe,
+  }
+}
+
+const resolveMilestones = (commandName: string): string[] => {
+  switch (commandName) {
+    case 'wizard':
+      return ['wizard_completed']
+    case 'auth.setup':
+    case 'init':
+      return ['auth_configured']
+    default:
+      return []
+  }
+}
 
 program
   .name('skill')
-  .description(
-    'Skill Recordings support agent CLI — triage, investigate, and manage customer conversations.\n\n' +
-      '  Getting Started:\n' +
-      '    1. skill auth setup        Configure 1Password secrets (Front API token, DB, etc.)\n' +
-      '    2. skill auth status        Verify your credentials are working\n' +
-      '    3. skill front inbox        See what needs attention right now\n\n' +
-      '  Common Workflows:\n' +
-      '    Triage inbox          skill front inbox → skill front triage\n' +
-      '    Investigate ticket    skill front conversation <id> --messages\n' +
-      '    Bulk cleanup          skill front bulk-archive --older-than 30d\n' +
-      '    Generate report       skill front report --inbox support\n' +
-      '    Check deploys         skill deploys\n\n' +
-      '  For AI Agents (Claude Code, MCP):\n' +
-      '    skill mcp              Start JSON-RPC server with 9 Front tools\n' +
-      '    skill plugin sync      Install the Claude Code plugin\n' +
-      '    All commands support --json for structured, HATEOAS-enriched output'
-  )
+  .description(getRootAdaptiveDescription(usageState))
   .version(versionLabel)
   .option('-f, --format <format>', 'Output format (json|text|table)')
   .option('-v, --verbose', 'Enable verbose output')
@@ -131,6 +182,70 @@ program.hook('preAction', (thisCommand, actionCommand) => {
   }
 })
 
+program.hook('preAction', (_thisCommand, actionCommand) => {
+  commandStartTimes.set(actionCommand, Date.now())
+})
+
+program.hook('preAction', async (_thisCommand, actionCommand) => {
+  try {
+    const context = resolveHintContext(actionCommand)
+    const state = await usageTracker.getUsage()
+    const hints = hintEngine.getHints(state, context)
+    writeHints(hints, process.stderr)
+    hintCounts.set(actionCommand, hints.length)
+  } catch {
+    // Never let hint rendering break the CLI.
+  }
+})
+
+program.hook('postAction', async (_thisCommand, actionCommand) => {
+  try {
+    const context = resolveHintContext(actionCommand)
+    const state = await usageTracker.record(context.command)
+    const milestones = resolveMilestones(context.command)
+    for (const milestone of milestones) {
+      await usageTracker.setMilestone(milestone)
+    }
+    const previouslyShown = hintCounts.get(actionCommand) ?? 0
+    const postHint = hintEngine.getPostRunHint(state, {
+      ...context,
+      previouslyShown,
+    })
+    if (postHint) writeHints([postHint], process.stderr)
+  } catch {
+    // Never let usage tracking break the CLI.
+  }
+
+  try {
+    const startTime = commandStartTimes.get(actionCommand) ?? Date.now()
+    const duration = Math.max(0, Date.now() - startTime)
+    const exitCode = process.exitCode ?? 0
+    const commandName = resolveCommandName(actionCommand)
+
+    void sendTelemetryEvent({
+      command: commandName,
+      duration,
+      success: exitCode === 0,
+      platform: process.platform,
+      user: resolveTelemetryUser(),
+    })
+  } catch {
+    // Never let telemetry break the CLI.
+  }
+
+  try {
+    const context = resolveHintContext(actionCommand)
+    await autoUpdateAfterCommand({
+      commandName: context.command,
+      currentVersion: buildVersion,
+      format: context.format,
+      isDevMode: isDevBuild,
+    })
+  } catch {
+    // Never let auto-update break the CLI.
+  }
+})
+
 // Core commands
 program
   .command('init')
@@ -140,13 +255,41 @@ program
     'Name of the integration (required in non-interactive mode)'
   )
   .option('--json', 'Output result as JSON (machine-readable)')
-  .action(init)
+  .action(async (name, options, command) => {
+    const opts =
+      typeof command.optsWithGlobals === 'function'
+        ? command.optsWithGlobals()
+        : {
+            ...command.parent?.opts(),
+            ...command.opts(),
+          }
+    const ctx = await createContext({
+      format: options.json ? 'json' : opts.format,
+      verbose: opts.verbose,
+      quiet: opts.quiet,
+    })
+    await init(ctx, name, options)
+  })
 
 program
   .command('wizard')
   .description('Interactive wizard for setting up a new property')
   .option('--json', 'Output result as JSON (machine-readable)')
-  .action(wizard)
+  .action(async (options, command) => {
+    const opts =
+      typeof command.optsWithGlobals === 'function'
+        ? command.optsWithGlobals()
+        : {
+            ...command.parent?.opts(),
+            ...command.opts(),
+          }
+    const ctx = await createContext({
+      format: options.json ? 'json' : opts.format,
+      verbose: opts.verbose,
+      quiet: opts.quiet,
+    })
+    await wizard(ctx, options)
+  })
 
 program
   .command('health')
@@ -162,7 +305,21 @@ program
   .option('-l, --list', 'List all registered apps')
   .option('--ids-only', 'Output only IDs (one per line)')
   .option('--json', 'Output result as JSON (machine-readable)')
-  .action(health)
+  .action(async (slugOrUrl, options, command) => {
+    const opts =
+      typeof command.optsWithGlobals === 'function'
+        ? command.optsWithGlobals()
+        : {
+            ...command.parent?.opts(),
+            ...command.opts(),
+          }
+    const ctx = await createContext({
+      format: options.json ? 'json' : opts.format,
+      verbose: opts.verbose,
+      quiet: opts.quiet,
+    })
+    await health(ctx, slugOrUrl, options)
+  })
 
 // Eval commands
 program
@@ -226,10 +383,10 @@ program
 registerDbStatusCommand(program)
 
 // Front commands
-registerFrontCommands(program)
+registerFrontCommands(program, usageState)
 
 // Inngest commands
-registerInngestCommands(program)
+registerInngestCommands(program, usageState)
 
 // Axiom commands
 registerAxiomCommands(program)
@@ -252,7 +409,7 @@ registerFaqCommands(program)
 // Infra commands
 registerDeployCommands(program)
 registerKbCommands(program)
-registerAuthCommands(program)
+registerAuthCommands(program, usageState)
 
 // Plugin commands
 registerPluginSyncCommand(program)

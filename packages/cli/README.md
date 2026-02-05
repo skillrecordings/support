@@ -14,6 +14,16 @@ skill <command> [options]
 All commands support `--json` for machine-readable output and reliable exit
 codes.
 
+## Adaptive Hints
+
+The CLI prints adaptive onboarding/discovery hints to `stderr` for new users.
+Hints learn from usage and fade as you run more commands.
+
+**Opt out:**
+- Use `--quiet`
+- Use `--json`
+- Pipe output (non-TTY)
+
 ## Commands
 
 ### `skill init <name>`
