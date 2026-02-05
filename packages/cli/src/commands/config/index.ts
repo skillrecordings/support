@@ -39,8 +39,10 @@ export function registerConfigCommands(program: Command): void {
     })
 
   config
-    .command('set <key-value>')
-    .description('Set encrypted config value (format: KEY=value)')
+    .command('set [key-value]')
+    .description(
+      'Set encrypted config value (format: KEY=value or interactive)'
+    )
     .option('--json', 'Output as JSON')
     .action(async (keyValue, options, command) => {
       const ctx = await buildContext(command, options.json)

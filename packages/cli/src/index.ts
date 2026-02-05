@@ -143,7 +143,7 @@ const resolveMilestones = (commandName: string): string[] => {
     case 'wizard':
       return ['wizard_completed']
     case 'auth.setup':
-    case 'init':
+    case 'config.init':
       return ['auth_configured']
     default:
       return []

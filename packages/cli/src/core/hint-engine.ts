@@ -66,7 +66,7 @@ export const DEFAULT_HINT_RULES: HintRule[] = [
   {
     id: 'onboarding.auth',
     audience: 'onboarding',
-    message: 'Configure credentials with `skill init` to unlock the full CLI.',
+    message: 'Set up credentials with `skill auth setup` (requires 1Password).',
     showWhen: (state) =>
       state.totalRuns >= 1 && !hasMilestone(state, 'auth_configured'),
     retireWhen: (state) => hasMilestone(state, 'auth_configured'),
