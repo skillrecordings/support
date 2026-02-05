@@ -11,6 +11,7 @@
 
 import type { CommandContext } from '../../core/context'
 import { CLIError, formatError } from '../../core/errors'
+import { requirePersonalKey } from '../../core/write-gate'
 import { getLinearClient } from './client'
 import { commentLinks, hateoasWrap, issueActions, issueLinks } from './hateoas'
 
@@ -34,6 +35,9 @@ export async function addComment(
       exitCode: 1,
     })
   }
+
+  // Require personal API key for write operations
+  requirePersonalKey('LINEAR_API_KEY')
 
   try {
     const client = getLinearClient()

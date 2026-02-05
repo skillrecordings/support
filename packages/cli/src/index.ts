@@ -2,30 +2,26 @@
 
 // Load .env.local before any module that validates env vars (e.g., @skillrecordings/database)
 // Bun auto-loads .env in the cwd, but CLI may run from anywhere — explicitly load from package root.
-import { readFileSync } from 'node:fs'
+//
+// Config loading priority (when decryption is implemented):
+// 1. Load shipped defaults from packages/cli/.env.encrypted
+// 2. Load user overrides from ~/.config/skill/.env.user.encrypted
+// 3. User values override shipped values
+// 4. Track provenance for write-gating (isUserKey() check)
+//
+// For now, we use plaintext .env.local fallback until worker-1 implements decryption.
+
 import { resolve } from 'node:path'
+import { loadPlaintextEnv } from './core/config-loader'
+
+const cliRoot = resolve(import.meta.dirname, '../..')
+const plaintextEnv = loadPlaintextEnv(cliRoot)
 
 let envLoaded = false
-const cliRoot = resolve(import.meta.dirname, '../..')
-for (const envFile of ['.env.local', '.env']) {
-  try {
-    const content = readFileSync(resolve(cliRoot, envFile), 'utf8')
-    for (const line of content.split('\n')) {
-      const trimmed = line.trim()
-      if (!trimmed || trimmed.startsWith('#')) continue
-      const eqIdx = trimmed.indexOf('=')
-      if (eqIdx === -1) continue
-      const key = trimmed.slice(0, eqIdx).trim()
-      const raw = trimmed.slice(eqIdx + 1).trim()
-      // Strip surrounding quotes
-      const value = raw.replace(/^["'](.*)["']$/, '$1')
-      if (!process.env[key]) {
-        process.env[key] = value
-      }
-    }
+for (const [key, value] of Object.entries(plaintextEnv)) {
+  if (!process.env[key]) {
+    process.env[key] = value
     envLoaded = true
-  } catch {
-    // File doesn't exist — skip
   }
 }
 
@@ -35,10 +31,17 @@ if (!envLoaded && !process.env.DATABASE_URL) {
   process.env.SKIP_ENV_VALIDATION = '1'
 }
 
+// TODO: Replace with loadConfigChain() once worker-1 implements decryptEnvFile()
+// This will enable:
+// - Shipped defaults from .env.encrypted
+// - User overrides from ~/.config/skill/.env.user.encrypted
+// - Provenance tracking for write-gating
+
 import { Command } from 'commander'
 import { registerAuthCommands } from './commands/auth/index'
 import { registerAxiomCommands } from './commands/axiom/index'
 import { registerDatasetCommands } from './commands/build-dataset'
+import { registerConfigCommands } from './commands/config/index'
 import { registerDbStatusCommand } from './commands/db-status'
 import { registerDeployCommands } from './commands/deploys'
 import { runEval } from './commands/eval'
@@ -67,6 +70,7 @@ import {
 import { autoUpdateAfterCommand } from './core/auto-update'
 import { createContext } from './core/context'
 import { HintEngine, writeHints } from './core/hint-engine'
+import { autoLinkSkill } from './core/skill-link'
 import { resolveTelemetryUser, sendTelemetryEvent } from './core/telemetry'
 import { getUsageTracker } from './core/usage-tracker'
 import { createMcpServer } from './mcp/server'
@@ -414,6 +418,7 @@ registerFaqCommands(program)
 registerDeployCommands(program)
 registerKbCommands(program)
 registerAuthCommands(program, usageState)
+registerConfigCommands(program)
 
 // Plugin commands
 registerPluginSyncCommand(program)
@@ -430,6 +435,9 @@ program
     const server = createMcpServer()
     await server.start()
   })
+
+// Auto-link skill-cli to ~/.claude/skills/ (silent, conflict-safe)
+void autoLinkSkill()
 
 // Parse and cleanup DB connections when done
 program.parseAsync().finally(async () => {

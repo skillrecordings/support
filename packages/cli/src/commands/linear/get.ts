@@ -13,7 +13,12 @@
 import type { CommandContext } from '../../core/context'
 import { CLIError, formatError } from '../../core/errors'
 import { getLinearClient } from './client'
-import { hateoasWrap, issueActions, issueLinks } from './hateoas'
+import {
+  WRITE_ACTION_META,
+  hateoasWrap,
+  issueActions,
+  issueLinks,
+} from './hateoas'
 
 /**
  * Priority display helpers
@@ -106,6 +111,7 @@ export async function getIssue(ctx: CommandContext, id: string): Promise<void> {
             data: issueData,
             links: issueLinks(issue.identifier, teamKey),
             actions: issueActions(issue.identifier),
+            meta: WRITE_ACTION_META,
           }),
           null,
           2
@@ -186,7 +192,7 @@ export async function getIssue(ctx: CommandContext, id: string): Promise<void> {
     }
 
     ctx.output.data('')
-    ctx.output.data('   Actions:')
+    ctx.output.data('   Actions (require personal API key):')
     ctx.output.data(
       `     • Comment:  skill linear comment ${issue.identifier} --body "text"`
     )
@@ -197,6 +203,9 @@ export async function getIssue(ctx: CommandContext, id: string): Promise<void> {
       `     • State:    skill linear state ${issue.identifier} --state "Done"`
     )
     ctx.output.data(`     • Close:    skill linear close ${issue.identifier}`)
+    ctx.output.data('')
+    ctx.output.data('   ⚠️  Write operations require a personal LINEAR_API_KEY.')
+    ctx.output.data('       Run `skill config init` to set up your keys.')
     ctx.output.data('')
   } catch (error) {
     const cliError =

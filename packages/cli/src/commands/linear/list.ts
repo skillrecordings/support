@@ -16,7 +16,12 @@
 import type { CommandContext } from '../../core/context'
 import { CLIError, formatError } from '../../core/errors'
 import { getLinearClient } from './client'
-import { hateoasWrap, issueListActions, issueListLinks } from './hateoas'
+import {
+  WRITE_ACTION_META,
+  hateoasWrap,
+  issueListActions,
+  issueListLinks,
+} from './hateoas'
 
 /**
  * Priority emoji mapping
@@ -187,6 +192,7 @@ export async function listIssues(
               teamKey
             ),
             actions: issueListActions(teamKey),
+            meta: WRITE_ACTION_META,
           }),
           null,
           2
