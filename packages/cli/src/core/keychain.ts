@@ -15,51 +15,137 @@ export function isMacOS(): boolean {
 }
 
 /**
- * Store a secret in macOS Keychain
+ * Check if running on Linux
  */
-export function storeInKeychain(key: KeychainKey, value: string): boolean {
-  if (!isMacOS()) {
-    return false
+export function isLinux(): boolean {
+  return process.platform === 'linux'
+}
+
+/**
+ * Check if keychain is supported (macOS or Linux with secret-tool)
+ */
+export function isKeychainSupported(): boolean {
+  if (isMacOS()) return true
+  if (isLinux()) {
+    try {
+      execSync('which secret-tool', { stdio: 'ignore' })
+      return true
+    } catch {
+      return false
+    }
   }
+  return false
+}
 
+/**
+ * Check if op CLI is installed and authenticated
+ */
+export function isOpCliAvailable(): boolean {
   try {
-    // Delete existing entry first (ignore errors)
-    spawnSync(
-      'security',
-      ['delete-generic-password', '-a', key, '-s', SERVICE_NAME],
-      { stdio: 'ignore' }
-    )
-
-    // Add new entry
-    const result = spawnSync(
-      'security',
-      ['add-generic-password', '-a', key, '-s', SERVICE_NAME, '-w', value],
-      { stdio: 'pipe' }
-    )
-
-    return result.status === 0
+    execSync('op account list', { stdio: 'ignore', timeout: 5000 })
+    return true
   } catch {
     return false
   }
 }
 
 /**
- * Retrieve secret from macOS Keychain
+ * Fetch a secret from 1Password using op CLI
  */
-export function getFromKeychain(key: KeychainKey): string | null {
-  if (!isMacOS()) {
-    return null
-  }
-
+export function fetchFromOp(
+  itemId: string,
+  vaultId: string,
+  field = 'credential'
+): string | null {
   try {
     const result = execSync(
-      `security find-generic-password -a "${key}" -s "${SERVICE_NAME}" -w 2>/dev/null`,
-      { encoding: 'utf8' }
+      `op item get "${itemId}" --vault "${vaultId}" --fields "label=${field}" --reveal`,
+      { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'], timeout: 10000 }
     )
     return result.trim() || null
   } catch {
     return null
   }
+}
+
+/**
+ * Store a secret in system keychain (macOS or Linux)
+ */
+export function storeInKeychain(key: KeychainKey, value: string): boolean {
+  if (isMacOS()) {
+    try {
+      // Delete existing entry first (ignore errors)
+      spawnSync(
+        'security',
+        ['delete-generic-password', '-a', key, '-s', SERVICE_NAME],
+        { stdio: 'ignore' }
+      )
+      // Add new entry
+      const result = spawnSync(
+        'security',
+        ['add-generic-password', '-a', key, '-s', SERVICE_NAME, '-w', value],
+        { stdio: 'pipe' }
+      )
+      return result.status === 0
+    } catch {
+      return false
+    }
+  }
+
+  if (isLinux()) {
+    try {
+      // secret-tool store --label="skill-cli: op-service-account-token" service skill-cli key op-service-account-token
+      const result = spawnSync(
+        'secret-tool',
+        [
+          'store',
+          '--label',
+          `${SERVICE_NAME}: ${key}`,
+          'service',
+          SERVICE_NAME,
+          'key',
+          key,
+        ],
+        { input: value, stdio: ['pipe', 'pipe', 'pipe'] }
+      )
+      return result.status === 0
+    } catch {
+      return false
+    }
+  }
+
+  return false
+}
+
+/**
+ * Retrieve secret from system keychain (macOS or Linux)
+ */
+export function getFromKeychain(key: KeychainKey): string | null {
+  if (isMacOS()) {
+    try {
+      const result = execSync(
+        `security find-generic-password -a "${key}" -s "${SERVICE_NAME}" -w 2>/dev/null`,
+        { encoding: 'utf8' }
+      )
+      return result.trim() || null
+    } catch {
+      return null
+    }
+  }
+
+  if (isLinux()) {
+    try {
+      const result = execSync(
+        `secret-tool lookup service "${SERVICE_NAME}" key "${key}" 2>/dev/null`,
+        { encoding: 'utf8' }
+      )
+      return result.trim() || null
+    } catch {
+      return null
+    }
+  }
+
+  return null
 }
 
 /**
@@ -148,17 +234,73 @@ export function addShellIntegration(): {
  * Get status of keychain setup
  */
 export function getKeychainStatus(): {
-  platform: 'macos' | 'other'
+  platform: 'macos' | 'linux' | 'other'
+  keychainSupported: boolean
+  opCliAvailable: boolean
   opTokenInKeychain: boolean
   ageKeyInKeychain: boolean
   shellIntegration: boolean
   opTokenInEnv: boolean
 } {
   return {
-    platform: isMacOS() ? 'macos' : 'other',
+    platform: isMacOS() ? 'macos' : isLinux() ? 'linux' : 'other',
+    keychainSupported: isKeychainSupported(),
+    opCliAvailable: isOpCliAvailable(),
     opTokenInKeychain: isInKeychain('op-service-account-token'),
     ageKeyInKeychain: isInKeychain('age-private-key'),
     shellIntegration: hasShellIntegration(),
     opTokenInEnv: !!process.env.OP_SERVICE_ACCOUNT_TOKEN,
   }
+}
+
+// 1Password vault/item IDs for service account token
+const OP_VAULT_ID = 'u3ujzar6l3nahlahsuzfvg7vcq'
+const OP_SERVICE_ACCOUNT_ITEM_ID = '3e4ip354ps3mhq2wwt6vmtm2zu'
+
+/**
+ * Automatically bootstrap keychain from op CLI if available.
+ * Called by config-loader when secrets are needed.
+ * Returns the OP_SERVICE_ACCOUNT_TOKEN if successful.
+ */
+export function autoBootstrapKeychain(): string | null {
+  // Already have token in env?
+  if (process.env.OP_SERVICE_ACCOUNT_TOKEN) {
+    return process.env.OP_SERVICE_ACCOUNT_TOKEN
+  }
+
+  // Already in keychain?
+  const fromKeychain = getFromKeychain('op-service-account-token')
+  if (fromKeychain) {
+    return fromKeychain
+  }
+
+  // No keychain support? Can't bootstrap.
+  if (!isKeychainSupported()) {
+    return null
+  }
+
+  // Try op CLI
+  if (!isOpCliAvailable()) {
+    return null
+  }
+
+  // Fetch service account token from 1Password
+  const token = fetchFromOp(
+    OP_SERVICE_ACCOUNT_ITEM_ID,
+    OP_VAULT_ID,
+    'credential'
+  )
+  if (!token) {
+    return null
+  }
+
+  // Store in keychain for future use
+  storeInKeychain('op-service-account-token', token)
+
+  // Also add shell integration if not present
+  if (!hasShellIntegration()) {
+    addShellIntegration()
+  }
+
+  return token
 }

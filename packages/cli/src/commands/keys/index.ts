@@ -6,15 +6,12 @@ import { getKeyProvenance } from '../../core/config-loader'
 import { createContext } from '../../core/context'
 import {
   addShellIntegration,
-  getFromKeychain,
+  autoBootstrapKeychain,
   getKeychainStatus,
-  hasShellIntegration,
-  isInKeychain,
-  isMacOS,
+  isKeychainSupported,
   storeInKeychain,
 } from '../../core/keychain'
 import { SECRET_REFS, type SecretRefKey } from '../../core/secret-refs'
-import { OnePasswordProvider } from '../../core/secrets'
 import { configInitAction, getAgeKeyPath } from '../config/init'
 import { configSetAction, getEncryptedConfigPath } from '../config/set'
 
@@ -307,222 +304,177 @@ export function registerKeysCommands(program: Command): void {
 
   keys
     .command('setup')
-    .description(
-      'Set up 1Password integration with macOS Keychain\n\n' +
-        '  Automatically pulls secrets from 1Password and stores\n' +
-        '  them in Keychain so CLI works without manual unlocks.\n\n' +
-        '  macOS only. Requires 1Password access.'
-    )
+    .description('Set up keychain + shell integration (tries everything)')
     .option('--json', 'Output as JSON')
-    .option('--status', 'Show current setup status')
     .action(async (options, command) => {
       const ctx = await buildContext(command, options.json)
       const outputJson = options.json || ctx.format === 'json'
 
       const OP_VAULT_LINK =
         'https://start.1password.com/open/i?a=GCTJE4MRGFHKRAYXCEXKZKCEFU&v=u3ujzar6l3nahlahsuzfvg7vcq&i=3e4ip354ps3mhq2wwt6vmtm2zu&h=egghead.1password.com'
-      const AGE_KEY_REF = 'op://Support/skill-cli-age-key/private_key'
 
-      // Status check
-      if (options.status) {
-        const status = getKeychainStatus()
-        if (outputJson) {
-          ctx.output.data(status)
-        } else {
-          ctx.output.data('\n🔐 Keychain Integration Status')
-          ctx.output.data('─'.repeat(50))
-          ctx.output.data(`   Platform:           ${status.platform}`)
-          ctx.output.data(
-            `   OP token in Keychain: ${status.opTokenInKeychain ? '✓' : '○'}`
-          )
-          ctx.output.data(
-            `   Age key in Keychain:  ${status.ageKeyInKeychain ? '✓' : '○'}`
-          )
-          ctx.output.data(
-            `   Shell integration:    ${status.shellIntegration ? '✓' : '○'}`
-          )
-          ctx.output.data(
-            `   OP token in env:      ${status.opTokenInEnv ? '✓' : '○'}`
-          )
-          ctx.output.data('')
-        }
-        return
-      }
-
-      // macOS only
-      if (!isMacOS()) {
-        if (outputJson) {
-          ctx.output.data({
-            success: false,
-            error: 'Keychain integration is macOS only',
-          })
-        } else {
-          ctx.output.error('Keychain integration is only available on macOS.')
-          ctx.output.data(
-            '\nOn other platforms, set OP_SERVICE_ACCOUNT_TOKEN in your environment.'
-          )
-        }
-        return
-      }
-
-      // Check if already fully set up
       const status = getKeychainStatus()
+      const steps: string[] = []
+      const errors: string[] = []
+
+      // Already fully done?
       if (
         status.opTokenInKeychain &&
         status.ageKeyInKeychain &&
         status.shellIntegration
       ) {
         if (outputJson) {
-          ctx.output.data({ success: true, message: 'Already configured' })
+          ctx.output.data({ success: true, status: 'configured' })
         } else {
-          ctx.output.data('\n✓ Keychain integration already configured!')
-          ctx.output.data('  OP token and age key are in Keychain.')
-          ctx.output.data('  Shell integration is set up.')
-          ctx.output.data('\n  Restart your shell or run: source ~/.zshrc')
+          ctx.output.data('✓ Already configured')
         }
         return
       }
 
-      ctx.output.data('\n🔐 1Password Keychain Setup')
-      ctx.output.data('─'.repeat(50))
+      // Step 1: Get OP_SERVICE_ACCOUNT_TOKEN
+      let opToken: string | null = null
 
-      try {
-        // Step 1: Get OP_SERVICE_ACCOUNT_TOKEN
-        let opToken = process.env.OP_SERVICE_ACCOUNT_TOKEN
-
-        if (!opToken && status.opTokenInKeychain) {
-          // Already in keychain, pull it
-          opToken = getFromKeychain('op-service-account-token') ?? undefined
-        }
-
-        if (!opToken) {
-          // Need to get the token from user
-          ctx.output.data('')
-          ctx.output.data(
-            'No OP_SERVICE_ACCOUNT_TOKEN found. Opening 1Password...'
-          )
-          ctx.output.data('')
-
-          // Try to open 1Password to the right item
-          const { execSync } = await import('node:child_process')
-          try {
-            execSync(`open "${OP_VAULT_LINK}"`, { stdio: 'ignore' })
-            ctx.output.data('  → 1Password should open to the Support vault')
-            ctx.output.data('  → Copy the "Service Account Token" field')
-          } catch {
-            ctx.output.data(`  Open this URL in 1Password:`)
-            ctx.output.data(`  ${OP_VAULT_LINK}`)
-          }
-
-          ctx.output.data('')
-
-          if (!process.stdin.isTTY) {
-            ctx.output.error(
-              'Non-interactive mode. Set OP_SERVICE_ACCOUNT_TOKEN and retry.'
-            )
-            return
-          }
-
-          opToken = await password({
-            message: 'Paste your OP_SERVICE_ACCOUNT_TOKEN:',
-          })
-
-          if (!opToken) {
-            ctx.output.data('\nCancelled.')
-            return
-          }
-        }
-
-        // Step 2: Store OP token in keychain
-        if (!status.opTokenInKeychain) {
-          ctx.output.data('')
-          ctx.output.data('Storing OP token in Keychain...')
-          if (!storeInKeychain('op-service-account-token', opToken)) {
-            ctx.output.error('Failed to store OP token in Keychain.')
-            return
-          }
-          ctx.output.data('  ✓ OP token stored')
-        } else {
-          ctx.output.data('\n  ✓ OP token already in Keychain')
-        }
-
-        // Step 3: Use 1Password SDK to fetch age key
-        if (!status.ageKeyInKeychain) {
-          ctx.output.data('')
-          ctx.output.data('Fetching age key from 1Password...')
-
-          // Temporarily set env var for SDK
-          const originalEnv = process.env.OP_SERVICE_ACCOUNT_TOKEN
-          process.env.OP_SERVICE_ACCOUNT_TOKEN = opToken
-
-          try {
-            const op = new OnePasswordProvider()
-            if (!(await op.isAvailable())) {
-              throw new Error('1Password SDK not available')
-            }
-            const ageKey = await op.resolve(AGE_KEY_REF)
-            if (!ageKey) {
-              throw new Error('Could not resolve age key from 1Password')
-            }
-
-            // Store age key in keychain
-            if (!storeInKeychain('age-private-key', ageKey)) {
-              throw new Error('Failed to store age key in Keychain')
-            }
-            ctx.output.data('  ✓ Age key fetched and stored')
-          } finally {
-            // Restore original env
-            if (originalEnv) {
-              process.env.OP_SERVICE_ACCOUNT_TOKEN = originalEnv
-            }
-          }
-        } else {
-          ctx.output.data('  ✓ Age key already in Keychain')
-        }
-
-        // Step 4: Add shell integration
-        if (!status.shellIntegration) {
-          ctx.output.data('')
-          ctx.output.data('Adding shell integration...')
-          const result = addShellIntegration()
-          if (result.success) {
-            ctx.output.data(`  ✓ Added exports to ${result.path}`)
-          } else {
-            ctx.output.data(
-              `  ⚠ Could not update ${result.path}: ${result.error}`
-            )
-            ctx.output.data('')
-            ctx.output.data('Add this to your shell rc file manually:')
-            ctx.output.data('')
-            ctx.output.data('  # skill-cli keychain integration')
-            ctx.output.data(
-              '  export OP_SERVICE_ACCOUNT_TOKEN=$(security find-generic-password -a "op-service-account-token" -s "skill-cli" -w 2>/dev/null)'
-            )
-            ctx.output.data(
-              '  export SKILL_AGE_KEY=$(security find-generic-password -a "age-private-key" -s "skill-cli" -w 2>/dev/null)'
-            )
-          }
-        } else {
-          ctx.output.data('  ✓ Shell integration already configured')
-        }
-
-        ctx.output.data('')
-        ctx.output.data('─'.repeat(50))
-        ctx.output.data('✓ Setup complete!')
-        ctx.output.data('')
-        ctx.output.data('Restart your shell or run:')
-        ctx.output.data('  source ~/.zshrc')
-        ctx.output.data('')
-      } catch (error) {
-        if (
-          error instanceof Error &&
-          (error.message.includes('User force closed') ||
-            error.message.includes('canceled'))
-        ) {
-          ctx.output.data('\nCancelled.')
-          return
-        }
-        throw error
+      // Try env
+      if (process.env.OP_SERVICE_ACCOUNT_TOKEN) {
+        opToken = process.env.OP_SERVICE_ACCOUNT_TOKEN
+        steps.push('✓ OP token from env')
       }
+
+      // Try keychain
+      if (!opToken) {
+        const { getFromKeychain } = await import('../../core/keychain')
+        opToken = getFromKeychain('op-service-account-token')
+        if (opToken) steps.push('✓ OP token from keychain')
+      }
+
+      // Try op CLI
+      if (!opToken && status.opCliAvailable) {
+        opToken = autoBootstrapKeychain()
+        if (opToken) steps.push('✓ OP token from op CLI')
+      }
+
+      // Step 2: Store OP token in keychain
+      if (opToken && !status.opTokenInKeychain && isKeychainSupported()) {
+        if (storeInKeychain('op-service-account-token', opToken)) {
+          steps.push('✓ OP token → keychain')
+        } else {
+          errors.push('Could not store OP token in keychain')
+        }
+      }
+
+      // Step 3: Get age key
+      let ageKey: string | null = null
+
+      // Try env
+      if (process.env.SKILL_AGE_KEY) {
+        ageKey = process.env.SKILL_AGE_KEY
+        steps.push('✓ Age key from env')
+      }
+
+      // Try keychain
+      if (!ageKey) {
+        const { getFromKeychain } = await import('../../core/keychain')
+        ageKey = getFromKeychain('age-private-key')
+        if (ageKey) steps.push('✓ Age key from keychain')
+      }
+
+      // Try 1Password SDK
+      if (!ageKey && opToken) {
+        const originalEnv = process.env.OP_SERVICE_ACCOUNT_TOKEN
+        process.env.OP_SERVICE_ACCOUNT_TOKEN = opToken
+        try {
+          const { OnePasswordProvider } = await import('../../core/secrets')
+          const op = new OnePasswordProvider()
+          if (await op.isAvailable()) {
+            ageKey = await op.resolve(
+              'op://Support/skill-cli-age-key/private_key'
+            )
+            if (ageKey) steps.push('✓ Age key from 1Password')
+          }
+        } catch {
+          errors.push('1Password SDK failed')
+        } finally {
+          if (originalEnv) {
+            process.env.OP_SERVICE_ACCOUNT_TOKEN = originalEnv
+          } else {
+            delete process.env.OP_SERVICE_ACCOUNT_TOKEN
+          }
+        }
+      }
+
+      // Step 4: Store age key in keychain
+      if (ageKey && !status.ageKeyInKeychain && isKeychainSupported()) {
+        if (storeInKeychain('age-private-key', ageKey)) {
+          steps.push('✓ Age key → keychain')
+        } else {
+          errors.push('Could not store age key in keychain')
+        }
+      }
+
+      // Step 5: Shell integration
+      if (!status.shellIntegration && isKeychainSupported()) {
+        const r = addShellIntegration()
+        if (r.success) {
+          steps.push(`✓ Shell → ${r.path}`)
+        } else {
+          errors.push(`Shell integration: ${r.error}`)
+        }
+      }
+
+      // Report results
+      const finalStatus = getKeychainStatus()
+      const success =
+        finalStatus.opTokenInKeychain && finalStatus.ageKeyInKeychain
+
+      if (outputJson) {
+        ctx.output.data({ success, steps, errors, status: finalStatus })
+        return
+      }
+
+      // Text output
+      for (const s of steps) {
+        ctx.output.data(s)
+      }
+
+      if (success) {
+        ctx.output.data('')
+        ctx.output.data('✓ Done! Run: source ~/.zshrc')
+        return
+      }
+
+      // Failed - give manual instructions
+      ctx.output.data('')
+      ctx.output.data('─'.repeat(50))
+      ctx.output.data('Could not complete automatic setup. Manual steps:')
+      ctx.output.data('')
+
+      if (!opToken) {
+        ctx.output.data('1. Get OP_SERVICE_ACCOUNT_TOKEN:')
+        ctx.output.data(`   open "${OP_VAULT_LINK}"`)
+        ctx.output.data('   Copy the "credential" field')
+        ctx.output.data('')
+        ctx.output.data('2. Add to ~/.zshrc:')
+        ctx.output.data('   export OP_SERVICE_ACCOUNT_TOKEN="<paste>"')
+        ctx.output.data('')
+      }
+
+      if (!ageKey) {
+        ctx.output.data('3. Get age key (requires OP token):')
+        ctx.output.data(
+          '   op read "op://Support/skill-cli-age-key/private_key"'
+        )
+        ctx.output.data('')
+        ctx.output.data('4. Add to ~/.zshrc:')
+        ctx.output.data('   export SKILL_AGE_KEY="<paste>"')
+        ctx.output.data('')
+      }
+
+      if (!isKeychainSupported()) {
+        ctx.output.data(
+          'Note: No keychain on this platform. Use env vars instead.'
+        )
+      }
+
+      ctx.output.data('Then run: source ~/.zshrc')
     })
 }

@@ -74,9 +74,9 @@ async function decryptEnvFile(
 /**
  * Get age private key.
  * Priority:
- * 1. SKILL_AGE_KEY env var (set from keychain via shell export)
- * 2. 1Password SDK (if OP_SERVICE_ACCOUNT_TOKEN available)
- * 3. Direct keychain lookup (macOS only)
+ * 1. SKILL_AGE_KEY env var (fast path)
+ * 2. Keychain lookup
+ * 3. 1Password SDK (auto-bootstraps from op CLI if needed)
  */
 async function getAgeKeyFrom1Password(): Promise<string | null> {
   // 1. Check env var (fast path when shell integration is set up)
@@ -84,31 +84,47 @@ async function getAgeKeyFrom1Password(): Promise<string | null> {
     return process.env.SKILL_AGE_KEY
   }
 
-  // 2. Try 1Password SDK
-  if (process.env.OP_SERVICE_ACCOUNT_TOKEN) {
-    try {
-      const { OnePasswordProvider } = await import('./secrets')
-      const op = new OnePasswordProvider()
-      if (await op.isAvailable()) {
-        const key = await op.resolve(
-          'op://Support/skill-cli-age-key/private_key'
-        )
-        if (key) return key
-      }
-    } catch {
-      // Fall through to keychain
-    }
-  }
+  // 2. Try keychain
+  try {
+    const { getFromKeychain, storeInKeychain, autoBootstrapKeychain } =
+      await import('./keychain')
+    const fromKeychain = getFromKeychain('age-private-key')
+    if (fromKeychain) return fromKeychain
 
-  // 3. Try keychain directly (macOS)
-  if (process.platform === 'darwin') {
-    try {
-      const { getFromKeychain } = await import('./keychain')
-      const key = getFromKeychain('age-private-key')
-      if (key) return key
-    } catch {
-      // Keychain not available
+    // 3. Try to get OP token (auto-bootstraps from op CLI if available)
+    let opToken = process.env.OP_SERVICE_ACCOUNT_TOKEN
+    if (!opToken) {
+      opToken = autoBootstrapKeychain() ?? undefined
     }
+
+    if (opToken) {
+      // Set env for SDK
+      const originalEnv = process.env.OP_SERVICE_ACCOUNT_TOKEN
+      process.env.OP_SERVICE_ACCOUNT_TOKEN = opToken
+
+      try {
+        const { OnePasswordProvider } = await import('./secrets')
+        const op = new OnePasswordProvider()
+        if (await op.isAvailable()) {
+          const key = await op.resolve(
+            'op://Support/skill-cli-age-key/private_key'
+          )
+          if (key) {
+            // Cache in keychain for next time
+            storeInKeychain('age-private-key', key)
+            return key
+          }
+        }
+      } finally {
+        if (originalEnv) {
+          process.env.OP_SERVICE_ACCOUNT_TOKEN = originalEnv
+        } else {
+          delete process.env.OP_SERVICE_ACCOUNT_TOKEN
+        }
+      }
+    }
+  } catch {
+    // Keychain/SDK not available
   }
 
   return null
