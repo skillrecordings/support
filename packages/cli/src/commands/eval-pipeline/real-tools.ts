@@ -15,12 +15,15 @@ import {
 } from '@skillrecordings/core/adapters/qdrant'
 import { tool } from 'ai'
 import type { Pool } from 'mysql2/promise'
-import { createPool } from 'mysql2/promise'
 import { z } from 'zod'
+import { type OutputFormatter } from '../../core/output'
+
+type Mysql2Module = typeof import('mysql2/promise')
 
 let mysqlPool: Pool | null = null
 let qdrantClient: QdrantClient | null = null
 let ollamaClient: OllamaClient | null = null
+let mysqlModule: Mysql2Module | null = null
 
 export interface RealToolsConfig {
   mysql?: {
@@ -58,18 +61,40 @@ const DEFAULT_CONFIG: RealToolsConfig = {
   },
 }
 
+const loadMysqlModule = async (): Promise<Mysql2Module> => {
+  if (mysqlModule) {
+    return mysqlModule
+  }
+
+  try {
+    mysqlModule = await import('mysql2/promise')
+    return mysqlModule
+  } catch (error) {
+    throw new Error(
+      `mysql2 is required for real tools. Install it before using eval-pipeline real tools. ${error instanceof Error ? error.message : ''}`.trim()
+    )
+  }
+}
+
 /**
  * Initialize connections to Docker services
  */
 export async function initRealTools(
   config: RealToolsConfig = DEFAULT_CONFIG,
+  output?: OutputFormatter,
   verbose = false
 ): Promise<{ mysql: boolean; qdrant: boolean; ollama: boolean }> {
   const status = { mysql: false, qdrant: false, ollama: false }
+  const log = (message: string): void => {
+    if (output && verbose) {
+      output.progress(message)
+    }
+  }
 
   // MySQL
   if (config.mysql) {
     try {
+      const { createPool } = await loadMysqlModule()
       mysqlPool = createPool({
         ...config.mysql,
         waitForConnections: true,
@@ -79,12 +104,9 @@ export async function initRealTools(
       await conn.ping()
       conn.release()
       status.mysql = true
-      if (verbose) console.log('  ✅ MySQL connected')
+      log('  ✅ MySQL connected')
     } catch (error) {
-      if (verbose)
-        console.log(
-          `  ❌ MySQL: ${error instanceof Error ? error.message : 'failed'}`
-        )
+      log(`  ❌ MySQL: ${error instanceof Error ? error.message : 'failed'}`)
     }
   }
 
@@ -94,13 +116,9 @@ export async function initRealTools(
       qdrantClient = createQdrantClient()
       const info = await qdrantClient.getCollectionInfo()
       status.qdrant = info.status !== 'not_found'
-      if (verbose)
-        console.log(`  ✅ Qdrant connected (${info.pointsCount} points)`)
+      log(`  ✅ Qdrant connected (${info.pointsCount} points)`)
     } catch (error) {
-      if (verbose)
-        console.log(
-          `  ❌ Qdrant: ${error instanceof Error ? error.message : 'failed'}`
-        )
+      log(`  ❌ Qdrant: ${error instanceof Error ? error.message : 'failed'}`)
     }
   }
 
@@ -113,16 +131,13 @@ export async function initRealTools(
         const available = await ollamaClient.isModelAvailable()
         if (available) {
           status.ollama = true
-          if (verbose) console.log('  ✅ Ollama connected')
+          log('  ✅ Ollama connected')
         } else {
-          if (verbose) console.log('  ⚠️ Ollama healthy but model not available')
+          log('  ⚠️ Ollama healthy but model not available')
         }
       }
     } catch (error) {
-      if (verbose)
-        console.log(
-          `  ❌ Ollama: ${error instanceof Error ? error.message : 'failed'}`
-        )
+      log(`  ❌ Ollama: ${error instanceof Error ? error.message : 'failed'}`)
     }
   }
 
@@ -213,7 +228,6 @@ export function createRealTools(scenario: {
             purchases: [],
           }
         } catch (error) {
-          console.error('lookupUser error:', error)
           return { found: false, error: String(error) }
         }
       },
@@ -267,7 +281,6 @@ export function createRealTools(scenario: {
               })),
           }
         } catch (error) {
-          console.error('searchKnowledge error:', error)
           return { similarTickets: [], knowledge: [], goodResponses: [] }
         }
       },

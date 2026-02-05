@@ -22,6 +22,8 @@ import {
 } from '@skillrecordings/core/pipeline'
 import { readFile, writeFile } from 'fs/promises'
 import { glob } from 'glob'
+import { type CommandContext } from '../../core/context'
+import { CLIError, formatError } from '../../core/errors'
 import {
   cleanupRealTools,
   createRealTools,
@@ -232,7 +234,10 @@ interface EvalMetrics {
 // Main runner
 // ============================================================================
 
-export async function run(options: RunOptions): Promise<void> {
+export async function run(
+  ctx: CommandContext,
+  options: RunOptions
+): Promise<void> {
   const {
     step,
     scenarios: scenarioGlob,
@@ -249,115 +254,139 @@ export async function run(options: RunOptions): Promise<void> {
     failFast,
     quick,
   } = options
-
-  // Clear cache if requested
-  if (clearCache) {
-    clearClassifyCache()
-    if (!json) {
-      console.log('🗑️  Cleared classify cache\n')
-    }
-  }
-
-  // Load scenarios
-  let scenarios = await loadScenarios(scenarioGlob, dataset)
-
-  // Apply quick filter (smoke test subset)
-  if (quick) {
-    scenarios = filterQuickScenarios(scenarios)
-    if (!json) {
-      console.log(`⚡ Quick mode: filtered to ${scenarios.length} scenarios\n`)
-    }
-  }
-
-  if (limit && limit < scenarios.length) {
-    scenarios = scenarios.slice(0, limit)
-  }
-
-  if (!json) {
-    const parallelInfo = parallel > 1 ? ` (parallel: ${parallel})` : ''
-    const flags = [
-      cacheClassify ? 'cache' : null,
-      failFast ? 'fail-fast' : null,
-    ]
-      .filter(Boolean)
-      .join(', ')
-    const flagsInfo = flags ? ` [${flags}]` : ''
-    console.log(
-      `\n🧪 Running ${step} eval on ${scenarios.length} scenarios${parallelInfo}${flagsInfo}\n`
-    )
-  }
-
-  // Initialize real tools if requested
-  if (realTools) {
-    if (!json) {
-      console.log('🔌 Connecting to Docker services...')
-    }
-    const status = await initRealTools(undefined, verbose && !json)
-
-    if (!status.mysql && !status.qdrant) {
-      console.error('❌ Failed to connect to any Docker services')
-      console.error('   Make sure MySQL (3306) and Qdrant (6333) are running')
-      process.exit(1)
-    }
-
-    if (!json) {
-      console.log('')
-    }
-  }
-
-  const startTime = Date.now()
-  let results: StepResult[] = []
+  const outputJson = json === true || ctx.format === 'json'
 
   try {
-    const evalOptions = {
-      verbose,
-      model,
-      forceLlm,
-      realTools,
-      parallel,
-      cacheClassify,
-      failFast,
+    // Clear cache if requested
+    if (clearCache) {
+      clearClassifyCache()
+      if (!outputJson) {
+        ctx.output.message('🗑️  Cleared classify cache')
+      }
     }
 
-    switch (step) {
-      case 'classify':
-        results = await runClassifyEval(scenarios, evalOptions)
-        break
-      case 'route':
-        results = await runRouteEval(scenarios, evalOptions)
-        break
-      case 'gather':
-        results = await runGatherEval(scenarios, evalOptions)
-        break
-      case 'validate':
-        results = await runValidateEval(scenarios, evalOptions)
-        break
-      case 'e2e':
-        results = await runE2EEval(scenarios, evalOptions)
-        break
-      case 'draft':
-        console.error(
-          `Step "${step}" not yet implemented. Use e2e for full pipeline.`
+    // Load scenarios
+    let scenarios = await loadScenarios(scenarioGlob, dataset)
+
+    // Apply quick filter (smoke test subset)
+    if (quick) {
+      scenarios = filterQuickScenarios(scenarios)
+      if (!outputJson) {
+        ctx.output.message(
+          `⚡ Quick mode: filtered to ${scenarios.length} scenarios`
         )
-        process.exit(1)
-      default:
-        console.error(`Unknown step: ${step}`)
-        process.exit(1)
+      }
     }
-  } finally {
-    // Clean up real tools connections
+
+    if (limit && limit < scenarios.length) {
+      scenarios = scenarios.slice(0, limit)
+    }
+
+    if (!outputJson) {
+      const parallelInfo = parallel > 1 ? ` (parallel: ${parallel})` : ''
+      const flags = [
+        cacheClassify ? 'cache' : null,
+        failFast ? 'fail-fast' : null,
+      ]
+        .filter(Boolean)
+        .join(', ')
+      const flagsInfo = flags ? ` [${flags}]` : ''
+      ctx.output.data(
+        `\n🧪 Running ${step} eval on ${scenarios.length} scenarios${parallelInfo}${flagsInfo}\n`
+      )
+    }
+
+    // Initialize real tools if requested
     if (realTools) {
-      await cleanupRealTools()
+      if (!outputJson) {
+        ctx.output.message('🔌 Connecting to Docker services...')
+      }
+      const status = await initRealTools(
+        undefined,
+        ctx.output,
+        verbose && !outputJson
+      )
+
+      if (!status.mysql && !status.qdrant) {
+        throw new CLIError({
+          userMessage: 'Failed to connect to any Docker services.',
+          suggestion: 'Make sure MySQL (3306) and Qdrant (6333) are running.',
+        })
+      }
+
+      if (!outputJson) {
+        ctx.output.data('')
+      }
     }
-  }
 
-  const totalDuration = Date.now() - startTime
-  const metrics = computeMetrics(results, step, totalDuration)
+    const startTime = Date.now()
+    let results: StepResult[] = []
 
-  if (json) {
-    console.log(JSON.stringify({ metrics, results }, null, 2))
-  } else {
-    printMetrics(step, metrics, verbose ? results : undefined)
+    try {
+      const evalOptions = {
+        verbose,
+        model,
+        forceLlm,
+        realTools,
+        parallel,
+        cacheClassify,
+        failFast,
+        outputJson,
+      }
+
+      switch (step) {
+        case 'classify':
+          results = await runClassifyEval(ctx, scenarios, evalOptions)
+          break
+        case 'route':
+          results = await runRouteEval(ctx, scenarios, evalOptions)
+          break
+        case 'gather':
+          results = await runGatherEval(ctx, scenarios, evalOptions)
+          break
+        case 'validate':
+          results = await runValidateEval(ctx, scenarios, evalOptions)
+          break
+        case 'e2e':
+          results = await runE2EEval(ctx, scenarios, evalOptions)
+          break
+        case 'draft':
+          throw new CLIError({
+            userMessage: `Step "${step}" not yet implemented.`,
+            suggestion: 'Use e2e for full pipeline.',
+          })
+        default:
+          throw new CLIError({
+            userMessage: `Unknown step: ${step}.`,
+            suggestion: 'Use classify, route, gather, validate, or e2e.',
+          })
+      }
+    } finally {
+      // Clean up real tools connections
+      if (realTools) {
+        await cleanupRealTools()
+      }
+    }
+
+    const totalDuration = Date.now() - startTime
+    const metrics = computeMetrics(results, step, totalDuration)
+
+    if (outputJson) {
+      ctx.output.data({ metrics, results })
+    } else {
+      printMetrics(ctx, step, metrics, verbose ? results : undefined)
+    }
+  } catch (error) {
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Eval pipeline failed.',
+            suggestion: 'Verify inputs and try again.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
 }
 
@@ -390,8 +419,10 @@ async function loadScenarios(
   if (scenarioGlob) {
     const files = await glob(scenarioGlob)
     if (files.length === 0) {
-      console.error(`No scenario files found matching: ${scenarioGlob}`)
-      process.exit(1)
+      throw new CLIError({
+        userMessage: `No scenario files found matching: ${scenarioGlob}.`,
+        suggestion: 'Verify the glob pattern or use --dataset.',
+      })
     }
 
     return Promise.all(
@@ -402,8 +433,10 @@ async function loadScenarios(
     )
   }
 
-  console.error('Must provide --scenarios or --dataset')
-  process.exit(1)
+  throw new CLIError({
+    userMessage: 'Must provide --scenarios or --dataset.',
+    suggestion: 'Pass one of the options to run the eval.',
+  })
 }
 
 /**
@@ -502,15 +535,18 @@ interface EvalOptions {
   parallel?: number
   cacheClassify?: boolean
   failFast?: boolean
+  outputJson?: boolean
 }
 
 async function runClassifyEval(
+  ctx: CommandContext,
   scenarios: Scenario[],
   options: EvalOptions
 ): Promise<StepResult[]> {
   const concurrency = options.parallel || 1
   const classifyHash = options.cacheClassify ? getClassifySourceHash() : ''
   let completed = 0
+  const outputJson = options.outputJson ?? false
 
   const processScenario = async (scenario: Scenario): Promise<StepResult> => {
     const trigger = scenario.trigger || scenario.triggerMessage
@@ -558,19 +594,17 @@ async function runClassifyEval(
       const passed = result.category === expected
 
       completed++
-      if (!options.verbose) {
-        process.stdout.write(
-          `\r  Processing ${completed}/${scenarios.length}...`
-        )
+      if (!options.verbose && !outputJson && ctx.verbose) {
+        ctx.output.progress(`Processing ${completed}/${scenarios.length}...`)
       }
 
       if (options.verbose && !passed) {
-        console.log(`\n❌ ${scenario.id}`)
-        console.log(`   Expected: ${expected}`)
-        console.log(
+        ctx.output.data(`\n❌ ${scenario.id}`)
+        ctx.output.data(`   Expected: ${expected}`)
+        ctx.output.data(
           `   Actual:   ${result.category} (${(result.confidence * 100).toFixed(0)}%)`
         )
-        console.log(`   Subject:  ${trigger.subject.slice(0, 60)}...`)
+        ctx.output.data(`   Subject:  ${trigger.subject.slice(0, 60)}...`)
       }
 
       return {
@@ -601,20 +635,21 @@ async function runClassifyEval(
     options.failFast || false
   )
 
-  if (!options.verbose) console.log('')
-  if (aborted) {
-    console.log('⚠️  Stopped early due to --fail-fast\n')
+  if (aborted && !outputJson) {
+    ctx.output.warn('Stopped early due to --fail-fast')
   }
   return results
 }
 
 async function runRouteEval(
+  ctx: CommandContext,
   scenarios: Scenario[],
   options: EvalOptions
 ): Promise<StepResult[]> {
   const concurrency = options.parallel || 1
   const classifyHash = options.cacheClassify ? getClassifySourceHash() : ''
   let completed = 0
+  const outputJson = options.outputJson ?? false
 
   const processScenario = async (scenario: Scenario): Promise<StepResult> => {
     const trigger = scenario.trigger || scenario.triggerMessage
@@ -672,18 +707,16 @@ async function runRouteEval(
       const passed = routeResult.action === expected
 
       completed++
-      if (!options.verbose) {
-        process.stdout.write(
-          `\r  Processing ${completed}/${scenarios.length}...`
-        )
+      if (!options.verbose && !outputJson && ctx.verbose) {
+        ctx.output.progress(`Processing ${completed}/${scenarios.length}...`)
       }
 
       if (options.verbose && !passed) {
-        console.log(`\n❌ ${scenario.id}`)
-        console.log(`   Expected: ${expected}`)
-        console.log(`   Actual:   ${routeResult.action}`)
-        console.log(`   Category: ${classification.category}`)
-        console.log(`   Reason:   ${routeResult.reason}`)
+        ctx.output.data(`\n❌ ${scenario.id}`)
+        ctx.output.data(`   Expected: ${expected}`)
+        ctx.output.data(`   Actual:   ${routeResult.action}`)
+        ctx.output.data(`   Category: ${classification.category}`)
+        ctx.output.data(`   Reason:   ${routeResult.reason}`)
       }
 
       return {
@@ -713,19 +746,20 @@ async function runRouteEval(
     options.failFast || false
   )
 
-  if (!options.verbose) console.log('')
-  if (aborted) {
-    console.log('⚠️  Stopped early due to --fail-fast\n')
+  if (aborted && !outputJson) {
+    ctx.output.warn('Stopped early due to --fail-fast')
   }
   return results
 }
 
 async function runGatherEval(
+  ctx: CommandContext,
   scenarios: Scenario[],
   options: EvalOptions
 ): Promise<StepResult[]> {
   const concurrency = options.parallel || 1
   let completed = 0
+  const outputJson = options.outputJson ?? false
 
   // Check if real tools are available
   const useRealTools = options.realTools && isRealToolsAvailable()
@@ -741,12 +775,16 @@ async function runGatherEval(
       reasoning: 'Gather eval requires --real-tools flag with Docker services',
     }))
 
-    if (!options.verbose) {
-      console.log(`  Processing ${scenarios.length}/${scenarios.length}...`)
+    if (!options.verbose && !outputJson) {
+      ctx.output.message(
+        `Processing ${scenarios.length}/${scenarios.length}...`
+      )
     }
-    console.log(
-      '\n⚠️  Gather eval: Use --real-tools with Docker services for actual tool calls\n'
-    )
+    if (!outputJson) {
+      ctx.output.warn(
+        'Gather eval: Use --real-tools with Docker services for actual tool calls'
+      )
+    }
     return results
   }
 
@@ -811,15 +849,13 @@ async function runGatherEval(
       const actual = hasContext ? 'context_complete' : 'context_incomplete'
 
       completed++
-      if (!options.verbose) {
-        process.stdout.write(
-          `\r  Processing ${completed}/${scenarios.length}...`
-        )
+      if (!options.verbose && !outputJson && ctx.verbose) {
+        ctx.output.progress(`Processing ${completed}/${scenarios.length}...`)
       }
 
       if (options.verbose && !hasContext) {
-        console.log(`\n⚠️  ${scenario.id}`)
-        console.log(`   Context: ${toolResults.join(', ')}`)
+        ctx.output.data(`\n⚠️  ${scenario.id}`)
+        ctx.output.data(`   Context: ${toolResults.join(', ')}`)
       }
 
       return {
@@ -849,9 +885,8 @@ async function runGatherEval(
     options.failFast || false
   )
 
-  if (!options.verbose) console.log('')
-  if (aborted) {
-    console.log('⚠️  Stopped early due to --fail-fast\n')
+  if (aborted && !outputJson) {
+    ctx.output.warn('Stopped early due to --fail-fast')
   }
   return results
 }
@@ -867,20 +902,24 @@ async function runGatherEval(
  * All validation checks are deterministic (no LLM calls).
  */
 async function runValidateEval(
+  ctx: CommandContext,
   scenarios: Scenario[],
   options: EvalOptions
 ): Promise<StepResult[]> {
   const concurrency = options.parallel || 1
   let completed = 0
+  const outputJson = options.outputJson ?? false
 
   // Filter to scenarios with drafts or assertions
   const validScenarios = scenarios.filter((s) => s.draft || s.assertions)
 
   if (validScenarios.length === 0) {
-    console.log('\n⚠️  No scenarios with draft or assertions found.')
-    console.log('   For validate eval, scenarios need either:')
-    console.log('   - "draft": "text to validate"')
-    console.log('   - "assertions": { "noFabrication": true, ... }\n')
+    if (!outputJson) {
+      ctx.output.warn('No scenarios with draft or assertions found.')
+      ctx.output.message('For validate eval, scenarios need either:')
+      ctx.output.message('   - "draft": "text to validate"')
+      ctx.output.message('   - "assertions": { "noFabrication": true, ... }')
+    }
     return []
   }
 
@@ -1000,17 +1039,17 @@ async function runValidateEval(
         .join(', ')
 
       completed++
-      if (!options.verbose) {
-        process.stdout.write(
-          `\r  Processing ${completed}/${validScenarios.length}...`
+      if (!options.verbose && !outputJson && ctx.verbose) {
+        ctx.output.progress(
+          `Processing ${completed}/${validScenarios.length}...`
         )
       }
 
       if (options.verbose && !passed) {
-        console.log(`\n❌ ${scenario.id}`)
-        console.log(`   Failed assertions: ${failedAssertions.join(', ')}`)
-        console.log(`   Issues found: ${issuesSummary || 'none'}`)
-        console.log(`   Draft preview: ${scenario.draft.slice(0, 80)}...`)
+        ctx.output.data(`\n❌ ${scenario.id}`)
+        ctx.output.data(`   Failed assertions: ${failedAssertions.join(', ')}`)
+        ctx.output.data(`   Issues found: ${issuesSummary || 'none'}`)
+        ctx.output.data(`   Draft preview: ${scenario.draft.slice(0, 80)}...`)
       }
 
       return {
@@ -1040,26 +1079,31 @@ async function runValidateEval(
     options.failFast || false
   )
 
-  if (!options.verbose) console.log('')
-  if (aborted) {
-    console.log('⚠️  Stopped early due to --fail-fast\n')
+  if (aborted && !outputJson) {
+    ctx.output.warn('Stopped early due to --fail-fast')
   }
   return results
 }
 
 async function runE2EEval(
+  ctx: CommandContext,
   scenarios: Scenario[],
   options: EvalOptions
 ): Promise<StepResult[]> {
   const { runPipeline } = await import('@skillrecordings/core/pipeline')
   const concurrency = options.parallel || 1
   let completed = 0
+  const outputJson = options.outputJson ?? false
 
   // Note: Real tools are available when --real-tools is passed
   // They're initialized globally and accessible to the pipeline's gather step
   if (options.realTools && options.verbose) {
     const available = isRealToolsAvailable()
-    console.log(`  Real tools: ${available ? 'connected' : 'not available'}\n`)
+    if (!outputJson) {
+      ctx.output.message(
+        `Real tools: ${available ? 'connected' : 'not available'}`
+      )
+    }
   }
 
   const processScenario = async (scenario: Scenario): Promise<StepResult> => {
@@ -1105,17 +1149,15 @@ async function runE2EEval(
       const passed = pipelineResult.action === expected
 
       completed++
-      if (!options.verbose) {
-        process.stdout.write(
-          `\r  Processing ${completed}/${scenarios.length}...`
-        )
+      if (!options.verbose && !outputJson && ctx.verbose) {
+        ctx.output.progress(`Processing ${completed}/${scenarios.length}...`)
       }
 
       if (options.verbose && !passed) {
-        console.log(`\n❌ ${scenario.id}`)
-        console.log(`   Expected: ${expected}`)
-        console.log(`   Actual:   ${pipelineResult.action}`)
-        console.log(
+        ctx.output.data(`\n❌ ${scenario.id}`)
+        ctx.output.data(`   Expected: ${expected}`)
+        ctx.output.data(`   Actual:   ${pipelineResult.action}`)
+        ctx.output.data(
           `   Steps:    ${pipelineResult.steps.map((s) => s.step).join(' → ')}`
         )
       }
@@ -1149,9 +1191,8 @@ async function runE2EEval(
     options.failFast || false
   )
 
-  if (!options.verbose) console.log('')
-  if (aborted) {
-    console.log('⚠️  Stopped early due to --fail-fast\n')
+  if (aborted && !outputJson) {
+    ctx.output.warn('Stopped early due to --fail-fast')
   }
   return results
 }
@@ -1237,6 +1278,7 @@ function computeMetrics(
 // ============================================================================
 
 function printMetrics(
+  ctx: CommandContext,
   step: PipelineStep,
   metrics: EvalMetrics,
   results?: StepResult[]
@@ -1250,19 +1292,19 @@ function printMetrics(
     e2e: '🔄',
   }
 
-  console.log(`${stepEmoji[step]}  ${step.toUpperCase()} Eval Results\n`)
-  console.log(`Total: ${metrics.total}`)
-  console.log(
+  ctx.output.data(`${stepEmoji[step]}  ${step.toUpperCase()} Eval Results\n`)
+  ctx.output.data(`Total: ${metrics.total}`)
+  ctx.output.data(
     `  ✅ Passed: ${metrics.passed} (${(metrics.accuracy * 100).toFixed(1)}%)`
   )
-  console.log(`  ❌ Failed: ${metrics.failed}`)
+  ctx.output.data(`  ❌ Failed: ${metrics.failed}`)
 
   if (step === 'route' && metrics.falseSilenceRate !== undefined) {
-    console.log(`\nRouting Errors:`)
-    console.log(
+    ctx.output.data(`\nRouting Errors:`)
+    ctx.output.data(
       `  False silence rate: ${(metrics.falseSilenceRate * 100).toFixed(1)}%`
     )
-    console.log(
+    ctx.output.data(
       `  False respond rate: ${(metrics.falseRespondRate! * 100).toFixed(1)}%`
     )
   }
@@ -1270,7 +1312,7 @@ function printMetrics(
   // Show breakdown if there are multiple labels
   const labelCount = Object.keys(metrics.breakdown).length
   if (labelCount > 1 && labelCount <= 20) {
-    console.log(
+    ctx.output.data(
       `\nBreakdown by ${step === 'classify' ? 'category' : 'action'}:`
     )
 
@@ -1284,7 +1326,7 @@ function printMetrics(
 
       const precisionStr = (stats.precision * 100).toFixed(0)
       const recallStr = (stats.recall * 100).toFixed(0)
-      console.log(
+      ctx.output.data(
         `  ${label}: ${stats.tp}/${total} (P=${precisionStr}% R=${recallStr}%)`
       )
     }
@@ -1292,24 +1334,24 @@ function printMetrics(
 
   // Latency
   const avgLatency = metrics.durationMs / metrics.total
-  console.log(`\nLatency: ${avgLatency.toFixed(0)}ms avg`)
+  ctx.output.data(`\nLatency: ${avgLatency.toFixed(0)}ms avg`)
 
   // Show individual failures if verbose
   if (results) {
     const failures = results.filter((r) => !r.passed)
     if (failures.length > 0) {
-      console.log(`\n--- FAILURES (${failures.length}) ---\n`)
+      ctx.output.data(`\n--- FAILURES (${failures.length}) ---\n`)
       for (const f of failures.slice(0, 10)) {
-        console.log(`❌ ${f.scenarioId}`)
-        console.log(`   Expected: ${f.expected}`)
-        console.log(`   Actual:   ${f.actual}`)
+        ctx.output.data(`❌ ${f.scenarioId}`)
+        ctx.output.data(`   Expected: ${f.expected}`)
+        ctx.output.data(`   Actual:   ${f.actual}`)
         if (f.reasoning) {
-          console.log(`   Reason:   ${f.reasoning.slice(0, 80)}...`)
+          ctx.output.data(`   Reason:   ${f.reasoning.slice(0, 80)}...`)
         }
-        console.log('')
+        ctx.output.data('')
       }
       if (failures.length > 10) {
-        console.log(`   ... and ${failures.length - 10} more`)
+        ctx.output.data(`   ... and ${failures.length - 10} more`)
       }
     }
   }

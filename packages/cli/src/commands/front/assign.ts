@@ -1,159 +1,120 @@
 /**
  * Front CLI assign command
  *
- * Assigns or unassigns a conversation via Front API
+ * Assigns or unassigns a conversation to a teammate
  */
 
-import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
 import type { Command } from 'commander'
-import { hateoasWrap } from './hateoas'
-import { writeJsonOutput } from './json-output'
+import { type CommandContext } from '../../core/context'
+import { CLIError, formatError } from '../../core/errors'
+import { getFrontClient, normalizeId } from './client'
+import { conversationActions, conversationLinks, hateoasWrap } from './hateoas'
+import { contextFromCommand } from './with-context'
 
-/**
- * Get Front API client from environment
- */
-function getFrontClient() {
-  const apiToken = process.env.FRONT_API_TOKEN
-  if (!apiToken) {
-    throw new Error('FRONT_API_TOKEN environment variable is required')
-  }
-  return createInstrumentedFrontClient({ apiToken })
+interface AssignOptions {
+  to?: string
+  unassign?: boolean
+  dryRun?: boolean
+  json?: boolean
 }
 
-/**
- * Normalize Front resource ID or URL to ID
- */
-function normalizeId(idOrUrl: string): string {
-  return idOrUrl.startsWith('http') ? idOrUrl.split('/').pop()! : idOrUrl
-}
-
-/**
- * Command: skill front assign <conversation-id> [teammate-id]
- * Assign a conversation to a teammate, or unassign with --unassign
- */
-async function assignConversation(
+export async function assignConversation(
+  ctx: CommandContext,
   conversationId: string,
-  teammateId: string | undefined,
-  options: { json?: boolean; unassign?: boolean }
+  options: AssignOptions
 ): Promise<void> {
+  const outputJson = options.json === true || ctx.format === 'json'
+  const dryRun = options.dryRun === true
+
   try {
-    const front = getFrontClient()
-    const convId = normalizeId(conversationId)
+    const normalizedId = normalizeId(conversationId)
 
-    if (!teammateId && !options.unassign) {
-      throw new Error(
-        'Provide a teammate ID or use --unassign to remove assignment'
-      )
+    if (options.unassign && options.to) {
+      throw new CLIError({
+        userMessage: 'Choose either --unassign or --to, not both.',
+        suggestion: 'Remove one of the options and try again.',
+      })
     }
 
-    if (teammateId && options.unassign) {
-      throw new Error('Cannot provide both teammate ID and --unassign')
+    if (!options.unassign && !options.to) {
+      throw new CLIError({
+        userMessage: 'Missing assignee.',
+        suggestion: 'Use --to <teammate-id> or --unassign.',
+      })
     }
 
-    const assigneeId = options.unassign ? '' : normalizeId(teammateId!)
+    const front = getFrontClient(ctx)
+    const assigneeId = options.unassign ? '' : options.to!
 
-    await front.conversations.updateAssignee(convId, assigneeId)
+    if (!dryRun) {
+      await front.conversations.updateAssignee(normalizedId, assigneeId)
+    }
 
-    if (options.json) {
-      writeJsonOutput(
+    const result = {
+      id: normalizedId,
+      action: options.unassign ? 'unassigned' : 'assigned',
+      assigneeId: options.unassign ? null : assigneeId,
+      dryRun,
+      success: true,
+    }
+
+    if (outputJson) {
+      ctx.output.data(
         hateoasWrap({
           type: 'assign-result',
-          command: options.unassign
-            ? `skill front assign ${convId} --unassign --json`
-            : `skill front assign ${convId} ${assigneeId} --json`,
-          data: {
-            id: convId,
-            assignee: options.unassign ? null : assigneeId,
-            success: true,
-          },
+          command: `skill front assign ${normalizedId} ${
+            options.unassign ? '--unassign' : `--to ${options.to}`
+          } --json`,
+          data: result,
+          links: conversationLinks(normalizedId),
+          actions: conversationActions(normalizedId),
         })
       )
-    } else {
-      if (options.unassign) {
-        console.log(`✅ Unassigned ${convId}`)
-      } else {
-        console.log(`✅ Assigned ${convId} to ${assigneeId}`)
-      }
+      return
     }
+
+    const verb = options.unassign ? 'Unassigned' : 'Assigned'
+    const target = options.unassign ? '' : ` to ${options.to}`
+
+    ctx.output.data('')
+    if (dryRun) {
+      ctx.output.data(`🧪 DRY RUN: ${verb} ${normalizedId}${target}`)
+    } else {
+      ctx.output.data(`✅ ${verb} ${normalizedId}${target}`)
+    }
+    ctx.output.data('')
   } catch (error) {
-    if (options.json) {
-      console.error(
-        JSON.stringify({
-          error: error instanceof Error ? error.message : 'Unknown error',
-        })
-      )
-    } else {
-      console.error(
-        'Error:',
-        error instanceof Error ? error.message : 'Unknown error'
-      )
-    }
-    process.exit(1)
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Failed to assign conversation.',
+            suggestion:
+              'Verify conversation ID, teammate ID, and FRONT_API_TOKEN.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
 }
 
-/**
- * Register assign command with Commander
- */
 export function registerAssignCommand(frontCommand: Command): void {
   frontCommand
     .command('assign')
-    .description('Assign a conversation to a teammate')
-    .argument('<conversation-id>', 'Conversation ID (cnv_xxx)')
-    .argument('[teammate-id]', 'Teammate ID (tea_xxx) - omit with --unassign')
-    .option('--unassign', 'Remove assignee')
+    .description('Assign or unassign a conversation')
+    .argument('<conversation-id>', 'Conversation ID (e.g., cnv_xxx)')
+    .option('--to <teammate-id>', 'Assign to teammate ID (tea_xxx)')
+    .option('--unassign', 'Remove assignee from conversation')
+    .option('--dry-run', 'Preview without making changes')
     .option('--json', 'Output as JSON')
-    .addHelpText(
-      'after',
-      `
-━━━ Assign / Unassign Conversations ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  Assign a conversation to a teammate, or remove the current assignee.
-  Accepts conversation IDs (cnv_xxx) and teammate IDs (tea_xxx).
-
-ASSIGN
-  skill front assign <conversation-id> <teammate-id>
-
-  The teammate must exist in your Front workspace.
-
-UNASSIGN
-  skill front assign <conversation-id> --unassign
-
-  Removes the current assignee. Cannot be combined with a teammate ID.
-
-FINDING IDs
-  Teammate IDs:
-    skill front teammates                                 # Human-readable list
-    skill front teammates --json | jq '.[].id'            # Just the IDs
-
-  Conversation IDs:
-    skill front search --inbox inb_xxx --json | jq '.data.conversations[].id'
-    skill front conversation <cnv_xxx>                    # Verify a conversation
-
-JSON OUTPUT (--json)
-  Returns a HATEOAS-wrapped object:
-    { type: "assign-result", data: { id, assignee, success } }
-
-EXAMPLES
-  # Assign a conversation to a teammate
-  skill front assign cnv_abc123 tea_def456
-
-  # Unassign (remove assignee)
-  skill front assign cnv_abc123 --unassign
-
-  # Assign and get JSON output
-  skill front assign cnv_abc123 tea_def456 --json
-
-  # Pipeline: assign all unassigned convos in an inbox to a teammate
-  skill front search --inbox inb_4bj7r --status unassigned --json \\
-    | jq -r '.data.conversations[].id' \\
-    | xargs -I{} skill front assign {} tea_def456
-
-RELATED COMMANDS
-  skill front teammates              List teammates and their IDs
-  skill front conversation <id>      View conversation details + current assignee
-  skill front search                 Find conversations by filters
-`
+    .action(
+      async (
+        conversationId: string,
+        options: AssignOptions,
+        command: Command
+      ) => {
+        const ctx = await contextFromCommand(command, options)
+        await assignConversation(ctx, conversationId, options)
+      }
     )
-    .action(assignConversation)
 }

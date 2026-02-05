@@ -8,20 +8,30 @@
  *   skill front triage --inbox <inbox-id> --json
  */
 
-import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
-import type { Conversation, ConversationList } from '@skillrecordings/front-sdk'
+import type {
+  Conversation,
+  ConversationList,
+  Message,
+  MessageList,
+} from '@skillrecordings/front-sdk'
+import { generateObject } from 'ai'
 import type { Command } from 'commander'
+import { z } from 'zod'
+import { type CommandContext, createContext } from '../../core/context'
+import { CLIError, formatError } from '../../core/errors'
+import { getFrontClient } from './client'
 import { hateoasWrap, triageActions } from './hateoas'
-import { writeJsonOutput } from './json-output'
 
 interface TriageOptions {
   inbox: string
   status?: 'unassigned' | 'assigned' | 'archived'
   autoArchive?: boolean
+  dryRun?: boolean
   json?: boolean
 }
 
 type Category = 'actionable' | 'noise' | 'spam'
+type Urgency = 'low' | 'medium' | 'high'
 
 interface TriageResult {
   id: string
@@ -31,6 +41,11 @@ interface TriageResult {
   category: Category
   reason: string
   created_at: number
+  llm?: {
+    urgency: Urgency
+    category: string
+    suggested_action: string
+  } | null
 }
 
 interface CategoryStats {
@@ -39,15 +54,67 @@ interface CategoryStats {
   spam: number
 }
 
-/**
- * Get Front API client
- */
-function getFrontClient() {
-  const apiToken = process.env.FRONT_API_TOKEN
-  if (!apiToken) {
-    throw new Error('FRONT_API_TOKEN environment variable is required')
+const LLM_MODEL = 'anthropic/claude-haiku-4-5'
+
+const llmTriageSchema = z.object({
+  urgency: z.enum(['low', 'medium', 'high']),
+  category: z.string(),
+  suggested_action: z.string(),
+})
+
+function normalizeMessageBody(message: Message | null): string {
+  if (!message) return ''
+  const rawBody = message.text || message.body || ''
+  if (!rawBody) return ''
+  return rawBody
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function buildLlmPrompt(
+  conversation: Conversation,
+  messageBody: string
+): string {
+  const subject = conversation.subject || '(no subject)'
+  const senderEmail = conversation.recipient?.handle || 'unknown'
+  const senderName = conversation.recipient?.name || 'unknown'
+  const tags =
+    conversation.tags && conversation.tags.length > 0
+      ? conversation.tags.map((t) => t.name).join(', ')
+      : 'none'
+  const messageSection = messageBody
+    ? `\nLatest inbound message:\n${messageBody}\n`
+    : '\nLatest inbound message: (not available)\n'
+
+  return `Classify this support conversation for triage.
+
+Subject: ${subject}
+Sender: ${senderName} <${senderEmail}>
+Tags: ${tags}
+${messageSection}
+
+Return urgency (low/medium/high), a short category label, and a suggested next action.`
+}
+
+async function classifyWithLlm(
+  conversation: Conversation,
+  message: Message | null
+): Promise<{
+  urgency: Urgency
+  category: string
+  suggested_action: string
+} | null> {
+  try {
+    const { object } = await generateObject({
+      model: LLM_MODEL,
+      schema: llmTriageSchema,
+      prompt: buildLlmPrompt(conversation, normalizeMessageBody(message)),
+    })
+    return object
+  } catch {
+    return null
   }
-  return createInstrumentedFrontClient({ apiToken })
 }
 
 /**
@@ -146,24 +213,51 @@ function formatTimestamp(ts: number): string {
   })
 }
 
+async function fetchLatestInboundMessage(
+  front: ReturnType<typeof getFrontClient>,
+  conversationId: string
+): Promise<Message | null> {
+  try {
+    const messageList = (await front.conversations.listMessages(
+      conversationId
+    )) as MessageList
+    const messages = messageList._results ?? []
+    const latestInbound = messages
+      .filter((message) => message.is_inbound)
+      .sort((a, b) => b.created_at - a.created_at)[0]
+
+    if (!latestInbound) return null
+
+    try {
+      const fullMessage = (await front.messages.get(
+        latestInbound.id
+      )) as Message
+      return fullMessage
+    } catch {
+      return latestInbound
+    }
+  } catch {
+    return null
+  }
+}
+
 /**
  * Main triage function
  */
 export async function triageConversations(
+  ctx: CommandContext,
   options: TriageOptions
 ): Promise<void> {
-  const {
-    inbox,
-    status = 'unassigned',
-    autoArchive = false,
-    json = false,
-  } = options
+  const { inbox, status = 'unassigned', autoArchive = false, dryRun } = options
+  const outputJson = options.json === true || ctx.format === 'json'
 
   try {
-    const front = getFrontClient()
+    const front = getFrontClient(ctx)
 
-    if (!json) {
-      console.log(`\nFetching ${status} conversations from inbox ${inbox}...`)
+    if (!outputJson) {
+      ctx.output.data(
+        `\nFetching ${status} conversations from inbox ${inbox}...`
+      )
     }
 
     // Build query URL
@@ -177,17 +271,17 @@ export async function triageConversations(
       const data = (await front.raw.get(nextUrl)) as ConversationList
       allConversations.push(...(data._results || []))
 
-      if (!json) {
-        process.stdout.write(
-          `\r  Fetched ${allConversations.length} conversations...`
+      if (!outputJson) {
+        ctx.output.progress(
+          `Fetched ${allConversations.length} conversations to triage`
         )
       }
 
       nextUrl = data._pagination?.next || null
     }
 
-    if (!json) {
-      console.log(`\n  Total: ${allConversations.length} conversations\n`)
+    if (!outputJson) {
+      ctx.output.data(`\n  Total: ${allConversations.length} conversations\n`)
     }
 
     // Categorize each conversation
@@ -196,6 +290,8 @@ export async function triageConversations(
 
     for (const conv of allConversations) {
       const { category, reason } = categorizeConversation(conv)
+      const latestMessage = await fetchLatestInboundMessage(front, conv.id)
+      const llm = await classifyWithLlm(conv, latestMessage)
       stats[category]++
 
       results.push({
@@ -206,12 +302,13 @@ export async function triageConversations(
         category,
         reason,
         created_at: conv.created_at,
+        llm,
       })
     }
 
     // Output results
-    if (json) {
-      writeJsonOutput(
+    if (outputJson) {
+      ctx.output.data(
         hateoasWrap({
           type: 'triage-result',
           command: `skill front triage --inbox ${inbox} --json`,
@@ -227,19 +324,19 @@ export async function triageConversations(
     }
 
     // Human-readable output
-    console.log('📊 Triage Results:')
-    console.log('-'.repeat(80))
-    console.log(
+    ctx.output.data('📊 Triage Results:')
+    ctx.output.data('-'.repeat(80))
+    ctx.output.data(
       `   Actionable: ${stats.actionable} (${Math.round((stats.actionable / allConversations.length) * 100)}%)`
     )
-    console.log(
+    ctx.output.data(
       `   Noise:      ${stats.noise} (${Math.round((stats.noise / allConversations.length) * 100)}%)`
     )
-    console.log(
+    ctx.output.data(
       `   Spam:       ${stats.spam} (${Math.round((stats.spam / allConversations.length) * 100)}%)`
     )
-    console.log('-'.repeat(80))
-    console.log('')
+    ctx.output.data('-'.repeat(80))
+    ctx.output.data('')
 
     // Show by category
     const byCategory: Record<Category, TriageResult[]> = {
@@ -254,46 +351,67 @@ export async function triageConversations(
 
     // Show actionable first
     if (byCategory.actionable.length > 0) {
-      console.log(`✅ ACTIONABLE (${byCategory.actionable.length}):`)
+      ctx.output.data(`✅ ACTIONABLE (${byCategory.actionable.length}):`)
       for (const r of byCategory.actionable
         .sort((a, b) => b.created_at - a.created_at)
         .slice(0, 10)) {
-        console.log(`   ${r.id} - ${formatTimestamp(r.created_at)}`)
-        console.log(`      From: ${r.senderEmail}`)
-        console.log(`      Subject: ${r.subject}`)
-        console.log(`      → ${r.reason}`)
-        console.log('')
+        ctx.output.data(`   ${r.id} - ${formatTimestamp(r.created_at)}`)
+        ctx.output.data(`      From: ${r.senderEmail}`)
+        ctx.output.data(`      Subject: ${r.subject}`)
+        ctx.output.data(`      → ${r.reason}`)
+        if (r.llm) {
+          ctx.output.data(
+            `      LLM: ${r.llm.urgency} · ${r.llm.category} · ${r.llm.suggested_action}`
+          )
+        }
+        ctx.output.data('')
       }
       if (byCategory.actionable.length > 10) {
-        console.log(`   ... and ${byCategory.actionable.length - 10} more\n`)
+        ctx.output.data(
+          `   ... and ${byCategory.actionable.length - 10} more\n`
+        )
       }
     }
 
     // Show noise
     if (byCategory.noise.length > 0) {
-      console.log(`🔇 NOISE (${byCategory.noise.length}):`)
+      ctx.output.data(`🔇 NOISE (${byCategory.noise.length}):`)
       for (const r of byCategory.noise
         .sort((a, b) => b.created_at - a.created_at)
         .slice(0, 5)) {
-        console.log(`   ${r.id} - ${r.senderEmail} - ${r.subject.slice(0, 60)}`)
-        console.log(`      → ${r.reason}`)
+        ctx.output.data(
+          `   ${r.id} - ${r.senderEmail} - ${r.subject.slice(0, 60)}`
+        )
+        ctx.output.data(`      → ${r.reason}`)
+        if (r.llm) {
+          ctx.output.data(
+            `      LLM: ${r.llm.urgency} · ${r.llm.category} · ${r.llm.suggested_action}`
+          )
+        }
       }
       if (byCategory.noise.length > 5) {
-        console.log(`   ... and ${byCategory.noise.length - 5} more\n`)
+        ctx.output.data(`   ... and ${byCategory.noise.length - 5} more\n`)
       }
     }
 
     // Show spam
     if (byCategory.spam.length > 0) {
-      console.log(`🗑️  SPAM (${byCategory.spam.length}):`)
+      ctx.output.data(`🗑️  SPAM (${byCategory.spam.length}):`)
       for (const r of byCategory.spam
         .sort((a, b) => b.created_at - a.created_at)
         .slice(0, 5)) {
-        console.log(`   ${r.id} - ${r.senderEmail} - ${r.subject.slice(0, 60)}`)
-        console.log(`      → ${r.reason}`)
+        ctx.output.data(
+          `   ${r.id} - ${r.senderEmail} - ${r.subject.slice(0, 60)}`
+        )
+        ctx.output.data(`      → ${r.reason}`)
+        if (r.llm) {
+          ctx.output.data(
+            `      LLM: ${r.llm.urgency} · ${r.llm.category} · ${r.llm.suggested_action}`
+          )
+        }
       }
       if (byCategory.spam.length > 5) {
-        console.log(`   ... and ${byCategory.spam.length - 5} more\n`)
+        ctx.output.data(`   ... and ${byCategory.spam.length - 5} more\n`)
       }
     }
 
@@ -301,44 +419,54 @@ export async function triageConversations(
     if (autoArchive) {
       const toArchive = [...byCategory.noise, ...byCategory.spam]
       if (toArchive.length === 0) {
-        console.log('No noise or spam to archive.\n')
+        ctx.output.data('No noise or spam to archive.\n')
         return
       }
 
-      console.log(`\n📦 Archiving ${toArchive.length} conversations...`)
+      if (dryRun) {
+        ctx.output.data(
+          `\n🧪 DRY RUN: Would archive ${toArchive.length} conversations:`
+        )
+        for (const item of toArchive) {
+          ctx.output.data(`   - ${item.id}`)
+        }
+        ctx.output.data('')
+        return
+      }
+
+      ctx.output.data(`\n📦 Archiving ${toArchive.length} conversations...`)
 
       let archived = 0
       for (const r of toArchive) {
         try {
           await front.conversations.update(r.id, { status: 'archived' })
           archived++
-          process.stdout.write(`\r  Archived ${archived}/${toArchive.length}`)
+          ctx.output.progress(
+            `Archived ${archived}/${toArchive.length} conversations`
+          )
         } catch (err) {
           // Skip failures
           continue
         }
       }
 
-      console.log(`\n✅ Archived ${archived} conversations\n`)
+      ctx.output.data(`\n✅ Archived ${archived} conversations\n`)
     } else if (byCategory.noise.length > 0 || byCategory.spam.length > 0) {
-      console.log(
+      ctx.output.data(
         `\n💡 Tip: Use --auto-archive to automatically archive noise/spam\n`
       )
     }
   } catch (error) {
-    if (json) {
-      console.error(
-        JSON.stringify({
-          error: error instanceof Error ? error.message : 'Unknown error',
-        })
-      )
-    } else {
-      console.error(
-        'Error:',
-        error instanceof Error ? error.message : 'Unknown error'
-      )
-    }
-    process.exit(1)
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Failed to triage Front conversations.',
+            suggestion: 'Verify inbox ID and FRONT_API_TOKEN.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
 }
 
@@ -356,72 +484,21 @@ export function registerTriageCommand(front: Command): void {
       'unassigned'
     )
     .option('--auto-archive', 'Automatically archive noise and spam')
+    .option('--dry-run', 'Preview auto-archive without making changes')
     .option('--json', 'JSON output')
-    .addHelpText(
-      'after',
-      `
-━━━ AI-Powered Triage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  Categorize inbox conversations into actionable, noise, or spam using
-  heuristic rules. Optionally auto-archive the junk.
-
-OPTIONS
-  -i, --inbox <id>       (required) Inbox ID to triage (inb_xxx)
-  -s, --status <status>  Conversation status to filter (default: unassigned)
-                         Values: unassigned, assigned, archived
-  --auto-archive         Archive all noise + spam conversations automatically
-  --json                 Output as JSON (HATEOAS-wrapped)
-
-CATEGORIZATION RULES
-  Category      Signals
-  ───────────── ──────────────────────────────────────────────────────────
-  Noise         mailer-daemon, noreply, no-reply, postmaster, newsletter
-                delivery failures, auto-replies, out-of-office,
-                automated reports (daily/weekly/monthly), cert notifications
-  Spam          partnership/sponsorship pitches, guest post / link exchange,
-                backlink requests, marketing opportunities
-  Actionable    Everything else (real support issues)
-
-WORKFLOW
-  1. Triage to see the breakdown:
-     skill front triage --inbox inb_4bj7r
-
-  2. Review categories in the output (actionable / noise / spam)
-
-  3. If satisfied, auto-archive the junk:
-     skill front triage --inbox inb_4bj7r --auto-archive
-
-JSON + jq PATTERNS
-  # Just the stats
-  skill front triage --inbox inb_4bj7r --json | jq '.data.stats'
-
-  # All noise conversation IDs
-  skill front triage --inbox inb_4bj7r --json | jq '[.data.results[] | select(.category == "noise") | .id]'
-
-  # Spam sender emails
-  skill front triage --inbox inb_4bj7r --json | jq '[.data.results[] | select(.category == "spam") | .senderEmail]'
-
-  # Actionable count
-  skill front triage --inbox inb_4bj7r --json | jq '.data.stats.actionable'
-
-EXAMPLES
-  # Triage unassigned conversations (default)
-  skill front triage --inbox inb_4bj7r
-
-  # Triage assigned conversations
-  skill front triage --inbox inb_4bj7r --status assigned
-
-  # Triage and auto-archive noise + spam
-  skill front triage --inbox inb_4bj7r --auto-archive
-
-  # Pipe JSON for downstream processing
-  skill front triage --inbox inb_4bj7r --json | jq '.data.results[] | select(.category == "actionable")'
-
-RELATED COMMANDS
-  skill front bulk-archive    Bulk-archive conversations by query
-  skill front report          Inbox activity report
-  skill front search          Search conversations with filters
-`
-    )
-    .action(triageConversations)
+    .action(async (options: TriageOptions, command: Command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: options.json ? 'json' : opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await triageConversations(ctx, options)
+    })
 }

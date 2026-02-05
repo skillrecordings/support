@@ -10,7 +10,6 @@
  */
 
 import { confirm } from '@inquirer/prompts'
-import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
 import {
   type TagWithConversationCount,
   findCaseVariants,
@@ -18,35 +17,23 @@ import {
 } from '@skillrecordings/core/tags/audit'
 import { DEFAULT_CATEGORY_TAG_MAPPING } from '@skillrecordings/core/tags/registry'
 import type { Command } from 'commander'
+import { type CommandContext, createContext } from '../../core/context'
+import { CLIError, formatError } from '../../core/errors'
+import { isListOutputFormat, outputList } from '../../core/list-output'
+import { getFrontClient } from './client'
 import { hateoasWrap, tagListActions, tagListLinks } from './hateoas'
-import { writeJsonOutput } from './json-output'
 
 /**
  * Get Front SDK client from environment
  */
-function getFrontSdkClient() {
-  const apiToken = process.env.FRONT_API_TOKEN
-  if (!apiToken) {
-    throw new Error('FRONT_API_TOKEN environment variable is required')
-  }
-  return createInstrumentedFrontClient({ apiToken })
-}
-
-/**
- * Get Front API token
- */
-function getFrontApiToken() {
-  const apiToken = process.env.FRONT_API_TOKEN
-  if (!apiToken) {
-    throw new Error('FRONT_API_TOKEN environment variable is required')
-  }
-  return apiToken
+function getFrontSdkClient(ctx: CommandContext) {
+  return getFrontClient(ctx)
 }
 
 /**
  * Raw fetch for tags - bypasses SDK validation which chokes on Front's messy data
  */
-async function fetchTagsRaw(): Promise<
+async function fetchTagsRaw(front: ReturnType<typeof getFrontClient>): Promise<
   Array<{
     id: string
     name: string
@@ -55,7 +42,6 @@ async function fetchTagsRaw(): Promise<
     description?: string | null
   }>
 > {
-  const apiToken = getFrontApiToken()
   const allTags: Array<{
     id: string
     name: string
@@ -65,8 +51,6 @@ async function fetchTagsRaw(): Promise<
   }> = []
 
   let nextUrl: string | null = 'https://api2.frontapp.com/tags'
-  const front = createInstrumentedFrontClient({ apiToken })
-
   while (nextUrl) {
     const data = (await front.raw.get(nextUrl)) as {
       _results: Array<{
@@ -89,17 +73,18 @@ async function fetchTagsRaw(): Promise<
 /**
  * Raw create tag - bypasses SDK response validation
  */
-async function createTagRaw(params: {
-  name: string
-  highlight?: string | null
-  description?: string | null
-}): Promise<void> {
-  const apiToken = getFrontApiToken()
+async function createTagRaw(
+  front: ReturnType<typeof getFrontClient>,
+  params: {
+    name: string
+    highlight?: string | null
+    description?: string | null
+  }
+): Promise<void> {
   const body: Record<string, unknown> = { name: params.name }
   if (params.highlight) body.highlight = params.highlight
   if (params.description) body.description = params.description
 
-  const front = createInstrumentedFrontClient({ apiToken })
   await front.raw.post('/tags', body)
 }
 
@@ -132,7 +117,7 @@ function sleep(ms: number): Promise<void> {
  * Uses the conversations endpoint and checks pagination
  */
 async function getConversationCount(
-  front: ReturnType<typeof createInstrumentedFrontClient>,
+  front: ReturnType<typeof getFrontClient>,
   tagId: string
 ): Promise<number> {
   try {
@@ -159,7 +144,7 @@ async function fetchConversationCountsRateLimited<
   T extends { id: string; name: string },
 >(
   tags: T[],
-  front: ReturnType<typeof createInstrumentedFrontClient>,
+  front: ReturnType<typeof getFrontClient>,
   options: {
     delayMs?: number
     batchSize?: number
@@ -203,13 +188,31 @@ async function fetchConversationCountsRateLimited<
  * Command: skill front tags list
  * List all tags with conversation counts
  */
-async function listTags(options: {
-  json?: boolean
-  unused?: boolean
-}): Promise<void> {
+export async function listTags(
+  ctx: CommandContext,
+  options: {
+    json?: boolean
+    unused?: boolean
+    idsOnly?: boolean
+    outputFormat?: string
+  }
+): Promise<void> {
+  const outputFormat = isListOutputFormat(options.outputFormat)
+    ? options.outputFormat
+    : undefined
+  if (options.outputFormat && !outputFormat) {
+    throw new CLIError({
+      userMessage: 'Invalid --output-format value.',
+      suggestion: 'Use json, ndjson, or csv.',
+    })
+  }
+  const outputJson =
+    options.json === true || ctx.format === 'json' || outputFormat === 'json'
+  const idsOnly = options.idsOnly === true
+
   try {
-    const front = getFrontSdkClient()
-    const tags = await fetchTagsRaw()
+    const front = getFrontSdkClient(ctx)
+    const tags = await fetchTagsRaw(front)
 
     // Fetch conversation counts for each tag
     const tagsWithCounts: TagWithCount[] = await Promise.all(
@@ -231,8 +234,24 @@ async function listTags(options: {
       ? tagsWithCounts.filter((t) => t.conversation_count === 0)
       : tagsWithCounts
 
-    if (options.json) {
-      writeJsonOutput(
+    if (idsOnly) {
+      for (const tag of filteredTags) {
+        ctx.output.data(tag.id)
+      }
+      return
+    }
+
+    if (outputFormat && outputFormat !== 'json') {
+      const rows = filteredTags.map((tag) => ({
+        ...tag,
+        _actions: tagListActions(),
+      }))
+      outputList(ctx, rows, outputFormat)
+      return
+    }
+
+    if (outputJson) {
+      ctx.output.data(
         hateoasWrap({
           type: 'tag-list',
           command: `skill front tags list${options.unused ? ' --unused' : ''} --json`,
@@ -248,59 +267,56 @@ async function listTags(options: {
 
     if (filteredTags.length === 0) {
       if (options.unused) {
-        console.log('\n✨ No unused tags found!\n')
+        ctx.output.data('\n✨ No unused tags found!\n')
       } else {
-        console.log('\n📭 No tags found.\n')
+        ctx.output.data('\n📭 No tags found.\n')
       }
       return
     }
 
     const header = options.unused ? '🏷️  Unused Tags' : '🏷️  All Tags'
-    console.log(`\n${header} (${filteredTags.length}):`)
-    console.log('-'.repeat(80))
+    ctx.output.data(`\n${header} (${filteredTags.length}):`)
+    ctx.output.data('-'.repeat(80))
 
     // Table header
-    console.log(
+    ctx.output.data(
       `${'ID'.padEnd(20)} ${'Name'.padEnd(30)} ${'Color'.padEnd(10)} ${'Convos'.padEnd(8)}`
     )
-    console.log('-'.repeat(80))
+    ctx.output.data('-'.repeat(80))
 
     for (const tag of filteredTags) {
       const highlight = tag.highlight || '-'
       const countStr =
         tag.conversation_count === 0 ? '0 ⚠️' : tag.conversation_count.toString()
 
-      console.log(
+      ctx.output.data(
         `${truncate(tag.id, 20).padEnd(20)} ${truncate(tag.name, 30).padEnd(30)} ${highlight.padEnd(10)} ${countStr.padEnd(8)}`
       )
     }
 
-    console.log('')
+    ctx.output.data('')
 
     if (!options.unused) {
       const unusedCount = tagsWithCounts.filter(
         (t) => t.conversation_count === 0
       ).length
       if (unusedCount > 0) {
-        console.log(
+        ctx.output.data(
           `💡 Found ${unusedCount} unused tag(s). Use --unused to filter.\n`
         )
       }
     }
   } catch (error) {
-    if (options.json) {
-      console.error(
-        JSON.stringify({
-          error: error instanceof Error ? error.message : 'Unknown error',
-        })
-      )
-    } else {
-      console.error(
-        'Error:',
-        error instanceof Error ? error.message : 'Unknown error'
-      )
-    }
-    process.exit(1)
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Failed to list Front tags.',
+            suggestion: 'Verify FRONT_API_TOKEN.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
 }
 
@@ -308,27 +324,37 @@ async function listTags(options: {
  * Command: skill front tags delete <id>
  * Delete a tag by ID
  */
-async function deleteTag(
+export async function deleteTag(
+  ctx: CommandContext,
   id: string,
-  options: { force?: boolean }
+  options: { force?: boolean; dryRun?: boolean }
 ): Promise<void> {
   try {
-    const front = getFrontSdkClient()
+    const front = getFrontSdkClient(ctx)
 
     // Fetch tag details first
     const tag = await front.tags.get(id)
     const convCount = await getConversationCount(front, id)
 
+    if (options.dryRun) {
+      ctx.output.data(
+        `\n🧪 DRY RUN: Would delete tag "${tag.name}" (${tag.id})`
+      )
+      ctx.output.data(`   Conversations: ${convCount}`)
+      ctx.output.data('')
+      return
+    }
+
     if (!options.force) {
-      console.log(`\n🏷️  Tag: ${tag.name}`)
-      console.log(`   ID: ${tag.id}`)
-      console.log(`   Conversations: ${convCount}`)
+      ctx.output.data(`\n🏷️  Tag: ${tag.name}`)
+      ctx.output.data(`   ID: ${tag.id}`)
+      ctx.output.data(`   Conversations: ${convCount}`)
 
       if (convCount > 0) {
-        console.log(
+        ctx.output.data(
           `\n⚠️  Warning: This tag is used in ${convCount} conversation(s).`
         )
-        console.log(
+        ctx.output.data(
           '   Deleting it will remove the tag from those conversations.'
         )
       }
@@ -339,19 +365,24 @@ async function deleteTag(
       })
 
       if (!confirmed) {
-        console.log('\n❌ Cancelled.\n')
+        ctx.output.data('\n❌ Cancelled.\n')
         return
       }
     }
 
     await front.tags.delete(id)
-    console.log(`\n✅ Deleted tag "${tag.name}" (${id})\n`)
+    ctx.output.data(`\n✅ Deleted tag "${tag.name}" (${id})\n`)
   } catch (error) {
-    console.error(
-      'Error:',
-      error instanceof Error ? error.message : 'Unknown error'
-    )
-    process.exit(1)
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Failed to delete Front tag.',
+            suggestion: 'Verify tag ID and FRONT_API_TOKEN.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
 }
 
@@ -359,26 +390,43 @@ async function deleteTag(
  * Command: skill front tags rename <id> <name>
  * Rename a tag
  */
-async function renameTag(id: string, newName: string): Promise<void> {
+export async function renameTag(
+  ctx: CommandContext,
+  id: string,
+  newName: string,
+  options: { dryRun?: boolean }
+): Promise<void> {
   try {
-    const front = getFrontSdkClient()
+    const front = getFrontSdkClient(ctx)
 
     // Fetch current tag details
     const oldTag = await front.tags.get(id)
     const oldName = oldTag.name
 
+    if (options.dryRun) {
+      ctx.output.data(`\n🧪 DRY RUN: Would rename tag:`)
+      ctx.output.data(`   "${oldName}" → "${newName}"`)
+      ctx.output.data(`   ID: ${id}\n`)
+      return
+    }
+
     // Update the tag
     const updatedTag = await front.tags.update(id, { name: newName })
 
-    console.log(`\n✅ Renamed tag:`)
-    console.log(`   "${oldName}" → "${updatedTag.name}"`)
-    console.log(`   ID: ${id}\n`)
+    ctx.output.data(`\n✅ Renamed tag:`)
+    ctx.output.data(`   "${oldName}" → "${updatedTag.name}"`)
+    ctx.output.data(`   ID: ${id}\n`)
   } catch (error) {
-    console.error(
-      'Error:',
-      error instanceof Error ? error.message : 'Unknown error'
-    )
-    process.exit(1)
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Failed to rename Front tag.',
+            suggestion: 'Verify tag ID, new name, and FRONT_API_TOKEN.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
 }
 
@@ -455,7 +503,7 @@ interface CleanupPlan {
  * Build cleanup plan from current tags
  */
 async function buildCleanupPlan(
-  front: ReturnType<typeof createInstrumentedFrontClient>,
+  front: ReturnType<typeof getFrontClient>,
   tagsWithCounts: TagWithConversationCount[]
 ): Promise<CleanupPlan> {
   const plan: CleanupPlan = {
@@ -548,17 +596,17 @@ async function buildCleanupPlan(
 /**
  * Print cleanup plan summary
  */
-function printCleanupPlan(plan: CleanupPlan): void {
-  console.log('\n📋 Tag Cleanup Plan')
-  console.log('='.repeat(60))
+function printCleanupPlan(ctx: CommandContext, plan: CleanupPlan): void {
+  ctx.output.data('\n📋 Tag Cleanup Plan')
+  ctx.output.data('='.repeat(60))
 
   // Duplicates to delete
   if (plan.duplicatesToDelete.length > 0) {
-    console.log(
+    ctx.output.data(
       `\n🔴 Duplicates to DELETE (${plan.duplicatesToDelete.length}):`
     )
     for (const item of plan.duplicatesToDelete) {
-      console.log(
+      ctx.output.data(
         `   - "${item.tag.name}" (${item.tag.conversationCount} convos) → ${item.reason}`
       )
     }
@@ -566,11 +614,11 @@ function printCleanupPlan(plan: CleanupPlan): void {
 
   // Case variants to rename
   if (plan.caseVariantsToRename.length > 0) {
-    console.log(
+    ctx.output.data(
       `\n🟡 Case variants to RENAME (${plan.caseVariantsToRename.length}):`
     )
     for (const item of plan.caseVariantsToRename) {
-      console.log(
+      ctx.output.data(
         `   - "${item.tag.name}" → "${item.newName}" (merge with ${item.canonical.conversationCount} convos)`
       )
     }
@@ -578,21 +626,21 @@ function printCleanupPlan(plan: CleanupPlan): void {
 
   // Obsolete to delete
   if (plan.obsoleteToDelete.length > 0) {
-    console.log(
+    ctx.output.data(
       `\n🗑️  Obsolete tags to DELETE (${plan.obsoleteToDelete.length}):`
     )
     for (const tag of plan.obsoleteToDelete) {
-      console.log(`   - "${tag.name}" (${tag.conversationCount} convos)`)
+      ctx.output.data(`   - "${tag.name}" (${tag.conversationCount} convos)`)
     }
   }
 
   // Missing to create
   if (plan.missingToCreate.length > 0) {
-    console.log(
+    ctx.output.data(
       `\n🟢 Missing standard tags to CREATE (${plan.missingToCreate.length}):`
     )
     for (const item of plan.missingToCreate) {
-      console.log(`   - "${item.name}" (${item.highlight})`)
+      ctx.output.data(`   - "${item.name}" (${item.highlight})`)
     }
   }
 
@@ -603,15 +651,15 @@ function printCleanupPlan(plan: CleanupPlan): void {
     plan.obsoleteToDelete.length +
     plan.missingToCreate.length
 
-  console.log('\n' + '='.repeat(60))
-  console.log(`📊 Total changes: ${totalChanges}`)
-  console.log(`   - Delete duplicates: ${plan.duplicatesToDelete.length}`)
-  console.log(`   - Rename variants: ${plan.caseVariantsToRename.length}`)
-  console.log(`   - Delete obsolete: ${plan.obsoleteToDelete.length}`)
-  console.log(`   - Create missing: ${plan.missingToCreate.length}`)
+  ctx.output.data('\n' + '='.repeat(60))
+  ctx.output.data(`📊 Total changes: ${totalChanges}`)
+  ctx.output.data(`   - Delete duplicates: ${plan.duplicatesToDelete.length}`)
+  ctx.output.data(`   - Rename variants: ${plan.caseVariantsToRename.length}`)
+  ctx.output.data(`   - Delete obsolete: ${plan.obsoleteToDelete.length}`)
+  ctx.output.data(`   - Create missing: ${plan.missingToCreate.length}`)
 
   if (totalChanges === 0) {
-    console.log('\n✨ No cleanup needed - tags are in good shape!')
+    ctx.output.data('\n✨ No cleanup needed - tags are in good shape!')
   }
 }
 
@@ -619,7 +667,8 @@ function printCleanupPlan(plan: CleanupPlan): void {
  * Execute cleanup plan
  */
 async function executeCleanupPlan(
-  front: ReturnType<typeof createInstrumentedFrontClient>,
+  ctx: CommandContext,
+  front: ReturnType<typeof getFrontClient>,
   plan: CleanupPlan
 ): Promise<{ success: number; failed: number }> {
   const results = { success: 0, failed: 0 }
@@ -627,12 +676,12 @@ async function executeCleanupPlan(
   // 1. Delete duplicates
   for (const item of plan.duplicatesToDelete) {
     try {
-      console.log(`   Deleting duplicate "${item.tag.name}"...`)
+      ctx.output.data(`   Deleting duplicate "${item.tag.name}"...`)
       await front.tags.delete(item.tag.id)
-      console.log(`   ✅ Deleted "${item.tag.name}"`)
+      ctx.output.data(`   ✅ Deleted "${item.tag.name}"`)
       results.success++
     } catch (error) {
-      console.log(
+      ctx.output.data(
         `   ❌ Failed to delete "${item.tag.name}": ${error instanceof Error ? error.message : 'Unknown error'}`
       )
       results.failed++
@@ -642,27 +691,31 @@ async function executeCleanupPlan(
   // 2. Rename case variants (we need to merge - can't just rename if target exists)
   for (const item of plan.caseVariantsToRename) {
     try {
-      console.log(`   Renaming "${item.tag.name}" → "${item.newName}"...`)
+      ctx.output.data(`   Renaming "${item.tag.name}" → "${item.newName}"...`)
       await front.tags.update(item.tag.id, { name: item.newName })
-      console.log(`   ✅ Renamed "${item.tag.name}" → "${item.newName}"`)
+      ctx.output.data(`   ✅ Renamed "${item.tag.name}" → "${item.newName}"`)
       results.success++
     } catch (error) {
       // If rename fails (maybe tag with that name exists), try to delete instead
       const errMsg = error instanceof Error ? error.message : 'Unknown error'
       if (errMsg.includes('already exists') || errMsg.includes('duplicate')) {
         try {
-          console.log(`   Name exists, deleting "${item.tag.name}" instead...`)
+          ctx.output.data(
+            `   Name exists, deleting "${item.tag.name}" instead...`
+          )
           await front.tags.delete(item.tag.id)
-          console.log(`   ✅ Deleted "${item.tag.name}" (merged into existing)`)
+          ctx.output.data(
+            `   ✅ Deleted "${item.tag.name}" (merged into existing)`
+          )
           results.success++
         } catch (delError) {
-          console.log(
+          ctx.output.data(
             `   ❌ Failed to delete "${item.tag.name}": ${delError instanceof Error ? delError.message : 'Unknown error'}`
           )
           results.failed++
         }
       } else {
-        console.log(`   ❌ Failed to rename "${item.tag.name}": ${errMsg}`)
+        ctx.output.data(`   ❌ Failed to rename "${item.tag.name}": ${errMsg}`)
         results.failed++
       }
     }
@@ -671,12 +724,12 @@ async function executeCleanupPlan(
   // 3. Delete obsolete tags
   for (const tag of plan.obsoleteToDelete) {
     try {
-      console.log(`   Deleting obsolete "${tag.name}"...`)
+      ctx.output.data(`   Deleting obsolete "${tag.name}"...`)
       await front.tags.delete(tag.id)
-      console.log(`   ✅ Deleted "${tag.name}"`)
+      ctx.output.data(`   ✅ Deleted "${tag.name}"`)
       results.success++
     } catch (error) {
-      console.log(
+      ctx.output.data(
         `   ❌ Failed to delete "${tag.name}": ${error instanceof Error ? error.message : 'Unknown error'}`
       )
       results.failed++
@@ -686,16 +739,16 @@ async function executeCleanupPlan(
   // 4. Create missing standard tags
   for (const item of plan.missingToCreate) {
     try {
-      console.log(`   Creating "${item.name}"...`)
-      await createTagRaw({
+      ctx.output.data(`   Creating "${item.name}"...`)
+      await createTagRaw(front, {
         name: item.name,
         highlight: item.highlight,
         description: item.description,
       })
-      console.log(`   ✅ Created "${item.name}"`)
+      ctx.output.data(`   ✅ Created "${item.name}"`)
       results.success++
     } catch (error) {
-      console.log(
+      ctx.output.data(
         `   ❌ Failed to create "${item.name}": ${error instanceof Error ? error.message : 'Unknown error'}`
       )
       results.failed++
@@ -709,16 +762,19 @@ async function executeCleanupPlan(
  * Command: skill front tags cleanup
  * Clean up tag issues: duplicates, case variants, obsolete tags
  */
-async function cleanupTags(options: { execute?: boolean }): Promise<void> {
+export async function cleanupTags(
+  ctx: CommandContext,
+  options: { execute?: boolean }
+): Promise<void> {
   try {
-    const front = getFrontSdkClient()
+    const front = getFrontSdkClient(ctx)
 
-    console.log('\n🔍 Analyzing tags...')
+    ctx.output.data('\n🔍 Analyzing tags...')
 
     // Fetch all tags (raw fetch to avoid SDK validation issues)
-    const tags = await fetchTagsRaw()
-    console.log(`   Found ${tags.length} tags`)
-    console.log('   Fetching conversation counts (rate-limited)...')
+    const tags = await fetchTagsRaw(front)
+    ctx.output.data(`   Found ${tags.length} tags`)
+    ctx.output.data('   Fetching conversation counts (rate-limited)...')
 
     // Fetch conversation counts with rate limiting and progress
     const counts = await fetchConversationCountsRateLimited(tags, front, {
@@ -726,10 +782,12 @@ async function cleanupTags(options: { execute?: boolean }): Promise<void> {
       batchSize: 5, // 5 concurrent requests per batch
       onProgress: (completed, total) => {
         const pct = Math.round((completed / total) * 100)
-        process.stdout.write(`\r   Progress: ${completed}/${total} (${pct}%)`)
+        ctx.output.progress(
+          `Progress: ${completed}/${total} (${pct}%) for tag analysis`
+        )
       },
     })
-    console.log('') // newline after progress
+    ctx.output.data('') // newline after progress
 
     // Build tag objects with counts
     const tagsWithCounts: TagWithConversationCount[] = tags.map((tag) => ({
@@ -749,7 +807,7 @@ async function cleanupTags(options: { execute?: boolean }): Promise<void> {
     const plan = await buildCleanupPlan(front, tagsWithCounts)
 
     // Print the plan
-    printCleanupPlan(plan)
+    printCleanupPlan(ctx, plan)
 
     const totalChanges =
       plan.duplicatesToDelete.length +
@@ -758,45 +816,50 @@ async function cleanupTags(options: { execute?: boolean }): Promise<void> {
       plan.missingToCreate.length
 
     if (totalChanges === 0) {
-      console.log('')
+      ctx.output.data('')
       return
     }
 
     // If not executing, show dry-run notice
     if (!options.execute) {
-      console.log('\n⚠️  DRY RUN - No changes made')
-      console.log('   Use --execute to apply these changes\n')
+      ctx.output.data('\n⚠️  DRY RUN - No changes made')
+      ctx.output.data('   Use --execute to apply these changes\n')
       return
     }
 
     // Confirm before executing
-    console.log('')
+    ctx.output.data('')
     const confirmed = await confirm({
       message: `Apply ${totalChanges} change(s)?`,
       default: false,
     })
 
     if (!confirmed) {
-      console.log('\n❌ Cancelled.\n')
+      ctx.output.data('\n❌ Cancelled.\n')
       return
     }
 
     // Execute the plan
-    console.log('\n🚀 Executing cleanup...\n')
-    const results = await executeCleanupPlan(front, plan)
+    ctx.output.data('\n🚀 Executing cleanup...\n')
+    const results = await executeCleanupPlan(ctx, front, plan)
 
     // Final summary
-    console.log('\n' + '='.repeat(60))
-    console.log('📊 Cleanup Complete')
-    console.log(`   ✅ Successful: ${results.success}`)
-    console.log(`   ❌ Failed: ${results.failed}`)
-    console.log('')
+    ctx.output.data('\n' + '='.repeat(60))
+    ctx.output.data('📊 Cleanup Complete')
+    ctx.output.data(`   ✅ Successful: ${results.success}`)
+    ctx.output.data(`   ❌ Failed: ${results.failed}`)
+    ctx.output.data('')
   } catch (error) {
-    console.error(
-      'Error:',
-      error instanceof Error ? error.message : 'Unknown error'
-    )
-    process.exit(1)
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Failed to clean up Front tags.',
+            suggestion: 'Verify FRONT_API_TOKEN and tag permissions.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
 }
 
@@ -807,134 +870,95 @@ export function registerTagCommands(frontCommand: Command): void {
   const tags = frontCommand
     .command('tags')
     .description('List, rename, delete, and clean up Front tags')
-    .addHelpText(
-      'after',
-      `
-━━━ Tag Management ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  Manage Front tags: list with usage counts, delete unused, rename,
-  and bulk-clean duplicates / case variants / obsolete tags.
-
-SUBCOMMANDS
-  list      List all tags with conversation counts (--unused, --json)
-  delete    Delete a tag by ID (tag_xxx)
-  rename    Rename a tag (tag_xxx → new name)
-  cleanup   Find and fix duplicate, case-variant, and obsolete tags
-
-EXAMPLES
-  skill front tags list
-  skill front tags list --unused --json
-  skill front tags delete tag_abc123 --force
-  skill front tags rename tag_abc123 "billing-issue"
-  skill front tags cleanup
-  skill front tags cleanup --execute
-
-RELATED COMMANDS
-  skill front tag <cnv_xxx> <tag_xxx>       Apply a tag to a conversation
-  skill front untag <cnv_xxx> <tag_xxx>     Remove a tag from a conversation
-`
-    )
 
   tags
     .command('list')
     .description('List all tags with conversation counts')
     .option('--json', 'Output as JSON')
     .option('--unused', 'Show only tags with 0 conversations')
-    .addHelpText(
-      'after',
-      `
-━━━ Tag List ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  Lists every tag in the Front workspace with its conversation count.
-  Conversation counts are fetched per-tag (rate-limited, ~5 concurrent).
-
-OPTIONS
-  --unused    Show only tags with 0 conversations (candidates for deletion)
-  --json      Output as JSON (HATEOAS-wrapped with links and actions)
-
-OUTPUT COLUMNS (table mode)
-  ID          Tag ID (tag_xxx)
-  Name        Tag display name
-  Color       Highlight color
-  Convos      Number of conversations using this tag (0 shows warning)
-
-JSON + jq PATTERNS
-  # All unused tags
-  skill front tags list --json | jq '.data[] | select(.conversation_count == 0)'
-
-  # Tag names only
-  skill front tags list --json | jq '.data[].name'
-
-  # Tags sorted by usage (most → least)
-  skill front tags list --json | jq '.data | sort_by(-.conversation_count)'
-
-  # Count of unused tags
-  skill front tags list --json | jq '[.data[] | select(.conversation_count == 0)] | length'
-
-NOTE
-  Fetching counts for many tags can take a while due to Front API rate limits.
-  The command batches requests (5 at a time, 100ms between batches).
-`
+    .option('--ids-only', 'Output only IDs (one per line)')
+    .option(
+      '--output-format <format>',
+      'Output format for lists (json|ndjson|csv)'
     )
-    .action(listTags)
+    .action(
+      async (
+        options: {
+          json?: boolean
+          unused?: boolean
+          idsOnly?: boolean
+          outputFormat?: string
+        },
+        command
+      ) => {
+        const opts =
+          typeof command.optsWithGlobals === 'function'
+            ? command.optsWithGlobals()
+            : {
+                ...command.parent?.opts(),
+                ...command.opts(),
+              }
+        const ctx = await createContext({
+          format:
+            options.json || options.outputFormat === 'json'
+              ? 'json'
+              : opts.format,
+          verbose: opts.verbose,
+          quiet: opts.quiet,
+        })
+        await listTags(ctx, options)
+      }
+    )
 
   tags
     .command('delete')
     .description('Delete a tag by ID')
     .argument('<id>', 'Tag ID (e.g., tag_xxx)')
     .option('-f, --force', 'Skip confirmation prompt')
-    .addHelpText(
-      'after',
-      `
-━━━ Tag Delete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  Delete a single tag by its Front ID.
-
-ARGUMENTS
-  <id>    Tag ID in tag_xxx format (find IDs via: skill front tags list --json)
-
-OPTIONS
-  -f, --force    Skip the confirmation prompt (use in scripts)
-
-BEHAVIOR
-  - Shows tag name, ID, and conversation count before prompting
-  - Warns if the tag is still applied to conversations
-  - Deleting a tag removes it from all conversations that use it
-  - This action is irreversible
-
-EXAMPLES
-  skill front tags delete tag_abc123
-  skill front tags delete tag_abc123 --force
-`
+    .option('--dry-run', 'Preview without deleting')
+    .action(
+      async (
+        id: string,
+        options: { force?: boolean; dryRun?: boolean },
+        command
+      ) => {
+        const opts =
+          typeof command.optsWithGlobals === 'function'
+            ? command.optsWithGlobals()
+            : {
+                ...command.parent?.opts(),
+                ...command.opts(),
+              }
+        const ctx = await createContext({
+          format: opts.format,
+          verbose: opts.verbose,
+          quiet: opts.quiet,
+        })
+        await deleteTag(ctx, id, options)
+      }
     )
-    .action(deleteTag)
 
   tags
     .command('rename')
     .description('Rename a tag')
     .argument('<id>', 'Tag ID (e.g., tag_xxx)')
     .argument('<name>', 'New tag name')
-    .addHelpText(
-      'after',
-      `
-━━━ Tag Rename ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  Rename a tag. The tag keeps its ID and stays applied to all conversations.
-
-ARGUMENTS
-  <id>      Tag ID in tag_xxx format
-  <name>    New display name for the tag
-
-EXAMPLES
-  skill front tags rename tag_abc123 "billing-issue"
-  skill front tags rename tag_abc123 "refund-request"
-
-NOTE
-  If a tag with the new name already exists, the API will return an error.
-  Use "skill front tags cleanup" to merge duplicates and case variants.
-`
-    )
-    .action(renameTag)
+    .option('--dry-run', 'Preview without renaming')
+    .action(async (id: string, name: string, options, command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await renameTag(ctx, id, name, options)
+    })
 
   tags
     .command('cleanup')
@@ -942,36 +966,19 @@ NOTE
       'Clean up tags: delete duplicates, merge case variants, remove obsolete, create missing standard tags'
     )
     .option('--execute', 'Actually apply changes (default is dry-run)', false)
-    .addHelpText(
-      'after',
-      `
-━━━ Tag Cleanup ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  Analyze all tags for issues and optionally fix them. Default is dry-run.
-
-WHAT IT FINDS
-  - Exact duplicates (same name, multiple tag IDs)
-  - Case variants ("Refund" vs "refund" vs "REFUND")
-  - Obsolete tags (date-based like "jan-2022", Gmail imports like "INBOX")
-  - Missing standard tags from the category registry
-
-WHAT IT DOES (with --execute)
-  - Deletes duplicate tags (keeps the one with most conversations)
-  - Renames case variants to canonical lowercase-hyphenated form
-  - Deletes obsolete/imported tags
-  - Creates missing standard category tags
-
-OPTIONS
-  --execute    Apply the cleanup plan. Without this flag, only a dry-run
-               report is printed (safe to run anytime).
-
-EXAMPLES
-  # See what would be changed (safe, read-only)
-  skill front tags cleanup
-
-  # Actually apply changes (prompts for confirmation)
-  skill front tags cleanup --execute
-`
-    )
-    .action(cleanupTags)
+    .action(async (options: { execute?: boolean }, command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await cleanupTags(ctx, options)
+    })
 }

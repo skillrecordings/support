@@ -23,6 +23,8 @@ import {
 } from '@skillrecordings/database'
 import { type Message } from '@skillrecordings/front-sdk'
 import type { Command } from 'commander'
+import { type CommandContext, createContext } from '../core/context'
+import { CLIError, formatError } from '../core/errors'
 
 interface EvalDataPoint {
   id: string
@@ -52,7 +54,8 @@ interface EvalDataPoint {
 /**
  * Build eval dataset from responses
  */
-async function buildDataset(options: {
+export async function buildDataset(options: {
+  ctx: CommandContext
   app?: string
   since?: string
   output?: string
@@ -60,15 +63,19 @@ async function buildDataset(options: {
   limit?: number
   includeHistory?: boolean
 }): Promise<void> {
+  const { ctx } = options
+  const outputJson = ctx.format === 'json'
   const db = getDb()
   const limit = options.limit || 100
 
   // Get Front token
   const frontToken = process.env.FRONT_API_TOKEN
   if (!frontToken) {
-    console.error('Error: FRONT_API_TOKEN environment variable required')
-    console.error('Set it or source the env file: source apps/front/.env.local')
-    process.exit(1)
+    throw new CLIError({
+      userMessage: 'FRONT_API_TOKEN environment variable required.',
+      suggestion:
+        'Set FRONT_API_TOKEN or source apps/front/.env.local before running.',
+    })
   }
 
   const front = createInstrumentedFrontClient({ apiToken: frontToken })
@@ -86,8 +93,9 @@ async function buildDataset(options: {
 
       const foundApp = appResults[0]
       if (!foundApp) {
-        console.error(`App not found: ${options.app}`)
-        process.exit(1)
+        ctx.output.error(`App not found: ${options.app}`)
+        process.exitCode = 1
+        return
       }
       conditions.push(eq(ActionsTable.app_id, foundApp.id))
     }
@@ -117,14 +125,20 @@ async function buildDataset(options: {
       .orderBy(desc(ActionsTable.created_at))
       .limit(limit)
 
-    console.log(`Found ${results.length} responses, fetching context...`)
+    if (!outputJson) {
+      ctx.output.message(
+        `Found ${results.length} responses, fetching context...`
+      )
+    }
 
     const dataset: EvalDataPoint[] = []
     let processed = 0
 
     for (const r of results) {
       processed++
-      process.stdout.write(`\rProcessing ${processed}/${results.length}...`)
+      if (!outputJson) {
+        ctx.output.progress(`Processing ${processed}/${results.length}...`)
+      }
 
       const params = r.action.parameters as {
         response?: string
@@ -222,37 +236,57 @@ async function buildDataset(options: {
       })
     }
 
-    console.log(`\n\nBuilt dataset with ${dataset.length} eval points`)
-    console.log(`  Labeled: ${dataset.filter((d) => d.label).length}`)
-    console.log(`  Good: ${dataset.filter((d) => d.label === 'good').length}`)
-    console.log(`  Bad: ${dataset.filter((d) => d.label === 'bad').length}`)
-    console.log(`  Unlabeled: ${dataset.filter((d) => !d.label).length}`)
+    if (outputJson) {
+      if (options.output) {
+        writeFileSync(options.output, JSON.stringify(dataset, null, 2), 'utf-8')
+        ctx.output.data({ success: true, output: options.output })
+      } else {
+        ctx.output.data(dataset)
+      }
+      return
+    }
 
-    const outputJson = JSON.stringify(dataset, null, 2)
+    ctx.output.data(`\n\nBuilt dataset with ${dataset.length} eval points`)
+    ctx.output.data(`  Labeled: ${dataset.filter((d) => d.label).length}`)
+    ctx.output.data(
+      `  Good: ${dataset.filter((d) => d.label === 'good').length}`
+    )
+    ctx.output.data(`  Bad: ${dataset.filter((d) => d.label === 'bad').length}`)
+    ctx.output.data(`  Unlabeled: ${dataset.filter((d) => !d.label).length}`)
+
+    const outputJsonText = JSON.stringify(dataset, null, 2)
 
     if (options.output) {
-      writeFileSync(options.output, outputJson, 'utf-8')
-      console.log(`\nSaved to ${options.output}`)
+      writeFileSync(options.output, outputJsonText, 'utf-8')
+      ctx.output.data(`\nSaved to ${options.output}`)
     } else {
-      console.log('\n' + outputJson)
+      ctx.output.data('\n' + outputJsonText)
     }
   } catch (error) {
-    console.error(
-      '\nError:',
-      error instanceof Error ? error.message : 'Unknown error'
-    )
-    process.exit(1)
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Failed to build dataset.',
+            suggestion: 'Verify database and Front API access.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
 }
 
 /**
  * Convert dataset to evalite format
  */
-async function toEvalite(options: {
+export async function toEvalite(options: {
+  ctx: CommandContext
   input: string
   output?: string
 }): Promise<void> {
   const { readFileSync } = await import('fs')
+  const { ctx } = options
+  const outputJson = ctx.format === 'json'
 
   const data = JSON.parse(
     readFileSync(options.input, 'utf-8')
@@ -271,15 +305,28 @@ async function toEvalite(options: {
     },
   }))
 
-  const outputJson = JSON.stringify(evaliteData, null, 2)
+  const outputJsonText = JSON.stringify(evaliteData, null, 2)
 
   if (options.output) {
-    writeFileSync(options.output, outputJson, 'utf-8')
-    console.log(
-      `Converted ${evaliteData.length} points to evalite format: ${options.output}`
-    )
+    writeFileSync(options.output, outputJsonText, 'utf-8')
+    if (outputJson) {
+      ctx.output.data({
+        success: true,
+        output: options.output,
+        count: evaliteData.length,
+      })
+    } else {
+      ctx.output.data(
+        `Converted ${evaliteData.length} points to evalite format: ${options.output}`
+      )
+    }
+    return
+  }
+
+  if (outputJson) {
+    ctx.output.data(evaliteData)
   } else {
-    console.log(outputJson)
+    ctx.output.data(outputJsonText)
   }
 }
 
@@ -300,12 +347,50 @@ export function registerDatasetCommands(program: Command): void {
     .option('-l, --limit <n>', 'Max responses to process', parseInt)
     .option('--labeled-only', 'Only include labeled responses')
     .option('--include-history', 'Include full conversation history')
-    .action(buildDataset)
+    .option('--json', 'Output as JSON')
+    .action(async (options, command) => {
+      const ctx = await createContext({
+        format:
+          options.json === true
+            ? 'json'
+            : typeof command.optsWithGlobals === 'function'
+              ? command.optsWithGlobals().format
+              : command.parent?.opts().format,
+        verbose:
+          typeof command.optsWithGlobals === 'function'
+            ? command.optsWithGlobals().verbose
+            : command.parent?.opts().verbose,
+        quiet:
+          typeof command.optsWithGlobals === 'function'
+            ? command.optsWithGlobals().quiet
+            : command.parent?.opts().quiet,
+      })
+      await buildDataset({ ctx, ...options })
+    })
 
   dataset
     .command('to-evalite')
     .description('Convert dataset to evalite format')
     .requiredOption('-i, --input <file>', 'Input dataset JSON file')
     .option('-o, --output <file>', 'Output file path')
-    .action(toEvalite)
+    .option('--json', 'Output as JSON')
+    .action(async (options, command) => {
+      const ctx = await createContext({
+        format:
+          options.json === true
+            ? 'json'
+            : typeof command.optsWithGlobals === 'function'
+              ? command.optsWithGlobals().format
+              : command.parent?.opts().format,
+        verbose:
+          typeof command.optsWithGlobals === 'function'
+            ? command.optsWithGlobals().verbose
+            : command.parent?.opts().verbose,
+        quiet:
+          typeof command.optsWithGlobals === 'function'
+            ? command.optsWithGlobals().quiet
+            : command.parent?.opts().quiet,
+      })
+      await toEvalite({ ctx, ...options })
+    })
 }

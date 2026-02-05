@@ -1,5 +1,7 @@
 import { randomBytes, randomUUID } from 'node:crypto'
 import { checkbox, confirm, input, select } from '@inquirer/prompts'
+import { type CommandContext } from '../core/context'
+import { CLIError, formatError } from '../core/errors'
 
 /**
  * All available capabilities an app can implement
@@ -87,21 +89,30 @@ function slugify(name: string): string {
 /**
  * Interactive wizard for setting up a new property (app)
  */
-export async function wizard(options: WizardOptions = {}): Promise<void> {
-  const { json = false } = options
+export async function wizard(
+  ctx: CommandContext,
+  options: WizardOptions = {}
+): Promise<void> {
+  const outputJson = options.json === true || ctx.format === 'json'
 
-  if (!process.stdin.isTTY && !json) {
-    console.error(
-      'Error: Wizard requires an interactive terminal. Use --json for non-interactive mode.'
-    )
-    process.exit(1)
+  if (!ctx.stdin.isTTY && !outputJson) {
+    const cliError = new CLIError({
+      userMessage:
+        'Wizard requires an interactive terminal. Use --json for non-interactive mode.',
+      suggestion: 'Re-run in a TTY or pass --json.',
+    })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
+    return
   }
 
   try {
-    console.log('\n🧙 Property Setup Wizard\n')
-    console.log(
-      'This will walk you through setting up a new app in the support platform.\n'
-    )
+    if (!outputJson) {
+      ctx.output.data('\n🧙 Property Setup Wizard\n')
+      ctx.output.data(
+        'This will walk you through setting up a new app in the support platform.\n'
+      )
+    }
 
     // Basic info
     const name = await input({
@@ -232,88 +243,97 @@ export async function wizard(options: WizardOptions = {}): Promise<void> {
       },
     }
 
-    if (json) {
-      console.log(JSON.stringify(result, null, 2))
-    } else {
-      console.log('\n' + '='.repeat(60))
-      console.log('✅ Configuration complete!\n')
-
-      console.log('📋 App Details:')
-      console.log(`   ID:   ${id}`)
-      console.log(`   Slug: ${slug}`)
-      console.log(`   Name: ${name}`)
-      console.log(`   URL:  ${integrationBaseUrl}`)
-
-      console.log('\n🔗 Front Integration:')
-      console.log(`   Inbox ID: ${frontInboxId}`)
-
-      if (stripeAccountId) {
-        console.log('\n💳 Stripe Connect:')
-        console.log(`   Account ID: ${stripeAccountId}`)
-      }
-
-      console.log('\n🔧 Capabilities:')
-      capabilities.forEach((c) => console.log(`   - ${c}`))
-
-      console.log('\n⏱️  Auto-Approval:')
-      console.log(`   Refunds:   within ${autoApproveRefundDays} days`)
-      console.log(`   Transfers: within ${autoApproveTransferDays} days`)
-
-      console.log('\n' + '='.repeat(60))
-      console.log('\n📝 Next Steps:\n')
-
-      console.log("1. Add to your app's .env:")
-      console.log('   ```')
-      console.log(`   SUPPORT_WEBHOOK_SECRET=${webhookSecret}`)
-      console.log('   ```\n')
-
-      console.log('2. Implement the SDK handler in your app:')
-      console.log('   ```typescript')
-      console.log('   // app/api/support/[...action]/route.ts')
-      console.log(
-        "   import { createSupportHandler } from '@skillrecordings/sdk/handler'"
-      )
-      console.log("   import { integration } from './integration'")
-      console.log('')
-      console.log('   const handler = createSupportHandler({')
-      console.log('     integration,')
-      console.log(`     secret: process.env.SUPPORT_WEBHOOK_SECRET!,`)
-      console.log('   })')
-      console.log('')
-      console.log('   export { handler as POST }')
-      console.log('   ```\n')
-
-      console.log('3. Insert into database:')
-      console.log('   ```sql')
-      console.log(
-        `   INSERT INTO SUPPORT_apps (id, slug, name, front_inbox_id, integration_base_url, webhook_secret, capabilities, auto_approve_refund_days, auto_approve_transfer_days)`
-      )
-      console.log(
-        `   VALUES ('${id}', '${slug}', '${name}', '${frontInboxId}', '${integrationBaseUrl}', '${webhookSecret}', '${JSON.stringify(capabilities)}', ${autoApproveRefundDays}, ${autoApproveTransferDays});`
-      )
-      console.log('   ```\n')
-
-      if (!stripeAccountId && useStripe) {
-        console.log('4. Connect Stripe account:')
-        console.log(
-          '   Visit https://skill-support-agent-web.vercel.app/api/stripe/connect/authorize?appSlug=' +
-            slug
-        )
-        console.log('')
-      }
-
-      console.log(
-        '📖 See docs/support-app-prd/67-sdk.md for full integration guide.\n'
-      )
+    if (outputJson) {
+      ctx.output.data(result)
+      return
     }
 
-    process.exit(0)
+    ctx.output.data('\n' + '='.repeat(60))
+    ctx.output.data('✅ Configuration complete!\n')
+
+    ctx.output.data('📋 App Details:')
+    ctx.output.data(`   ID:   ${id}`)
+    ctx.output.data(`   Slug: ${slug}`)
+    ctx.output.data(`   Name: ${name}`)
+    ctx.output.data(`   URL:  ${integrationBaseUrl}`)
+
+    ctx.output.data('\n🔗 Front Integration:')
+    ctx.output.data(`   Inbox ID: ${frontInboxId}`)
+
+    if (stripeAccountId) {
+      ctx.output.data('\n💳 Stripe Connect:')
+      ctx.output.data(`   Account ID: ${stripeAccountId}`)
+    }
+
+    ctx.output.data('\n🔧 Capabilities:')
+    capabilities.forEach((c) => ctx.output.data(`   - ${c}`))
+
+    ctx.output.data('\n⏱️  Auto-Approval:')
+    ctx.output.data(`   Refunds:   within ${autoApproveRefundDays} days`)
+    ctx.output.data(`   Transfers: within ${autoApproveTransferDays} days`)
+
+    ctx.output.data('\n' + '='.repeat(60))
+    ctx.output.data('\n📝 Next Steps:\n')
+
+    ctx.output.data("1. Add to your app's .env:")
+    ctx.output.data('   ```')
+    ctx.output.data(`   SUPPORT_WEBHOOK_SECRET=${webhookSecret}`)
+    ctx.output.data('   ```\n')
+
+    ctx.output.data('2. Implement the SDK handler in your app:')
+    ctx.output.data('   ```typescript')
+    ctx.output.data('   // app/api/support/[...action]/route.ts')
+    ctx.output.data(
+      "   import { createSupportHandler } from '@skillrecordings/sdk/handler'"
+    )
+    ctx.output.data("   import { integration } from './integration'")
+    ctx.output.data('')
+    ctx.output.data('   const handler = createSupportHandler({')
+    ctx.output.data('     integration,')
+    ctx.output.data(`     secret: process.env.SUPPORT_WEBHOOK_SECRET!,`)
+    ctx.output.data('   })')
+    ctx.output.data('')
+    ctx.output.data('   export { handler as POST }')
+    ctx.output.data('   ```\n')
+
+    ctx.output.data('3. Insert into database:')
+    ctx.output.data('   ```sql')
+    ctx.output.data(
+      `   INSERT INTO SUPPORT_apps (id, slug, name, front_inbox_id, integration_base_url, webhook_secret, capabilities, auto_approve_refund_days, auto_approve_transfer_days)`
+    )
+    ctx.output.data(
+      `   VALUES ('${id}', '${slug}', '${name}', '${frontInboxId}', '${integrationBaseUrl}', '${webhookSecret}', '${JSON.stringify(capabilities)}', ${autoApproveRefundDays}, ${autoApproveTransferDays});`
+    )
+    ctx.output.data('   ```\n')
+
+    if (!stripeAccountId && useStripe) {
+      ctx.output.data('4. Connect Stripe account:')
+      ctx.output.data(
+        '   Visit https://skill-support-agent-web.vercel.app/api/stripe/connect/authorize?appSlug=' +
+          slug
+      )
+      ctx.output.data('')
+    }
+
+    ctx.output.data(
+      '📖 See docs/support-app-prd/67-sdk.md for full integration guide.\n'
+    )
   } catch (error) {
     if ((error as Error).name === 'ExitPromptError') {
       // User cancelled
-      console.log('\n\nWizard cancelled.')
-      process.exit(1)
+      ctx.output.warn('Wizard cancelled.')
+      process.exitCode = 1
+      return
     }
-    throw error
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Wizard failed.',
+            suggestion: 'Re-run the wizard and check your inputs.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
 }

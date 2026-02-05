@@ -8,13 +8,65 @@
  */
 
 import { AppsTable, eq, getDb } from '@skillrecordings/database'
-import { IntegrationClient } from '@skillrecordings/sdk/client'
 import type { Command } from 'commander'
+import { type CommandContext, createContext } from '../core/context'
+import { CLIError, formatError } from '../core/errors'
+import { isListOutputFormat, outputList } from '../core/list-output'
+import { IntegrationClient } from '../lib/integration-client'
+
+type AppConfig = {
+  slug: string
+  name: string
+  baseUrl: string
+  webhookSecret: string
+  stripeAccountId: string | null
+  instructorTeammateId: string | null
+}
+
+type AppConfigRow = {
+  slug: string
+  name: string
+  baseUrl: string | null
+  webhookSecret: string | null
+  stripeAccountId: string | null
+  instructorTeammateId: string | null
+}
+
+const CONTENT_TYPES = [
+  'resource',
+  'course',
+  'module',
+  'lesson',
+  'article',
+  'exercise',
+  'social',
+] as const
+
+type ContentType = (typeof CONTENT_TYPES)[number]
+
+const handleToolsError = (
+  ctx: CommandContext,
+  error: unknown,
+  message: string,
+  suggestion = 'Verify database access and integration settings.'
+): void => {
+  const cliError =
+    error instanceof CLIError
+      ? error
+      : new CLIError({
+          userMessage: message,
+          suggestion,
+          cause: error,
+        })
+
+  ctx.output.error(formatError(cliError))
+  process.exitCode = cliError.exitCode
+}
 
 /**
  * Get app config from database by slug
  */
-async function getAppConfig(slug: string) {
+async function getAppConfig(slug: string): Promise<AppConfigRow | null> {
   const db = getDb()
   const results = await db
     .select()
@@ -39,215 +91,268 @@ async function getAppConfig(slug: string) {
   }
 }
 
+async function resolveAppConfig(slug: string): Promise<AppConfig> {
+  const app = await getAppConfig(slug)
+  if (!app) {
+    throw new CLIError({
+      userMessage: `App not found: ${slug}.`,
+      suggestion: 'Use "skill tools list" to see registered apps.',
+    })
+  }
+
+  if (!app.baseUrl || !app.webhookSecret) {
+    throw new CLIError({
+      userMessage: `App ${slug} is missing baseUrl or webhookSecret.`,
+      suggestion: 'Confirm the app integration configuration in the database.',
+    })
+  }
+
+  return {
+    ...app,
+    baseUrl: app.baseUrl,
+    webhookSecret: app.webhookSecret,
+  }
+}
+
 /**
  * List all registered apps
  */
-async function listApps(options: { json?: boolean }) {
-  const db = getDb()
-  const apps = await db
-    .select({
-      slug: AppsTable.slug,
-      name: AppsTable.name,
-      baseUrl: AppsTable.integration_base_url,
+export async function listApps(
+  ctx: CommandContext,
+  options: { json?: boolean; idsOnly?: boolean; outputFormat?: string }
+): Promise<void> {
+  const outputFormat = isListOutputFormat(options.outputFormat)
+    ? options.outputFormat
+    : undefined
+  if (options.outputFormat && !outputFormat) {
+    throw new CLIError({
+      userMessage: 'Invalid --output-format value.',
+      suggestion: 'Use json, ndjson, or csv.',
     })
-    .from(AppsTable)
-
-  if (options.json) {
-    console.log(JSON.stringify(apps, null, 2))
-    process.exit(0)
   }
+  const outputJson =
+    options.json === true || ctx.format === 'json' || outputFormat === 'json'
+  const idsOnly = options.idsOnly === true
 
-  console.log('\nRegistered Apps:')
-  console.log('================')
-  for (const app of apps) {
-    console.log(`  ${app.slug} - ${app.name}`)
-    console.log(`    URL: ${app.baseUrl}`)
-    console.log()
+  try {
+    const db = getDb()
+    const apps = await db
+      .select({
+        slug: AppsTable.slug,
+        name: AppsTable.name,
+        baseUrl: AppsTable.integration_base_url,
+      })
+      .from(AppsTable)
+
+    if (idsOnly) {
+      for (const app of apps) {
+        ctx.output.data(app.slug)
+      }
+      return
+    }
+
+    if (outputFormat && outputFormat !== 'json') {
+      outputList(ctx, apps, outputFormat)
+      return
+    }
+
+    if (outputJson) {
+      ctx.output.data(apps)
+      return
+    }
+
+    ctx.output.data('\nRegistered Apps:')
+    ctx.output.data('================')
+    for (const app of apps) {
+      ctx.output.data(`  ${app.slug} - ${app.name}`)
+      ctx.output.data(`    URL: ${app.baseUrl}`)
+      ctx.output.data('')
+    }
+  } catch (error) {
+    handleToolsError(ctx, error, 'Failed to list registered apps.')
   }
-  process.exit(0)
 }
 
 /**
  * Test content search against an app
  */
-async function searchContent(
+export async function searchContent(
+  ctx: CommandContext,
   slug: string,
   query: string,
   options: { types?: string; limit?: string; json?: boolean }
-) {
-  const app = await getAppConfig(slug)
-  if (!app) {
-    console.error(`App not found: ${slug}`)
-    console.error('Use "skill tools list" to see registered apps')
-    process.exit(1)
-  }
-
-  if (!app.baseUrl || !app.webhookSecret) {
-    console.error(`App ${slug} is missing baseUrl or webhookSecret`)
-    process.exit(1)
-  }
-
-  const client = new IntegrationClient({
-    baseUrl: app.baseUrl,
-    webhookSecret: app.webhookSecret,
-  })
-
-  console.log(`\nSearching ${app.name} for: "${query}"`)
-  console.log(`Endpoint: ${app.baseUrl}`)
-  console.log()
+): Promise<void> {
+  const outputJson = options.json === true || ctx.format === 'json'
 
   try {
-    const result = await client.searchContent({
-      query,
-      types: options.types?.split(',') as any,
-      limit: options.limit ? parseInt(options.limit, 10) : 5,
+    const app = await resolveAppConfig(slug)
+    const limit = options.limit ? parseInt(options.limit, 10) : 5
+    const types = options.types
+      ? options.types
+          .split(',')
+          .map((value) => value.trim())
+          .filter((value) => value.length > 0)
+      : undefined
+
+    if (Number.isNaN(limit) || limit < 1) {
+      throw new CLIError({
+        userMessage: '--limit must be a positive number.',
+        suggestion: 'Provide a limit of 1 or greater (default: 5).',
+      })
+    }
+
+    if (
+      types &&
+      types.some((type) => !CONTENT_TYPES.includes(type as ContentType))
+    ) {
+      throw new CLIError({
+        userMessage: '--types contains an invalid content type.',
+        suggestion:
+          'Use a comma-separated list of: resource, course, module, lesson, article, exercise, social.',
+      })
+    }
+
+    const client = new IntegrationClient({
+      baseUrl: app.baseUrl,
+      webhookSecret: app.webhookSecret,
     })
 
-    if (options.json) {
-      console.log(JSON.stringify(result, null, 2))
-      process.exit(0)
+    if (!outputJson) {
+      ctx.output.data(`\nSearching ${app.name} for: "${query}"`)
+      ctx.output.data(`Endpoint: ${app.baseUrl}`)
+      ctx.output.data('')
+    }
+
+    const result = await client.searchContent({
+      query,
+      types: types as ContentType[] | undefined,
+      limit,
+    })
+
+    if (outputJson) {
+      ctx.output.data(result)
+      return
     }
 
     if (!result.results || result.results.length === 0) {
-      console.log('No results found.')
-      process.exit(0)
+      ctx.output.data('No results found.')
+      return
     }
 
-    console.log(`Found ${result.results.length} results:\n`)
+    ctx.output.data(`Found ${result.results.length} results:\n`)
     for (const item of result.results) {
-      console.log(`  [${item.type}] ${item.title}`)
+      ctx.output.data(`  [${item.type}] ${item.title}`)
       if (item.url) {
-        console.log(`    URL: ${item.url}`)
+        ctx.output.data(`    URL: ${item.url}`)
       }
       if (item.description) {
-        console.log(
+        ctx.output.data(
           `    ${item.description.slice(0, 200)}${item.description.length > 200 ? '...' : ''}`
         )
       }
-      console.log()
+      ctx.output.data('')
     }
-    process.exit(0)
   } catch (error) {
-    console.error(
-      'Search failed:',
-      error instanceof Error ? error.message : error
-    )
-    process.exit(1)
+    handleToolsError(ctx, error, 'Search failed.')
   }
 }
 
 /**
  * Test user lookup against an app
  */
-async function lookupUser(
+export async function lookupUser(
+  ctx: CommandContext,
   slug: string,
   email: string,
   options: { json?: boolean }
-) {
-  const app = await getAppConfig(slug)
-  if (!app) {
-    console.error(`App not found: ${slug}`)
-    process.exit(1)
-  }
-
-  if (!app.baseUrl || !app.webhookSecret) {
-    console.error(`App ${slug} is missing baseUrl or webhookSecret`)
-    process.exit(1)
-  }
-
-  const client = new IntegrationClient({
-    baseUrl: app.baseUrl,
-    webhookSecret: app.webhookSecret,
-  })
-
-  console.log(`\nLooking up user: ${email}`)
-  console.log(`Endpoint: ${app.baseUrl}`)
-  console.log()
+): Promise<void> {
+  const outputJson = options.json === true || ctx.format === 'json'
 
   try {
+    const app = await resolveAppConfig(slug)
+
+    const client = new IntegrationClient({
+      baseUrl: app.baseUrl,
+      webhookSecret: app.webhookSecret,
+    })
+
+    if (!outputJson) {
+      ctx.output.data(`\nLooking up user: ${email}`)
+      ctx.output.data(`Endpoint: ${app.baseUrl}`)
+      ctx.output.data('')
+    }
+
     const user = await client.lookupUser(email)
 
-    if (options.json) {
-      console.log(JSON.stringify(user, null, 2))
-      process.exit(0)
+    if (outputJson) {
+      ctx.output.data(user)
+      return
     }
 
     if (!user) {
-      console.log('User not found.')
-      process.exit(0)
+      ctx.output.data('User not found.')
+      return
     }
 
-    console.log('User found:')
-    console.log(`  ID: ${user.id}`)
-    console.log(`  Email: ${user.email}`)
-    if (user.name) console.log(`  Name: ${user.name}`)
-    console.log()
-    process.exit(0)
+    ctx.output.data('User found:')
+    ctx.output.data(`  ID: ${user.id}`)
+    ctx.output.data(`  Email: ${user.email}`)
+    if (user.name) ctx.output.data(`  Name: ${user.name}`)
+    ctx.output.data('')
   } catch (error) {
-    console.error(
-      'Lookup failed:',
-      error instanceof Error ? error.message : error
-    )
-    process.exit(1)
+    handleToolsError(ctx, error, 'Lookup failed.')
   }
 }
 
 /**
  * Test purchases lookup against an app
  */
-async function getPurchases(
+export async function getPurchases(
+  ctx: CommandContext,
   slug: string,
   userId: string,
   options: { json?: boolean }
-) {
-  const app = await getAppConfig(slug)
-  if (!app) {
-    console.error(`App not found: ${slug}`)
-    process.exit(1)
-  }
-
-  if (!app.baseUrl || !app.webhookSecret) {
-    console.error(`App ${slug} is missing baseUrl or webhookSecret`)
-    process.exit(1)
-  }
-
-  const client = new IntegrationClient({
-    baseUrl: app.baseUrl,
-    webhookSecret: app.webhookSecret,
-  })
-
-  console.log(`\nFetching purchases for user: ${userId}`)
-  console.log(`Endpoint: ${app.baseUrl}`)
-  console.log()
+): Promise<void> {
+  const outputJson = options.json === true || ctx.format === 'json'
 
   try {
+    const app = await resolveAppConfig(slug)
+
+    const client = new IntegrationClient({
+      baseUrl: app.baseUrl,
+      webhookSecret: app.webhookSecret,
+    })
+
+    if (!outputJson) {
+      ctx.output.data(`\nFetching purchases for user: ${userId}`)
+      ctx.output.data(`Endpoint: ${app.baseUrl}`)
+      ctx.output.data('')
+    }
+
     const purchases = await client.getPurchases(userId)
 
-    if (options.json) {
-      console.log(JSON.stringify(purchases, null, 2))
-      process.exit(0)
+    if (outputJson) {
+      ctx.output.data(purchases)
+      return
     }
 
     if (!purchases || purchases.length === 0) {
-      console.log('No purchases found.')
-      process.exit(0)
+      ctx.output.data('No purchases found.')
+      return
     }
 
-    console.log(`Found ${purchases.length} purchases:\n`)
+    ctx.output.data(`Found ${purchases.length} purchases:\n`)
     for (const p of purchases) {
-      console.log(`  [${p.id}] ${p.productName}`)
-      console.log(`    Status: ${p.status}`)
-      console.log(`    Amount: ${p.amount} ${p.currency}`)
-      console.log(`    Date: ${new Date(p.purchasedAt).toLocaleDateString()}`)
-      console.log()
+      ctx.output.data(`  [${p.id}] ${p.productName}`)
+      ctx.output.data(`    Status: ${p.status}`)
+      ctx.output.data(`    Amount: ${p.amount} ${p.currency}`)
+      ctx.output.data(
+        `    Date: ${new Date(p.purchasedAt).toLocaleDateString()}`
+      )
+      ctx.output.data('')
     }
-    process.exit(0)
   } catch (error) {
-    console.error(
-      'Fetch failed:',
-      error instanceof Error ? error.message : error
-    )
-    process.exit(1)
+    handleToolsError(ctx, error, 'Fetch failed.')
   }
 }
 
@@ -262,8 +367,35 @@ export function registerToolsCommands(program: Command) {
   tools
     .command('list')
     .description('List all registered apps')
+    .option('--ids-only', 'Output only IDs (one per line)')
+    .option(
+      '--output-format <format>',
+      'Output format for lists (json|ndjson|csv)'
+    )
     .option('--json', 'Output as JSON')
-    .action(listApps)
+    .action(
+      async (
+        options: { json?: boolean; idsOnly?: boolean; outputFormat?: string },
+        command
+      ) => {
+        const opts =
+          typeof command.optsWithGlobals === 'function'
+            ? command.optsWithGlobals()
+            : {
+                ...command.parent?.opts(),
+                ...command.opts(),
+              }
+        const ctx = await createContext({
+          format:
+            options.json || options.outputFormat === 'json'
+              ? 'json'
+              : opts.format,
+          verbose: opts.verbose,
+          quiet: opts.quiet,
+        })
+        await listApps(ctx, options)
+      }
+    )
 
   tools
     .command('search')
@@ -273,7 +405,21 @@ export function registerToolsCommands(program: Command) {
     .option('-t, --types <types>', 'Filter by content types (comma-separated)')
     .option('-l, --limit <limit>', 'Max results (default: 5)')
     .option('--json', 'Output as JSON')
-    .action(searchContent)
+    .action(async (slug, query, options, command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: options.json ? 'json' : opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await searchContent(ctx, slug, query, options)
+    })
 
   tools
     .command('lookup')
@@ -281,7 +427,21 @@ export function registerToolsCommands(program: Command) {
     .argument('<app-slug>', 'App slug')
     .argument('<email>', 'User email to look up')
     .option('--json', 'Output as JSON')
-    .action(lookupUser)
+    .action(async (slug, email, options, command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: options.json ? 'json' : opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await lookupUser(ctx, slug, email, options)
+    })
 
   tools
     .command('purchases')
@@ -289,5 +449,19 @@ export function registerToolsCommands(program: Command) {
     .argument('<app-slug>', 'App slug')
     .argument('<user-id>', 'User ID')
     .option('--json', 'Output as JSON')
-    .action(getPurchases)
+    .action(async (slug, userId, options, command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: options.json ? 'json' : opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await getPurchases(ctx, slug, userId, options)
+    })
 }

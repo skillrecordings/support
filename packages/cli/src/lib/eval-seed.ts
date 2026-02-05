@@ -51,6 +51,19 @@ export async function cleanDatabase(connection: any): Promise<void> {
   await connection.execute('SET FOREIGN_KEY_CHECKS = 1')
 }
 
+export async function cleanQdrant(): Promise<void> {
+  const qdrantUrl = process.env.QDRANT_URL || 'http://localhost:6333'
+  const collection = process.env.QDRANT_COLLECTION || 'knowledge'
+
+  try {
+    await fetch(`${qdrantUrl}/collections/${collection}`, {
+      method: 'DELETE',
+    })
+  } catch {
+    // Collection might not exist, ignore
+  }
+}
+
 export async function loadJsonFiles(dirPath: string): Promise<any[]> {
   try {
     const files = await readdir(dirPath)

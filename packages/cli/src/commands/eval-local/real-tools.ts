@@ -10,11 +10,15 @@ import {
   createQdrantClient,
 } from '@skillrecordings/core/adapters/qdrant'
 import { tool } from 'ai'
-import { type Pool, createPool } from 'mysql2/promise'
+import type { Pool } from 'mysql2/promise'
 import { z } from 'zod'
+import { type OutputFormatter } from '../../core/output'
+
+type Mysql2Module = typeof import('mysql2/promise')
 
 let mysqlPool: Pool | null = null
 let qdrantClient: QdrantClient | null = null
+let mysqlModule: Mysql2Module | null = null
 
 export interface RealToolsConfig {
   mysql?: {
@@ -45,6 +49,21 @@ const DEFAULT_CONFIG: RealToolsConfig = {
   },
 }
 
+const loadMysqlModule = async (): Promise<Mysql2Module> => {
+  if (mysqlModule) {
+    return mysqlModule
+  }
+
+  try {
+    mysqlModule = await import('mysql2/promise')
+    return mysqlModule
+  } catch (error) {
+    throw new Error(
+      `mysql2 is required for real tools. Install it before using --real-tools. ${error instanceof Error ? error.message : ''}`.trim()
+    )
+  }
+}
+
 /**
  * Initialize connections to Docker services
  */
@@ -52,6 +71,7 @@ export async function initRealTools(
   config: RealToolsConfig = DEFAULT_CONFIG
 ): Promise<void> {
   if (config.mysql) {
+    const { createPool } = await loadMysqlModule()
     mysqlPool = createPool({
       ...config.mysql,
       waitForConnections: true,
@@ -84,7 +104,8 @@ export async function cleanupRealTools(): Promise<void> {
  */
 export function createRealTools(
   scenario: { appId?: string; customerEmail?: string },
-  embedFn?: (text: string) => Promise<number[]>
+  embedFn?: (text: string) => Promise<number[]>,
+  output?: OutputFormatter
 ) {
   const appId = scenario.appId || 'total-typescript'
   const customerEmail = scenario.customerEmail || '[EMAIL]'
@@ -143,7 +164,9 @@ export function createRealTools(
             purchases: [],
           }
         } catch (error) {
-          console.error('lookupUser error:', error)
+          output?.error(
+            `lookupUser error: ${error instanceof Error ? error.message : String(error)}`
+          )
           return { found: false, error: String(error) }
         }
       },
@@ -192,7 +215,9 @@ export function createRealTools(
               })),
           }
         } catch (error) {
-          console.error('searchKnowledge error:', error)
+          output?.error(
+            `searchKnowledge error: ${error instanceof Error ? error.message : String(error)}`
+          )
           return { similarTickets: [], knowledge: [], goodResponses: [] }
         }
       },

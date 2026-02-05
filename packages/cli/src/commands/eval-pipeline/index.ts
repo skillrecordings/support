@@ -6,6 +6,7 @@
  */
 
 import type { Command } from 'commander'
+import { createContext } from '../../core/context'
 import { run } from './run'
 import { seed } from './seed'
 
@@ -40,7 +41,21 @@ export function registerEvalPipelineCommands(program: Command): void {
     .option('--clear-cache', 'Clear cached classify results before run')
     .option('--fail-fast', 'Stop on first failure')
     .option('--quick', 'Run smoke test subset (~10 scenarios)')
-    .action(run)
+    .action(async (options, command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: options.json ? 'json' : opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await run(ctx, options)
+    })
 
   // Seed subcommand
   evalPipeline
@@ -49,5 +64,19 @@ export function registerEvalPipelineCommands(program: Command): void {
     .option('--clean', 'Drop and recreate all data')
     .option('--fixtures <path>', 'Path to fixtures directory', 'fixtures')
     .option('--json', 'JSON output for scripting')
-    .action(seed)
+    .action(async (options, command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: options.json ? 'json' : opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await seed(ctx, options)
+    })
 }

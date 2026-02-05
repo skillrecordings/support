@@ -1,0 +1,327 @@
+{
+  "version": "1.0",
+  "projectName": "cli-rearchitect",
+  "description": "Rearchitect @skillrecordings/cli as agent-first compiled binary. Parent epic: skillrecordings/support#172. All work in packages/cli/.",
+  "stories": [
+    {
+      "id": "story-ml863g76",
+      "title": "Core Infrastructure Types (Phase 0) — Issue #177",
+      "description": "Create the foundational CommandContext, CLIError hierarchy, and signal handling modules with full test coverage.\n\n## Context\n- Parent epic: https://github.com/skillrecordings/support/issues/172\n- Full issue: https://github.com/skillrecordings/support/issues/177\n- Read `packages/cli/PROGRESS.md` if it exists for prior story status\n\n## Files to Create\n- `packages/cli/src/core/context.ts` — CommandContext interface + createContext() factory\n- `packages/cli/src/core/errors.ts` — CLIError base + AuthError(10), NetworkError(11), DatabaseError(12)\n- `packages/cli/src/core/signals.ts` — AbortController wrapper + SIGINT/SIGTERM + cleanup registry\n- `packages/cli/tests/unit/core/context.test.ts`\n- `packages/cli/tests/unit/core/errors.test.ts`\n- `packages/cli/tests/unit/core/signals.test.ts`\n- `packages/cli/PROGRESS.md`\n\n## Key Design\nCommandContext carries: stdin, stdout, stderr, config, signal (AbortSignal), secrets (SecretsProvider), format ('json'|'text'|'table'), onCleanup(fn).\nExit codes: 0=success, 1=error, 2=usage, 10=auth, 11=network, 12=db.\nCLIError has: userMessage, exitCode, suggestion?, debugMessage?.\nSignal handling: trap SIGINT(130)/SIGTERM(143), run cleanup registry in reverse, second SIGINT force-exits.\n\n## TDD: Write failing tests first, then implement. Table-driven tests preferred.\n\n## On Completion\nUpdate packages/cli/PROGRESS.md with completion summary. Commit: `feat(cli): core infrastructure types - context, errors, signals`",
+      "priority": 1,
+      "passes": true,
+      "validationCommand": "cd packages/cli && bun run check-types && bun run test",
+      "acceptanceCriteria": [
+        "CommandContext interface exported with stdin/stdout/stderr/config/signal/secrets/format/onCleanup",
+        "createContext() returns valid context with defaults and accepts partial overrides",
+        "CLIError AuthError NetworkError DatabaseError all exported with correct exit codes",
+        "formatError() renders user message + suggestion and handles unknown errors",
+        "Signal handlers trap SIGINT and SIGTERM",
+        "Cleanup registry runs callbacks in reverse order",
+        "Second SIGINT force-exits",
+        "All new tests pass"
+      ]
+    },
+    {
+      "id": "story-ml863q07",
+      "title": "db-status Migration PoC (Phase 0) — Issue #178",
+      "description": "Migrate the db-status command to use CommandContext as proof-of-concept. Create test helpers.\n\n## Context\n- Parent epic: #172, Issue: #178\n- Depends on: Story 1 (core types must exist)\n- Read packages/cli/PROGRESS.md for prior story status\n\n## Files to Create/Modify\n- `packages/cli/tests/helpers/test-context.ts` — createTestContext() that captures stdout/stderr buffers\n- `packages/cli/tests/integration/commands/db-status.test.ts` — Table-driven integration tests\n- `packages/cli/src/commands/db-status.ts` — MODIFY: accept CommandContext, use ctx.stdout, lazy getDb()\n\n## Task\n1. Create createTestContext() helper: returns CommandContext with captured stdout/stderr, getStdout()/getStderr() accessors, no-op AbortController, mock secrets\n2. Rewrite db-status: receive CommandContext param, replace console.log→ctx.stdout.write(), replace database singleton→lazy getDb(), add error handling with DatabaseError+suggestion, use ctx.signal for timeout\n3. Write table-driven integration tests: success, connection failure, timeout\n\n## TDD: Write failing tests first. Use createTestContext() to capture and assert output.\n\n## On Completion\nUpdate packages/cli/PROGRESS.md. Commit: `feat(cli): migrate db-status to CommandContext pattern`",
+      "priority": 2,
+      "passes": true,
+      "validationCommand": "cd packages/cli && bun run check-types && bun run test",
+      "acceptanceCriteria": [
+        "db-status uses CommandContext with no direct console.log or database singleton",
+        "db-status handles connection failure with DatabaseError and suggestion",
+        "createTestContext() helper captures stdout/stderr for assertions",
+        "Table-driven integration tests cover success and error paths",
+        "All tests pass"
+      ]
+    },
+    {
+      "id": "story-ml863y75",
+      "title": "SecretsProvider Abstraction (Phase 1) — Issue #179",
+      "description": "Create SecretsProvider interface with 1Password SDK and env var implementations.\n\n## Context\n- Parent epic: #172, Issue: #179\n- Depends on: Story 1 (core types)\n- Read packages/cli/PROGRESS.md\n\n## Files to Create\n- `packages/cli/src/core/secrets.ts` — SecretsProvider interface + OnePasswordProvider + EnvProvider + factory\n- `packages/cli/src/core/secret-refs.ts` — Central manifest of all op:// secret references\n- `packages/cli/tests/unit/core/secrets.test.ts`\n\n## Key Design\nSecretsProvider: { resolve(ref): Promise<string>, resolveAll(refs): Promise<Record>, isAvailable(): Promise<boolean>, name: string }\nOnePasswordProvider: uses @1password/sdk with OP_SERVICE_ACCOUNT_TOKEN, caches resolved secrets\nEnvProvider: extracts key from op:// ref, looks up process.env\nFactory: createSecretsProvider() tries 1Password first, falls back to env\n\n## TDD: Mock @1password/sdk in tests. Test: successful resolution, missing secret, provider fallback, batch resolution.\n\n## On Completion\nUpdate packages/cli/PROGRESS.md. Commit: `feat(cli): SecretsProvider abstraction with 1Password SDK`",
+      "priority": 3,
+      "passes": true,
+      "validationCommand": "cd packages/cli && bun run check-types && bun run test",
+      "acceptanceCriteria": [
+        "SecretsProvider interface exported",
+        "OnePasswordProvider resolves secrets via @1password/sdk (mocked in tests)",
+        "EnvProvider falls back to process.env",
+        "Factory tries 1Password first then env",
+        "Secret refs manifest contains all required secrets",
+        "Unit tests cover resolution, missing secret, fallback, batch",
+        "All tests pass"
+      ]
+    },
+    {
+      "id": "story-ml8646k3",
+      "title": "Secret Loading Migration (Phase 1) — Issue #180",
+      "description": "Remove old secret loading infrastructure. Wire SecretsProvider into createContext(). Update auth commands.\n\n## Context\n- Parent epic: #172, Issue: #180\n- Depends on: Stories 2+3\n\n## Files to Delete\n- packages/cli/src/preload.ts\n- packages/cli/src/lib/env-loader.ts\n- packages/cli/src/lib/crypto.ts\n\n## Files to Modify\n- packages/cli/src/core/context.ts — Wire SecretsProvider into createContext()\n- packages/cli/src/commands/auth/ — Remove keygen/encrypt/decrypt, add login/status/whoami\n- packages/cli/src/index.ts — Remove preload, update command registration\n\n## Files to Create\n- packages/cli/tests/integration/commands/auth.test.ts\n\n## Key Points\n- Commands that dont need secrets (--help, --version) must never trigger resolution\n- auth status: show active provider + available secrets\n- auth login: validate 1Password token\n- auth whoami: show service account info\n- DELETE: auth keygen, auth encrypt, auth decrypt\n\n## On Completion\nUpdate packages/cli/PROGRESS.md. Commit: `feat(cli): migrate to native 1Password secrets`",
+      "priority": 4,
+      "passes": true,
+      "validationCommand": "cd packages/cli && bun run check-types && bun run test",
+      "acceptanceCriteria": [
+        "preload.ts env-loader.ts crypto.ts deleted",
+        "No references to age encryption remain",
+        "SecretsProvider wired into createContext()",
+        "skill --help works without secrets configured",
+        "auth status shows active provider",
+        "Old auth commands removed",
+        "All tests pass"
+      ]
+    },
+    {
+      "id": "story-ml864fd7",
+      "title": "OutputFormatter Abstraction (Phase 2) — Issue #181",
+      "description": "Create OutputFormatter with JSON/text/table formatters. Add global --format, --verbose, --quiet flags.\n\n## Context\n- Parent epic: #172, Issue: #181\n- Depends on: Story 2\n\n## Files to Create\n- packages/cli/src/core/output.ts — OutputFormatter interface + JsonFormatter + TextFormatter + TableFormatter\n- packages/cli/tests/unit/core/output.test.ts\n\n## Files to Modify\n- packages/cli/src/core/context.ts — Add output: OutputFormatter to CommandContext\n- packages/cli/src/index.ts — Add global flags\n\n## Key Design\nOutputFormatter: { data(value), table(rows, columns), message(text), success(text), warn(text), error(text), progress(label) }\n- data() → stdout (primary output)\n- message/success/warn/error → stderr\n- JsonFormatter: data() = JSON.stringify to stdout\n- TextFormatter: data() = human-readable to stdout\n- TableFormatter: data() = aligned columns to stdout\n- Auto-detect: if !process.stdout.isTTY, default to JSON\n- Global flags: --format json|text|table (persistent), --verbose/-v, --quiet/-q\n\n## On Completion\nUpdate packages/cli/PROGRESS.md. Commit: `feat(cli): OutputFormatter abstraction with dual output`",
+      "priority": 5,
+      "passes": true,
+      "validationCommand": "cd packages/cli && bun run check-types && bun run test",
+      "acceptanceCriteria": [
+        "OutputFormatter interface exported",
+        "JsonFormatter produces valid JSON on stdout",
+        "TextFormatter produces human-readable output",
+        "Auto-detection: piped output defaults to JSON",
+        "--format flag works and inherited by subcommands",
+        "--verbose and --quiet work correctly",
+        "Unit tests cover all formatters",
+        "All tests pass"
+      ]
+    },
+    {
+      "id": "story-ml864mze",
+      "title": "Command Migration Batch 1 — Front + Inngest (Phase 2) — Issue #182",
+      "description": "Migrate Front and Inngest commands to CommandContext + OutputFormatter. Replace all console.log.\n\n## Context\n- Parent epic: #172, Issue: #182\n- Depends on: Story 5\n\n## Files to Modify\n- packages/cli/src/commands/front/*.ts — All front commands\n- packages/cli/src/commands/inngest/*.ts — All inngest commands (now under inngest subcommand)\n\n## Files to Create\n- packages/cli/tests/integration/commands/front.test.ts\n- packages/cli/tests/integration/commands/inngest.test.ts\n\n## Commands to migrate\nFront: message, conversation, tags, inbox, archive, bulk-archive, pull\nInngest: events, runs, run, signal, investigate, stats, failures, search\n\nFor each command:\n1. Accept CommandContext parameter\n2. Replace console.log→ctx.output.data() or ctx.output.message()\n3. Replace console.error→ctx.output.error()\n4. Use CLIError for error handling with suggestions\n5. Write happy-path + error-path test\n\n## On Completion\nUpdate packages/cli/PROGRESS.md. Commit: `feat(cli): migrate front + inngest commands to OutputFormatter`",
+      "priority": 6,
+      "passes": true,
+      "validationCommand": "cd packages/cli && bun run check-types && bun run test",
+      "acceptanceCriteria": [
+        "Zero console.log in front/ and inngest/ command files",
+        "All front commands use CommandContext + OutputFormatter",
+        "All inngest commands use CommandContext + OutputFormatter",
+        "skill front conversation <id> --format json outputs valid JSON",
+        "Integration tests cover happy + error paths",
+        "All tests pass"
+      ]
+    },
+    {
+      "id": "story-ml864tat",
+      "title": "Command Migration Batch 2 — Axiom + Tools + Memory (Phase 2) — Issue #183",
+      "description": "Migrate Axiom, Tools, and Memory commands to CommandContext + OutputFormatter.\n\n## Context\n- Parent epic: #172, Issue: #183\n- Depends on: Story 6\n\n## Files to Modify\n- packages/cli/src/commands/axiom/*.ts\n- packages/cli/src/commands/tools/*.ts (list, search, lookup)\n- packages/cli/src/commands/memory/*.ts\n\n## Files to Create\n- packages/cli/tests/integration/commands/axiom.test.ts\n- packages/cli/tests/integration/commands/tools.test.ts\n- packages/cli/tests/integration/commands/memory.test.ts\n\n## Commands\nAxiom: query, agents, errors, conversation, classifications, workflow-steps, approvals, pipeline-trace, step-timings, error-rate, data-flow-check, tag-health, approval-stats, pipeline-health\nTools: list, search, lookup\nMemory: store, find, get, validate, upvote, downvote, delete, stats, stale\n\nSame pattern: accept CommandContext, replace console.log, use CLIError, write tests.\n\n## On Completion\nUpdate packages/cli/PROGRESS.md. Commit: `feat(cli): migrate axiom + tools + memory commands`",
+      "priority": 7,
+      "passes": true,
+      "validationCommand": "cd packages/cli && bun run check-types && bun run test",
+      "acceptanceCriteria": [
+        "Zero console.log in axiom/ tools/ memory/ command files",
+        "All commands use CommandContext + OutputFormatter",
+        "--format json outputs valid JSON for all commands",
+        "Integration tests cover happy + error paths",
+        "All tests pass"
+      ]
+    },
+    {
+      "id": "story-ml864ys3",
+      "title": "Command Migration Batch 3 — Remaining Commands (Phase 2) — Issue #184",
+      "description": "Migrate all remaining commands: eval, pipeline, deploy, FAQ, KB, health, wizard, responses, dataset, init.\n\n## Context\n- Parent epic: #172, Issue: #184\n- Depends on: Story 7\n\n## Files to Modify\n- packages/cli/src/commands/eval/*.ts\n- packages/cli/src/commands/pipeline/*.ts\n- packages/cli/src/commands/deploys/*.ts\n- packages/cli/src/commands/faq/*.ts\n- packages/cli/src/commands/kb/*.ts\n- packages/cli/src/commands/health.ts\n- packages/cli/src/commands/wizard.ts\n- packages/cli/src/commands/responses/*.ts\n- packages/cli/src/commands/dataset/*.ts\n- packages/cli/src/commands/init.ts\n\n## Goal\nZero console.log calls remain in ANY command file across the entire CLI. Every command uses CommandContext + OutputFormatter.\n\n## On Completion\nUpdate packages/cli/PROGRESS.md. Commit: `feat(cli): complete command migration to OutputFormatter`",
+      "priority": 8,
+      "passes": true,
+      "validationCommand": "cd packages/cli && bun run check-types && bun run test",
+      "acceptanceCriteria": [
+        "Zero console.log in ANY command file",
+        "Every command uses CommandContext + OutputFormatter",
+        "--format json works for all commands",
+        "Integration tests exist for all command groups",
+        "All tests pass"
+      ]
+    },
+    {
+      "id": "story-ml8657n3",
+      "title": "Dead Code Removal + Deduplication (Phase 5) — Issue #185",
+      "description": "Delete dead code, deduplicate shared helpers, update docs.\n\n## Context\n- Parent epic: #172, Issue: #185\n- Depends on: Story 8\n\n## Files to Delete\n- packages/cli/src/commands/front-stats.ts (unregistered standalone script)\n- packages/cli/src/commands/front-cache.ts (unregistered, never wired)\n- packages/cli/src/commands/eval-local/compare.ts (hardcoded fake data stub)\n\n## Files to Create\n- packages/cli/src/lib/eval-seed.ts — Shared seed logic (from eval-pipeline version)\n- packages/cli/src/lib/axiom-client.ts — Deduplicated axiom helpers (getAxiomClient, getDataset, parseTimeRange, formatDuration, formatTime)\n\n## Files to Modify\n- packages/cli/src/commands/eval-local/seed.ts — Import from shared eval-seed.ts\n- packages/cli/src/commands/eval-pipeline/seed.ts — Import from shared eval-seed.ts\n- packages/cli/src/commands/axiom/index.ts — Import from shared axiom-client.ts\n- packages/cli/src/commands/axiom/forensic.ts — Import from shared axiom-client.ts\n- packages/cli/package.json — Remove @skillrecordings/sdk\n- CLAUDE.md — Update with accurate command list and new flags\n\n## On Completion\nUpdate packages/cli/PROGRESS.md. Commit: `chore(cli): remove dead code and deduplicate helpers`",
+      "priority": 9,
+      "passes": true,
+      "validationCommand": "cd packages/cli && bun run check-types && bun run test",
+      "acceptanceCriteria": [
+        "front-stats.ts front-cache.ts deleted",
+        "eval-local compare stub deleted",
+        "@skillrecordings/sdk removed from dependencies",
+        "Eval seed logic in shared src/lib/eval-seed.ts",
+        "Axiom helpers in shared src/lib/axiom-client.ts",
+        "CLAUDE.md updated",
+        "No dead imports or unused exports",
+        "All tests pass"
+      ]
+    },
+    {
+      "id": "story-ml865gzq",
+      "title": "Compiled Binary Build Script (Phase 3) — Issue #186",
+      "description": "## Progress Notification (MANDATORY)\nAfter completing this story, write a status update to `packages/cli/PROGRESS.md` with:\n- Story title and completion timestamp\n- Files created/modified\n- Test count before and after\n- Any issues encountered\n\nCreate build.ts for bun build --compile targeting 4 platforms. Handle native modules. Version embedding.\n\n## Context\n- Parent epic: #172, Issue: #186\n- Depends on: Story 9\n\n## Files to Create\n- packages/cli/build.ts — Programmatic Bun.build() for 4 targets\n- packages/cli/tests/e2e/binary.test.ts\n\n## Files to Modify\n- packages/cli/package.json — Add build:compile script\n\n## Key Details\n- Targets: bun-linux-x64, bun-linux-arm64, bun-darwin-x64, bun-darwin-arm64\n- CRITICAL: autoloadDotenv: false (never bake secrets)\n- Define BUILD_VERSION (from package.json) and BUILD_COMMIT (git rev-parse --short HEAD)\n- Minify + sourcemap + bytecode\n- Handle native modules: externalize/replace mysql2, duckdb, @mapbox/node-pre-gyp\n- skill --version prints: skill v1.2.3 (abc1234) bun-linux-x64\n- E2E: compile, run --version, run --help, verify no secrets in binary via strings\n\n## On Completion\nUpdate packages/cli/PROGRESS.md. Commit: `feat(cli): compiled binary build with bun build --compile`",
+      "priority": 10,
+      "passes": true,
+      "validationCommand": "cd packages/cli && bun run check-types && bun run test",
+      "acceptanceCriteria": [
+        "bun run build:compile produces binaries in dist/",
+        "--version outputs correct format",
+        "--help works without env vars",
+        "No secrets baked into binary",
+        "E2E tests verify binary behavior",
+        "All tests pass"
+      ]
+    },
+    {
+      "id": "story-ml865on5",
+      "title": "Release Infrastructure (Phase 3) — Issue #187",
+      "description": "## Progress Notification (MANDATORY)\nAfter completing this story, write a status update to `packages/cli/PROGRESS.md` with:\n- Story title and completion timestamp\n- Files created/modified\n- Test count before and after\n- Any issues encountered\n\nCreate GitHub Actions release workflow and curl install script.\n\n## Context\n- Parent epic: #172, Issue: #187\n- Depends on: Story 10\n\n## Files to Create\n- .github/workflows/cli-release.yml — Build + release on cli-v* tag push\n- packages/cli/install.sh — Platform-detecting install script\n- packages/cli/tests/e2e/install.test.ts\n\n## Details\nGH Actions: trigger on push tags cli-v*, matrix 4 targets, oven-sh/setup-bun@v2, compile + release + upload\nInstall script: detect platform/arch, download from latest GH release, install to ~/.local/bin/skill, chmod +x, verify --version\n\n## On Completion\nUpdate packages/cli/PROGRESS.md. Commit: `feat(cli): release workflow and install script`",
+      "priority": 11,
+      "passes": true,
+      "validationCommand": "cd packages/cli && bun run check-types && bun run test",
+      "acceptanceCriteria": [
+        "GitHub Actions workflow is valid YAML",
+        "Workflow builds all 4 platform targets",
+        "Install script detects platform and arch",
+        "Install script downloads and installs binary",
+        "All tests pass"
+      ]
+    },
+    {
+      "id": "story-ml865xas",
+      "title": "MCP Server Mode (Phase 4) — Issue #188",
+      "description": "## Progress Notification (MANDATORY)\nAfter completing this story, write a status update to `packages/cli/PROGRESS.md` with:\n- Story title and completion timestamp\n- Files created/modified\n- Test count before and after\n- Any issues encountered\n\nCreate MCP server entrypoint exposing CLI commands as MCP tools over stdio.\n\n## Context\n- Parent epic: #172, Issue: #188\n- Depends on: Story 5\n\n## Files to Create\n- packages/cli/src/mcp.ts — MCP server entrypoint with StdioServerTransport\n- packages/cli/tests/integration/mcp.test.ts\n\n## Files to Modify\n- packages/cli/src/index.ts — Add --mcp flag\n- packages/cli/package.json — Add @modelcontextprotocol/sdk dep\n\n## Key Details\n- Uses @modelcontextprotocol/sdk with StdioServerTransport\n- Auto-generate tool registrations by walking Commander command tree\n- Tool names: front-conversation, axiom-query, tools-search, etc.\n- Zod schemas from Commander option definitions\n- CRITICAL: No console.log in MCP mode (stdout = protocol channel), all logging via console.error\n- Tool annotations: readOnlyHint for reads, destructiveHint for destructive ops\n- --mcp flag skips Commander parsing, launches MCP server\n- Exits when stdin closes\n\n## On Completion\nUpdate packages/cli/PROGRESS.md. Commit: `feat(cli): MCP server mode for agent integration`",
+      "priority": 12,
+      "passes": true,
+      "validationCommand": "cd packages/cli && bun run check-types && bun run test",
+      "acceptanceCriteria": [
+        "skill --mcp launches MCP server on stdio",
+        "MCP tools match Commander command tree",
+        "Tools have Zod input schemas",
+        "Tool annotations set correctly",
+        "JSON-RPC via stdin returns valid response",
+        "No console.log in MCP mode",
+        "Integration tests pass",
+        "All tests pass"
+      ]
+    },
+    {
+      "id": "story-ml8665cd",
+      "title": "Test Coverage Gap Fill + CI (Phase 6) — Issue #189",
+      "description": "## Progress Notification (MANDATORY)\nAfter completing this story, write a status update to `packages/cli/PROGRESS.md` with:\n- Story title and completion timestamp\n- Files created/modified\n- Test count before and after\n- Any issues encountered\n\nFill test coverage gaps. Set up coverage reporting and CI thresholds.\n\n## Context\n- Parent epic: #172, Issue: #189\n- Depends on: Stories 8+10\n\n## Files to Create/Modify\n- packages/cli/vitest.config.ts — Add coverage configuration (@vitest/coverage-v8)\n- .github/workflows/cli-test.yml — CI for tests on every PR touching packages/cli/\n- packages/cli/tests/ — Fill gaps\n\n## Details\nCoverage config: @vitest/coverage-v8, thresholds 80% overall + 90% on src/core/, formats text+lcov+json\nCI: runs on PR, steps: install, check-types, test --coverage, fails below threshold\nGap analysis: run coverage, identify untested paths, add missing tests for edge cases (error handling, config precedence, output format)\n\n## On Completion\nUpdate packages/cli/PROGRESS.md with final summary. Commit: `feat(cli): test coverage CI with 80%+ threshold`",
+      "priority": 13,
+      "passes": true,
+      "validationCommand": "cd packages/cli && bun run check-types && bun run test",
+      "acceptanceCriteria": [
+        "Coverage report generates with bun vitest run --coverage",
+        "Overall coverage >= 80% lines",
+        "Core module coverage >= 90% lines",
+        "CI workflow runs tests on PR",
+        "CI fails if coverage drops below threshold",
+        "All tests pass"
+      ]
+    },
+    {
+      "id": "story-ml8a0ylh",
+      "title": "Interactive Auth Setup Wizard with 1Password Deep Links — Issue #177 appendix",
+      "description": "## Progress Notification (MANDATORY)\nAfter completing this story, write a status update to `packages/cli/PROGRESS.md` with:\n- Story title and completion timestamp\n- Files created/modified\n- Test count before and after\n- Any issues encountered\n\nCreate `skill auth setup` — a zero-friction interactive wizard that requires `op` CLI and walks the user through secrets configuration using direct 1Password deep links.\n\n## Context\n- This is an internal tool for Skill Recordings employees who ALL have 1Password vault access\n- **`op` CLI is REQUIRED** — not optional, not a fallback. Push users to set up proper tooling.\n- Secrets live in the 1Password **Support** vault (ID: `u3ujzar6l3nahlahsuzfvg7vcq`)\n- Two items:\n  - **AGE key pair** (ID: `lxndka3exn475vqdiqq5heg2wm`) — `skill-cli-age-key` for .env.encrypted decryption\n  - **Service Account Token** (ID: `3e4ip354ps3mhq2wwt6vmtm2zu`) — OP_SERVICE_ACCOUNT_TOKEN for 1Password SDK\n- 1Password deep link base: `https://start.1password.com/open/i?a=GCTJE4MRGFHKRAYXCEXKZKCEFU&v=u3ujzar6l3nahlahsuzfvg7vcq&h=egghead.1password.com`\n- Append `&i=<item_id>` for specific items\n\n## Files to Create\n- `packages/cli/src/commands/auth/setup.ts` — Interactive wizard\n- `packages/cli/src/core/onepassword-links.ts` — Deep link constants, op CLI detection, op CLI helpers\n- `packages/cli/tests/integration/commands/auth-setup.test.ts`\n\n## Files to Modify\n- `packages/cli/src/commands/auth/index.ts` — Register setup subcommand\n- `packages/cli/src/core/secret-refs.ts` — Add AGE_SECRET_KEY ref\n\n## Design: op CLI Required\n\nThe wizard should:\n1. Check for `op` CLI — if missing, print install instructions and EXIT with clear error\n   ```\n   ❌ 1Password CLI (op) is required but not found.\n   \n   Install it:\n     brew install 1password-cli        # macOS\n     # or see https://developer.1password.com/docs/cli/get-started/\n   \n   All Skill Recordings team members have vault access.\n   Once installed, run: skill auth setup\n   ```\n2. Check `op` is signed in — if not, run `op signin` interactively\n3. Verify vault access — `op vault get u3ujzar6l3nahlahsuzfvg7vcq` \n4. Pull secrets directly via op CLI:\n   - `op read \"op://Support/skill-cli-age-key/password\"` → AGE_SECRET_KEY\n   - `op read \"op://Support/skill-cli-service-account/credential\"` → OP_SERVICE_ACCOUNT_TOKEN\n5. Optionally offer to write a `.env.local` or print shell exports\n6. Verify by resolving a known secret through SecretsProvider\n\n## Wizard Flow\n```\n$ skill auth setup\n\n🔐 Setting up skill-cli secrets...\n\nChecking 1Password CLI...\n  op CLI: ✅ v2.x found\n  Signed in: ✅ egghead.1password.com\n  Support vault: ✅ accessible\n\nFetching secrets from 1Password...\n  AGE_SECRET_KEY: ✅ fetched\n  OP_SERVICE_ACCOUNT_TOKEN: ✅ fetched\n\nVerifying access...\n  Decrypt .env.encrypted: ✅\n  1Password SDK resolve: ✅\n\n🎉 All set! Secrets configured.\n\nAdd to your shell profile for persistence:\n  export AGE_SECRET_KEY=\"AGE-SECRET-KEY-xxx...\"\n  export OP_SERVICE_ACCOUNT_TOKEN=\"op_xxx...\"\n\nOr use op CLI injection:\n  op run --env-file=.env.op -- skill <command>\n```\n\n## Key Details\n- HARD REQUIRE `op` CLI — no fallback to manual paste\n- Use `child_process.execSync` to call `op` commands\n- Deep links as BACKUP only — if `op read` fails, offer \"Open in 1Password\" as fallback\n- `op whoami` to check sign-in status\n- `op vault get <id>` to verify vault access\n- Add AGE_SECRET_KEY to secret-refs.ts: `AGE_SECRET_KEY: 'op://Support/skill-cli-age-key/password'`\n- Handle `op` CLI errors gracefully (not signed in, no vault access, etc.)\n\n## TDD: Write tests mocking child_process.execSync for op CLI calls.\n\n## On Completion\nUpdate packages/cli/PROGRESS.md. Commit: `feat(cli): interactive auth setup wizard requiring op CLI`",
+      "priority": 14,
+      "passes": true,
+      "validationCommand": "cd packages/cli && bun run check-types && bun run test",
+      "acceptanceCriteria": [
+        "skill auth setup launches interactive wizard",
+        "Deep links open correct 1Password items in browser",
+        "Validates OP_SERVICE_ACCOUNT_TOKEN by resolving a test secret",
+        "Validates AGE_SECRET_KEY format",
+        "Non-interactive mode works with --token and --age-key flags",
+        "AGE_SECRET_KEY added to secret-refs.ts",
+        "Prints shell export instructions on success",
+        "Tests cover happy path and validation failures",
+        "All tests pass"
+      ]
+    },
+    {
+      "id": "story-ml8bd0sg",
+      "title": "Claude Code Plugin: skill-cli Front Inbox Manager",
+      "description": "## Progress Notification (MANDATORY)\nAfter completing this story, write a status update to `packages/cli/PROGRESS.md` with:\n- Story title and completion timestamp\n- Files created/modified\n- Test count before and after\n- Any issues encountered\n\nCreate a Claude Code plugin that ships with the CLI and gives Claude Code native awareness of `skill front` commands with baked-in product→inbox aliases, HATEOAS auto-chaining, and cross-inbox daily briefing flows.\n\n## Deliverables\n\n### 1. Plugin Directory Structure\nCreate at `packages/cli/plugin/`:\n```\nplugin/\n  .claude-plugin/\n    plugin.json\n  skills/\n    front-inbox/\n      SKILL.md\n      examples/\n        triage-tt.md\n        bulk-archive.md\n```\n\n### 2. plugin.json Structure\n```json\n{\n  \"name\": \"skill-cli\",\n  \"version\": \"1.0.0\",\n  \"displayName\": \"Skill Recordings CLI\",\n  \"description\": \"Front inbox management and support agent tooling\",\n  \"author\": \"Skill Recordings\",\n  \"skills\": [\"front-inbox\"],\n  \"cliVersion\": \"${PACKAGE_JSON_VERSION}\"\n}\n```\n\n### 3. SKILL.md: Front Inbox Management\nThe skill should include:\n\n**Inbox Aliases Table:**\n- Total TypeScript → inb_3srbb (aliases: TT, typescript, total)\n- Pro Tailwind → inb_3pqh3 (aliases: tailwind, ptw)\n- AI Hero → inb_4bj7r (aliases: ai-hero, aihero)\n- Epic React → inb_1bwzr (aliases: react, kcd)\n- Epic Web → inb_jqs2t (aliases: epicweb)\n- Epic AI → inb_jqs11 (aliases: epicai)\n- egghead → inb_1c77r (aliases: egg)\n- Just JavaScript → inb_2odqf (aliases: justjs, jj)\n- Testing Accessibility → inb_3bkef (aliases: a11y)\n- Pro Next.js → inb_43olj (aliases: nextjs, pro-next)\n\n**Command Reference:**\n- skill front inbox — list all inboxes with pending counts\n- skill front triage -i <inbox> --json — get pending conversations in JSON\n- skill front conversation <id> -m — get full conversation + messages\n- skill front bulk-archive -i <inbox> --filter \"tag:handled\" --dry-run — preview bulk actions\n- skill front tags <inbox> — list all tags used in that inbox\n\n**HATEOAS Chaining Rules:**\n- Always use --json for agent parsing\n- Follow _actions from response to chain operations\n- Non-destructive (mark-read, tag): auto-execute\n- Destructive (archive, delete): ask user first\n- Always run with --dry-run before bulk-archive\n- When _actions has multiple items, ask user which to prioritize\n\n**Daily Briefing Flow:**\n1. Query all inboxes in parallel with triage (pending count, urgent tags)\n2. Synthesize cross-inbox summary: \"TT: 5 pending (2 urgent), AI Hero: 3 pending (0 urgent)\"\n3. Ask user: \"What should I focus on?\" and execute based on response\n\n**Error Handling:**\n- Connection errors: suggest checking FRONT_API_TOKEN\n- Rate limits: use exponential backoff\n- Malformed responses: fall back to text output\n\n### 4. `skill plugin sync` Command\nCreate at `packages/cli/src/commands/plugin-sync.ts`:\n\n```typescript\nexport async function executePluginSync(ctx: CommandContext, options: {\n  global?: boolean\n  dry?: boolean\n  force?: boolean\n}): Promise<void>\n```\n\nBehavior:\n- Reads from packages/cli/plugin/ directory\n- Copies to ~/.claude/plugins/skill-cli/ (or ~/.claude/skills/skill-cli if --global)\n- Creates parent dirs if needed\n- Checks version in plugin.json vs installed version\n- Skips if up-to-date (unless --force)\n- Prints sync status and plugin version\n- Non-interactive, idempotent\n\n### 5. Files to Create\n- `packages/cli/plugin/.claude-plugin/plugin.json`\n- `packages/cli/plugin/skills/front-inbox/SKILL.md` (~300 lines, comprehensive)\n- `packages/cli/plugin/skills/front-inbox/examples/triage-tt.md`\n- `packages/cli/plugin/skills/front-inbox/examples/bulk-archive.md`\n- `packages/cli/src/commands/plugin-sync.ts` (~150 lines)\n- `packages/cli/tests/integration/commands/plugin-sync.test.ts` (~80 lines)\n\n### 6. Files to Modify\n- `packages/cli/src/index.ts` — Register plugin-sync subcommand\n- `packages/cli/package.json` — Add plugin sync to postinstall or manual command\n\n## Acceptance Criteria\n- `skill plugin sync` runs without error\n- Plugin appears at ~/.claude/plugins/skill-cli/\n- SKILL.md includes full command reference + alias table\n- Version tracking works (skips sync if up-to-date)\n- `--force` flag re-syncs regardless of version\n- Claude Code auto-activates skill when user mentions \"inbox\" or product name\n- HATEOAS chaining examples work in practice\n- All tests pass\n\n## Testing Strategy\n- Mock filesystem operations (fs-extra) in tests\n- Test version comparison logic\n- Verify plugin.json structure\n- Test --dry-run mode\n\n## On Completion\nUpdate packages/cli/PROGRESS.md. Commit: `feat(cli): Claude Code plugin for front inbox management`",
+      "priority": 15,
+      "passes": true,
+      "validationCommand": "cd packages/cli && bun run check-types && bun run test",
+      "acceptanceCriteria": [
+        "plugin.json valid JSON with name/version/skills",
+        "SKILL.md exists with full command reference and inbox aliases",
+        "skill plugin sync command created and executable",
+        "Plugin syncs to ~/.claude/plugins/skill-cli/",
+        "Version checking skips sync when up-to-date",
+        "--force flag forces re-sync",
+        "Triage + briefing flow documented with examples",
+        "All tests pass"
+      ]
+    },
+    {
+      "id": "story-ml8cda7j",
+      "title": "P0 Bugs: Fix inbox filtering and pagination",
+      "description": "Fix critical bugs blocking triage workflows (from real AI Hero inbox session).\n\n## Progress Notification (MANDATORY)\nAfter completing this story, write a status update to `packages/cli/PROGRESS.md` with:\n- Story title and completion timestamp\n- Files created/modified\n- Test count before and after\n- Any issues encountered\n\n## Context from feat/front-cli-improvements (4ad51f7, 66ffb6a, 916bf14 on main)\nThese learnings ALREADY SHIPPED on main. Use them as reference:\n\n### Status Filtering Fix\n- Must use `q[statuses][]=unassigned` query param format\n- Free-text `q=status:unassigned` does NOT work for status filtering\n- Confirmed by comparing working triage.ts vs broken inbox.ts\n\n### Pagination Fix\n- Always use `limit=50` as page size (hardcoded), loop on `_pagination.next` cursor URLs\n- User's `--limit` flag should be a client-side cap only, not passed as the API page size\n\n### Search Command Available\n- `skill front search` now available with optional query + filter flags\n- Filters compose: `--status unassigned --inbox inb_4bj7r` works without text query\n- Full Front query syntax: inbox:inb_xxx, tag:tag_xxx, is:open/archived/assigned/unassigned/unreplied/snoozed/resolved, from:email, after/before:<unix_ts>\n\n## Bugs to Fix\n1. `skill front inbox --status <status>` doesn't filter — apply the q[statuses][] fix\n2. `skill front inbox --limit 200` pagination broken — implement cursor-based pagination with limit=50 page size\n\n## On Completion\nCommit: `fix(cli): inbox status filtering and pagination`",
+      "priority": 16,
+      "passes": true,
+      "validationCommand": "cd packages/cli && bun run check-types && bun run test",
+      "acceptanceCriteria": [
+        "--status filter works correctly",
+        "--limit pagination returns all results",
+        "Integration tests pass",
+        "All tests pass"
+      ]
+    },
+    {
+      "id": "story-ml8cdgpf",
+      "title": "P1 Commands: Add assign, tag, reply operations",
+      "description": "Add missing commands that are blockers for real triage workflows.\n\n## Progress Notification (MANDATORY)\nAfter completing this story, write a status update to `packages/cli/PROGRESS.md` with:\n- Story title and completion timestamp\n- Files created/modified\n- Test count before and after\n- Any issues encountered\n\n## Context from feat/front-cli-improvements (already on main)\nThese commands ALREADY EXIST on main. Port them to the rearchitect branch:\n\n### Existing Patterns to Follow\n- `registerAssignCommand(frontCommand)` — assign/unassign (optional teammate-id + --unassign flag)\n- `registerConversationTagCommands(frontCommand)` — tag + untag (case-insensitive name resolution via /tags endpoint)\n- `registerReplyCommand(frontCommand)` — draft reply only (HITL, never auto-send)\n- `registerApiCommand(frontCommand)` — raw passthrough escape hatch (method + endpoint + --data)\n\n### API Gotchas\n- `front.conversations.updateAssignee(convId, '')` works for unassigning — no separate raw PUT needed\n- CreateDraft schema requires channel_id but POST /conversations/{id}/drafts infers it — use `front.raw.post` to bypass typed method\n- TS7022 circular ref: use explicit type annotation on variable instead of generic parameter on `front.raw.get<>()`\n\n### HATEOAS Actions\n- `conversationActions(convId)` includes: archive, assign, unassign, tag, untag, reply, tags-list\n- `conversationListActions(inboxId)` includes: bulk-archive, triage, report\n\n## New Commands\n1. `skill front assign <conversation-id> --to <teammate-id>` + `--unassign`\n2. `skill front bulk-assign -i <inbox> --filter \"<query>\" --to <teammate-id>`\n3. `skill front tag <conversation-id> --tag <tag-name>` (case-insensitive name resolution)\n4. `skill front untag <conversation-id> --tag <tag-name>`\n5. `skill front reply <conversation-id> --message \"<text>\"` (draft only, HITL)\n\nAll commands: --dry-run, --json, CLIError handling, HATEOAS _actions.\n\n## On Completion\nCommit: `feat(cli): add assign, tag, reply commands`",
+      "priority": 17,
+      "passes": true,
+      "validationCommand": "cd packages/cli && bun run check-types && bun run test",
+      "acceptanceCriteria": [
+        "assign command works",
+        "bulk-assign works",
+        "tag/untag work",
+        "reply sends message",
+        "--dry-run available",
+        "--json output valid",
+        "All tests pass"
+      ]
+    },
+    {
+      "id": "story-ml8cdmrg",
+      "title": "P2 Improvements: pull bodies, triage LLM, report IDs",
+      "description": "Usability improvements from real triage session.\n\n## Progress Notification (MANDATORY)\nAfter completing this story, write a status update to `packages/cli/PROGRESS.md` with:\n- Story title and completion timestamp\n- Files created/modified\n- Test count before and after\n\n## Context from main branch\n- `skill front search` available with full Front query syntax (optional query + filter flags)\n- Front query syntax: inbox:inb_xxx, tag:tag_xxx, is:status, from:email, after/before:<ts>\n- Pagination: always limit=50 page size, loop on _pagination.next cursors\n- Use registerXxxCommand pattern for new commands\n\n## Improvements\n1. `pull` command: include full message bodies (currently empty)\n2. `conversation` display: remove 200-char truncation, add --no-truncate\n3. `triage` command: add LLM classification (urgency/category/suggested_action via generateObject)\n4. `report` command: include unresolved_ids array with all conversation IDs\n5. All list commands: add --ids-only flag (one ID per line)\n\n## On Completion\nCommit: `feat(cli): improve pull, conversation, triage, report commands`",
+      "priority": 18,
+      "passes": true,
+      "validationCommand": "cd packages/cli && bun run check-types && bun run test",
+      "acceptanceCriteria": [
+        "pull includes message bodies",
+        "conversation not truncated",
+        "triage has LLM classification",
+        "report includes conversation IDs",
+        "--ids-only works",
+        "All tests pass"
+      ]
+    },
+    {
+      "id": "story-ml8cdsmr",
+      "title": "P3 SDK Access: API passthrough and composability",
+      "description": "Advanced features for power users.\n\n## Progress Notification (MANDATORY)\nAfter completing this story, write a status update to `packages/cli/PROGRESS.md` with:\n- Story title and completion timestamp\n- Files created/modified\n- Test count before and after\n\n## Context from main branch\n- `registerApiCommand` already exists on main — raw passthrough with method + endpoint + --data\n- HATEOAS actions framework: conversationActions() and conversationListActions() already return action arrays\n- Front query syntax reference available via `skill front search --help`\n\n## Features\n1. `skill front api GET/POST/PATCH/DELETE <path>` — raw Front SDK passthrough (--allow-destructive for writes)\n2. --ids-only for all list commands (one ID per line)\n3. --output-format json|ndjson|csv\n4. --dry-run for all destructive operations\n5. HATEOAS _actions in all responses (use existing conversationActions/conversationListActions helpers)\n\n## On Completion\nCommit: `feat(cli): API passthrough, improved piping, complete HATEOAS`",
+      "priority": 19,
+      "passes": true,
+      "validationCommand": "cd packages/cli && bun run check-types && bun run test",
+      "acceptanceCriteria": [
+        "API passthrough works",
+        "--allow-destructive required for writes",
+        "--ids-only works",
+        "NDJSON output valid",
+        "--dry-run on destructive ops",
+        "HATEOAS _actions present",
+        "All tests pass"
+      ]
+    }
+  ],
+  "metadata": {
+    "createdAt": "2026-02-04T15:13:09.231Z",
+    "totalIterations": 19,
+    "lastIteration": "2026-02-04T21:26:45.856Z"
+  }
+}

@@ -3,7 +3,6 @@ import { defineConfig } from 'tsup'
 export default defineConfig({
   entry: {
     index: 'src/index.ts',
-    preload: 'preload.ts',
   },
   format: ['esm'],
   target: 'node20',
@@ -17,7 +16,6 @@ export default defineConfig({
     '@skillrecordings/database',
     '@skillrecordings/front-sdk',
     '@skillrecordings/memory',
-    '@skillrecordings/sdk',
   ],
   // Native modules must be installed at runtime
   external: [

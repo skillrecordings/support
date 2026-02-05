@@ -9,6 +9,8 @@
  */
 
 import type { Command } from 'commander'
+import { type CommandContext, createContext } from '../../core/context'
+import { CLIError, formatError } from '../../core/errors'
 import {
   formatDuration,
   formatTime,
@@ -18,15 +20,36 @@ import {
 } from '../../lib/axiom-client'
 import { registerForensicCommands } from './forensic'
 
+const handleAxiomError = (
+  ctx: CommandContext,
+  error: unknown,
+  message: string,
+  suggestion = 'Verify AXIOM_TOKEN and query parameters.'
+): void => {
+  const cliError =
+    error instanceof CLIError
+      ? error
+      : new CLIError({
+          userMessage: message,
+          suggestion,
+          cause: error,
+        })
+
+  ctx.output.error(formatError(cliError))
+  process.exitCode = cliError.exitCode
+}
+
 /**
  * Run a raw APL query
  */
-async function runQuery(
+export async function runQuery(
+  ctx: CommandContext,
   apl: string,
   options: { since?: string; json?: boolean }
 ): Promise<void> {
   const client = getAxiomClient()
   const { startTime, endTime } = parseTimeRange(options.since ?? '24h')
+  const outputJson = options.json === true || ctx.format === 'json'
 
   try {
     const result = await client.query(apl, {
@@ -34,54 +57,54 @@ async function runQuery(
       endTime: endTime.toISOString(),
     })
 
-    if (options.json) {
-      console.log(JSON.stringify(result, null, 2))
+    if (outputJson) {
+      ctx.output.data(result)
       return
     }
 
     // Display results in table format
     const matches = result.matches ?? []
     if (matches.length === 0) {
-      console.log('No results found')
+      ctx.output.data('No results found')
       return
     }
 
-    console.log(
+    ctx.output.data(
       `\nFound ${matches.length} results (${result.status?.elapsedTime}ms)`
     )
-    console.log('='.repeat(80))
+    ctx.output.data('='.repeat(80))
 
     for (const match of matches) {
       const data = match.data as Record<string, unknown>
-      console.log(`\n[${formatTime(match._time)}]`)
+      ctx.output.data(`\n[${formatTime(match._time)}]`)
       for (const [key, value] of Object.entries(data)) {
         if (key.startsWith('_')) continue
         const displayValue =
           typeof value === 'object' ? JSON.stringify(value) : value
-        console.log(`  ${key}: ${displayValue}`)
+        ctx.output.data(`  ${key}: ${displayValue}`)
       }
     }
   } catch (error) {
-    console.error(
-      'Query failed:',
-      error instanceof Error ? error.message : error
-    )
-    process.exit(1)
+    handleAxiomError(ctx, error, 'Failed to run Axiom query.')
   }
 }
 
 /**
  * List recent agent runs
  */
-async function listAgentRuns(options: {
-  app?: string
-  limit?: number
-  since?: string
-  json?: boolean
-}): Promise<void> {
+export async function listAgentRuns(
+  ctx: CommandContext,
+  options: {
+    app?: string
+    limit?: number
+    since?: string
+    json?: boolean
+  }
+): Promise<void> {
   const client = getAxiomClient()
   const limit = options.limit ?? 20
   const { startTime, endTime } = parseTimeRange(options.since ?? '24h')
+  const outputJson = options.json === true || ctx.format === 'json'
 
   let apl = `['${getDataset()}']
 | where name == 'agent.run'`
@@ -103,24 +126,18 @@ async function listAgentRuns(options: {
 
     const matches = result.matches ?? []
 
-    if (options.json) {
-      console.log(
-        JSON.stringify(
-          matches.map((m) => m.data),
-          null,
-          2
-        )
-      )
+    if (outputJson) {
+      ctx.output.data(matches.map((m) => m.data))
       return
     }
 
     if (matches.length === 0) {
-      console.log('No agent runs found')
+      ctx.output.data('No agent runs found')
       return
     }
 
-    console.log('\nRecent Agent Runs')
-    console.log('='.repeat(100))
+    ctx.output.data('\nRecent Agent Runs')
+    ctx.output.data('='.repeat(100))
 
     for (const match of matches) {
       const d = match.data as Record<string, unknown>
@@ -131,10 +148,10 @@ async function listAgentRuns(options: {
       const model = String(d.model ?? '').replace('anthropic/', '')
       const approval = d.requiresApproval ? '!' : d.autoSent ? '+' : '-'
 
-      console.log(`\n[${time}] ${app} (${duration})`)
-      console.log(`  Model: ${model} | Tools: ${tools} | Auto: ${approval}`)
-      console.log(`  Conv: ${d.conversationId}`)
-      if (d.customerEmail) console.log(`  Customer: ${d.customerEmail}`)
+      ctx.output.data(`\n[${time}] ${app} (${duration})`)
+      ctx.output.data(`  Model: ${model} | Tools: ${tools} | Auto: ${approval}`)
+      ctx.output.data(`  Conv: ${d.conversationId}`)
+      if (d.customerEmail) ctx.output.data(`  Customer: ${d.customerEmail}`)
     }
 
     // Summary stats
@@ -149,30 +166,30 @@ async function listAgentRuns(options: {
       (m) => (m.data as Record<string, unknown>).requiresApproval
     ).length
 
-    console.log('\n' + '-'.repeat(100))
-    console.log(
+    ctx.output.data('\n' + '-'.repeat(100))
+    ctx.output.data(
       `Total: ${matches.length} | Avg duration: ${formatDuration(avgDuration)} | Auto-sent: ${autoSent} | Approvals: ${approvals}`
     )
   } catch (error) {
-    console.error(
-      'Query failed:',
-      error instanceof Error ? error.message : error
-    )
-    process.exit(1)
+    handleAxiomError(ctx, error, 'Failed to list recent agent runs.')
   }
 }
 
 /**
  * List recent errors
  */
-async function listErrors(options: {
-  since?: string
-  limit?: number
-  json?: boolean
-}): Promise<void> {
+export async function listErrors(
+  ctx: CommandContext,
+  options: {
+    since?: string
+    limit?: number
+    json?: boolean
+  }
+): Promise<void> {
   const client = getAxiomClient()
   const limit = options.limit ?? 50
   const { startTime, endTime } = parseTimeRange(options.since ?? '24h')
+  const outputJson = options.json === true || ctx.format === 'json'
 
   const apl = `['${getDataset()}']
 | where status == 'error' or error != ''
@@ -187,24 +204,18 @@ async function listErrors(options: {
 
     const matches = result.matches ?? []
 
-    if (options.json) {
-      console.log(
-        JSON.stringify(
-          matches.map((m) => m.data),
-          null,
-          2
-        )
-      )
+    if (outputJson) {
+      ctx.output.data(matches.map((m) => m.data))
       return
     }
 
     if (matches.length === 0) {
-      console.log('No errors found')
+      ctx.output.data('No errors found')
       return
     }
 
-    console.log('\nRecent Errors')
-    console.log('='.repeat(100))
+    ctx.output.data('\nRecent Errors')
+    ctx.output.data('='.repeat(100))
 
     for (const match of matches) {
       const d = match.data as Record<string, unknown>
@@ -216,32 +227,30 @@ async function listErrors(options: {
         d.message ??
         `[${d.level ?? 'error'}] ${d.name ?? 'unknown event'}`
 
-      console.log(`\n[${time}] ${name}`)
-      console.log(`  Error: ${String(error).slice(0, 200)}`)
-      if (d.conversationId) console.log(`  Conv: ${d.conversationId}`)
-      if (d.appId) console.log(`  App: ${d.appId}`)
+      ctx.output.data(`\n[${time}] ${name}`)
+      ctx.output.data(`  Error: ${String(error).slice(0, 200)}`)
+      if (d.conversationId) ctx.output.data(`  Conv: ${d.conversationId}`)
+      if (d.appId) ctx.output.data(`  App: ${d.appId}`)
     }
 
-    console.log('\n' + '-'.repeat(100))
-    console.log(`Total errors: ${matches.length}`)
+    ctx.output.data('\n' + '-'.repeat(100))
+    ctx.output.data(`Total errors: ${matches.length}`)
   } catch (error) {
-    console.error(
-      'Query failed:',
-      error instanceof Error ? error.message : error
-    )
-    process.exit(1)
+    handleAxiomError(ctx, error, 'Failed to list recent errors.')
   }
 }
 
 /**
  * Get all events for a conversation
  */
-async function getConversation(
+export async function getConversation(
+  ctx: CommandContext,
   conversationId: string,
   options: { since?: string; json?: boolean }
 ): Promise<void> {
   const client = getAxiomClient()
   const { startTime, endTime } = parseTimeRange(options.since ?? '7d')
+  const outputJson = options.json === true || ctx.format === 'json'
 
   const apl = `['${getDataset()}']
 | where conversationId == '${conversationId}'
@@ -255,24 +264,20 @@ async function getConversation(
 
     const matches = result.matches ?? []
 
-    if (options.json) {
-      console.log(
-        JSON.stringify(
-          matches.map((m) => ({ _time: m._time, ...(m.data as object) })),
-          null,
-          2
-        )
+    if (outputJson) {
+      ctx.output.data(
+        matches.map((m) => ({ _time: m._time, ...(m.data as object) }))
       )
       return
     }
 
     if (matches.length === 0) {
-      console.log(`No events found for conversation: ${conversationId}`)
+      ctx.output.data(`No events found for conversation: ${conversationId}`)
       return
     }
 
-    console.log(`\nConversation Timeline: ${conversationId}`)
-    console.log('='.repeat(100))
+    ctx.output.data(`\nConversation Timeline: ${conversationId}`)
+    ctx.output.data('='.repeat(100))
 
     for (const match of matches) {
       const d = match.data as Record<string, unknown>
@@ -282,44 +287,46 @@ async function getConversation(
         ? ` (${formatDuration(Number(d.durationMs))})`
         : ''
 
-      console.log(`\n[${time}] ${name}${duration}`)
+      ctx.output.data(`\n[${time}] ${name}${duration}`)
 
       // Show relevant fields based on event type
-      if (d.category) console.log(`  Category: ${d.category} (${d.confidence})`)
-      if (d.complexity) console.log(`  Complexity: ${d.complexity}`)
-      if (d.routingType) console.log(`  Routing: ${d.routingType}`)
-      if (d.model) console.log(`  Model: ${d.model}`)
+      if (d.category)
+        ctx.output.data(`  Category: ${d.category} (${d.confidence})`)
+      if (d.complexity) ctx.output.data(`  Complexity: ${d.complexity}`)
+      if (d.routingType) ctx.output.data(`  Routing: ${d.routingType}`)
+      if (d.model) ctx.output.data(`  Model: ${d.model}`)
       if (d.toolCallsCount)
-        console.log(
+        ctx.output.data(
           `  Tools: ${d.toolCallsCount} (${(d.toolNames as string[])?.join(', ') ?? ''})`
         )
-      if (d.memoriesRetrieved) console.log(`  Memories: ${d.memoriesRetrieved}`)
-      if (d.error) console.log(`  Error: ${d.error}`)
+      if (d.memoriesRetrieved)
+        ctx.output.data(`  Memories: ${d.memoriesRetrieved}`)
+      if (d.error) ctx.output.data(`  Error: ${d.error}`)
       if (d.reasoning)
-        console.log(`  Reasoning: ${String(d.reasoning).slice(0, 150)}`)
+        ctx.output.data(`  Reasoning: ${String(d.reasoning).slice(0, 150)}`)
     }
 
-    console.log('\n' + '-'.repeat(100))
-    console.log(`Total events: ${matches.length}`)
+    ctx.output.data('\n' + '-'.repeat(100))
+    ctx.output.data(`Total events: ${matches.length}`)
   } catch (error) {
-    console.error(
-      'Query failed:',
-      error instanceof Error ? error.message : error
-    )
-    process.exit(1)
+    handleAxiomError(ctx, error, 'Failed to fetch conversation timeline.')
   }
 }
 
 /**
  * Get classification distribution
  */
-async function getClassificationStats(options: {
-  app?: string
-  since?: string
-  json?: boolean
-}): Promise<void> {
+export async function getClassificationStats(
+  ctx: CommandContext,
+  options: {
+    app?: string
+    since?: string
+    json?: boolean
+  }
+): Promise<void> {
   const client = getAxiomClient()
   const { startTime, endTime } = parseTimeRange(options.since ?? '24h')
+  const outputJson = options.json === true || ctx.format === 'json'
 
   let apl = `['${getDataset()}']
 | where name == 'classifier.run'`
@@ -340,18 +347,18 @@ async function getClassificationStats(options: {
 
     const buckets = result.buckets?.totals ?? []
 
-    if (options.json) {
-      console.log(JSON.stringify(buckets, null, 2))
+    if (outputJson) {
+      ctx.output.data(buckets)
       return
     }
 
     if (buckets.length === 0) {
-      console.log('No classification data found')
+      ctx.output.data('No classification data found')
       return
     }
 
-    console.log('\nClassification Distribution')
-    console.log('='.repeat(60))
+    ctx.output.data('\nClassification Distribution')
+    ctx.output.data('='.repeat(60))
 
     // Group by category
     const byCategory: Record<
@@ -383,35 +390,35 @@ async function getClassificationStats(options: {
       const complexityStr = Object.entries(complexities)
         .map(([c, n]) => `${c}:${n}`)
         .join(', ')
-      console.log(
+      ctx.output.data(
         `${category.padEnd(25)} ${String(total).padStart(5)} (${pct.padStart(5)}%)  [${complexityStr}]`
       )
     }
 
-    console.log('-'.repeat(60))
-    console.log(`Total classifications: ${grandTotal}`)
+    ctx.output.data('-'.repeat(60))
+    ctx.output.data(`Total classifications: ${grandTotal}`)
   } catch (error) {
-    console.error(
-      'Query failed:',
-      error instanceof Error ? error.message : error
-    )
-    process.exit(1)
+    handleAxiomError(ctx, error, 'Failed to fetch classification stats.')
   }
 }
 
 /**
  * List workflow step traces (for debugging timeout issues)
  */
-async function listWorkflowSteps(options: {
-  workflow?: string
-  conversation?: string
-  since?: string
-  limit?: number
-  json?: boolean
-}): Promise<void> {
+export async function listWorkflowSteps(
+  ctx: CommandContext,
+  options: {
+    workflow?: string
+    conversation?: string
+    since?: string
+    limit?: number
+    json?: boolean
+  }
+): Promise<void> {
   const client = getAxiomClient()
   const limit = options.limit ?? 50
   const { startTime, endTime } = parseTimeRange(options.since ?? '24h')
+  const outputJson = options.json === true || ctx.format === 'json'
 
   let apl = `['${getDataset()}']
 | where type == 'workflow-step'`
@@ -438,24 +445,18 @@ async function listWorkflowSteps(options: {
 
     const matches = result.matches ?? []
 
-    if (options.json) {
-      console.log(
-        JSON.stringify(
-          matches.map((m) => m.data),
-          null,
-          2
-        )
-      )
+    if (outputJson) {
+      ctx.output.data(matches.map((m) => m.data))
       return
     }
 
     if (matches.length === 0) {
-      console.log('No workflow steps found')
+      ctx.output.data('No workflow steps found')
       return
     }
 
-    console.log('\nWorkflow Steps')
-    console.log('='.repeat(100))
+    ctx.output.data('\nWorkflow Steps')
+    ctx.output.data('='.repeat(100))
 
     for (const match of matches) {
       const d = match.data as Record<string, unknown>
@@ -465,34 +466,36 @@ async function listWorkflowSteps(options: {
       const duration = formatDuration(Number(d.durationMs) || 0)
       const success = d.success ? '✓' : '✗'
 
-      console.log(`\n[${time}] ${workflow} > ${step} ${success} (${duration})`)
-      if (d.conversationId) console.log(`  Conv: ${d.conversationId}`)
-      if (d.error) console.log(`  Error: ${d.error}`)
-      if (d.metadata) console.log(`  Meta: ${JSON.stringify(d.metadata)}`)
+      ctx.output.data(
+        `\n[${time}] ${workflow} > ${step} ${success} (${duration})`
+      )
+      if (d.conversationId) ctx.output.data(`  Conv: ${d.conversationId}`)
+      if (d.error) ctx.output.data(`  Error: ${d.error}`)
+      if (d.metadata) ctx.output.data(`  Meta: ${JSON.stringify(d.metadata)}`)
     }
 
-    console.log('\n' + '-'.repeat(100))
-    console.log(`Total: ${matches.length}`)
+    ctx.output.data('\n' + '-'.repeat(100))
+    ctx.output.data(`Total: ${matches.length}`)
   } catch (error) {
-    console.error(
-      'Query failed:',
-      error instanceof Error ? error.message : error
-    )
-    process.exit(1)
+    handleAxiomError(ctx, error, 'Failed to list workflow steps.')
   }
 }
 
 /**
  * List approval-related traces (for debugging HITL flow)
  */
-async function listApprovals(options: {
-  since?: string
-  limit?: number
-  json?: boolean
-}): Promise<void> {
+export async function listApprovals(
+  ctx: CommandContext,
+  options: {
+    since?: string
+    limit?: number
+    json?: boolean
+  }
+): Promise<void> {
   const client = getAxiomClient()
   const limit = options.limit ?? 30
   const { startTime, endTime } = parseTimeRange(options.since ?? '24h')
+  const outputJson = options.json === true || ctx.format === 'json'
 
   const apl = `['${getDataset()}']
 | where type in ('approval', 'slack')
@@ -507,24 +510,18 @@ async function listApprovals(options: {
 
     const matches = result.matches ?? []
 
-    if (options.json) {
-      console.log(
-        JSON.stringify(
-          matches.map((m) => m.data),
-          null,
-          2
-        )
-      )
+    if (outputJson) {
+      ctx.output.data(matches.map((m) => m.data))
       return
     }
 
     if (matches.length === 0) {
-      console.log('No approval traces found')
+      ctx.output.data('No approval traces found')
       return
     }
 
-    console.log('\nApproval Flow Traces')
-    console.log('='.repeat(100))
+    ctx.output.data('\nApproval Flow Traces')
+    ctx.output.data('='.repeat(100))
 
     for (const match of matches) {
       const d = match.data as Record<string, unknown>
@@ -536,24 +533,20 @@ async function listApprovals(options: {
         ? ` (${formatDuration(Number(d.durationMs))})`
         : ''
 
-      console.log(`\n[${time}] ${name} ${success}${duration}`)
-      if (actionId) console.log(`  Action: ${actionId}`)
-      if (d.actionType) console.log(`  Type: ${d.actionType}`)
-      if (d.conversationId) console.log(`  Conv: ${d.conversationId}`)
-      if (d.channel) console.log(`  Channel: ${d.channel}`)
-      if (d.messageTs) console.log(`  Slack TS: ${d.messageTs}`)
-      if (d.error) console.log(`  Error: ${d.error}`)
-      if (d.customerEmail) console.log(`  Customer: ${d.customerEmail}`)
+      ctx.output.data(`\n[${time}] ${name} ${success}${duration}`)
+      if (actionId) ctx.output.data(`  Action: ${actionId}`)
+      if (d.actionType) ctx.output.data(`  Type: ${d.actionType}`)
+      if (d.conversationId) ctx.output.data(`  Conv: ${d.conversationId}`)
+      if (d.channel) ctx.output.data(`  Channel: ${d.channel}`)
+      if (d.messageTs) ctx.output.data(`  Slack TS: ${d.messageTs}`)
+      if (d.error) ctx.output.data(`  Error: ${d.error}`)
+      if (d.customerEmail) ctx.output.data(`  Customer: ${d.customerEmail}`)
     }
 
-    console.log('\n' + '-'.repeat(100))
-    console.log(`Total: ${matches.length}`)
+    ctx.output.data('\n' + '-'.repeat(100))
+    ctx.output.data(`Total: ${matches.length}`)
   } catch (error) {
-    console.error(
-      'Query failed:',
-      error instanceof Error ? error.message : error
-    )
-    process.exit(1)
+    handleAxiomError(ctx, error, 'Failed to list approval traces.')
   }
 }
 
@@ -571,7 +564,21 @@ export function registerAxiomCommands(program: Command): void {
     .argument('<apl>', 'APL query string')
     .option('-s, --since <time>', 'Time range (e.g., 1h, 24h, 7d)', '24h')
     .option('--json', 'Output as JSON')
-    .action(runQuery)
+    .action(async (apl, options, command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: options.json ? 'json' : opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await runQuery(ctx, apl, options)
+    })
 
   axiom
     .command('agents')
@@ -580,7 +587,21 @@ export function registerAxiomCommands(program: Command): void {
     .option('-l, --limit <n>', 'Number of results', parseInt)
     .option('-s, --since <time>', 'Time range (e.g., 1h, 24h, 7d)', '24h')
     .option('--json', 'Output as JSON')
-    .action(listAgentRuns)
+    .action(async (options, command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: options.json ? 'json' : opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await listAgentRuns(ctx, options)
+    })
 
   axiom
     .command('errors')
@@ -588,7 +609,21 @@ export function registerAxiomCommands(program: Command): void {
     .option('-l, --limit <n>', 'Number of results', parseInt)
     .option('-s, --since <time>', 'Time range (e.g., 1h, 24h, 7d)', '24h')
     .option('--json', 'Output as JSON')
-    .action(listErrors)
+    .action(async (options, command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: options.json ? 'json' : opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await listErrors(ctx, options)
+    })
 
   axiom
     .command('conversation')
@@ -596,7 +631,21 @@ export function registerAxiomCommands(program: Command): void {
     .argument('<conversationId>', 'Front conversation ID')
     .option('-s, --since <time>', 'Time range (e.g., 1h, 24h, 7d)', '7d')
     .option('--json', 'Output as JSON')
-    .action(getConversation)
+    .action(async (conversationId, options, command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: options.json ? 'json' : opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await getConversation(ctx, conversationId, options)
+    })
 
   axiom
     .command('classifications')
@@ -604,7 +653,21 @@ export function registerAxiomCommands(program: Command): void {
     .option('-a, --app <slug>', 'Filter by app')
     .option('-s, --since <time>', 'Time range (e.g., 1h, 24h, 7d)', '24h')
     .option('--json', 'Output as JSON')
-    .action(getClassificationStats)
+    .action(async (options, command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: options.json ? 'json' : opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await getClassificationStats(ctx, options)
+    })
 
   axiom
     .command('workflow-steps')
@@ -614,7 +677,21 @@ export function registerAxiomCommands(program: Command): void {
     .option('-l, --limit <n>', 'Number of results', parseInt)
     .option('-s, --since <time>', 'Time range (e.g., 1h, 24h, 7d)', '24h')
     .option('--json', 'Output as JSON')
-    .action(listWorkflowSteps)
+    .action(async (options, command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: options.json ? 'json' : opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await listWorkflowSteps(ctx, options)
+    })
 
   axiom
     .command('approvals')
@@ -622,7 +699,21 @@ export function registerAxiomCommands(program: Command): void {
     .option('-l, --limit <n>', 'Number of results', parseInt)
     .option('-s, --since <time>', 'Time range (e.g., 1h, 24h, 7d)', '24h')
     .option('--json', 'Output as JSON')
-    .action(listApprovals)
+    .action(async (options, command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: options.json ? 'json' : opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await listApprovals(ctx, options)
+    })
 
   // Register forensic / self-diagnosis queries
   registerForensicCommands(axiom)

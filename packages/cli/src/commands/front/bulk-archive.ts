@@ -10,10 +10,11 @@
  *   skill front bulk-archive ... --json             # JSON output
  */
 
-import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
 import type { Command } from 'commander'
+import { type CommandContext, createContext } from '../../core/context'
+import { CLIError, formatError } from '../../core/errors'
+import { getFrontClient } from './client'
 import { hateoasWrap } from './hateoas'
-import { writeJsonOutput } from './json-output'
 
 interface BulkArchiveOptions {
   inbox?: string
@@ -67,9 +68,10 @@ interface ArchiveResult {
 function parseDuration(duration: string): number {
   const match = duration.match(/^(\d+)([dhm])$/)
   if (!match) {
-    throw new Error(
-      'Invalid duration format. Use: 30d (days), 24h (hours), 60m (minutes)'
-    )
+    throw new CLIError({
+      userMessage: 'Invalid duration format.',
+      suggestion: 'Use 30d (days), 24h (hours), or 60m (minutes).',
+    })
   }
 
   const value = parseInt(match[1]!, 10)
@@ -83,7 +85,10 @@ function parseDuration(duration: string): number {
     case 'm':
       return value * 60 * 1000
     default:
-      throw new Error(`Unknown duration unit: ${unit}`)
+      throw new CLIError({
+        userMessage: `Unknown duration unit: ${unit}`,
+        suggestion: 'Use d, h, or m (e.g., 30d, 24h, 60m).',
+      })
   }
 }
 
@@ -91,7 +96,7 @@ function parseDuration(duration: string): number {
  * Check if conversation matches filter criteria
  */
 async function matchesFilters(
-  front: ReturnType<typeof createInstrumentedFrontClient>,
+  front: ReturnType<typeof getFrontClient>,
   conv: FrontConversation,
   options: BulkArchiveOptions
 ): Promise<{ matches: boolean; reason: string }> {
@@ -168,31 +173,28 @@ async function matchesFilters(
 }
 
 export async function bulkArchiveConversations(
+  ctx: CommandContext,
   options: BulkArchiveOptions
 ): Promise<void> {
-  const { inbox, dryRun = false, json = false } = options
-
-  const frontToken = process.env.FRONT_API_TOKEN
-  if (!frontToken) {
-    console.error('Error: FRONT_API_TOKEN environment variable required')
-    process.exit(1)
-  }
-
-  const front = createInstrumentedFrontClient({ apiToken: frontToken })
+  const { inbox, dryRun = false } = options
+  const outputJson = options.json === true || ctx.format === 'json'
 
   try {
+    const front = getFrontClient(ctx)
     // If no inbox specified, list available inboxes
     if (!inbox) {
-      console.log('Fetching available inboxes...\n')
+      ctx.output.data('Fetching available inboxes...\n')
       const inboxesData = (await front.raw.get('/inboxes')) as {
         _results: Array<{ id: string; name: string; address?: string }>
       }
 
-      console.log('Available inboxes:')
+      ctx.output.data('Available inboxes:')
       for (const ib of inboxesData._results || []) {
-        console.log(`  ${ib.id}: ${ib.name} (${ib.address || 'no address'})`)
+        ctx.output.data(
+          `  ${ib.id}: ${ib.name} (${ib.address || 'no address'})`
+        )
       }
-      console.log(
+      ctx.output.data(
         '\nUse --inbox <id> to bulk archive conversations from a specific inbox'
       )
       return
@@ -206,16 +208,17 @@ export async function bulkArchiveConversations(
       !options.tag &&
       !options.olderThan
     ) {
-      console.error(
-        'Error: At least one filter required (--sender, --subject, --status, --tag, --older-than)'
-      )
-      process.exit(1)
+      throw new CLIError({
+        userMessage: 'At least one filter is required.',
+        suggestion:
+          'Use --sender, --subject, --status, --tag, or --older-than.',
+      })
     }
 
-    if (!json) {
-      console.log(`Fetching conversations from inbox ${inbox}...`)
+    if (!outputJson) {
+      ctx.output.data(`Fetching conversations from inbox ${inbox}...`)
       if (dryRun) {
-        console.log('(DRY RUN - no changes will be made)\n')
+        ctx.output.data('(DRY RUN - no changes will be made)\n')
       }
     }
 
@@ -232,20 +235,20 @@ export async function bulkArchiveConversations(
       allConversations = allConversations.concat(data._results || [])
       nextUrl = data._pagination?.next || null
 
-      if (!json) {
-        process.stdout.write(
-          `\r  Fetched ${allConversations.length} conversations...`
+      if (!outputJson) {
+        ctx.output.progress(
+          `Fetched ${allConversations.length} conversations from inbox`
         )
       }
     }
 
-    if (!json) {
-      console.log(`\n  Total: ${allConversations.length} conversations`)
+    if (!outputJson) {
+      ctx.output.data(`\n  Total: ${allConversations.length} conversations`)
     }
 
     // Filter conversations
-    if (!json) {
-      console.log('\nApplying filters...')
+    if (!outputJson) {
+      ctx.output.data('\nApplying filters...')
     }
 
     const result: ArchiveResult = {
@@ -258,9 +261,9 @@ export async function bulkArchiveConversations(
     let processed = 0
     for (const conv of allConversations) {
       processed++
-      if (!json) {
-        process.stdout.write(
-          `\r  Checking ${processed}/${allConversations.length}...`
+      if (!outputJson) {
+        ctx.output.progress(
+          `Checking ${processed}/${allConversations.length} conversations`
         )
       }
 
@@ -277,14 +280,16 @@ export async function bulkArchiveConversations(
       await new Promise((r) => setTimeout(r, 100))
     }
 
-    if (!json) {
-      console.log(`\n\nFound ${result.matches.length} matching conversations`)
+    if (!outputJson) {
+      ctx.output.data(
+        `\n\nFound ${result.matches.length} matching conversations`
+      )
     }
 
     // If dry run, just show matches
     if (dryRun) {
-      if (json) {
-        writeJsonOutput(
+      if (outputJson) {
+        ctx.output.data(
           hateoasWrap({
             type: 'bulk-archive-result',
             command: `skill front bulk-archive --inbox ${inbox} --dry-run --json`,
@@ -292,13 +297,13 @@ export async function bulkArchiveConversations(
           })
         )
       } else {
-        console.log('\nMatching conversations:')
-        console.log('-'.repeat(80))
+        ctx.output.data('\nMatching conversations:')
+        ctx.output.data('-'.repeat(80))
         for (const match of result.matches) {
-          console.log(`${match.id}: ${match.subject}`)
-          console.log(`  Reason: ${match.reason}`)
+          ctx.output.data(`${match.id}: ${match.subject}`)
+          ctx.output.data(`  Reason: ${match.reason}`)
         }
-        console.log(
+        ctx.output.data(
           `\nRun without --dry-run to archive ${result.matches.length} conversation(s)`
         )
       }
@@ -307,10 +312,10 @@ export async function bulkArchiveConversations(
 
     // Archive each matching conversation
     if (result.matches.length === 0) {
-      if (!json) {
-        console.log('\nNo conversations to archive.')
+      if (!outputJson) {
+        ctx.output.data('\nNo conversations to archive.')
       } else {
-        writeJsonOutput(
+        ctx.output.data(
           hateoasWrap({
             type: 'bulk-archive-result',
             command: `skill front bulk-archive --inbox ${inbox} --json`,
@@ -321,16 +326,16 @@ export async function bulkArchiveConversations(
       return
     }
 
-    if (!json) {
-      console.log('\nArchiving conversations...')
+    if (!outputJson) {
+      ctx.output.data('\nArchiving conversations...')
     }
 
     let archiveCount = 0
     for (const match of result.matches) {
       archiveCount++
-      if (!json) {
-        process.stdout.write(
-          `\r  Archiving ${archiveCount}/${result.matches.length}...`
+      if (!outputJson) {
+        ctx.output.progress(
+          `Archiving ${archiveCount}/${result.matches.length} conversations`
         )
       }
 
@@ -351,8 +356,8 @@ export async function bulkArchiveConversations(
     }
 
     // Output results
-    if (json) {
-      writeJsonOutput(
+    if (outputJson) {
+      ctx.output.data(
         hateoasWrap({
           type: 'bulk-archive-result',
           command: `skill front bulk-archive --inbox ${inbox} --json`,
@@ -360,38 +365,35 @@ export async function bulkArchiveConversations(
         })
       )
     } else {
-      console.log('\n\nBulk Archive Results:')
-      console.log('-'.repeat(80))
-      console.log(`Total conversations checked: ${result.total}`)
-      console.log(`Matched: ${result.matches.length}`)
-      console.log(`Archived: ${result.archived}`)
-      console.log(`Failed: ${result.failed}`)
+      ctx.output.data('\n\nBulk Archive Results:')
+      ctx.output.data('-'.repeat(80))
+      ctx.output.data(`Total conversations checked: ${result.total}`)
+      ctx.output.data(`Matched: ${result.matches.length}`)
+      ctx.output.data(`Archived: ${result.archived}`)
+      ctx.output.data(`Failed: ${result.failed}`)
 
       if (result.failed > 0) {
-        console.log('\nFailed conversations:')
+        ctx.output.data('\nFailed conversations:')
         for (const match of result.matches.filter(
           (m) => m.status === 'failed'
         )) {
-          console.log(`  ${match.id}: ${match.subject}`)
-          console.log(`    Error: ${match.error}`)
+          ctx.output.data(`  ${match.id}: ${match.subject}`)
+          ctx.output.data(`    Error: ${match.error}`)
         }
       }
-      console.log('')
+      ctx.output.data('')
     }
   } catch (error) {
-    if (json) {
-      console.error(
-        JSON.stringify({
-          error: error instanceof Error ? error.message : 'Unknown error',
-        })
-      )
-    } else {
-      console.error(
-        '\nError:',
-        error instanceof Error ? error.message : 'Unknown error'
-      )
-    }
-    process.exit(1)
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Failed to bulk archive Front conversations.',
+            suggestion: 'Verify inbox ID, filters, and FRONT_API_TOKEN.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
 }
 
@@ -415,66 +417,19 @@ export function registerBulkArchiveCommand(parent: Command): void {
     )
     .option('--dry-run', 'Preview without archiving')
     .option('--json', 'JSON output')
-    .addHelpText(
-      'after',
-      `
-━━━ Bulk Archive Conversations ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  Archive conversations matching filter criteria from a specific inbox.
-  Requires --inbox and at least one filter. Filters are AND-combined.
-  Rate limiting is built in (100-150ms between API calls).
-
-  ⚠️  ALWAYS use --dry-run first to preview what would be archived.
-
-FILTER OPTIONS
-  --sender <email>        Sender email (substring match, case-insensitive)
-  --subject <text>        Subject line (substring match, case-insensitive)
-  --status <status>       Conversation status (unassigned, assigned, archived)
-  --tag <name>            Tag name (substring match, case-insensitive)
-  --older-than <duration> Age filter — duration format: 30d, 7d, 24h, 60m
-
-  Filters combine with AND: --status unassigned --older-than 30d means
-  conversations that are BOTH unassigned AND older than 30 days.
-
-DRY RUN (preview first!)
-  skill front bulk-archive --inbox inb_4bj7r --sender "mailer-daemon" --dry-run
-
-  Shows matching count + each conversation ID/subject/reason. No changes made.
-
-EXECUTE (after verifying dry run)
-  skill front bulk-archive --inbox inb_4bj7r --sender "mailer-daemon"
-
-PRACTICAL EXAMPLES
-  # Archive all noise from mailer-daemon
-  skill front bulk-archive --inbox inb_4bj7r --sender "mailer-daemon" --dry-run
-  skill front bulk-archive --inbox inb_4bj7r --sender "mailer-daemon"
-
-  # Archive unassigned conversations older than 30 days
-  skill front bulk-archive --inbox inb_4bj7r --status unassigned --older-than 30d --dry-run
-
-  # Archive everything tagged "spam"
-  skill front bulk-archive --inbox inb_4bj7r --tag "spam" --dry-run
-
-  # Archive old daily report emails
-  skill front bulk-archive --inbox inb_4bj7r --subject "Daily Report" --older-than 7d --dry-run
-
-  # List available inboxes (omit --inbox)
-  skill front bulk-archive
-
-JSON OUTPUT (for scripting)
-  skill front bulk-archive --inbox inb_4bj7r --status unassigned --dry-run --json
-
-  # Count matches
-  skill front bulk-archive ... --dry-run --json | jq '.data.matches | length'
-
-  # Extract matched IDs
-  skill front bulk-archive ... --dry-run --json | jq -r '.data.matches[].id'
-
-RELATED COMMANDS
-  skill front triage          Categorize conversations before archiving
-  skill front archive         Archive specific conversations by ID
-  skill front search          Find conversations by query / filters
-`
-    )
-    .action(bulkArchiveConversations)
+    .action(async (options: BulkArchiveOptions, command: Command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: options.json ? 'json' : opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await bulkArchiveConversations(ctx, options)
+    })
 }

@@ -4,34 +4,17 @@
  * Archives one or more conversations via Front API
  */
 
-import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
 import type { Command } from 'commander'
+import { type CommandContext, createContext } from '../../core/context'
+import { CLIError, formatError } from '../../core/errors'
+import { getFrontClient, normalizeId } from './client'
 import { hateoasWrap } from './hateoas'
-import { writeJsonOutput } from './json-output'
-
-/**
- * Get Front API client from environment
- */
-function getFrontClient() {
-  const apiToken = process.env.FRONT_API_TOKEN
-  if (!apiToken) {
-    throw new Error('FRONT_API_TOKEN environment variable is required')
-  }
-  return createInstrumentedFrontClient({ apiToken })
-}
-
-/**
- * Normalize Front resource ID or URL to ID
- */
-function normalizeId(idOrUrl: string): string {
-  return idOrUrl.startsWith('http') ? idOrUrl.split('/').pop()! : idOrUrl
-}
 
 /**
  * Archive a single conversation
  */
 async function archiveConversation(
-  front: ReturnType<typeof createInstrumentedFrontClient>,
+  front: ReturnType<typeof getFrontClient>,
   convId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
@@ -50,16 +33,42 @@ async function archiveConversation(
  * Command: skill front archive <id> [ids...]
  * Archive one or more conversations
  */
-async function archiveConversations(
+export async function archiveConversations(
+  ctx: CommandContext,
   convId: string,
   additionalIds: string[],
-  options: { json?: boolean }
+  options: { json?: boolean; dryRun?: boolean }
 ): Promise<void> {
-  try {
-    const front = getFrontClient()
-    const allIds = [convId, ...additionalIds]
+  const outputJson = options.json === true || ctx.format === 'json'
 
-    if (options.json) {
+  try {
+    const front = getFrontClient(ctx)
+    const allIds = [convId, ...additionalIds]
+    const normalizedIds = allIds.map(normalizeId)
+
+    if (options.dryRun) {
+      if (outputJson) {
+        ctx.output.data(
+          hateoasWrap({
+            type: 'archive-preview',
+            command: `skill front archive ${normalizedIds.join(' ')} --dry-run --json`,
+            data: { dryRun: true, ids: normalizedIds },
+          })
+        )
+        return
+      }
+
+      ctx.output.data(
+        `\n🧪 DRY RUN: Would archive ${allIds.length} conversation(s):`
+      )
+      for (const id of normalizedIds) {
+        ctx.output.data(`   - ${id}`)
+      }
+      ctx.output.data('')
+      return
+    }
+
+    if (outputJson) {
       // JSON output: show results for each conversation
       const results = await Promise.all(
         allIds.map(async (id) => {
@@ -71,10 +80,10 @@ async function archiveConversations(
           }
         })
       )
-      writeJsonOutput(
+      ctx.output.data(
         hateoasWrap({
           type: 'archive-result',
-          command: `skill front archive ${allIds.map(normalizeId).join(' ')} --json`,
+          command: `skill front archive ${normalizedIds.join(' ')} --json`,
           data: results,
         })
       )
@@ -82,7 +91,7 @@ async function archiveConversations(
     }
 
     // Human-readable output
-    console.log(`\n📦 Archiving ${allIds.length} conversation(s)...\n`)
+    ctx.output.data(`\n📦 Archiving ${allIds.length} conversation(s)...\n`)
 
     const results = await Promise.all(
       allIds.map(async (id) => {
@@ -90,9 +99,9 @@ async function archiveConversations(
         const result = await archiveConversation(front, id)
 
         if (result.success) {
-          console.log(`   ✅ Archived ${normalizedId}`)
+          ctx.output.data(`   ✅ Archived ${normalizedId}`)
         } else {
-          console.log(
+          ctx.output.data(
             `   ❌ Failed to archive ${normalizedId}: ${result.error}`
           )
         }
@@ -104,32 +113,34 @@ async function archiveConversations(
     const successCount = results.filter((r) => r.success).length
     const failureCount = results.filter((r) => !r.success).length
 
-    console.log('')
-    console.log(`📊 Summary:`)
-    console.log(`   ✅ Successful: ${successCount}`)
+    ctx.output.data('')
+    ctx.output.data(`📊 Summary:`)
+    ctx.output.data(`   ✅ Successful: ${successCount}`)
     if (failureCount > 0) {
-      console.log(`   ❌ Failed: ${failureCount}`)
+      ctx.output.data(`   ❌ Failed: ${failureCount}`)
     }
-    console.log('')
+    ctx.output.data('')
 
     // Exit with error code if any failed
     if (failureCount > 0) {
-      process.exit(1)
+      const cliError = new CLIError({
+        userMessage: 'One or more conversations failed to archive.',
+        suggestion: 'Review the output above for failed IDs.',
+      })
+      ctx.output.error(formatError(cliError))
+      process.exitCode = cliError.exitCode
     }
   } catch (error) {
-    if (options.json) {
-      console.error(
-        JSON.stringify({
-          error: error instanceof Error ? error.message : 'Unknown error',
-        })
-      )
-    } else {
-      console.error(
-        'Error:',
-        error instanceof Error ? error.message : 'Unknown error'
-      )
-    }
-    process.exit(1)
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Failed to archive Front conversations.',
+            suggestion: 'Verify the conversation IDs and FRONT_API_TOKEN.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
 }
 
@@ -142,47 +153,28 @@ export function registerArchiveCommand(frontCommand: Command): void {
     .description('Archive one or more conversations by ID')
     .argument('<id>', 'Conversation ID (e.g., cnv_xxx)')
     .argument('[ids...]', 'Additional conversation IDs to archive')
+    .option('--dry-run', 'Preview without archiving')
     .option('--json', 'Output as JSON')
-    .addHelpText(
-      'after',
-      `
-━━━ Archive Conversations ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  Sets the status of one or more conversations to 'archived' in Front.
-  Accepts conversation IDs (cnv_xxx) or full Front API URLs.
-
-SINGLE CONVERSATION
-  skill front archive cnv_abc123
-
-MULTIPLE CONVERSATIONS
-  skill front archive cnv_abc123 cnv_def456 cnv_ghi789
-
-  All IDs are archived concurrently. The summary shows success/failure counts.
-
-JSON OUTPUT (for scripting)
-  skill front archive cnv_abc123 --json
-  skill front archive cnv_abc123 cnv_def456 --json
-
-  JSON envelope includes per-conversation success/error status.
-
-BATCH PIPELINE (search → archive)
-  # Archive all snoozed conversations in an inbox
-  skill front search "is:snoozed" --inbox inb_4bj7r --json \\
-    | jq -r '.data.conversations[].id' \\
-    | xargs -I{} skill front archive {}
-
-  # Archive unassigned conversations older than 30 days
-  skill front search "is:unassigned" --inbox inb_4bj7r --json \\
-    | jq -r '.data.conversations[].id' \\
-    | xargs -I{} skill front archive {}
-
-  For filter-based bulk archiving with built-in safety, use bulk-archive instead.
-
-RELATED COMMANDS
-  skill front bulk-archive   Filter-based bulk archive (--dry-run, rate limiting)
-  skill front conversation    View conversation details before archiving
-  skill front search          Find conversations by query / filters
-`
+    .action(
+      async (
+        id: string,
+        ids: string[],
+        options: { json?: boolean; dryRun?: boolean },
+        command: Command
+      ) => {
+        const opts =
+          typeof command.optsWithGlobals === 'function'
+            ? command.optsWithGlobals()
+            : {
+                ...command.parent?.opts(),
+                ...command.opts(),
+              }
+        const ctx = await createContext({
+          format: options.json ? 'json' : opts.format,
+          verbose: opts.verbose,
+          quiet: opts.quiet,
+        })
+        await archiveConversations(ctx, id, ids ?? [], options)
+      }
     )
-    .action(archiveConversations)
 }

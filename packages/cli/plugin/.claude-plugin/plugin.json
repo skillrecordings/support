@@ -1,0 +1,9 @@
+{
+  "name": "skill-cli",
+  "version": "1.0.0",
+  "displayName": "Skill Recordings CLI",
+  "description": "Front inbox management and support agent tooling",
+  "author": "Skill Recordings",
+  "skills": ["front-inbox"],
+  "cliVersion": "${PACKAGE_JSON_VERSION}"
+}

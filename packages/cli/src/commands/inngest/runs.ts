@@ -1,5 +1,7 @@
 import { confirm } from '@inquirer/prompts'
 import { Command } from 'commander'
+import { type CommandContext, createContext } from '../../core/context'
+import { CLIError, formatError } from '../../core/errors'
 import { InngestClient, detectDevServer } from './client'
 
 interface RunCommandOptions {
@@ -45,10 +47,13 @@ ${run.output ? JSON.stringify(run.output, null, 2) : '(no output)'}
 /**
  * Get details for a specific function run
  */
-async function runCommand(
+export async function runCommand(
+  ctx: CommandContext,
   id: string,
   options: RunCommandOptions
 ): Promise<void> {
+  const outputJson = options.json === true || ctx.format === 'json'
+
   try {
     // Auto-detect dev server if --dev not explicitly set
     const isDev = options.dev ?? (await detectDevServer())
@@ -56,33 +61,35 @@ async function runCommand(
 
     const run = await client.getRun(id)
 
-    if (options.json) {
-      console.log(JSON.stringify(run, null, 2))
+    if (outputJson) {
+      ctx.output.data(run)
     } else {
-      console.log(formatRun(run))
+      ctx.output.data(formatRun(run))
 
       if (options.jobs) {
         // TODO: Implement job queue position display
-        console.log('\n(Job queue position tracking not yet implemented)')
+        ctx.output.data('\n(Job queue position tracking not yet implemented)')
       }
     }
-
-    process.exit(0)
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error)
-    if (options.json) {
-      console.error(JSON.stringify({ error: message }))
-    } else {
-      console.error(`Error: ${message}`)
-    }
-    process.exit(1)
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Failed to fetch Inngest run.',
+            suggestion: 'Verify run ID and INNGEST_SIGNING_KEY.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
 }
 
 /**
  * Cancel a running function
  */
-async function cancelCommand(
+export async function cancelCommand(
+  ctx: CommandContext,
   id: string,
   options: CancelCommandOptions
 ): Promise<void> {
@@ -98,20 +105,26 @@ async function cancelCommand(
       })
 
       if (!confirmed) {
-        console.log('Cancelled.')
-        process.exit(0)
+        ctx.output.data('Cancelled.')
+        return
       }
     }
 
     const client = new InngestClient({ dev: isDev })
     await client.cancelRun(id)
 
-    console.log(`✅ Run ${id} cancelled successfully`)
-    process.exit(0)
+    ctx.output.data(`✅ Run ${id} cancelled successfully`)
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error)
-    console.error(`Error: ${message}`)
-    process.exit(1)
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Failed to cancel Inngest run.',
+            suggestion: 'Verify run ID and INNGEST_SIGNING_KEY.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
 }
 
@@ -126,7 +139,23 @@ export function registerRunsCommands(inngest: Command): void {
     .option('--jobs', 'Show job queue position (stub)')
     .option('--json', 'Output as JSON')
     .option('--dev', 'Use local dev server (localhost:8288)')
-    .action(runCommand)
+    .action(
+      async (id: string, options: RunCommandOptions, command: Command) => {
+        const opts =
+          typeof command.optsWithGlobals === 'function'
+            ? command.optsWithGlobals()
+            : {
+                ...command.parent?.opts(),
+                ...command.opts(),
+              }
+        const ctx = await createContext({
+          format: options.json ? 'json' : opts.format,
+          verbose: opts.verbose,
+          quiet: opts.quiet,
+        })
+        await runCommand(ctx, id, options)
+      }
+    )
 
   inngest
     .command('cancel')
@@ -134,5 +163,21 @@ export function registerRunsCommands(inngest: Command): void {
     .argument('<id>', 'Run ID')
     .option('--force', 'Skip confirmation')
     .option('--dev', 'Use local dev server (localhost:8288)')
-    .action(cancelCommand)
+    .action(
+      async (id: string, options: CancelCommandOptions, command: Command) => {
+        const opts =
+          typeof command.optsWithGlobals === 'function'
+            ? command.optsWithGlobals()
+            : {
+                ...command.parent?.opts(),
+                ...command.opts(),
+              }
+        const ctx = await createContext({
+          format: opts.format,
+          verbose: opts.verbose,
+          quiet: opts.quiet,
+        })
+        await cancelCommand(ctx, id, options)
+      }
+    )
 }

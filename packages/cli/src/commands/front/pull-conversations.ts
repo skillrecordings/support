@@ -6,10 +6,11 @@
  */
 
 import { writeFileSync } from 'fs'
-import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
 import type { Command } from 'commander'
+import { type CommandContext, createContext } from '../../core/context'
+import { CLIError, formatError } from '../../core/errors'
+import { getFrontClient } from './client'
 import { hateoasWrap } from './hateoas'
-import { writeJsonOutput } from './json-output'
 
 interface PullOptions {
   inbox?: string
@@ -63,36 +64,35 @@ interface EvalSample {
   category: string // inferred from tags/content
 }
 
-export async function pullConversations(options: PullOptions): Promise<void> {
-  const { inbox, limit = 50, output, filter, json = false } = options
-
-  const frontToken = process.env.FRONT_API_TOKEN
-  if (!frontToken) {
-    console.error('Error: FRONT_API_TOKEN environment variable required')
-    process.exit(1)
-  }
-
-  const front = createInstrumentedFrontClient({ apiToken: frontToken })
+export async function pullConversations(
+  ctx: CommandContext,
+  options: PullOptions
+): Promise<void> {
+  const { inbox, limit = 50, output, filter } = options
+  const outputJson = options.json === true || ctx.format === 'json'
 
   try {
+    const front = getFrontClient(ctx)
     // If no inbox specified, list available inboxes
     if (!inbox) {
-      console.log('Fetching available inboxes...\n')
+      ctx.output.data('Fetching available inboxes...\n')
       const inboxesData = (await front.raw.get('/inboxes')) as {
         _results: Array<{ id: string; name: string; address?: string }>
       }
 
-      console.log('Available inboxes:')
+      ctx.output.data('Available inboxes:')
       for (const ib of inboxesData._results || []) {
-        console.log(`  ${ib.id}: ${ib.name} (${ib.address || 'no address'})`)
+        ctx.output.data(
+          `  ${ib.id}: ${ib.name} (${ib.address || 'no address'})`
+        )
       }
-      console.log(
+      ctx.output.data(
         '\nUse --inbox <id> to pull conversations from a specific inbox'
       )
       return
     }
 
-    console.log(`Pulling conversations from inbox ${inbox}...`)
+    ctx.output.data(`Pulling conversations from inbox ${inbox}...`)
 
     // Get conversations from inbox
     let allConversations: FrontConversation[] = []
@@ -107,13 +107,13 @@ export async function pullConversations(options: PullOptions): Promise<void> {
       allConversations = allConversations.concat(data._results || [])
       nextUrl = data._pagination?.next || null
 
-      process.stdout.write(
-        `\r  Fetched ${allConversations.length} conversations...`
+      ctx.output.progress(
+        `Fetched ${allConversations.length} conversations from inbox`
       )
     }
 
     allConversations = allConversations.slice(0, limit)
-    console.log(`\n  Total: ${allConversations.length} conversations`)
+    ctx.output.data(`\n  Total: ${allConversations.length} conversations`)
 
     // Filter if specified
     if (filter) {
@@ -123,20 +123,29 @@ export async function pullConversations(options: PullOptions): Promise<void> {
         const tags = c.tags.map((t) => t.name.toLowerCase()).join(' ')
         return subject.includes(filterLower) || tags.includes(filterLower)
       })
-      console.log(
+      ctx.output.data(
         `  After filter "${filter}": ${allConversations.length} conversations`
       )
     }
 
     // Build eval samples
-    console.log('\nFetching message details...')
+    ctx.output.data('\nFetching message details...')
     const samples: EvalSample[] = []
     let processed = 0
 
+    const normalizeBody = (message: FrontMessage): string => {
+      const rawBody = message.text || message.body || ''
+      if (!rawBody) return ''
+      return rawBody
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+    }
+
     for (const conv of allConversations) {
       processed++
-      process.stdout.write(
-        `\r  Processing ${processed}/${allConversations.length}...`
+      ctx.output.progress(
+        `Processing ${processed}/${allConversations.length} conversations`
       )
 
       try {
@@ -145,9 +154,21 @@ export async function pullConversations(options: PullOptions): Promise<void> {
           `/conversations/${conv.id}/messages`
         )) as { _results: FrontMessage[] }
         const messages = messagesData._results || []
+        const hydratedMessages: FrontMessage[] = []
+
+        for (const message of messages) {
+          try {
+            const fullMessage = (await front.messages.get(
+              message.id
+            )) as FrontMessage
+            hydratedMessages.push(fullMessage)
+          } catch {
+            hydratedMessages.push(message)
+          }
+        }
 
         // Find the most recent inbound message as trigger
-        const inboundMessages = messages
+        const inboundMessages = hydratedMessages
           .filter((m) => m.is_inbound)
           .sort((a, b) => b.created_at - a.created_at)
 
@@ -155,29 +176,17 @@ export async function pullConversations(options: PullOptions): Promise<void> {
         if (!triggerMessage) continue // Skip if no inbound messages
 
         // Extract body text
-        const bodyText =
-          triggerMessage.text ||
-          triggerMessage.body
-            ?.replace(/<[^>]*>/g, ' ')
-            .replace(/\s+/g, ' ')
-            .trim() ||
-          ''
+        const bodyText = normalizeBody(triggerMessage)
 
         // Skip very short messages
         if (bodyText.length < 20) continue
 
         // Build conversation history
-        const history = messages
+        const history = hydratedMessages
           .sort((a, b) => a.created_at - b.created_at)
           .map((m) => ({
             direction: (m.is_inbound ? 'in' : 'out') as 'in' | 'out',
-            body:
-              m.text ||
-              m.body
-                ?.replace(/<[^>]*>/g, ' ')
-                .replace(/\s+/g, ' ')
-                .trim() ||
-              '',
+            body: normalizeBody(m),
             timestamp: m.created_at,
             author: m.author?.email,
           }))
@@ -234,26 +243,26 @@ export async function pullConversations(options: PullOptions): Promise<void> {
       }
     }
 
-    console.log(`\n\nBuilt ${samples.length} eval samples`)
+    ctx.output.data(`\n\nBuilt ${samples.length} eval samples`)
 
     // Category breakdown
     const byCategory: Record<string, number> = {}
     for (const s of samples) {
       byCategory[s.category] = (byCategory[s.category] || 0) + 1
     }
-    console.log('\nBy category:')
+    ctx.output.data('\nBy category:')
     for (const [cat, count] of Object.entries(byCategory).sort(
       (a, b) => b[1] - a[1]
     )) {
-      console.log(`  ${cat}: ${count}`)
+      ctx.output.data(`  ${cat}: ${count}`)
     }
 
     // Output
     if (output) {
       writeFileSync(output, JSON.stringify(samples, null, 2))
-      console.log(`\nSaved to ${output}`)
-    } else if (json) {
-      writeJsonOutput(
+      ctx.output.data(`\nSaved to ${output}`)
+    } else if (outputJson) {
+      ctx.output.data(
         hateoasWrap({
           type: 'eval-dataset',
           command: `skill front pull --inbox ${inbox} --json`,
@@ -262,11 +271,16 @@ export async function pullConversations(options: PullOptions): Promise<void> {
       )
     }
   } catch (error) {
-    console.error(
-      '\nError:',
-      error instanceof Error ? error.message : 'Unknown error'
-    )
-    process.exit(1)
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Failed to pull Front conversations.',
+            suggestion: 'Verify inbox ID, filters, and FRONT_API_TOKEN.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
 }
 
@@ -279,72 +293,19 @@ export function registerPullCommand(parent: Command): void {
     .option('-o, --output <file>', 'Output file path')
     .option('-f, --filter <term>', 'Filter by subject/tag containing term')
     .option('--json', 'JSON output')
-    .addHelpText(
-      'after',
-      `
-━━━ Pull Conversations (Eval Dataset Export) ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  Export conversations from a Front inbox as structured EvalSample objects.
-  Designed for building eval datasets for routing, classification, and
-  canned-response testing.
-
-OPTIONS
-  -i, --inbox <id>      Inbox ID to pull from (inb_xxx). Omit to list
-                         available inboxes and their IDs.
-  -l, --limit <n>       Max conversations to export (default: 50)
-  -o, --output <file>   Write output to a file instead of stdout
-  -f, --filter <term>   Only include conversations whose subject or tags
-                         contain this text (case-insensitive)
-  --json                Output as JSON (HATEOAS-wrapped)
-
-OUTPUT FORMAT (EvalSample)
-  Each sample includes:
-  - id / conversationId    Front conversation ID
-  - subject                Conversation subject
-  - customerEmail          Sender email address
-  - status                 Conversation status
-  - tags                   Array of tag names
-  - triggerMessage         Most recent inbound message (id, subject, body, timestamp)
-  - conversationHistory    Full message thread (direction, body, timestamp, author)
-  - category               Inferred category (see below)
-
-CATEGORY INFERENCE
-  Category      Rule
-  ───────────── ──────────────────────────────────────────────────────────
-  refund        Tag or subject contains "refund"
-  access        Tag contains "access" or subject contains "login"/"access"
-  technical     Tag contains "technical" or subject contains "error"/"bug"
-  feedback      Subject contains "feedback" or "suggestion"
-  business      Subject contains "partnership" or "collaborate"
-  general       Everything else (default)
-
-RATE LIMITING
-  Built-in 100ms delay between conversation message fetches to respect
-  Front API limits. Large exports will take time proportional to --limit.
-
-EXAMPLES
-  # List available inboxes (no --inbox flag)
-  skill front pull
-
-  # Pull 50 conversations (default limit)
-  skill front pull --inbox inb_4bj7r
-
-  # Pull 200 conversations and save to file
-  skill front pull --inbox inb_4bj7r --limit 200 --output data/eval-dataset.json
-
-  # Pull only refund-related conversations
-  skill front pull --inbox inb_4bj7r --filter refund --output data/refund-samples.json
-
-  # Pipe JSON for analysis
-  skill front pull --inbox inb_4bj7r --json | jq '[.data[] | {id, category, subject}]'
-
-  # Category breakdown
-  skill front pull --inbox inb_4bj7r --json | jq '[.data[].category] | group_by(.) | map({(.[0]): length}) | add'
-
-RELATED COMMANDS
-  skill eval routing <file>    Run routing eval against a dataset
-  skill front inbox             List inboxes
-`
-    )
-    .action(pullConversations)
+    .action(async (options: PullOptions, command: Command) => {
+      const opts =
+        typeof command.optsWithGlobals === 'function'
+          ? command.optsWithGlobals()
+          : {
+              ...command.parent?.opts(),
+              ...command.opts(),
+            }
+      const ctx = await createContext({
+        format: options.json ? 'json' : opts.format,
+        verbose: opts.verbose,
+        quiet: opts.quiet,
+      })
+      await pullConversations(ctx, options)
+    })
 }

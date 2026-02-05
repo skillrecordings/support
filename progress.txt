@@ -1,22 +1,115 @@
-# Progress Log for slack-bot-llm-router
-
-Initialized: 2026-02-04T17:26:13.407Z
+# CLI Rearchitect Review Fixes
 
 ---
-[2026-02-04T17:30:24.521Z]
-Completed: LLM-Powered Slack Intent Router
-Files modified: none
-Tool calls: 0
-Validation: cd packages/slack && bun run check-types 2>/dev/null; cd ../.. && bun run test --filter slack 2>/dev/null || (cd packages/slack && bunx vitest --run 2>/dev/null) || echo "tests passed or no test runner configured"
+[2026-02-04T22:02:46.771Z]
+Completed: Extract shared Front client helpers to front/client.ts
+Files: none
 Summary: **Summary**
-- Added LLM-based intent classification with async fallback, new `general_query` intent, and Front search execution for open-ended queries.
-- Updated Slack mention/thread-reply handlers to use async routing and added tests for both keyword fast path and LLM fallback.
-- Added new LLM classifier module and tests with mocked `generateObject`.
+- Added `packages/cli/src/commands/front/client.ts` with shared `requireFrontToken`, `getFrontClient`, and `normalizeId`.
+- Updated all Front command files to import shared helpers and removed local copies, including type updates where needed.
+- Added unit tests in `packages/cli/tests/unit/commands/front/client.test.ts`.
+- Appended progress entry in `packages/cli/PROGRESS.md`.
 
-**Notes**
-- Repo model naming rules required `model: 'anthropic/claude-haiku-4-5'` instead of `gpt-4o-mini`.
-- `ai-sdk` and `tdd-red-green-refactor` skills were listed in AGENTS, but no local skill files were available, so I proceeded without them.
-- Unrelated modified files remain untouched: `prd.json`, `progress.txt`.
+**Tests
+
+---
+[2026-02-04T22:11:27.180Z]
+Completed: Implement MCP Server Mode (Phase 4 redo)
+Files: none
+Summary: **Summary**
+- Added MCP JSON-RPC stdio server plus tool registry/bridge in `packages/cli/src/mcp/server.ts` and `packages/cli/src/mcp/tools.ts`.
+- Wired `skill mcp` command in `packages/cli/src/index.ts` and added unit coverage in `packages/cli/tests/unit/mcp/server.test.ts` and `packages/cli/tests/unit/mcp/tools.test.ts`.
+- Appended the requested progress entry in `packages/cli/PROGRESS.md`.
+
+**T
+
+---
+[2026-02-04T22:13:30.353Z]
+Completed: CSV injection sanitization in list-output.ts
+Files: none
+Summary: **Summary**
+- Added CSV formula-injection sanitization for string values and exported `toCsvCell` for testability. (`packages/cli/src/core/list-output.ts`)
+- Added unit coverage for formula prefixes, quoting, and null handling. (`packages/cli/tests/unit/core/list-output.test.ts`)
+- Logged progress entry. (`packages/cli/PROGRESS.md`)
 
 **Tests**
-- `cd packages/slack && bun run check-types 2>/dev/null; cd ../.. && bun run test --filter slack 2>/dev/null || 
+- `cd packages/cli && bun run check-types`
+- `cd packa
+
+---
+[2026-02-04T22:13:57.412Z]
+Completed: Clean up progress.txt and add coverage verification
+Files: none
+Summary: I have a conflict in instructions: the story requires resetting `progress.txt`, but your instructions say “Do not modify … progress.txt directly.”  
+Do you want me to proceed with replacing `progress.txt` contents as specified?
+
+Once confirmed, I’ll run the coverage checks, adjust thresholds/tests if needed, add `test:coverage`, and update `packages/cli/PROGRESS.md`.
+
+---
+[2026-02-04T22:16:44.040Z]
+Completed: Deduplicate command registration pattern + createContext boilerplate
+Files: none
+Summary: Summary:
+- Added shared `contextFromCommand()` helper and replaced repeated context-creation boilerplate in `front` command registrations for assign, reply, conversation tags, bulk-assign, and api.
+- Added unit coverage for `contextFromCommand()` and logged progress entry.
+
+Files changed:
+- `packages/cli/src/commands/front/with-context.ts`
+- `packages/cli/src/commands/front/assign.ts`
+- `packages/
+
+---
+[2026-02-04T23:20:53.042Z]
+Failed: Intelligent Front API response caching with TTL tiers and mutation invalidation
+Validation: 
+ RUN  v3.2.4 /home/joel/Code/skillrecordings/support-cli-rearchitect/packages/cli
+
+ ✓ tests/e2e/install.test.ts (1 test) 46ms
+ ✓ src/commands/eval.test.ts (7 tests) 59ms
+ ✓ tests/unit/core/output.test.ts (8 tests) 17ms
+ ✓ tests/integration/commands/inngest.test.ts (16 tests) 16ms
+ ✓ tests/integrati
+Codex: 
+
+---
+[2026-02-04T23:22:38.007Z]
+Completed: Intelligent Front API response caching with TTL tiers and mutation invalidation
+Files: none
+Summary: Summary:
+- Added HTTP-level Front response caching with TTL tiers, classification, invalidation, and stats. (`packages/cli/src/commands/front/cache.ts`)
+- Wrapped the base Front client so all sub-clients share cached GETs and invalidate on mutations; added cache reset/stats helpers. (`packages/cli/src/commands/front/client.ts`)
+- Added cache unit tests and cached-client integration tests; ensured 
+
+---
+[2026-02-04T23:32:55.567Z]
+Failed: Proactive rate limiter with token bucket for Front API (100 req/min shared budget)
+Validation: src/commands/front/inbox.ts(57,32): error TS2304: Cannot find name 'ctx'.
+
+Codex: 
+
+---
+[2026-02-04T23:43:12.057Z]
+Failed: Proactive rate limiter with token bucket for Front API (100 req/min shared budget)
+Validation: 
+ RUN  v3.2.4 /home/joel/Code/skillrecordings/support-cli-rearchitect/packages/cli
+
+ ❯ tests/unit/commands/front/rate-limiter.test.ts (11 tests | 1 failed) 49ms
+   ✓ FrontRateLimiter > allows requests under budget 12ms
+   ✓ FrontRateLimiter > queues requests over budget 5ms
+   ✓ FrontRateLimiter > r
+Codex: 
+
+---
+[2026-02-04T23:47:06.987Z]
+Completed: Proactive rate limiter with token bucket for Front API (100 req/min shared budget)
+Files: none
+Summary: **Summary**
+Updated `packages/cli/src/commands/front/rate-limiter.ts` to allow immediate acquires when under budget and no queue is pending, while still honoring pause/min-gap and abort signals.
+Appended the progress entry in `packages/cli/PROGRESS.md` per the story instructions.
+
+**Tests**
+`cd packages/cli && bun run check-types`
+`cd packages/cli && bun run test`
+
+**Learnings**
+Vitest’s concurren

@@ -1,231 +1,109 @@
-import fs from 'node:fs/promises'
-import path from 'node:path'
-import type { Command } from 'commander'
-import {
-  detectPlatform,
-  detectShellProfile,
-  isKeychainAvailable,
-  readFromKeychain,
-  shellProfileHasExport,
-} from '../../lib/keychain.js'
-import {
-  getOpInstallInstructions,
-  isOpCliAvailable,
-  isOpSignedIn,
-  isServiceAccountConfigured,
-} from '../../lib/onepassword.js'
+import { type CommandContext } from '../../core/context'
+import { SECRET_REFS } from '../../core/secret-refs'
+import { createSecretsProvider } from '../../core/secrets'
 
-const KEY_NAME = 'AGE_SECRET_KEY'
+interface StatusOptions {
+  json?: boolean
+}
+
+type SecretStatus = {
+  key: string
+  ref: string
+  available: boolean
+  source: '1password' | 'env'
+}
 
 interface AuthStatus {
-  envLocal: {
-    exists: boolean
-    path: string
-  }
-  envEncrypted: {
-    exists: boolean
-    path: string
-  }
-  ageSecretKey: {
+  activeProvider: string
+  opServiceAccountToken: {
     configured: boolean
-    masked?: string
   }
-  keychain: {
-    available: boolean
-    platform: string
-    stored: boolean
-  }
-  onepassword: {
-    cliInstalled: boolean
-    signedIn: boolean
-    serviceAccountConfigured: boolean
-  }
-  shellProfile: {
-    path: string | null
-    hasExport: boolean
-  }
-  envSource: 'local' | 'encrypted' | 'none'
+  secrets: SecretStatus[]
+  availableSecrets: string[]
+  missingSecrets: string[]
 }
 
-async function fileExists(filePath: string): Promise<boolean> {
+const resolveSecretStatus = async (
+  providerName: string,
+  provider: Awaited<ReturnType<typeof createSecretsProvider>>,
+  key: string,
+  ref: string
+): Promise<SecretStatus> => {
+  if (providerName === 'env') {
+    return {
+      key,
+      ref,
+      available: Boolean(process.env[key]),
+      source: 'env',
+    }
+  }
+
   try {
-    await fs.access(filePath)
-    return true
+    await provider.resolve(ref)
+    return { key, ref, available: true, source: '1password' }
   } catch {
-    return false
+    return { key, ref, available: false, source: '1password' }
   }
 }
 
-function maskAgeKey(key: string): string {
-  if (!key.startsWith('AGE-SECRET-KEY-1')) {
-    return 'INVALID_FORMAT'
+/**
+ * Check auth configuration status
+ */
+export async function statusAction(
+  ctx: CommandContext,
+  options: StatusOptions
+): Promise<void> {
+  const provider = await createSecretsProvider()
+  const entries = Object.entries(SECRET_REFS)
+
+  const secrets = await Promise.all(
+    entries.map(([key, ref]) =>
+      resolveSecretStatus(provider.name, provider, key, ref)
+    )
+  )
+
+  const availableSecrets = secrets
+    .filter((secret) => secret.available)
+    .map((secret) => secret.key)
+  const missingSecrets = secrets
+    .filter((secret) => !secret.available)
+    .map((secret) => secret.key)
+
+  const status: AuthStatus = {
+    activeProvider: provider.name,
+    opServiceAccountToken: {
+      configured: Boolean(process.env.OP_SERVICE_ACCOUNT_TOKEN),
+    },
+    secrets,
+    availableSecrets,
+    missingSecrets,
   }
-  const prefix = key.slice(0, 19)
-  const suffix = key.slice(-3)
-  return `${prefix}...${suffix}`
-}
 
-function determineEnvSource(
-  localExists: boolean,
-  encryptedExists: boolean,
-  ageKeyConfigured: boolean
-): 'local' | 'encrypted' | 'none' {
-  if (localExists) return 'local'
-  if (encryptedExists && ageKeyConfigured) return 'encrypted'
-  return 'none'
-}
+  const outputJson = options.json === true || ctx.format === 'json'
 
-export function registerStatusCommand(auth: Command): void {
-  auth
-    .command('status')
-    .description('Show auth configuration status')
-    .option('--json', 'Output as JSON')
-    .action(async (options: { json?: boolean }) => {
-      const status = await getAuthStatus()
-
-      if (options.json) {
-        console.log(JSON.stringify(status, null, 2))
-        return
-      }
-
-      printStatus(status)
-    })
-}
-
-async function getAuthStatus(): Promise<AuthStatus> {
-  const platform = detectPlatform()
-  const cliDir = path.resolve(import.meta.dirname, '../../..')
-
-  // File checks
-  const envLocalPath = path.join(cliDir, '.env.local')
-  const envLocalExists = await fileExists(envLocalPath)
-  const envEncryptedPath = path.join(cliDir, '.env.encrypted')
-  const envEncryptedExists = await fileExists(envEncryptedPath)
-
-  // Environment
-  const ageSecretKey = process.env[KEY_NAME]
-  const ageKeyConfigured = Boolean(ageSecretKey)
-
-  // Keychain
-  const keychainAvailable = isKeychainAvailable()
-  const keychainValue = keychainAvailable ? readFromKeychain(KEY_NAME) : null
-
-  // 1Password
-  const opInstalled = isOpCliAvailable()
-
-  // Shell profile
-  const profilePath = detectShellProfile()
-
-  const envSource = determineEnvSource(
-    envLocalExists,
-    envEncryptedExists,
-    ageKeyConfigured
-  )
-
-  return {
-    envLocal: { exists: envLocalExists, path: envLocalPath },
-    envEncrypted: { exists: envEncryptedExists, path: envEncryptedPath },
-    ageSecretKey: {
-      configured: ageKeyConfigured,
-      masked: ageKeyConfigured && ageSecretKey ? maskAgeKey(ageSecretKey) : undefined,
-    },
-    keychain: {
-      available: keychainAvailable,
-      platform:
-        platform === 'macos'
-          ? 'macOS Keychain'
-          : platform === 'linux'
-            ? 'Linux secret-tool'
-            : 'unsupported',
-      stored: !!keychainValue,
-    },
-    onepassword: {
-      cliInstalled: opInstalled,
-      signedIn: opInstalled ? isOpSignedIn() : false,
-      serviceAccountConfigured: isServiceAccountConfigured(),
-    },
-    shellProfile: {
-      path: profilePath,
-      hasExport: profilePath ? shellProfileHasExport(profilePath, KEY_NAME) : false,
-    },
-    envSource,
+  if (outputJson) {
+    ctx.output.data(status)
+    return
   }
-}
 
-function printStatus(status: AuthStatus): void {
-  console.log('\nAuth Status:\n')
-
-  // Environment files
-  console.log('  Environment Files:')
-  console.log(
-    `    .env.local:      ${status.envLocal.exists ? '✓ (exists)' : '✗ (not found)'}`
-  )
-  console.log(
-    `    .env.encrypted:  ${status.envEncrypted.exists ? '✓ (exists)' : '✗ (not found)'}`
+  // Human-readable output
+  ctx.output.data('Auth Status\n')
+  ctx.output.data(`Active Provider: ${status.activeProvider}`)
+  ctx.output.data(
+    `OP_SERVICE_ACCOUNT_TOKEN: ${status.opServiceAccountToken.configured ? 'configured' : 'not set'}`
   )
 
-  // AGE key
-  console.log('\n  AGE_SECRET_KEY:')
-  const envIcon = status.ageSecretKey.configured ? '✓' : '✗'
-  console.log(
-    `    env:       ${envIcon} ${status.ageSecretKey.configured ? `(${status.ageSecretKey.masked})` : 'not set'}`
-  )
-
-  // Keychain
-  console.log(`\n  Keychain (${status.keychain.platform}):`)
-  if (!status.keychain.available) {
-    console.log(`    ${KEY_NAME}:  ✗ (keychain CLI not available)`)
-  } else {
-    const kcIcon = status.keychain.stored ? '✓' : '✗'
-    console.log(
-      `    ${KEY_NAME}:  ${kcIcon} ${status.keychain.stored ? '(stored)' : 'not found'}`
+  ctx.output.data('\nSecrets:')
+  for (const secret of status.secrets) {
+    ctx.output.data(
+      `  ${secret.key}: ${secret.available ? '✓' : '✗'} (${secret.source})`
     )
   }
 
-  // 1Password
-  console.log('\n  1Password:')
-  if (!status.onepassword.cliInstalled) {
-    console.log(`    op CLI:           ✗ not installed (${getOpInstallInstructions()})`)
-  } else {
-    const signedInIcon = status.onepassword.signedIn ? '✓' : '✗'
-    console.log(
-      `    op CLI:           ✓ installed, ${signedInIcon} ${status.onepassword.signedIn ? 'signed in' : 'not signed in'}`
-    )
-  }
-  console.log(
-    `    service account:  ${status.onepassword.serviceAccountConfigured ? '✓ configured' : '✗ not set'}`
-  )
-
-  // Shell profile
-  console.log('\n  Shell Profile:')
-  if (status.shellProfile.path) {
-    const spIcon = status.shellProfile.hasExport ? '✓' : '✗'
-    console.log(
-      `    ${status.shellProfile.path}:  ${spIcon} ${status.shellProfile.hasExport ? 'export configured' : 'no export line'}`
-    )
-  } else {
-    console.log('    Could not detect shell profile')
-  }
-
-  // Env source
-  console.log('\n  Env Source:')
-  if (status.envSource === 'local') {
-    console.log('    → Using .env.local')
-  } else if (status.envSource === 'encrypted') {
-    console.log('    → Using .env.encrypted')
-  } else {
-    console.log('    → No env source available')
-  }
-
-  // Summary
-  const allGood =
-    status.ageSecretKey.configured &&
-    status.keychain.stored &&
-    status.shellProfile.hasExport
-
-  if (allGood) {
-    console.log('\n  Everything looks good.\n')
-  } else if (!status.keychain.stored) {
-    console.log("\n  Run 'skill auth setup' to configure.\n")
+  if (status.missingSecrets.length > 0) {
+    ctx.output.data('\nMissing Secrets:')
+    for (const secret of status.missingSecrets) {
+      ctx.output.data(`  - ${secret}`)
+    }
   }
 }

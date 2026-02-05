@@ -1,185 +1,185 @@
 /**
- * Front CLI raw API passthrough command
+ * Front CLI API passthrough
  *
- * Escape hatch for arbitrary Front API calls.
+ * Allows raw Front API requests for power users.
  */
 
-import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
 import type { Command } from 'commander'
-import { writeJsonOutput } from './json-output'
+import { type CommandContext } from '../../core/context'
+import { CLIError, formatError } from '../../core/errors'
+import { getFrontClient } from './client'
+import { hateoasWrap } from './hateoas'
+import { contextFromCommand } from './with-context'
 
-/**
- * Get Front API client from environment
- */
-function getFrontClient() {
-  const apiToken = process.env.FRONT_API_TOKEN
-  if (!apiToken) {
-    throw new Error('FRONT_API_TOKEN environment variable is required')
+const ALLOWED_METHODS = ['GET', 'POST', 'PATCH', 'DELETE'] as const
+
+type AllowedMethod = (typeof ALLOWED_METHODS)[number]
+
+function normalizeMethod(method: string): AllowedMethod {
+  const normalized = method.toUpperCase()
+  if (!ALLOWED_METHODS.includes(normalized as AllowedMethod)) {
+    throw new CLIError({
+      userMessage: `Unsupported method: ${method}.`,
+      suggestion: `Use one of: ${ALLOWED_METHODS.join(', ')}.`,
+    })
   }
-  return createInstrumentedFrontClient({ apiToken })
+  return normalized as AllowedMethod
 }
 
-/**
- * Execute a raw Front API request
- */
-async function apiPassthrough(
+function normalizePath(path: string): string {
+  if (path.startsWith('http')) return path
+  if (path.startsWith('/')) return path
+  return `/${path}`
+}
+
+function parseData(data?: string): unknown {
+  if (!data) return undefined
+  try {
+    return JSON.parse(data)
+  } catch (error) {
+    throw new CLIError({
+      userMessage: 'Invalid JSON for --data.',
+      suggestion: 'Provide valid JSON, e.g. --data "{"key":"value"}"',
+      cause: error,
+    })
+  }
+}
+
+export async function runFrontApi(
+  ctx: CommandContext,
   method: string,
-  endpoint: string,
-  options: { data?: string }
+  path: string,
+  options: {
+    json?: boolean
+    data?: string
+    allowDestructive?: boolean
+    dryRun?: boolean
+  }
 ): Promise<void> {
-  const front = getFrontClient()
-  const httpMethod = method.toUpperCase()
+  const outputJson = options.json === true || ctx.format === 'json'
 
-  let body: any = undefined
-  if (options.data) {
-    try {
-      body = JSON.parse(options.data)
-    } catch {
-      throw new Error('Invalid JSON in --data')
+  try {
+    const normalizedMethod = normalizeMethod(method)
+    const normalizedPath = normalizePath(path)
+    const isDestructive = normalizedMethod !== 'GET'
+
+    if (isDestructive && !options.allowDestructive) {
+      throw new CLIError({
+        userMessage: `${normalizedMethod} requests require --allow-destructive.`,
+        suggestion: 'Re-run with --allow-destructive once you are sure.',
+      })
     }
-  }
 
-  const normalizedEndpoint = endpoint.startsWith('/')
-    ? endpoint
-    : `/${endpoint}`
+    const payload = parseData(options.data)
+    if (
+      payload &&
+      (normalizedMethod === 'GET' || normalizedMethod === 'DELETE')
+    ) {
+      throw new CLIError({
+        userMessage: `${normalizedMethod} requests do not accept --data.`,
+        suggestion: 'Remove --data or use a write method.',
+      })
+    }
 
-  let result: any
-  switch (httpMethod) {
-    case 'GET':
-      result = await front.raw.get(normalizedEndpoint)
-      break
-    case 'POST':
-      result = await front.raw.post(normalizedEndpoint, body)
-      break
-    case 'PATCH':
-      result = await front.raw.patch(normalizedEndpoint, body)
-      break
-    case 'PUT':
-      result = await front.raw.put(normalizedEndpoint, body)
-      break
-    case 'DELETE':
-      result = await front.raw.delete(normalizedEndpoint)
-      break
-    default:
-      throw new Error(
-        `Unsupported method: ${method}. Use GET, POST, PATCH, PUT, or DELETE.`
+    if (isDestructive && options.dryRun) {
+      const preview = {
+        dryRun: true,
+        method: normalizedMethod,
+        path: normalizedPath,
+        data: payload,
+      }
+
+      if (outputJson) {
+        ctx.output.data(
+          hateoasWrap({
+            type: 'front-api-dry-run',
+            command: `skill front api ${normalizedMethod} ${normalizedPath} --json`,
+            data: preview,
+          })
+        )
+        return
+      }
+
+      ctx.output.data('🧪 DRY RUN: Front API request preview')
+      ctx.output.data(JSON.stringify(preview, null, 2))
+      ctx.output.data('')
+      return
+    }
+
+    const front = getFrontClient(ctx)
+    let result: unknown
+
+    switch (normalizedMethod) {
+      case 'GET':
+        result = await front.raw.get(normalizedPath)
+        break
+      case 'POST':
+        result = await front.raw.post(normalizedPath, payload ?? {})
+        break
+      case 'PATCH':
+        result = await front.raw.patch(normalizedPath, payload ?? {})
+        break
+      case 'DELETE':
+        result = await front.raw.delete(normalizedPath)
+        break
+      default:
+        throw new CLIError({
+          userMessage: `Unsupported method: ${normalizedMethod}.`,
+        })
+    }
+
+    if (outputJson) {
+      ctx.output.data(
+        hateoasWrap({
+          type: 'front-api-response',
+          command: `skill front api ${normalizedMethod} ${normalizedPath} --json`,
+          data: result,
+        })
       )
-  }
+      return
+    }
 
-  // Always JSON output for raw API
-  writeJsonOutput(result)
+    ctx.output.data(`Front API ${normalizedMethod} ${normalizedPath}`)
+    ctx.output.data(JSON.stringify(result, null, 2))
+    ctx.output.data('')
+  } catch (error) {
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Front API passthrough failed.',
+            suggestion: 'Verify method, path, and FRONT_API_TOKEN.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
+  }
 }
 
-/**
- * Register api command with Commander
- */
-export function registerApiCommand(frontCommand: Command): void {
-  frontCommand
+export function registerApiCommand(front: Command): void {
+  front
     .command('api')
-    .description('Raw Front API request (escape hatch)')
-    .argument('<method>', 'HTTP method (GET, POST, PATCH, PUT, DELETE)')
-    .argument(
-      '<endpoint>',
-      'API endpoint path (e.g., /me, /conversations/cnv_xxx)'
-    )
-    .option('--data <json>', 'Request body as JSON string')
-    .addHelpText(
-      'after',
-      `
-━━━ Raw Front API Passthrough ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  Escape hatch for making arbitrary Front API calls. Use this when no
-  typed CLI command exists for what you need.
-
-ARGUMENTS
-  <method>      HTTP method: GET, POST, PATCH, PUT, DELETE
-  <endpoint>    API path (leading / is optional — both work)
-
-OPTIONS
-  --data <json>   Request body as a valid JSON string (for POST, PATCH, PUT)
-
-COMMON ENDPOINTS
-  Endpoint                          What it returns
-  ─────────────────────────────── ──────────────────────────────────────
-  /me                               Authenticated identity
-  /inboxes                          All inboxes
-  /conversations/cnv_xxx            Conversation details
-  /conversations/cnv_xxx/messages   Messages in a conversation
-  /tags                             All tags
-  /teammates                        All teammates
-  /contacts                         All contacts
-  /accounts                         All accounts
-  /channels                         All channels
-  /rules                            All rules
-
-ENDPOINT NORMALIZATION
-  Leading slash is optional. These are equivalent:
-    skill front api GET /me
-    skill front api GET me
-
-OUTPUT
-  Always JSON. Pipe to jq for filtering.
-
-EXAMPLES
-  # Check authenticated identity
-  skill front api GET /me
-
-  # List all inboxes
-  skill front api GET /inboxes
-
-  # Get a specific conversation
-  skill front api GET /conversations/cnv_abc123
-
-  # Archive a conversation
-  skill front api PATCH /conversations/cnv_abc123 --data '{"status":"archived"}'
-
-  # Apply a tag to a conversation
-  skill front api POST /conversations/cnv_abc123/tags --data '{"tag_ids":["tag_xxx"]}'
-
-  # Create a new tag
-  skill front api POST /tags --data '{"name":"my-new-tag","highlight":"blue"}'
-
-  # Delete a tag
-  skill front api DELETE /tags/tag_xxx
-
-  # List teammates and extract emails
-  skill front api GET /teammates | jq '._results[].email'
-
-  # Get conversation + pipe to jq for specific fields
-  skill front api GET /conversations/cnv_abc123 | jq '{subject, status, assignee: .assignee.email}'
-
-WHEN TO USE THIS vs TYPED COMMANDS
-  Prefer typed commands when available — they have better error handling,
-  pagination, and output formatting:
-    skill front search        (not: skill front api GET /conversations/search/...)
-    skill front inbox         (not: skill front api GET /inboxes)
-    skill front tags list     (not: skill front api GET /tags)
-    skill front conversation  (not: skill front api GET /conversations/cnv_xxx)
-
-  Use "skill front api" for endpoints without a dedicated command, or when
-  you need the raw response shape.
-
-  Full API docs: https://dev.frontapp.com/reference
-`
-    )
+    .description('Raw Front API passthrough')
+    .argument('<method>', 'HTTP method (GET, POST, PATCH, DELETE)')
+    .argument('<path>', 'API path (e.g., /inboxes)')
+    .option('--data <json>', 'JSON payload for POST/PATCH/DELETE')
+    .option('--allow-destructive', 'Allow write requests')
+    .option('--dry-run', 'Preview a write request without executing')
+    .option('--json', 'Output as JSON')
     .action(
-      async (method: string, endpoint: string, options: { data?: string }) => {
-        try {
-          await apiPassthrough(method, endpoint, options)
-        } catch (error) {
-          console.error(
-            JSON.stringify(
-              {
-                error: error instanceof Error ? error.message : 'Unknown error',
-                method: method.toUpperCase(),
-                endpoint,
-              },
-              null,
-              2
-            )
-          )
-          process.exit(1)
-        }
+      async (
+        method: string,
+        path: string,
+        options: {
+          json?: boolean
+          data?: string
+          allowDestructive?: boolean
+          dryRun?: boolean
+        },
+        command: Command
+      ) => {
+        const ctx = await contextFromCommand(command, options)
+        await runFrontApi(ctx, method, path, options)
       }
     )
 }

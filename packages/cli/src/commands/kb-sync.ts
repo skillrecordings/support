@@ -23,6 +23,9 @@ import {
   upsertVector,
 } from '@skillrecordings/core/vector/client'
 import type { Command } from 'commander'
+import { type CommandContext, createContext } from '../core/context'
+import { CLIError, formatError } from '../core/errors'
+import { isListOutputFormat, outputList } from '../core/list-output'
 
 /**
  * Hash content to enable idempotent updates
@@ -41,7 +44,7 @@ async function fetchContent(url: string): Promise<string> {
     const filePath = url.replace('file://', '')
     return fs.readFile(filePath, 'utf-8')
   }
-  
+
   const response = await fetch(url)
   if (!response.ok) {
     throw new Error(
@@ -49,6 +52,25 @@ async function fetchContent(url: string): Promise<string> {
     )
   }
   return response.text()
+}
+
+const handleKbError = (
+  ctx: CommandContext,
+  error: unknown,
+  message: string,
+  suggestion = 'Verify knowledge sources and try again.'
+): void => {
+  const cliError =
+    error instanceof CLIError
+      ? error
+      : new CLIError({
+          userMessage: message,
+          suggestion,
+          cause: error,
+        })
+
+  ctx.output.error(formatError(cliError))
+  process.exitCode = cliError.exitCode
 }
 
 /**
@@ -250,13 +272,17 @@ function formatDuration(ms: number): string {
 /**
  * Sync knowledge base from FAQ sources
  */
-export async function sync(options: {
-  app?: string
-  all?: boolean
-  dryRun?: boolean
-  json?: boolean
-}): Promise<void> {
+export async function sync(
+  ctx: CommandContext,
+  options: {
+    app?: string
+    all?: boolean
+    dryRun?: boolean
+    json?: boolean
+  }
+): Promise<void> {
   const startTime = Date.now()
+  const outputJson = options.json === true || ctx.format === 'json'
 
   try {
     // Determine which apps to sync
@@ -269,28 +295,24 @@ export async function sync(options: {
     } else if (options.app) {
       appsToSync = [options.app]
     } else {
-      if (options.json) {
-        console.error(JSON.stringify({ error: 'Must specify --app or --all' }))
-      } else {
-        console.error('Error: Must specify --app <appId> or --all')
-      }
-      process.exit(1)
+      throw new CLIError({
+        userMessage: 'Must specify --app <appId> or --all.',
+        suggestion: 'Use --app <appId> or --all to sync sources.',
+      })
     }
 
     if (appsToSync.length === 0) {
-      if (options.json) {
-        console.error(JSON.stringify({ error: 'No apps enabled for sync' }))
-      } else {
-        console.error('No apps enabled for sync')
-      }
-      process.exit(1)
+      throw new CLIError({
+        userMessage: 'No apps enabled for sync.',
+        suggestion: 'Enable at least one product source before syncing.',
+      })
     }
 
     const results: SyncResult[] = []
 
     for (const appId of appsToSync) {
-      if (!options.json) {
-        console.log(
+      if (!outputJson) {
+        ctx.output.data(
           `\n${options.dryRun ? '[DRY RUN] ' : ''}Syncing ${appId}...`
         )
       }
@@ -298,17 +320,17 @@ export async function sync(options: {
       const result = await syncApp(appId, options.dryRun ?? false)
       results.push(result)
 
-      if (!options.json) {
+      if (!outputJson) {
         if (result.errors.length > 0) {
-          console.log(`  ⚠️  Errors:`)
+          ctx.output.warn(`Errors:`)
           for (const error of result.errors) {
-            console.log(`     - ${error}`)
+            ctx.output.data(`     - ${error}`)
           }
         }
-        console.log(`  📚 Total: ${result.total}`)
-        console.log(`  ✅ Added: ${result.added}`)
-        console.log(`  🔄 Updated: ${result.updated}`)
-        console.log(`  ⏭️  Unchanged: ${result.unchanged}`)
+        ctx.output.data(`  📚 Total: ${result.total}`)
+        ctx.output.data(`  ✅ Added: ${result.added}`)
+        ctx.output.data(`  🔄 Updated: ${result.updated}`)
+        ctx.output.data(`  ⏭️  Unchanged: ${result.unchanged}`)
       }
     }
 
@@ -327,44 +349,36 @@ export async function sync(options: {
       results,
     }
 
-    if (options.json) {
-      console.log(JSON.stringify(summary, null, 2))
+    if (outputJson) {
+      ctx.output.data(summary)
     } else {
-      console.log('\n' + '─'.repeat(50))
-      console.log(
+      ctx.output.data('\n' + '─'.repeat(50))
+      ctx.output.data(
         `${options.dryRun ? '[DRY RUN] ' : ''}Sync complete in ${summary.duration}`
       )
-      console.log(
+      ctx.output.data(
         `Apps: ${summary.apps} | Total: ${summary.total} | Added: ${summary.added} | Updated: ${summary.updated} | Unchanged: ${summary.unchanged}`
       )
       if (summary.errors > 0) {
-        console.log(`⚠️  ${summary.errors} errors occurred`)
+        ctx.output.warn(`${summary.errors} errors occurred`)
       }
     }
   } catch (error) {
-    if (options.json) {
-      console.error(
-        JSON.stringify({
-          error: error instanceof Error ? error.message : 'Unknown error',
-        })
-      )
-    } else {
-      console.error(
-        'Error:',
-        error instanceof Error ? error.message : 'Unknown error'
-      )
-    }
-    process.exit(1)
+    handleKbError(ctx, error, 'Knowledge base sync failed.')
   }
 }
 
 /**
  * Display knowledge base statistics
  */
-export async function stats(options: {
-  app?: string
-  json?: boolean
-}): Promise<void> {
+export async function stats(
+  ctx: CommandContext,
+  options: {
+    app?: string
+    json?: boolean
+  }
+): Promise<void> {
+  const outputJson = options.json === true || ctx.format === 'json'
   try {
     const sources = listProductSources()
     const redis = getRedis()
@@ -404,71 +418,86 @@ export async function stats(options: {
       })
     }
 
-    if (options.json) {
-      console.log(JSON.stringify(appStats, null, 2))
+    if (outputJson) {
+      ctx.output.data(appStats)
       return
     }
 
-    console.log('\nKnowledge Base Statistics')
-    console.log('─'.repeat(60))
+    ctx.output.data('\nKnowledge Base Statistics')
+    ctx.output.data('─'.repeat(60))
 
     const total = appStats.reduce((sum, s) => sum + s.articleCount, 0)
 
     for (const stat of appStats) {
       const status = stat.enabled ? '✅' : '⏸️'
-      console.log(`\n${status} ${stat.appId} (${stat.format})`)
-      console.log(`   Articles: ${stat.articleCount}`)
+      ctx.output.data(`\n${status} ${stat.appId} (${stat.format})`)
+      ctx.output.data(`   Articles: ${stat.articleCount}`)
     }
 
-    console.log('\n' + '─'.repeat(60))
-    console.log(`Total articles: ${total}`)
-    console.log('')
+    ctx.output.data('\n' + '─'.repeat(60))
+    ctx.output.data(`Total articles: ${total}`)
+    ctx.output.data('')
   } catch (error) {
-    if (options.json) {
-      console.error(
-        JSON.stringify({
-          error: error instanceof Error ? error.message : 'Unknown error',
-        })
-      )
-    } else {
-      console.error(
-        'Error:',
-        error instanceof Error ? error.message : 'Unknown error'
-      )
-    }
-    process.exit(1)
+    handleKbError(ctx, error, 'Failed to load knowledge base stats.')
   }
 }
 
 /**
  * List configured product sources
  */
-export async function list(options: { json?: boolean }): Promise<void> {
+export async function list(
+  ctx: CommandContext,
+  options: { json?: boolean; idsOnly?: boolean; outputFormat?: string }
+): Promise<void> {
   const sources = listProductSources()
+  const outputFormat = isListOutputFormat(options.outputFormat)
+    ? options.outputFormat
+    : undefined
+  if (options.outputFormat && !outputFormat) {
+    throw new CLIError({
+      userMessage: 'Invalid --output-format value.',
+      suggestion: 'Use json, ndjson, or csv.',
+    })
+  }
+  const outputJson =
+    options.json === true || ctx.format === 'json' || outputFormat === 'json'
+  const idsOnly = options.idsOnly === true
 
-  if (options.json) {
-    console.log(JSON.stringify(sources, null, 2))
+  if (idsOnly) {
+    for (const source of sources) {
+      ctx.output.data(source.appId)
+    }
     return
   }
 
-  console.log('\nConfigured Knowledge Sources')
-  console.log('─'.repeat(60))
+  if (outputFormat && outputFormat !== 'json') {
+    outputList(ctx, sources, outputFormat)
+    return
+  }
+
+  if (outputJson) {
+    ctx.output.data(sources)
+    return
+  }
+
+  ctx.output.data('\nConfigured Knowledge Sources')
+  ctx.output.data('─'.repeat(60))
 
   for (const source of sources) {
     const status = source.enabled ? '✅' : '⏸️'
-    console.log(`\n${status} ${source.appId}`)
-    console.log(`   Format: ${source.format}`)
-    console.log(`   Source: ${source.defaultSource || 'docs'}`)
-    console.log(`   Category: ${source.defaultCategory || 'general'}`)
+    ctx.output.data(`\n${status} ${source.appId}`)
+    ctx.output.data(`   Format: ${source.format}`)
+    ctx.output.data(`   Source: ${source.defaultSource || 'docs'}`)
+    ctx.output.data(`   Category: ${source.defaultCategory || 'general'}`)
     if (source.sourceUrls && source.sourceUrls.length > 0) {
-      console.log(`   URLs:`)
+      ctx.output.data(`   URLs:`)
       for (const url of source.sourceUrls) {
-        console.log(`     - ${url}`)
+        ctx.output.data(`     - ${url}`)
       }
     }
   }
 
-  console.log('')
+  ctx.output.data('')
 }
 
 /**
@@ -483,16 +512,75 @@ export function registerKbCommands(program: Command): void {
     .option('--all', 'Sync all enabled apps')
     .option('--dry-run', 'Show what would be synced without making changes')
     .option('--json', 'Output as JSON')
-    .action(sync)
+    .action(async (options, command) => {
+      const ctx = await createContext({
+        format:
+          options.json === true || options.outputFormat === 'json'
+            ? 'json'
+            : typeof command.optsWithGlobals === 'function'
+              ? command.optsWithGlobals().format
+              : command.parent?.opts().format,
+        verbose:
+          typeof command.optsWithGlobals === 'function'
+            ? command.optsWithGlobals().verbose
+            : command.parent?.opts().verbose,
+        quiet:
+          typeof command.optsWithGlobals === 'function'
+            ? command.optsWithGlobals().quiet
+            : command.parent?.opts().quiet,
+      })
+      await sync(ctx, options)
+    })
 
   kb.command('stats')
     .description('Show knowledge base statistics')
     .option('--app <appId>', 'Filter by app')
     .option('--json', 'Output as JSON')
-    .action(stats)
+    .action(async (options, command) => {
+      const ctx = await createContext({
+        format:
+          options.json === true
+            ? 'json'
+            : typeof command.optsWithGlobals === 'function'
+              ? command.optsWithGlobals().format
+              : command.parent?.opts().format,
+        verbose:
+          typeof command.optsWithGlobals === 'function'
+            ? command.optsWithGlobals().verbose
+            : command.parent?.opts().verbose,
+        quiet:
+          typeof command.optsWithGlobals === 'function'
+            ? command.optsWithGlobals().quiet
+            : command.parent?.opts().quiet,
+      })
+      await stats(ctx, options)
+    })
 
   kb.command('list')
     .description('List configured knowledge sources')
+    .option('--ids-only', 'Output only IDs (one per line)')
+    .option(
+      '--output-format <format>',
+      'Output format for lists (json|ndjson|csv)'
+    )
     .option('--json', 'Output as JSON')
-    .action(list)
+    .action(async (options, command) => {
+      const ctx = await createContext({
+        format:
+          options.json === true
+            ? 'json'
+            : typeof command.optsWithGlobals === 'function'
+              ? command.optsWithGlobals().format
+              : command.parent?.opts().format,
+        verbose:
+          typeof command.optsWithGlobals === 'function'
+            ? command.optsWithGlobals().verbose
+            : command.parent?.opts().verbose,
+        quiet:
+          typeof command.optsWithGlobals === 'function'
+            ? command.optsWithGlobals().quiet
+            : command.parent?.opts().quiet,
+      })
+      await list(ctx, options)
+    })
 }

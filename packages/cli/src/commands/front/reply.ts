@@ -1,166 +1,110 @@
 /**
  * Front CLI reply command
  *
- * Creates a draft reply on a conversation.
- * DRAFT only — never auto-send. HITL principle.
+ * Creates a draft reply on a conversation (HITL-only, never sends).
  */
 
-import { createInstrumentedFrontClient } from '@skillrecordings/core/front/instrumented-client'
 import type { Command } from 'commander'
-import { hateoasWrap } from './hateoas'
-import { writeJsonOutput } from './json-output'
+import { type CommandContext } from '../../core/context'
+import { CLIError, formatError } from '../../core/errors'
+import { getFrontClient, normalizeId } from './client'
+import { conversationActions, conversationLinks, hateoasWrap } from './hateoas'
+import { contextFromCommand } from './with-context'
 
-/**
- * Get Front API client from environment
- */
-function getFrontClient() {
-  const apiToken = process.env.FRONT_API_TOKEN
-  if (!apiToken) {
-    throw new Error('FRONT_API_TOKEN environment variable is required')
-  }
-  return createInstrumentedFrontClient({ apiToken })
+interface ReplyOptions {
+  message?: string
+  dryRun?: boolean
+  json?: boolean
 }
 
-/**
- * Normalize Front resource ID or URL to ID
- */
-function normalizeId(idOrUrl: string): string {
-  return idOrUrl.startsWith('http') ? idOrUrl.split('/').pop()! : idOrUrl
-}
-
-/**
- * Command: skill front reply <conversation-id> --body "message text"
- * Creates a DRAFT reply — does NOT auto-send.
- */
-async function replyToConversation(
+export async function replyToConversation(
+  ctx: CommandContext,
   conversationId: string,
-  options: { body: string; author?: string; json?: boolean }
+  options: ReplyOptions
 ): Promise<void> {
+  const outputJson = options.json === true || ctx.format === 'json'
+  const dryRun = options.dryRun === true
+
   try {
-    const front = getFrontClient()
+    if (!options.message) {
+      throw new CLIError({
+        userMessage: 'Message body is required.',
+        suggestion: 'Use --message "<text>".',
+      })
+    }
+
+    const front = getFrontClient(ctx)
     const normalizedId = normalizeId(conversationId)
 
-    // Use raw.post because CreateDraft schema requires channel_id,
-    // but conversation reply endpoint infers it from the conversation.
-    const draft = await front.raw.post<{ id?: string }>(
-      `/conversations/${normalizedId}/drafts`,
-      {
-        body: options.body,
-        ...(options.author ? { author_id: options.author } : {}),
-      }
-    )
+    let draft: unknown = null
+    if (!dryRun) {
+      // Use raw client to avoid channel_id validation in typed schema.
+      draft = await front.raw.post(`/conversations/${normalizedId}/drafts`, {
+        body: options.message,
+      })
+    }
 
-    if (options.json) {
-      writeJsonOutput(
+    const result = {
+      id: normalizedId,
+      action: 'reply-draft',
+      message: options.message,
+      dryRun,
+      draft,
+      success: true,
+    }
+
+    if (outputJson) {
+      ctx.output.data(
         hateoasWrap({
-          type: 'draft-reply',
-          command: `skill front reply ${normalizedId} --body ${JSON.stringify(options.body)}${
-            options.author ? ` --author ${options.author}` : ''
-          } --json`,
-          data: draft,
+          type: 'reply-result',
+          command: `skill front reply ${normalizedId} --message "${options.message}" --json`,
+          data: result,
+          links: conversationLinks(normalizedId),
+          actions: conversationActions(normalizedId),
         })
       )
       return
     }
 
-    const draftId = draft.id
-    const bodyPreview =
-      options.body.length > 100
-        ? options.body.slice(0, 100) + '...'
-        : options.body
-
-    console.log('')
-    console.log(`📝 Draft reply created on ${normalizedId}`)
-    if (draftId) {
-      console.log(`   Draft ID: ${draftId}`)
-    }
-    console.log(`   Body preview: ${bodyPreview}`)
-    console.log('')
-    console.log(`   💡 Review and send from Front.`)
-    console.log('')
-  } catch (error) {
-    if (options.json) {
-      console.error(
-        JSON.stringify({
-          error: error instanceof Error ? error.message : 'Unknown error',
-        })
-      )
+    ctx.output.data('')
+    if (dryRun) {
+      ctx.output.data(`🧪 DRY RUN: Draft reply for ${normalizedId}`)
     } else {
-      console.error(
-        'Error:',
-        error instanceof Error ? error.message : 'Unknown error'
-      )
+      ctx.output.data(`✉️  Draft created for ${normalizedId}`)
+      ctx.output.data('   (Draft only - not sent. Requires human approval.)')
     }
-    process.exit(1)
+    ctx.output.data('')
+  } catch (error) {
+    const cliError =
+      error instanceof CLIError
+        ? error
+        : new CLIError({
+            userMessage: 'Failed to draft reply.',
+            suggestion:
+              'Verify conversation ID, message body, and FRONT_API_TOKEN.',
+            cause: error,
+          })
+    ctx.output.error(formatError(cliError))
+    process.exitCode = cliError.exitCode
   }
 }
 
-/**
- * Register reply command with Commander
- */
 export function registerReplyCommand(frontCommand: Command): void {
   frontCommand
     .command('reply')
-    .description('Create a draft reply on a conversation')
-    .argument('<conversation-id>', 'Conversation ID (cnv_xxx)')
-    .requiredOption('--body <text>', 'Reply body text')
-    .option('--author <teammate-id>', 'Author teammate ID')
+    .description('Draft a reply on a conversation (HITL, never auto-send)')
+    .argument('<conversation-id>', 'Conversation ID (e.g., cnv_xxx)')
+    .option('--message <text>', 'Reply body text')
+    .option('--dry-run', 'Preview without making changes')
     .option('--json', 'Output as JSON')
-    .addHelpText(
-      'after',
-      `
-━━━ Draft Reply (HITL — Human-in-the-Loop) ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ⚠️  SAFETY: This command creates a DRAFT only. It NEVER auto-sends.
-  The draft appears in Front for a human to review, edit, and send manually.
-  This is by design — the HITL principle ensures no message goes out without
-  human approval.
-
-USAGE
-  skill front reply <conversation-id> --body "Your reply text here"
-
-OPTIONS
-  --body <text>              Required. The reply body text.
-                             Accepts plain text or HTML.
-  --author <teammate-id>     Optional. Teammate ID (tea_xxx) to set as sender.
-                             Defaults to the API token owner.
-  --json                     Output as JSON.
-
-BODY FORMAT
-  Plain text:   --body "Thanks for reaching out. We'll look into this."
-  HTML:         --body "<p>Hi there,</p><p>Your refund has been processed.</p>"
-
-  For multi-line plain text, the body will render as-is in the Front draft.
-
-JSON OUTPUT (--json)
-  Returns a HATEOAS-wrapped object:
-    { type: "draft-reply", data: { id, ... } }
-
-WORKFLOW
-  1. Read the conversation first:
-       skill front conversation cnv_abc123 -m
-  2. Draft a reply:
-       skill front reply cnv_abc123 --body "We've processed your request."
-  3. Open Front → review the draft → edit if needed → click Send.
-
-EXAMPLES
-  # Simple draft reply
-  skill front reply cnv_abc123 --body "Thanks, we're looking into this now."
-
-  # HTML reply with specific author
-  skill front reply cnv_abc123 \\
-    --body "<p>Hi! Your license has been transferred.</p>" \\
-    --author tea_def456
-
-  # Draft reply and capture the draft ID
-  skill front reply cnv_abc123 --body "Processing your refund." --json \\
-    | jq '.data.id'
-
-RELATED COMMANDS
-  skill front conversation <id> -m    View conversation + message history
-  skill front message <id>            View a specific message body
-  skill front search                  Find conversations to reply to
-`
+    .action(
+      async (
+        conversationId: string,
+        options: ReplyOptions,
+        command: Command
+      ) => {
+        const ctx = await contextFromCommand(command, options)
+        await replyToConversation(ctx, conversationId, options)
+      }
     )
-    .action(replyToConversation)
 }

@@ -126,31 +126,31 @@ export function conversationActions(convId: string): HateoasAction[] {
     },
     {
       action: 'assign',
-      command: `skill front assign ${convId} <teammate-id> --json`,
-      description: 'Assign to a teammate',
+      command: `skill front assign ${convId} --to <teammate-id>`,
+      description: 'Assign this conversation',
     },
     {
       action: 'unassign',
-      command: `skill front assign ${convId} --unassign --json`,
-      description: 'Remove assignee',
+      command: `skill front assign ${convId} --unassign`,
+      description: 'Unassign this conversation',
     },
     {
       action: 'tag',
-      command: `skill front tag ${convId} <tag-name-or-id> --json`,
-      description: 'Add a tag',
+      command: `skill front tag ${convId} --tag "<tag-name>"`,
+      description: 'Add a tag to this conversation',
     },
     {
       action: 'untag',
-      command: `skill front untag ${convId} <tag-name-or-id> --json`,
-      description: 'Remove a tag',
+      command: `skill front untag ${convId} --tag "<tag-name>"`,
+      description: 'Remove a tag from this conversation',
     },
     {
       action: 'reply',
-      command: `skill front reply ${convId} --body "<text>" --json`,
-      description: 'Create a draft reply',
+      command: `skill front reply ${convId} --message "<text>"`,
+      description: 'Draft a reply (HITL, not sent)',
     },
     {
-      action: 'tags',
+      action: 'tags-list',
       command: `skill front tags list --json`,
       description: 'View available tags',
     },
@@ -181,6 +181,11 @@ export function conversationListActions(inboxId?: string): HateoasAction[] {
   if (inboxId) {
     actions.push(
       {
+        action: 'report',
+        command: `skill front report --inbox ${inboxId} --json`,
+        description: 'Generate forensics report',
+      },
+      {
         action: 'bulk-archive',
         command: `skill front bulk-archive --inbox ${inboxId} --dry-run --json`,
         description: 'Bulk archive with filters',
@@ -190,11 +195,6 @@ export function conversationListActions(inboxId?: string): HateoasAction[] {
         action: 'triage',
         command: `skill front triage --inbox ${inboxId} --json`,
         description: 'Triage conversations',
-      },
-      {
-        action: 'report',
-        command: `skill front report --inbox ${inboxId} --json`,
-        description: 'Generate inbox report',
       }
     )
   }
