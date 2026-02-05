@@ -1,7 +1,9 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { password, select } from '@inquirer/prompts'
 import { Decrypter, Encrypter, identityToRecipient } from 'age-encryption'
 import type { CommandContext } from '../../core/context'
 import { EXIT_CODES } from '../../core/errors'
+import { SECRET_REFS } from '../../core/secret-refs'
 import { getAgeKeyPath, getUserConfigDir } from './init'
 
 export interface ConfigSetOptions {
@@ -75,7 +77,7 @@ async function readExistingConfig(
  */
 export async function configSetAction(
   ctx: CommandContext,
-  keyValue: string,
+  keyValue: string | undefined,
   options: ConfigSetOptions = {}
 ): Promise<void> {
   const outputJson = options.json === true || ctx.format === 'json'
@@ -98,8 +100,39 @@ export async function configSetAction(
     return
   }
 
+  // Interactive mode: no argument provided and stdin is a TTY
+  let finalKeyValue = keyValue
+  if (!finalKeyValue && process.stdin.isTTY && !outputJson) {
+    try {
+      const selectedKey = await select({
+        message: 'Select a secret key to set:',
+        choices: Object.keys(SECRET_REFS).map((key) => ({
+          name: key,
+          value: key,
+        })),
+      })
+
+      const secretValue = await password({
+        message: `Enter value for ${selectedKey}:`,
+      })
+
+      finalKeyValue = `${selectedKey}=${secretValue}`
+    } catch (error) {
+      // User cancelled (Ctrl+C)
+      if (
+        error instanceof Error &&
+        (error.message.includes('User force closed') ||
+          error.message.includes('canceled'))
+      ) {
+        ctx.output.data('Cancelled')
+        return
+      }
+      throw error
+    }
+  }
+
   // Parse KEY=value
-  const parsed = parseKeyValue(keyValue)
+  const parsed = parseKeyValue(finalKeyValue || '')
   if (!parsed) {
     const result: ConfigSetResult = {
       success: false,
