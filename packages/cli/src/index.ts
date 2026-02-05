@@ -70,6 +70,7 @@ import {
 import { autoUpdateAfterCommand } from './core/auto-update'
 import { createContext } from './core/context'
 import { HintEngine, writeHints } from './core/hint-engine'
+import { autoLinkSkill } from './core/skill-link'
 import { resolveTelemetryUser, sendTelemetryEvent } from './core/telemetry'
 import { getUsageTracker } from './core/usage-tracker'
 import { createMcpServer } from './mcp/server'
@@ -434,6 +435,9 @@ program
     const server = createMcpServer()
     await server.start()
   })
+
+// Auto-link skill-cli to ~/.claude/skills/ (silent, conflict-safe)
+void autoLinkSkill()
 
 // Parse and cleanup DB connections when done
 program.parseAsync().finally(async () => {

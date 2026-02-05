@@ -13,3 +13,6 @@ feat: user-local API key config with write gating
 - Include HATEOAS hints in JSON output:
   - `_meta.personal_key_hint` with setup instructions
   - `_actions[].requires_personal_key` flag for write actions
+- Auto-symlink skill-cli to `~/.claude/skills/` on CLI startup:
+  - Creates symlink on first run (if target doesn't exist)
+  - Skips if conflict detected (existing file/directory)
