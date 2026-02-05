@@ -13,6 +13,7 @@
 
 import type { CommandContext } from '../../core/context'
 import { CLIError, formatError } from '../../core/errors'
+import { requirePersonalKey } from '../../core/write-gate'
 import { getLinearClient } from './client'
 import { hateoasWrap, issueActions, issueLinks } from './hateoas'
 
@@ -61,6 +62,9 @@ export async function linkIssues(
   // TypeScript needs help here - we've verified length is exactly 1
   const relationship = relationships[0]!
   const targetValue = relationship.value!
+
+  // Require personal API key for write operations
+  requirePersonalKey('LINEAR_API_KEY')
 
   try {
     const client = getLinearClient()

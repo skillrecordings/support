@@ -11,6 +11,7 @@
 
 import type { CommandContext } from '../../core/context'
 import { CLIError, formatError } from '../../core/errors'
+import { requirePersonalKey } from '../../core/write-gate'
 import { getLinearClient } from './client'
 import { hateoasWrap, issueLinks, teamLinks } from './hateoas'
 
@@ -27,6 +28,9 @@ export async function closeIssue(
   issueId: string,
   options: CloseOptions = {}
 ): Promise<void> {
+  // Require personal API key for write operations
+  requirePersonalKey('LINEAR_API_KEY')
+
   try {
     const client = getLinearClient()
 
