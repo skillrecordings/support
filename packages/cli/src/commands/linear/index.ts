@@ -147,6 +147,7 @@ Examples:
     .option('--state <name>', 'Filter by state name')
     .option('--json', 'Output as JSON with HATEOAS links')
     .action(async (options, command: Command) => {
+      requirePersonalKey('LINEAR_API_KEY')
       const ctx = await contextFromCommand(command, options)
       await listMyIssues(ctx, {
         limit: parseInt(options.limit || '20', 10),

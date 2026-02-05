@@ -2,10 +2,11 @@
 "@skillrecordings/cli": patch
 ---
 
-fix(cli): require personal LINEAR_API_KEY for write operations
+fix(cli): require personal LINEAR_API_KEY for user-specific operations
 
-Linear write operations (create, update, assign, state, close, label, link, comment)
-now require a personal API key. Read operations (my, issues, search, issue, teams, etc.)
+Linear operations that are user-specific now require a personal API key:
+- `my` - shows YOUR issues (requires your key)
+- Write operations: create, update, assign, state, close, label, link, comment
+
+Read operations that don't involve user identity (issues, search, teams, etc.)
 continue to work with the shipped key.
-
-This prevents accidental mutations using someone else's API key.
