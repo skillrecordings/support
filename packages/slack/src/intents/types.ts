@@ -4,6 +4,7 @@ export type IntentCategory =
   | 'context_lookup'
   | 'escalation'
   | 'quick_action'
+  | 'general_query'
   | 'unknown'
 
 export interface ParsedIntent {

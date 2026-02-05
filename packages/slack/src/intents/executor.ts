@@ -71,6 +71,9 @@ export async function executeIntent(
             'Draft feedback captured — apply it by replying to a draft notification.',
         }
 
+      case 'general_query':
+        return await executeGeneralQuery(intent, context)
+
       case 'unknown':
       default:
         return {
@@ -85,6 +88,76 @@ export async function executeIntent(
       success: false,
       message: `Something went wrong: ${error instanceof Error ? error.message : 'Unknown error'}`,
     }
+  }
+}
+
+/**
+ * Execute general query - search Front for matching conversations
+ */
+async function executeGeneralQuery(
+  intent: ParsedIntent,
+  context: ExecutionContext
+): Promise<ExecutionResult> {
+  const front = getFrontClient()
+  const slackClient = getSlackClient()
+
+  const query =
+    intent.entities.query || intent.entities.product || intent.rawText || ''
+
+  await updateStatus(context, `🔍 Searching Front for "${query}"...`)
+
+  const conversations = await front.conversations.search(query)
+  const results = conversations._results as Conversation[]
+
+  await updateStatus(
+    context,
+    `📋 Found ${results.length} conversation${results.length === 1 ? '' : 's'}...`
+  )
+
+  if (results.length === 0) {
+    const message = `No conversations found for "${query}".`
+    await slackClient.chat.postMessage({
+      channel: context.channel,
+      text: message,
+      thread_ts: context.threadTs,
+    })
+    return { success: true, message }
+  }
+
+  const lines: string[] = [
+    `📋 *${results.length} conversation${results.length === 1 ? '' : 's'}* found for "${query}":`,
+  ]
+
+  for (const c of results.slice(0, 10)) {
+    const subject = c.subject || 'No subject'
+    const status = c.status || 'unknown'
+    const link = `https://app.frontapp.com/open/${c.id}`
+    const statusEmoji = getStatusEmoji(status)
+    const date = c.created_at
+      ? new Date(c.created_at * 1000).toLocaleDateString()
+      : ''
+
+    lines.push(
+      `${statusEmoji} <${link}|${truncate(subject, 40)}> (${status}) ${date}`
+    )
+  }
+
+  if (results.length > 10) {
+    lines.push(`...and ${results.length - 10} more`)
+  }
+
+  const message = lines.join('\n')
+
+  await slackClient.chat.postMessage({
+    channel: context.channel,
+    text: message,
+    thread_ts: context.threadTs,
+  })
+
+  return {
+    success: true,
+    message,
+    data: { conversationCount: results.length },
   }
 }
 

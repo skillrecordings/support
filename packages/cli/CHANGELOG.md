@@ -1,5 +1,68 @@
 # @skillrecordings/cli
 
+## 0.10.2
+
+### Patch Changes
+
+- 0279153: Rotate Axiom API token in encrypted environment.
+
+## 0.10.1
+
+### Patch Changes
+
+- 22b3af7: Fix JSON output truncation for large result sets. `--json` output exceeding 64KB is now written to `/tmp/skill-front/<timestamp>.json` with a summary envelope on stdout. Affects all `skill front` commands.
+
+## 0.10.0
+
+### Minor Changes
+
+- 9c4d627: Add comprehensive agent-optimized help text to all `skill front` commands. Every command now has a detailed cheat sheet accessible via `--help` with practical examples, filter/status values, jq patterns, related commands, and workflow guidance. Commands covered: inbox, conversation, message, teammates, teammate, assign, reply, tag, untag, tags (list/delete/rename/cleanup), archive, bulk-archive, report, triage, pull-conversations, and api.
+
+## 0.9.0
+
+### Minor Changes
+
+- 916bf14: Add `skill front search` with full Front query syntax support — text search, inline filters (inbox, tag, from, to, assignee, status, date ranges, custom fields), pagination, and comprehensive `--help` cheat sheet. Fix `skill -V` to read version from package.json instead of hardcoded 0.0.0.
+
+## 0.8.0
+
+### Minor Changes
+
+- bad1a4e: Add `skill front search` command with full Front query syntax (text, inbox, tag, assignee, status, sender, date range). Fix `skill -V` to read version from package.json instead of hardcoded 0.0.0.
+
+## 0.7.0
+
+### Minor Changes
+
+- 66ffb6a: Add `skill front search` command with full Front query syntax support (text, inbox, tag, assignee, status, from, date range filters).
+
+## 0.6.0
+
+### Minor Changes
+
+- 9297996: Add assign, tag/untag, reply, and api passthrough commands to `skill front`. Fix inbox status filter and pagination bugs. Add HATEOAS actions for new commands.
+
+## 0.5.0
+
+### Minor Changes
+
+- 97f98d8: Add `skill auth setup` — interactive keychain-based secret setup with 1Password CLI integration
+  - `skill auth setup`: prompts for AGE_SECRET_KEY, stores in OS keychain (macOS Keychain / Linux secret-tool), appends shell profile export
+  - `skill auth status`: shows env, keychain, 1Password CLI, and shell profile status
+  - Auto-fetches key from 1Password if `op` CLI is installed and signed in
+  - Falls back to direct 1Password link + manual paste
+  - Supports `--json` for machine-readable output
+
+## 0.4.0
+
+### Minor Changes
+
+- e676fb6: feat: wire up front commands, HATEOAS JSON output, restore .env.encrypted decryption
+  - Register 5 orphaned front commands (inbox, archive, bulk-archive, report, triage)
+  - Wrap all --json output with \_links and \_actions for agent discoverability
+  - Restore age decryption for .env.encrypted (AGE_SECRET_KEY from shell env)
+  - Update command descriptions for clarity
+
 ## 0.3.0
 
 ### Minor Changes
