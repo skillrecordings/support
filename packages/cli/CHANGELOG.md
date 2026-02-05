@@ -1,5 +1,13 @@
 # @skillrecordings/cli
 
+## 0.14.2
+
+### Patch Changes
+
+- 9dae31c: fix: inject BUILD_VERSION in tsup build for npm package
+
+  The tsup build (used for npm publishing) now injects BUILD_VERSION, BUILD_COMMIT, and BUILD_TARGET at build time. Previously only the native binary build did this, causing npm-installed CLI to show "0.0.0-dev".
+
 ## 0.14.1
 
 ### Patch Changes
