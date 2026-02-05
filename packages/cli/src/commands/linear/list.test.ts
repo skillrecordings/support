@@ -92,10 +92,13 @@ describe('listIssues - time filters', () => {
     expect(diff).toBeLessThan(1000)
   })
 
-  it('should throw error for invalid time format', async () => {
+  it('should report error for invalid time format', async () => {
     mockClient.issues.mockResolvedValue({ nodes: [] })
 
-    await expect(listIssues(ctx, { olderThan: 'invalid' })).rejects.toThrow()
+    await listIssues(ctx, { olderThan: 'invalid' })
+
+    // listIssues catches errors internally and sets exitCode
+    expect(process.exitCode).toBe(1)
   })
 })
 

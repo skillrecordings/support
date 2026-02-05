@@ -30,29 +30,24 @@ const createState = (overrides: Partial<UsageState> = {}): UsageState => ({
 })
 
 describe('HintEngine', () => {
-  it('ships with required onboarding and contextual rules', () => {
-    const onboarding = DEFAULT_HINT_RULES.filter(
-      (rule) => rule.audience !== 'contextual'
-    )
+  it('ships with contextual post-run rules', () => {
     const contextual = DEFAULT_HINT_RULES.filter(
       (rule) => rule.audience === 'contextual'
     )
 
-    expect(onboarding.length).toBeGreaterThanOrEqual(6)
-    expect(contextual.length).toBeGreaterThanOrEqual(3)
+    // All hints are now contextual and post-run only
+    expect(contextual.length).toBeGreaterThanOrEqual(5)
+    expect(DEFAULT_HINT_RULES.every((rule) => rule.postRun === true)).toBe(true)
   })
 
-  it('returns up to the max number of hints per invocation', () => {
+  it('returns no pre-run hints (all hints are post-run)', () => {
     const engine = new HintEngine()
     const state = createState({ totalRuns: 2 })
 
     const hints = engine.getHints(state, { command: 'front.inbox' })
 
-    expect(hints).toHaveLength(2)
-    expect(hints.map((hint) => hint.id)).toEqual([
-      'onboarding.wizard',
-      'onboarding.auth',
-    ])
+    // No pre-run hints exist anymore
+    expect(hints).toHaveLength(0)
   })
 
   it('suppresses hints in json or quiet mode', () => {

@@ -57,7 +57,8 @@ const FRONT_DESCRIPTIONS: Record<ProficiencyLevel, string> = {
     '  Bulk operations:\n' +
     '    skill front bulk-archive              Archive old/spam conversations\n' +
     '    skill front report                    Volume + tag + sender forensics\n\n' +
-    '  All commands accept --json for HATEOAS-enriched output with _links and _actions.',
+    '  All commands accept --json for HATEOAS-enriched output with _links and _actions.\n\n' +
+    '  Environment: FRONT_API_TOKEN required. Run `skill doctor` to check.',
   abbreviated:
     'Front API workflows for inbox triage and conversation actions.\n\n' +
     '  Common:\n' +
@@ -91,7 +92,8 @@ const INNGEST_DESCRIPTIONS: Record<ProficiencyLevel, string> = {
     '  Debug pipeline runs:\n' +
     '    skill inngest runs --status failed --after 1h    Recent failures\n' +
     '    skill inngest events --after 12h                 Recent events\n' +
-    '    skill inngest investigate <run-id>                Deep-dive a specific run',
+    '    skill inngest investigate <run-id>                Deep-dive a specific run\n\n' +
+    '  Environment: INNGEST_SIGNING_KEY required. Run `skill doctor` to check.',
   abbreviated:
     'Inngest events and workflow runs.\n\n' +
     '  Common:\n' +

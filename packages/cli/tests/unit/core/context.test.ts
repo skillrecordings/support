@@ -17,7 +17,8 @@ describe('createContext', () => {
     expect(context.verbose).toBe(false)
     expect(context.quiet).toBe(false)
     expect(context.signal.aborted).toBe(false)
-    expect(context.secrets.name).toBe('env')
+    // Default provider depends on whether OP_SERVICE_ACCOUNT_TOKEN is set
+    expect(['env', '1password']).toContain(context.secrets.name)
     expect(typeof context.onCleanup).toBe('function')
   })
 

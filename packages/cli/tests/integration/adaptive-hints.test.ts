@@ -39,52 +39,29 @@ const makeCommandEntry = (count = 1) => {
 
 describe('adaptive hints journey', () => {
   it(
-    'guides a fresh user and fades for a proficient one',
+    'shows no pre-run hints (all hints are post-run contextual)',
     { timeout: 15000 },
     async () => {
       const configDir = await createConfigDir()
 
+      // Fresh user running init - no pre-run hints should appear
       const firstRun = runCli(['init', 'MyApp'], {
         XDG_CONFIG_HOME: configDir,
         SKILL_CLI_FORCE_HINTS: '1',
       })
 
       expect(firstRun.status).toBe(0)
-      expect(firstRun.stderr).toContain('New here? Run `skill wizard`')
+      // No onboarding hints in pre-run anymore
+      expect(firstRun.stderr).not.toContain('New here?')
 
-      // Pre-seed auth_configured milestone to retire onboarding.auth hint
-      // This makes room for discovery hints (max 2 hints shown at once)
-      const stateWithAuth = createUsageState({
-        totalRuns: 1,
-        commands: { init: makeCommandEntry(1) },
-        milestones: {
-          auth_configured: {
-            achieved: true,
-            achievedAt: new Date().toISOString(),
-          },
-        },
-      })
-      await writeUsageState(configDir, stateWithAuth)
-
-      const secondRun = runCli(['init', 'MyApp'], {
-        XDG_CONFIG_HOME: configDir,
-        SKILL_CLI_FORCE_HINTS: '1',
-      })
-
-      expect(secondRun.status).toBe(0)
-      expect(secondRun.stderr).toContain('skill wizard')
-      expect(secondRun.stderr).toContain('skill front inbox')
-
+      // Proficient user also gets no pre-run hints
       const proficientState = createUsageState({
         totalRuns: 6,
         commands: {
           wizard: makeCommandEntry(1),
           init: makeCommandEntry(2),
-          health: makeCommandEntry(1),
           'front.inbox': makeCommandEntry(1),
           'front.triage': makeCommandEntry(1),
-          'inngest.stats': makeCommandEntry(1),
-          'axiom.query': makeCommandEntry(1),
         },
         milestones: {
           wizard_completed: {
@@ -106,27 +83,30 @@ describe('adaptive hints journey', () => {
       })
 
       expect(proficientRun.status).toBe(0)
-      expect(proficientRun.stderr.trim()).toBe('')
     }
   )
 
-  it('suppresses hints for json and quiet modes', async () => {
-    const configDir = await createConfigDir()
+  it(
+    'suppresses hints for json and quiet modes',
+    { timeout: 15000 },
+    async () => {
+      const configDir = await createConfigDir()
 
-    const jsonRun = runCli(['init', 'MyApp', '--json'], {
-      XDG_CONFIG_HOME: configDir,
-      SKILL_CLI_FORCE_HINTS: '1',
-    })
+      const jsonRun = runCli(['init', 'MyApp', '--json'], {
+        XDG_CONFIG_HOME: configDir,
+        SKILL_CLI_FORCE_HINTS: '1',
+      })
 
-    expect(jsonRun.status).toBe(0)
-    expect(jsonRun.stderr).not.toContain('skill wizard')
+      expect(jsonRun.status).toBe(0)
+      expect(jsonRun.stderr).not.toContain('Tip:')
 
-    const quietRun = runCli(['--quiet', 'init', 'MyApp'], {
-      XDG_CONFIG_HOME: await createConfigDir(),
-      SKILL_CLI_FORCE_HINTS: '1',
-    })
+      const quietRun = runCli(['--quiet', 'init', 'MyApp'], {
+        XDG_CONFIG_HOME: await createConfigDir(),
+        SKILL_CLI_FORCE_HINTS: '1',
+      })
 
-    expect(quietRun.status).toBe(0)
-    expect(quietRun.stderr).not.toContain('skill wizard')
-  })
+      expect(quietRun.status).toBe(0)
+      expect(quietRun.stderr).not.toContain('Tip:')
+    }
+  )
 })

@@ -15,7 +15,7 @@ const runCli = (args: string[], env: Record<string, string | undefined>) =>
 const createConfigDir = async () => mkdtemp(join(tmpdir(), 'skill-cli-hints-'))
 
 describe('cli hints lifecycle', () => {
-  it('shows onboarding hints on first run', async () => {
+  it('shows no pre-run hints on first run (all hints are post-run)', async () => {
     const configDir = await createConfigDir()
 
     const result = runCli(['init', 'MyApp'], {
@@ -24,7 +24,8 @@ describe('cli hints lifecycle', () => {
     })
 
     expect(result.status).toBe(0)
-    expect(result.stderr).toContain('New here? Run `skill wizard`')
+    // No pre-run onboarding hints anymore — all hints are post-run contextual
+    expect(result.stderr).not.toContain('New here?')
   })
 
   it('records usage and milestones after command runs', async () => {

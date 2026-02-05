@@ -343,6 +343,5 @@ export async function listIssues(
           })
     ctx.output.error(formatError(cliError))
     process.exitCode = cliError.exitCode
-    throw cliError
   }
 }
