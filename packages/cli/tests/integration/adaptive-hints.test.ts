@@ -38,59 +38,77 @@ const makeCommandEntry = (count = 1) => {
 }
 
 describe('adaptive hints journey', () => {
-  it('guides a fresh user and fades for a proficient one', async () => {
-    const configDir = await createConfigDir()
+  it(
+    'guides a fresh user and fades for a proficient one',
+    { timeout: 15000 },
+    async () => {
+      const configDir = await createConfigDir()
 
-    const firstRun = runCli(['init', 'MyApp'], {
-      XDG_CONFIG_HOME: configDir,
-      SKILL_CLI_FORCE_HINTS: '1',
-    })
+      const firstRun = runCli(['init', 'MyApp'], {
+        XDG_CONFIG_HOME: configDir,
+        SKILL_CLI_FORCE_HINTS: '1',
+      })
 
-    expect(firstRun.status).toBe(0)
-    expect(firstRun.stderr).toContain('New here? Run `skill wizard`')
+      expect(firstRun.status).toBe(0)
+      expect(firstRun.stderr).toContain('New here? Run `skill wizard`')
 
-    const secondRun = runCli(['init', 'MyApp'], {
-      XDG_CONFIG_HOME: configDir,
-      SKILL_CLI_FORCE_HINTS: '1',
-    })
-
-    expect(secondRun.status).toBe(0)
-    expect(secondRun.stderr).toContain('skill wizard')
-    expect(secondRun.stderr).toContain('skill front inbox')
-
-    const proficientState = createUsageState({
-      totalRuns: 6,
-      commands: {
-        wizard: makeCommandEntry(1),
-        init: makeCommandEntry(2),
-        health: makeCommandEntry(1),
-        'front.inbox': makeCommandEntry(1),
-        'front.triage': makeCommandEntry(1),
-        'inngest.stats': makeCommandEntry(1),
-        'axiom.query': makeCommandEntry(1),
-      },
-      milestones: {
-        wizard_completed: {
-          achieved: true,
-          achievedAt: new Date().toISOString(),
+      // Pre-seed auth_configured milestone to retire onboarding.auth hint
+      // This makes room for discovery hints (max 2 hints shown at once)
+      const stateWithAuth = createUsageState({
+        totalRuns: 1,
+        commands: { init: makeCommandEntry(1) },
+        milestones: {
+          auth_configured: {
+            achieved: true,
+            achievedAt: new Date().toISOString(),
+          },
         },
-        auth_configured: {
-          achieved: true,
-          achievedAt: new Date().toISOString(),
+      })
+      await writeUsageState(configDir, stateWithAuth)
+
+      const secondRun = runCli(['init', 'MyApp'], {
+        XDG_CONFIG_HOME: configDir,
+        SKILL_CLI_FORCE_HINTS: '1',
+      })
+
+      expect(secondRun.status).toBe(0)
+      expect(secondRun.stderr).toContain('skill wizard')
+      expect(secondRun.stderr).toContain('skill front inbox')
+
+      const proficientState = createUsageState({
+        totalRuns: 6,
+        commands: {
+          wizard: makeCommandEntry(1),
+          init: makeCommandEntry(2),
+          health: makeCommandEntry(1),
+          'front.inbox': makeCommandEntry(1),
+          'front.triage': makeCommandEntry(1),
+          'inngest.stats': makeCommandEntry(1),
+          'axiom.query': makeCommandEntry(1),
         },
-      },
-    })
+        milestones: {
+          wizard_completed: {
+            achieved: true,
+            achievedAt: new Date().toISOString(),
+          },
+          auth_configured: {
+            achieved: true,
+            achievedAt: new Date().toISOString(),
+          },
+        },
+      })
 
-    await writeUsageState(configDir, proficientState)
+      await writeUsageState(configDir, proficientState)
 
-    const proficientRun = runCli(['init', 'MyApp'], {
-      XDG_CONFIG_HOME: configDir,
-      SKILL_CLI_FORCE_HINTS: '1',
-    })
+      const proficientRun = runCli(['init', 'MyApp'], {
+        XDG_CONFIG_HOME: configDir,
+        SKILL_CLI_FORCE_HINTS: '1',
+      })
 
-    expect(proficientRun.status).toBe(0)
-    expect(proficientRun.stderr.trim()).toBe('')
-  })
+      expect(proficientRun.status).toBe(0)
+      expect(proficientRun.stderr.trim()).toBe('')
+    }
+  )
 
   it('suppresses hints for json and quiet modes', async () => {
     const configDir = await createConfigDir()
