@@ -213,6 +213,64 @@ skill front api POST /conversations/cnv_xxx/tags --data '{"tag_ids":["tag_xxx"]}
 skill front pull-conversations --inbox inb_xxx --output data.json
 ```
 
+## Linear Commands
+
+### ⚠️ Personal API Key Required for Write Operations
+
+**All write operations (create, update, assign, close, comment, etc.) require a personal LINEAR_API_KEY.**
+
+```bash
+# Set up your personal API key
+skill config init
+skill config set LINEAR_API_KEY=lin_api_xxx
+
+# Without a personal key, write commands will fail with:
+# "Write operations require a personal API key for LINEAR_API_KEY."
+```
+
+### Read Operations (no personal key needed)
+```bash
+skill linear issues                           # List issues
+skill linear issues --team ENG                # Filter by team
+skill linear issues --state "In Progress"     # Filter by state
+skill linear issues --assignee me             # My issues
+skill linear issue ENG-123                    # Get issue details
+skill linear search "bug"                     # Search issues
+skill linear teams                            # List teams
+skill linear users                            # List users
+skill linear states ENG                       # Workflow states for team
+skill linear labels ENG                       # Labels for team
+skill linear projects                         # List projects
+skill linear my                               # My assigned issues
+```
+
+### Write Operations (require personal API key)
+```bash
+skill linear create "Fix the bug" --team ENG                    # Create issue
+skill linear create "Task" --team ENG --priority 1 --state "Todo"
+skill linear update ENG-123 --priority 0 --estimate 3           # Update issue
+skill linear assign ENG-123 --to user@example.com               # Assign
+skill linear assign ENG-123 --unassign                          # Unassign
+skill linear state ENG-123 --state "In Review"                  # Change state
+skill linear close ENG-123                                      # Close issue
+skill linear close ENG-123 --reason "Fixed in PR #42"           # Close with reason
+skill linear comment ENG-123 --body "Working on this"           # Add comment
+skill linear label ENG-123 --add "bug"                          # Add label
+skill linear label ENG-123 --remove "feature"                   # Remove label
+skill linear link ENG-123 --blocks ENG-456                      # Link issues
+skill linear link ENG-123 --blocked-by ENG-456
+skill linear link ENG-123 --related ENG-456
+```
+
+### JSON Output with HATEOAS
+```bash
+skill linear issue ENG-123 --json
+# Response includes:
+# - _meta.personal_key_hint: Warning about write operations
+# - _actions[].requires_personal_key: true for write actions
+# - _links: Related resources
+```
+
 ## Other Commands
 
 ### Initialize integration

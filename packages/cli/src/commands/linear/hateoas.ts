@@ -16,12 +16,22 @@ export interface HateoasAction {
   command: string
   description: string
   destructive?: boolean
+  /** Write operations require a personal API key */
+  requires_personal_key?: boolean
+}
+
+export interface HateoasMeta {
+  /** Hint about personal API key requirement */
+  personal_key_hint?: string
+  /** Setup command for personal keys */
+  setup_command?: string
 }
 
 export interface HateoasResponse<T> {
   data: T
   _links: HateoasLink[]
   _actions: HateoasAction[]
+  _meta?: HateoasMeta
   _type: string
   _command: string
 }
@@ -32,14 +42,29 @@ export function hateoasWrap<T>(opts: {
   data: T
   links?: HateoasLink[]
   actions?: HateoasAction[]
+  meta?: HateoasMeta
 }): HateoasResponse<T> {
-  return {
+  const response: HateoasResponse<T> = {
     _type: opts.type,
     _command: opts.command,
     data: opts.data,
     _links: opts.links ?? [],
     _actions: opts.actions ?? [],
   }
+  if (opts.meta) {
+    response._meta = opts.meta
+  }
+  return response
+}
+
+/**
+ * Standard metadata for responses that include write actions.
+ * Provides clear hint about personal API key requirement.
+ */
+export const WRITE_ACTION_META: HateoasMeta = {
+  personal_key_hint:
+    '⚠️ Write operations require a personal LINEAR_API_KEY. Run `skill config init` to set up your keys.',
+  setup_command: 'skill config init',
 }
 
 // ── Link/action builders for each resource type ──
@@ -76,42 +101,50 @@ export function issueActions(identifier: string): HateoasAction[] {
       action: 'comment',
       command: `skill linear comment ${identifier} --body "<text>"`,
       description: 'Add a comment',
+      requires_personal_key: true,
     },
     {
       action: 'assign',
       command: `skill linear assign ${identifier} --to <user-email>`,
       description: 'Assign this issue',
+      requires_personal_key: true,
     },
     {
       action: 'unassign',
       command: `skill linear assign ${identifier} --unassign`,
       description: 'Unassign this issue',
+      requires_personal_key: true,
     },
     {
       action: 'update-state',
       command: `skill linear state ${identifier} --state "<state-name>"`,
       description: 'Change workflow state',
+      requires_personal_key: true,
     },
     {
       action: 'update-priority',
       command: `skill linear update ${identifier} --priority <0-4>`,
       description: 'Change priority (0=urgent, 4=none)',
+      requires_personal_key: true,
     },
     {
       action: 'add-label',
       command: `skill linear label ${identifier} --add "<label-name>"`,
       description: 'Add a label',
+      requires_personal_key: true,
     },
     {
       action: 'close',
       command: `skill linear close ${identifier}`,
       description: 'Close this issue',
       destructive: true,
+      requires_personal_key: true,
     },
     {
       action: 'link',
       command: `skill linear link ${identifier} --blocks <other-id>`,
       description: 'Link to another issue',
+      requires_personal_key: true,
     },
   ]
 }
@@ -141,6 +174,7 @@ export function issueListActions(teamKey?: string): HateoasAction[] {
       action: 'create',
       command: `skill linear create "<title>"${teamKey ? ` --team ${teamKey}` : ''}`,
       description: 'Create a new issue',
+      requires_personal_key: true,
     },
     {
       action: 'search',
