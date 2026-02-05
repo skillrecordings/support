@@ -106,9 +106,14 @@ export const DEFAULT_HINT_RULES: HintRule[] = [
     id: 'discovery.keys',
     audience: 'discovery',
     message: 'Override shared credentials with your own: `skill keys add`',
-    showWhen: (state) => state.totalRuns >= 3 && !hasCommand(state, 'keys'),
+    showWhen: (state) =>
+      state.totalRuns >= 3 &&
+      !hasCommand(state, 'keys') &&
+      !hasMilestone(state, 'auth_configured'),
     retireWhen: (state) =>
-      hasCommand(state, 'keys') || hasCommand(state, 'keys.add'),
+      hasCommand(state, 'keys') ||
+      hasCommand(state, 'keys.add') ||
+      hasMilestone(state, 'auth_configured'),
   },
   {
     id: 'context.front.triage',
