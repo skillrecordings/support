@@ -51,6 +51,7 @@ import { health } from './commands/health'
 import { init } from './commands/init'
 import { registerInngestCommands } from './commands/inngest/index'
 import { registerKbCommands } from './commands/kb-sync'
+import { registerLinearCommands } from './commands/linear/index'
 import { registerMemoryCommands } from './commands/memory/index'
 import { registerPipelineCommands } from './commands/pipeline'
 import { registerPluginSyncCommand } from './commands/plugin-sync'
@@ -402,6 +403,9 @@ registerDatasetCommands(program)
 registerResponseCommands(program)
 registerToolsCommands(program)
 registerMemoryCommands(program)
+
+// Linear commands
+registerLinearCommands(program)
 
 // FAQ commands
 registerFaqCommands(program)
