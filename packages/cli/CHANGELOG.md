@@ -1,5 +1,29 @@
 # @skillrecordings/cli
 
+## 0.17.0
+
+### Minor Changes
+
+- 01fef36: feat(cli): auto-bootstrap keychain from op CLI
+
+  The CLI now automatically fetches secrets from 1Password when `op` CLI is
+  installed and authenticated. No manual setup required.
+  - Detects `op` CLI and fetches OP_SERVICE_ACCOUNT_TOKEN from vault
+  - Caches tokens in system keychain (macOS Keychain / Linux secret-tool)
+  - Adds shell exports to ~/.zshrc automatically
+  - `skill keys setup` tries everything and shows manual steps if needed
+
+### Patch Changes
+
+- bd78925: fix(cli): make hints contextual and show after output
+
+  No more random hints about unrelated commands before your output.
+  Hints now only appear after output and are relevant to the command you ran.
+
+- 45a1e58: feat(cli): add loading spinners for data-fetching commands
+
+  Commands that hit APIs (front inbox, axiom queries, inngest events, linear search/my/teams) now show animated spinners while loading. Spinners only appear in TTY mode and are suppressed for JSON output or piped commands.
+
 ## 0.16.1
 
 ### Patch Changes
