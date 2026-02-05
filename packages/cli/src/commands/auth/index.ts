@@ -24,7 +24,20 @@ const buildContext = async (command: Command, json?: boolean) => {
  * Register auth commands with Commander
  */
 export function registerAuthCommands(program: Command): void {
-  const auth = program.command('auth').description('Manage CLI auth status')
+  const auth = program
+    .command('auth')
+    .description(
+      'Manage CLI authentication and secrets.\n\n' +
+        '  First time? Start here:\n' +
+        '    skill auth setup          Interactive wizard — connects to 1Password vault,\n' +
+        '                              configures FRONT_API_TOKEN, DATABASE_URL, and more.\n' +
+        '                              Requires: `op` CLI installed (brew install 1password-cli)\n\n' +
+        '  Check your setup:\n' +
+        '    skill auth status          Shows which secrets are configured and which are missing\n' +
+        '    skill auth whoami          Verify your 1Password service account identity\n\n' +
+        '  All Skill Recordings employees have access to the Support vault in 1Password.\n' +
+        '  The setup wizard handles everything — no manual token pasting needed.'
+    )
 
   auth
     .command('status')

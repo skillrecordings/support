@@ -86,7 +86,23 @@ const program = new Command()
 
 program
   .name('skill')
-  .description('CLI tool for managing app integrations')
+  .description(
+    'Skill Recordings support agent CLI — triage, investigate, and manage customer conversations.\n\n' +
+      '  Getting Started:\n' +
+      '    1. skill auth setup        Configure 1Password secrets (Front API token, DB, etc.)\n' +
+      '    2. skill auth status        Verify your credentials are working\n' +
+      '    3. skill front inbox        See what needs attention right now\n\n' +
+      '  Common Workflows:\n' +
+      '    Triage inbox          skill front inbox → skill front triage\n' +
+      '    Investigate ticket    skill front conversation <id> --messages\n' +
+      '    Bulk cleanup          skill front bulk-archive --older-than 30d\n' +
+      '    Generate report       skill front report --inbox support\n' +
+      '    Check deploys         skill deploys\n\n' +
+      '  For AI Agents (Claude Code, MCP):\n' +
+      '    skill mcp              Start JSON-RPC server with 9 Front tools\n' +
+      '    skill plugin sync      Install the Claude Code plugin\n' +
+      '    All commands support --json for structured, HATEOAS-enriched output'
+  )
   .version(versionLabel)
   .option('-f, --format <format>', 'Output format (json|text|table)')
   .option('-v, --verbose', 'Enable verbose output')
@@ -94,6 +110,15 @@ program
   .option('--rate-limit <n>', 'Override Front API rate limit per minute', (v) =>
     Number.parseInt(v, 10)
   )
+
+// Show guided help when run with no args
+program.addHelpText(
+  'after',
+  '\n  Need help? Start with:\n' +
+    '    skill auth setup            Set up credentials (1Password)\n' +
+    '    skill front inbox            See what needs attention\n' +
+    '    skill --help                 This message\n'
+)
 
 program.hook('preAction', (thisCommand, actionCommand) => {
   const opts =
@@ -234,7 +259,12 @@ registerPluginSyncCommand(program)
 
 program
   .command('mcp')
-  .description('Start MCP server for AI coding agent integration')
+  .description(
+    'Start MCP server for AI coding agent integration.\n' +
+      '  Exposes 9 Front tools over JSON-RPC stdio for Claude Code, Cursor, etc.\n' +
+      '  Tools: inbox, conversation, message, assign, reply, tag, archive, search, report\n' +
+      '  Usage: skill mcp  (then connect your AI editor to stdin/stdout)'
+  )
   .action(async () => {
     const server = createMcpServer()
     await server.start()

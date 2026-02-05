@@ -394,7 +394,27 @@ async function getTeammate(
 export function registerFrontCommands(program: Command): void {
   const front = program
     .command('front')
-    .description('Front conversations, inboxes, tags, archival, and reporting')
+    .description(
+      'Front conversations, inboxes, tags, archival, and reporting.\n\n' +
+        '  Prerequisites:\n' +
+        '    FRONT_API_TOKEN must be set. Run: skill auth setup\n\n' +
+        '  Start here:\n' +
+        '    skill front inbox                    See unassigned conversations\n' +
+        '    skill front inbox support             List conversations in a specific inbox\n' +
+        '    skill front triage                    AI-powered categorization of inbox items\n\n' +
+        '  Investigate a conversation:\n' +
+        '    skill front conversation <id> -m      Full conversation with messages\n' +
+        '    skill front message <id>              Single message details + body\n\n' +
+        '  Take action:\n' +
+        '    skill front assign <id>               Assign to a teammate\n' +
+        '    skill front reply <id>                Draft a reply (HITL, never auto-sends)\n' +
+        '    skill front tag <id>                  Add a tag\n' +
+        '    skill front archive <id>              Archive a resolved conversation\n\n' +
+        '  Bulk operations:\n' +
+        '    skill front bulk-archive              Archive old/spam conversations\n' +
+        '    skill front report                    Volume + tag + sender forensics\n\n' +
+        '  All commands accept --json for HATEOAS-enriched output with _links and _actions.'
+    )
 
   front
     .command('message')
