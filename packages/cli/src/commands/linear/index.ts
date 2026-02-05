@@ -36,6 +36,7 @@
 
 import type { Command } from 'commander'
 import { type CommandContext, createContext } from '../../core/context'
+import { requirePersonalKey } from '../../core/write-gate'
 import { assignIssue } from './assign'
 import { closeIssue } from './close'
 import { addComment } from './comment'
@@ -89,7 +90,9 @@ Quick start:
   skill linear create "Title"        Create issue
   skill linear search "query"        Search issues
 
-All commands support --json for machine-readable output.`
+All commands support --json for machine-readable output.
+
+⚠️  Write operations require personal LINEAR_API_KEY (run 'skill keys add').`
   )
 
   // ─────────────────────────────────────────────────────────────
@@ -219,6 +222,7 @@ Priority: 0=Urgent, 1=High, 2=Medium, 3=Low, 4=None`
     .option('--due-date <YYYY-MM-DD>', 'Due date')
     .option('--json', 'Output as JSON with HATEOAS links')
     .action(async (title: string, options, command: Command) => {
+      requirePersonalKey('LINEAR_API_KEY')
       const ctx = await contextFromCommand(command, options)
       await createIssue(ctx, title, {
         description: options.description,
@@ -251,6 +255,7 @@ Examples:
     .option('--project <name>', 'Move to project')
     .option('--json', 'Output as JSON with HATEOAS links')
     .action(async (id: string, options, command: Command) => {
+      requirePersonalKey('LINEAR_API_KEY')
       const ctx = await contextFromCommand(command, options)
       await updateIssue(ctx, id, {
         title: options.title,
@@ -283,6 +288,7 @@ Examples:
     .option('--unassign', 'Remove assignee')
     .option('--json', 'Output as JSON with HATEOAS links')
     .action(async (id: string, options, command: Command) => {
+      requirePersonalKey('LINEAR_API_KEY')
       const ctx = await contextFromCommand(command, options)
       await assignIssue(ctx, id, {
         to: options.to,
@@ -305,6 +311,7 @@ Use 'skill linear states <team>' to see available states.`
     .requiredOption('--state <name>', 'Target state name')
     .option('--json', 'Output as JSON with HATEOAS links')
     .action(async (id: string, options, command: Command) => {
+      requirePersonalKey('LINEAR_API_KEY')
       const ctx = await contextFromCommand(command, options)
       await changeState(ctx, id, { state: options.state })
     })
@@ -322,6 +329,7 @@ Examples:
     .option('--canceled', 'Close as canceled instead of done')
     .option('--json', 'Output as JSON with HATEOAS links')
     .action(async (id: string, options, command: Command) => {
+      requirePersonalKey('LINEAR_API_KEY')
       const ctx = await contextFromCommand(command, options)
       await closeIssue(ctx, id, { canceled: options.canceled })
     })
@@ -353,6 +361,7 @@ Use 'skill linear labels <team>' to see available labels.`
     )
     .option('--json', 'Output as JSON with HATEOAS links')
     .action(async (id: string, options, command: Command) => {
+      requirePersonalKey('LINEAR_API_KEY')
       const ctx = await contextFromCommand(command, options)
       await modifyLabels(ctx, id, {
         add: options.add,
@@ -378,6 +387,7 @@ Examples:
     .option('--duplicate <id>', 'Duplicate of <id>')
     .option('--json', 'Output as JSON with HATEOAS links')
     .action(async (id: string, options, command: Command) => {
+      requirePersonalKey('LINEAR_API_KEY')
       const ctx = await contextFromCommand(command, options)
       await linkIssues(ctx, id, {
         blocks: options.blocks,
@@ -404,6 +414,7 @@ Examples:
     .requiredOption('--body <text>', 'Comment text (supports markdown)')
     .option('--json', 'Output as JSON with HATEOAS links')
     .action(async (id: string, options, command: Command) => {
+      requirePersonalKey('LINEAR_API_KEY')
       const ctx = await contextFromCommand(command, options)
       await addComment(ctx, id, { body: options.body })
     })
