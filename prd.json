@@ -40,7 +40,7 @@
       "title": "Wire usage tracker + hint engine into CLI command lifecycle",
       "description": "Integrate the usage tracker and hint engine into the CLI's commander lifecycle so hints appear automatically.\n\n**Files:** `packages/cli/src/index.ts` (modify hooks), `packages/cli/tests/integration/commands/hints.test.ts`\n\n**Validation:** (cd packages/cli && bun run test)",
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "validationCommand": "(cd packages/cli && bun run test)",
       "acceptanceCriteria": [
         "preAction hook shows onboarding hints to stderr",
@@ -56,7 +56,7 @@
       "title": "Axiom telemetry — ship anonymized usage events",
       "description": "Add telemetry that ships CLI usage events to Axiom. This is an internal tool on work machines — no anonymization needed, include user identity for per-person analysis.\n\n**Files:** `packages/cli/src/core/telemetry.ts`, `packages/cli/tests/unit/core/telemetry.test.ts`, `packages/cli/src/index.ts` (wire into postAction)\n\n**Validation:** (cd packages/cli && bun run test)",
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "validationCommand": "(cd packages/cli && bun run test)",
       "acceptanceCriteria": [
         "TelemetryEvent type with command, duration, success, platform fields",
@@ -73,7 +73,7 @@
       "title": "Replace static help descriptions with adaptive ones from hint engine",
       "description": "Replace the static help text descriptions in command groups with dynamic versions that adapt based on usage state.\n\n**Files:** `packages/cli/src/core/adaptive-help.ts`, `packages/cli/tests/unit/core/adaptive-help.test.ts`, `packages/cli/src/index.ts`, `packages/cli/src/commands/front/index.ts`, `packages/cli/src/commands/auth/index.ts`\n\n**Validation:** (cd packages/cli && bun run test)",
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "validationCommand": "(cd packages/cli && bun run test)",
       "acceptanceCriteria": [
         "getAdaptiveDescription function for each command group",
@@ -88,7 +88,7 @@
       "title": "Changeset + integration test for full adaptive hints flow",
       "description": "Final polish: add changeset, ensure full integration test coverage for the adaptive hints system end-to-end.\n\n**Files:** `.changeset/adaptive-hints.md`, `packages/cli/tests/integration/adaptive-hints.test.ts`, `packages/cli/README.md`\n\n**Validation:** (cd packages/cli && bun run test)",
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "validationCommand": "(cd packages/cli && bun run test)",
       "acceptanceCriteria": [
         "Changeset file for minor CLI bump",
@@ -103,7 +103,7 @@
       "title": "Auto-update — check npm for new versions and self-update",
       "description": "Add auto-update capability to the CLI. This is an internal tool on work machines — just update, no consent dialogs.\n\n**Files:** `packages/cli/src/core/auto-update.ts`, `packages/cli/tests/unit/core/auto-update.test.ts`, `packages/cli/src/index.ts` (wire into postAction)\n\n**Validation:** (cd packages/cli && bun run test)",
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "validationCommand": "(cd packages/cli && bun run test)",
       "acceptanceCriteria": [
         "checkForUpdate() queries npm registry with 1-hour throttle",
@@ -119,7 +119,7 @@
   ],
   "metadata": {
     "createdAt": "2026-02-04T22:10:00.000Z",
-    "totalIterations": 2,
-    "lastIteration": "2026-02-05T01:17:36.658Z"
+    "totalIterations": 7,
+    "lastIteration": "2026-02-05T01:42:56.146Z"
   }
 }

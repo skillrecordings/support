@@ -29,3 +29,53 @@ Summary: **Summary**
 
 **Notes**
 - The `tdd-red-green-refa
+
+---
+[2026-02-05T01:26:54.450Z]
+Completed: Wire usage tracker + hint engine into CLI command lifecycle
+Files: none
+Summary: **Summary**
+- Wired hint rendering and usage tracking into CLI lifecycle hooks in `packages/cli/src/index.ts`, including command-name resolution, piped-output suppression, post-run contextual hints, and milestone auto-detection.
+- Wrapped `init`, `wizard`, and `health` actions to build a `CommandContext` before invoking the command handlers in `packages/cli/src/index.ts` so CLI execution works end
+
+---
+[2026-02-05T01:29:55.963Z]
+Completed: Axiom telemetry — ship anonymized usage events
+Files: none
+Summary: Summary:
+- Added `TelemetryEvent` definition and Axiom send helper with opt-out + missing-token silent skips in `packages/cli/src/core/telemetry.ts`.
+- Wired telemetry emission into CLI `postAction` with duration/success/platform/user fields and a start-time tracker in `packages/cli/src/index.ts`.
+- Added unit tests covering send, opt-out, missing token, user sanitization, and error swallowing in 
+
+---
+[2026-02-05T01:34:04.024Z]
+Completed: Replace static help descriptions with adaptive ones from hint engine
+Files: none
+Summary: **Summary**
+- Added adaptive help descriptions with progressive collapse for root, front, auth, and inngest in `packages/cli/src/core/adaptive-help.ts`.
+- Wired adaptive descriptions into `packages/cli/src/index.ts`, `packages/cli/src/commands/front/index.ts`, `packages/cli/src/commands/auth/index.ts`, and `packages/cli/src/commands/inngest/index.ts` using usage state fallback logic.
+- Added unit 
+
+---
+[2026-02-05T01:37:41.375Z]
+Completed: Changeset + integration test for full adaptive hints flow
+Files: none
+Summary: Summary:
+- Added adaptive hints E2E integration test covering fresh → proficient journey plus JSON/quiet suppression in `packages/cli/tests/integration/adaptive-hints.test.ts`.
+- Documented adaptive hints behavior and opt-out paths in `packages/cli/README.md`.
+- Added changeset for minor CLI bump in `.changeset/adaptive-hints.md`.
+
+Tests:
+- `cd packages/cli && bun run test`
+
+Learnings:
+- The CLI h
+
+---
+[2026-02-05T01:42:56.147Z]
+Completed: Auto-update — check npm for new versions and self-update
+Files: none
+Summary: Summary:
+- Added auto-update core with npm registry checks, semver comparison, throttling, and bun/npm global install support in `packages/cli/src/core/auto-update.ts`.
+- Wired auto-update into CLI `postAction`, respecting dev, mcp, and json skips in `packages/cli/src/index.ts`.
+- Added unit tests covering registry throttling, semver comparisons, update execution, and skip conditions in `packages/
