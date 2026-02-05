@@ -192,22 +192,137 @@ non-interactive operation:
 - Check exit codes: 0 = success, 1 = error
 - Never interactive in non-TTY environments (CI/CD safe)
 
-## Auth (Encrypted Secrets)
+## Secrets Management
 
-Distribute CLI secrets to team members via age encryption + 1Password.
+The CLI uses a layered secrets system:
 
-```bash
-# Generate keypair (admin)
-skill auth keygen
+1. **1Password (preferred)** - Service account token resolves secrets directly
+2. **Encrypted `.env.encrypted`** - Age-encrypted env file for offline/CI use
+3. **Plain `.env.local`** - Local development fallback
 
-# Encrypt secrets (admin)
-skill auth encrypt .env.local
+### Secret Resolution Order
 
-# Decrypt secrets (team)
-skill auth decrypt .env.local.age --output .env.local
+```
+1Password (OP_SERVICE_ACCOUNT_TOKEN set?)
+    ↓ yes → resolve from 1Password vault
+    ↓ no
+.env.encrypted exists + AGE_SECRET_KEY available?
+    ↓ yes → decrypt and load
+    ↓ no
+.env.local exists?
+    ↓ yes → load plain env vars
+    ↓ no → error: missing secrets
 ```
 
-See [docs/CLI-AUTH.md](./docs/CLI-AUTH.md) for complete setup guide.
+### Adding a New Secret
+
+**Step 1: Add to `secret-refs.ts`**
+
+```typescript
+// packages/cli/src/core/secret-refs.ts
+export const SECRET_REFS = {
+  // ... existing secrets
+  MY_NEW_KEY: 'op://Support/skill-cli/MY_NEW_KEY',
+} as const
+```
+
+**Step 2: Add to 1Password**
+
+```bash
+# Using op CLI
+op item edit "skill-cli" --vault "Support" "MY_NEW_KEY=your-secret-value"
+
+# Or via 1Password UI:
+# 1. Open Support vault → skill-cli item
+# 2. Add new field: MY_NEW_KEY = your-value
+```
+
+**Step 3: Update `.env.encrypted`**
+
+```bash
+# Decrypt current secrets
+AGE_KEY=$(op read "op://Support/skill-cli-age-key/password")
+age -d -i <(echo "$AGE_KEY") .env.encrypted > .env.local
+
+# Add new secret to .env.local
+echo "MY_NEW_KEY=your-secret-value" >> .env.local
+
+# Re-encrypt
+AGE_PUB=$(echo "$AGE_KEY" | age-keygen -y)
+age -r "$AGE_PUB" .env.local > .env.encrypted
+
+# Verify
+age -d -i <(echo "$AGE_KEY") .env.encrypted | grep MY_NEW_KEY
+```
+
+**Step 4: Commit changes**
+
+```bash
+git add packages/cli/src/core/secret-refs.ts packages/cli/.env.encrypted
+git commit -m "chore(cli): add MY_NEW_KEY secret"
+```
+
+### Updating an Existing Secret
+
+```bash
+# 1. Update in 1Password
+op item edit "skill-cli" --vault "Support" "MY_KEY=new-value"
+
+# 2. Update .env.encrypted (same process as adding)
+AGE_KEY=$(op read "op://Support/skill-cli-age-key/password")
+age -d -i <(echo "$AGE_KEY") .env.encrypted > .env.local
+
+# Edit .env.local with new value
+sed -i '' 's/MY_KEY=.*/MY_KEY=new-value/' .env.local
+
+# Re-encrypt
+AGE_PUB=$(echo "$AGE_KEY" | age-keygen -y)
+age -r "$AGE_PUB" .env.local > .env.encrypted
+```
+
+### Auth Commands
+
+```bash
+# Check current auth status
+skill auth status
+
+# Validate 1Password token
+skill auth login
+
+# Show service account info
+skill auth whoami
+
+# Interactive setup wizard
+skill auth setup
+```
+
+### Key Locations
+
+| Item | Location |
+|------|----------|
+| Secrets | `op://Support/skill-cli/*` |
+| Age keypair | `op://Support/skill-cli-age-key/password` |
+| Encrypted env | `packages/cli/.env.encrypted` |
+| Secret refs | `packages/cli/src/core/secret-refs.ts` |
+
+### CI/CD Usage
+
+For CI environments without 1Password:
+
+```bash
+# Set age key as CI secret, then:
+echo "$AGE_SECRET_KEY" > /tmp/age.key
+age -d -i /tmp/age.key .env.encrypted > .env.local
+rm /tmp/age.key
+```
+
+Or use 1Password service account:
+
+```bash
+export OP_SERVICE_ACCOUNT_TOKEN="$OP_TOKEN"
+skill auth status  # Verifies connection
+skill front inbox  # Commands auto-resolve secrets
+```
 
 ## Implementation
 
