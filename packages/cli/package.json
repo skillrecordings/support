@@ -5,7 +5,7 @@
   "bin": {
     "skill": "./bin/skill.mjs"
   },
-  "files": ["dist", "bin", "plugin"],
+  "files": ["dist", "bin", "plugin", ".env.encrypted"],
   "scripts": {
     "dev": "bun src/index.ts",
     "build": "tsup",

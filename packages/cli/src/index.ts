@@ -1,22 +1,23 @@
 #!/usr/bin/env bun
 
-// Load .env.local before any module that validates env vars (e.g., @skillrecordings/database)
-// Bun auto-loads .env in the cwd, but CLI may run from anywhere — explicitly load from package root.
+// Load config before any module that validates env vars (e.g., @skillrecordings/database)
 //
-// Config loading priority (when decryption is implemented):
-// 1. Load shipped defaults from packages/cli/.env.encrypted
+// Config loading priority:
+// 1. Load shipped defaults from packages/cli/.env.encrypted (decrypted via 1Password age key)
 // 2. Load user overrides from ~/.config/skill/.env.user.encrypted
-// 3. User values override shipped values
+// 3. Fall back to plaintext .env.local for local dev
 // 4. Track provenance for write-gating (isUserKey() check)
-//
-// For now, we use plaintext .env.local fallback until worker-1 implements decryption.
 
 import { resolve } from 'node:path'
-import { loadPlaintextEnv } from './core/config-loader'
+import { initConfig, loadPlaintextEnv } from './core/config-loader'
 
 const cliRoot = resolve(import.meta.dirname, '..')
-const plaintextEnv = loadPlaintextEnv(cliRoot)
 
+// Try encrypted config chain first (works with 1Password)
+await initConfig(cliRoot)
+
+// Fall back to plaintext .env.local for local dev (if vars not already set)
+const plaintextEnv = loadPlaintextEnv(cliRoot)
 let envLoaded = false
 for (const [key, value] of Object.entries(plaintextEnv)) {
   if (!process.env[key]) {
@@ -25,17 +26,10 @@ for (const [key, value] of Object.entries(plaintextEnv)) {
   }
 }
 
-// Skip env validation when no .env file found (e.g., global npm install, --help, --version)
-// Commands that need DATABASE_URL will fail at runtime with a clear error instead.
+// Skip env validation when no config found (e.g., global npm install, --help, --version)
 if (!envLoaded && !process.env.DATABASE_URL) {
   process.env.SKIP_ENV_VALIDATION = '1'
 }
-
-// TODO: Replace with loadConfigChain() once worker-1 implements decryptEnvFile()
-// This will enable:
-// - Shipped defaults from .env.encrypted
-// - User overrides from ~/.config/skill/.env.user.encrypted
-// - Provenance tracking for write-gating
 
 import { Command } from 'commander'
 import { registerAuthCommands } from './commands/auth/index'

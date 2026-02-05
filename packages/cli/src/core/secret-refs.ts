@@ -1,4 +1,6 @@
 export const SECRET_REFS = {
+  LINEAR_API_KEY: 'op://Support/skill-cli/LINEAR_API_KEY',
+  AI_GATEWAY_API_KEY: 'op://Support/skill-cli/AI_GATEWAY_API_KEY',
   DATABASE_URL: 'op://Support/skill-cli/DATABASE_URL',
   FRONT_API_TOKEN: 'op://Support/skill-cli/FRONT_API_TOKEN',
   FRONT_WEBHOOK_SECRET: 'op://Support/skill-cli/FRONT_WEBHOOK_SECRET',

@@ -40,20 +40,55 @@ function parseEnvContent(content: string): Record<string, string> {
 
 /**
  * Decrypt age-encrypted env file.
- * STUB: This will be implemented by worker-1 (user-secrets.ts).
- * For now, returns empty object if encrypted file exists.
  *
  * @param encryptedPath - Path to .env.encrypted file
- * @param keyPath - Path to age private key (optional, will use 1Password if not provided)
  * @returns Decrypted env vars
  */
 async function decryptEnvFile(
-  encryptedPath: string,
-  keyPath?: string
+  encryptedPath: string
 ): Promise<Record<string, string>> {
-  // TODO: worker-1 will implement this using age CLI
-  // For now, return empty to unblock config chain implementation
-  return {}
+  const { existsSync } = await import('node:fs')
+  const { readFile } = await import('node:fs/promises')
+
+  if (!existsSync(encryptedPath)) {
+    return {}
+  }
+
+  // Get age key from 1Password
+  const ageKey = await getAgeKeyFrom1Password()
+  if (!ageKey) {
+    return {}
+  }
+
+  try {
+    const { decrypt } = await import('../lib/crypto')
+    const encrypted = await readFile(encryptedPath)
+    const decrypted = await decrypt(encrypted, ageKey)
+    return parseEnvContent(decrypted)
+  } catch {
+    // Decryption failed - return empty
+    return {}
+  }
+}
+
+/**
+ * Get age private key from 1Password
+ */
+async function getAgeKeyFrom1Password(): Promise<string | null> {
+  if (!process.env.OP_SERVICE_ACCOUNT_TOKEN) {
+    return null
+  }
+
+  try {
+    const { OnePasswordProvider } = await import('./secrets')
+    const op = new OnePasswordProvider()
+    if (!(await op.isAvailable())) {
+      return null
+    }
+    return await op.resolve('op://Support/skill-cli-age-key/private_key')
+  } catch {
+    return null
+  }
 }
 
 /**
