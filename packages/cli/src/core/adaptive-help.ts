@@ -42,8 +42,6 @@ const ROOT_DESCRIPTIONS: Record<ProficiencyLevel, string> = {
 const FRONT_DESCRIPTIONS: Record<ProficiencyLevel, string> = {
   full:
     'Front conversations, inboxes, tags, archival, and reporting.\n\n' +
-    '  Prerequisites:\n' +
-    '    FRONT_API_TOKEN must be set. Run: skill auth setup\n\n' +
     '  Start here:\n' +
     '    skill front inbox                    See unassigned conversations\n' +
     '    skill front inbox support             List conversations in a specific inbox\n' +
@@ -67,32 +65,24 @@ const FRONT_DESCRIPTIONS: Record<ProficiencyLevel, string> = {
     '    skill front triage\n' +
     '    skill front conversation <id> -m\n' +
     '    skill front reply <id>\n' +
-    '    skill front archive <id>\n\n' +
-    '  Requires FRONT_API_TOKEN (skill auth setup).',
-  minimal:
-    'Front API commands (inbox, triage, assign, reply, archive). Requires FRONT_API_TOKEN.',
+    '    skill front archive <id>',
+  minimal: 'Front API commands (inbox, triage, assign, reply, archive).',
 }
 
 const AUTH_DESCRIPTIONS: Record<ProficiencyLevel, string> = {
   full:
-    'Manage CLI authentication and secrets.\n\n' +
-    '  First time? Start here:\n' +
-    '    skill auth setup          Interactive wizard — connects to 1Password vault,\n' +
-    '                              configures FRONT_API_TOKEN, DATABASE_URL, and more.\n' +
-    '                              Requires: `op` CLI installed (brew install 1password-cli)\n\n' +
+    'View CLI authentication status.\n\n' +
     '  Check your setup:\n' +
-    '    skill auth status          Shows which secrets are configured and which are missing\n' +
+    '    skill auth status          Shows which secrets are loaded\n' +
     '    skill auth whoami          Verify your 1Password service account identity\n\n' +
-    '  All Skill Recordings employees have access to the Support vault in 1Password.\n' +
-    '  The setup wizard handles everything — no manual token pasting needed.',
+    '  API keys ship with the CLI (encrypted). To override with personal keys:\n' +
+    '    skill keys                  Manage personal API key overrides',
   abbreviated:
-    'Manage CLI authentication and 1Password secrets.\n\n' +
-    '  Start:\n' +
-    '    skill auth setup\n' +
+    'View CLI authentication status.\n\n' +
+    '  Commands:\n' +
     '    skill auth status\n' +
-    '    skill auth whoami\n\n' +
-    '  Requires the 1Password CLI (`op`).',
-  minimal: 'Auth and 1Password setup commands.',
+    '    skill auth whoami',
+  minimal: 'Auth status commands (auth status, auth whoami).',
 }
 
 const INNGEST_DESCRIPTIONS: Record<ProficiencyLevel, string> = {
@@ -101,17 +91,14 @@ const INNGEST_DESCRIPTIONS: Record<ProficiencyLevel, string> = {
     '  Debug pipeline runs:\n' +
     '    skill inngest runs --status failed --after 1h    Recent failures\n' +
     '    skill inngest events --after 12h                 Recent events\n' +
-    '    skill inngest investigate <run-id>                Deep-dive a specific run\n\n' +
-    '  Requires: INNGEST_SIGNING_KEY, INNGEST_EVENT_KEY in env',
+    '    skill inngest investigate <run-id>                Deep-dive a specific run',
   abbreviated:
     'Inngest events and workflow runs.\n\n' +
     '  Common:\n' +
     '    skill inngest runs --status failed --after 1h\n' +
     '    skill inngest events --after 12h\n' +
-    '    skill inngest investigate <run-id>\n\n' +
-    '  Requires INNGEST_SIGNING_KEY, INNGEST_EVENT_KEY.',
-  minimal:
-    'Inngest events and runs debugging. Requires INNGEST_SIGNING_KEY and INNGEST_EVENT_KEY.',
+    '    skill inngest investigate <run-id>',
+  minimal: 'Inngest events and runs debugging.',
 }
 
 const GROUP_DESCRIPTIONS: Record<
