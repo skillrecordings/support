@@ -10,6 +10,12 @@ let pool: Pool | null = null
 
 export function getDb(): Database {
   if (!db) {
+    if (!env.DATABASE_URL) {
+      throw new Error(
+        'DATABASE_URL is not set. This command requires a database connection.\n' +
+          'Set DATABASE_URL in your environment or .env.local file.'
+      )
+    }
     // Strip ?sslaccept=strict from PlanetScale URLs -- mysql2 doesn't recognize it
     // and SSL is already configured via the ssl option below
     const url = new URL(env.DATABASE_URL)
