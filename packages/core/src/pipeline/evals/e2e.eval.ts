@@ -61,7 +61,7 @@ export async function runE2EEval(
     verbose,
     json,
     limit,
-    model = 'anthropic/claude-haiku-4-5',
+    model = 'anthropic/claude-sonnet-4',
   } = options
 
   const content = await readFile(dataset, 'utf-8')

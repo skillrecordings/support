@@ -5,7 +5,7 @@
 
 /** Default model for AI-powered draft refinement */
 export const DEFAULT_DRAFT_MODEL =
-  process.env.SLACK_DRAFT_MODEL ?? 'anthropic/claude-sonnet-4-5'
+  process.env.SLACK_DRAFT_MODEL ?? 'anthropic/claude-sonnet-4'
 
 /** Cache TTL for status queries (ms) */
 export const STATUS_CACHE_TTL_MS = Number(

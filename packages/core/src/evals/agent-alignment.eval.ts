@@ -114,7 +114,7 @@ evalite('Agent Alignment - Local vs Prod', {
         conversationHistory: [],
         customerContext: { email: '[EMAIL]' },
         appId: input.app,
-        model: 'anthropic/claude-haiku-4-5', // Fast model for evals
+        model: 'anthropic/claude-sonnet-4', // Fast model for evals
         integrationClient: client,
         appConfig: {
           instructor_teammate_id: app.instructor_teammate_id,

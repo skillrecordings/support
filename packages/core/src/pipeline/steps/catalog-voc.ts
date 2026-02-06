@@ -93,7 +93,7 @@ export interface CatalogVocOutput {
 
 export async function analyzeVocResponse(
   messages: ThreadMessage[],
-  model: string = 'anthropic/claude-haiku-4-5'
+  model: string = 'anthropic/claude-sonnet-4'
 ): Promise<VocAnalysis> {
   // Combine customer messages for analysis
   const customerMessages = messages
@@ -294,7 +294,7 @@ export async function catalogVoc(
   options: CatalogVocOptions = {}
 ): Promise<CatalogVocOutput> {
   const {
-    model = 'anthropic/claude-haiku-4-5',
+    model = 'anthropic/claude-sonnet-4',
     slackWebhookUrl,
     skipSlack = false,
     skipExpansion = false,

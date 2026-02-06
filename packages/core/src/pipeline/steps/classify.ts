@@ -413,7 +413,7 @@ Output your classification with confidence (0-1) and brief reasoning.`
 export async function llmClassify(
   input: ClassifyInput,
   signals: MessageSignals,
-  model: string = 'anthropic/claude-haiku-4-5',
+  model: string = 'anthropic/claude-sonnet-4',
   options: { appId?: string; runId?: string } = {}
 ): Promise<ClassifyOutput & { citedMemoryIds?: string[] }> {
   const message = `Subject: ${input.subject}\n\nBody:\n${input.body}`
@@ -499,7 +499,7 @@ export async function classify(
   options: ClassifyOptions = {}
 ): Promise<ClassifyOutput & { citedMemoryIds?: string[] }> {
   const {
-    model = 'anthropic/claude-haiku-4-5',
+    model = 'anthropic/claude-sonnet-4',
     forceLLM = false,
     appId,
     runId,
@@ -1054,7 +1054,7 @@ export function fastClassifyThread(
 export async function llmClassifyThread(
   input: ThreadClassifyInput,
   signals: ThreadSignals,
-  model: string = 'anthropic/claude-haiku-4-5',
+  model: string = 'anthropic/claude-sonnet-4',
   options: { runId?: string } = {}
 ): Promise<ThreadClassifyOutput & { citedMemoryIds?: string[] }> {
   // Build thread context for prompt
@@ -1152,7 +1152,7 @@ export async function classifyThread(
   options: ClassifyOptions = {}
 ): Promise<ThreadClassifyOutput & { citedMemoryIds?: string[] }> {
   const {
-    model = 'anthropic/claude-haiku-4-5',
+    model = 'anthropic/claude-sonnet-4',
     forceLLM = false,
     runId,
   } = options
