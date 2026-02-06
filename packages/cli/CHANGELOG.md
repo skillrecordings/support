@@ -1,5 +1,15 @@
 # @skillrecordings/cli
 
+## 0.18.1
+
+### Patch Changes
+
+- 3f320ef: Fix write-gate rejecting Linear API key from encrypted user config
+
+  `getAgeKeyFrom1Password()` never checked the local `~/.config/skill/age.key` file, only env var, keychain, and 1Password SDK. When 1Password wasn't available, decryption silently failed and provenance was never set to `'user'`, causing all write operations to be rejected even with a valid key on disk.
+
+  Renamed to `getAgeKey()` with priority: env var → local age.key → keychain → 1Password SDK. Removed duplicate broken implementations in `config/get.ts` and `config/list.ts`.
+
 ## 0.18.0
 
 ### Minor Changes
