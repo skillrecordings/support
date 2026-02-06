@@ -94,7 +94,7 @@ export async function draft(
   options: DraftOptions = {}
 ): Promise<DraftResult> {
   const {
-    model = 'anthropic/claude-haiku-4-5',
+    model = 'anthropic/claude-sonnet-4',
     promptOverride,
     appId,
     templateThreshold = 0.9,
@@ -339,7 +339,8 @@ Write your response:`
       customerContext,
       appId,
       model: model as
-        | 'anthropic/claude-haiku-4-5'
+        | 'anthropic/claude-sonnet-4'
+        | 'anthropic/claude-opus-4'
         | 'anthropic/claude-sonnet-4-5'
         | 'anthropic/claude-opus-4-5',
       priorKnowledge: memoryContext || undefined,

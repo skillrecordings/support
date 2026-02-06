@@ -745,13 +745,16 @@ export const agentTools = {
 
 /** Available models via AI Gateway */
 export type SupportAgentModel =
+  | 'anthropic/claude-haiku-4'
+  | 'anthropic/claude-sonnet-4'
+  | 'anthropic/claude-opus-4'
+  // Legacy 4.5 models (deprecated)
   | 'anthropic/claude-haiku-4-5'
   | 'anthropic/claude-sonnet-4-5'
   | 'anthropic/claude-opus-4-5'
 
-/** Default model - Opus for quality */
-export const DEFAULT_AGENT_MODEL: SupportAgentModel =
-  'anthropic/claude-opus-4-5'
+/** Default model - Opus 4 for quality */
+export const DEFAULT_AGENT_MODEL: SupportAgentModel = 'anthropic/claude-opus-4'
 
 export interface AgentInput {
   /** Current message from customer */
