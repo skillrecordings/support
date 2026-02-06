@@ -1,6 +1,6 @@
 {
   "name": "@skillrecordings/cli",
-  "version": "0.18.0",
+  "version": "0.18.1",
   "type": "module",
   "bin": {
     "skill": "./bin/skill.mjs"
