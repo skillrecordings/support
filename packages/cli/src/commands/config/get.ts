@@ -1,28 +1,9 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { Decrypter } from 'age-encryption'
+import { getAgeKey } from '../../core/config-loader'
 import type { CommandContext } from '../../core/context'
 import { EXIT_CODES } from '../../core/errors'
 import { getEncryptedConfigPath } from './set'
-
-/**
- * Get age key from 1Password (same key used for all encryption)
- */
-async function getAgeKeyFrom1Password(): Promise<string | null> {
-  if (!process.env.OP_SERVICE_ACCOUNT_TOKEN) {
-    return null
-  }
-
-  try {
-    const { OnePasswordProvider } = await import('../../core/secrets')
-    const op = new OnePasswordProvider()
-    if (!(await op.isAvailable())) {
-      return null
-    }
-    return await op.resolve('op://Support/skill-cli-age-key/private_key')
-  } catch {
-    return null
-  }
-}
 
 export interface ConfigGetOptions {
   json?: boolean
@@ -86,12 +67,12 @@ export async function configGetAction(
 ): Promise<void> {
   const outputJson = options.json === true || ctx.format === 'json'
 
-  // Get age key from 1Password
-  const identity = await getAgeKeyFrom1Password()
+  // Get age key (env var > local file > keychain > 1Password)
+  const identity = await getAgeKey()
   if (!identity) {
     const result: ConfigGetResult = {
       success: false,
-      error: 'OP_SERVICE_ACCOUNT_TOKEN not set. Required for encrypted config.',
+      error: 'No age key found. Set SKILL_AGE_KEY, place key at ~/.config/skill/age.key, or configure 1Password.',
     }
 
     if (outputJson) {

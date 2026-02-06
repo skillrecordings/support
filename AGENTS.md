@@ -2,6 +2,18 @@
 
 Support platform monorepo (agent-first, Front is source of truth, HITL approvals).
 
+## Before You Do Anything
+
+**Read existing code before proposing changes.** Do not guess at architecture, do not suggest alternatives to established patterns. If you're touching env config, secrets, deployment pipelines, or integration wiring — read the implementation files first. Ask clarifying questions rather than assuming.
+
+## Issue Tracking
+
+We use **GitHub Issues** (not Linear, not Jira). When creating issues, always target the appropriate GitHub repo unless explicitly told otherwise.
+
+```bash
+gh issue create --repo skillrecordings/support --title "..." --body "..."
+```
+
 ## Package manager
 - bun workspaces (no npm/pnpm)
 
@@ -215,6 +227,17 @@ const { object } = await generateObject({
 The Vercel AI Gateway uses `AI_GATEWAY_API_KEY` (stable token, in `packages/cli/.env.local`).
 - OIDC tokens (`VERCEL_OIDC_TOKEN`) expire and need refresh — avoid for scripts
 - Pull env: `cd packages/cli && vercel env pull .env.local`
+
+## Environment & Secrets
+
+This repo uses `.env.local` files pulled from Vercel. **Never** commit secrets, `.env.local`, or credentials to git. Never suggest alternative secret management patterns — follow what's already in place.
+
+```bash
+# Pull env vars for a specific app
+cd apps/front && vercel env pull .env.local --scope skillrecordings
+```
+
+The CLI package has its own `.env.local` with `AI_GATEWAY_API_KEY` — see `packages/cli/.env.local`.
 
 ## Critical Anti-Patterns (learned the hard way)
 

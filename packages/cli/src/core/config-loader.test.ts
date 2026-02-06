@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   type KeyProvenance,
   _setProvenanceForTesting,
+  getAgeKey,
   getKeyProvenance,
   isUserKey,
   loadConfigChain,
@@ -151,6 +152,56 @@ describe('config-loader', () => {
       _setProvenanceForTesting(new Map())
 
       expect(getKeyProvenance('MISSING')).toBeUndefined()
+    })
+  })
+
+  describe('getAgeKey', () => {
+    const originalEnv = { ...process.env }
+
+    afterEach(() => {
+      // Restore env
+      delete process.env.SKILL_AGE_KEY
+      delete process.env.AGE_USER_KEY
+    })
+
+    it('returns SKILL_AGE_KEY env var when set', async () => {
+      process.env.SKILL_AGE_KEY = 'AGE-SECRET-KEY-FROM-ENV'
+
+      const result = await getAgeKey()
+
+      expect(result).toBe('AGE-SECRET-KEY-FROM-ENV')
+    })
+
+    it('reads local age.key file when env var is not set', async () => {
+      // Point AGE_USER_KEY to our temp dir's age.key so getAgeKeyPath() resolves there
+      const ageKeyPath = join(tempConfigDir, 'age.key')
+      writeFileSync(ageKeyPath, 'AGE-SECRET-KEY-FROM-FILE\n')
+      process.env.AGE_USER_KEY = ageKeyPath
+
+      const result = await getAgeKey()
+
+      expect(result).toBe('AGE-SECRET-KEY-FROM-FILE')
+    })
+
+    it('trims whitespace from local age.key file', async () => {
+      const ageKeyPath = join(tempConfigDir, 'age.key')
+      writeFileSync(ageKeyPath, '  AGE-SECRET-KEY-TRIMMED  \n')
+      process.env.AGE_USER_KEY = ageKeyPath
+
+      const result = await getAgeKey()
+
+      expect(result).toBe('AGE-SECRET-KEY-TRIMMED')
+    })
+
+    it('prefers env var over local file', async () => {
+      process.env.SKILL_AGE_KEY = 'AGE-SECRET-KEY-FROM-ENV'
+      const ageKeyPath = join(tempConfigDir, 'age.key')
+      writeFileSync(ageKeyPath, 'AGE-SECRET-KEY-FROM-FILE')
+      process.env.AGE_USER_KEY = ageKeyPath
+
+      const result = await getAgeKey()
+
+      expect(result).toBe('AGE-SECRET-KEY-FROM-ENV')
     })
   })
 

@@ -1,6 +1,6 @@
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { USER_CONFIG_PATHS, getUserConfigPath } from './user-config'
+import { USER_CONFIG_PATHS, getAgeKeyPath, getUserConfigPath } from './user-config'
 
 /**
  * Key provenance tracking.
@@ -47,15 +47,14 @@ function parseEnvContent(content: string): Record<string, string> {
 async function decryptEnvFile(
   encryptedPath: string
 ): Promise<Record<string, string>> {
-  const { existsSync } = await import('node:fs')
   const { readFile } = await import('node:fs/promises')
 
   if (!existsSync(encryptedPath)) {
     return {}
   }
 
-  // Get age key from 1Password
-  const ageKey = await getAgeKeyFrom1Password()
+  // Get age key (env var > local file > keychain > 1Password)
+  const ageKey = await getAgeKey()
   if (!ageKey) {
     return {}
   }
@@ -72,26 +71,38 @@ async function decryptEnvFile(
 }
 
 /**
- * Get age private key.
+ * Get age private key from the best available source.
  * Priority:
  * 1. SKILL_AGE_KEY env var (fast path)
- * 2. Keychain lookup
- * 3. 1Password SDK (auto-bootstraps from op CLI if needed)
+ * 2. Local age.key file at ~/.config/skill/age.key
+ * 3. Keychain lookup
+ * 4. 1Password SDK (auto-bootstraps from op CLI if needed)
  */
-async function getAgeKeyFrom1Password(): Promise<string | null> {
+export async function getAgeKey(): Promise<string | null> {
   // 1. Check env var (fast path when shell integration is set up)
   if (process.env.SKILL_AGE_KEY) {
     return process.env.SKILL_AGE_KEY
   }
 
-  // 2. Try keychain
+  // 2. Check local age.key file
+  try {
+    const ageKeyPath = getAgeKeyPath()
+    if (existsSync(ageKeyPath)) {
+      const key = readFileSync(ageKeyPath, 'utf8').trim()
+      if (key) return key
+    }
+  } catch {
+    // File not readable — continue to other methods
+  }
+
+  // 3. Try keychain
   try {
     const { getFromKeychain, storeInKeychain, autoBootstrapKeychain } =
       await import('./keychain')
     const fromKeychain = getFromKeychain('age-private-key')
     if (fromKeychain) return fromKeychain
 
-    // 3. Try to get OP token (auto-bootstraps from op CLI if available)
+    // 4. Try to get OP token (auto-bootstraps from op CLI if available)
     let opToken = process.env.OP_SERVICE_ACCOUNT_TOKEN
     if (!opToken) {
       opToken = autoBootstrapKeychain() ?? undefined
