@@ -423,7 +423,7 @@ Be practical — a response doesn't need to be perfect, just on-topic.`
 async function checkRelevance(
   draft: string,
   customerMessage: { subject: string; body: string },
-  model: string = 'anthropic/claude-sonnet-4'
+  model: string = 'anthropic/claude-sonnet-4-5'
 ): Promise<{ issues: ValidationIssue[]; score: number }> {
   const customerText = [
     customerMessage.subject ? `Subject: ${customerMessage.subject}` : '',
@@ -513,7 +513,7 @@ Be practical — some technical terms (like "browser" or "login") are fine. Flag
  */
 async function checkAudienceAwareness(
   draft: string,
-  model: string = 'anthropic/claude-sonnet-4'
+  model: string = 'anthropic/claude-sonnet-4-5'
 ): Promise<ValidationIssue[]> {
   const prompt = `Draft response to customer:
 ${draft}
@@ -665,7 +665,7 @@ export interface ValidateOptions {
   correctionThreshold?: number
   /** Skip relevance check (for testing or when LLM unavailable) */
   skipRelevanceCheck?: boolean
-  /** Model to use for relevance check (default: 'anthropic/claude-sonnet-4') */
+  /** Model to use for relevance check (default: 'anthropic/claude-sonnet-4-5') */
   relevanceModel?: string
   /** Check if draft uses customer-appropriate language (default: false) */
   checkAudienceAwareness?: boolean
@@ -757,7 +757,7 @@ export async function validate(
     skipMemoryQuery = false,
     correctionThreshold = 0.7,
     skipRelevanceCheck = false,
-    relevanceModel = 'anthropic/claude-sonnet-4',
+    relevanceModel = 'anthropic/claude-sonnet-4-5',
     checkAudienceAwareness: shouldCheckAudience = false,
   } = options
 

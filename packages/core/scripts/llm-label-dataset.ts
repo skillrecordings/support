@@ -1,16 +1,16 @@
 #!/usr/bin/env bun
 /**
  * LLM-Powered Dataset Labeling
- * 
+ *
  * Uses Claude to label threads accurately via Vercel AI Gateway.
  * Much more reliable than regex patterns.
- * 
+ *
  * Requires AI_GATEWAY_API_KEY (preferred) or VERCEL_OIDC_TOKEN.
  */
 
-import { readFile, writeFile } from 'fs/promises'
 import { resolve } from 'path'
 import { generateObject } from 'ai'
+import { readFile, writeFile } from 'fs/promises'
 import { z } from 'zod'
 
 // Load env vars - try packages/cli first (has stable AI_GATEWAY_API_KEY), then root
@@ -39,7 +39,7 @@ Pull from Vercel: cd packages/cli && vercel env pull .env.local
 }
 
 // Model to use (via Vercel AI Gateway)
-// ALWAYS use versionless names: claude-haiku-4-5, claude-sonnet-4-5, claude-opus-4-5
+// ALWAYS use versionless names: claude-haiku-4-5, claude-sonnet-4-5, claude-opus-4-6
 const MODEL = 'anthropic/claude-sonnet-4-5'
 
 interface RawThread {
@@ -123,7 +123,7 @@ Provide category, confidence (0-1), and brief reasoning.`
 const LabelSchema = z.object({
   category: z.enum([
     'support_access',
-    'support_refund', 
+    'support_refund',
     'support_transfer',
     'support_technical',
     'support_billing',
@@ -154,17 +154,23 @@ function getAction(category: string): string {
   }
 }
 
-async function labelThread(thread: RawThread, appId: string): Promise<LabeledThread | null> {
+async function labelThread(
+  thread: RawThread,
+  appId: string
+): Promise<LabeledThread | null> {
   // Build thread text for LLM
-  const messages = thread.conversationHistory.map((m, i) => {
-    const dir = m.direction === 'in' ? 'CUSTOMER' : 'TEAM'
-    return `[${i + 1}] ${dir}: ${scrubPII(m.body.slice(0, 500))}`
-  }).join('\n\n')
-  
-  const prompt = LABEL_PROMPT
-    .replace('{status}', thread.status)
-    .replace('{msgCount}', String(thread.conversationHistory.length))
-  
+  const messages = thread.conversationHistory
+    .map((m, i) => {
+      const dir = m.direction === 'in' ? 'CUSTOMER' : 'TEAM'
+      return `[${i + 1}] ${dir}: ${scrubPII(m.body.slice(0, 500))}`
+    })
+    .join('\n\n')
+
+  const prompt = LABEL_PROMPT.replace('{status}', thread.status).replace(
+    '{msgCount}',
+    String(thread.conversationHistory.length)
+  )
+
   try {
     const { object } = await generateObject({
       model: MODEL,
@@ -172,13 +178,13 @@ async function labelThread(thread: RawThread, appId: string): Promise<LabeledThr
       system: prompt,
       prompt: `Subject: ${thread.subject}\n\n${messages}`,
     })
-    
+
     // Build labeled thread
-    const scrubbedMessages = thread.conversationHistory.map(m => ({
+    const scrubbedMessages = thread.conversationHistory.map((m) => ({
       direction: m.direction,
       body: scrubPII(m.body),
     }))
-    
+
     return {
       id: `labeled_${thread.id.slice(4, 12)}`,
       conversationId: thread.conversationId,
@@ -188,7 +194,10 @@ async function labelThread(thread: RawThread, appId: string): Promise<LabeledThr
         conversationId: thread.conversationId,
         appId,
         messages: scrubbedMessages,
-        triggerMessage: scrubbedMessages[scrubbedMessages.length - 1] || { body: '', direction: 'in' },
+        triggerMessage: scrubbedMessages[scrubbedMessages.length - 1] || {
+          body: '',
+          direction: 'in',
+        },
       },
       expected: {
         category: object.category,
@@ -211,38 +220,45 @@ async function labelThread(thread: RawThread, appId: string): Promise<LabeledThr
 async function main() {
   const files = process.argv.slice(2)
   if (files.length === 0) {
-    console.log('Usage: bun scripts/llm-label-dataset.ts <input.json> [input2.json...] [-o output.json]')
+    console.log(
+      'Usage: bun scripts/llm-label-dataset.ts <input.json> [input2.json...] [-o output.json]'
+    )
     console.log('\nExamples:')
     console.log('  bun scripts/llm-label-dataset.ts data/tt-archived.json')
-    console.log('  bun scripts/llm-label-dataset.ts data/tt-archived.json data/aihero-archived.json -o data/llm-labeled.json')
+    console.log(
+      '  bun scripts/llm-label-dataset.ts data/tt-archived.json data/aihero-archived.json -o data/llm-labeled.json'
+    )
     return
   }
-  
+
   // Parse args
   const outputIdx = files.indexOf('-o')
-  const outputPath = outputIdx >= 0 ? files[outputIdx + 1] : 'fixtures/datasets/llm-labeled.json'
+  const outputPath =
+    outputIdx >= 0 ? files[outputIdx + 1] : 'fixtures/datasets/llm-labeled.json'
   const inputFiles = outputIdx >= 0 ? files.slice(0, outputIdx) : files
-  
+
   const allLabeled: LabeledThread[] = []
-  
+
   for (const inputPath of inputFiles) {
     console.log(`\n📂 Processing ${inputPath}...`)
     const raw: RawThread[] = JSON.parse(await readFile(inputPath, 'utf-8'))
-    
+
     // Detect app from path
-    const appId = inputPath.includes('aihero') ? 'ai-hero' 
-      : inputPath.includes('tt') ? 'total-typescript'
-      : 'unknown'
-    
+    const appId = inputPath.includes('aihero')
+      ? 'ai-hero'
+      : inputPath.includes('tt')
+        ? 'total-typescript'
+        : 'unknown'
+
     console.log(`   Found ${raw.length} threads (app: ${appId})`)
-    
+
     // Label each thread
     let labeled = 0
     let failed = 0
-    
+
     for (let i = 0; i < raw.length; i++) {
       process.stdout.write(`\r   Labeling ${i + 1}/${raw.length}...`)
-      
+
       const result = await labelThread(raw[i], appId)
       if (result) {
         allLabeled.push(result)
@@ -250,30 +266,30 @@ async function main() {
       } else {
         failed++
       }
-      
+
       // Rate limit
-      await new Promise(r => setTimeout(r, 100))
+      await new Promise((r) => setTimeout(r, 100))
     }
-    
+
     console.log(`\n   ✅ Labeled: ${labeled}, Failed: ${failed}`)
   }
-  
+
   // Save
   await writeFile(outputPath, JSON.stringify(allLabeled, null, 2))
-  
+
   // Stats
   const cats: Record<string, number> = {}
   for (const l of allLabeled) {
     cats[l.expected.category] = (cats[l.expected.category] || 0) + 1
   }
-  
+
   console.log(`\n📊 Final Dataset:`)
   console.log(`   Total: ${allLabeled.length}`)
   console.log(`\n   By category:`)
   for (const [cat, count] of Object.entries(cats).sort((a, b) => b[1] - a[1])) {
     console.log(`     ${cat}: ${count}`)
   }
-  
+
   console.log(`\n✅ Saved to ${outputPath}`)
 }
 

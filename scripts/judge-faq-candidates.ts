@@ -55,7 +55,7 @@ const judgmentSchema = z.object({
 
 async function judgeFaq(faq: FaqCandidate): Promise<JudgedFaq['judgment']> {
   const result = await generateObject({
-    model: 'anthropic/claude-opus-4',
+    model: 'anthropic/claude-opus-4-6',
     schema: judgmentSchema,
     prompt: `You are a quality reviewer for FAQ content on a software education platform (TypeScript, React courses).
 

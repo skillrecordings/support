@@ -186,7 +186,7 @@ export interface AnalyzeTagsOptions {
  * ```ts
  * const suggestions = await analyzeTagsWithAI({
  *   tags: [{ id: 'tag_1', name: 'refund', ... }, ...],
- *   model: 'anthropic/claude-sonnet-4'
+ *   model: 'anthropic/claude-sonnet-4-5'
  * })
  * console.log(suggestions.similarGroups)
  * ```
@@ -194,7 +194,7 @@ export interface AnalyzeTagsOptions {
 export async function analyzeTagsWithAI(
   options: AnalyzeTagsOptions
 ): Promise<TagSuggestions> {
-  const { tags, model = 'anthropic/claude-sonnet-4' } = options
+  const { tags, model = 'anthropic/claude-sonnet-4-5' } = options
 
   // Format tags for the prompt
   const tagList = tags

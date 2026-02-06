@@ -39,7 +39,7 @@ Pull from Vercel: cd packages/cli && vercel env pull .env.local
 }
 
 // Model to use (via Vercel AI Gateway)
-// ALWAYS use versionless names: claude-haiku-4-5, claude-sonnet-4-5, claude-opus-4-5
+// ALWAYS use versionless names: claude-haiku-4-5, claude-sonnet-4-5, claude-opus-4-6
 const MODEL = 'anthropic/claude-sonnet-4-5'
 
 interface RawThread {

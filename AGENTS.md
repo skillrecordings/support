@@ -205,10 +205,10 @@ const { object } = await generateObject({
 |-------|----------|
 | `anthropic/claude-haiku-4-5` | Fast, cheap (evals, classification) |
 | `anthropic/claude-sonnet-4-5` | Balanced (drafting, general) |
-| `anthropic/claude-opus-4-5` | Best quality (complex reasoning) |
+| `anthropic/claude-opus-4-6` | Best quality (complex reasoning) |
 
 ❌ **Never:** `claude-sonnet-4-[PHONE]`, `claude-3-5-sonnet-latest`, etc.
-✅ **Always:** `claude-sonnet-4-5`, `claude-haiku-4-5`, `claude-opus-4-5`
+✅ **Always:** `claude-sonnet-4-5`, `claude-haiku-4-5`, `claude-opus-4-6`
 
 ### Auth
 

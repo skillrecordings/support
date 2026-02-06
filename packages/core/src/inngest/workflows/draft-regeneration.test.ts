@@ -166,13 +166,13 @@ describe('regenerateDraftWithFeedback', () => {
       const mockDeps = createMockDeps()
 
       await regenerateDraftWithFeedback(baseInput, {
-        model: 'anthropic/claude-sonnet-4',
+        model: 'anthropic/claude-sonnet-4-5',
         skipFrontUpdate: true,
         deps: mockDeps,
       })
 
       const call = mockDeps._mocks.generateText.mock.calls[0]!
-      expect(call[0].model).toBe('anthropic/claude-sonnet-4')
+      expect(call[0].model).toBe('anthropic/claude-sonnet-4-5')
     })
   })
 
