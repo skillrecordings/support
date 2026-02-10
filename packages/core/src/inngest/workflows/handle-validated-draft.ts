@@ -7,11 +7,11 @@
  */
 
 import { randomUUID } from 'crypto'
-import { markdownToHtml } from '@skillrecordings/core/front/markdown'
 import { ActionsTable, getDb } from '@skillrecordings/database'
 import { type ChannelList, type InboxList } from '@skillrecordings/front-sdk'
 import { eq, sql } from 'drizzle-orm'
 import { createInstrumentedFrontClient } from '../../front/instrumented-client'
+import { markdownToHtml } from '../../front/markdown'
 import {
   initializeAxiom,
   log,
