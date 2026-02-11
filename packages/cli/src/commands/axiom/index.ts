@@ -195,11 +195,11 @@ export async function listErrors(
   const limit = options.limit ?? 50
   const { startTime, endTime } = parseTimeRange(options.since ?? '24h')
   const outputJson = options.json === true || ctx.format === 'json'
+  const queryLimit = Math.max(limit * 4, 200)
 
   const apl = `['${getDataset()}']
-| where status == 'error' or error != ''
 | sort by _time desc
-| limit ${limit}`
+| limit ${queryLimit}`
 
   try {
     const result = await withSpinner('Loading errors...', () =>
@@ -209,7 +209,20 @@ export async function listErrors(
       })
     )
 
-    const matches = result.matches ?? []
+    const matches = (result.matches ?? [])
+      .filter((match) => {
+        const d = match.data as Record<string, unknown>
+        const status = String(d.status ?? '').toLowerCase()
+        const level = String(d.level ?? '').toLowerCase()
+        const errorText = [d.error, d.errorStack, d.errorMessage]
+          .map((value) =>
+            value === undefined || value === null ? '' : String(value).trim()
+          )
+          .find((value) => value.length > 0)
+
+        return status === 'error' || level === 'error' || Boolean(errorText)
+      })
+      .slice(0, limit)
 
     if (outputJson) {
       ctx.output.data(matches.map((m) => m.data))

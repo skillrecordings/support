@@ -127,4 +127,45 @@ describe('axiom commands', () => {
     expect(errorOutput).toContain('Suggestion:')
     expect(process.exitCode).toBe(1)
   })
+
+  it('listErrors JSON filters out non-error rows', async () => {
+    mockQuery.mockResolvedValueOnce({
+      matches: [
+        {
+          _time: '2024-01-01T00:00:00Z',
+          data: { status: 'success', level: 'info', message: 'ok' },
+        },
+        {
+          _time: '2024-01-01T00:00:01Z',
+          data: { status: 'error', message: 'failed step' },
+        },
+        {
+          _time: '2024-01-01T00:00:02Z',
+          data: { level: 'error', name: 'workflow.run' },
+        },
+        {
+          _time: '2024-01-01T00:00:03Z',
+          data: { error: 'Unexpected end of JSON input' },
+        },
+      ],
+      status: { elapsedTime: 12 },
+    })
+
+    const { ctx, getStdout, getStderr } = await createTestContext({
+      format: 'json',
+    })
+
+    await listErrors(ctx, { json: true, limit: 10 })
+
+    expect(getStderr()).toBe('')
+    const payload = parseLastJson(getStdout()) as Array<Record<string, unknown>>
+    expect(payload).toHaveLength(3)
+    expect(payload).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ status: 'error' }),
+        expect.objectContaining({ level: 'error' }),
+        expect.objectContaining({ error: 'Unexpected end of JSON input' }),
+      ])
+    )
+  })
 })
