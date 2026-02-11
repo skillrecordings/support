@@ -1,9 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import {
-  type CleanupReport,
-  RETENTION_DEFAULTS,
-  cleanupExpiredData,
-} from './retention'
+import { RETENTION_DEFAULTS, cleanupExpiredData } from './retention'
 
 describe('RETENTION_DEFAULTS', () => {
   it('should define retention periods in days', () => {
@@ -32,13 +28,11 @@ describe('cleanupExpiredData', () => {
     }
     mockVectorIndex = {
       delete: vi.fn(),
-      query: vi.fn(),
+      range: vi.fn().mockResolvedValue({ vectors: [], nextCursor: '' }),
     }
   })
 
   it('should return a cleanup report with zero counts when nothing to delete', async () => {
-    mockVectorIndex.query.mockResolvedValue([])
-
     const report = await cleanupExpiredData(mockDb, mockVectorIndex)
 
     expect(report).toEqual({
@@ -51,8 +45,6 @@ describe('cleanupExpiredData', () => {
   })
 
   it('should call db.delete for conversations with correct cutoff', async () => {
-    mockVectorIndex.query.mockResolvedValue([])
-
     await cleanupExpiredData(mockDb, mockVectorIndex)
 
     // Should have called delete three times: conversations, audit logs, webhook payloads
@@ -73,7 +65,6 @@ describe('cleanupExpiredData', () => {
       .mockReturnValueOnce(deleteConversations)
       .mockReturnValueOnce(deleteAuditLogs)
       .mockReturnValueOnce(deleteWebhookPayloads)
-    mockVectorIndex.query.mockResolvedValue([])
 
     const report = await cleanupExpiredData(mockDb, mockVectorIndex)
 
@@ -94,7 +85,6 @@ describe('cleanupExpiredData', () => {
       .mockReturnValueOnce(deleteConversations)
       .mockReturnValueOnce(deleteAuditLogs)
       .mockReturnValueOnce(deleteWebhookPayloads)
-    mockVectorIndex.query.mockResolvedValue([])
 
     const report = await cleanupExpiredData(mockDb, mockVectorIndex)
 
@@ -102,10 +92,13 @@ describe('cleanupExpiredData', () => {
   })
 
   it('should delete expired vectors from vector index', async () => {
-    mockVectorIndex.query.mockResolvedValue([
-      { id: 'vec-1', metadata: { createdAt: '2020-01-01T00:00:00Z' } },
-      { id: 'vec-2', metadata: { createdAt: '2020-01-01T00:00:00Z' } },
-    ])
+    mockVectorIndex.range.mockResolvedValue({
+      vectors: [
+        { id: 'vec-1', metadata: { createdAt: '2020-01-01T00:00:00Z' } },
+        { id: 'vec-2', metadata: { resolvedAt: '2020-01-01T00:00:00Z' } },
+      ],
+      nextCursor: '',
+    })
     mockVectorIndex.delete.mockResolvedValue({ deleted: 2 })
 
     const report = await cleanupExpiredData(mockDb, mockVectorIndex)
@@ -115,11 +108,38 @@ describe('cleanupExpiredData', () => {
   })
 
   it('should not call vectorIndex.delete when no expired vectors', async () => {
-    mockVectorIndex.query.mockResolvedValue([])
+    mockVectorIndex.range.mockResolvedValue({
+      vectors: [
+        { id: 'vec-new', metadata: { createdAt: new Date().toISOString() } },
+      ],
+      nextCursor: '',
+    })
 
     await cleanupExpiredData(mockDb, mockVectorIndex)
 
     expect(mockVectorIndex.delete).not.toHaveBeenCalled()
+  })
+
+  it('should paginate vector range results', async () => {
+    mockVectorIndex.range
+      .mockResolvedValueOnce({
+        vectors: [
+          { id: 'vec-1', metadata: { createdAt: '2020-01-01T00:00:00Z' } },
+        ],
+        nextCursor: '1',
+      })
+      .mockResolvedValueOnce({
+        vectors: [
+          { id: 'vec-2', metadata: { createdAt: '2020-01-01T00:00:00Z' } },
+        ],
+        nextCursor: '1',
+      })
+    mockVectorIndex.delete.mockResolvedValue({ deleted: 2 })
+
+    const report = await cleanupExpiredData(mockDb, mockVectorIndex)
+
+    expect(mockVectorIndex.range).toHaveBeenCalledTimes(2)
+    expect(report.vectorsDeleted).toBe(2)
   })
 
   it('should handle missing affectedRows gracefully', async () => {
@@ -136,7 +156,6 @@ describe('cleanupExpiredData', () => {
       .mockReturnValueOnce(deleteConversations)
       .mockReturnValueOnce(deleteAuditLogs)
       .mockReturnValueOnce(deleteWebhookPayloads)
-    mockVectorIndex.query.mockResolvedValue([])
 
     const report = await cleanupExpiredData(mockDb, mockVectorIndex)
 

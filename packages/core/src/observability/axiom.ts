@@ -29,19 +29,39 @@ function isTransientAxiomIngestError(error: unknown): boolean {
   )
 }
 
+function handleAxiomError(
+  error: unknown,
+  context: 'send trace' | 'flush trace batch'
+): void {
+  if (isTransientAxiomIngestError(error)) {
+    if (!hasLoggedTransientAxiomIngestWarning) {
+      hasLoggedTransientAxiomIngestWarning = true
+      console.warn(
+        '[Axiom] Transient ingest response issue detected; suppressing repeated warnings'
+      )
+    }
+    return
+  }
+
+  // Don't throw - observability failures shouldn't crash the app
+  console.error(`[Axiom] Failed to ${context}:`, error)
+}
+
 /**
  * Initialize Axiom client (call once at app startup)
  */
 export function initializeAxiom(): void {
   const token = process.env.AXIOM_TOKEN
-  const dataset = process.env.AXIOM_DATASET || 'support-traces'
 
   if (!token) {
     console.warn('[Axiom] AXIOM_TOKEN not set, tracing disabled')
     return
   }
 
-  axiomClient = new Axiom({ token })
+  axiomClient = new Axiom({
+    token,
+    onError: (error) => handleAxiomError(error, 'flush trace batch'),
+  })
 }
 
 /**
@@ -150,18 +170,7 @@ async function sendTrace(trace: Record<string, any>): Promise<void> {
       ...trace,
     })
   } catch (error) {
-    if (isTransientAxiomIngestError(error)) {
-      if (!hasLoggedTransientAxiomIngestWarning) {
-        hasLoggedTransientAxiomIngestWarning = true
-        console.warn(
-          '[Axiom] Transient ingest response issue detected; suppressing repeated warnings'
-        )
-      }
-      return
-    }
-
-    // Don't throw - observability failures shouldn't crash the app
-    console.error('[Axiom] Failed to send trace:', error)
+    handleAxiomError(error, 'send trace')
   }
 }
 

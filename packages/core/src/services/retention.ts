@@ -28,6 +28,49 @@ export interface CleanupReport {
   timestamp: string
 }
 
+const VECTOR_RANGE_PAGE_SIZE = 1000
+type VectorRangePage = {
+  vectors?: Array<{ id: string | number; metadata?: Record<string, unknown> }>
+  nextCursor?: string | number | null
+}
+
+function parseMetadataTimestamp(value: unknown): number | null {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    // Treat low values as seconds and convert to milliseconds.
+    return value < 1_000_000_000_000 ? value * 1000 : value
+  }
+
+  if (typeof value !== 'string') return null
+
+  const dateValue = Date.parse(value)
+  if (Number.isNaN(dateValue)) return null
+
+  return dateValue
+}
+
+function isVectorExpired(vector: any, cutoffMs: number): boolean {
+  const metadata = vector?.metadata
+  if (!metadata || typeof metadata !== 'object') return false
+
+  const timestampCandidates = [
+    metadata.createdAtMs,
+    metadata.createdAtUnix,
+    metadata.created_at,
+    metadata.createdAt,
+    metadata.resolvedAt,
+    metadata.lastUpdated,
+  ]
+
+  for (const candidate of timestampCandidates) {
+    const parsed = parseMetadataTimestamp(candidate)
+    if (parsed !== null) {
+      return parsed < cutoffMs
+    }
+  }
+
+  return false
+}
+
 /**
  * Clean up expired data according to retention policies.
  *
@@ -81,19 +124,46 @@ export async function cleanupExpiredData(
 
   report.conversationsDeleted = conversationResult[0]?.affectedRows ?? 0
 
-  // Step 2: Delete expired vectors
-  const expiredVectors = await vectorIndex.query({
-    // Upstash Vector requires a query payload with data/vector/sparseVector.
-    // Use a generic query to retrieve candidates for deletion.
-    data: 'retention cleanup',
-    topK: 1000,
-    filter: `createdAt < "${vectorCutoff.toISOString()}"`,
-  })
+  // Step 2: Delete expired vectors.
+  // Upstash filter comparisons only support numeric operands, so we paginate
+  // through vectors and evaluate metadata timestamps locally.
+  const vectorCutoffMs = vectorCutoff.getTime()
+  const expiredVectorIds: Array<string | number> = []
+  let cursor: string | number = 0
 
-  if (expiredVectors.length > 0) {
-    const vectorIds = expiredVectors.map((v: any) => v.id)
-    const deleteResult = await vectorIndex.delete(vectorIds)
-    report.vectorsDeleted = deleteResult.deleted || 0
+  while (true) {
+    const page: VectorRangePage = await vectorIndex.range({
+      cursor,
+      limit: VECTOR_RANGE_PAGE_SIZE,
+      includeMetadata: true,
+    })
+
+    const vectors = Array.isArray(page?.vectors) ? page.vectors : []
+    for (const vector of vectors) {
+      if (isVectorExpired(vector, vectorCutoffMs)) {
+        expiredVectorIds.push(vector.id)
+      }
+    }
+
+    const nextCursor: string | number | null | undefined = page?.nextCursor
+    if (
+      nextCursor === undefined ||
+      nextCursor === null ||
+      nextCursor === '' ||
+      String(nextCursor) === String(cursor)
+    ) {
+      break
+    }
+
+    cursor = nextCursor
+  }
+
+  if (expiredVectorIds.length > 0) {
+    for (let i = 0; i < expiredVectorIds.length; i += VECTOR_RANGE_PAGE_SIZE) {
+      const idsChunk = expiredVectorIds.slice(i, i + VECTOR_RANGE_PAGE_SIZE)
+      const deleteResult = await vectorIndex.delete(idsChunk)
+      report.vectorsDeleted += deleteResult.deleted || 0
+    }
   }
 
   // Step 3: Hard delete audit logs older than retention period

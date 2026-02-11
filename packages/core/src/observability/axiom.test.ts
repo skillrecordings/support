@@ -7,14 +7,23 @@ import {
 } from './axiom'
 
 // Mock @axiomhq/js
-const mockIngest = vi.fn()
-const mockFlush = vi.fn()
+const { mockIngest, mockFlush, mockAxiom } = vi.hoisted(() => {
+  const ingest = vi.fn()
+  const flush = vi.fn()
+  const axiom = vi.fn(() => ({
+    ingest,
+    flush,
+  }))
+
+  return {
+    mockIngest: ingest,
+    mockFlush: flush,
+    mockAxiom: axiom,
+  }
+})
 
 vi.mock('@axiomhq/js', () => ({
-  Axiom: vi.fn(() => ({
-    ingest: mockIngest,
-    flush: mockFlush,
-  })),
+  Axiom: mockAxiom,
 }))
 
 describe('Axiom Tracing', () => {
@@ -218,6 +227,15 @@ describe('Axiom Tracing', () => {
   describe('initializeAxiom', () => {
     it('should initialize without throwing', () => {
       expect(() => initializeAxiom()).not.toThrow()
+    })
+
+    it('should configure Axiom onError handler for async ingest failures', () => {
+      expect(mockAxiom).toHaveBeenCalledWith(
+        expect.objectContaining({
+          token: 'test-token',
+          onError: expect.any(Function),
+        })
+      )
     })
   })
 })
