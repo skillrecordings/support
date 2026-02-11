@@ -38,6 +38,7 @@
     "turbo": "^2.7.5",
     "turbo-ignore": "^2.7.5",
     "typescript": "5.9.2",
+    "vercel": "^50.15.0",
     "vitest": "^3.0.0"
   },
   "lint-staged": {

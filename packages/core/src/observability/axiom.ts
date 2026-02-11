@@ -13,6 +13,21 @@ import type {
 } from './types'
 
 let axiomClient: Axiom | null = null
+let hasLoggedTransientAxiomIngestWarning = false
+
+function isTransientAxiomIngestError(error: unknown): boolean {
+  if (!(error instanceof Error)) return false
+  const message = error.message || ''
+
+  // Axiom ingest occasionally returns empty/timeout responses in production.
+  // These are non-fatal for app behavior; avoid flooding runtime error logs.
+  return (
+    (error instanceof SyntaxError &&
+      message.includes('Unexpected end of JSON input')) ||
+    error.name === 'TimeoutError' ||
+    message.includes('The operation timed out')
+  )
+}
 
 /**
  * Initialize Axiom client (call once at app startup)
@@ -135,6 +150,16 @@ async function sendTrace(trace: Record<string, any>): Promise<void> {
       ...trace,
     })
   } catch (error) {
+    if (isTransientAxiomIngestError(error)) {
+      if (!hasLoggedTransientAxiomIngestWarning) {
+        hasLoggedTransientAxiomIngestWarning = true
+        console.warn(
+          '[Axiom] Transient ingest response issue detected; suppressing repeated warnings'
+        )
+      }
+      return
+    }
+
     // Don't throw - observability failures shouldn't crash the app
     console.error('[Axiom] Failed to send trace:', error)
   }

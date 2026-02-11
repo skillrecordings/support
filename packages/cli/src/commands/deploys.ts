@@ -1,9 +1,73 @@
 import { execSync } from 'child_process'
+import { existsSync, readFileSync } from 'node:fs'
+import path from 'node:path'
 import { Command } from 'commander'
 import { type CommandContext, createContext } from '../core/context'
 import { CLIError, formatError } from '../core/errors'
 
 const VERCEL_SCOPE = 'skillrecordings'
+
+function hasWorkspaceVercelDependency(dir: string): boolean {
+  const packageJsonPath = path.join(dir, 'package.json')
+  if (!existsSync(packageJsonPath)) return false
+  try {
+    const pkg = JSON.parse(readFileSync(packageJsonPath, 'utf-8')) as {
+      workspaces?: unknown
+      devDependencies?: Record<string, string>
+      dependencies?: Record<string, string>
+    }
+    const hasWorkspaces = Array.isArray(pkg.workspaces)
+    const hasVercel =
+      typeof pkg.devDependencies?.vercel === 'string' ||
+      typeof pkg.dependencies?.vercel === 'string'
+    return hasWorkspaces && hasVercel
+  } catch {
+    return false
+  }
+}
+
+function findPreferredNodeModulesBinDir(startDir: string): string | null {
+  // Prefer repo-pinned Vercel CLI from the monorepo root.
+  // Fallback order: workspace root candidate -> farthest candidate -> PATH.
+  const candidates: string[] = []
+  let dir = startDir
+  while (true) {
+    const candidate = path.join(dir, 'node_modules', '.bin')
+    const vercelBin =
+      process.platform === 'win32'
+        ? path.join(candidate, 'vercel.cmd')
+        : path.join(candidate, 'vercel')
+    if (existsSync(vercelBin)) {
+      candidates.push(candidate)
+    }
+    const parent = path.dirname(dir)
+    if (parent === dir) break
+    dir = parent
+  }
+
+  for (const candidate of candidates) {
+    const rootDir = path.resolve(candidate, '..', '..')
+    if (hasWorkspaceVercelDependency(rootDir)) return candidate
+  }
+
+  return candidates.length > 0 ? candidates[candidates.length - 1]! : null
+}
+
+function getVercelEnv(): NodeJS.ProcessEnv {
+  const env: NodeJS.ProcessEnv = {
+    ...process.env,
+    FORCE_COLOR: '0',
+    NO_COLOR: '1',
+  }
+
+  const binDir = findPreferredNodeModulesBinDir(process.cwd())
+  if (binDir) {
+    const currentPath = env.PATH ?? ''
+    env.PATH = `${binDir}${path.delimiter}${currentPath}`
+  }
+
+  return env
+}
 
 // Map of app names to their Vercel project names
 const APPS: Record<string, { vercel: string; description: string }> = {
@@ -25,12 +89,15 @@ function stripAnsi(str: string): string {
 function runVercel(args: string): string {
   try {
     // Capture both stdout and stderr (Vercel CLI writes table to stderr)
-    const raw = execSync(`vercel ${args} --scope ${VERCEL_SCOPE} --yes 2>&1`, {
-      encoding: 'utf-8',
-      timeout: 30000,
-      stdio: ['pipe', 'pipe', 'pipe'],
-      env: { ...process.env, FORCE_COLOR: '0', NO_COLOR: '1' },
-    }).trim()
+    const raw = execSync(
+      `vercel ${args} --scope ${VERCEL_SCOPE} --non-interactive 2>&1`,
+      {
+        encoding: 'utf-8',
+        timeout: 60000,
+        stdio: ['pipe', 'pipe', 'pipe'],
+        env: getVercelEnv(),
+      }
+    ).trim()
     return stripAnsi(raw)
   } catch (err: any) {
     const out = err.stdout?.trim() || err.stderr?.trim() || err.message
@@ -162,7 +229,7 @@ export async function deploysStatus(
 export async function deploysLogs(
   ctx: CommandContext,
   appName: string,
-  options: { lines?: string; json?: boolean }
+  options: { lines?: string; json?: boolean; since?: string }
 ) {
   const outputJson = options.json === true || ctx.format === 'json'
   try {
@@ -180,7 +247,7 @@ export async function deploysLogs(
     }
 
     // Get latest production deployment URL
-    const lsOutput = runVercel(`ls ${app.vercel} --limit 5`)
+    const lsOutput = runVercel(`ls ${app.vercel}`)
     const prodLine = lsOutput
       .split('\n')
       .find((l) => l.includes('Production') && l.includes('Ready'))
@@ -195,10 +262,17 @@ export async function deploysLogs(
 
     const url = urlMatch[0]
 
+    const limit = parseInt(options.lines || '30')
+    const sinceClause = options.since ? ` --since ${options.since}` : ''
+
     if (outputJson) {
       const logsOutput = execSync(
-        `vercel logs ${url} --scope ${VERCEL_SCOPE} --output short 2>&1 | tail -${options.lines || '30'}`,
-        { encoding: 'utf-8', timeout: 30000 }
+        `vercel logs ${url} --no-follow --limit ${limit} --json${sinceClause} --scope ${VERCEL_SCOPE} --non-interactive 2>&1`,
+        {
+          encoding: 'utf-8',
+          timeout: 120000,
+          env: getVercelEnv(),
+        }
       )
       ctx.output.data({ app: name, deployment: url, logs: logsOutput.trim() })
       return
@@ -208,8 +282,12 @@ export async function deploysLogs(
 
     try {
       const logsOutput = execSync(
-        `vercel logs ${url} --scope ${VERCEL_SCOPE} --output short 2>&1 | tail -${options.lines || '30'}`,
-        { encoding: 'utf-8', timeout: 30000 }
+        `vercel logs ${url} --no-follow --limit ${limit}${sinceClause} --scope ${VERCEL_SCOPE} --non-interactive 2>&1`,
+        {
+          encoding: 'utf-8',
+          timeout: 120000,
+          env: getVercelEnv(),
+        }
       )
       ctx.output.data(logsOutput)
     } catch (err: any) {
@@ -247,7 +325,7 @@ export async function deploysInspect(
     const [name, app] = apps[0]!
 
     // Get latest production deployment URL
-    const lsOutput = runVercel(`ls ${app.vercel} --limit 3`)
+    const lsOutput = runVercel(`ls ${app.vercel}`)
     const prodLine = lsOutput
       .split('\n')
       .find((l) => l.includes('Production') && l.includes('Ready'))
@@ -318,6 +396,7 @@ export function registerDeployCommands(program: Command) {
     .description('Show recent logs for an app')
     .argument('<app>', 'App name (front, slack)')
     .option('-n, --lines <number>', 'Number of log lines', '30')
+    .option('--since <duration>', 'Fetch logs since (e.g. 30m, 1h)')
     .option('--json', 'JSON output')
     .action(async (app, options, command) => {
       const ctx = await createContext({

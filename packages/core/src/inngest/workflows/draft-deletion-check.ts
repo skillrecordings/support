@@ -38,9 +38,9 @@ export const draftDeletionCheckWorkflow = inngest.createFunction(
     id: 'support-draft-deletion-check',
     name: 'Draft Deletion Check',
     retries: 2,
-    // Limit concurrency - we'll have many of these running
+    // Keep within current Inngest plan limit to avoid registration failures.
     concurrency: {
-      limit: 50,
+      limit: 5,
     },
   },
   { event: SUPPORT_DRAFT_CREATED },
